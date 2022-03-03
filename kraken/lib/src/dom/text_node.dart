@@ -38,6 +38,14 @@ class TextNode extends Node {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
+      // When text node is the child of textarea element, the renderer of text node is not attached,
+      // so it needs to set defaultValue property of textarea element directly.
+      if (parentElement is TextareaElement) {
+        TextareaElement textareaElement = parentElement as TextareaElement;
+        if (!textareaElement.properties.containsKey(VALUE)) {
+          textareaElement.setProperty(DEFAULT_VALUE, textareaElement.textContent);
+        }
+      }
     }
   }
 

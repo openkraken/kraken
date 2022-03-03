@@ -777,7 +777,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _updateRemoteEditingValueIfNeeded();
   }
 
-  void _formatAndSetValue(TextEditingValue value, { bool userInteraction = false, SelectionChangedCause? cause }) {
+  void _formatAndSetValue(TextEditingValue value, {
+    bool userInteraction = false,
+    SelectionChangedCause? cause,
+    String valueKey = VALUE
+  }) {
     if (userInteraction && value.text.length > _maxLength) return;
 
     final bool textChanged = _value.text != value.text
@@ -803,6 +807,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     if (textChanged) {
       _handleTextChanged(value.text, userInteraction, cause);
+      // Sync value to input element property
+      properties[valueKey] = value.text;
     }
 
     if (renderEditable != null) {
@@ -826,8 +832,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       _actualText = _buildTextSpan(text: text);
     }
 
-    // Sync value to input element property
-    properties[VALUE] = text;
     if (userInteraction) {
       // TODO: return the string containing the input data that was added to the element,
       // which MAY be null if it doesn't apply.
@@ -994,7 +998,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         selection: selection,
         composing: composing,
       );
-      _formatAndSetValue(newTextEditingValue);
+      _formatAndSetValue(newTextEditingValue, valueKey: key);
     } else if (key == 'placeholder') {
       // Update placeholder text.
       _rebuildTextSpan();

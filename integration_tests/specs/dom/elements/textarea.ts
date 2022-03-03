@@ -10,6 +10,96 @@ describe('Tags textarea', () => {
     await snapshot();
   });
 
+  it('works with child text node appended when value property not exist', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      const text = document.createTextNode('Hello World');
+      textarea.appendChild(text);
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works with child text node changed data when value property not exist', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World');
+
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      text.data = 'Hello World Hello World Hello World';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works with child text node removed when value property not exist', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World');
+
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.removeChild(text);
+      await snapshot();
+      done();
+    });
+  });
+
+  it('does works with child text node appended when value property exists', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.value = 'setted value';
+    const text = document.createTextNode('Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      const text = document.createTextNode('Hello World');
+      textarea.appendChild(text);
+      await snapshot();
+      done();
+    });
+  });
+  it('does not work with child text node changed data when value property exists', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.value = 'setted value';
+    const text = document.createTextNode('Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      text.data = 'Hello World Hello World Hello World';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('does not work with child text node removed when value property exists', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.value = 'setted value';
+    const text = document.createTextNode('Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.removeChild(text);
+      await snapshot();
+      done();
+    });
+  });
+
   it('with multiple text node child', async () => {
     const textarea = document.createElement('textarea');
     textarea.style.fontSize = '16px';

@@ -36,7 +36,8 @@ class TextareaElement extends TextFormControlElement {
     return computedLineHeight * double.parse(properties[ROWS] ?? '2');
   }
 
-  // Text content of textarea acts as default value when defaultValue property is not set.
+  // The concatenation of the data of all the Text node descendants of node.
+  // https://dom.spec.whatwg.org/#concept-descendant-text-content
   String get textContent {
     String str = '';
     // Set data of all text node children as value of textarea.
@@ -49,13 +50,26 @@ class TextareaElement extends TextFormControlElement {
   }
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
+  Node appendChild(Node child) {
+    super.appendChild(child);
+    // Need to update defaultValue when child text node is appended.
+    updateDefaultValue();
+    return child;
+  }
 
-    if (!properties.containsKey(VALUE) && !properties.containsKey(DEFAULT_VALUE)) {
+  @override
+  Node removeChild(Node child) {
+    super.removeChild(child);
+    // Need to update defaultValue when child text node is removed.
+    updateDefaultValue();
+    return child;
+  }
+
+  void updateDefaultValue() {
+    // Text content of textarea acts as default value when defaultValue property is not set.
+    if (!properties.containsKey(VALUE)) {
       setProperty(DEFAULT_VALUE, textContent);
     }
   }
-
 }
 
