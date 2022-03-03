@@ -11,9 +11,7 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderTextControlMultiline extends RenderIntrinsic {
-  RenderTextControlMultiline(CSSRenderStyle renderStyle,) : super(
-    renderStyle,
-  );
+  RenderTextControlMultiline(CSSRenderStyle renderStyle) : super(renderStyle);
 
   @override
   RenderIntrinsic toRepaintBoundaryIntrinsic() {
@@ -121,9 +119,7 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
       if (constraints.maxWidth != double.infinity) {
         width = constraints.maxWidth;
       } else {
-        width = childSize.width
-          - renderStyle.paddingLeft.computedValue - renderStyle.paddingRight.computedValue
-          - renderStyle.effectiveBorderLeftWidth.computedValue - renderStyle.effectiveBorderRightWidth.computedValue;
+        width = childSize.width;
       }
 
       double height;
@@ -132,9 +128,6 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
         height = constraints.maxHeight;
       } else  {
         height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
-        height = height
-          - renderStyle.paddingTop.computedValue - renderStyle.paddingBottom.computedValue
-          - renderStyle.effectiveBorderTopWidth.computedValue - renderStyle.effectiveBorderBottomWidth.computedValue;
       }
 
       size = Size(width, height);
