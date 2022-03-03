@@ -18,6 +18,35 @@ inline std::string trim(std::string& str) {
   return str;
 }
 
+GumboOutput* parse(std::string html, bool needDefaultHTML) {
+  auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html.length());
+
+  if (!needDefaultHTML) {
+    // Find body.
+    const GumboVector* children = &htmlTree->root->v.element.children;
+    for (int i = 0; i < children->length; ++i) {
+      auto* child = (GumboNode*)children->data[i];
+      if (child->type == GUMBO_NODE_ELEMENT) {
+        std::string tagName;
+        if (child->v.element.tag != GUMBO_TAG_UNKNOWN) {
+          tagName = gumbo_normalized_tagname(child->v.element.tag);
+        } else {
+          GumboStringPiece piece = child->v.element.original_tag;
+          gumbo_tag_from_original_text(&piece);
+          tagName = std::string(piece.data, piece.length);
+        }
+
+        if (tagName.compare("body") == 0) {
+          htmlTree->root = child;
+          break;
+        }
+      }
+    }
+  }
+
+  return htmlTree;
+}
+
 void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   ExecutionContext* context = root->context();
   JSContext* ctx = context->ctx();
@@ -78,33 +107,10 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntr
     if (!trim(html).empty()) {
       // Gumbo-parser parse HTML.
       size_t html_length = html.length();
-      auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
 
-      GumboNode* root = htmlTree->root;
-      if (!isEntry) {
-        // Find body.
-        const GumboVector* children = &htmlTree->root->v.element.children;
-        for (int i = 0; i < children->length; ++i) {
-          auto* child = (GumboNode*)children->data[i];
-          if (child->type == GUMBO_NODE_ELEMENT) {
-            std::string tagName;
-            if (child->v.element.tag != GUMBO_TAG_UNKNOWN) {
-              tagName = gumbo_normalized_tagname(child->v.element.tag);
-            } else {
-              GumboStringPiece piece = child->v.element.original_tag;
-              gumbo_tag_from_original_text(&piece);
-              tagName = std::string(piece.data, piece.length);
-            }
+      GumboOutput* htmlTree = parse(html, isEntry);
 
-            if (tagName.compare("body") == 0) {
-              root = child;
-              break;
-            }
-          }
-        }
-      }
-
-      traverseHTML(rootNode, root);
+      traverseHTML(rootNode, htmlTree->root);
       // Free gumbo parse nodes.
       gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
     }
