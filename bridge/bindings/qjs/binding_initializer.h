@@ -12,7 +12,7 @@ namespace kraken {
 
 class ExecutingContext;
 
-void installBindings(ExecutingContext* context);
+void InstallBindings(ExecutingContext* context);
 
 }  // namespace kraken
 

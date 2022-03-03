@@ -15,8 +15,8 @@ void Console::__kraken_print__(ExecutingContext* context, ScriptValue& logValue,
   std::string buffer = logValue.toCString();
   stream << buffer;
 
-  std::string logLevel = levelValue.isEmpty() ? "info" : levelValue.toCString();
-  printLog(context->getContextId(), stream, logLevel, nullptr);
+//  std::string logLevel = levelValue.isEmpty() ? "info" : levelValue.toCString();
+//  printLog(context->getContextId(), stream, logLevel, nullptr);
 }
 
 }  // namespace kraken

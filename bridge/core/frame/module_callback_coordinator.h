@@ -14,17 +14,21 @@
 
 namespace kraken {
 
+class ModuleListener;
+
 class ModuleCallbackCoordinator final {
  public:
   ModuleCallbackCoordinator();
 
-  void addModuleCallbacks(ModuleCallback* callback);
-  void removeModuleCallbacks(ModuleCallback* callback);
+  void AddModuleCallbacks(ModuleCallback* callback);
+  void RemoveModuleCallbacks(ModuleCallback* callback);
 
-  void trace(GCVisitor* visitor);
+  void Trace(GCVisitor* visitor);
 
  private:
-  list_head m_listeners;
+  list_head listeners_;
+
+  friend ModuleListener;
 };
 
 }  // namespace kraken

@@ -7,36 +7,36 @@
 
 namespace kraken {
 
-void ExceptionState::throwException(JSContext* ctx, ErrorType type, const char* message) {
+void ExceptionState::ThrowException(JSContext* ctx, ErrorType type, const char* message) {
   switch (type) {
     case ErrorType::TypeError:
-      m_exception = JS_ThrowTypeError(ctx, "%s", message);
+      exception_ = JS_ThrowTypeError(ctx, "%s", message);
       break;
     case InternalError:
-      m_exception = JS_ThrowInternalError(ctx, "%s", message);
+      exception_ = JS_ThrowInternalError(ctx, "%s", message);
       break;
     case RangeError:
-      m_exception = JS_ThrowRangeError(ctx, "%s", message);
+      exception_ = JS_ThrowRangeError(ctx, "%s", message);
       break;
     case ReferenceError:
-      m_exception = JS_ThrowReferenceError(ctx, "%s", message);
+      exception_ = JS_ThrowReferenceError(ctx, "%s", message);
       break;
     case SyntaxError:
-      m_exception = JS_ThrowSyntaxError(ctx, "%s", message);
+      exception_ = JS_ThrowSyntaxError(ctx, "%s", message);
       break;
   }
 }
 
-void ExceptionState::throwException(JSContext* ctx, JSValue exception) {
-  m_exception = JS_DupValue(ctx, exception);
+void ExceptionState::ThrowException(JSContext* ctx, JSValue exception) {
+  exception_ = JS_DupValue(ctx, exception);
 }
 
-bool ExceptionState::hasException() {
-  return !JS_IsNull(m_exception);
+bool ExceptionState::HasException() {
+  return !JS_IsNull(exception_);
 }
 
-JSValue ExceptionState::toQuickJS() {
-  return m_exception;
+JSValue ExceptionState::ToQuickJS() {
+  return exception_;
 }
 
 }  // namespace kraken

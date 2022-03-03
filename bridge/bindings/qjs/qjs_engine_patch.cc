@@ -296,9 +296,9 @@ static JSString* js_alloc_string(JSRuntime* runtime, JSContext* ctx, int max_len
   return p;
 }
 
-JSValue JS_NewUnicodeString(JSRuntime* runtime, JSContext* ctx, const uint16_t* code, uint32_t length) {
+JSValue JS_NewUnicodeString(JSContext* ctx, const uint16_t* code, uint32_t length) {
   JSString* str;
-  str = js_alloc_string(runtime, ctx, length, 1);
+  str = js_alloc_string(JS_GetRuntime(ctx), ctx, length, 1);
   if (!str)
     return JS_EXCEPTION;
   memcpy(str->u.str16, code, length * 2);

@@ -14,36 +14,34 @@
 
 namespace kraken {
 
-DOMTimer::DOMTimer(QJSFunction* callback) : m_callback(callback) {}
-
-JSClassID DOMTimer::classId{0};
+DOMTimer::DOMTimer(JSContext* ctx, QJSFunction* callback) : callback_(callback), ScriptWrappable(ctx) {}
 
 void DOMTimer::fire() {
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx));
-  if (!m_callback->isFunction(m_ctx))
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx()));
+  if (!callback_->IsFunction(ctx()))
     return;
 
-  ScriptValue returnValue = m_callback->invoke(m_ctx, 0, nullptr);
+  ScriptValue returnValue = callback_->Invoke(ctx(), 0, nullptr);
 
   if (returnValue.isException()) {
     context->handleException(&returnValue);
   }
 }
 
-void DOMTimer::trace(GCVisitor* visitor) const {
-  m_callback->trace(visitor);
+void DOMTimer::Trace(GCVisitor* visitor) const {
+  callback_->Trace(visitor);
 }
 
-void DOMTimer::dispose() const {
-  m_callback->dispose();
+void DOMTimer::Dispose() const {
+  callback_->Dispose();
 }
 
 int32_t DOMTimer::timerId() {
-  return m_timerId;
+  return timerId_;
 }
 
 void DOMTimer::setTimerId(int32_t timerId) {
-  m_timerId = timerId;
+  timerId_ = timerId;
 }
 
 }  // namespace kraken

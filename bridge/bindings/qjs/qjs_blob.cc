@@ -7,6 +7,7 @@
 #include "member_installer.h"
 #include "core/executing_context.h"
 #include "core/fileapi/blob.h"
+#include "converter.h"
 
 namespace kraken {
 
@@ -176,13 +177,15 @@ static JSValue typeAttributeSetCallback(JSContext* ctx, JSValueConst this_val, i
 }
 
 
-JSValue QJSBlob::constructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
-//  if (argc == 0) {
-//    auto* blob = Blob::create(ctx);
-//    return blob->toQuickJS();
-//  }
-//
-//  JSValue arrayValue = argv[0];
+JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
+  if (argc == 0) {
+    auto* blob = Blob::create(ctx);
+    return blob->ToQuickJS();
+  }
+
+
+
+//  JSValue arrayValue =  argv[0];
 //  JSValue optionValue = JS_UNDEFINED;
 //
 //  if (argc > 1) {
@@ -193,11 +196,11 @@ JSValue QJSBlob::constructorCallback(JSContext* ctx, JSValue func_obj, JSValue t
 //    return JS_ThrowTypeError(ctx, "Failed to construct 'Blob': The provided value cannot be converted to a sequence");
 //  }
 //
-//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+//  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 //  BlobBuilder builder;
 //
 //  if (argc == 1 || JS_IsUndefined(optionValue)) {
-//    builder.append(*context, arrayValue);
+//    builder.append(*context, ScriptValue(ctx, arrayValue));
 //    auto* blob = Blob::create(ctx, builder.finalize());
 //    return blob->toQuickJS();
 //  }
@@ -207,9 +210,8 @@ JSValue QJSBlob::constructorCallback(JSContext* ctx, JSValue func_obj, JSValue t
 //                             "Failed to construct 'Blob': parameter 2 ('options') "
 //                             "is not an object");
 //  }
-//
-//  JSAtom mimeTypeKey = JS_NewAtom(ctx, "type");
-//
+
+//  ScriptAtom mineType = ScriptAtom(ctx, "type");
 //  JSValue mimeTypeValue = JS_GetProperty(ctx, optionValue, mimeTypeKey);
 //  builder.append(*context, mimeTypeValue);
 //  const char* cMineType = JS_ToCString(ctx, mimeTypeValue);
@@ -231,7 +233,7 @@ void QJSBlob::install(ExecutingContext* context) {
 }
 
 void QJSBlob::installConstructor(ExecutingContext* context) {
-  const WrapperTypeInfo* wrapperTypeInfo = getWrapperTypeInfo();
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue constructor = context->contextData()->constructorForType(wrapperTypeInfo);
 
   std::initializer_list<MemberInstaller::AttributeConfig> attributeConfig {
@@ -241,7 +243,7 @@ void QJSBlob::installConstructor(ExecutingContext* context) {
 }
 
 void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
-  const WrapperTypeInfo* wrapperTypeInfo = getWrapperTypeInfo();
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
 
   std::initializer_list<MemberInstaller::AttributeConfig> attributesConfig {
@@ -253,7 +255,7 @@ void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
 }
 
 void QJSBlob::installPrototypeProperties(ExecutingContext* context) {
-  const WrapperTypeInfo* wrapperTypeInfo = getWrapperTypeInfo();
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
 
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {

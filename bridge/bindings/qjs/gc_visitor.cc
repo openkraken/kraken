@@ -7,8 +7,8 @@
 
 namespace kraken {
 
-void GCVisitor::trace(JSValue value) {
-  JS_MarkValue(m_runtime, value, m_markFunc);
+void GCVisitor::Trace(JSValue value) {
+  JS_MarkValue(runtime_, value, markFunc_);
 }
 
 }  // namespace kraken

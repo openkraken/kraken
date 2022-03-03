@@ -17,7 +17,7 @@
 #include <mutex>
 #include <unordered_map>
 #include "bindings/qjs/binding_initializer.h"
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/rejected_promises.h"
 #include "bindings/qjs/script_value.h"
 #include "foundation/macros.h"
@@ -61,12 +61,13 @@ struct PromiseContext {
 
 bool isContextValid(int32_t contextId);
 
-class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTracker> {
+class ExecutionContextGCTracker : public ScriptWrappable {
+  DEFINE_WRAPPERTYPEINFO();
  public:
-  static JSClassID contextGcTrackerClassId;
+  explicit ExecutionContextGCTracker(JSContext* ctx);
 
-  void trace(GCVisitor* visitor) const override;
-  void dispose() const override;
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
 
  private:
 };
@@ -169,11 +170,6 @@ class ObjectProperty {
  private:
   JSValue m_value{JS_NULL};
 };
-
-// Property define helpers
-void installFunctionProperty(ExecutingContext* context, JSValueConst thisObject, const char* functionName, JSCFunction function, int argc);
-void installPropertyGetterSetter(ExecutingContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction);
-void installPropertyGetter(ExecutingContext* context, JSValueConst thisObject, const char* property, JSCFunction getterFunction);
 
 std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 

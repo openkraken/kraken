@@ -13,7 +13,7 @@ void ModuleListenerContainer::addModuleListener(ModuleListener* listener) {
 
 void ModuleListenerContainer::trace(GCVisitor* visitor) {
   for (auto& listener : m_listeners) {
-    visitor->trace(listener->toQuickJS());
+    listener->m_function->Trace(visitor);
   }
 }
 

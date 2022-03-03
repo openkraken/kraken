@@ -6,6 +6,8 @@
 #include "script_value.h"
 #include "native_string_utils.h"
 #include "qjs_engine_patch.h"
+#include <vector>
+#include "core/executing_context.h"
 
 namespace kraken {
 
@@ -24,38 +26,20 @@ ScriptValue ScriptValue::createJSONObject(JSContext* ctx, const char* jsonString
   return result;
 }
 
-ScriptValue ScriptValue::fromNativeString(JSContext* ctx, NativeString* nativeString) {
-  JSValue result = JS_NewUnicodeString(JS_GetRuntime(ctx), ctx, nativeString->string, nativeString->length);
-  return ScriptValue(ctx, result);
-}
-
 ScriptValue ScriptValue::Empty(JSContext* ctx) {
   return ScriptValue(ctx);
 }
 
-bool ScriptValue::isEmpty() {
-  return JS_IsNull(m_value);
-}
-
-bool ScriptValue::isString() {
-  return JS_IsString(m_value);
-}
-
-bool ScriptValue::isArray() {
-  return JS_IsArray(m_ctx, m_value);
-}
-
-JSValue ScriptValue::toQuickJS() {
+JSValue ScriptValue::ToQuickJS() const {
   return m_value;
 }
 
-ScriptValue ScriptValue::toJSONStringify(ExceptionState* exception) {
+ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) {
   JSValue stringifyedValue = JS_JSONStringify(m_ctx, m_value, JS_NULL, JS_NULL);
   ScriptValue result = ScriptValue(m_ctx);
   // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
   if (JS_IsException(stringifyedValue)) {
-    exception->throwException(m_ctx, stringifyedValue);
-    result = ScriptValue(m_ctx, stringifyedValue);
+    exception->ThrowException(m_ctx, stringifyedValue);
   } else {
     result = ScriptValue(m_ctx, stringifyedValue);
   }

@@ -12,7 +12,7 @@
 
 namespace kraken {
 
-void installBindings(ExecutingContext* context) {
+void InstallBindings(ExecutingContext* context) {
   QJSWindow::installGlobalFunctions(context);
   QJSModuleManager::install(context);
   QJSConsole::install(context);

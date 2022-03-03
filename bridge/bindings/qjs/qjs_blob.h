@@ -18,13 +18,13 @@ class QJSBlob final {
  public:
   static void install(ExecutingContext* context);
 
-  static WrapperTypeInfo* getWrapperTypeInfo() {
+  static WrapperTypeInfo* GetWrapperTypeInfo() {
     return const_cast<WrapperTypeInfo*>(&m_wrapperTypeInfo);
   }
 
  private:
-  static JSValue constructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
-  constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {"Blob", nullptr, constructorCallback};
+  static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
+  constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {"Blob", nullptr, ConstructorCallback};
 
   static void installPrototypeMethods(ExecutingContext* context);
   static void installPrototypeProperties(ExecutingContext* context);

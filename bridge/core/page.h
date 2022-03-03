@@ -21,7 +21,7 @@ class KrakenPage;
 using JSBridgeDisposeCallback = void (*)(KrakenPage* bridge);
 using ConsoleMessageHandler = std::function<void(void* ctx, const std::string& message, int logLevel)>;
 
-/// KrakenPage is class which manage all js objects create by <Kraken> flutter widget.
+/// KrakenPage is class which manage all js objects Create by <Kraken> flutter widget.
 /// Every <Kraken> flutter widgets have a corresponding KrakenPage, and all objects created by JavaScript are stored here,
 /// and there is no data sharing between objects between different KrakenPages.
 /// It's safe to allocate many KrakenPages at the same times on one thread, but not safe for multi-threads, only one thread can enter to KrakenPage at the same time.

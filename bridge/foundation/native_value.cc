@@ -222,12 +222,12 @@ static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int
 JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
   switch (value.tag) {
     case NativeTag::TAG_STRING: {
-      auto* string = static_cast<NativeString*>(value.u.ptr);
-      if (string == nullptr)
-        return JS_NULL;
-      JSValue returnedValue = JS_NewUnicodeString(context->runtime(), context->ctx(), string->string, string->length);
-      string->free();
-      return returnedValue;
+//      auto* string = static_cast<NativeString*>(value.u.ptr);
+//      if (string == nullptr)
+//        return JS_NULL;
+//      JSValue returnedValue = JS_NewUnicodeString(context->runtime(), context->ctx(), string->string, string->length);
+//      string->free();
+//      return returnedValue;
     }
     case NativeTag::TAG_INT: {
       return JS_NewUint32(context->ctx(), value.u.int64);

@@ -7,18 +7,18 @@
 
 namespace kraken {
 
-ModuleCallback::ModuleCallback(QJSFunction* function) : m_function(function) {}
+ModuleCallback::ModuleCallback(QJSFunction* function) : function_(function) {}
 
 QJSFunction* ModuleCallback::value() {
-  return m_function;
+  return function_;
 }
 
-void ModuleCallback::trace(GCVisitor* visitor) const {
-  m_function->trace(visitor);
+void ModuleCallback::Trace(GCVisitor* visitor) const {
+  function_->Trace(visitor);
 }
 
-void ModuleCallback::dispose() const {
-  m_function->dispose();
+void ModuleCallback::Dispose() const {
+  function_->Dispose();
 }
 
 }  // namespace kraken

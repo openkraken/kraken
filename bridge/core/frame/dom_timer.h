@@ -6,16 +6,16 @@
 #ifndef KRAKENBRIDGE_DOM_TIMER_H
 #define KRAKENBRIDGE_DOM_TIMER_H
 
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/qjs_function.h"
 #include "dom_timer_coordinator.h"
 
 namespace kraken {
 
-class DOMTimer : public GarbageCollected<DOMTimer> {
+class DOMTimer : public ScriptWrappable {
+  DEFINE_WRAPPERTYPEINFO();
  public:
-  static JSClassID classId;
-  DOMTimer(QJSFunction* callback);
+  DOMTimer(JSContext* ctx, QJSFunction* callback);
 
   // Trigger timer callback.
   void fire();
@@ -23,15 +23,15 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
   int32_t timerId();
   void setTimerId(int32_t timerId);
 
-  [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "DOMTimer"; }
+  [[nodiscard]] FORCE_INLINE const char* GetHumanReadableName() const override { return "DOMTimer"; }
 
-  void trace(GCVisitor* visitor) const override;
-  void dispose() const override;
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
 
  private:
-  int32_t m_timerId{-1};
-  int32_t m_isInterval{false};
-  QJSFunction* m_callback;
+  int32_t timerId_{-1};
+  int32_t isInterval_{false};
+  QJSFunction* callback_;
 };
 
 }  // namespace kraken

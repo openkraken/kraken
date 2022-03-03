@@ -29,13 +29,13 @@ class ModuleCallback : public GarbageCollected<ModuleCallback> {
 
   QJSFunction* value();
 
-  void trace(GCVisitor* visitor) const override;
-  void dispose() const override;
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
 
   ModuleCallbackLinker linker{this};
 
  private:
-  QJSFunction* m_function{nullptr};
+  QJSFunction* function_{nullptr};
 };
 
 }  // namespace kraken

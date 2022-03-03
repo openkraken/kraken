@@ -32,7 +32,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
   if (errmsg != nullptr) {
     ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
     ScriptValue arguments[] = {errorObject};
-    ScriptValue returnValue = moduleContext->callback->value()->invoke(ctx, 1, arguments);
+    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
       context->handleException(&returnValue);
     }
@@ -41,14 +41,14 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     std::string utf8Arguments = toUTF8(argumentString);
     ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
     ScriptValue arguments[] = {jsonObject};
-    ScriptValue returnValue = moduleContext->callback->value()->invoke(ctx, 1, arguments);
+    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
       context->handleException(&returnValue);
     }
   }
 
   context->drainPendingPromiseJobs();
-  context->moduleCallbacks()->removeModuleCallbacks(moduleContext->callback);
+  context->moduleCallbacks()->RemoveModuleCallbacks(moduleContext->callback);
 }
 
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json) {
@@ -59,48 +59,48 @@ ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context, S
   std::unique_ptr<NativeString> moduleName = moduleNameValue.toNativeString();
   std::unique_ptr<NativeString> method = methodValue.toNativeString();
   std::unique_ptr<NativeString> params;
-  if (!paramsValue.isEmpty()) {
-    ScriptValue stringifiedValue = paramsValue.toJSONStringify(exception);
-    if (exception->hasException()) {
-      return stringifiedValue;
-    }
+//  if (!paramsValue.isEmpty()) {
+//    ScriptValue stringifiedValue = paramsValue.ToJSONStringify(exception);
+//    if (exception->HasException()) {
+//      return stringifiedValue;
+//    }
+//
+//    params = stringifiedValue.toNativeString();
+//  }
+//
+//  if (context->dartMethodPtr()->invokeModule == nullptr) {
+//    exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+//    return ScriptValue(context->ctx());
+//  }
+//
+//  auto* moduleCallback = makeGarbageCollected<ModuleCallback>(callback);
+//  context->moduleCallbacks()->AddModuleCallbacks(moduleCallback);
+//
+//  ModuleContext* moduleContext = new ModuleContext{context, moduleCallback};
+//
+//  NativeString* result;
+//  if (callback != nullptr) {
+//    result = context->dartMethodPtr()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleTransientCallback);
+//  } else {
+//    result = context->dartMethodPtr()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleUnexpectedCallback);
+//  }
+//
+//  moduleName->free();
+//  method->free();
+//  if (params != nullptr) {
+//    params->free();
+//  }
+//
+//  if (result == nullptr) {
+//    return ScriptValue::Empty(context->ctx());
+//  }
+//
+//  ScriptValue resultString = ScriptValue::fromNativeString(context->ctx(), result);
+//
+//  // Manual free returned result string;
+//  result->free();
 
-    params = stringifiedValue.toNativeString();
-  }
-
-  if (context->dartMethodPtr()->invokeModule == nullptr) {
-    exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
-    return ScriptValue(context->ctx());
-  }
-
-  auto* moduleCallback = makeGarbageCollected<ModuleCallback>(callback);
-  context->moduleCallbacks()->addModuleCallbacks(moduleCallback);
-
-  ModuleContext* moduleContext = new ModuleContext{context, moduleCallback};
-
-  NativeString* result;
-  if (callback != nullptr) {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleTransientCallback);
-  } else {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->getContextId(), moduleName.get(), method.get(), params.get(), handleInvokeModuleUnexpectedCallback);
-  }
-
-  moduleName->free();
-  method->free();
-  if (params != nullptr) {
-    params->free();
-  }
-
-  if (result == nullptr) {
-    return ScriptValue::Empty(context->ctx());
-  }
-
-  ScriptValue resultString = ScriptValue::fromNativeString(context->ctx(), result);
-
-  // Manual free returned result string;
-  result->free();
-
-  return resultString;
+//  return resultString;
 }
 
 void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context, QJSFunction* handler, ExceptionState* exception) {

@@ -18,6 +18,7 @@ class ModuleListenerContainer final {
 
  private:
   std::forward_list<ModuleListener*> m_listeners;
+  friend ModuleListener;
 };
 
 }  // namespace kraken

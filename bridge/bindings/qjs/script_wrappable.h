@@ -21,10 +21,10 @@ namespace kraken {
 // class has a corresponding .idl file.
 #define DEFINE_WRAPPERTYPEINFO()                               \
  public:                                                       \
-  const WrapperTypeInfo* getWrapperTypeInfo() const override { \
+  const WrapperTypeInfo* GetWrapperTypeInfo() const override { \
     return &wrapper_type_info_;                                \
   }                                                            \
-  static const WrapperTypeInfo* getStaticWrapperTypeInfo() {   \
+  static const WrapperTypeInfo* GetStaticWrapperTypeInfo() {   \
     return &wrapper_type_info_;                                \
   }                                                            \
                                                                \
@@ -42,14 +42,18 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   explicit ScriptWrappable(JSContext* ctx);
 
   // Returns the WrapperTypeInfo of the instance.
-  virtual const WrapperTypeInfo* getWrapperTypeInfo() const = 0;
+  virtual const WrapperTypeInfo* GetWrapperTypeInfo() const = 0;
 
-  FORCE_INLINE JSValue toQuickJS();
+  JSValue ToQuickJS();
+  FORCE_INLINE ExecutingContext* context() const { return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_)); };
+  FORCE_INLINE JSContext* ctx() const { return ctx_; }
 
  private:
-  bool m_wrapped{false};
-  void initializeQuickJSObject();
-  JSValue m_jsObject{JS_NULL};
+  bool wrapped_{false};
+  void InitializeQuickJSObject();
+  JSValue jsObject_{JS_NULL};
+  JSContext* ctx_{nullptr};
+  JSRuntime* runtime_{nullptr};
 };
 
 inline ScriptWrappable* toScriptWrappable(JSValue object) {

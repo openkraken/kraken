@@ -19,14 +19,14 @@ class ExceptionState {
   KRAKEN_DISALLOW_NEW();
 
  public:
-  void throwException(JSContext* ctx, ErrorType type, const char* message);
-  void throwException(JSContext* ctx, JSValue exception);
-  bool hasException();
-  JSValue toQuickJS();
+  void ThrowException(JSContext* ctx, ErrorType type, const char* message);
+  void ThrowException(JSContext* ctx, JSValue exception);
+  bool HasException();
+  JSValue ToQuickJS();
 
  private:
-  JSValue m_exception{JS_NULL};
-  JSContext* m_ctx;
+  JSValue exception_{JS_NULL};
+  JSContext* ctx_;
 };
 
 }  // namespace kraken

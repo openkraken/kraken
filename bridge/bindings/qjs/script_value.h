@@ -8,13 +8,17 @@
 
 #include <quickjs/quickjs.h>
 #include <memory>
+
 #include "exception_state.h"
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 
 namespace kraken {
 
-// ScriptValue is a stack allocate only QuickJS JSValue wrapper which hold all information to hide out QuickJS running details.
+class ExecutingContext;
+class WrapperTypeInfo;
+
+// ScriptValue is a stack allocate only QuickJS JSValue wrapper ScriptValuewhich hold all information to hide out QuickJS running details.
 class ScriptValue final {
   // ScriptValue should only allocate at stack.
   KRAKEN_DISALLOW_NEW();
@@ -39,14 +43,11 @@ class ScriptValue final {
     }
     return *this;
   };
+  ~ScriptValue() { JS_FreeValue(m_ctx, m_value); };
 
-  ~ScriptValue() { JS_FreeValue(m_ctx, m_value); }
-  bool isEmpty();
-  bool isString();
-  bool isArray();
-  JSValue toQuickJS();
+  JSValue ToQuickJS() const;
   // Create a new ScriptValue from call JSON.stringify to current value.
-  ScriptValue toJSONStringify(ExceptionState* exception);
+  ScriptValue ToJSONStringify(ExceptionState* exception);
   std::unique_ptr<NativeString> toNativeString();
   std::string toCString();
 

@@ -22,13 +22,13 @@ std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* m_runtime{nullptr};
 
-void ExecutionContextGCTracker::trace(GCVisitor* visitor) const {
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx));
+ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx): ScriptWrappable(ctx) {}
+
+void ExecutionContextGCTracker::Trace(GCVisitor* visitor) const {
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx()));
   context->trace(visitor);
 }
-void ExecutionContextGCTracker::dispose() const {}
-
-JSClassID ExecutionContextGCTracker::contextGcTrackerClassId{0};
+void ExecutionContextGCTracker::Dispose() const {}
 
 ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
@@ -68,13 +68,13 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   JS_SetContextOpaque(m_ctx, this);
   JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
 
-  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>()->initialize<ExecutionContextGCTracker>(m_ctx, &ExecutionContextGCTracker::contextGcTrackerClassId);
-  JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->toQuickJS(), JS_PROP_NORMAL);
+  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>(ctx());
+  JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->ToQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;
 
   // Register all built-in native bindings.
-  installBindings(m_ctx);
+  InstallBindings(this);
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -121,7 +121,7 @@ ExecutingContext::~ExecutingContext() {
   if (JS_IsObject(exception) || JS_IsException(exception)) {
     // There must be bugs in native functions from call stack frame. Someone needs to fix it if throws.
     reportError(exception);
-    assert_m(false, "Unhandled exception found when dispose JSContext.");
+    assert_m(false, "Unhandled exception found when Dispose JSContext.");
   }
 
   JS_FreeValue(m_ctx, globalObject);
@@ -199,7 +199,7 @@ bool ExecutingContext::handleException(JSValue* exc) {
 }
 
 bool ExecutingContext::handleException(ScriptValue* exc) {
-  JSValue value = exc->toQuickJS();
+  JSValue value = exc->ToQuickJS();
   handleException(&value);
 }
 
@@ -373,53 +373,6 @@ void ExecutingContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   } else {
     context->m_rejectedPromise.trackUnhandledPromiseRejection(context, promise, reason);
   }
-}
-
-void installFunctionProperty(ExecutingContext* context, JSValue thisObject, const char* functionName, JSCFunction function, int argc) {
-  JSValue f = JS_NewCFunction(context->ctx(), function, functionName, argc);
-  JSValue pf = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, argc, 0, 1, &f);
-  JSAtom key = JS_NewAtom(context->ctx(), functionName);
-
-  JS_FreeValue(context->ctx(), f);
-
-// We should avoid overwrite exist property functions.
-#ifdef DEBUG
-  assert_m(JS_HasProperty(context->ctx(), thisObject, key) == 0, (std::string("Found exist function property: ") + std::string(functionName)).c_str());
-#endif
-
-  JS_DefinePropertyValue(context->ctx(), thisObject, key, pf, JS_PROP_ENUMERABLE);
-  JS_FreeAtom(context->ctx(), key);
-}
-
-void installPropertyGetterSetter(ExecutingContext* context, JSValue thisObject, const char* property, JSCFunction getterFunction, JSCFunction setterFunction) {
-  // Getter on jsObject works well with all conditions.
-  // We create an getter function and define to jsObject directly.
-  JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property);
-  JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
-  JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-
-  // Getter on jsObject works well with all conditions.
-  // We create an getter function and define to jsObject directly.
-  JSValue setter = JS_NewCFunction(context->ctx(), setterFunction, "setter", 0);
-  JSValue setterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 1, 0, 1, &setter);
-
-  // Define getter and setter property.
-  JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, setterProxy, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
-
-  JS_FreeAtom(context->ctx(), propertyKeyAtom);
-  JS_FreeValue(context->ctx(), getter);
-  JS_FreeValue(context->ctx(), setter);
-}
-
-void installPropertyGetter(ExecutingContext* context, JSValue thisObject, const char* property, JSCFunction getterFunction) {
-  // Getter on jsObject works well with all conditions.
-  // We create an getter function and define to jsObject directly.
-  JSAtom propertyKeyAtom = JS_NewAtom(context->ctx(), property);
-  JSValue getter = JS_NewCFunction(context->ctx(), getterFunction, "getter", 0);
-  JSValue getterProxy = JS_NewCFunctionData(context->ctx(), handleCallThisOnProxy, 0, 0, 1, &getter);
-  JS_DefinePropertyGetSet(context->ctx(), thisObject, propertyKeyAtom, getterProxy, JS_UNDEFINED, JS_PROP_NORMAL | JS_PROP_ENUMERABLE);
-  JS_FreeAtom(context->ctx(), propertyKeyAtom);
-  JS_FreeValue(context->ctx(), getter);
 }
 
 DOMTimerCoordinator* ExecutingContext::timers() {

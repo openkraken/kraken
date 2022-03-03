@@ -6,6 +6,8 @@
 #ifndef KRAKENBRIDGE_MACROS_H
 #define KRAKENBRIDGE_MACROS_H
 
+#include <stddef.h>
+
 #if defined(__GNUC__) || defined(__clang__)
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 #define UNLIKELY(x) __builtin_expect(!!(x), 0)
@@ -25,6 +27,13 @@
 #define KRAKEN_DISALLOW_MOVE(TypeName) \
   TypeName(TypeName&&) = delete;       \
   TypeName& operator=(TypeName&&) = delete
+
+#define KRAKEN_STATIC_ONLY(Type)                          \
+  Type() = delete;                                        \
+  Type(const Type&) = delete;                             \
+  Type& operator=(const Type&) = delete;                  \
+  void* operator new(size_t) = delete;                    \
+  void* operator new(size_t, void*) = delete
 
 // KRAKEN_DISALLOW_NEW(): Cannot be allocated with new operators but can be a
 // part of object, a value object in collections or stack allocated. If it has

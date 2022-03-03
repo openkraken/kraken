@@ -181,9 +181,9 @@ class ExecutingContext;
 
 class QJS${getClassName(blob)} final {
  public:
-  static void install(ExecutionContext* context);
+  static void install(ExecutingContext* context);
  private:
-  static void installGlobalFunctions(ExecutionContext* context);
+  static void installGlobalFunctions(ExecutingContext* context);
 };
 
 }

@@ -30,7 +30,7 @@ class ExecutingContext;
  * class FinalType final : public GarbageCollected<FinalType> {
  *  public:
  *   void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {
- *     // trace all memory wants to collected by GC.
+ *     // Trace all memory wants to collected by GC.
  *   }
  * };
  */
@@ -51,13 +51,13 @@ class GarbageCollected {
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
-  virtual void trace(GCVisitor* visitor) const = 0;
+  virtual void Trace(GCVisitor* visitor) const = 0;
 
   /**
    * Called before underline JavaScript object been collected by GC.
    * Note: JS_FreeValue and JS_FreeAtom is not available, use JS_FreeValueRT and JS_FreeAtomRT instead.
    */
-  virtual void dispose() const = 0;
+  virtual void Dispose() const = 0;
 
   /**
    * Specifies a name for the garbage-collected object. Such names will never
@@ -65,17 +65,10 @@ class GarbageCollected {
    *
    * @returns a human readable name for the object.
    */
-  [[nodiscard]] FORCE_INLINE virtual const char* getHumanReadableName() const { return ""; };
-
-  FORCE_INLINE JSContext* ctx() { return m_ctx; };
-  FORCE_INLINE ExecutingContext* context() const { return static_cast<ExecutingContext*>(JS_GetContextOpaque(m_ctx)); };
+  [[nodiscard]] FORCE_INLINE virtual const char* GetHumanReadableName() const { return ""; };
 
  protected:
-  JSValue jsObject{JS_NULL};
-  JSContext* m_ctx{nullptr};
-  JSRuntime* m_runtime{nullptr};
   GarbageCollected(){};
-  GarbageCollected(JSContext* ctx) : m_runtime(JS_GetRuntime(ctx)), m_ctx(ctx){};
   friend class MakeGarbageCollectedTrait<T>;
 };
 

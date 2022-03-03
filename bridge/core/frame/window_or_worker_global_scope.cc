@@ -58,8 +58,7 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction
 #endif
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(handler)->initialize<DOMTimer>(context->ctx(), &DOMTimer::classId);
-
+  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), handler);
   auto timerId = context->dartMethodPtr()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
 
   // Register timerId.
@@ -72,12 +71,12 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction
 
 int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
   if (context->dartMethodPtr()->setInterval == nullptr) {
-    exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
+    exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
     return -1;
   }
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(handler)->initializeQuickJSObject<DOMTimer>(context->ctx(), &DOMTimer::classId);
+  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), handler);
 
   uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
 
@@ -90,7 +89,7 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunctio
 
 void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState* exception) {
   if (context->dartMethodPtr()->clearTimeout == nullptr) {
-    exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
+    exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
     return;
   }
 

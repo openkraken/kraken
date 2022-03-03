@@ -40,13 +40,13 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-  QJSFunction* handler = QJSFunction::create(ctx, callbackValue);
+  QJSFunction* handler = QJSFunction::Create(ctx, callbackValue);
   ExceptionState exceptionState;
 
   int32_t timerId = WindowOrWorkerGlobalScope::setTimeout(context, handler, timeout, &exceptionState);
 
-  if (exceptionState.hasException()) {
-    return exceptionState.toQuickJS();
+  if (exceptionState.HasException()) {
+    return exceptionState.ToQuickJS();
   }
 
   // `-1` represents ffi error occurred.
@@ -84,12 +84,12 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
     return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
-  QJSFunction* handler = QJSFunction::create(ctx, callbackValue);
+  QJSFunction* handler = QJSFunction::Create(ctx, callbackValue);
   ExceptionState exception;
   int32_t timerId = WindowOrWorkerGlobalScope::setInterval(context, handler, timeout, &exception);
 
-  if (exception.hasException()) {
-    return exception.toQuickJS();
+  if (exception.HasException()) {
+    return exception.ToQuickJS();
   }
 
   if (timerId == -1) {
@@ -117,8 +117,8 @@ static JSValue clearTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSV
   ExceptionState exception;
   WindowOrWorkerGlobalScope::clearTimeout(context, id, &exception);
 
-  if (exception.hasException()) {
-    return exception.toQuickJS();
+  if (exception.HasException()) {
+    return exception.ToQuickJS();
   }
 
   return JS_NULL;

@@ -8,43 +8,43 @@
 
 namespace kraken {
 
-ScriptWrappable::ScriptWrappable(JSContext* ctx): GarbageCollected<ScriptWrappable>(ctx) {}
+ScriptWrappable::ScriptWrappable(JSContext* ctx): ctx_(ctx), runtime_(JS_GetRuntime(ctx)) {}
 
-JSValue ScriptWrappable::toQuickJS() {
-  if (m_wrapped) {
-    return m_jsObject;
+JSValue ScriptWrappable::ToQuickJS() {
+  if (wrapped_) {
+    return jsObject_;
   }
 
   // Initialize the corresponding quickjs object.
-  initializeQuickJSObject();
+  InitializeQuickJSObject();
 
-  return m_jsObject;
+  return jsObject_;
 }
 
-void ScriptWrappable::initializeQuickJSObject() {
-  auto* wrapperTypeInfo = const_cast<WrapperTypeInfo*>(getWrapperTypeInfo());
-  JSRuntime* runtime = m_runtime;
+void ScriptWrappable::InitializeQuickJSObject() {
+  auto* wrapperTypeInfo = const_cast<WrapperTypeInfo*>(GetWrapperTypeInfo());
+  JSRuntime* runtime = runtime_;
 
-  /// When classId is 0, it means this class are not initialized. We should create a JSClassDef to describe the behavior of this class and associate with classID.
-  /// ClassId should be a static toQuickJS to make sure JSClassDef when this class are created at the first class.
+  /// When classId is 0, it means this class are not initialized. We should Create a JSClassDef to describe the behavior of this class and associate with classID.
+  /// ClassId should be a static ToQuickJS to make sure JSClassDef when this class are created at the first class.
   if (wrapperTypeInfo->classId == 0 || !JS_HasClassId(runtime, wrapperTypeInfo->classId)) {
     /// Allocate a new unique classID from QuickJS.
     JS_NewClassID(&wrapperTypeInfo->classId);
     /// Basic template to describe the behavior about this class.
     JSClassDef def{};
 
-    def.class_name = getHumanReadableName();
+    def.class_name = GetHumanReadableName();
 
     /// This callback will be called when QuickJS GC is running at marking stage.
-    /// Users of this class should override `void trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to tell GC
+    /// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to tell GC
     /// which member of their class should be collected by GC.
     def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
       auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
       GCVisitor visitor{rt, mark_func};
-      object->trace(&visitor);
+      object->Trace(&visitor);
     };
 
-    /// Define custom behavior when call getProperty, setProperty on object.
+    /// Define custom behavior when call GetProperty, SetProperty on object.
     if (wrapperTypeInfo->exoticMethods != nullptr) {
       def.exotic = wrapperTypeInfo->exoticMethods;
     }
@@ -53,7 +53,7 @@ void ScriptWrappable::initializeQuickJSObject() {
     /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
       auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      object->dispose();
+      object->Dispose();
       free(object);
     };
 
@@ -63,14 +63,14 @@ void ScriptWrappable::initializeQuickJSObject() {
   /// The JavaScript object underline this class. This `jsObject` is the JavaScript object which can be directly access within JavaScript code.
   /// When the reference count of `jsObject` decrease to 0, QuickJS will trigger `finalizer` callback and free `jsObject` memory.
   /// When QuickJS GC found `jsObject` at marking stage, `gc_mark` callback will be triggered.
-  jsObject = JS_NewObjectClass(m_ctx, wrapperTypeInfo->classId);
-  JS_SetOpaque(jsObject, this);
+  jsObject_ = JS_NewObjectClass(ctx_, wrapperTypeInfo->classId);
+  JS_SetOpaque(jsObject_, this);
 
   // Let instance inherit EventTarget prototype methods.
   JSValue prototype = context()->contextData()->prototypeForType(wrapperTypeInfo);
-  JS_SetPrototype(m_ctx, jsObject, prototype);
+  JS_SetPrototype(ctx_, jsObject_, prototype);
 
-  m_wrapped = true;
+  wrapped_ = true;
 }
 
 }

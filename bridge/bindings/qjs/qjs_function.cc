@@ -8,37 +8,37 @@
 
 namespace kraken {
 
-bool QJSFunction::isFunction(JSContext* ctx) {
-  return JS_IsFunction(ctx, m_function);
+bool QJSFunction::IsFunction(JSContext* ctx) {
+  return JS_IsFunction(ctx, function_);
 }
 
-ScriptValue QJSFunction::invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments) {
+ScriptValue QJSFunction::Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments) {
   // 'm_function' might be destroyed when calling itself (if it frees the handler), so must take extra care.
-  JS_DupValue(ctx, m_function);
+  JS_DupValue(ctx, function_);
 
   JSValue argv[std::max(1, argc)];
 
   for (int i = 0; i < argc; i++) {
-    argv[0 + i] = arguments[i].toQuickJS();
+    argv[0 + i] = arguments[i].ToQuickJS();
   }
 
-  JSValue returnValue = JS_Call(ctx, m_function, JS_UNDEFINED, argc, argv);
+  JSValue returnValue = JS_Call(ctx, function_, JS_UNDEFINED, argc, argv);
 
   // Free the previous duplicated function.
-  JS_FreeValue(m_ctx, m_function);
+  JS_FreeValue(ctx, function_);
 
   return ScriptValue(ctx, returnValue);
 }
 
-const char* QJSFunction::getHumanReadableName() const {
+const char* QJSFunction::GetHumanReadableName() const {
   return "QJSFunction";
 }
 
-void QJSFunction::trace(GCVisitor* visitor) const {
-  visitor->trace(m_function);
+void QJSFunction::Trace(GCVisitor* visitor) const {
+  visitor->Trace(function_);
 }
 
-void QJSFunction::dispose() const {
-  JS_FreeValueRT(m_runtime, m_function);
+void QJSFunction::Dispose() const {
+  JS_FreeValueRT(JS_GetRuntime(ctx_), function_);
 }
 }  // namespace kraken

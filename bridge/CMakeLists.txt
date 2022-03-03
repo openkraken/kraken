@@ -181,6 +181,9 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 
   list(APPEND BRIDGE_SOURCE
     # Binding files
+    bindings/qjs/ts_type.h
+    bindings/qjs/converter.h
+    bindings/qjs/converter_impl.h
     bindings/qjs/binding_initializer.cc
     bindings/qjs/binding_initializer.h
     bindings/qjs/member_installer.cc
@@ -198,6 +201,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/qjs_function.h
     bindings/qjs/script_value.cc
     bindings/qjs/script_value.h
+    bindings/qjs/atom_string.cc
+    bindings/qjs/atom_string.h
     bindings/qjs/exception_state.cc
     bindings/qjs/exception_state.h
     bindings/qjs/gc_visitor.cc
@@ -210,6 +215,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/qjs_page.h
     bindings/qjs/qjs_blob.cc
     bindings/qjs/qjs_blob.h
+    bindings/qjs/qjs_blob_property_bag.cc
+    bindings/qjs/qjs_blob_property_bag.h
+    bindings/qjs/qjs_union_arraybuffer_arraybufferview_blob_string.h
+    bindings/qjs/qjs_union_arraybuffer_arraybufferview_blob_string.cc
 
     # Core sources
     core/executing_context.cc
@@ -221,6 +230,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dart_methods.h
     core/fileapi/blob.h
     core/fileapi/blob.cc
+    core/fileapi/dom_array_buffer_view.cc
+    core/fileapi/dom_array_buffer_view.h
     core/frame/console.cc
     core/frame/console.h
     core/frame/dom_timer.cc
@@ -261,8 +272,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_SOURCE
     out/qjs_console.cc
     out/qjs_console.h
-    out/qjs_module_manager.cc
-    out/qjs_module_manager.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

@@ -66,13 +66,13 @@ DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
 
 void DOMTimerCoordinator::trace(GCVisitor* visitor) {
   for (auto& timer : m_activeTimers) {
-    visitor->trace(timer.second->toQuickJS());
+    visitor->Trace(timer.second->ToQuickJS());
   }
 
   // Recycle all abandoned timers.
   if (!m_abandonedTimers.empty()) {
     for (auto& timer : m_abandonedTimers) {
-      visitor->trace(timer->toQuickJS());
+      visitor->Trace(timer->ToQuickJS());
     }
     // All abandoned timers should be freed at the sweep stage.
     m_abandonedTimers.clear();

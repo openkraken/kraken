@@ -24,7 +24,7 @@ class Blob : public ScriptWrappable {
   static Blob* create(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime);
 
   Blob() = delete;
-  explicit Blob(JSContext* ctx);
+  explicit Blob(JSContext* ctx): ScriptWrappable(ctx) {};
   explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx) {};
   explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime) : mimeType(mime), _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx){};
 
@@ -33,8 +33,8 @@ class Blob : public ScriptWrappable {
   /// get bytes data's length
   int32_t size();
 
-  void trace(GCVisitor* visitor) const override;
-  void dispose() const override;
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
 
  private:
   size_t _size;
@@ -42,18 +42,6 @@ class Blob : public ScriptWrappable {
   std::vector<uint8_t> _data;
   friend BlobBuilder;
   friend QJSBlob;
-};
-
-class BlobBuilder {
- public:
-  void append(ExecutingContext& context, ScriptValue& value);
-  void append(ExecutingContext& context, Blob* blob);
-
-  std::vector<uint8_t> finalize();
-
- private:
-  friend Blob;
-  std::vector<uint8_t> _data;
 };
 
 }  // namespace kraken

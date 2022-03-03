@@ -14,21 +14,22 @@ namespace kraken {
 // https://webidl.spec.whatwg.org/#dfn-callback-interface
 class QJSFunction : public GarbageCollected<QJSFunction> {
  public:
-  static QJSFunction* create(JSContext* ctx, JSValue function) { return makeGarbageCollected<QJSFunction>(ctx, function); }
-  explicit QJSFunction(JSContext* ctx, JSValue function) : m_function(JS_DupValue(ctx, function)), GarbageCollected<QJSFunction>(ctx){};
+  static QJSFunction* Create(JSContext* ctx, JSValue function) { return makeGarbageCollected<QJSFunction>(ctx, function); }
+  explicit QJSFunction(JSContext* ctx, JSValue function) : function_(JS_DupValue(ctx, function)) {};
 
-  bool isFunction(JSContext* ctx);
+  bool IsFunction(JSContext* ctx);
 
   // Performs "invoke".
   // https://webidl.spec.whatwg.org/#invoke-a-callback-function
-  ScriptValue invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
+  ScriptValue Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
 
-  const char* getHumanReadableName() const override;
-  void trace(GCVisitor* visitor) const override;
-  void dispose() const override;
+  const char* GetHumanReadableName() const override;
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
 
  private:
-  JSValue m_function{JS_NULL};
+  JSContext* ctx_{nullptr};
+  JSValue function_{JS_NULL};
 };
 
 }  // namespace kraken
