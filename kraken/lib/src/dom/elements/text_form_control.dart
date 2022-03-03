@@ -434,11 +434,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     return textPainter.size;
   }
 
-  // The average width of characters in a font family.
-  // Flutter does not expose avgCharWidth of font metrics, so it fallbacks to
-  // so use width of '0' as WebKit did.
-  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/rendering/RenderTextControl.cpp#L142
-  double get avgCharWidth {
+  Size get avgCharSize {
     TextStyle textStyle = TextStyle(
       fontFamilyFallback: renderStyle.fontFamily,
       fontSize: renderStyle.fontSize.computedValue,
@@ -457,7 +453,19 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     List<LineMetrics> lineMetrics = painter.computeLineMetrics();
 
-    return lineMetrics[0].width;
+    return Size(lineMetrics[0].width, lineMetrics[0].height);
+  }
+
+  // The average width of characters in a font family.
+  // Flutter does not expose avgCharWidth of font metrics, so it fallbacks to
+  // so use width of '0' as WebKit did.
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/rendering/RenderTextControl.cpp#L142
+  double get avgCharWidth {
+    return avgCharSize.width;
+  }
+
+  double get avgCharHeight {
+    return avgCharSize.height;
   }
 
   // Must override in subClasses.

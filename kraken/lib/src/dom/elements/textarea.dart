@@ -31,7 +31,7 @@ class TextareaElement extends TextFormControlElement {
     // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-rows
     double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
       ? renderStyle.lineHeight.computedValue
-      : 1.2 * renderStyle.fontSize.computedValue;
+      : avgCharHeight;
 
     return computedLineHeight * double.parse(properties[ROWS] ?? '2');
   }
