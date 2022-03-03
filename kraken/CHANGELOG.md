@@ -1,3 +1,15 @@
+## 0.10.2
+
+**Bug Fixed**
+
++ Fix report error cause stack overflow. https://github.com/openkraken/kraken/pull/1164
++ Fix object-fit not work due to image resize optimization. https://github.com/openkraken/kraken/pull/1165
++ Fix crash when reload. https://github.com/openkraken/kraken/pull/1167
++ Fix referer and origin. https://github.com/openkraken/kraken/pull/1170
++ Fix large file content may fail. https://github.com/openkraken/kraken/pull/1176
++ Fix native event memory align on 32 bit devices. https://github.com/openkraken/kraken/pull/1182
++ Fix image load error cause crash. https://github.com/openkraken/kraken/pull/1187
+
 ## 0.10.1
 
 **Bug Fixed**

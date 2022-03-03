@@ -302,9 +302,16 @@ list(APPEND BRIDGE_LINK_LIBS gumbo_parse_static)
 
 if (${IS_ANDROID})
   find_library(log-lib log)
+
+  if (${ANDROID_ABI} MATCHES "armeabi-v7a" OR ${ANDROID_ABI} MATCHES "x86")
+    add_definitions(-DANDROID_32_BIT=1)
+  endif()
+
   add_definitions(-DIS_ANDROID=1)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
-endif ()
+elseif(${IS_IOS})
+  add_definitions(-DIS_IOS=1)
+endif()
 
 ### Kraken
 target_include_directories(kraken PRIVATE

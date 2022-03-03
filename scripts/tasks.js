@@ -440,6 +440,7 @@ task(`build-ios-kraken-lib`, (done) => {
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=SIMULATOR64 \
     -DDEPLOYMENT_TARGET=9.0 \
+    -DIS_IOS=TRUE \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     ${externCmakeArgs.join(' ')} \
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-x64 -S ${paths.bridge}`, {
@@ -461,6 +462,7 @@ task(`build-ios-kraken-lib`, (done) => {
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS \
+    -DIS_IOS=TRUE \
     -DARCHS="armv7;armv7s" \
     -DDEPLOYMENT_TARGET=9.0 \
     ${externCmakeArgs.join(' ')} \
@@ -485,6 +487,7 @@ task(`build-ios-kraken-lib`, (done) => {
     -DCMAKE_TOOLCHAIN_FILE=${paths.bridge}/cmake/ios.toolchain.cmake \
     -DPLATFORM=OS64 \
     -DDEPLOYMENT_TARGET=9.0 \
+    -DIS_IOS=TRUE \
     ${externCmakeArgs.join(' ')} \
     ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
     -DENABLE_BITCODE=FALSE -G "Unix Makefiles" -B ${paths.bridge}/cmake-build-ios-arm64 -S ${paths.bridge}`, {
@@ -578,7 +581,7 @@ task('build-ios-frameworks', (done) => {
 task('build-linux-kraken-lib', (done) => {
   const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
- 
+
   const soBinaryDirectory = path.join(paths.bridge, `build/linux/lib/`);
   const bridgeCmakeDir = path.join(paths.bridge, 'cmake-build-linux');
   // generate project
@@ -630,10 +633,11 @@ task('build-android-kraken-lib', (done) => {
     }
   }
 
-  const archs = ['arm64-v8a', 'armeabi-v7a'];
+  const archs = ['arm64-v8a', 'armeabi-v7a', 'x86'];
   const toolChainMap = {
     'arm64-v8a': 'aarch64-linux-android',
-    'armeabi-v7a': 'arm-linux-androideabi'
+    'armeabi-v7a': 'arm-linux-androideabi',
+    'x86': 'i686-linux-android'
   };
   const buildType = (buildMode === 'Release' || buildMode == 'Relwithdebinfo') ? 'Relwithdebinfo' : 'Debug';
   let externCmakeArgs = [];

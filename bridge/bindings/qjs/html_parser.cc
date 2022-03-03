@@ -7,6 +7,7 @@
 #include "dom/document.h"
 #include "dom/text_node.h"
 #include "executing_context.h"
+#include "foundation/logging.h"
 
 #include <utility>
 

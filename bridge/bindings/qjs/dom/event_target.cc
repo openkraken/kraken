@@ -148,12 +148,18 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, EventTarget::classId(eventValue)));
+#if ANDROID_32_BIT
+  eventInstance->nativeEvent->target = reinterpret_cast<int64_t>(eventTargetInstance);
+#else
   eventInstance->nativeEvent->target = eventTargetInstance;
+#endif
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
 bool EventTargetInstance::dispatchEvent(EventInstance* event) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
+  auto* pEventType = reinterpret_cast<NativeString*>(event->nativeEvent->type);
+
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(pEventType->string), pEventType->length);
   std::string eventType = toUTF8(u16EventType);
 
   // protect this util event trigger finished.
@@ -183,12 +189,12 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
 }
 
 bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->nativeEvent->type->string), eventInstance->nativeEvent->type->length);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->type()->string), eventInstance->type()->length);
   std::string eventTypeStr = toUTF8(u16EventType);
   JSAtom eventType = JS_NewAtom(m_ctx, eventTypeStr.c_str());
 
   // Modify the currentTarget to this.
-  eventInstance->nativeEvent->currentTarget = this;
+  eventInstance->setCurrentTarget(this);
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
@@ -501,7 +507,7 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
   // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
   auto* nativeEvent = reinterpret_cast<NativeEvent*>(raw->bytes);
   EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-  eventInstance->nativeEvent->target = eventTargetInstance;
+  eventInstance->setTarget(eventTargetInstance);
   eventTargetInstance->dispatchEvent(eventInstance);
   JS_FreeValue(context->ctx(), eventInstance->jsObject);
 }

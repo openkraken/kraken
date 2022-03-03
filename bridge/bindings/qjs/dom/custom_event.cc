@@ -27,7 +27,7 @@ JSValue CustomEvent::initCustomEvent(JSContext* ctx, JSValue this_val, int argc,
   }
 
   JSValue typeValue = argv[0];
-  eventInstance->nativeEvent->type = jsValueToNativeString(ctx, typeValue).release();
+  eventInstance->setType(jsValueToNativeString(ctx, typeValue).release());
 
   if (argc <= 2) {
     bool canBubble = JS_ToBool(ctx, argv[1]);
@@ -83,8 +83,9 @@ CustomEventInstance::CustomEventInstance(CustomEvent* jsCustomEvent, JSAtom cust
 
 CustomEventInstance::CustomEventInstance(CustomEvent* jsCustomEvent, NativeCustomEvent* nativeCustomEvent)
     : nativeCustomEvent(nativeCustomEvent), EventInstance(jsCustomEvent, reinterpret_cast<NativeEvent*>(nativeCustomEvent)) {
-  JSValue newDetail = JS_NewUnicodeString(jsCustomEvent->context()->runtime(), jsCustomEvent->context()->ctx(), nativeCustomEvent->detail->string, nativeCustomEvent->detail->length);
-  nativeCustomEvent->detail->free();
+  auto* detail = reinterpret_cast<NativeString*>(nativeCustomEvent->detail);
+  JSValue newDetail = JS_NewUnicodeString(jsCustomEvent->context()->runtime(), jsCustomEvent->context()->ctx(), detail->string, detail->length);
+  detail->free();
   m_detail.value(newDetail);
   JS_FreeValue(m_ctx, newDetail);
 }
