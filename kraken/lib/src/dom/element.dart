@@ -756,13 +756,6 @@ abstract class Element
     }
 
     didDetachRenderer();
-
-    // Ensure pending layout/compositeBitsUpdate/paint render object to be finished.
-    SchedulerBinding.instance!.addPostFrameCallback(_disposeRenderBoxModel);
-  }
-
-  // Call dispose method of renderBoxModel when it is detached from tree.
-  void _disposeRenderBoxModel([_]) {
     renderBoxModel?.dispose();
     renderBoxModel = null;
   }

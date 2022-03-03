@@ -1,4 +1,5 @@
 type int64 = number;
+type double = number;
 
 interface HostObject {}
 interface Element {}
@@ -9,12 +10,14 @@ interface CanvasRenderingContext2D extends HostObject {
   font: string;
   strokeStyle: string;
   lineCap: string;
-  lineDashOffset: string;
+  lineDashOffset: double;
   lineJoin: string;
-  lineWidth: string;
-  miterLimit: string;
+  lineWidth: double;
+  miterLimit: double;
   textAlign: string;
   textBaseline: string;
+  // @TODO: Following number should be double.
+  // Reference https://html.spec.whatwg.org/multipage/canvas.html
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
   arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void;
   beginPath(): void;

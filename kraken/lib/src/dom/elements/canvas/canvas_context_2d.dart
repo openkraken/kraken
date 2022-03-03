@@ -249,10 +249,11 @@ class CanvasRenderingContext2D extends BindingObject {
         if (color != null) strokeStyle = color;
         break;
       case 'lineCap': lineCap = parseLineCap(castToType<String>(value)); break;
-      case 'lineDashOffset': lineDashOffset = castToType<double>(value); break;
+      // @TODO: Binding should guarantee that input value is determined type, like double or int.
+      case 'lineDashOffset': lineDashOffset = castToType<num>(value).toDouble(); break;
       case 'lineJoin': lineJoin = parseLineJoin(castToType<String>(value)); break;
-      case 'lineWidth': lineWidth = castToType<double>(value); break;
-      case 'miterLimit': miterLimit = castToType<double>(value); break;
+      case 'lineWidth': lineWidth = castToType<num>(value).toDouble(); break;
+      case 'miterLimit': miterLimit = castToType<num>(value).toDouble(); break;
       case 'textAlign': textAlign = parseTextAlign(castToType<String>(value)); break;
       case 'textBaseline': textBaseline = parseTextBaseline(castToType<String>(value)); break;
       default: super.setBindingProperty(key, value);

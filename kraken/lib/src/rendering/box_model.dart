@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -1295,12 +1296,16 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-
   /// Called when its corresponding element disposed
   @override
   @mustCallSuper
   void dispose() {
-    super.dispose();
+    // Ensure pending layout/compositeBitsUpdate/paint render object to be finished.
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      // Call dispose method of renderBoxModel when it is detached from tree.
+      super.dispose();
+    });
+
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
