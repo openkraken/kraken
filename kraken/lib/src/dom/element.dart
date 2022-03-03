@@ -696,10 +696,6 @@ abstract class Element
 
   @override
   void dispose() {
-    parentNode?.removeChild(this);
-
-    assert(isRendererAttached == false, 'Should unmount $this before calling dispose.');
-
     renderStyle.detach();
     style.dispose();
     attributes.clear();
@@ -729,7 +725,7 @@ abstract class Element
     }
 
     if (renderer != null) {
-      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      // If element attach WidgetElement, render object should be attach to render tree when mount.
       if (parent is! WidgetElement) {
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }

@@ -130,7 +130,7 @@ class KrakenViewController
     }
 
     if (originalViewport != null) {
-      // Should update to newlast controller.
+      // Should update to new controller.
       originalViewport.controller = rootController;
       viewport = originalViewport;
     } else {

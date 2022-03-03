@@ -9,8 +9,6 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 
-
-
 const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget {

@@ -22,7 +22,7 @@ enum NodeType {
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
 abstract class RenderObjectNode {
-  RenderBox? get renderer => throw FlutterError('This node has no render object implemented.');
+  RenderBox? get renderer => null;
 
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectNode] represents, using the configuration described by this
@@ -54,7 +54,7 @@ abstract class RenderObjectNode {
   void didDetachRenderer();
 }
 
-/// Lifecycles that triggered when NodeTree changes.
+/// Lifecycle that triggered when node tree changes.
 /// Ref: https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-lifecycle-callbacks
 abstract class LifecycleCallbacks {
   // Invoked each time the custom element is appended into a document-connected element.
@@ -146,13 +146,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   /// Release any resources held by this node.
   @override
   void dispose() {
+    parentNode?.removeChild(this);
+    assert(!isRendererAttached, 'Should unmount $this before calling dispose.');
     super.dispose();
-
-    parentNode = null;
-    for (int i = 0; i < childNodes.length; i ++) {
-      childNodes[i].parentNode = null;
-    }
-    childNodes.clear();
   }
 
   @override
@@ -240,6 +236,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       bool isOldNodeConnected = oldNode.isConnected;
       int referenceIndex = childNodes.indexOf(oldNode);
       oldNode.parentNode = null;
+      newNode.parentNode = this;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
 
