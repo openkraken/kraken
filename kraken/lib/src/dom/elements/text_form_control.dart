@@ -375,7 +375,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         if (style[WIDTH].isEmpty) {
           renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
         }
-        if (style[HEIGHT].isEmpty) {
+        if (style[HEIGHT].isEmpty && defaultHeight != null) {
           renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
         }
         _renderTextControlLeaderLayer!.markNeedsLayout();
@@ -493,6 +493,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         );
         renderEditable!.handleTapDown(details);
       }
+
+      // Focus element on touch start.
+      TextFormControlElement.setFocus(this);
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
     } else if (event.type == EVENT_TOUCH_MOVE ||
