@@ -212,18 +212,6 @@ class Element extends Node
     }
   }
 
-  RenderIntrinsic createRenderIntrinsic() {
-    return RenderIntrinsic(
-      renderStyle,
-    );
-  }
-
-  RenderIntrinsic createRenderRepaintBoundaryIntrinsic() {
-    return RenderRepaintBoundaryIntrinsic(
-      renderStyle,
-    );
-  }
-
   RenderIntrinsic _createRenderIntrinsic({
     RenderIntrinsic? previousIntrinsic,
     bool isRepaintBoundary = false
@@ -232,9 +220,13 @@ class Element extends Node
 
     if (previousIntrinsic == null) {
       if (isRepaintBoundary) {
-        nextIntrinsic = createRenderRepaintBoundaryIntrinsic();
+        nextIntrinsic = RenderRepaintBoundaryIntrinsic(
+          renderStyle,
+        );
       } else {
-        nextIntrinsic = createRenderIntrinsic();
+        nextIntrinsic = RenderIntrinsic(
+          renderStyle,
+        );
       }
     } else {
       if (previousIntrinsic is RenderRepaintBoundaryIntrinsic) {
@@ -258,7 +250,7 @@ class Element extends Node
     return nextIntrinsic;
   }
 
-  // Create _renderLayoutBox if type changed and copy children if there has previous _renderLayoutBox.
+  // Create renderLayoutBox if type changed and copy children if there has previous renderLayoutBox.
   RenderLayoutBox _createRenderLayout({
       RenderLayoutBox? previousRenderLayoutBox,
       CSSRenderStyle? renderStyle,

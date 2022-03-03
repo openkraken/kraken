@@ -371,8 +371,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
       // It needs to judge width in style here cause
       // width in renderStyle may be set in node attach.
-      } else if (property == FONT_SIZE && style[WIDTH].isEmpty) {
-        renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
+      } else if (property == FONT_SIZE) {
+        if (style[WIDTH].isEmpty) {
+          renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
+        }
+        if (style[HEIGHT].isEmpty) {
+          renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
+        }
         _renderTextControlLeaderLayer!.markNeedsLayout();
       }
     }
