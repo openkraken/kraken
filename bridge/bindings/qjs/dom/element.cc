@@ -288,7 +288,7 @@ JSValue Element::toBlob(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
     JSValue devicePixelRatioValue = argv[0];
 
     if (!JS_IsNumber(devicePixelRatioValue)) {
-      return JS_ThrowTypeError(ctx, "Failed to export blob: parameter 2 (devicePixelRatio) is not an number.");
+      return JS_ThrowTypeError(ctx, "Failed to export blob: parameter 1 (devicePixelRatio) is not an number.");
     }
 
     JS_ToFloat64(ctx, &devicePixelRatio, devicePixelRatioValue);
