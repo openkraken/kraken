@@ -28,11 +28,10 @@ class RenderTextControlMultiline extends RenderIntrinsic {
   double? get lineHeight {
     TextareaElement textareaElement = renderStyle.target as TextareaElement;
 
-    double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue
-      : 1.2 * renderStyle.fontSize.computedValue;
-
-    return computedLineHeight * double.parse(textareaElement.properties[ROWS] ?? '2');
+    if (renderStyle.lineHeight != CSSLengthValue.normal) {
+      return renderStyle.lineHeight.computedValue * double.parse(textareaElement.properties[ROWS] ?? '2');
+    }
+    return null;
   }
 }
 

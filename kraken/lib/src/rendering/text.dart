@@ -109,12 +109,11 @@ class RenderTextBox extends RenderBox
     if (paragraph != null) {
 
       int lines = paragraph.lineMetrics.length;
-      double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
-        ? renderStyle.lineHeight.computedValue
-        : 1.2 * renderStyle.fontSize.computedValue;
-
-      return computedLineHeight * lines;
+      if (renderStyle.lineHeight != CSSLengthValue.normal) {
+        return renderStyle.lineHeight.computedValue * lines;
+      }
     }
+    return null;
   }
 
   // Auto value for min-width
