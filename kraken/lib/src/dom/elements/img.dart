@@ -55,7 +55,7 @@ class ImageElement extends Element {
   bool _isInLazyLoading = false;
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
   // A boolean value which indicates whether or not the image has completely loaded.
-  bool complete = false;
+  bool _complete = false;
 
   // The attribute directs the user agent to fetch a resource immediately or to defer fetching
   // until some conditions associated with the element are met, according to the attribute's
@@ -93,7 +93,7 @@ class ImageElement extends Element {
       case 'scaling': return scaling;
       case 'naturalWidth': return naturalWidth;
       case 'naturalHeight': return naturalHeight;
-      case 'complete': return complete;
+      case 'complete': return _complete;
       default: return super.getBindingProperty(key);
     }
   }
@@ -352,7 +352,6 @@ class ImageElement extends Element {
       _cachedImageStream?.removeListener(_getListener());
     }
 
-    complete = false;
     _frameCount = 0;
     _cachedImageStream = newStream;
 
@@ -409,8 +408,8 @@ class ImageElement extends Element {
     _replaceImage(info: imageInfo);
     _frameCount++;
 
-    if (!complete) {
-      complete = true;
+    if (!_complete) {
+      _complete = true;
       if (synchronousCall) {
         // `synchronousCall` happens when caches image and calling `addListener`.
         scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -438,7 +437,6 @@ class ImageElement extends Element {
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
     _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
-    complete = false;
     _frameCount = 0;
     final ImageStream stream = provider.resolve(config);
     ImageStreamListener? listener;
@@ -447,8 +445,8 @@ class ImageElement extends Element {
         _replaceImage(info: imageInfo);
         _frameCount++;
 
-        if (!complete && !_shouldLazyLoading) {
-          complete = true;
+        if (!_complete && !_shouldLazyLoading) {
+          _complete = true;
           if (sync) {
             // `synchronousCall` happens when caches image and calling `addListener`.
             scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -470,8 +468,12 @@ class ImageElement extends Element {
 
   String get src => _resolvedSource?.toString() ?? '';
   set src(String value) {
+    String prevSrc = src;
     internalSetAttribute('src', value);
     _resolveSource(value);
+    if (prevSrc != src) {
+      _complete = false;
+    }
     // Update image source if image already attached except image is lazy loading.
     if (isRendererAttached && !_isInLazyLoading) {
       _resolveImage(_resolvedSource, updateImageProvider: true);
