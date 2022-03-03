@@ -142,7 +142,7 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
-  RenderIntrinsic toRepaintBoundaryIntrinsic() {
+  RenderRepaintBoundaryIntrinsic toRepaintBoundaryIntrinsic() {
     RenderObject? childRenderObject = child;
     child = null;
     RenderRepaintBoundaryIntrinsic newChild = RenderRepaintBoundaryIntrinsic(renderStyle);

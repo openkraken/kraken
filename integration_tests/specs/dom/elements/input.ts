@@ -18,6 +18,25 @@ describe('Tags input', () => {
     await snapshot();
   });
 
+  it('with size attribute', async () => {
+    const input = document.createElement('input');
+    input.style.fontSize = '16px';
+    input.setAttribute('value', 'Hello World Hello World Hello World Hello World');
+    input.setAttribute('size', '10');
+    document.body.appendChild(input);
+
+    await snapshot();
+  });
+  
+  it('with defaultValue property', async () => {
+    const input = document.createElement('input');
+    input.style.fontSize = '16px';
+    input.defaultValue = 'Hello World Hello World Hello World Hello World';
+    document.body.appendChild(input);
+
+    await snapshot();
+  });
+
   it('with placeholder and value set', async () => {
     const input = document.createElement('input');
     input.style.width = '100px';

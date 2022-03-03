@@ -780,13 +780,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         renderStyle.alignItems == AlignItems.baseline)) {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
-        double? lineHeight = _getLineHeight(child);
-
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (lineHeight != null) {
-          childLeading = lineHeight - childSize!.height;
-        }
         double? childMarginTop = 0;
         double? childMarginBottom = 0;
         if (child is RenderBoxModel) {
@@ -794,15 +787,14 @@ class RenderFlexLayout extends RenderLayoutBox {
           childMarginBottom = child.renderStyle.marginBottom.computedValue;
         }
         maxSizeAboveBaseline = math.max(
-          childAscent + childLeading / 2,
+          childAscent,
           maxSizeAboveBaseline,
         );
         maxSizeBelowBaseline = math.max(
           childMarginTop +
             childMarginBottom +
             childSize!.height -
-            childAscent +
-            childLeading / 2,
+            childAscent,
           maxSizeBelowBaseline,
         );
         runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
@@ -2056,9 +2048,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Leading between height of line box's content area and line height of line box.
     double lineBoxLeading = 0;
     double? lineBoxHeight = _getLineHeight(this);
-    // @TODO line-height of layout should add the line-height of multiple line child
-    // rather than exclude it.
-    if (child is! RenderTextBox && lineBoxHeight != null) {
+    if (lineBoxHeight != null) {
       lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
     }
 
@@ -2228,15 +2218,19 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   double? _getLineHeight(RenderBox child) {
-    double? lineHeight;
+    CSSLengthValue? lineHeight;
     if (child is RenderTextBox) {
-      lineHeight = child.lineHeight;
+      lineHeight = renderStyle.lineHeight;
     } else if (child is RenderBoxModel) {
-      lineHeight = child.lineHeight;
+      lineHeight = child.renderStyle.lineHeight;
     } else if (child is RenderPositionPlaceholder) {
-      lineHeight = child.positioned!.lineHeight;
+      lineHeight = child.positioned!.renderStyle.lineHeight;
     }
-    return lineHeight;
+
+    if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
+      return lineHeight.computedValue;
+    }
+    return null;
   }
 
   @override

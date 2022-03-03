@@ -102,20 +102,6 @@ class RenderTextBox extends RenderBox
   BoxSizeType? widthSizeType;
   BoxSizeType? heightSizeType;
 
-  // Line height of RenderTextBox itself, should multiply text lines
-  // to get the actual line height.
-  double? get lineHeight {
-    KrakenRenderParagraph? paragraph = child as KrakenRenderParagraph?;
-    if (paragraph != null) {
-
-      int lines = paragraph.lineMetrics.length;
-      if (renderStyle.lineHeight != CSSLengthValue.normal) {
-        return renderStyle.lineHeight.computedValue * lines;
-      }
-    }
-    return null;
-  }
-
   // Auto value for min-width
   double autoMinWidth = 0;
 

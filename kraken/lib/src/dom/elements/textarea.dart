@@ -2,10 +2,8 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
 
 const String TEXTAREA = 'TEXTAREA';
 const String ROWS = 'rows';
@@ -19,25 +17,6 @@ const Map<String, dynamic> _defaultStyle = {
 class TextareaElement extends TextFormControlElement {
   TextareaElement(EventTargetContext? context)
     : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
-
-  @override
-  RenderBox createRenderer() {
-    return renderIntrinsic ??= createRenderIntrinsic();
-  }
-
-  @override
-  RenderIntrinsic createRenderIntrinsic() {
-    return RenderTextControlMultiline(
-      renderStyle,
-    );
-  }
-
-  @override
-  RenderIntrinsic createRenderRepaintBoundaryIntrinsic() {
-    return RenderRepaintBoundaryTextControlMultiline(
-      renderStyle,
-    );
-  }
 
   @override
   double? get defaultWidth {
