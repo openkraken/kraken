@@ -86,6 +86,11 @@ mixin TextControlState on State<Kraken> {
 
       // Action to delete text.
       DeleteTextIntent: CallbackAction<DeleteTextIntent>(onInvoke: _handleDeleteText),
+      DeleteByWordTextIntent: CallbackAction<DeleteByWordTextIntent>(onInvoke: _handleDeleteByWordText),
+      DeleteByLineTextIntent: CallbackAction<DeleteByLineTextIntent>(onInvoke: _handleDeleteByLineText),
+      DeleteForwardTextIntent: CallbackAction<DeleteForwardTextIntent>(onInvoke: _handleDeleteForwardText),
+      DeleteForwardByWordTextIntent: CallbackAction<DeleteForwardByWordTextIntent>(onInvoke: _handleDeleteForwardByWordText),
+      DeleteForwardByLineTextIntent: CallbackAction<DeleteForwardByLineTextIntent>(onInvoke: _handleDeleteForwardByLineText),
 
       // Action of hot keys control/command + (X, C, V, A).
       SelectAllTextIntent: CallbackAction<SelectAllTextIntent>(onInvoke: _handleSelectAllText),
@@ -110,12 +115,17 @@ mixin TextControlState on State<Kraken> {
       ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
       ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
       ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
+      ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
+      ExtendSelectionLeftByLineTextIntent: CallbackAction<ExtendSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
+      ExtendSelectionLeftByWordAndStopAtReversalTextIntent: CallbackAction<ExtendSelectionLeftByWordAndStopAtReversalTextIntent>(onInvoke: _handleExtendSelectionLeftByWordAndStopAtReversalText),
+      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
+      ExtendSelectionRightByLineTextIntent: CallbackAction<ExtendSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
+      ExtendSelectionRightByWordAndStopAtReversalTextIntent: CallbackAction<ExtendSelectionRightByWordAndStopAtReversalTextIntent>(onInvoke: _handleExtendSelectionRightByWordAndStopAtReversalText),
+
       ExpandSelectionToEndTextIntent: CallbackAction<ExpandSelectionToEndTextIntent>(onInvoke: _handleExtendSelectionToEndText),
       ExpandSelectionToStartTextIntent: CallbackAction<ExpandSelectionToStartTextIntent>(onInvoke: _handleExtendSelectionToStartText),
-      ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
-      ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
-      ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
-      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
+      ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExpandSelectionLeftByLineText),
+      ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExpandSelectionRightByLineText),
     };
   }
 
@@ -189,6 +199,57 @@ mixin TextControlState on State<Kraken> {
       }
     }
   }
+
+  void _handleDeleteByWordText(DeleteByWordTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteByWord(SelectionChangedCause.keyboard, false);
+      }
+    }
+  }
+
+  void _handleDeleteByLineText(DeleteByLineTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteByLine(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleDeleteForwardText(DeleteForwardTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForward(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleDeleteForwardByWordText(DeleteForwardByWordTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      }
+    }
+  }
+
+  void _handleDeleteForwardByLineText(DeleteForwardByLineTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
 
   void _handleSelectAllText(SelectAllTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
@@ -410,7 +471,7 @@ mixin TextControlState on State<Kraken> {
     }
   }
 
-  void _handleExtendSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
+  void _handleExpandSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
       RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
@@ -420,7 +481,7 @@ mixin TextControlState on State<Kraken> {
     }
   }
 
-  void _handleExtendSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
+  void _handleExpandSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
       RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
@@ -440,12 +501,52 @@ mixin TextControlState on State<Kraken> {
     }
   }
 
+  void _handleExtendSelectionLeftByLineText(ExtendSelectionLeftByLineTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleExtendSelectionLeftByWordAndStopAtReversalText(ExtendSelectionLeftByWordAndStopAtReversalTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
+      }
+    }
+  }
+
   void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
     dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
       RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
       if (focusedRenderEditable != null) {
         focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleExtendSelectionRightByLineText(ExtendSelectionRightByLineTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+      }
+    }
+  }
+
+  void _handleExtendSelectionRightByWordAndStopAtReversalText(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent) {
+    dom.Element? focusedElement = _findFocusedElement();
+    if (focusedElement != null) {
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
       }
     }
   }
