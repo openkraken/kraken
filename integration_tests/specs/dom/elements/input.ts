@@ -27,6 +27,49 @@ describe('Tags input', () => {
 
     await snapshot();
   });
+
+    
+  it('with size attribute change when width is not set', async (done) => {
+    const input = document.createElement('input');
+    input.style.fontSize = '16px';
+    input.setAttribute('value', 'Hello World');
+    document.body.appendChild(input);
+
+    requestAnimationFrame(async () => {
+      input.setAttribute('size', '30');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with cols attribute change when width is set', async (done) => {
+    const input = document.createElement('input');
+    input.style.fontSize = '16px';
+    input.style.width = '100px';
+    input.setAttribute('value', 'Hello World');
+    document.body.appendChild(input);
+
+    requestAnimationFrame(async () => {
+      input.setAttribute('size', '30');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with size attribute set and width changed to auto', async (done) => {
+    const input = document.createElement('input');
+    input.style.fontSize = '16px';
+    input.style.width = '100px';
+    input.setAttribute('size', '30');
+    input.setAttribute('value', 'Hello World');
+    document.body.appendChild(input);
+
+    requestAnimationFrame(async () => {
+      input.style.width = 'auto';
+      await snapshot();
+      done();
+    });
+  });
   
   it('with defaultValue property', async () => {
     const input = document.createElement('input');
