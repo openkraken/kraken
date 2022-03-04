@@ -145,6 +145,96 @@ describe('Tags textarea', () => {
     await snapshot();
   });
 
+  it('with rows attribute change when height is not set', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.setAttribute('rows', '20');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with rows attribute change when height is set', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.style.height = '200px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.setAttribute('rows', '20');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with rows attribute set and height changed to auto', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.setAttribute('rows', '20');
+    textarea.style.height = '200px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.style.height = 'auto';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with cols attribute change when width is not set', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.setAttribute('cols', '30');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with cols attribute change when width is set', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.style.width = '150px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.setAttribute('cols', '30');
+      await snapshot();
+      done();
+    });
+  });
+
+  it('with cols attribute set and width changed to auto', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.setAttribute('cols', '30');
+    textarea.style.width = '150px';
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.style.width = 'auto';
+      await snapshot();
+      done();
+    });
+  });
+
   it('with defaultValue property', async () => {
     const textarea = document.createElement('textarea');
     textarea.style.fontSize = '16px';
@@ -269,6 +359,26 @@ describe('Tags textarea', () => {
   it('font-size changes when width and height not set', async (done) => {
     const textarea = document.createElement('textarea');
     textarea.style.fontSize = '16px';
+    textarea.setAttribute('rows', '10');
+    textarea.setAttribute('placeholder', 'Please input text.');
+    const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      textarea.style.fontSize = '28px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('font-size changes when width and height is set', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.style.width = '160px';
+    textarea.style.height = '160px';
     textarea.setAttribute('rows', '10');
     textarea.setAttribute('placeholder', 'Please input text.');
     const text = document.createTextNode('Hello World\nHello World Hello World Hello World');
