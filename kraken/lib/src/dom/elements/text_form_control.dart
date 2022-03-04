@@ -568,7 +568,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       autocorrect: autoCorrect,
       inputAction: _textInputType == TextInputType.multiline
         ? TextInputAction.newline
-        : TextInputAction.done,
+        : _textInputAction,
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
@@ -709,9 +709,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         // TODO: Handle this case.
         break;
       case TextInputAction.emergencyCall:
-        // TODO: Handle this case.
-        break;
-      case TextInputAction.newline:
         // TODO: Handle this case.
         break;
     }
