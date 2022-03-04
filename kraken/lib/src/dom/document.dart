@@ -28,6 +28,9 @@ class Document extends Node {
   RenderViewportBox? get viewport => _viewport;
 
   @override
+  Document get ownerDocument => this;
+
+  @override
   String get nodeName => '#document';
 
   @override
@@ -98,25 +101,14 @@ class Document extends Node {
 
   @override
   void addEventListener(String eventType, EventHandler handler) {
-    switch (eventType) {
-      case EVENT_SCROLL:
-        // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        documentElement?.addEventListener(eventType, handler);
-        break;
-      default:
-        // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
-        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        documentElement?.addEventListener(eventType, handler);
-        break;
-    }
+    // Events listened on document proxy to documentElement which can handle hitTest.
+    // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
+    documentElement?.addEventListener(eventType, handler);
   }
 
   @override
   void removeEventListener(String eventType, EventHandler handler) {
-    switch (eventType) {
-      case EVENT_SCROLL: documentElement?.removeEventListener(eventType, handler); break;
-      default: documentElement?.removeEventListener(eventType, handler); break;
-    }
+    documentElement?.removeEventListener(eventType, handler);
   }
 
   Element createElement(String type, [context]) {
@@ -162,6 +154,16 @@ class Document extends Node {
     // Recalculate style for all nodes sync.
     documentElement?.recalculateNestedStyle();
   }
+
+  // @override
+  // void dispatchEvent(Event event) {
+  //   if (event.type == SCROLL) {
+  //
+  //     print('1111 $event');
+  //   }
+  //
+  //   super.dispatchEvent(event);
+  // }
 
   @override
   void dispose() {

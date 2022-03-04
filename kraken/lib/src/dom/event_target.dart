@@ -48,6 +48,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
 
   @mustCallSuper
   void dispatchEvent(Event event) {
+    print('dispach $event');
     if (_disposed) return;
 
     event.target = this;

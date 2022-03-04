@@ -82,14 +82,14 @@ class Window extends EventTarget {
         return super.addEventListener(eventType, handler);
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        return document.documentElement!.addEventListener(eventType, handler);
+        return document.documentElement?.addEventListener(eventType, handler);
       case EVENT_RESIZE:
         // TODO: Fired at the Window when the viewport is resized.
         break;
       default:
         // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.documentElement!.addEventListener(eventType, handler);
+        document.addEventListener(eventType, handler);
         break;
     }
   }
@@ -101,12 +101,12 @@ class Window extends EventTarget {
       case EVENT_LOAD:
         return super.removeEventListener(eventType, handler);
       case EVENT_SCROLL:
-        return document.documentElement!.removeEventListener(eventType, handler);
+        return document.documentElement?.removeEventListener(eventType, handler);
       case EVENT_RESIZE:
         // TODO: Fired at the Window when the viewport is resized.
         break;
       default:
-        document.documentElement!.removeEventListener(eventType, handler);
+        document.removeEventListener(eventType, handler);
         break;
     }
   }

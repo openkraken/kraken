@@ -20,20 +20,15 @@ class HTMLElement extends Element {
   }
 
   @override
-  void addEventListener(String eventType, EventHandler handler) {
-    // Scroll event not working on html.
-    if (eventType == EVENT_SCROLL) return;
-    super.addEventListener(eventType, handler);
-  }
-
-  @override
   void dispatchEvent(Event event) {
-    if (event.type == SCROLL) {
+    // Scroll event proxy to document.
+    if (event.type == EVENT_SCROLL) {
       // https://www.w3.org/TR/2014/WD-DOM-Level-3-Events-20140925/#event-type-scroll
       // When dispatched on the Document element, this event type must bubble to the Window object.
       event.bubbles = true;
+      ownerDocument.dispatchEvent(event);
+      return;
     }
-
     super.dispatchEvent(event);
   }
 }
