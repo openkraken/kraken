@@ -42,8 +42,8 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
 class EditableTextDelegate implements TextSelectionDelegate {
-  final TextFormControlElement _inputElement;
-  EditableTextDelegate(this._inputElement);
+  final TextFormControlElement _textFormControlElement;
+  EditableTextDelegate(this._textFormControlElement);
 
   TextEditingValue _textEditingValue = TextEditingValue();
 
@@ -57,10 +57,10 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {
-    RenderEditable renderEditable = _inputElement.renderEditable!;
-    KrakenScrollable _scrollable = _inputElement._scrollable;
+    RenderEditable renderEditable = _textFormControlElement.renderEditable!;
+    KrakenScrollable _scrollable = _textFormControlElement._scrollable;
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
-    final RevealedOffset targetOffset = _inputElement._getOffsetToRevealCaret(localRect);
+    final RevealedOffset targetOffset = _textFormControlElement._getOffsetToRevealCaret(localRect);
     _scrollable.position!.jumpTo(targetOffset.offset);
     renderEditable.showOnScreen(rect: targetOffset.rect);
   }
@@ -70,7 +70,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
   bool showToolbar() {
-    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    TextSelectionOverlay? _selectionOverlay = _textFormControlElement._selectionOverlay;
     // Web is using native dom elements to enable clipboard functionality of the
     // toolbar: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this
@@ -89,7 +89,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void hideToolbar([bool hideHandles = true]) {
-    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    TextSelectionOverlay? _selectionOverlay = _textFormControlElement._selectionOverlay;
     if (_selectionOverlay == null) {
       return;
     }
@@ -107,7 +107,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   /// Toggles the visibility of the toolbar.
   void toggleToolbar() {
-    TextSelectionOverlay? _selectionOverlay = _inputElement._selectionOverlay;
+    TextSelectionOverlay? _selectionOverlay = _textFormControlElement._selectionOverlay;
     assert(_selectionOverlay != null);
     if (_selectionOverlay!.toolbarIsVisible) {
       hideToolbar();
@@ -130,7 +130,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    _inputElement._formatAndSetValue(value, userInteraction: true, cause: cause);
+    _textFormControlElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
 }
 
@@ -201,7 +201,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
       text: placeholderText,
-      // The color of input placeholder.
+      // The color of placeholder.
       color: Color.fromARGB(255, 169, 169, 169)
     );
   }
@@ -221,7 +221,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   static void clearFocus() {
     if (TextFormControlElement.focusedTextFormControlElement != null) {
-      TextFormControlElement.focusedTextFormControlElement!.blurInput();
+      TextFormControlElement.focusedTextFormControlElement!.blurTextFormControl();
     }
 
     TextFormControlElement.focusedTextFormControlElement = null;
@@ -237,7 +237,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
       clearFocus();
       TextFormControlElement.focusedTextFormControlElement = textFormControlElement;
-      textFormControlElement.focusInput();
+      textFormControlElement.focusTextFormControl();
     }
   }
 
@@ -246,7 +246,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   @override
   getProperty(String key) {
     switch(key) {
-      // @TODO: Apply algorithm of input element property width.
+      // @TODO: Apply algorithm of text form control element property width and height.
       case 'width':
       case 'height':
         return 0.0;
@@ -349,10 +349,26 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   void _onStyleChanged(String property, String? original, String present) {
-    // @TODO: Filter style properties that used by text span.
+    // Need to rebuild text span when text related style changed.
     if (property == COLOR
+      || property == FONT_WEIGHT
+      || property == FONT_STYLE
+      || property == FONT_FAMILY
+      || property == FONT_SIZE
+      || property == LINE_HEIGHT
+      || property == LETTER_SPACING
+      || property == WORD_SPACING
+      || property == WHITE_SPACE
+      || property == TEXT_DECORATION_LINE
+      || property == TEXT_DECORATION_COLOR
+      || property == TEXT_DECORATION_STYLE
+      || property == TEXT_SHADOW
     ) {
       _rebuildTextSpan();
+    }
+
+    if (property == TEXT_ALIGN && renderEditable != null) {
+      renderEditable!.textAlign = renderStyle.textAlign;
     }
   }
 
@@ -392,7 +408,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   Offset? _selectStartPosition;
 
-  // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
+  // Get the text size of text control form element by manually layout
+  // cause RenderEditable does not expose textPainter.
   Size getTextSize() {
     TextPainter textPainter = TextPainter(
       text: renderEditable!.text,
@@ -484,7 +501,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.screenX, touch.screenY);
 
-      // Disable text selection and enable scrolling when text size is larger than input size.
+      // Disable text selection and enable scrolling when text size is larger than text form control element size.
       if (_textSize!.width > renderEditable!.size.width
        || _textSize!.height > renderEditable!.size.height) {
         if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
@@ -517,7 +534,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     }
   }
 
-  void focusInput() {
+  void focusTextFormControl() {
     if (isRendererAttached) {
       // Set focus that make it add keyboard listener
       renderEditable!.hasFocus = true;
@@ -526,7 +543,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     }
   }
 
-  void blurInput() {
+  void blurTextFormControl() {
     if (isRendererAttached) {
       // Set focus that make it remove keyboard listener
       renderEditable!.hasFocus = false;
@@ -780,7 +797,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     if (textChanged) {
       _handleTextChanged(value.text, userInteraction, cause);
-      // Sync value to input element property
+      // Sync value to the text form control element property.
       properties[valueKey] = value.text;
     }
 
@@ -801,7 +818,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         _actualText = renderEditable!.text = _buildTextSpan(text: text);
       }
     } else {
-      // Update text when input element is not appended to dom yet.
+      // Update text when element is not appended to dom yet.
       _actualText = _buildTextSpan(text: text);
     }
 
