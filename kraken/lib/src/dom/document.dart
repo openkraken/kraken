@@ -155,16 +155,6 @@ class Document extends Node {
     documentElement?.recalculateNestedStyle();
   }
 
-  // @override
-  // void dispatchEvent(Event event) {
-  //   if (event.type == SCROLL) {
-  //
-  //     print('1111 $event');
-  //   }
-  //
-  //   super.dispatchEvent(event);
-  // }
-
   @override
   void dispose() {
     _viewport = null;
