@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'package:flutter/foundation.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
@@ -32,7 +31,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler == null) {
       _eventHandlers[eventType] = existHandler = [];
-    } else if (!existHandler.contains(eventHandler)) {
+    } else if (existHandler.contains(eventHandler)) {
       // To avoid listen more than once.
       return;
     }
@@ -49,10 +48,14 @@ abstract class EventTarget extends BindingObject with _Focusable {
   @mustCallSuper
   void dispatchEvent(Event event) {
     if (_disposed) return;
-
     event.target = this;
-    if (contextId != null && pointer != null) {
-      emitUIEvent(contextId!, pointer!, event);
+
+    String eventType = event.type;
+    List<EventHandler>? existHandler = _eventHandlers[eventType];
+    if (existHandler != null) {
+      for (EventHandler handler in existHandler) {
+        handler(event);
+      }
     }
   }
 

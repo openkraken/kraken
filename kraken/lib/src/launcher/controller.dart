@@ -434,7 +434,7 @@ class KrakenViewController
     if (!_existsTarget(targetId)) return;
     EventTarget? target = _getEventTargetById<EventTarget>(targetId);
     if (target != null) {
-      BindingBridge.markEventAvaiableToDispatch(target, eventType, true);
+      BindingBridge.listenEvent(target, eventType);
     }
 
     if (kProfileMode) {
@@ -451,7 +451,7 @@ class KrakenViewController
 
     EventTarget? target = _getEventTargetById<EventTarget>(targetId);
     if (target != null) {
-      BindingBridge.markEventAvaiableToDispatch(target, eventType, false);
+      BindingBridge.unlistenEvent(target, eventType);
     }
 
     if (kProfileMode) {

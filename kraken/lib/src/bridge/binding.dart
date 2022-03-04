@@ -83,6 +83,15 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
   }
 }
 
+// Dispatch the event to the binding side.
+void _dispatchEvent(Event event) {
+  Pointer<NativeBindingObject>? pointer = event.target?.pointer;
+  int? contextId = event.target?.contextId;
+  if (contextId != null && pointer != null) {
+    emitUIEvent(contextId, pointer, event);
+  }
+}
+
 abstract class BindingBridge {
   static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod = Pointer.fromFunction(_invokeBindingMethod);
   static  Pointer<NativeFunction<NativeInvokeBindingMethod>> get nativeInvokeBindingMethod => _nativeInvokeBindingMethod;
@@ -122,11 +131,16 @@ abstract class BindingBridge {
     BindingObject.unbind = _unbindObject;
   }
 
-  static void markEventAvaiableToDispatch(EventTarget target, String type, bool avaiable) {
-    if (avaiable) {
-      target.addEventListener(type, target.dispatchEvent);
-    } else {
-      target.removeEventListener(type, target.dispatchEvent);
-    }
+  static void teardown() {
+    BindingObject.bind = null;
+    BindingObject.unbind = null;
+  }
+
+  static void listenEvent(EventTarget target, String type) {
+    target.addEventListener(type, _dispatchEvent);
+  }
+
+  static void unlistenEvent(EventTarget target, String type) {
+    target.removeEventListener(type, _dispatchEvent);
   }
 }
