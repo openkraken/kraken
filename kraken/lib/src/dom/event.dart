@@ -571,3 +571,9 @@ class TouchList {
     return touchList;
   }
 }
+
+abstract class EventDispatchController {
+  void bindEventDispatcher(String type);
+
+  void unbindEventDispatcher(String type);
+}

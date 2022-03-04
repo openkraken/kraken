@@ -168,15 +168,15 @@ class KrakenViewController
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
       if (gestureListener!.onTouchStart != null) {
-        window.addEvent(EVENT_TOUCH_START);
+        window.bindEventDispatcher(EVENT_TOUCH_START);
       }
 
       if (gestureListener!.onTouchMove != null) {
-        window.addEvent(EVENT_TOUCH_MOVE);
+        window.bindEventDispatcher(EVENT_TOUCH_MOVE);
       }
 
       if (gestureListener!.onTouchEnd != null) {
-        window.addEvent(EVENT_TOUCH_END);
+        window.bindEventDispatcher(EVENT_TOUCH_END);
       }
     }
 
@@ -426,21 +426,14 @@ class KrakenViewController
     }
   }
 
-  void addEvent(int targetId, String eventType) {
+  void bindEventDispatcher(int targetId, String eventType) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
     if (!_existsTarget(targetId)) return;
-    EventTarget target = _getEventTargetById<EventTarget>(targetId)!;
-
-    if (target is Element) {
-      target.addEvent(eventType);
-    } else if (target is Window) {
-      target.addEvent(eventType);
-    } else if (target is Document) {
-      target.addEvent(eventType);
-    }
+    EventDispatchController? target = _getEventTargetById<EventDispatchController>(targetId);
+    target?.bindEventDispatcher(eventType);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ADD_EVENT_END, uniqueId: targetId);
@@ -456,7 +449,7 @@ class KrakenViewController
 
     Element target = _getEventTargetById<Element>(targetId)!;
 
-    target.removeEvent(eventType);
+    target.unbindEventDispatcher(eventType);
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);

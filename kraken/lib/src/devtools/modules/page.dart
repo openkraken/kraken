@@ -249,8 +249,8 @@ class InspectPageModule extends UIInspectorModule {
           ScreencastFrameMetadata(
             0,
             1,
-            document.viewport.viewportSize.width,
-            document.viewport.viewportSize.height,
+            document.viewport!.viewportSize.width,
+            document.viewport!.viewportSize.height,
             root.offsetLeft,
             root.offsetTop,
             timestamp: timeStamp.inMilliseconds,

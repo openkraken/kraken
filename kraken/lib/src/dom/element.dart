@@ -84,7 +84,8 @@ abstract class Element
     extends Node
     with ElementBase,
          ElementEventMixin,
-         ElementOverflowMixin {
+         ElementOverflowMixin
+    implements EventDispatchController {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -1553,13 +1554,15 @@ abstract class Element
     }
   }
 
-  void addEvent(String eventType) {
+  @override
+  void bindEventDispatcher(String eventType) {
     if (hasEventListener(eventType)) return; // Only listen once.
     addEventListener(eventType, dispatchEvent);
     _ensureEventResponderBound();
   }
 
-  void removeEvent(String eventType) {
+  @override
+  void unbindEventDispatcher(String eventType) {
     if (!hasEventListener(eventType)) return; // Only listen once.
     removeEventListener(eventType, dispatchEvent);
 

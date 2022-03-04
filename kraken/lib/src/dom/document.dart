@@ -11,34 +11,38 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 import 'package:kraken/widget.dart';
 
-class Document extends Node {
-
-  final RenderViewportBox viewport;
-  KrakenController controller;
+class Document extends Node implements EventDispatchController {
+  final KrakenController controller;
+  RenderViewportBox? _viewport;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
   Document(context, {
-    required this.viewport,
     required this.controller,
+    required RenderViewportBox viewport,
     this.gestureListener,
     this.widgetDelegate,
-  }) : super(NodeType.DOCUMENT_NODE, context);
+  }) : _viewport = viewport,
+        super(NodeType.DOCUMENT_NODE, context);
+
+  RenderViewportBox? get viewport => _viewport;
 
   @override
   String get nodeName => '#document';
 
   @override
-  RenderBox? get renderer => viewport;
+  RenderBox? get renderer => _viewport;
 
   Element? _documentElement;
-  Element? get documentElement {
-    return _documentElement;
-  }
+  Element? get documentElement => _documentElement;
   set documentElement(Element? element) {
     if (_documentElement == element) {
       return;
     }
+
+    RenderViewportBox? viewport = _viewport;
+    // When document is disposed, viewport is null.
+    if (viewport == null) return;
 
     if (element != null) {
       element.attachTo(this);
@@ -92,7 +96,8 @@ class Document extends Node {
     return super.replaceChild(newNode, oldNode);
   }
 
-  addEvent(String eventType) {
+  @override
+  void bindEventDispatcher(String eventType) {
     if (hasEventListener(eventType)) return; // Only listen once.
 
     switch (eventType) {
@@ -100,11 +105,17 @@ class Document extends Node {
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
         return documentElement?.addEventListener(eventType, dispatchEvent);
       default:
-        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        documentElement?.addEvent(eventType);
+        documentElement?.bindEventDispatcher(eventType);
         break;
     }
+  }
+
+
+  @override
+  void unbindEventDispatcher(String eventType) {
+    // Ignoring unbind.
   }
 
   Element createElement(String type, [context]) {
@@ -153,6 +164,7 @@ class Document extends Node {
 
   @override
   void dispose() {
+    _viewport = null;
     gestureListener = null;
     widgetDelegate = null;
     styleSheets.clear();

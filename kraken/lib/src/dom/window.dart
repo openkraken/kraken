@@ -11,7 +11,7 @@ import 'package:kraken/module.dart';
 
 const String WINDOW = 'WINDOW';
 
-class Window extends EventTarget {
+class Window extends EventTarget implements EventDispatchController {
   final Document document;
 
   Window(BindingContext? context, this.document) : super(context) {
@@ -74,7 +74,8 @@ class Window extends EventTarget {
       ..scrollBy(x, y);
   }
 
-  void addEvent(String eventType) {
+  @override
+  void bindEventDispatcher(String eventType) {
     if (hasEventListener(eventType)) return; // Only listen once.
 
     switch (eventType) {
@@ -89,10 +90,19 @@ class Window extends EventTarget {
         // TODO: Fired at the Window when the viewport is resized.
         break;
       default:
-        // Events listened on the Window need to be proxied to the Document, because there is a RenderView on the Document, which can handle hitTest.
+        // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.documentElement!.addEvent(eventType);
+        document.documentElement!.bindEventDispatcher(eventType);
         break;
+    }
+  }
+
+  @override
+  void unbindEventDispatcher(String eventType) {
+    switch (eventType) {
+      case EVENT_COLOR_SCHEME_CHANGE:
+      case EVENT_LOAD:
+        return removeEventListener(eventType, dispatchEvent);
     }
   }
 }
