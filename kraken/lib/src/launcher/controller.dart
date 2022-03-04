@@ -168,15 +168,15 @@ class KrakenViewController
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
       if (gestureListener!.onTouchStart != null) {
-        window.bindEventDispatcher(EVENT_TOUCH_START);
+        window.addEventListener(EVENT_TOUCH_START, window.dispatchEvent);
       }
 
       if (gestureListener!.onTouchMove != null) {
-        window.bindEventDispatcher(EVENT_TOUCH_MOVE);
+        window.addEventListener(EVENT_TOUCH_MOVE, window.dispatchEvent);
       }
 
       if (gestureListener!.onTouchEnd != null) {
-        window.bindEventDispatcher(EVENT_TOUCH_END);
+        window.addEventListener(EVENT_TOUCH_END, window.dispatchEvent);
       }
     }
 
@@ -426,14 +426,16 @@ class KrakenViewController
     }
   }
 
-  void bindEventDispatcher(int targetId, String eventType) {
+  void addEvent(int targetId, String eventType) {
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_ADD_EVENT_START, uniqueId: targetId);
     }
     if (!_existsTarget(targetId)) return;
-    EventDispatchController? target = _getEventTargetById<EventDispatchController>(targetId);
-    target?.bindEventDispatcher(eventType);
+    EventTarget? target = _getEventTargetById<EventTarget>(targetId);
+    if (target != null) {
+      BindingBridge.markEventAvaiableToDispatch(target, eventType, true);
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ADD_EVENT_END, uniqueId: targetId);
@@ -447,9 +449,11 @@ class KrakenViewController
     }
     assert(_existsTarget(targetId), 'targetId: $targetId event: $eventType');
 
-    Element target = _getEventTargetById<Element>(targetId)!;
+    EventTarget? target = _getEventTargetById<EventTarget>(targetId);
+    if (target != null) {
+      BindingBridge.markEventAvaiableToDispatch(target, eventType, false);
+    }
 
-    target.unbindEventDispatcher(eventType);
     if (kProfileMode) {
       PerformanceTiming.instance()
           .mark(PERF_REMOVE_EVENT_END, uniqueId: targetId);

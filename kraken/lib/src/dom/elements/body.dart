@@ -17,18 +17,18 @@ class BodyElement extends Element {
       : super(context, defaultStyle: _defaultStyle);
 
   @override
-  void bindEventDispatcher(String eventType) {
+  void addEventListener(String eventType, EventHandler eventHandler) {
     // Scroll event not working on body.
     if (eventType == EVENT_SCROLL) return;
 
-    // Event of Body should set to documentElement.
-    // The Render Object of element which set position may be at the same level as the Render Object of body,
+    // Event of body should set to document element.
+    // The render object of element which set position may be at the same level as the render object of body,
     // resulting in the failure to get events handlers.
-    ownerDocument.documentElement?.bindEventDispatcher(eventType);
+    ownerDocument.documentElement?.addEventListener(eventType, eventHandler);
   }
 
   @override
-  void unbindEventDispatcher(String eventType) {
-    ownerDocument.documentElement?.unbindEventDispatcher(eventType);
+  void removeEventListener(String eventType, EventHandler eventHandler) {
+    ownerDocument.documentElement?.removeEventListener(eventType, eventHandler);
   }
 }

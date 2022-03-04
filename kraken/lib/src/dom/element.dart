@@ -84,8 +84,7 @@ abstract class Element
     extends Node
     with ElementBase,
          ElementEventMixin,
-         ElementOverflowMixin
-    implements EventDispatchController {
+         ElementOverflowMixin {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -1555,16 +1554,14 @@ abstract class Element
   }
 
   @override
-  void bindEventDispatcher(String eventType) {
-    if (hasEventListener(eventType)) return; // Only listen once.
-    addEventListener(eventType, dispatchEvent);
+  void addEventListener(String eventType, EventHandler handler) {
+    super.addEventListener(eventType, handler);
     _ensureEventResponderBound();
   }
 
   @override
-  void unbindEventDispatcher(String eventType) {
-    if (!hasEventListener(eventType)) return; // Only listen once.
-    removeEventListener(eventType, dispatchEvent);
+  void removeEventListener(String eventType, EventHandler handler) {
+    super.removeEventListener(eventType, handler);
 
     RenderBoxModel? selfRenderBoxModel = renderBoxModel;
     if (selfRenderBoxModel != null) {
@@ -1579,6 +1576,7 @@ abstract class Element
       }
     }
   }
+
 
   void click() {
     flushLayout();

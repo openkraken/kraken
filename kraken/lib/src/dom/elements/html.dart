@@ -16,14 +16,14 @@ class HTMLElement extends Element {
   HTMLElement([BindingContext? context])
       : super(context, defaultStyle: defaultStyle) {
     // Since the bubbling process is in bridge, we need to globally hijack click for focus shifting, so you need to listen here.
-    bindEventDispatcher(EVENT_CLICK);
+    addEventListener(EVENT_CLICK, dispatchEvent);
   }
 
   @override
-  void bindEventDispatcher(String eventType) {
+  void addEventListener(String eventType, EventHandler handler) {
     // Scroll event not working on html.
     if (eventType == EVENT_SCROLL) return;
-    super.bindEventDispatcher(eventType);
+    super.addEventListener(eventType, handler);
   }
 
   @override

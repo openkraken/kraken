@@ -498,12 +498,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    bindEventDispatcher(EVENT_TOUCH_START);
-    bindEventDispatcher(EVENT_TOUCH_MOVE);
-    bindEventDispatcher(EVENT_TOUCH_END);
-    bindEventDispatcher(EVENT_CLICK);
-    bindEventDispatcher(EVENT_DOUBLE_CLICK);
-    bindEventDispatcher(EVENT_LONG_PRESS);
+    addEventListener(EVENT_TOUCH_START, dispatchEvent);
+    addEventListener(EVENT_TOUCH_MOVE, dispatchEvent);
+    addEventListener(EVENT_TOUCH_END, dispatchEvent);
+    addEventListener(EVENT_CLICK, dispatchEvent);
+    addEventListener(EVENT_DOUBLE_CLICK, dispatchEvent);
+    addEventListener(EVENT_LONG_PRESS, dispatchEvent);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);

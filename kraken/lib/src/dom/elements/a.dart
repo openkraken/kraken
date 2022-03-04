@@ -13,7 +13,7 @@ const String _TARGET_SELF = 'self';
 class AnchorElement extends Element {
   AnchorElement([BindingContext? context])
       : super(context) {
-    bindEventDispatcher(EVENT_CLICK);
+    addEventListener(EVENT_CLICK, dispatchEvent);
   }
 
   @override

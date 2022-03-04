@@ -11,7 +11,7 @@ import 'package:kraken/module.dart';
 
 const String WINDOW = 'WINDOW';
 
-class Window extends EventTarget implements EventDispatchController {
+class Window extends EventTarget {
   final Document document;
 
   Window(BindingContext? context, this.document) : super(context) {
@@ -75,34 +75,39 @@ class Window extends EventTarget implements EventDispatchController {
   }
 
   @override
-  void bindEventDispatcher(String eventType) {
-    if (hasEventListener(eventType)) return; // Only listen once.
-
+  void addEventListener(String eventType, EventHandler handler) {
     switch (eventType) {
       case EVENT_COLOR_SCHEME_CHANGE:
-        return addEventListener(eventType, dispatchEvent);
       case EVENT_LOAD:
-        return addEventListener(eventType, dispatchEvent);
+        return super.addEventListener(eventType, handler);
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        return document.documentElement!.addEventListener(eventType, dispatchEvent);
+        return document.documentElement!.addEventListener(eventType, handler);
       case EVENT_RESIZE:
         // TODO: Fired at the Window when the viewport is resized.
         break;
       default:
         // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.documentElement!.bindEventDispatcher(eventType);
+        document.documentElement!.addEventListener(eventType, handler);
         break;
     }
   }
 
   @override
-  void unbindEventDispatcher(String eventType) {
+  void removeEventListener(String eventType, EventHandler handler) {
     switch (eventType) {
       case EVENT_COLOR_SCHEME_CHANGE:
       case EVENT_LOAD:
-        return removeEventListener(eventType, dispatchEvent);
+        return super.removeEventListener(eventType, handler);
+      case EVENT_SCROLL:
+        return document.documentElement!.removeEventListener(eventType, handler);
+      case EVENT_RESIZE:
+        // TODO: Fired at the Window when the viewport is resized.
+        break;
+      default:
+        document.documentElement!.removeEventListener(eventType, handler);
+        break;
     }
   }
 }

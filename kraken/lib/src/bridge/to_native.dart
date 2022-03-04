@@ -528,7 +528,7 @@ void flushUICommand() {
             controller.view.disposeEventTarget(id);
             break;
           case UICommandType.addEvent:
-            controller.view.bindEventDispatcher(id, command.args[0]);
+            controller.view.addEvent(id, command.args[0]);
             break;
           case UICommandType.removeEvent:
             controller.view.removeEvent(id, command.args[0]);

@@ -11,6 +11,7 @@ import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 
 // We have some integrated built-in behavior starting with string prefix reuse the callNativeMethod implements.
@@ -119,5 +120,13 @@ abstract class BindingBridge {
   static void setup() {
     BindingObject.bind = _bindObject;
     BindingObject.unbind = _unbindObject;
+  }
+
+  static void markEventAvaiableToDispatch(EventTarget target, String type, bool avaiable) {
+    if (avaiable) {
+      target.addEventListener(type, target.dispatchEvent);
+    } else {
+      target.removeEventListener(type, target.dispatchEvent);
+    }
   }
 }

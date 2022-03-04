@@ -11,7 +11,7 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 import 'package:kraken/widget.dart';
 
-class Document extends Node implements EventDispatchController {
+class Document extends Node {
   final KrakenController controller;
   RenderViewportBox? _viewport;
   GestureListener? gestureListener;
@@ -97,25 +97,26 @@ class Document extends Node implements EventDispatchController {
   }
 
   @override
-  void bindEventDispatcher(String eventType) {
-    if (hasEventListener(eventType)) return; // Only listen once.
-
+  void addEventListener(String eventType, EventHandler handler) {
     switch (eventType) {
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        return documentElement?.addEventListener(eventType, dispatchEvent);
+        documentElement?.addEventListener(eventType, handler);
+        break;
       default:
         // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        documentElement?.bindEventDispatcher(eventType);
+        documentElement?.addEventListener(eventType, handler);
         break;
     }
   }
 
-
   @override
-  void unbindEventDispatcher(String eventType) {
-    // Ignoring unbind.
+  void removeEventListener(String eventType, EventHandler handler) {
+    switch (eventType) {
+      case EVENT_SCROLL: documentElement?.removeEventListener(eventType, handler); break;
+      default: documentElement?.removeEventListener(eventType, handler); break;
+    }
   }
 
   Element createElement(String type, [context]) {
