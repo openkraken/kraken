@@ -18,6 +18,51 @@ class TextareaElement extends TextFormControlElement {
   TextareaElement(EventTargetContext? context)
     : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
+  // Width and height set through style.
+  double? _styleWidth;
+  double? _styleHeight;
+
+  @override
+  void setProperty(String key, value) {
+    super.setProperty(key, value);
+
+    if (key == ROWS) {
+      _updateDefaultHeight();
+    } else if (key == COLS) {
+      _updateDefaultWidth();
+    }
+  }
+
+  @override
+  void willAttachRenderer() {
+    super.willAttachRenderer();
+    style.addStyleChangeListener();
+  }
+
+  void _stylePropertyChanged(String property, String? original, String present) {
+    if (property == WIDTH) {
+      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.computedValue : null;
+      _updateDefaultWidth();
+    } else if (property == HEIGHT) {
+      _styleHeight = renderStyle.height.isNotAuto ? renderStyle.height.computedValue : null;
+      _updateDefaultHeight();
+    }
+  }
+
+  void _updateDefaultWidth() {
+    // cols is only valid when width in style is not set.
+    if (_styleWidth == null) {
+      renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
+    }
+  }
+
+  void _updateDefaultHeight() {
+    // rows is only valid when height in style is not set.
+    if (_styleHeight == null) {
+      renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
+    }
+  }
+
   @override
   double? get defaultWidth {
     // cols defaults to 20.

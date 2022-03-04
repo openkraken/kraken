@@ -316,11 +316,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     animationController.addListener(_onCursorColorTick);
 
     // Set default width/height when width/height is not set in style.
-    if (renderBoxModel!.renderStyle.width.isAuto) {
-      renderBoxModel!.renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
+    if (renderStyle.width.isAuto) {
+      renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
     }
-    if (renderBoxModel!.renderStyle.height.isAuto && defaultHeight != null) {
-      renderBoxModel!.renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
+    if (renderStyle.height.isAuto && defaultHeight != null) {
+      renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
     }
 
     addChild(createRenderBox());
