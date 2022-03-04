@@ -174,18 +174,18 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _scrollOffset = value;
     _scrollOffset.removeListener(_scrollXListener);
     _scrollOffset.addListener(_scrollXListener);
-    _renderTextControlLeaderLayer?.markNeedsLayout();
+    renderTextControlLeaderLayer?.markNeedsLayout();
   }
 
   void _scrollXListener() {
-    _renderTextControlLeaderLayer?.markNeedsPaint();
+    renderTextControlLeaderLayer?.markNeedsPaint();
   }
 
   bool obscureText = false;
   bool autoCorrect = true;
   late EditableTextDelegate _textSelectionDelegate;
   TextSpan? _actualText;
-  RenderTextControlLeaderLayer? _renderTextControlLeaderLayer;
+  RenderTextControlLeaderLayer? renderTextControlLeaderLayer;
 
   final LayerLink _toolbarLayerLink = LayerLink();
   RenderEditable? renderEditable;
@@ -315,14 +315,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
 
-    // Set default width/height when width/height is not set in style.
-    if (renderStyle.width.isAuto) {
-      renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
-    }
-    if (renderStyle.height.isAuto && defaultHeight != null) {
-      renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
-    }
-
     addChild(createRenderBox());
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -357,32 +349,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   void _onStyleChanged(String property, String? original, String present) {
-
-    if (_renderTextControlLeaderLayer != null && isRendererAttached) {
-      CSSRenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (property == HEIGHT) {
-        _renderTextControlLeaderLayer!.markNeedsLayout();
-
-      } else if (property == LINE_HEIGHT && style[HEIGHT].isEmpty) {
-        if (defaultHeight != null) {
-          renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
-        }
-        _renderTextControlLeaderLayer!.markNeedsLayout();
-
-      // It needs to judge width in style here cause
-      // width in renderStyle may be set in node attach.
-      } else if (property == FONT_SIZE) {
-        if (style[WIDTH].isEmpty) {
-          renderStyle.width = CSSLengthValue(defaultWidth, CSSLengthType.PX);
-        }
-        if (style[HEIGHT].isEmpty && defaultHeight != null) {
-          renderStyle.height = CSSLengthValue(defaultHeight, CSSLengthType.PX);
-        }
-        _renderTextControlLeaderLayer!.markNeedsLayout();
-      }
-    }
     // @TODO: Filter style properties that used by text span.
-    _rebuildTextSpan();
+    if (property == COLOR
+    ) {
+      _rebuildTextSpan();
+    }
   }
 
   void _rebuildTextSpan() {
@@ -467,12 +438,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   double get avgCharHeight {
     return avgCharSize.height;
   }
-
-  // Must override in subClasses.
-  double? get defaultWidth => null;
-
-  // Must override in subClasses.
-  double? get defaultHeight => null;
 
   Size? _textSize;
 
@@ -674,13 +639,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   RenderTextControlLeaderLayer createRenderBox() {
     RenderEditable renderEditable = createRenderEditable();
 
-    _renderTextControlLeaderLayer = RenderTextControlLeaderLayer(
+    renderTextControlLeaderLayer = RenderTextControlLeaderLayer(
       link: _toolbarLayerLink,
       child: renderEditable,
       scrollable: _scrollable,
       isMultiline: isMultiline,
     );
-    return _renderTextControlLeaderLayer!;
+    return renderTextControlLeaderLayer!;
   }
 
   @override
