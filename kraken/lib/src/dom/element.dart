@@ -19,8 +19,6 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 import 'package:meta/meta.dart';
 
-import 'element_event.dart';
-
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
 const String _STYLE_PROPERTY = 'style';
@@ -259,8 +257,9 @@ abstract class Element
         }
       }
       renderBoxModel = nextRenderBoxModel;
+
       // Ensure that the event responder is bound.
-      _ensureEventResponderBound();
+      ensureEventResponderBound();
     }
   }
 
@@ -478,8 +477,8 @@ abstract class Element
     // Remove renderBox.
     _renderBoxModel.detachFromContainingBlock();
 
-    // Remove pointer listener
-    removeEventResponder(renderBoxModel!);
+    // Clear pointer listener
+    clearEventResponder(renderBoxModel!);
   }
 
   @override
@@ -1538,46 +1537,6 @@ abstract class Element
     return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
   }
 
-  void _ensureEventResponderBound() {
-    // Must bind event responder on render box model whatever there is no event listener.
-    RenderBoxModel? _renderBoxModel = renderBoxModel;
-    if (_renderBoxModel != null) {
-      // Make sure pointer responder bind.
-      addEventResponder(_renderBoxModel);
-      if (_hasIntersectionObserverEvent(getEventHandlers())) {
-        _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
-        // Mark the compositing state for this render object as dirty
-        // cause it will create new layer.
-        _renderBoxModel.markNeedsCompositingBitsUpdate();
-      }
-    }
-  }
-
-  @override
-  void addEventListener(String eventType, EventHandler handler) {
-    super.addEventListener(eventType, handler);
-    _ensureEventResponderBound();
-  }
-
-  @override
-  void removeEventListener(String eventType, EventHandler handler) {
-    super.removeEventListener(eventType, handler);
-
-    RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-    if (selfRenderBoxModel != null) {
-      if (getEventHandlers().isEmpty) {
-        // Remove pointer responder if there is no event handler.
-        removeEventResponder(selfRenderBoxModel);
-      }
-
-      // Remove listener when no intersection related event
-      if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(getEventHandlers())) {
-        selfRenderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
-      }
-    }
-  }
-
-
   void click() {
     flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
@@ -1661,16 +1620,6 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
     parent = parent.parentElement;
   }
   return parent;
-}
-
-bool _isIntersectionObserverEvent(String eventType) {
-  return eventType == EVENT_APPEAR || eventType == EVENT_DISAPPEAR || eventType == EVENT_INTERSECTION_CHANGE;
-}
-
-bool _hasIntersectionObserverEvent(Map eventHandlers) {
-  return eventHandlers.containsKey('appear') ||
-      eventHandlers.containsKey('disappear') ||
-      eventHandlers.containsKey('intersectionchange');
 }
 
 // Cache fixed renderObject to root element

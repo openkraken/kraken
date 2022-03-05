@@ -10,8 +10,6 @@ import 'package:kraken/gesture.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef MouseEventListener = void Function(String, TapUpDetails);
-
 typedef GetEventHandlers = Map<String, List<EventHandler>> Function();
 
 typedef GetEventTarget = EventTarget Function();
@@ -22,17 +20,17 @@ mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
 
-  MouseEventListener? onClick;
+  Function? onClick;
+
+  Function? onDoubleClick;
 
   GestureCallback? onSwipe;
-
-  GestureCallback? onDoubleClick;
 
   GestureCallback? onPan;
 
   GestureCallback? onScale;
 
-  GestureCallback? onLongPress;
+  Function? onLongPress;
 
   GetEventHandlers? getEventHandlers;
 

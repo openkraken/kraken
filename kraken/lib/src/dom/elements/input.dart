@@ -498,12 +498,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    addEventListener(EVENT_TOUCH_START, dispatchEvent);
-    addEventListener(EVENT_TOUCH_MOVE, dispatchEvent);
-    addEventListener(EVENT_TOUCH_END, dispatchEvent);
-    addEventListener(EVENT_CLICK, dispatchEvent);
-    addEventListener(EVENT_DOUBLE_CLICK, dispatchEvent);
-    addEventListener(EVENT_LONG_PRESS, dispatchEvent);
+    addEventListener(EVENT_TOUCH_START, _handleEditable);
+    addEventListener(EVENT_TOUCH_MOVE, _handleEditable);
+    addEventListener(EVENT_TOUCH_END, _handleEditable);
+    addEventListener(EVENT_CLICK, _handleEditable);
+    addEventListener(EVENT_DOUBLE_CLICK, _handleEditable);
+    addEventListener(EVENT_LONG_PRESS, _handleEditable);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -622,9 +622,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   // Whether gesture is dragging.
   bool _isDragging = false;
 
-  @override
-  void dispatchEvent(Event event) {
-    super.dispatchEvent(event);
+  void _handleEditable(Event event) {
     if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
 

@@ -25,6 +25,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
   @protected
   bool hasEventListener(String type) => _eventHandlers.containsKey(type);
 
+  @mustCallSuper
   void addEventListener(String eventType, EventHandler eventHandler) {
     if (_disposed) return;
 
@@ -38,11 +39,17 @@ abstract class EventTarget extends BindingObject with _Focusable {
     existHandler.add(eventHandler);
   }
 
+  @mustCallSuper
   void removeEventListener(String eventType, EventHandler eventHandler) {
     if (_disposed) return;
 
     List<EventHandler>? currentHandlers = _eventHandlers[eventType];
-    currentHandlers?.remove(eventHandler);
+    if (currentHandlers != null) {
+      currentHandlers.remove(eventHandler);
+      if (currentHandlers.isEmpty) {
+        _eventHandlers.remove(eventType);
+      }
+    }
   }
 
   @mustCallSuper

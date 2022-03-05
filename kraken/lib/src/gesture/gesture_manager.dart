@@ -188,14 +188,21 @@ class GestureManager {
   void onDoubleClick() {
     Function? onDoubleClick = _target?.onDoubleClick;
     if (onDoubleClick != null) {
-      onDoubleClick(Event(EVENT_DOUBLE_CLICK));
+      onDoubleClick();
     }
   }
 
   void onTapUp(TapUpDetails details) {
     Function? onClick = _target?.onClick;
     if (onClick != null) {
-      onClick(EVENT_CLICK, details);
+      onClick(details);
+    }
+  }
+
+  void onLongPressEnd(LongPressEndDetails details) {
+    Function? onLongPress = _target?.onLongPress;
+    if (onLongPress != null) {
+      onLongPress(details);
     }
   }
 
@@ -289,21 +296,6 @@ class GestureManager {
         GestureEvent(
           EVENT_SCALE,
           GestureEventInit( state: EVENT_STATE_END )
-        )
-      );
-    }
-  }
-
-  void onLongPressEnd(LongPressEndDetails details) {
-    Function? onLongPress = _target?.onLongPress;
-    if (onLongPress != null) {
-      onLongPress(
-        GestureEvent(
-          EVENT_LONG_PRESS,
-          GestureEventInit(
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy
-          )
         )
       );
     }

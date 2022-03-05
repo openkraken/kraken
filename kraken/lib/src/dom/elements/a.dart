@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/gestures.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
@@ -13,13 +12,10 @@ const String _TARGET_SELF = 'self';
 class AnchorElement extends Element {
   AnchorElement([BindingContext? context])
       : super(context) {
-    addEventListener(EVENT_CLICK, dispatchEvent);
-  }
+        addEventListener(EVENT_CLICK, _handleClick);
+      }
 
-  @override
-  void handleMouseEvent(String eventType, TapUpDetails details) {
-    super.handleMouseEvent(eventType, details);
-
+  void _handleClick(Event event) {
     String? href = attributes['href'];
     if (href != null && href.isNotEmpty) {
       String baseUrl = ownerDocument.controller.url;

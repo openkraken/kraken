@@ -7,8 +7,16 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/rendering.dart';
+
+enum AppearEventType {
+  none,
+  appear,
+  disappear
+}
 
 const String EVENT_CLICK = 'click';
 const String EVENT_INPUT = 'input';
@@ -58,6 +66,141 @@ const String EVENT_RESIZE = 'resize';
 const String EVENT_STATE_START = 'start';
 const String EVENT_STATE_UPDATE = 'update';
 const String EVENT_STATE_END = 'end';
+
+mixin ElementEventMixin on ElementBase {
+  AppearEventType prevAppearState = AppearEventType.none;
+
+  void clearEventResponder(RenderPointerListenerMixin renderBox) {
+    renderBox.onClick = null;
+    renderBox.onDoubleClick = null;
+    renderBox.onSwipe = null;
+    renderBox.onPan = null;
+    renderBox.onScale = null;
+    renderBox.onLongPress = null;
+    renderBox.getEventTarget = null;
+    renderBox.dispatchEvent = null;
+    renderBox.getEventHandlers = null;
+  }
+
+  void ensureEventResponderBound() {
+    // Must bind event responder on render box model whatever there is no event listener.
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox != null) {
+      // Make sure pointer responder bind.
+      renderBox.onClick = handleClick;
+      renderBox.onDoubleClick = handleDoubleClick;
+      renderBox.onLongPress = handleLongPress;
+      renderBox.onSwipe = dispatchEvent;
+      renderBox.onPan = dispatchEvent;
+      renderBox.onScale = dispatchEvent;
+      renderBox.getEventHandlers = getEventHandlers;
+      renderBox.getEventTarget = getEventTarget;
+      renderBox.dispatchEvent = dispatchEvent;
+    }
+  }
+
+  bool _isOneofIntersectionEventAndAllNonListened(String eventType) {
+    return (eventType == EVENT_APPEAR || eventType == EVENT_DISAPPEAR || eventType == EVENT_INTERSECTION_CHANGE) &&
+      !(hasEventListener(EVENT_APPEAR) || hasEventListener(EVENT_DISAPPEAR) || hasEventListener(EVENT_INTERSECTION_CHANGE));
+  }
+
+  @override
+  void addEventListener(String eventType, EventHandler handler) {
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox != null) {
+      ensureEventResponderBound();
+      if (_isOneofIntersectionEventAndAllNonListened(eventType)) {
+        renderBox.addIntersectionChangeListener(handleIntersectionChange);
+        // Mark the compositing state for this render object as dirty
+        // cause it will create new layer.
+        renderBox.markNeedsCompositingBitsUpdate();
+      }
+    }
+    super.addEventListener(eventType, handler);
+  }
+
+  @override
+  void removeEventListener(String eventType, EventHandler handler) {
+    super.removeEventListener(eventType, handler);
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox != null) {
+      // Remove listener when no intersection related event
+      if (_isOneofIntersectionEventAndAllNonListened(eventType)) {
+        renderBox.removeIntersectionChangeListener(handleIntersectionChange);
+      }
+    }
+  }
+
+  EventTarget getEventTarget() {
+    return this;
+  }
+
+  void handleClick(TapUpDetails details) {
+    RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
+    if (root == null) {
+      return;
+    }
+    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
+    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
+    double clientX = globalOffset.dx;
+    double clientY = globalOffset.dy;
+    dispatchEvent(
+      (MouseEvent(EVENT_CLICK,
+        MouseEventInit(
+          bubbles: true,
+          cancelable: true,
+          clientX: clientX,
+          clientY: clientY,
+          offsetX: details.localPosition.dx,
+          offsetY: details.localPosition.dy,
+        )
+      ))
+    );
+  }
+
+  void handleDoubleClick() {
+    dispatchEvent(
+      (MouseEvent(EVENT_DOUBLE_CLICK,
+        MouseEventInit(
+          bubbles: true,
+          cancelable: true,
+        )
+      ))
+    );
+  }
+
+  void handleLongPress(LongPressEndDetails details) {
+    GestureEvent(
+      EVENT_LONG_PRESS,
+      GestureEventInit(
+        deltaX: details.globalPosition.dx,
+        deltaY: details.globalPosition.dy
+      )
+    );
+  }
+
+  void handleAppear() {
+    if (prevAppearState == AppearEventType.appear) return;
+    prevAppearState = AppearEventType.appear;
+
+    dispatchEvent(AppearEvent());
+  }
+
+  void handleDisappear() {
+    if (prevAppearState == AppearEventType.disappear) return;
+    prevAppearState = AppearEventType.disappear;
+    dispatchEvent(DisappearEvent());
+  }
+
+  void handleIntersectionChange(IntersectionObserverEntry entry) {
+    dispatchEvent(IntersectionChangeEvent(entry.intersectionRatio));
+    if (entry.intersectionRatio > 0) {
+      handleAppear();
+    } else {
+      handleDisappear();
+    }
+  }
+}
 
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
@@ -201,7 +344,6 @@ class MouseEventInit extends EventInit {
   })
       : super(bubbles: bubbles, cancelable: cancelable);
 }
-
 
 class GestureEventInit extends EventInit {
   final String state;

@@ -84,7 +84,7 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
 }
 
 // Dispatch the event to the binding side.
-void _dispatchEvent(Event event) {
+void _dispatchBindingEvent(Event event) {
   Pointer<NativeBindingObject>? pointer = event.target?.pointer;
   int? contextId = event.target?.contextId;
   if (contextId != null && pointer != null) {
@@ -137,10 +137,10 @@ abstract class BindingBridge {
   }
 
   static void listenEvent(EventTarget target, String type) {
-    target.addEventListener(type, _dispatchEvent);
+    target.addEventListener(type, _dispatchBindingEvent);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
-    target.removeEventListener(type, _dispatchEvent);
+    target.removeEventListener(type, _dispatchBindingEvent);
   }
 }

@@ -167,16 +167,17 @@ class KrakenViewController
 
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
-      if (gestureListener!.onTouchStart != null) {
-        window.addEventListener(EVENT_TOUCH_START, window.dispatchEvent);
+      GestureListener listener = gestureListener!;
+      if (listener.onTouchStart != null) {
+        window.addEventListener(EVENT_TOUCH_START, (Event event) => listener.onTouchStart!(event as TouchEvent));
       }
 
-      if (gestureListener!.onTouchMove != null) {
-        window.addEventListener(EVENT_TOUCH_MOVE, window.dispatchEvent);
+      if (listener.onTouchMove != null) {
+        window.addEventListener(EVENT_TOUCH_MOVE, (Event event) => listener.onTouchMove!(event as TouchEvent));
       }
 
-      if (gestureListener!.onTouchEnd != null) {
-        window.addEventListener(EVENT_TOUCH_END, window.dispatchEvent);
+      if (listener.onTouchEnd != null) {
+        window.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
       }
     }
 
