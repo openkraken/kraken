@@ -484,8 +484,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         renderEditable!.handleTapDown(details);
       }
 
-      // Focus element on touch start.
-      TextFormControlElement.setFocus(this);
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
     } else if (event.type == EVENT_TOUCH_MOVE ||
@@ -529,6 +527,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       _isDragging = false;
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       renderEditable!.handleDoubleTap();
+      // Focus element on double click.
+      TextFormControlElement.setFocus(this);
       _textSelectionDelegate.showToolbar();
       _isDragging = false;
     }
