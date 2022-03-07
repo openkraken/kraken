@@ -19,9 +19,9 @@ inline std::string trim(std::string& str) {
 }
 
 // Parse html,needDefaultHTML should be true if need to automatically complete html, head, and body when they are missing.
-GumboOutput* parse(std::string html, bool needDefaultHTML = false) {
+GumboOutput* parse(std::string& html, bool needDefaultHTML = false) {
   // Gumbo-parser parse HTML.
-  auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html.length());
+  GumboOutput* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html.length());
 
   if (!needDefaultHTML) {
     // Find body.
