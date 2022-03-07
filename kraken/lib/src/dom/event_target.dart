@@ -64,6 +64,18 @@ abstract class EventTarget extends BindingObject with _Focusable {
         handler(event);
       }
     }
+
+    // Bubble event to root event target.
+    if (event.bubbles && this is Node) {
+      Node self = this as Node;
+      Node? parentNode = self.parentNode;
+      if (parentNode != null) {
+        parentNode.dispatchEvent(event);
+      } else {
+        // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
+        self.ownerDocument.controller.view.window.dispatchEvent(event);
+      }
+    }
   }
 
   @override

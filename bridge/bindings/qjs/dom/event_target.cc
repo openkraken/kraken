@@ -167,22 +167,6 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
 
   internalDispatchEvent(event);
 
-  // Bubble event to root event target.
-  if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
-    auto node = reinterpret_cast<NodeInstance*>(this);
-    auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
-
-    if (parent != nullptr) {
-      parent->dispatchEvent(event);
-    } else {
-      // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
-      JSValue globalObjectValue = JS_GetGlobalObject(m_context->ctx());
-      auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
-      window->internalDispatchEvent(event);
-      JS_FreeValue(m_ctx, globalObjectValue);
-    }
-  }
-
   JS_FreeValue(m_ctx, jsObject);
 
   return event->cancelled();
