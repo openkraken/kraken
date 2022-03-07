@@ -201,7 +201,7 @@ class Kraken extends StatefulWidget {
 class _KrakenState extends State<Kraken> with RouteAware {
   @override
   Widget build(BuildContext context) {
-    return KrakenTextControl();
+    return KrakenTextControl(context);
   }
 
   @override

@@ -53,7 +53,9 @@ class WidgetDelegate {
 
 // Widget involves actions of text control elements(input, textarea).
 class KrakenTextControl extends StatefulWidget {
-  KrakenTextControl();
+  KrakenTextControl(this.parentContext);
+
+  final BuildContext parentContext;
 
   @override
   _KrakenTextControlState createState() => _KrakenTextControlState();
@@ -68,14 +70,13 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
 
   @override
   Widget build(BuildContext context) {
-
     return RepaintBoundary(
       child: FocusableActionDetector(
         actions: _actionMap,
         focusNode: _focusNode,
         onFocusChange: _handleFocusChange,
         child: KrakenRenderObjectWidget(
-          context.widget as Kraken,
+          widget.parentContext.widget as Kraken,
           widgetDelegate,
         )
       )
