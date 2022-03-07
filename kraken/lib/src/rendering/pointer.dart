@@ -10,8 +10,6 @@ import 'package:kraken/gesture.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef GetEventHandlers = Map<String, List<EventHandler>> Function();
-
 typedef GetEventTarget = EventTarget Function();
 
 typedef DispatchEvent = void Function(Event event);
@@ -32,11 +30,11 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   Function? onLongPress;
 
-  GetEventHandlers? getEventHandlers;
-
   GetEventTarget? getEventTarget;
 
   DispatchEvent? dispatchEvent;
+
+  List<String> events = [];
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

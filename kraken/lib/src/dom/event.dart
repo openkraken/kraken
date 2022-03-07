@@ -79,7 +79,6 @@ mixin ElementEventMixin on ElementBase {
     renderBox.onLongPress = null;
     renderBox.getEventTarget = null;
     renderBox.dispatchEvent = null;
-    renderBox.getEventHandlers = null;
   }
 
   void ensureEventResponderBound() {
@@ -93,7 +92,6 @@ mixin ElementEventMixin on ElementBase {
       renderBox.onSwipe = dispatchEvent;
       renderBox.onPan = dispatchEvent;
       renderBox.onScale = dispatchEvent;
-      renderBox.getEventHandlers = getEventHandlers;
       renderBox.getEventTarget = getEventTarget;
       renderBox.dispatchEvent = dispatchEvent;
     }

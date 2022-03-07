@@ -73,16 +73,11 @@ class GestureManager {
 
       for (int i = 0; i < _hitTestTargetList.length; i++) {
         RenderBox renderBox = _hitTestTargetList[i];
-        Map<String, List<EventHandler>>? eventHandlers;
-        if (renderBox is RenderPointerListenerMixin && renderBox.getEventHandlers != null) {
-          eventHandlers = renderBox.getEventHandlers!();
-        }
-
-        // Mark event that should propagation in dom tree.
-        if (eventHandlers != null && eventHandlers.isNotEmpty) {
-          for (String eventType in eventHandlers.keys) {
+        if (renderBox is RenderPointerListenerMixin) {
+          // Mark event that should propagation in dom tree.
+          renderBox.events.forEach((eventType) {
             _hitTestEventMap[eventType] = true;
-          }
+          });
         }
       }
 
