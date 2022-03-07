@@ -51,8 +51,37 @@ class WidgetDelegate {
       );
 }
 
-// State involves actions of text control elements(input, textarea).
-mixin TextControlState on State<Kraken> {
+// Widget involves actions of text control elements(input, textarea).
+class KrakenTextControl extends StatefulWidget {
+  KrakenTextControl();
+
+  @override
+  _KrakenTextControlState createState() => _KrakenTextControlState();
+}
+
+class _KrakenTextControlState extends State<KrakenTextControl> {
+  @override
+  void initState() {
+    super.initState();
+    _initActionMap();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return RepaintBoundary(
+      child: FocusableActionDetector(
+        actions: _actionMap,
+        focusNode: _focusNode,
+        onFocusChange: _handleFocusChange,
+        child: KrakenRenderObjectWidget(
+          context.widget as Kraken,
+          widgetDelegate,
+        )
+      )
+    );
+  }
+
   final FocusNode _focusNode = FocusNode();
 
   Map<Type, Action<Intent>>? _actionMap;
@@ -78,7 +107,7 @@ mixin TextControlState on State<Kraken> {
     );
   }
 
-  void initActionMap() {
+  void _initActionMap() {
     _actionMap = <Type, Action<Intent>>{
       // Action of focus.
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
@@ -756,3 +785,4 @@ mixin TextControlState on State<Kraken> {
     return _selectionControls;
   }
 }
+

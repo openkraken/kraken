@@ -196,28 +196,13 @@ class Kraken extends StatefulWidget {
 
   @override
   _KrakenState createState() => _KrakenState();
-
 }
 
-class _KrakenState extends State<Kraken> with RouteAware, TextControlState {
-  @override
-  void initState() {
-    super.initState();
-    initActionMap();
-  }
-
+class _KrakenState extends State<Kraken> with RouteAware {
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-        child: createTextControlDetector(
-          KrakenRenderObjectWidget(
-            context.widget as Kraken,
-            widgetDelegate,
-          )
-        )
-    );
+    return KrakenTextControl();
   }
-
 
   @override
   void didChangeDependencies() {
