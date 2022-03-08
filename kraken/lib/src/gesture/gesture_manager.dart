@@ -181,23 +181,23 @@ class GestureManager {
   }
 
   void onDoubleClick(TapDownDetails details) {
-    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
-    if (dispatchMouseEvent != null) {
-      dispatchMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
+    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+    if (handleMouseEvent != null) {
+      handleMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onTapDown(TapDownDetails details) {
-    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
-    if (dispatchMouseEvent != null) {
-      dispatchMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
+    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+    if (handleMouseEvent != null) {
+      handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
-    if (dispatchMouseEvent != null) {
-      dispatchMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
+    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+    if (handleMouseEvent != null) {
+      handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 

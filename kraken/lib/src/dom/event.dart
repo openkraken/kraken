@@ -71,7 +71,7 @@ mixin ElementEventMixin on ElementBase {
   AppearEventType prevAppearState = AppearEventType.none;
 
   void clearEventResponder(RenderPointerListenerMixin renderBox) {
-    renderBox.dispatchMouseEvent = null;
+    renderBox.handleMouseEvent = null;
     renderBox.onSwipe = null;
     renderBox.onPan = null;
     renderBox.onScale = null;
@@ -84,7 +84,7 @@ mixin ElementEventMixin on ElementBase {
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox != null) {
       // Make sure pointer responder bind.
-      renderBox.dispatchMouseEvent = dispatchMouseEvent;
+      renderBox.handleMouseEvent = handleMouseEvent;
       renderBox.onSwipe = dispatchEvent;
       renderBox.onPan = dispatchEvent;
       renderBox.onScale = dispatchEvent;
@@ -129,7 +129,7 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-  void dispatchMouseEvent(String type, {
+  void handleMouseEvent(String type, {
     Offset localPosition = Offset.zero,
     Offset globalPosition = Offset.zero,
     bool bubbles = true,

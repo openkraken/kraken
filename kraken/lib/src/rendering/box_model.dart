@@ -701,7 +701,7 @@ class RenderBoxModel extends RenderBox
       // Copy pointer listener
       ..getEventTarget = getEventTarget
       ..dispatchEvent = dispatchEvent
-      ..dispatchMouseEvent = dispatchMouseEvent
+      ..handleMouseEvent = handleMouseEvent
       ..onSwipe = onSwipe
       ..onPan = onPan
       ..onScale = onScale
