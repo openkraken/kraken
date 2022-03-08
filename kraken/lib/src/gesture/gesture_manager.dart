@@ -181,23 +181,23 @@ class GestureManager {
   }
 
   void onDoubleClick(TapDownDetails details) {
-    Function? onDoubleClick = _target?.onDoubleClick;
-    if (onDoubleClick != null) {
-      onDoubleClick();
+    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
+    if (dispatchMouseEvent != null) {
+      dispatchMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onTapDown(TapDownDetails details) {
-    Function? onClick = _target?.onClick;
-    if (onClick != null) {
-      onClick(details);
+    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
+    if (dispatchMouseEvent != null) {
+      dispatchMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    Function? onLongPress = _target?.onLongPress;
-    if (onLongPress != null) {
-      onLongPress(details);
+    DispatchMouseEvent? dispatchMouseEvent = _target?.dispatchMouseEvent;
+    if (dispatchMouseEvent != null) {
+      dispatchMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 

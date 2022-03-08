@@ -14,21 +14,19 @@ typedef GetEventTarget = EventTarget Function();
 
 typedef DispatchEvent = void Function(Event event);
 
+typedef DispatchMouseEvent = void Function(String type, { Offset localPosition, Offset globalPosition, bool bubbles, bool cancelable });
+
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
 
-  Function? onClick;
-
-  Function? onDoubleClick;
+  DispatchMouseEvent? dispatchMouseEvent;
 
   GestureCallback? onSwipe;
 
   GestureCallback? onPan;
 
   GestureCallback? onScale;
-
-  Function? onLongPress;
 
   GetEventTarget? getEventTarget;
 

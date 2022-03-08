@@ -71,12 +71,10 @@ mixin ElementEventMixin on ElementBase {
   AppearEventType prevAppearState = AppearEventType.none;
 
   void clearEventResponder(RenderPointerListenerMixin renderBox) {
-    renderBox.onClick = null;
-    renderBox.onDoubleClick = null;
+    renderBox.dispatchMouseEvent = null;
     renderBox.onSwipe = null;
     renderBox.onPan = null;
     renderBox.onScale = null;
-    renderBox.onLongPress = null;
     renderBox.getEventTarget = null;
     renderBox.dispatchEvent = null;
   }
@@ -86,9 +84,7 @@ mixin ElementEventMixin on ElementBase {
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox != null) {
       // Make sure pointer responder bind.
-      renderBox.onClick = handleClick;
-      renderBox.onDoubleClick = handleDoubleClick;
-      renderBox.onLongPress = handleLongPress;
+      renderBox.dispatchMouseEvent = dispatchMouseEvent;
       renderBox.onSwipe = dispatchEvent;
       renderBox.onPan = dispatchEvent;
       renderBox.onScale = dispatchEvent;
@@ -133,60 +129,35 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-  void handleClick(TapDownDetails details) {
+  void dispatchMouseEvent(String type, {
+    Offset localPosition = Offset.zero,
+    Offset globalPosition = Offset.zero,
+    bool bubbles = true,
+    bool cancelable = true,
+  }) {
     RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
+
     if (root == null) {
       return;
     }
+
     // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
-    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
+    Offset globalOffset = root.globalToLocal(Offset(globalPosition.dx, globalPosition.dy));
     double clientX = globalOffset.dx;
     double clientY = globalOffset.dy;
+
     dispatchEvent(
       (MouseEvent(EVENT_CLICK,
         MouseEventInit(
-          bubbles: true,
-          cancelable: true,
+          bubbles: bubbles,
+          cancelable: cancelable,
           clientX: clientX,
           clientY: clientY,
-          offsetX: details.localPosition.dx,
-          offsetY: details.localPosition.dy,
+          offsetX: localPosition.dx,
+          offsetY: localPosition.dy,
         )
       ))
     );
-  }
-
-  void handleDoubleClick(TapDownDetails details) {
-    RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
-    if (root == null) {
-      return;
-    }
-    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
-    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
-    double clientX = globalOffset.dx;
-    double clientY = globalOffset.dy;
-    dispatchEvent(
-      (MouseEvent(EVENT_DOUBLE_CLICK,
-        MouseEventInit(
-          bubbles: true,
-          cancelable: true,
-          clientX: clientX,
-          clientY: clientY,
-          offsetX: details.localPosition.dx,
-          offsetY: details.localPosition.dy,
-        )
-      ))
-    );
-  }
-
-  void handleLongPress(LongPressEndDetails details) {
-    dispatchEvent(GestureEvent(
-        EVENT_LONG_PRESS,
-        GestureEventInit(
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy
-        )
-    ));
   }
 
   void handleAppear() {
