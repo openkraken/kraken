@@ -201,10 +201,10 @@ class GestureManager {
     }
   }
 
-  void onSwipe(Event event) {
+  void onSwipe(SwipeDetails details) {
     Function? handleGestureEvent = _target?.handleGestureEvent;
     if (handleGestureEvent != null) {
-      handleGestureEvent(event);
+      handleGestureEvent(EVENT_SWIPE, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
     }
   }
 

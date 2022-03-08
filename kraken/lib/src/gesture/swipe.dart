@@ -14,7 +14,19 @@ enum _SwipeState {
   accepted,
 }
 
-typedef GestureCallback = void Function(Event);
+typedef GestureSwipeCallback = void Function(SwipeDetails details);
+
+class SwipeDetails {
+  /// Creates the details for a [GestureSwipeCallback].
+  const SwipeDetails({
+    this.direction = '',
+    this.velocity = Velocity.zero,
+  });
+
+  final String direction;
+
+  final Velocity velocity;
+}
 
 /// Determine the approriate pan slop pixels based on the [kind] of pointer.
 double computeSwipeSlop(PointerDeviceKind kind) {
@@ -76,7 +88,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureSwipeCancelCallback? onCancel;
 
-  GestureCallback? onSwipe;
+  GestureSwipeCallback? onSwipe;
 
   /// The minimum distance an input pointer drag must have moved to
   /// to be considered a fling gesture.
@@ -308,8 +320,12 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
       debugReport = () {
         return '$estimate; fling at $velocity.';
       };
-      GestureEventInit e = GestureEventInit(direction: _direction ?? '', velocityX: velocity.pixelsPerSecond.dx, velocityY: velocity.pixelsPerSecond.dy );
-      invokeCallback<void>('onSwipe', () => onSwipe!(GestureEvent(EVENT_SWIPE, e)), debugReport: debugReport);
+
+      SwipeDetails details = SwipeDetails(
+        direction: _direction ?? '',
+        velocity: velocity,
+      );
+      invokeCallback<void>('onSwipe', () => onSwipe!(details));
     }
   }
 
