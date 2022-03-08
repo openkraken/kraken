@@ -21,6 +21,8 @@ import 'src/css/values.dart' as css_values;
 
 import 'src/gesture/scroll_physics.dart' as scroll_physics;
 
+import 'src/launcher/bundle.dart' as bundle;
+
 // The main entry for kraken unit test.
 // Setup all common logic.
 void main() {
@@ -62,6 +64,10 @@ void main() {
 
   group('gesture', () {
     scroll_physics.main();
+  });
+
+  group('launcher', () {
+    bundle.main();
   });
 
   tearDownAll(() {

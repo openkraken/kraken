@@ -201,7 +201,7 @@ class NetworkAssetBundle extends AssetBundle {
         _additionalHttpHeaders = additionalHttpHeaders,
         httpClient = HttpClient();
 
-  int? contextId;
+  final int? contextId;
   final Uri _baseUrl;
   final HttpClient httpClient;
   final Map<String, String>? _additionalHttpHeaders;
