@@ -705,7 +705,7 @@ class RenderBoxModel extends RenderBox
       ..handleGestureEvent = handleGestureEvent
       ..onPointerSignal = onPointerSignal
 
-      ..events = List.from(events)
+      ..eventManager = eventManager.copyWith()
 
       // Copy renderPositionHolder
       ..renderPositionPlaceholder = renderPositionPlaceholder

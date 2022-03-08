@@ -43,7 +43,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
     if ((this is Element) && existHandler.isEmpty) {
       RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
       if (renderBoxModel != null) {
-        renderBoxModel.events.add(eventType);
+        renderBoxModel.eventManager.add(eventType);
       }
     }
 
@@ -64,7 +64,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
         if (this is Element && (this as Element).renderBoxModel != null) {
           RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
           if (renderBoxModel != null) {
-            renderBoxModel.events.add(eventType);
+            renderBoxModel.eventManager.add(eventType);
           }
         }
       }

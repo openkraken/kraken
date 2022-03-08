@@ -19,7 +19,7 @@ class RenderViewportBox extends RenderProxyBox
     this.gestureListener,
     this.background,
     required KrakenController controller,
-  })  : _viewportSize = viewportSize,
+  }) : _viewportSize = viewportSize,
         super(child) {
     if (gestureListener != null && gestureListener!.onDrag != null) {
       _verticalDragGestureRecognizer.onUpdate = _horizontalDragGestureRecognizer.onUpdate = onDragUpdate;

@@ -45,14 +45,14 @@ class WidgetDelegate {
   GetTextSelectionControls getTextSelectionControls;
 
   WidgetDelegate(
-      this.getContext,
-      this.requestFocus,
-      this.getTargetPlatform,
-      this.getCursorColor,
-      this.getSelectionColor,
-      this.getCursorRadius,
-      this.getTextSelectionControls,
-      );
+    this.getContext,
+    this.requestFocus,
+    this.getTargetPlatform,
+    this.getCursorColor,
+    this.getSelectionColor,
+    this.getCursorRadius,
+    this.getTextSelectionControls,
+  );
 }
 
 class Kraken extends StatefulWidget {

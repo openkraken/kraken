@@ -75,7 +75,7 @@ class GestureManager {
         RenderBox renderBox = _hitTestTargetList[i];
         if (renderBox is RenderPointerListenerMixin) {
           // Mark event that should propagation in dom tree.
-          renderBox.events.forEach((eventType) {
+          renderBox.eventManager.events.forEach((eventType) {
             _hitTestEventMap[eventType] = true;
           });
         }
