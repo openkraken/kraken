@@ -68,7 +68,7 @@ const String EVENT_STATE_UPDATE = 'update';
 const String EVENT_STATE_END = 'end';
 
 mixin ElementEventMixin on ElementBase {
-  AppearEventType prevAppearState = AppearEventType.none;
+  AppearEventType _prevAppearState = AppearEventType.none;
 
   void clearEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.handleMouseEvent = null;
@@ -170,15 +170,15 @@ mixin ElementEventMixin on ElementBase {
   }
 
   void handleAppear() {
-    if (prevAppearState == AppearEventType.appear) return;
-    prevAppearState = AppearEventType.appear;
+    if (_prevAppearState == AppearEventType.appear) return;
+    _prevAppearState = AppearEventType.appear;
 
     dispatchEvent(AppearEvent());
   }
 
   void handleDisappear() {
-    if (prevAppearState == AppearEventType.disappear) return;
-    prevAppearState = AppearEventType.disappear;
+    if (_prevAppearState == AppearEventType.disappear) return;
+    _prevAppearState = AppearEventType.disappear;
     dispatchEvent(DisappearEvent());
   }
 
