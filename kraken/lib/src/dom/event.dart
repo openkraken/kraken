@@ -156,12 +156,24 @@ mixin ElementEventMixin on ElementBase {
     );
   }
 
-  void handleDoubleClick() {
+  void handleDoubleClick(TapDownDetails details) {
+    RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
+    if (root == null) {
+      return;
+    }
+    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
+    Offset globalOffset = root.globalToLocal(Offset(details.globalPosition.dx, details.globalPosition.dy));
+    double clientX = globalOffset.dx;
+    double clientY = globalOffset.dy;
     dispatchEvent(
       (MouseEvent(EVENT_DOUBLE_CLICK,
         MouseEventInit(
           bubbles: true,
           cancelable: true,
+          clientX: clientX,
+          clientY: clientY,
+          offsetX: details.localPosition.dx,
+          offsetY: details.localPosition.dy,
         )
       ))
     );
