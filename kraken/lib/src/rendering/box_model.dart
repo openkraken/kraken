@@ -702,9 +702,7 @@ class RenderBoxModel extends RenderBox
       ..getEventTarget = getEventTarget
       ..dispatchEvent = dispatchEvent
       ..handleMouseEvent = handleMouseEvent
-      ..onSwipe = onSwipe
-      ..onPan = onPan
-      ..onScale = onScale
+      ..handleGestureEvent = handleGestureEvent
       ..onPointerSignal = onPointerSignal
 
       ..events = List.from(events)

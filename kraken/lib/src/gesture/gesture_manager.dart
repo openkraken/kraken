@@ -23,7 +23,7 @@ class GestureManager {
       _instance = GestureManager._();
 
       _instance!.gestures[EVENT_CLICK] = TapGestureRecognizer();
-      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapDown = _instance!.onTapDown;
+      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapDown = _instance!.onClick;
 
       _instance!.gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
       (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = _instance!.onDoubleClick;
@@ -181,118 +181,72 @@ class GestureManager {
   }
 
   void onDoubleClick(TapDownDetails details) {
-    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+    Function? handleMouseEvent = _target?.handleMouseEvent;
     if (handleMouseEvent != null) {
       handleMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
-  void onTapDown(TapDownDetails details) {
-    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+  void onClick(TapDownDetails details) {
+    Function? handleMouseEvent = _target?.handleMouseEvent;
     if (handleMouseEvent != null) {
       handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onLongPressEnd(LongPressEndDetails details) {
-    HandleMouseEvent? handleMouseEvent = _target?.handleMouseEvent;
+    Function? handleMouseEvent = _target?.handleMouseEvent;
     if (handleMouseEvent != null) {
       handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
     }
   }
 
   void onSwipe(Event event) {
-    Function? onSwipe = _target?.onSwipe;
-    if (onSwipe != null) {
-      onSwipe(event);
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(event);
     }
   }
 
   void onPanStart(DragStartDetails details) {
-    Function? onPan = _target?.onPan;
-    if (onPan != null) {
-      onPan(
-        GestureEvent(
-          EVENT_PAN,
-          GestureEventInit(
-            state: EVENT_STATE_START,
-            deltaX: details.globalPosition.dx,
-            deltaY: details.globalPosition.dy
-          )
-        )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(EVENT_PAN, state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
     }
   }
 
   void onPanUpdate(DragUpdateDetails details) {
-    Function? onPan = _target?.onPan;
-    if (onPan != null) {
-      onPan(
-          GestureEvent(
-              EVENT_PAN,
-              GestureEventInit(
-                  state: EVENT_STATE_UPDATE,
-                  deltaX: details.globalPosition.dx,
-                  deltaY: details.globalPosition.dy
-              )
-          )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(EVENT_PAN, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
     }
   }
 
   void onPanEnd(DragEndDetails details) {
-    Function? onPan = _target?.onPan;
-    if (onPan != null) {
-      onPan(
-        GestureEvent(
-          EVENT_PAN,
-          GestureEventInit(
-            state: EVENT_STATE_END,
-            velocityX: details.velocity.pixelsPerSecond.dx,
-            velocityY: details.velocity.pixelsPerSecond.dy
-          )
-        )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(EVENT_PAN, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
     }
   }
 
   void onScaleStart(ScaleStartDetails details) {
-    Function? onScale = _target?.onScale;
-    if (onScale != null) {
-      onScale(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit( state: EVENT_STATE_START )
-        )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_START);
     }
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    Function? onScale = _target?.onScale;
-    if (onScale != null) {
-      onScale(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit(
-            state: EVENT_STATE_UPDATE,
-            rotation: details.rotation,
-            scale: details.scale
-          )
-        )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale);
     }
   }
 
   void onScaleEnd(ScaleEndDetails details) {
-    Function? onScale = _target?.onScale;
-    if (onScale != null) {
-      onScale(
-        GestureEvent(
-          EVENT_SCALE,
-          GestureEventInit( state: EVENT_STATE_END )
-        )
-      );
+    Function? handleGestureEvent = _target?.handleGestureEvent;
+    if (handleGestureEvent != null) {
+      handleGestureEvent(GestureEvent, state: EVENT_STATE_END);
     }
   }
 }

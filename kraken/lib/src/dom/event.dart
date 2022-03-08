@@ -72,9 +72,7 @@ mixin ElementEventMixin on ElementBase {
 
   void clearEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.handleMouseEvent = null;
-    renderBox.onSwipe = null;
-    renderBox.onPan = null;
-    renderBox.onScale = null;
+    renderBox.handleGestureEvent = null;
     renderBox.getEventTarget = null;
     renderBox.dispatchEvent = null;
   }
@@ -85,9 +83,7 @@ mixin ElementEventMixin on ElementBase {
     if (renderBox != null) {
       // Make sure pointer responder bind.
       renderBox.handleMouseEvent = handleMouseEvent;
-      renderBox.onSwipe = dispatchEvent;
-      renderBox.onPan = dispatchEvent;
-      renderBox.onScale = dispatchEvent;
+      renderBox.handleGestureEvent = handleGestureEvent;
       renderBox.getEventTarget = getEventTarget;
       renderBox.dispatchEvent = dispatchEvent;
     }
@@ -158,6 +154,19 @@ mixin ElementEventMixin on ElementBase {
         )
       ))
     );
+  }
+
+  void handleGestureEvent(String type, {
+    String state = '',
+    String direction = '',
+    double rotation = 0.0,
+    double deltaX = 0.0,
+    double deltaY = 0.0,
+    double velocityX = 0.0,
+    double velocityY = 0.0,
+    double scale = 0.0
+  }) {
+
   }
 
   void handleAppear() {
