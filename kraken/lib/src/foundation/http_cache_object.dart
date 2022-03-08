@@ -146,12 +146,16 @@ class HttpCacheObject {
 
   /// Read the index file.
   Future<void> read() async {
-    if (_valid) return;
-    final bool isIndexFileExist = await _file.exists();
-    if (!isIndexFileExist) {
-      // Index file not exist, dispose.
+    // Make sure file exists, or causing io exception.
+    if (!await _file.exists() || !await _blob.exists()) {
+      _valid = false;
       return;
     }
+
+    // If index read before, ignoring to read again.
+    // Note: if index or blob file were being changed, this will make chaos,
+    //   usually this is an abnormal operation.
+    if (_valid) return;
 
     try {
       Uint8List bytes = await _file.readAsBytes();
@@ -286,6 +290,10 @@ class HttpCacheObject {
     // Store shorted response headers, 4B.
     writeString(bytesBuilder, headers ?? '', 4);
 
+    // In case of cache object file is deleted by accident.
+    if (!await _file.exists()) {
+      await _file.create(recursive: true);
+    }
     // The index file will not be TOO LARGE,
     // so take bytes at one time.
     await _file.writeAsBytes(bytesBuilder.takeBytes(), flush: true);
