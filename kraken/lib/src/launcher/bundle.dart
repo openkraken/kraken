@@ -196,7 +196,7 @@ String _resolveStringFromData(ByteData data) {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl, {int? contextId, Map<String, String>? additionalHttpHeaders })
+  NetworkAssetBundle(Uri baseUrl, {this.contextId, Map<String, String>? additionalHttpHeaders })
       : _baseUrl = baseUrl,
         _additionalHttpHeaders = additionalHttpHeaders,
         httpClient = HttpClient();
