@@ -23,10 +23,10 @@ class GestureManager {
       _instance = GestureManager._();
 
       _instance!.gestures[EVENT_CLICK] = TapGestureRecognizer();
-      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapUp = _instance!.onTapUp;
+      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapDown = _instance!.onTapDown;
 
       _instance!.gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
-      (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTap = _instance!.onDoubleClick;
+      (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = _instance!.onDoubleClick;
 
       _instance!.gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
       (_instance!.gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
@@ -180,14 +180,14 @@ class GestureManager {
 
   }
 
-  void onDoubleClick() {
+  void onDoubleClick(TapDownDetails details) {
     Function? onDoubleClick = _target?.onDoubleClick;
     if (onDoubleClick != null) {
       onDoubleClick();
     }
   }
 
-  void onTapUp(TapUpDetails details) {
+  void onTapDown(TapDownDetails details) {
     Function? onClick = _target?.onClick;
     if (onClick != null) {
       onClick(details);

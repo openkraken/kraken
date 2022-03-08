@@ -133,7 +133,7 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-  void handleClick(TapUpDetails details) {
+  void handleClick(TapDownDetails details) {
     RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
     if (root == null) {
       return;
