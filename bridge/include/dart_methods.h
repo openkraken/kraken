@@ -18,7 +18,7 @@ struct NativeScreen;
 
 using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg);
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
-using AsyncModuleCallback = void (*)(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
+using AsyncModuleCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json);
 using AsyncBlobCallback = void (*)(void* callbackContext, int32_t contextId, const char* error, uint8_t* bytes, int32_t length);
 typedef NativeString* (*InvokeModule)(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(int32_t contextId);

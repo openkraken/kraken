@@ -27,13 +27,6 @@
 namespace foundation {
 namespace {
 
-const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"VERBOSE", BOLD("INFO"), FYEL("WARN"), BOLD("DEBUG"), FRED("ERROR")};
-const char* GetNameForLogSeverity(LogSeverity severity) {
-  if (severity >= LOG_INFO && severity < LOG_NUM_SEVERITIES)
-    return kLogSeverityNames[severity];
-  return FCYN("UNKNOWN");
-}
-
 const char* StripDots(const char* path) {
   while (strncmp(path, "../", 3) == 0)
     path += 3;
@@ -60,19 +53,19 @@ LogMessage::~LogMessage() {
   android_LogPriority priority = ANDROID_LOG_VERBOSE;
 
   switch (severity_) {
-    case LOG_VERBOSE:
+    case VERBOSE:
       priority = ANDROID_LOG_VERBOSE;
       break;
-    case LOG_INFO:
+    case INFO:
       priority = ANDROID_LOG_INFO;
       break;
-    case LOG_DEBUG_:
+    case DEBUG:
       priority = ANDROID_LOG_DEBUG;
       break;
-    case LOG_WARN:
+    case WARN:
       priority = ANDROID_LOG_WARN;
       break;
-    case LOG_ERROR:
+    case ERROR:
       priority = ANDROID_LOG_ERROR;
       break;
   }
@@ -80,7 +73,7 @@ LogMessage::~LogMessage() {
 #elif defined(IS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
-  if (severity_ == LOG_ERROR) {
+  if (severity_ == ERROR) {
     std::cerr << stream_.str() << std::endl;
     std::cerr.flush();
   } else {
@@ -121,7 +114,7 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
       _log_level = MessageLevel::Info;
       break;
     case 'd':
-      KRAKEN_LOG(DEBUG_) << stream.str();
+      KRAKEN_LOG(DEBUG) << stream.str();
       _log_level = MessageLevel::Debug;
       break;
     case 'w':

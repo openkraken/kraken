@@ -25,6 +25,13 @@ void bindWindow(ExecutionContext* context) {
   context->defineGlobalProperty("__window__", window->jsObject);
 }
 
+JSValue ensureWindowIsGlobal(EventTargetInstance* target) {
+  if (target == target->context()->window()) {
+    return target->context()->global();
+  }
+  return target->jsObject;
+}
+
 JSClassID Window::kWindowClassId{0};
 
 Window::Window(ExecutionContext* context) : EventTarget(context, "Window") {
@@ -43,6 +50,7 @@ JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) 
 }
 JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 #if FLUTTER_BACKEND
+  getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scroll", 2, arguments);
@@ -51,6 +59,7 @@ JSValue Window::scrollTo(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
 #endif
 }
 JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
   return window->callNativeMethods("scrollBy", 2, arguments);
@@ -63,11 +72,9 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
 
   JSValue messageEventInitValue = JS_NewObject(ctx);
 
-  // TODO: convert originValue to current src.
-  JSValue messageOriginValue = JS_NewString(ctx, "");
-
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
+  // TODO: convert originValue to current src.
+  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", JS_NewString(ctx, ""));
 
   JSValue messageType = JS_NewString(ctx, "message");
   JSValue arguments[] = {messageType, messageEventInitValue};
@@ -80,7 +87,6 @@ JSValue Window::postMessage(JSContext* ctx, JSValue this_val, int argc, JSValue*
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
-  JS_FreeValue(ctx, messageOriginValue);
   return JS_NULL;
 }
 

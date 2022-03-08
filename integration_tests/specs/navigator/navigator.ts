@@ -9,11 +9,27 @@ describe('Navigator', () => {
     expect(navigator.hardwareConcurrency > 0).toBeTrue();
   });
 
-  it('getDeviceInfo', async () => {
-    let deviceInfo = await navigator.getDeviceInfo();
-    expect(deviceInfo.brand).toBe('Apple');
-    expect(deviceInfo.isPhysicalDevice).toBeTrue();
-    expect(deviceInfo.platformName).toBe('Mac OS');
+  it('platform', async () => {
+    expect(navigator.platform).toBeDefined();
+  });
+
+  it('appName', () => {
+    expect(navigator.appName).toBeDefined();
+  });
+
+  it('appVersion', () => {
+    expect(navigator.appVersion).toBeDefined();
+  });
+
+  it('language', async () => {
+    expect(navigator.language).toBeDefined();
+    expect(navigator.language.includes('-')).toBeTrue();
+  });
+
+  it('languages', async () => {
+    expect(navigator.languages instanceof Array).toBeTrue();
+    expect(navigator.languages[0]).toBeDefined();
+    expect(navigator.languages[0].includes('-')).toBeTrue();
   });
 
   it('userAgent', () => {

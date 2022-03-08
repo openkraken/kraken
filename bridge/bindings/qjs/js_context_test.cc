@@ -26,6 +26,20 @@ TEST(Context, evalWithError) {
   EXPECT_EQ(errorHandlerExecuted, true);
 }
 
+TEST(Context, recursionThrowError) {
+  static bool errorHandlerExecuted = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
+  auto bridge = TEST_init(errorHandler);
+  const char* code =
+      "addEventListener('error', (evt) => {\n"
+      "  console.log('tagName', evt.target.tagName());\n"
+      "});\n"
+      "\n"
+      "throw Error('foo');";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+}
+
 TEST(Context, unrejectPromiseError) {
   static bool errorHandlerExecuted = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) {
@@ -47,6 +61,172 @@ TEST(Context, unrejectPromiseError) {
       "\n";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
+}
+
+TEST(Context, globalErrorHandlerTargetReturnToWindow) {
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {};
+  auto bridge = TEST_init(errorHandler);
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+
+    EXPECT_STREQ(message.c_str(), "true");
+  };
+
+  std::string code = R"(
+window.addEventListener('error', (e) => { console.log(e.target === window) });
+throw new Error('1234');
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(logCalled, true);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
+}
+
+TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
+  static bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {
+    errorHandlerExecuted = true;
+    EXPECT_STREQ(errmsg,
+                 "TypeError: cannot read property 'forceNullError' of null\n"
+                 "    at <anonymous> (file://:12)\n"
+                 "    at Promise (native)\n"
+                 "    at <eval> (file://:14)\n");
+  };
+  auto bridge = TEST_init(errorHandler);
+  static int logIndex = 0;
+  static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}} true"};
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
+  };
+
+  std::string code = R"(
+window.onunhandledrejection = (e) => {
+  console.log('unhandled event', e, e.target === window);
+};
+window.onerror = (e) => {
+  console.log('error event', e);
+}
+
+var p = new Promise(function (resolve, reject) {
+  var nullObject = null;
+  // Raise a TypeError: Cannot read property 'forceNullError' of null
+  var x = nullObject.forceNullError();
+  resolve();
+});
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+  EXPECT_EQ(logCalled, true);
+  EXPECT_EQ(logIndex, 2);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
+}
+
+TEST(Context, handledRejectionWillNotTriggerUnHandledRejectionEvent) {
+  static bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
+  auto bridge = TEST_init(errorHandler);
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "rejected");
+  };
+
+  std::string code = R"(
+window.addEventListener('unhandledrejection', event => {
+  console.log('unhandledrejection fired: ' + event.reason);
+});
+
+window.addEventListener('rejectionhandled', event => {
+  console.log('rejectionhandled fired: ' + event.reason);
+});
+
+function generateRejectedPromise(isEventuallyHandled) {
+  // Create a promise which immediately rejects with a given reason.
+  var rejectedPromise = Promise.reject('Error at ' +
+    new Date().toLocaleTimeString());
+  rejectedPromise.catch(() => {
+    console.log('rejected');
+  });
+}
+
+generateRejectedPromise(true);
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
+}
+
+TEST(Context, unhandledRejectionEventWillTriggerWhenNotHandled) {
+  static bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
+  auto bridge = TEST_init(errorHandler);
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+
+  std::string code = R"(
+window.addEventListener('unhandledrejection', event => {
+  console.log('unhandledrejection fired: ' + event.reason);
+});
+
+window.addEventListener('rejectionhandled', event => {
+  console.log('rejectionhandled fired: ' + event.reason);
+});
+
+function generateRejectedPromise(isEventuallyHandled) {
+  // Create a promise which immediately rejects with a given reason.
+  var rejectedPromise = Promise.reject('Error');
+}
+
+generateRejectedPromise(true);
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
+}
+
+TEST(Context, handledRejectionEventWillTriggerWhenUnHandledRejectHandled) {
+  static bool errorHandlerExecuted = false;
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
+  auto bridge = TEST_init(errorHandler);
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+
+  std::string code = R"(
+window.addEventListener('unhandledrejection', event => {
+  console.log('unhandledrejection fired: ' + event.reason);
+});
+
+window.addEventListener('rejectionhandled', event => {
+  console.log('rejectionhandled fired: ' + event.reason);
+});
+
+function generateRejectedPromise() {
+  // Create a promise which immediately rejects with a given reason.
+  var rejectedPromise = Promise.reject('Error');
+    // We need to handle the rejection "after the fact" in order to trigger a
+    // unhandledrejection followed by rejectionhandled. Here we simulate that
+    // via a setTimeout(), but in a real-world system this might take place due
+    // to, e.g., fetch()ing resources at startup and then handling any rejected
+    // requests at some point later on.
+    setTimeout(() => {
+      // We need to provide an actual function to .catch() or else the promise
+      // won't be considered handled.
+      rejectedPromise.catch(() => {});
+    });
+}
+
+generateRejectedPromise();
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+
+  TEST_runLoop(bridge->getContext());
+  EXPECT_EQ(errorHandlerExecuted, false);
+  EXPECT_EQ(logCalled, true);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, unrejectPromiseErrorWithMultipleContext) {
@@ -75,7 +255,7 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   bridge2->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
-  EXPECT_EQ(errorCalledCount, 2);
+  EXPECT_EQ(errorCalledCount, 4);
 }
 
 TEST(Context, accessGetUICommandItemsAfterDisposed) {

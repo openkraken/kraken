@@ -4,6 +4,7 @@
  */
 
 #include "console.h"
+#include "foundation/logging.h"
 
 namespace kraken::binding::qjs {
 

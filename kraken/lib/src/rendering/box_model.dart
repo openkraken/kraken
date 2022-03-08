@@ -429,10 +429,7 @@ class RenderLayoutBox extends RenderBoxModel
     } else {
       childScrollableSize = child.boxSize;
     }
-    double maxScrollableX = scrollableSize.width;
-    double maxScrollableY = scrollableSize.height;
-    maxScrollableX = math.max(maxScrollableX,
-        childRenderStyle.left.computedValue + childScrollableSize!.width);
+    double maxScrollableX = childRenderStyle.left.computedValue + childScrollableSize!.width;
 
     if (childRenderStyle.right.isNotAuto) {
       if (isScrollingContentBox &&
@@ -450,8 +447,7 @@ class RenderLayoutBox extends RenderBoxModel
       }
     }
 
-    maxScrollableY = math.max(maxScrollableY,
-        childRenderStyle.top.computedValue + childScrollableSize.height);
+    double maxScrollableY = childRenderStyle.top.computedValue + childScrollableSize.height;
     if (childRenderStyle.bottom.isNotAuto) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
@@ -467,6 +463,18 @@ class RenderLayoutBox extends RenderBoxModel
             -childRenderStyle.bottom.computedValue + _contentSize!.height);
       }
     }
+
+    RenderBoxModel scrollContainer = isScrollingContentBox
+      ? parent as RenderBoxModel : this;
+    // Scrollable area of positioned element will ignore padding area of scroll container.
+    maxScrollableX -= scrollContainer.renderStyle.paddingLeft.computedValue
+      + scrollContainer.renderStyle.paddingRight.computedValue;
+    maxScrollableY -= scrollContainer.renderStyle.paddingTop.computedValue
+      + scrollContainer.renderStyle.paddingBottom.computedValue;
+
+    maxScrollableX = math.max(maxScrollableX, scrollableSize.width);
+    maxScrollableY = math.max(maxScrollableY, scrollableSize.height);
+
     scrollableSize = Size(maxScrollableX, maxScrollableY);
   }
 
@@ -594,7 +602,6 @@ class RenderBoxModel extends RenderBox
   BoxConstraints? _contentConstraints;
 
   BoxConstraints? get contentConstraints {
-    assert(_contentConstraints != null);
     return _contentConstraints;
   }
 

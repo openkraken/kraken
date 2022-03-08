@@ -14,7 +14,7 @@ void bindCustomEvent(ExecutionContext* context);
 
 struct NativeCustomEvent {
   NativeEvent nativeEvent;
-  NativeString* detail{nullptr};
+  int64_t detail{0};
 };
 
 class CustomEventInstance;

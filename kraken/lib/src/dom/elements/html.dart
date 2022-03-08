@@ -24,4 +24,15 @@ class HTMLElement extends Element {
     if (eventType == EVENT_SCROLL) return;
     super.addEvent(eventType);
   }
+
+  @override
+  void dispatchEvent(Event event) {
+    if (event.type == SCROLL) {
+      // https://www.w3.org/TR/2014/WD-DOM-Level-3-Events-20140925/#event-type-scroll
+      // When dispatched on the Document element, this event type must bubble to the Window object.
+      event.bubbles = true;
+    }
+
+    super.dispatchEvent(event);
+  }
 }

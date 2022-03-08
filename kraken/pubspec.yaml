@@ -1,6 +1,6 @@
 name: kraken
 description: A high-performance, web standards-compliant rendering engine.
-version: 0.10.0+3
+version: 0.10.2
 homepage: https://openkraken.com
 
 environment:
@@ -18,7 +18,6 @@ dependencies:
   vector_math: ^2.1.0 # Pure dart module.
   connectivity: ^3.0.6 # No AndroidX used.
   shared_preferences: ^2.0.6 # No AndroidX used.
-  device_info: ^2.0.1 # Only support iOS and Android, no AndroidX used.
 
 dev_dependencies:
   flutter_test:
