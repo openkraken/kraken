@@ -180,13 +180,13 @@ mixin ElementEventMixin on ElementBase {
   }
 
   void handleLongPress(LongPressEndDetails details) {
-    GestureEvent(
-      EVENT_LONG_PRESS,
-      GestureEventInit(
-        deltaX: details.globalPosition.dx,
-        deltaY: details.globalPosition.dy
-      )
-    );
+    dispatchEvent(GestureEvent(
+        EVENT_LONG_PRESS,
+        GestureEventInit(
+            deltaX: details.globalPosition.dx,
+            deltaY: details.globalPosition.dy
+        )
+    ));
   }
 
   void handleAppear() {
