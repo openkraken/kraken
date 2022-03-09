@@ -30,6 +30,12 @@ class Document extends Node {
   @override
   Document get ownerDocument => this;
 
+  Element? focusedElement;
+
+  // Returns the Window object of the active document.
+  // https://html.spec.whatwg.org/multipage/window-object.html#dom-document-defaultview-dev
+  Window get defaultView => controller.view.window;
+
   @override
   String get nodeName => '#document';
 

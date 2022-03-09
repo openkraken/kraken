@@ -92,7 +92,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
         parentNode.dispatchEvent(event);
       } else {
         // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
-        self.ownerDocument.controller.view.window.dispatchEvent(event);
+        self.ownerDocument.defaultView.dispatchEvent(event);
       }
     }
   }

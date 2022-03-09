@@ -169,17 +169,27 @@ class KrakenViewController
     if (gestureListener != null) {
       GestureListener listener = gestureListener!;
       if (listener.onTouchStart != null) {
-        window.addEventListener(EVENT_TOUCH_START, (Event event) => listener.onTouchStart!(event as TouchEvent));
+        document.addEventListener(EVENT_TOUCH_START, (Event event) => listener.onTouchStart!(event as TouchEvent));
       }
 
       if (listener.onTouchMove != null) {
-        window.addEventListener(EVENT_TOUCH_MOVE, (Event event) => listener.onTouchMove!(event as TouchEvent));
+        document.addEventListener(EVENT_TOUCH_MOVE, (Event event) => listener.onTouchMove!(event as TouchEvent));
       }
 
       if (listener.onTouchEnd != null) {
-        window.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
+        document.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
       }
     }
+
+    // Blur input element when new input focused.
+    document.addEventListener(EVENT_CLICK, (event) {
+      if (event.target is Element) {
+        if (document.focusedElement != null) {
+          document.focusedElement!.blur();
+        }
+        event.target!.focus();
+      }
+    });
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);
@@ -201,16 +211,6 @@ class KrakenViewController
   late RenderViewportBox viewport;
   late Document document;
   late Window window;
-
-  void shiftFocus(EventTarget target) {
-    // TODO: get focus for other element which need to get focus.
-    InputElement? inputElement = InputElement.focusInputElement;
-    if (inputElement != null && inputElement != target) {
-      inputElement.blur();
-    }
-
-    target.focus();
-  }
 
   void evaluateJavaScripts(String code, [String source = 'vm://']) {
     assert(!_disposed, 'Kraken have already disposed');
@@ -734,9 +734,9 @@ class KrakenViewController
       viewport.bottomInset = bottomInset;
     } else {
       bool shouldScrollByToCenter = false;
-      InputElement? focusInputElement = InputElement.focusInputElement;
-      if (focusInputElement != null) {
-        RenderBox? renderer = focusInputElement.renderer;
+      Element? focusedElement = document.focusedElement;
+      if (focusedElement != null) {
+        RenderBox? renderer = focusedElement.renderer;
         if (renderer != null && renderer.hasSize) {
           Offset focusOffset = renderer.localToGlobal(Offset.zero);
           // FOCUS_VIEWINSET_BOTTOM_OVERALL to meet border case.
@@ -943,13 +943,6 @@ class KrakenController {
 
     if (autoExecuteEntrypoint) {
       executeEntrypoint();
-    }
-  }
-
-  void dispatchEvent(Event event) {
-    EventTarget? target = event.target;
-    if (event.type == EVENT_CLICK && target != null) {
-      _view.shiftFocus(target);
     }
   }
 

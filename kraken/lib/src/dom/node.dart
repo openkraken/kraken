@@ -82,7 +82,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   NodeType nodeType;
   String get nodeName;
 
-  // The read-only ownerDocument property of the Node interface returns the top-level document object of the node.
+  // FIXME: The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
+  // https://dom.spec.whatwg.org/#dom-node-ownerdocument
   late Document ownerDocument;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
@@ -277,28 +278,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void dispatchEvent(Event event) {
     if (disposed) return;
     super.dispatchEvent(event);
-
-    // Dispatch listener for widget.
-    var gestureListener = ownerDocument.gestureListener;
-    if (gestureListener != null) {
-      Function? onTouchStart = gestureListener.onTouchStart;
-      if (onTouchStart != null && event.type == EVENT_TOUCH_START) {
-        onTouchStart(event as TouchEvent);
-      }
-
-      Function? onTouchMove = gestureListener.onTouchMove;
-      if (onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-        onTouchMove(event as TouchEvent);
-      }
-
-      Function? onTouchEnd = gestureListener.onTouchEnd;
-      if (onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-        onTouchEnd(event as TouchEvent);
-      }
-    }
-
-    // Dispatch listener for document to do someting such as shift the focus.
-    ownerDocument.controller.dispatchEvent(event);
   }
 }
 

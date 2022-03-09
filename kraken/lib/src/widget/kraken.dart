@@ -421,12 +421,12 @@ class _KrakenState extends State<Kraken> with RouteAware {
       dom.Element? focusedElement = _findFocusedElement(focusableElements);
       // Currently only input element is focusable.
       if (focused) {
-        if (dom.InputElement.focusInputElement == null) {
-          (focusableElements[0] as dom.InputElement).focus();
+        if (rootElement.ownerDocument.focusedElement == null) {
+          focusableElements[0].focus();
         }
       } else {
         if (focusedElement != null) {
-          (focusedElement as dom.InputElement).blur();
+          focusedElement.blur();
         }
       }
     }

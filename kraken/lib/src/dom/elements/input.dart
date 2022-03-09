@@ -147,29 +147,6 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-input-element.html
 class InputElement extends Element implements TextInputClient, TickerProvider {
-  static InputElement? focusInputElement;
-
-  static void clearFocus() {
-    if (InputElement.focusInputElement != null) {
-      InputElement.focusInputElement!.blurInput();
-    }
-
-    InputElement.focusInputElement = null;
-  }
-
-  static void setFocus(InputElement inputElement) {
-    if (InputElement.focusInputElement != inputElement) {
-      // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = inputElement.ownerDocument.widgetDelegate;
-      if (widgetDelegate != null) {
-        widgetDelegate.requestFocus();
-      }
-
-      clearFocus();
-      InputElement.focusInputElement = inputElement;
-      inputElement.focusInput();
-    }
-  }
 
   static String obscuringCharacter = '•';
 
@@ -485,12 +462,23 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   @override
   void focus() {
-    setFocus(this);
+    if (ownerDocument.focusedElement != this) {
+      ownerDocument.focusedElement!.blur();
+      // Focus kraken widget to get focus from other widgets.
+      WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
+      if (widgetDelegate != null) {
+        widgetDelegate.requestFocus();
+      }
+      focusInput();
+    }
   }
 
   @override
   void blur() {
-    clearFocus();
+    if (ownerDocument.focusedElement == this) {
+      ownerDocument.focusedElement = null;
+      blurInput();
+    }
   }
 
   @override
@@ -522,7 +510,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       if (autofocus) {
-        InputElement.setFocus(this);
+        focus();
       }
     });
   }
@@ -536,7 +524,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void willDetachRenderer() {
     super.willDetachRenderer();
-    InputElement.clearFocus();
+    blur();
     _cursorTimer?.cancel();
     if (_textInputConnection != null && _textInputConnection!.attached) {
       _textInputConnection!.close();
@@ -755,7 +743,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   bool get multiLine => maxLines > 1;
-  bool get _hasFocus => InputElement.focusInputElement == this;
+  bool get _hasFocus => ownerDocument.focusedElement == this;
   int get _maxLength {
     if (maxLength > 0) return maxLength;
     // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
@@ -829,7 +817,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.done:
-        InputElement.clearFocus();
+        blur();
         break;
       case TextInputAction.none:
         // TODO: Handle this case.
