@@ -19,32 +19,32 @@ class GestureManager {
     if (_instance == null) {
       _instance = GestureManager._();
 
-      _instance!.gestures[EVENT_CLICK] = TapGestureRecognizer();
-      (_instance!.gestures[EVENT_CLICK] as TapGestureRecognizer).onTapDown = _instance!.onClick;
+      _instance!._gestures[EVENT_CLICK] = TapGestureRecognizer();
+      (_instance!._gestures[EVENT_CLICK] as TapGestureRecognizer).onTapDown = _instance!.onClick;
 
-      _instance!.gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
-      (_instance!.gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = _instance!.onDoubleClick;
+      _instance!._gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
+      (_instance!._gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = _instance!.onDoubleClick;
 
-      _instance!.gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
-      (_instance!.gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
+      _instance!._gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
+      (_instance!._gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = _instance!.onSwipe;
 
-      _instance!.gestures[EVENT_PAN] = PanGestureRecognizer();
-      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onStart = _instance!.onPanStart;
-      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = _instance!.onPanUpdate;
-      (_instance!.gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = _instance!.onPanEnd;
+      _instance!._gestures[EVENT_PAN] = PanGestureRecognizer();
+      (_instance!._gestures[EVENT_PAN] as PanGestureRecognizer).onStart = _instance!.onPanStart;
+      (_instance!._gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = _instance!.onPanUpdate;
+      (_instance!._gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = _instance!.onPanEnd;
 
-      _instance!.gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
-      (_instance!.gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = _instance!.onLongPressEnd;
+      _instance!._gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
+      (_instance!._gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = _instance!.onLongPressEnd;
 
-      _instance!.gestures[EVENT_SCALE] = ScaleGestureRecognizer();
-      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = _instance!.onScaleStart;
-      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = _instance!.onScaleUpdate;
-      (_instance!.gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = _instance!.onScaleEnd;
+      _instance!._gestures[EVENT_SCALE] = ScaleGestureRecognizer();
+      (_instance!._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = _instance!.onScaleStart;
+      (_instance!._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = _instance!.onScaleUpdate;
+      (_instance!._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = _instance!.onScaleEnd;
     }
     return _instance!;
   }
 
-  final Map<String, GestureRecognizer> gestures = <String, GestureRecognizer>{};
+  final Map<String, GestureRecognizer> _gestures = <String, GestureRecognizer>{};
 
   final List<RenderBox> _hitTestTargetList = [];
   // Collect the events in the hitTest list.
@@ -85,7 +85,7 @@ class GestureManager {
       touchType = EVENT_TOUCH_START;
 
       // Add pointer to gestures then register the gesture recognizer to the arena.
-      gestures.forEach((key, gesture) {
+      _gestures.forEach((key, gesture) {
         // Register the recognizer that needs to be monitored.
         if (_hitTestEventMap.containsKey(key)) {
           gesture.addPointer(event);
