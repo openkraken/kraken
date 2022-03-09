@@ -18,12 +18,12 @@ inline std::string trim(std::string& str) {
   return str;
 }
 
-// Parse html,needDefaultHTML should be true if need to automatically complete html, head, and body when they are missing.
-GumboOutput* parse(std::string& html, bool needDefaultHTML = false) {
+// Parse html,isHTMLFragment should be false if need to automatically complete html, head, and body when they are missing.
+GumboOutput* parse(std::string& html, bool isHTMLFragment = false) {
   // Gumbo-parser parse HTML.
   GumboOutput* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html.length());
 
-  if (!needDefaultHTML) {
+  if (isHTMLFragment) {
     // Find body.
     const GumboVector* children = &htmlTree->root->v.element.children;
     for (int i = 0; i < children->length; ++i) {
@@ -102,12 +102,12 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   }
 }
 
-bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntry) {
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isHTMLFragment) {
   if (rootNode != nullptr) {
     rootNode->internalClearChild();
 
     if (!trim(html).empty()) {
-      GumboOutput* htmlTree = parse(html, isEntry);
+      GumboOutput* htmlTree = parse(html, isHTMLFragment);
 
       traverseHTML(rootNode, htmlTree->root);
       // Free gumbo parse nodes.
@@ -120,9 +120,18 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isEntr
   return true;
 }
 
-bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode, bool isEntry) {
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
+  return parseHTML(html, rootNode, false);
+}
+
+bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
   std::string html = std::string(code, codeLength);
-  return parseHTML(html, rootNode, isEntry);
+  return parseHTML(html, rootNode, false);
+}
+
+bool HTMLParser::parseHTMLFragment(const char* code, size_t codeLength, NodeInstance* rootNode) {
+  std::string html = std::string(code, codeLength);
+  return parseHTML(html, rootNode, true);
 }
 
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {

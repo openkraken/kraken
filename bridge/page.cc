@@ -137,7 +137,7 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
     JS_FreeValue(ctx, documentElement->jsObject);
   }
 
-  HTMLParser::parseHTML(code, length, documentElement, true);
+  HTMLParser::parseHTML(code, length, documentElement);
 
   return true;
 }
