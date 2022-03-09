@@ -1,3 +1,9 @@
+## 0.10.2+1
+
+**Bug Fixed**
+
++ Fix ios framework bundle missing CFBundleVersion and CFBundleAShortVersionString key. https://github.com/openkraken/kraken/pull/1194
+
 ## 0.10.2
 
 **Bug Fixed**
