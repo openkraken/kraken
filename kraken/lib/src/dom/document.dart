@@ -101,6 +101,7 @@ class Document extends Node {
 
   @override
   void addEventListener(String eventType, EventHandler handler) {
+    super.addEventListener(eventType, handler);
     // Events listened on document proxy to documentElement which can handle hitTest.
     // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
     documentElement?.addEventListener(eventType, handler);
@@ -108,6 +109,7 @@ class Document extends Node {
 
   @override
   void removeEventListener(String eventType, EventHandler handler) {
+    super.removeEventListener(eventType, handler);
     documentElement?.removeEventListener(eventType, handler);
   }
 
