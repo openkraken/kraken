@@ -50,12 +50,6 @@ class GestureManager {
   // Collect the events in the hitTest list.
   final Map<String, bool> _hitTestEventMap = {};
 
-  // final Map<int, PointerEvent> _pointerToEvent = {};
-  //
-  // final Map<int, RenderPointerListenerMixin> _pointerToTarget = {};
-
-  // final List<int> _pointers = [];
-
   final Map<int, Point> _pointerToPoint = {};
 
   RenderPointerListenerMixin? _target;
