@@ -8,15 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
+
 
 class GestureManager {
 
   static GestureManager? _instance;
   GestureManager._();
-
-  static const int MAX_STEP_MS = 16;
-  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
 
   factory GestureManager.instance() {
     if (_instance == null) {
@@ -53,11 +50,13 @@ class GestureManager {
   // Collect the events in the hitTest list.
   final Map<String, bool> _hitTestEventMap = {};
 
-  final Map<int, PointerEvent> _pointerToEvent = {};
+  // final Map<int, PointerEvent> _pointerToEvent = {};
+  //
+  // final Map<int, RenderPointerListenerMixin> _pointerToTarget = {};
 
-  final Map<int, RenderPointerListenerMixin> _pointerToTarget = {};
+  // final List<int> _pointers = [];
 
-  final List<int> _pointers = [];
+  final Map<int, Point> _pointerToPoint = {};
 
   RenderPointerListenerMixin? _target;
 
@@ -67,6 +66,14 @@ class GestureManager {
 
   void addPointer(PointerEvent event) {
     String touchType;
+
+    Point? point = _pointerToPoint[event.pointer];
+    if (point != null) {
+      point.event = event;
+    } else {
+      _pointerToPoint[event.pointer] = Point(event);
+    }
+
     if (event is PointerDownEvent) {
       // Reset the hitTest event map when start a new gesture.
       _hitTestEventMap.clear();
@@ -82,8 +89,6 @@ class GestureManager {
       }
 
       touchType = EVENT_TOUCH_START;
-      _pointerToEvent[event.pointer] = event;
-      _pointers.add(event.pointer);
 
       // Add pointer to gestures then register the gesture recognizer to the arena.
       gestures.forEach((key, gesture) {
@@ -99,7 +104,10 @@ class GestureManager {
         for (int i = 0; i < _hitTestTargetList.length; i++) {
           RenderBox renderBox = _hitTestTargetList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            _pointerToTarget[event.pointer] = renderBox as RenderPointerListenerMixin;
+            Point? point = _pointerToPoint[event.pointer];
+            if (point != null) {
+              point.target = renderBox as RenderPointerListenerMixin;
+            }
             break;
           }
         }
@@ -107,7 +115,6 @@ class GestureManager {
       _hitTestTargetList.clear();
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
-      _pointerToEvent[event.pointer] = event;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
     } else {
@@ -115,67 +122,29 @@ class GestureManager {
     }
 
     // If the target node is not attached, the event will be ignored.
-    if (_pointerToTarget[event.pointer] == null) return;
+    if (_pointerToPoint[event.pointer] == null) return;
 
     // Only dispatch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
     if (needDispatch) {
-      TouchEvent e = TouchEvent(touchType);
-      RenderPointerListenerMixin currentTarget = _pointerToTarget[event.pointer] as RenderPointerListenerMixin;
-
-      for (int i = 0; i < _pointers.length; i++) {
-        int pointer = _pointers[i];
-        PointerEvent pointerEvent = _pointerToEvent[pointer] as PointerEvent;
-        RenderPointerListenerMixin target = _pointerToTarget[pointer] as RenderPointerListenerMixin;
-
-        Touch touch = Touch(
-          identifier: pointerEvent.pointer,
-          target: target.getEventTarget!(),
-          screenX: pointerEvent.position.dx,
-          screenY: pointerEvent.position.dy,
-          clientX: pointerEvent.localPosition.dx,
-          clientY: pointerEvent.localPosition.dy,
-          pageX: pointerEvent.localPosition.dx,
-          pageY: pointerEvent.localPosition.dy,
-          radiusX: pointerEvent.radiusMajor,
-          radiusY: pointerEvent.radiusMinor,
-          rotationAngle: pointerEvent.orientation,
-          force: pointerEvent.pressure,
-        );
-
-        if (pointer == event.pointer) {
-          e.changedTouches.append(touch);
-        }
-
-        if (currentTarget == target) {
-          e.targetTouches.append(touch);
-        }
-
-        e.touches.append(touch);
-      }
-
-      if (touchType == EVENT_TOUCH_MOVE) {
-        _throttler.throttle(() {
-          currentTarget.dispatchEvent!(e);
-        });
-      } else {
-        currentTarget.dispatchEvent!(e);
+      Function? handleTouchEvent = _target?.handleTouchEvent;
+      if (handleTouchEvent != null) {
+        handleTouchEvent(touchType, _pointerToPoint[event.pointer], _pointerToPoint.values.toList());
       }
     }
 
     // End of the gesture.
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerToTarget.length == 1;
-      if (isSinglePointer) {
-        _target = _pointerToTarget[event.pointer];
+      bool isSinglePointer = _pointerToPoint.length == 1;
+      Point? point = _pointerToPoint[event.pointer];
+      if (isSinglePointer && point != null) {
+        _target = point.target;
       } else {
         _target = null;
       }
 
-      _pointers.remove(event.pointer);
-      _pointerToEvent.remove(event.pointer);
-      _pointerToTarget.remove(event.pointer);
+      _pointerToPoint.remove(event.pointer);
     }
 
   }

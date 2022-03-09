@@ -10,10 +10,6 @@ import 'package:kraken/gesture.dart';
 
 typedef GestureCallback = void Function(Event);
 
-typedef GetEventTarget = EventTarget Function();
-
-typedef DispatchEvent = void Function(Event event);
-
 typedef HandleMouseEvent = void Function(String type, {
   Offset localPosition,
   Offset globalPosition,
@@ -31,6 +27,10 @@ typedef HandleGestureEvent = void Function(String type, {
   double velocityY,
   double scale
 });
+
+typedef HandleTouchEvent = void Function(String type, Point targetPoint, List<Point> pointerEventList);
+
+typedef HandleGetEventTarget = EventTarget Function();
 
 class EventManager {
   EventManager({ List<String>? events }) : _events = events ?? [];
@@ -64,9 +64,9 @@ mixin RenderPointerListenerMixin on RenderBox {
 
   HandleGestureEvent? handleGestureEvent;
 
-  GetEventTarget? getEventTarget;
+  HandleTouchEvent? handleTouchEvent;
 
-  DispatchEvent? dispatchEvent;
+  HandleGetEventTarget? getEventTarget;
 
   EventManager eventManager = EventManager();
 

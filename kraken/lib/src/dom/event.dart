@@ -11,6 +11,8 @@ import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/gesture.dart';
+import 'package:kraken/scheduler.dart';
 
 enum AppearEventType {
   none,
@@ -70,11 +72,14 @@ const String EVENT_STATE_END = 'end';
 mixin ElementEventMixin on ElementBase {
   AppearEventType _prevAppearState = AppearEventType.none;
 
+  static const int MAX_STEP_MS = 16;
+  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+
   void clearEventResponder(RenderPointerListenerMixin renderBox) {
     renderBox.handleMouseEvent = null;
     renderBox.handleGestureEvent = null;
+    renderBox.handleTouchEvent = null;
     renderBox.getEventTarget = null;
-    renderBox.dispatchEvent = null;
   }
 
   void ensureEventResponderBound() {
@@ -84,8 +89,8 @@ mixin ElementEventMixin on ElementBase {
       // Make sure pointer responder bind.
       renderBox.handleMouseEvent = handleMouseEvent;
       renderBox.handleGestureEvent = handleGestureEvent;
+      renderBox.handleTouchEvent = handleTouchEvent;
       renderBox.getEventTarget = getEventTarget;
-      renderBox.dispatchEvent = dispatchEvent;
     }
   }
 
@@ -123,6 +128,50 @@ mixin ElementEventMixin on ElementBase {
 
   EventTarget getEventTarget() {
     return this;
+  }
+
+  void handleTouchEvent(String touchType, Point targetPoint, List<Point> points) {
+    TouchEvent e = TouchEvent(touchType);
+    RenderPointerListenerMixin currentTarget = targetPoint.target!;
+
+    for (int i = 0; i < points.length; i++) {
+      Point point = points[i];
+      PointerEvent pointerEvent = point.event;
+      RenderPointerListenerMixin target = point.target!;
+
+      Touch touch = Touch(
+        identifier: pointerEvent.pointer,
+        target: target.getEventTarget!(),
+        screenX: pointerEvent.position.dx,
+        screenY: pointerEvent.position.dy,
+        clientX: pointerEvent.localPosition.dx,
+        clientY: pointerEvent.localPosition.dy,
+        pageX: pointerEvent.localPosition.dx,
+        pageY: pointerEvent.localPosition.dy,
+        radiusX: pointerEvent.radiusMajor,
+        radiusY: pointerEvent.radiusMinor,
+        rotationAngle: pointerEvent.orientation,
+        force: pointerEvent.pressure,
+      );
+
+      if (targetPoint == point) {
+        e.changedTouches.append(touch);
+      }
+
+      if (currentTarget == target) {
+        e.targetTouches.append(touch);
+      }
+
+      e.touches.append(touch);
+    }
+
+    if (touchType == EVENT_TOUCH_MOVE) {
+      _throttler.throttle(() {
+        dispatchEvent(e);
+      });
+    } else {
+      dispatchEvent(e);
+    }
   }
 
   void handleMouseEvent(String type, {

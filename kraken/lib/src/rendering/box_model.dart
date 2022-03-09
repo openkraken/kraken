@@ -699,8 +699,7 @@ class RenderBoxModel extends RenderBox
       ..scrollOffsetY = scrollOffsetY
 
       // Copy pointer listener
-      ..getEventTarget = getEventTarget
-      ..dispatchEvent = dispatchEvent
+      ..handleTouchEvent = handleTouchEvent
       ..handleMouseEvent = handleMouseEvent
       ..handleGestureEvent = handleGestureEvent
       ..onPointerSignal = onPointerSignal
