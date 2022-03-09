@@ -61,11 +61,13 @@ class GestureManager {
   void addPointer(PointerEvent event) {
     String touchType;
 
-    Point? point = _pointerToPoint[event.pointer];
-    if (point != null) {
-      point.event = event;
-    } else {
-      _pointerToPoint[event.pointer] = Point(event);
+    if (event is PointerDownEvent || event is PointerMoveEvent || event is PointerUpEvent) {
+      Point? point = _pointerToPoint[event.pointer];
+      if (point != null) {
+        point.event = event;
+      } else {
+        _pointerToPoint[event.pointer] = Point(event);
+      }
     }
 
     if (event is PointerDownEvent) {
@@ -107,6 +109,15 @@ class GestureManager {
         }
       }
       _hitTestTargetList.clear();
+
+      // Multi pointer operations in the web will organize click and other gesture triggers.
+      bool isSinglePointer = _pointerToPoint.length == 1;
+      Point? point = _pointerToPoint[event.pointer];
+      if (isSinglePointer && point != null) {
+        _target = point.target;
+      } else {
+        _target = null;
+      }
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
     } else if (event is PointerUpEvent) {
@@ -129,15 +140,6 @@ class GestureManager {
 
     // End of the gesture.
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerToPoint.length == 1;
-      Point? point = _pointerToPoint[event.pointer];
-      if (isSinglePointer && point != null) {
-        _target = point.target;
-      } else {
-        _target = null;
-      }
-
       _pointerToPoint.remove(event.pointer);
     }
 
