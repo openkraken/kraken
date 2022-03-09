@@ -5,7 +5,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 
 enum _SwipeState {
@@ -325,7 +324,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
         direction: _direction ?? '',
         velocity: velocity,
       );
-      invokeCallback<void>('onSwipe', () => onSwipe!(details));
+      invokeCallback<void>('onSwipe', () => onSwipe!(details), debugReport: debugReport);
     }
   }
 
