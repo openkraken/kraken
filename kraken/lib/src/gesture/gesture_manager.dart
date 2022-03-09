@@ -61,18 +61,11 @@ class GestureManager {
   void addPointer(PointerEvent event) {
     String touchType;
 
-    if (event is PointerDownEvent || event is PointerMoveEvent || event is PointerUpEvent) {
-      Point? point = _pointerToPoint[event.pointer];
-      if (point != null) {
-        point.event = event;
-      } else {
-        _pointerToPoint[event.pointer] = Point(event);
-      }
-    }
-
     if (event is PointerDownEvent) {
       // Reset the hitTest event map when start a new gesture.
       _hitTestEventMap.clear();
+
+      _pointerToPoint[event.pointer] = Point(event);
 
       for (int i = 0; i < _hitTestTargetList.length; i++) {
         RenderBox renderBox = _hitTestTargetList[i];
@@ -124,6 +117,11 @@ class GestureManager {
       touchType = EVENT_TOUCH_END;
     } else {
       touchType = EVENT_TOUCH_CANCEL;
+    }
+
+    Point? point = _pointerToPoint[event.pointer];
+    if (point != null) {
+      point.event = event;
     }
 
     // If the target node is not attached, the event will be ignored.
