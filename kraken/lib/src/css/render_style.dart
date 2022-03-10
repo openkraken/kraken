@@ -134,7 +134,6 @@ abstract class RenderStyle {
   FlexWrap get flexWrap;
   JustifyContent get justifyContent;
   AlignItems get alignItems;
-  AlignItems get effectiveAlignItems;
   AlignContent get alignContent;
   AlignSelf get alignSelf;
   CSSLengthValue? get flexBasis;
@@ -838,7 +837,7 @@ class CSSRenderStyle
         parentRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildStretchSelf = renderStyle.alignSelf != AlignSelf.auto
         ? renderStyle.alignSelf == AlignSelf.stretch
-        : parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
+        : parentRenderStyle.alignItems == AlignItems.stretch;
     }
 
     CSSLengthValue marginTop = renderStyle.marginTop;

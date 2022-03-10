@@ -221,18 +221,6 @@ mixin CSSFlexboxMixin on RenderStyle {
   }
 
   @override
-  AlignItems get effectiveAlignItems {
-    if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
-      if (textAlign == TextAlign.right) {
-        return AlignItems.flexEnd;
-      } else if (textAlign == TextAlign.center) {
-        return AlignItems.center;
-      }
-    }
-    return alignItems;
-  }
-
-  @override
   AlignContent get alignContent => _alignContent ?? AlignContent.stretch;
   AlignContent? _alignContent;
   set alignContent(AlignContent? value) {
