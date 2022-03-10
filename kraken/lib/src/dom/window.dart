@@ -85,7 +85,8 @@ class Window extends EventTarget {
         return super.addEventListener(eventType, handler);
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        return document.documentElement?.addEventListener(eventType, handler);
+        document.documentElement?.addEventListener(eventType, handler);
+        break;
       case EVENT_RESIZE:
         // TODO: Fired at the Window when the viewport is resized.
         break;
