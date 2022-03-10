@@ -8,7 +8,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
 import 'package:meta/meta.dart';
-import 'package:kraken/rendering.dart';
 
 typedef EventHandler = void Function(Event event);
 
@@ -68,33 +67,11 @@ abstract class EventTarget extends BindingObject with _Focusable {
     _eventHandlers.keys.forEach(removeEventsFromRenderBoxModel);
   }
 
-  // Add event to events when listening is required to add corresponding events on the element.
-  void addEventsToRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox;
-    if (this is Node) {
-      renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
-    } else if (this is Window) {
-      renderBox = (this as Window).document.viewport;
-    }
+  // Add event to events of render when listening is required to add corresponding events on the element.
+  void addEventsToRenderBoxModel(String eventType);
 
-    if (renderBox != null) {
-      renderBox.eventManager.add(eventType);
-    }
-  }
-
-  // Remove event from events when there is no corresponding event to listen for on the element.
-  void removeEventsFromRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox;
-    if (this is Node) {
-      renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
-    } else if (this is Window) {
-      renderBox = (this as Window).document.viewport;
-    }
-
-    if (renderBox != null) {
-      renderBox.eventManager.add(eventType);
-    }
-  }
+  // Remove event from events of render when there is no corresponding event to listen for on the element.
+  void removeEventsFromRenderBoxModel(String eventType);
 
   @mustCallSuper
   void dispatchEvent(Event event) {

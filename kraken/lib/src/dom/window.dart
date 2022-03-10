@@ -8,6 +8,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/rendering.dart';
 
 const String WINDOW = 'WINDOW';
 
@@ -117,5 +118,21 @@ class Window extends EventTarget {
     }
 
     super.addEventListener(eventType, handler);
+  }
+
+  @override
+  void addEventsToRenderBoxModel(String eventType) {
+    RenderPointerListenerMixin? renderBox = document.viewport;
+    if (renderBox != null) {
+      renderBox.eventManager.add(eventType);
+    }
+  }
+
+  @override
+  void removeEventsFromRenderBoxModel(String eventType) {
+    RenderPointerListenerMixin? renderBox = document.viewport;
+    if (renderBox != null) {
+      renderBox.eventManager.remove(eventType);
+    }
   }
 }
