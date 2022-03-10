@@ -468,6 +468,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Focus kraken widget to get focus from other widgets.
       WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
       widgetDelegate?.requestFocus();
+      ownerDocument.focusedElement = this;
 
       focusInput();
     }
@@ -690,7 +691,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it remove keyboard listener
       renderEditable!.hasFocus = false;
       deactiveTextInput();
-      dispatchEvent(Event(EVENT_BLUR));
+      Event event = Event(EVENT_BLUR);
+      event.target = this;
+      dispatchEvent(event);
       // Trigger change event if value has changed.
       _triggerChangeEvent();
     }
