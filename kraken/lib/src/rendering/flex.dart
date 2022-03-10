@@ -1882,10 +1882,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         // Text-align should only work for text node.
-        // @TODO: Need to implement inine formating context to unify with W3C.
-        // Text node is aligned in anonymous inline box in W3C rather than
-        // aligned in flexbox in Kraken.
-        // https://www.w3.org/TR/css-inline-3/#model
+        // @TODO: Need to implement flex formatting context to unify with W3C spec.
+        // Each contiguous sequence of child text runs is wrapped in an anonymous block container flex item.
+        // Text is aligned in anonymous block container rather than flexbox container.
+        // https://www.w3.org/TR/css-flexbox-1/#flex-items
+
         if (renderStyle.alignItems == AlignItems.stretch
           && child is RenderTextBox
           && !_isHorizontalFlexDirection
