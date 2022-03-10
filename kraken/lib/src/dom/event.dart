@@ -132,6 +132,7 @@ mixin ElementEventMixin on ElementBase {
 
   void handleTouchEvent(String touchType, gesture_pointer.Pointer targetPointer, List<gesture_pointer.Pointer> points) {
     TouchEvent e = TouchEvent(touchType);
+    e.target = this;
     RenderPointerListenerMixin currentTarget = targetPointer.target!;
 
     for (int i = 0; i < points.length; i++) {
@@ -191,8 +192,7 @@ mixin ElementEventMixin on ElementBase {
     double clientX = globalOffset.dx;
     double clientY = globalOffset.dy;
 
-    dispatchEvent(
-      (MouseEvent(type,
+    Event event = MouseEvent(type,
         MouseEventInit(
           bubbles: bubbles,
           cancelable: cancelable,
@@ -201,8 +201,11 @@ mixin ElementEventMixin on ElementBase {
           offsetX: localPosition.dx,
           offsetY: localPosition.dy,
         )
-      ))
     );
+
+    event.target = this;
+
+    dispatchEvent(event);
   }
 
   void handleGestureEvent(String type, {

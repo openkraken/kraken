@@ -80,7 +80,6 @@ abstract class EventTarget extends BindingObject with _Focusable {
   @mustCallSuper
   void dispatchEvent(Event event) {
     if (_disposed) return;
-    event.target = this;
 
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
