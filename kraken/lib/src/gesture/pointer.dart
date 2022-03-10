@@ -7,8 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 
-class Point {
-  Point(PointerEvent event) : _event = event;
+class Pointer {
+  Pointer(PointerEvent event) : _event = event;
 
   PointerEvent _event;
   PointerEvent get event => _event;

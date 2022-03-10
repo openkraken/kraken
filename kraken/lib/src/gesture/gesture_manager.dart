@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
-
+import 'package:kraken/src/gesture/pointer.dart' as gesture_pointer;
 
 class GestureManager {
 
@@ -50,7 +50,7 @@ class GestureManager {
   // Collect the events in the hitTest list.
   final Map<String, bool> _hitTestEventMap = {};
 
-  final Map<int, Point> _pointerToPoint = {};
+  final Map<int, gesture_pointer.Pointer> _pointerToPointer = {};
 
   RenderPointerListenerMixin? _target;
 
@@ -65,7 +65,7 @@ class GestureManager {
       // Reset the hitTest event map when start a new gesture.
       _hitTestEventMap.clear();
 
-      _pointerToPoint[event.pointer] = Point(event);
+      _pointerToPointer[event.pointer] = gesture_pointer.Pointer(event);
 
       for (int i = 0; i < _hitTestTargetList.length; i++) {
         RenderBox renderBox = _hitTestTargetList[i];
@@ -93,9 +93,9 @@ class GestureManager {
         for (int i = 0; i < _hitTestTargetList.length; i++) {
           RenderBox renderBox = _hitTestTargetList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            Point? point = _pointerToPoint[event.pointer];
-            if (point != null) {
-              point.target = renderBox as RenderPointerListenerMixin;
+            gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+            if (pointer != null) {
+              pointer.target = renderBox as RenderPointerListenerMixin;
             }
             break;
           }
@@ -104,10 +104,10 @@ class GestureManager {
       _hitTestTargetList.clear();
 
       // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerToPoint.length == 1;
-      Point? point = _pointerToPoint[event.pointer];
-      if (isSinglePointer && point != null) {
-        _target = point.target;
+      bool isSinglePointer = _pointerToPointer.length == 1;
+      gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+      if (isSinglePointer && pointer != null) {
+        _target = pointer.target;
       } else {
         _target = null;
       }
@@ -119,26 +119,26 @@ class GestureManager {
       touchType = EVENT_TOUCH_CANCEL;
     }
 
-    Point? point = _pointerToPoint[event.pointer];
-    if (point != null) {
-      point.updateEvent(event);
+    gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+    if (pointer != null) {
+      pointer.updateEvent(event);
     }
 
     // If the target node is not attached, the event will be ignored.
-    if (_pointerToPoint[event.pointer] == null) return;
+    if (_pointerToPointer[event.pointer] == null) return;
 
     // Only dispatch touch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
     if (needDispatch) {
       Function? handleTouchEvent = _target?.handleTouchEvent;
       if (handleTouchEvent != null) {
-        handleTouchEvent(touchType, _pointerToPoint[event.pointer], _pointerToPoint.values.toList());
+        handleTouchEvent(touchType, _pointerToPointer[event.pointer], _pointerToPointer.values.toList());
       }
     }
 
     // End of the gesture.
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _pointerToPoint.remove(event.pointer);
+      _pointerToPointer.remove(event.pointer);
     }
   }
 

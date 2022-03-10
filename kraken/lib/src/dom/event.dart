@@ -11,8 +11,8 @@ import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/scheduler.dart';
+import 'package:kraken/src/gesture/pointer.dart' as gesture_pointer;
 
 enum AppearEventType {
   none,
@@ -130,14 +130,14 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-  void handleTouchEvent(String touchType, Point targetPoint, List<Point> points) {
+  void handleTouchEvent(String touchType, gesture_pointer.Pointer targetPointer, List<gesture_pointer.Pointer> points) {
     TouchEvent e = TouchEvent(touchType);
-    RenderPointerListenerMixin currentTarget = targetPoint.target!;
+    RenderPointerListenerMixin currentTarget = targetPointer.target!;
 
     for (int i = 0; i < points.length; i++) {
-      Point point = points[i];
-      PointerEvent pointerEvent = point.event;
-      RenderPointerListenerMixin target = point.target!;
+      gesture_pointer.Pointer pointer = points[i];
+      PointerEvent pointerEvent = pointer.event;
+      RenderPointerListenerMixin target = pointer.target!;
 
       Touch touch = Touch(
         identifier: pointerEvent.pointer,
@@ -154,7 +154,7 @@ mixin ElementEventMixin on ElementBase {
         force: pointerEvent.pressure,
       );
 
-      if (targetPoint == point) {
+      if (targetPointer == pointer) {
         e.changedTouches.append(touch);
       }
 
