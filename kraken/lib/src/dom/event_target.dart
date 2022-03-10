@@ -59,18 +59,22 @@ abstract class EventTarget extends BindingObject with _Focusable {
     }
   }
 
+  @protected
   void addAllEventsToRenderBoxModel() {
     _eventHandlers.keys.forEach(addEventsToRenderBoxModel);
   }
 
+  @protected
   void removeAllEventsFromRenderBoxModel() {
     _eventHandlers.keys.forEach(removeEventsFromRenderBoxModel);
   }
 
   // Add event to events of render when listening is required to add corresponding events on the element.
+  @protected
   void addEventsToRenderBoxModel(String eventType);
 
   // Remove event from events of render when there is no corresponding event to listen for on the element.
+  @protected
   void removeEventsFromRenderBoxModel(String eventType);
 
   @mustCallSuper
