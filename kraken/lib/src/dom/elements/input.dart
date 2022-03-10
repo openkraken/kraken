@@ -463,12 +463,12 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void focus() {
     if (ownerDocument.focusedElement != this) {
-      ownerDocument.focusedElement!.blur();
+      // Blur current focused element.
+      ownerDocument.focusedElement?.blur();
       // Focus kraken widget to get focus from other widgets.
       WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
-      if (widgetDelegate != null) {
-        widgetDelegate.requestFocus();
-      }
+      widgetDelegate?.requestFocus();
+
       focusInput();
     }
   }
@@ -594,7 +594,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   Offset? _selectStartPosition;
 
-  // Get the text size of input by layouting manually cause RenderEditable does not expose textPainter.
+  // Get the text size of input by layout manually cause RenderEditable does not expose textPainter.
   Size getTextSize() {
     final Size textSize = (TextPainter(
       text: renderEditable!.text,
@@ -1416,7 +1416,7 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
   }
 
   // Note paint override can not be done in RenderInputBox cause input toolbar
-  // paints relative to the perferred height of textPainter.
+  // paints relative to the preferred height of textPainter.
   @override
   void paint(PaintingContext context, Offset offset) {
     final Offset transformedOffset = offset.translate(_offset!.dx, _offset!.dy);
