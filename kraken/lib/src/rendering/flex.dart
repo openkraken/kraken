@@ -1882,7 +1882,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         // Text-align should only work for text node.
-        // @TODO Need to implement IFC.
+        // @TODO: Need to implement inine formating context to unify with W3C.
         // Text node is aligned in anonymous inline box in W3C rather than
         // aligned in flexbox in Kraken.
         // https://www.w3.org/TR/css-inline-3/#model
