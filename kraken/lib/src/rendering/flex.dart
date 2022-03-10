@@ -1142,17 +1142,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         double mainAxisMargin = _isHorizontalFlexDirection ? marginHorizontal : marginVertical;
         totalSpace += childSpace + mainAxisMargin;
       }
-
       runChildren.forEach(calTotalSpace);
 
       // Flexbox with no size on main axis should adapt the main axis size with children.
       double initialFreeSpace = mainSizeType != BoxSizeType.automatic ?
         maxMainSize - totalSpace : 0;
 
-      bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
-      bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
-
-      if (isFlexGrow || isFlexShrink) {
+      if (totalFlexGrow > 0 || totalFlexShrink > 0) {
         // remainingFreeSpace starts out at the same value as initialFreeSpace
         // but as we place and lay out flex items we subtract from it.
         metrics.remainingFreeSpace = initialFreeSpace;
@@ -1211,6 +1207,13 @@ class RenderFlexLayout extends RenderLayoutBox {
           isCrossSizeChanged = childCrossSize != childCrossLogicalSize;
         }
 
+        double flexGrow = _getFlexGrow(child);
+        double flexShrink = _getFlexShrink(child);
+        bool isFlexGrow = totalFlexGrow > 0 && flexGrow > 0
+          && runChild.adjustedMainSize != runChild.originalMainSize;
+        bool isFlexShrink = totalFlexShrink > 0 && flexShrink > 0
+          && runChild.adjustedMainSize != runChild.originalMainSize;
+
         // Child's size don't need to recompute if no flex-grow、flex-shrink or cross size not changed.
         if (!isFlexGrow && !isFlexShrink && !isCrossSizeChanged) {
           continue;
@@ -1221,11 +1224,9 @@ class RenderFlexLayout extends RenderLayoutBox {
           continue;
         }
 
-        double flexGrow = _getFlexGrow(child);
-        double flexShrink = _getFlexShrink(child);
         // Whether child need to layout.
-        bool isChildNeedsLayout = (isFlexGrow && flexGrow > 0) ||
-          (isFlexShrink && flexShrink > 0) ||
+        bool isChildNeedsLayout = isFlexGrow ||
+          isFlexShrink ||
           isStretchSelf;
 
         if (!isChildNeedsLayout) {
