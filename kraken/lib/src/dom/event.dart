@@ -192,7 +192,7 @@ mixin ElementEventMixin on ElementBase {
     double clientY = globalOffset.dy;
 
     dispatchEvent(
-      (MouseEvent(EVENT_CLICK,
+      (MouseEvent(type,
         MouseEventInit(
           bubbles: bubbles,
           cancelable: cancelable,
