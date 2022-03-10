@@ -463,7 +463,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   @override
   void focus() {
     if (ownerDocument.focusedElement != this) {
-      ownerDocument.focusedElement!.blur();
+      ownerDocument.focusedElement?.blur();
       // Focus kraken widget to get focus from other widgets.
       WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
       if (widgetDelegate != null) {
