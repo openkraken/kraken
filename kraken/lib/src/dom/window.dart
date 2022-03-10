@@ -14,6 +14,9 @@ const String WINDOW = 'WINDOW';
 class Window extends EventTarget {
   final Document document;
 
+  @override
+  EventTarget? get parent => null;
+
   Window(BindingContext? context, this.document) : super(context) {
     window.onPlatformBrightnessChanged = () {
       ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');

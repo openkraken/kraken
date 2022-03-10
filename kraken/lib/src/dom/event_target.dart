@@ -84,15 +84,8 @@ abstract class EventTarget extends BindingObject with _Focusable {
     }
 
     // Bubble event to root event target.
-    if (event.bubbles && this is Node) {
-      Node self = this as Node;
-      Node? parentNode = self.parentNode;
-      if (parentNode != null) {
-        parentNode.dispatchEvent(event);
-      } else {
-        // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
-        self.ownerDocument.defaultView.dispatchEvent(event);
-      }
+    if (event.bubbles && parent != null) {
+      parent?.dispatchEvent(event);
     }
   }
 
@@ -111,6 +104,8 @@ abstract class EventTarget extends BindingObject with _Focusable {
       PerformanceTiming.instance().mark(PERF_DISPOSE_EVENT_TARGET_END, uniqueId: hashCode);
     }
   }
+
+  EventTarget? get parent;
 }
 
 // Used for input.
