@@ -2,6 +2,7 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -69,17 +70,17 @@ abstract class EventTarget extends BindingObject with _Focusable {
 
   // Add event to events when listening is required to add corresponding events on the element.
   void addEventsToRenderBoxModel(String eventType) {
-    RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
-    if (renderBoxModel != null) {
-      renderBoxModel.eventManager.add(eventType);
+    RenderPointerListenerMixin? renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    if (renderBox != null) {
+      renderBox.eventManager.add(eventType);
     }
   }
 
   // Remove event from events when there is no corresponding event to listen for on the element.
   void removeEventsFromRenderBoxModel(String eventType) {
-    RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
-    if (renderBoxModel != null) {
-      renderBoxModel.eventManager.add(eventType);
+    RenderPointerListenerMixin? renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    if (renderBox != null) {
+      renderBox.eventManager.add(eventType);
     }
   }
 
