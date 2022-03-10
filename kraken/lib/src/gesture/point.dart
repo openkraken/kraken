@@ -8,9 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 
 class Point {
-  Point(this.event);
+  Point(PointerEvent event) : _event = event;
 
-  PointerEvent event;
+  PointerEvent _event;
+  PointerEvent get event => _event;
+
+  void updateEvent(PointerEvent event) {
+    _event = event;
+  }
 
   RenderPointerListenerMixin? target;
 }

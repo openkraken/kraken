@@ -121,13 +121,13 @@ class GestureManager {
 
     Point? point = _pointerToPoint[event.pointer];
     if (point != null) {
-      point.event = event;
+      point.updateEvent(event);
     }
 
     // If the target node is not attached, the event will be ignored.
     if (_pointerToPoint[event.pointer] == null) return;
 
-    // Only dispatch event that added.
+    // Only dispatch touch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
     if (needDispatch) {
       Function? handleTouchEvent = _target?.handleTouchEvent;
@@ -140,7 +140,6 @@ class GestureManager {
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _pointerToPoint.remove(event.pointer);
     }
-
   }
 
   void onDoubleClick(TapDownDetails details) {
