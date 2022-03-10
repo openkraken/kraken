@@ -50,7 +50,7 @@ class GestureManager {
   // Collect the events in the hitTest list.
   final Map<String, bool> _hitTestEventMap = {};
 
-  final Map<int, gesture_pointer.Pointer> _pointerToPointer = {};
+  final Map<int, gesture_pointer.Pointer> _pointerIdToPointer = {};
 
   RenderPointerListenerMixin? _target;
 
@@ -65,7 +65,7 @@ class GestureManager {
       // Reset the hitTest event map when start a new gesture.
       _hitTestEventMap.clear();
 
-      _pointerToPointer[event.pointer] = gesture_pointer.Pointer(event);
+      _pointerIdToPointer[event.pointer] = gesture_pointer.Pointer(event);
 
       for (int i = 0; i < _hitTestTargetList.length; i++) {
         RenderBox renderBox = _hitTestTargetList[i];
@@ -93,7 +93,7 @@ class GestureManager {
         for (int i = 0; i < _hitTestTargetList.length; i++) {
           RenderBox renderBox = _hitTestTargetList[i];
           if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
-            gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+            gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
             if (pointer != null) {
               pointer.target = renderBox as RenderPointerListenerMixin;
             }
@@ -104,8 +104,8 @@ class GestureManager {
       _hitTestTargetList.clear();
 
       // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerToPointer.length == 1;
-      gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+      bool isSinglePointer = _pointerIdToPointer.length == 1;
+      gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
       if (isSinglePointer && pointer != null) {
         _target = pointer.target;
       } else {
@@ -119,26 +119,26 @@ class GestureManager {
       touchType = EVENT_TOUCH_CANCEL;
     }
 
-    gesture_pointer.Pointer? pointer = _pointerToPointer[event.pointer];
+    gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
     if (pointer != null) {
       pointer.updateEvent(event);
     }
 
     // If the target node is not attached, the event will be ignored.
-    if (_pointerToPointer[event.pointer] == null) return;
+    if (_pointerIdToPointer[event.pointer] == null) return;
 
     // Only dispatch touch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
     if (needDispatch) {
       Function? handleTouchEvent = _target?.handleTouchEvent;
       if (handleTouchEvent != null) {
-        handleTouchEvent(touchType, _pointerToPointer[event.pointer], _pointerToPointer.values.toList());
+        handleTouchEvent(touchType, _pointerIdToPointer[event.pointer], _pointerIdToPointer.values.toList());
       }
     }
 
     // End of the gesture.
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _pointerToPointer.remove(event.pointer);
+      _pointerIdToPointer.remove(event.pointer);
     }
   }
 
