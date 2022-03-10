@@ -91,27 +91,30 @@ mixin ElementEventMixin on ElementBase {
       renderBox.handleGestureEvent = handleGestureEvent;
       renderBox.handleTouchEvent = handleTouchEvent;
       renderBox.getEventTarget = getEventTarget;
-    }
-  }
 
-  bool _isOneofIntersectionEventAndAllNonListened(String eventType) {
-    return (eventType == EVENT_APPEAR || eventType == EVENT_DISAPPEAR || eventType == EVENT_INTERSECTION_CHANGE) &&
-      !(hasEventListener(EVENT_APPEAR) || hasEventListener(EVENT_DISAPPEAR) || hasEventListener(EVENT_INTERSECTION_CHANGE));
-  }
-
-  @override
-  void addEventListener(String eventType, EventHandler handler) {
-    RenderBoxModel? renderBox = renderBoxModel;
-    if (renderBox != null) {
-      ensureEventResponderBound();
-      if (_isOneofIntersectionEventAndAllNonListened(eventType)) {
+      if (_hasIntersectionObserverEvent()) {
         renderBox.addIntersectionChangeListener(handleIntersectionChange);
         // Mark the compositing state for this render object as dirty
         // cause it will create new layer.
         renderBox.markNeedsCompositingBitsUpdate();
+      } else {
+        // Remove listener when no intersection related event
+        renderBox.removeIntersectionChangeListener(handleIntersectionChange);
       }
     }
+  }
+
+  bool _hasIntersectionObserverEvent() {
+    return hasEventListener(EVENT_APPEAR) || hasEventListener(EVENT_DISAPPEAR) || hasEventListener(EVENT_INTERSECTION_CHANGE);
+  }
+
+  @override
+  void addEventListener(String eventType, EventHandler handler) {
     super.addEventListener(eventType, handler);
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox != null) {
+      ensureEventResponderBound();
+    }
   }
 
   @override
@@ -119,10 +122,7 @@ mixin ElementEventMixin on ElementBase {
     super.removeEventListener(eventType, handler);
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox != null) {
-      // Remove listener when no intersection related event
-      if (_isOneofIntersectionEventAndAllNonListened(eventType)) {
-        renderBox.removeIntersectionChangeListener(handleIntersectionChange);
-      }
+      ensureEventResponderBound();
     }
   }
 

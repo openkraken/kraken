@@ -21,7 +21,7 @@ describe('Appear Event', () => {
     div.style.position = 'absolute';
     div.style.top = '0';
 
-    div.addEventListener('disappear', function onDisappear(){
+    div.addEventListener('disappear', function onDisappear() {
       div.removeEventListener('disappear', onDisappear);
       done();
     });
