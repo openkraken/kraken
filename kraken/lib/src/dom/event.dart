@@ -218,7 +218,18 @@ mixin ElementEventMixin on ElementBase {
     double velocityY = 0.0,
     double scale = 0.0
   }) {
-
+    Event event = GestureEvent(type, GestureEventInit(
+      state: state,
+      direction: direction,
+      rotation: rotation,
+      deltaX: deltaX,
+      deltaY: deltaY,
+      velocityX: velocityX,
+      velocityY: velocityY,
+      scale: scale,
+    ));
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void handleAppear() {
