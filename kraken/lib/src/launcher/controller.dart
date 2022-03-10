@@ -182,14 +182,14 @@ class KrakenViewController
     }
 
     // Blur input element when new input focused.
-    document.addEventListener(EVENT_CLICK, (event) {
-      if (event.target is Element) {
-        if (document.focusedElement != null) {
-          document.focusedElement!.blur();
-        }
-        event.target!.focus();
-      }
-    });
+    // document.addEventListener(EVENT_CLICK, (event) {
+    //   if (event.target is Element) {
+    //     if (document.focusedElement != null) {
+    //       document.focusedElement!.blur();
+    //     }
+    //     event.target!.focus();
+    //   }
+    // });
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);

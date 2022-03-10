@@ -38,12 +38,8 @@ abstract class EventTarget extends BindingObject with _Focusable {
       return;
     }
 
-    // add event to events when listening is required to add corresponding events on the element.
-    if ((this is Element) && existHandler.isEmpty) {
-      RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
-      if (renderBoxModel != null) {
-        renderBoxModel.eventManager.add(eventType);
-      }
+    if (existHandler.isEmpty) {
+      addEventsToRenderBoxModel(eventType);
     }
 
     existHandler.add(eventHandler);
@@ -58,15 +54,32 @@ abstract class EventTarget extends BindingObject with _Focusable {
       currentHandlers.remove(eventHandler);
       if (currentHandlers.isEmpty) {
         _eventHandlers.remove(eventType);
-
-        // Remove event from events when there is no corresponding event to listen for on the element.
-        if (this is Element && (this as Element).renderBoxModel != null) {
-          RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
-          if (renderBoxModel != null) {
-            renderBoxModel.eventManager.add(eventType);
-          }
-        }
+        removeEventsFromRenderBoxModel(eventType);
       }
+    }
+  }
+
+  void addAllEventsToRenderBoxModel() {
+    _eventHandlers.keys.forEach(addEventsToRenderBoxModel);
+  }
+
+  void removeAllEventsFromRenderBoxModel() {
+    _eventHandlers.keys.forEach(removeEventsFromRenderBoxModel);
+  }
+
+  // Add event to events when listening is required to add corresponding events on the element.
+  void addEventsToRenderBoxModel(String eventType) {
+    RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
+    if (renderBoxModel != null) {
+      renderBoxModel.eventManager.add(eventType);
+    }
+  }
+
+  // Remove event from events when there is no corresponding event to listen for on the element.
+  void removeEventsFromRenderBoxModel(String eventType) {
+    RenderBoxModel? renderBoxModel = (this as Element).renderBoxModel;
+    if (renderBoxModel != null) {
+      renderBoxModel.eventManager.add(eventType);
     }
   }
 
