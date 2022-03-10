@@ -95,6 +95,8 @@ class Window extends EventTarget {
         document.addEventListener(eventType, handler);
         break;
     }
+
+    super.addEventListener(eventType, handler);
   }
 
   @override
@@ -112,5 +114,7 @@ class Window extends EventTarget {
         document.removeEventListener(eventType, handler);
         break;
     }
+
+    super.addEventListener(eventType, handler);
   }
 }

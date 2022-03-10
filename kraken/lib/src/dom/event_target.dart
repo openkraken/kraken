@@ -70,7 +70,13 @@ abstract class EventTarget extends BindingObject with _Focusable {
 
   // Add event to events when listening is required to add corresponding events on the element.
   void addEventsToRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    RenderPointerListenerMixin? renderBox;
+    if (this is Node) {
+      renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    } else if (this is Window) {
+      renderBox = (this as Window).document.viewport;
+    }
+
     if (renderBox != null) {
       renderBox.eventManager.add(eventType);
     }
@@ -78,7 +84,13 @@ abstract class EventTarget extends BindingObject with _Focusable {
 
   // Remove event from events when there is no corresponding event to listen for on the element.
   void removeEventsFromRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    RenderPointerListenerMixin? renderBox;
+    if (this is Node) {
+      renderBox = (this as Node).renderer as RenderPointerListenerMixin?;
+    } else if (this is Window) {
+      renderBox = (this as Window).document.viewport;
+    }
+
     if (renderBox != null) {
       renderBox.eventManager.add(eventType);
     }
