@@ -23,6 +23,9 @@ void bindWindow(ExecutionContext* context) {
   auto* window = new WindowInstance(windowConstructor);
   JS_SetOpaque(context->global(), window);
   context->defineGlobalProperty("__window__", window->jsObject);
+
+  context->defineGlobalProperty("__kraken__", JS_NewObject(context->ctx()));
+
 }
 
 JSValue ensureWindowIsGlobal(EventTargetInstance* target) {
