@@ -101,17 +101,10 @@ class GestureManager {
           }
         }
       }
-      _hitTestTargetList.clear();
 
-      // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerIdToPointer.length == 1;
-      gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
-      if (isSinglePointer && pointer != null) {
-        _target = pointer.target;
-      } else {
-        _target = null;
-      }
+      _hitTestTargetList.clear();
     } else if (event is PointerMoveEvent) {
+      return;
       touchType = EVENT_TOUCH_MOVE;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
@@ -129,8 +122,8 @@ class GestureManager {
 
     // Only dispatch touch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
-    if (needDispatch) {
-      Function? handleTouchEvent = _target?.handleTouchEvent;
+    if (needDispatch && pointer != null) {
+      Function? handleTouchEvent = pointer.target?.handleTouchEvent;
       if (handleTouchEvent != null) {
         handleTouchEvent(touchType, _pointerIdToPointer[event.pointer], _pointerIdToPointer.values.toList());
       }
@@ -138,6 +131,15 @@ class GestureManager {
 
     // End of the gesture.
     if (event is PointerUpEvent || event is PointerCancelEvent) {
+      // Multi pointer operations in the web will organize click and other gesture triggers.
+      bool isSinglePointer = _pointerIdToPointer.length == 1;
+      gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
+      if (isSinglePointer && pointer != null) {
+        _target = pointer.target;
+      } else {
+        _target = null;
+      }
+
       _pointerIdToPointer.remove(event.pointer);
     }
   }
