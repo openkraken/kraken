@@ -85,7 +85,7 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
 
 // Dispatch the event to the binding side.
 void _dispatchBindingEvent(Event event) {
-  Pointer<NativeBindingObject>? pointer = event.target?.pointer;
+  Pointer<NativeBindingObject>? pointer = event.currentTarget?.pointer;
   int? contextId = event.target?.contextId;
   if (contextId != null && pointer != null) {
     emitUIEvent(contextId, pointer, event);
