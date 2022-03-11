@@ -257,7 +257,9 @@ class ImageElement extends Element {
   }
 
   void _dispatchLoadEvent() {
-    dispatchEvent(Event(EVENT_LOAD));
+    Event event = Event(EVENT_LOAD);
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void _handleEventAfterImageLoaded() {

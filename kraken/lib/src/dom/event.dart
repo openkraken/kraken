@@ -202,7 +202,6 @@ mixin ElementEventMixin on ElementBase {
           offsetY: localPosition.dy,
         )
     );
-
     event.target = this;
 
     dispatchEvent(event);
