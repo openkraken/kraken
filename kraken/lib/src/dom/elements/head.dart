@@ -285,13 +285,17 @@ class ScriptElement extends Element {
         bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_LOAD));
+          Event event = Event(EVENT_LOAD);
+          event.target = this;
+          dispatchEvent(event);
         });
       } catch (e, st) {
         // An error occurred.
         debugPrint('Failed to load script: $src, reason: $e\n$st');
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_ERROR));
+          Event event = Event(EVENT_ERROR);
+          event.target = this;
+          dispatchEvent(event);
         });
       }
       SchedulerBinding.instance!.scheduleFrame();

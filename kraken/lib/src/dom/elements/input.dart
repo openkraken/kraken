@@ -1113,6 +1113,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     String currentValue = _textSelectionDelegate._textEditingValue.text;
     if (_inputValueAtBegin != currentValue) {
       Event changeEvent = Event(EVENT_CHANGE);
+      changeEvent.target = this;
       dispatchEvent(changeEvent);
     }
   }
