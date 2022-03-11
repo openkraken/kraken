@@ -16,7 +16,7 @@ class Window extends EventTarget {
   final Document document;
 
   @override
-  EventTarget? get parent => null;
+  EventTarget? get parentEventTarget => null;
 
   Window(BindingContext? context, this.document) : super(context) {
     window.onPlatformBrightnessChanged = () {

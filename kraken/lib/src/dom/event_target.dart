@@ -93,8 +93,8 @@ abstract class EventTarget extends BindingObject with _Focusable {
     }
 
     // Bubble event to root event target.
-    if (event.bubbles && parent != null) {
-      parent?.internalDispatchEvent(event);
+    if (event.bubbles && parentEventTarget != null) {
+      parentEventTarget?.internalDispatchEvent(event);
     }
   }
 
@@ -114,7 +114,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
     }
   }
 
-  EventTarget? get parent;
+  EventTarget? get parentEventTarget;
 }
 
 // Used for input.

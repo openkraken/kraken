@@ -297,7 +297,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  EventTarget? get parent => parentNode;
+  EventTarget? get parentEventTarget => parentNode;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

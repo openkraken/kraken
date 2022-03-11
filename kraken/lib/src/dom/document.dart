@@ -26,7 +26,7 @@ class Document extends Node {
         super(NodeType.DOCUMENT_NODE, context);
 
   @override
-  EventTarget? get parent => defaultView;
+  EventTarget? get parentEventTarget => defaultView;
 
   RenderViewportBox? get viewport => _viewport;
 
