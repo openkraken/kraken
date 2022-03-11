@@ -121,16 +121,12 @@ class LinkElement extends Element {
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          Event event = Event(EVENT_LOAD);
-          event.target = this;
-          dispatchEvent(event);
+          dispatchEvent(Event(EVENT_LOAD));
         });
       } catch (e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          Event event = Event(EVENT_ERROR);
-          event.target = this;
-          dispatchEvent(event);
+          dispatchEvent(Event(EVENT_ERROR));
         });
       }
       SchedulerBinding.instance!.scheduleFrame();
@@ -285,17 +281,13 @@ class ScriptElement extends Element {
         bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          Event event = Event(EVENT_LOAD);
-          event.target = this;
-          dispatchEvent(event);
+          dispatchEvent(Event(EVENT_LOAD));
         });
       } catch (e, st) {
         // An error occurred.
         debugPrint('Failed to load script: $src, reason: $e\n$st');
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          Event event = Event(EVENT_ERROR);
-          event.target = this;
-          dispatchEvent(event);
+          dispatchEvent(Event(EVENT_ERROR));
         });
       }
       SchedulerBinding.instance!.scheduleFrame();

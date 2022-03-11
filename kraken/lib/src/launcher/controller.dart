@@ -1165,7 +1165,6 @@ class KrakenController {
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.window;
-        event.target = window;
         window.dispatchEvent(event);
         // @HACK: window.load should trigger after all image had loaded.
         // Someone needs to fix this in the future.

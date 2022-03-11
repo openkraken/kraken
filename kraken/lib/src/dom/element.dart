@@ -502,9 +502,7 @@ abstract class Element
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
   void _dispatchScrollEvent() {
-    Event event = Event(EVENT_SCROLL);
-    event.target = this;
-    dispatchEvent(event);
+    dispatchEvent(Event(EVENT_SCROLL));
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
@@ -1546,7 +1544,6 @@ abstract class Element
   void click() {
     flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
-    clickEvent.target = this;
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }

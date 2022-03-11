@@ -202,8 +202,6 @@ mixin ElementEventMixin on ElementBase {
           offsetY: localPosition.dy,
         )
     );
-    event.target = this;
-
     dispatchEvent(event);
   }
 
@@ -227,7 +225,6 @@ mixin ElementEventMixin on ElementBase {
       velocityY: velocityY,
       scale: scale,
     ));
-    event.target = this;
     dispatchEvent(event);
   }
 
@@ -235,17 +232,14 @@ mixin ElementEventMixin on ElementBase {
     if (_prevAppearState == AppearEventType.appear) return;
     _prevAppearState = AppearEventType.appear;
 
-    Event event = AppearEvent();
-    event.target = this;
-    dispatchEvent(event);
+    dispatchEvent(AppearEvent());
   }
 
   void handleDisappear() {
     if (_prevAppearState == AppearEventType.disappear) return;
     _prevAppearState = AppearEventType.disappear;
-    Event event = DisappearEvent();
-    event.target = this;
-    dispatchEvent(event);
+
+    dispatchEvent(DisappearEvent());
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {

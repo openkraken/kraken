@@ -257,9 +257,7 @@ class ImageElement extends Element {
   }
 
   void _dispatchLoadEvent() {
-    Event event = Event(EVENT_LOAD);
-    event.target = this;
-    dispatchEvent(event);
+    dispatchEvent(Event(EVENT_LOAD));
   }
 
   void _handleEventAfterImageLoaded() {
@@ -278,9 +276,7 @@ class ImageElement extends Element {
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
     print('$exception\n$stackTrace');
-    Event event = Event(EVENT_ERROR);
-    event.target = this;
-    dispatchEvent(event);
+    dispatchEvent(Event(EVENT_ERROR));
   }
 
   void _resizeImage() {

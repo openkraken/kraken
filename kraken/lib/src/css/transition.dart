@@ -321,9 +321,7 @@ mixin CSSTransitionMixin on RenderStyle {
       animation.cancel();
 
       // An Event fired when a CSS transition has been cancelled.
-      Event event = Event(EVENT_TRANSITION_CANCEL);
-      event.target = target;
-      target.dispatchEvent(event);
+      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
 
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
       if (_animationProperties.containsKey(propertyName)) {
@@ -352,23 +350,17 @@ mixin CSSTransitionMixin on RenderStyle {
       // An Event fired when a CSS transition is created,
       // when it is added to a set of running transitions,
       // though not necessarily started.
-      Event event = Event(EVENT_TRANSITION_START);
-      event.target = target;
-      target.dispatchEvent(event);
+      target.dispatchEvent(Event(EVENT_TRANSITION_START));
     };
 
     animation.onfinish = (AnimationPlaybackEvent event) {
       _propertyRunningTransition.remove(propertyName);
       target.setRenderStyle(propertyName, end);
       // An Event fired when a CSS transition has finished playing.
-      Event event = Event(EVENT_TRANSITION_END);
-      event.target = target;
-      target.dispatchEvent(event);
+      target.dispatchEvent(Event(EVENT_TRANSITION_END));
     };
 
-    Event event = Event(EVENT_TRANSITION_RUN);
-    event.target = target;
-    target.dispatchEvent(event);
+    target.dispatchEvent(Event(EVENT_TRANSITION_RUN));
 
     animation.play();
   }

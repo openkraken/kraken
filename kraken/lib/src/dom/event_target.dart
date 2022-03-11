@@ -78,6 +78,11 @@ abstract class EventTarget extends BindingObject with _Focusable {
   void dispatchEvent(Event event) {
     if (_disposed) return;
 
+    event.target = this;
+    internalDispatchEvent(event);
+  }
+
+  void internalDispatchEvent(Event event) {
     event.currentTarget = this;
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
@@ -89,7 +94,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
 
     // Bubble event to root event target.
     if (event.bubbles && parent != null) {
-      parent?.dispatchEvent(event);
+      parent?.internalDispatchEvent(event);
     }
   }
 
