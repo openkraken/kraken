@@ -234,9 +234,6 @@ EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit
 
 void EventInstance::finalizer(JSRuntime* rt, JSValue val) {
   auto* event = static_cast<EventInstance*>(JS_GetOpaque(val, Event::kEventClassID));
-  if (event->context()->isValid()) {
-    JS_FreeValue(event->m_ctx, event->jsObject);
-  }
   delete event;
 }
 
