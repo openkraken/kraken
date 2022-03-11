@@ -14,7 +14,7 @@ static void CreateRawJavaScriptObjects(benchmark::State& state) {
   std::string code = "var a = {}";
   // Perform setup here
   for (auto _ : state) {
-    context->evaluateJavaScript(code.c_str(), code.size(), "internal://", 0);
+    context->EvaluateJavaScript(code.c_str(), code.size(), "internal://", 0);
   }
 }
 
@@ -23,7 +23,7 @@ static void CreateDivElement(benchmark::State& state) {
   std::string code = "var a = document.createElement('div');";
   // Perform setup here
   for (auto _ : state) {
-    context->evaluateJavaScript(code.c_str(), code.size(), "internal://", 0);
+    context->EvaluateJavaScript(code.c_str(), code.size(), "internal://", 0);
   }
 }
 

@@ -23,7 +23,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
       contextId,
       [](ExecutingContext* context, const char* message) {
         if (context->dartMethodPtr()->onJsError != nullptr) {
-          context->dartMethodPtr()->onJsError(context->getContextId(), message);
+          context->dartMethodPtr()->onJsError(context->contextid(), message);
         }
         KRAKEN_LOG(ERROR) << message << std::endl;
       },
@@ -84,7 +84,7 @@ void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* e
 }
 
 void KrakenPage::evaluateScript(const NativeString* script, const char* url, int startLine) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return;
 
 #if ENABLE_PROFILE
@@ -93,32 +93,32 @@ void KrakenPage::evaluateScript(const NativeString* script, const char* url, int
   std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
-  m_context->evaluateJavaScript(script->string, script->length, url, startLine);
+  m_context->EvaluateJavaScript(script->string, script->length, url, startLine);
 #endif
 }
 
 void KrakenPage::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return;
-  m_context->evaluateJavaScript(script, length, url, startLine);
+  m_context->EvaluateJavaScript(script, length, url, startLine);
 }
 
 void KrakenPage::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return;
-  m_context->evaluateJavaScript(script, length, url, startLine);
+  m_context->EvaluateJavaScript(script, length, url, startLine);
 }
 
 uint8_t* KrakenPage::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return nullptr;
-  return m_context->dumpByteCode(script, length, url, byteLength);
+  return m_context->DumpByteCode(script, length, url, byteLength);
 }
 
 void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return;
-  m_context->evaluateByteCode(bytes, byteLength);
+  m_context->EvaluateByteCode(bytes, byteLength);
 }
 
 void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {

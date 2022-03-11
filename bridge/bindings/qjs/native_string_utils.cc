@@ -53,11 +53,4 @@ std::string jsValueToStdString(JSContext* ctx, JSValue& value) {
   return str;
 }
 
-std::string jsAtomToStdString(JSContext* ctx, JSAtom atom) {
-  const char* cstr = JS_AtomToCString(ctx, atom);
-  std::string str = std::string(cstr);
-  JS_FreeCString(ctx, cstr);
-  return str;
-}
-
 }  // namespace kraken

@@ -18,12 +18,12 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
   auto* moduleContext = static_cast<ModuleContext*>(ptr);
   ExecutingContext* context = moduleContext->context;
 
-  if (!context->isValid())
+  if (!context->IsValid())
     return;
 
   if (moduleContext->callback == nullptr) {
     JSValue exception = JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
-    context->handleException(&exception);
+    context->HandleException(&exception);
     return;
   }
 
@@ -34,7 +34,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     ScriptValue arguments[] = {errorObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
-      context->handleException(&returnValue);
+      context->HandleException(&returnValue);
     }
   } else {
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string), json->length);
@@ -43,12 +43,12 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     ScriptValue arguments[] = {jsonObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.isException()) {
-      context->handleException(&returnValue);
+      context->HandleException(&returnValue);
     }
   }
 
-  context->drainPendingPromiseJobs();
-  context->moduleCallbacks()->RemoveModuleCallbacks(moduleContext->callback);
+  context->DrainPendingPromiseJobs();
+  context->ModuleCallbacks()->RemoveModuleCallbacks(moduleContext->callback);
 }
 
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json) {
@@ -105,7 +105,7 @@ ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context, S
 
 void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context, QJSFunction* handler, ExceptionState* exception) {
   auto* listener = makeGarbageCollected<ModuleListener>(handler);
-  context->moduleListeners()->addModuleListener(listener);
+  context->ModuleListeners()->addModuleListener(listener);
 }
 
 }  // namespace kraken

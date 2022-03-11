@@ -12,7 +12,7 @@ using namespace kraken;
 
 TEST(Context, isValid) {
   auto bridge = TEST_init();
-  EXPECT_EQ(bridge->getContext()->isValid(), true);
+  EXPECT_EQ(bridge->getContext()->IsValid(), true);
 }
 
 TEST(Context, evalWithError) {
@@ -232,7 +232,7 @@ TEST(Context, accessGetUICommandItemsAfterDisposed) {
   int32_t contextId;
   {
     auto bridge = TEST_init();
-    contextId = bridge->getContext()->getContextId();
+    contextId = bridge->getContext()->contextid();
   }
 
   EXPECT_EQ(getUICommandItems(contextId), nullptr);
@@ -245,7 +245,7 @@ TEST(Context, disposeContext) {
   auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
   static bool disposed = false;
   bridge->disposeCallback = [](kraken::KrakenPage* bridge) { disposed = true; };
-  disposePage(bridge->getContext()->getContextId());
+  disposePage(bridge->getContext()->contextid());
   EXPECT_EQ(disposed, true);
 }
 

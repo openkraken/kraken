@@ -109,6 +109,7 @@ struct Converter<TSSequence<T>> : public ConverterBase<TSSequence<T>> {
 
     for (uint32_t i = 0; i < length; i++) {
       auto&& item = Converter<T>::FromValue(ctx, JS_GetPropertyUint32(ctx, value, i));
+      v.emplace_back(item);
     }
 
     return v;

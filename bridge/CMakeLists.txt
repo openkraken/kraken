@@ -272,6 +272,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_SOURCE
     out/qjs_console.cc
     out/qjs_console.h
+    out/qjs_module_manager.cc
+    out/qjs_module_manager.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

@@ -465,7 +465,7 @@ function generateFunctionValueInit(object: FunctionObject) {
 
   function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
     if (argument.type === FunctionArgumentType.function) {
-      return `QJSFunction::create(ctx, argv[${argsIndex}])`;
+      return `QJSFunction::Create(ctx, argv[${argsIndex}])`;
     }
     return `ScriptValue(ctx, argv[${argsIndex}]);`;
   }
@@ -474,7 +474,7 @@ function generateFunctionValueInit(object: FunctionObject) {
     if (argument.type === FunctionArgumentType.function) {
       return `nullptr;
 if (argc > ${argsIndex} && JS_IsFunction(ctx, argv[${argsIndex}])) {
-  ${argument.name} = QJSFunction::create(ctx, argv[${argsIndex}]);
+  ${argument.name} = QJSFunction::Create(ctx, argv[${argsIndex}]);
 }`;
     } else {
       return `ScriptValue(ctx, JS_NULL);
@@ -506,10 +506,10 @@ ExceptionState exception;
 
 ${returnValue}${coreClassName}::${object.declare.name}(context, ${params.join(', ')}, &exception);
 
-if (exception.hasException()) {
-  return exception.toQuickJS();
+if (exception.HasException()) {
+  return exception.ToQuickJS();
 }
-${returnValue && 'return returnValue.toQuickJS();'}`, 2);
+${returnValue ? 'return returnValue.ToQuickJS();' : 'return JS_NULL; '}`, 2);
 }
 
 function generateFunctionSource(blob: Blob, object: FunctionObject) {
@@ -549,16 +549,16 @@ namespace kraken {
 
 ${sources.join('\n')}
 
-void QJS${getClassName(blob)}::install(ExecutingContext* context) {
-  installGlobalFunctions(context);
+void QJS${getClassName(blob)}::Install(ExecutingContext* context) {
+  InstallGlobalFunctions(context);
 }
 
-void QJS${getClassName(blob)}::installGlobalFunctions(ExecutingContext* context) {
+void QJS${getClassName(blob)}::InstallGlobalFunctions(ExecutingContext* context) {
   std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
     ${installList.join('\n')}
   };
 
-  MemberInstaller::installFunctions(context, context->global(), functionConfig);
+  MemberInstaller::InstallFunctions(context, context->global(), functionConfig);
 }
 }`;
 }

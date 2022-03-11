@@ -40,8 +40,8 @@ class MemberInstaller {
     int flag{JS_PROP_C_W_E};  // Flags for object properties.
   };
 
-  static void installAttributes(ExecutingContext* context, JSValue root, std::initializer_list<AttributeConfig>);
-  static void installFunctions(ExecutingContext* context, JSValue root, std::initializer_list<FunctionConfig>);
+  static void InstallAttributes(ExecutingContext* context, JSValue root, std::initializer_list<AttributeConfig> config);
+  static void InstallFunctions(ExecutingContext* context, JSValue root, std::initializer_list<FunctionConfig> config);
 };
 
 }  // namespace kraken

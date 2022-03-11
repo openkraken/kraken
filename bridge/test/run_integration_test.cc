@@ -37,7 +37,7 @@ TEST(IntegrationTest, runSpecs) {
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
-  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* {
+  executeTest(context->contextid(), [](int32_t contextId, NativeString* status) -> void* {
     KRAKEN_LOG(VERBOSE) << "done";
     return nullptr;
   });

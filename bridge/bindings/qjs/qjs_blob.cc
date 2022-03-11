@@ -239,7 +239,7 @@ void QJSBlob::installConstructor(ExecutingContext* context) {
   std::initializer_list<MemberInstaller::AttributeConfig> attributeConfig {
     {"Blob", nullptr, nullptr, constructor}
   };
-  MemberInstaller::installAttributes(context, context->global(), attributeConfig);
+  MemberInstaller::InstallAttributes(context, context->Global(), attributeConfig);
 }
 
 void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
@@ -251,7 +251,7 @@ void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
     {"type", typeAttributeGetCallback, typeAttributeSetCallback}
   };
 
-  MemberInstaller::installAttributes(context, prototype, attributesConfig);
+  MemberInstaller::InstallAttributes(context, prototype, attributesConfig);
 }
 
 void QJSBlob::installPrototypeProperties(ExecutingContext* context) {
@@ -264,7 +264,7 @@ void QJSBlob::installPrototypeProperties(ExecutingContext* context) {
     {"text", text, 0}
   };
 
-  MemberInstaller::installFunctions(context, prototype, functionConfig);
+  MemberInstaller::InstallFunctions(context, prototype, functionConfig);
 }
 
 }

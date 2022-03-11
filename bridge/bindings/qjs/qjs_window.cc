@@ -131,7 +131,7 @@ void QJSWindow::installGlobalFunctions(ExecutingContext* context) {
       {"clearTimeout", clearTimeout, 0},
   };
 
-  MemberInstaller::installFunctions(context, context->global(), functionConfig);
+  MemberInstaller::InstallFunctions(context, context->Global(), functionConfig);
 }
 
 }  // namespace kraken

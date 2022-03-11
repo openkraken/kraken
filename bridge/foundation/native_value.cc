@@ -80,9 +80,9 @@ void call_native_function(NativeFunctionContext* functionContext, int32_t argc, 
   for (int i = 0; i < argc; i++) {
     arguments[i] = nativeValueToJSValue(context, argv[i]);
   }
-  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->global(), argc, arguments);
-  context->drainPendingPromiseJobs();
-  if (context->handleException(&result)) {
+  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->Global(), argc, arguments);
+  context->DrainPendingPromiseJobs();
+  if (context->HandleException(&result)) {
     *returnValue = jsValueToNativeValue(context->ctx(), result);
   }
 
@@ -161,26 +161,26 @@ static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc
 
 void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int32_t contextId, const char* errmsg) {
   auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
-  if (!promiseContext->context->isValid())
+  if (!promiseContext->context->IsValid())
     return;
-  if (promiseContext->context->getContextId() != contextId)
+  if (promiseContext->context->contextid() != contextId)
     return;
 
   auto* context = promiseContext->context;
 
   if (nativeValue != nullptr) {
     JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
-    JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->global(), 1, &value);
-    context->drainPendingPromiseJobs();
-    context->handleException(&returnValue);
+    JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->Global(), 1, &value);
+    context->DrainPendingPromiseJobs();
+    context->HandleException(&returnValue);
     JS_FreeValue(context->ctx(), value);
     JS_FreeValue(context->ctx(), returnValue);
   } else if (errmsg != nullptr) {
     JSValue error = JS_NewError(context->ctx());
     JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->global(), 1, &error);
-    context->drainPendingPromiseJobs();
-    context->handleException(&returnValue);
+    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->Global(), 1, &error);
+    context->DrainPendingPromiseJobs();
+    context->HandleException(&returnValue);
     JS_FreeValue(context->ctx(), error);
     JS_FreeValue(context->ctx(), returnValue);
   }

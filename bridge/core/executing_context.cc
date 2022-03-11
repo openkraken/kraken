@@ -20,18 +20,19 @@ std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExc
   return std::make_unique<ExecutingContext>(contextId, handler, owner);
 }
 
-static JSRuntime* m_runtime{nullptr};
+static JSRuntime* runtime_{nullptr};
 
 ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx): ScriptWrappable(ctx) {}
+const WrapperTypeInfo& ExecutionContextGCTracker::wrapper_type_info_{"GCTracker"};
 
 void ExecutionContextGCTracker::Trace(GCVisitor* visitor) const {
   auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx()));
-  context->trace(visitor);
+  context->Trace(visitor);
 }
 void ExecutionContextGCTracker::Dispose() const {}
 
 ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
-    : contextId(contextId), _handler(handler), owner(owner), ctxInvalid_(false), uniqueId(context_unique_id++) {
+    : context_id_(contextId), handler_(handler), owner_(owner), ctx_invalid_(false), unique_id_(context_unique_id++) {
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
@@ -51,25 +52,25 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   init_list_head(&promise_job_list);
   init_list_head(&native_function_job_list);
 
-  if (m_runtime == nullptr) {
-    m_runtime = JS_NewRuntime();
+  if (runtime_ == nullptr) {
+    runtime_ = JS_NewRuntime();
   }
   // Avoid stack overflow when running in multiple threads.
-  JS_UpdateStackTop(m_runtime);
-  m_ctx = JS_NewContext(m_runtime);
+  JS_UpdateStackTop(runtime_);
+  ctx_ = JS_NewContext(runtime_);
 
-  timeOrigin = std::chrono::system_clock::now();
-  globalObject = JS_GetGlobalObject(m_ctx);
+  time_origin_ = std::chrono::system_clock::now();
+  global_object_ = JS_GetGlobalObject(ctx_);
   JSValue windowGetter = JS_NewCFunction(
-      m_ctx, [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_GetGlobalObject(ctx); }, "get", 0);
-  JSAtom windowKey = JS_NewAtom(m_ctx, "window");
-  JS_DefinePropertyGetSet(m_ctx, globalObject, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
-  JS_FreeAtom(m_ctx, windowKey);
-  JS_SetContextOpaque(m_ctx, this);
-  JS_SetHostPromiseRejectionTracker(m_runtime, promiseRejectTracker, nullptr);
+      ctx_, [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_GetGlobalObject(ctx); }, "get", 0);
+  JSAtom windowKey = JS_NewAtom(ctx_, "window");
+  JS_DefinePropertyGetSet(ctx_, global_object_, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
+  JS_FreeAtom(ctx_, windowKey);
+  JS_SetContextOpaque(ctx_, this);
+  JS_SetHostPromiseRejectionTracker(runtime_, promiseRejectTracker, nullptr);
 
-  m_gcTracker = makeGarbageCollected<ExecutionContextGCTracker>(ctx());
-  JS_DefinePropertyValueStr(m_ctx, globalObject, "_gc_tracker_", m_gcTracker->ToQuickJS(), JS_PROP_NORMAL);
+  gc_tracker_ = makeGarbageCollected<ExecutionContextGCTracker>(ctx());
+  JS_DefinePropertyValueStr(ctx_, global_object_, "_gc_tracker_", gc_tracker_->ToQuickJS(), JS_PROP_NORMAL);
 
   runningContexts++;
 
@@ -84,7 +85,7 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   initKrakenPolyFill(this);
 
   for (auto& p : pluginByteCode) {
-    evaluateByteCode(p.second.bytes, p.second.length);
+    EvaluateByteCode(p.second.bytes, p.second.length);
   }
 
 #if ENABLE_PROFILE
@@ -93,16 +94,16 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 }
 
 ExecutingContext::~ExecutingContext() {
-  valid_contexts[contextId] = false;
-  ctxInvalid_ = true;
+  valid_contexts[context_id_] = false;
+  ctx_invalid_ = true;
 
   // Free unresolved promise.
   {
     struct list_head *el, *el1;
     list_for_each_safe(el, el1, &promise_job_list) {
       auto* promiseContext = list_entry(el, PromiseContext, link);
-      JS_FreeValue(m_ctx, promiseContext->resolveFunc);
-      JS_FreeValue(m_ctx, promiseContext->rejectFunc);
+      JS_FreeValue(ctx_, promiseContext->resolveFunc);
+      JS_FreeValue(ctx_, promiseContext->rejectFunc);
       delete promiseContext;
     }
   }
@@ -117,117 +118,117 @@ ExecutingContext::~ExecutingContext() {
   }
 
   // Check if current context have unhandled exceptions.
-  JSValue exception = JS_GetException(m_ctx);
+  JSValue exception = JS_GetException(ctx_);
   if (JS_IsObject(exception) || JS_IsException(exception)) {
     // There must be bugs in native functions from call stack frame. Someone needs to fix it if throws.
-    reportError(exception);
+    ReportError(exception);
     assert_m(false, "Unhandled exception found when Dispose JSContext.");
   }
 
-  JS_FreeValue(m_ctx, globalObject);
-  JS_FreeContext(m_ctx);
+  JS_FreeValue(ctx_, global_object_);
+  JS_FreeContext(ctx_);
 
   // Run GC to clean up remaining objects about m_ctx;
-  JS_RunGC(m_runtime);
+  JS_RunGC(runtime_);
 
 #if DUMP_LEAKS
   if (--runningContexts == 0) {
-    JS_FreeRuntime(m_runtime);
-    m_runtime = nullptr;
+    JS_FreeRuntime(runtime_);
+    runtime_ = nullptr;
   }
 #endif
-  m_ctx = nullptr;
+  ctx_ = nullptr;
 }
 
-bool ExecutingContext::evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool ExecutingContext::EvaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
-  JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
-  drainPendingPromiseJobs();
-  bool success = handleException(&result);
-  JS_FreeValue(m_ctx, result);
+  JSValue result = JS_Eval(ctx_, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
+  DrainPendingPromiseJobs();
+  bool success = HandleException(&result);
+  JS_FreeValue(ctx_, result);
   return success;
 }
 
-bool ExecutingContext::evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine) {
+bool ExecutingContext::EvaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), length));
-  JSValue result = JS_Eval(m_ctx, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
-  drainPendingPromiseJobs();
-  bool success = handleException(&result);
-  JS_FreeValue(m_ctx, result);
+  JSValue result = JS_Eval(ctx_, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
+  DrainPendingPromiseJobs();
+  bool success = HandleException(&result);
+  JS_FreeValue(ctx_, result);
   return success;
 }
 
-bool ExecutingContext::evaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine) {
-  JSValue result = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
-  drainPendingPromiseJobs();
-  bool success = handleException(&result);
-  JS_FreeValue(m_ctx, result);
+bool ExecutingContext::EvaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine) {
+  JSValue result = JS_Eval(ctx_, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL);
+  DrainPendingPromiseJobs();
+  bool success = HandleException(&result);
+  JS_FreeValue(ctx_, result);
   return success;
 }
 
-bool ExecutingContext::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
+bool ExecutingContext::EvaluateByteCode(uint8_t* bytes, size_t byteLength) {
   JSValue obj, val;
-  obj = JS_ReadObject(m_ctx, bytes, byteLength, JS_READ_OBJ_BYTECODE);
-  if (!handleException(&obj))
+  obj = JS_ReadObject(ctx_, bytes, byteLength, JS_READ_OBJ_BYTECODE);
+  if (!HandleException(&obj))
     return false;
-  val = JS_EvalFunction(m_ctx, obj);
-  if (!handleException(&val))
+  val = JS_EvalFunction(ctx_, obj);
+  if (!HandleException(&val))
     return false;
-  JS_FreeValue(m_ctx, val);
+  JS_FreeValue(ctx_, val);
   return true;
 }
 
-bool ExecutingContext::isValid() const {
-  return !ctxInvalid_;
+bool ExecutingContext::IsValid() const {
+  return !ctx_invalid_;
 }
 
-void* ExecutingContext::getOwner() {
-  assert(!ctxInvalid_ && "context has been released");
-  return owner;
+void* ExecutingContext::owner() {
+  assert(!ctx_invalid_ && "context has been released");
+  return owner_;
 }
 
-bool ExecutingContext::handleException(JSValue* exc) {
+bool ExecutingContext::HandleException(JSValue* exc) {
   if (JS_IsException(*exc)) {
-    JSValue error = JS_GetException(m_ctx);
-    reportError(error);
-    dispatchGlobalErrorEvent(this, error);
-    JS_FreeValue(m_ctx, error);
+    JSValue error = JS_GetException(ctx_);
+    ReportError(error);
+    DispatchGlobalErrorEvent(this, error);
+    JS_FreeValue(ctx_, error);
     return false;
   }
 
   return true;
 }
 
-bool ExecutingContext::handleException(ScriptValue* exc) {
+bool ExecutingContext::HandleException(ScriptValue* exc) {
   JSValue value = exc->ToQuickJS();
-  handleException(&value);
+  HandleException(&value);
 }
 
-JSValue ExecutingContext::global() {
-  return globalObject;
+JSValue ExecutingContext::Global() {
+  return global_object_;
 }
 
 JSContext* ExecutingContext::ctx() {
-  assert(!ctxInvalid_ && "context has been released");
-  return m_ctx;
+  assert(!ctx_invalid_ && "context has been released");
+  return ctx_;
 }
 
 JSRuntime* ExecutingContext::runtime() {
-  return m_runtime;
+  return runtime_;
 }
 
-void ExecutingContext::reportError(JSValueConst error) {
-  if (!JS_IsError(m_ctx, error))
+void ExecutingContext::ReportError(JSValueConst error) {
+  if (!JS_IsError(ctx_, error))
     return;
 
-  JSValue messageValue = JS_GetPropertyStr(m_ctx, error, "message");
-  JSValue errorTypeValue = JS_GetPropertyStr(m_ctx, error, "name");
-  const char* title = JS_ToCString(m_ctx, messageValue);
-  const char* type = JS_ToCString(m_ctx, errorTypeValue);
+  JSValue messageValue = JS_GetPropertyStr(ctx_, error, "message");
+  JSValue errorTypeValue = JS_GetPropertyStr(ctx_, error, "name");
+  const char* title = JS_ToCString(ctx_, messageValue);
+  const char* type = JS_ToCString(ctx_, errorTypeValue);
   const char* stack = nullptr;
-  JSValue stackValue = JS_GetPropertyStr(m_ctx, error, "stack");
+  JSValue stackValue = JS_GetPropertyStr(ctx_, error, "stack");
   if (!JS_IsUndefined(stackValue)) {
-    stack = JS_ToCString(m_ctx, stackValue);
+    stack = JS_ToCString(ctx_, stackValue);
   }
 
   uint32_t messageLength = strlen(type) + strlen(title);
@@ -235,23 +236,23 @@ void ExecutingContext::reportError(JSValueConst error) {
     messageLength += 4 + strlen(stack);
     char message[messageLength];
     sprintf(message, "%s: %s\n%s", type, title, stack);
-    _handler(this, message);
+    handler_(this, message);
   } else {
     messageLength += 3;
     char message[messageLength];
     sprintf(message, "%s: %s", type, title);
-    _handler(this, message);
+    handler_(this, message);
   }
 
-  JS_FreeValue(m_ctx, errorTypeValue);
-  JS_FreeValue(m_ctx, messageValue);
-  JS_FreeValue(m_ctx, stackValue);
-  JS_FreeCString(m_ctx, title);
-  JS_FreeCString(m_ctx, stack);
-  JS_FreeCString(m_ctx, type);
+  JS_FreeValue(ctx_, errorTypeValue);
+  JS_FreeValue(ctx_, messageValue);
+  JS_FreeValue(ctx_, stackValue);
+  JS_FreeCString(ctx_, title);
+  JS_FreeCString(ctx_, stack);
+  JS_FreeCString(ctx_, type);
 }
 
-void ExecutingContext::drainPendingPromiseJobs() {
+void ExecutingContext::DrainPendingPromiseJobs() {
   // should executing pending promise jobs.
   JSContext* pctx;
   int finished = JS_ExecutePendingJob(runtime(), &pctx);
@@ -263,30 +264,30 @@ void ExecutingContext::drainPendingPromiseJobs() {
   }
 
   // Throw error when promise are not handled.
-  m_rejectedPromise.process(this);
+  rejected_promises_.process(this);
 }
 
-void ExecutingContext::defineGlobalProperty(const char* prop, JSValue value) {
-  JSAtom atom = JS_NewAtom(m_ctx, prop);
-  JS_SetProperty(m_ctx, globalObject, atom, value);
-  JS_FreeAtom(m_ctx, atom);
+void ExecutingContext::DefineGlobalProperty(const char* prop, JSValue value) {
+  JSAtom atom = JS_NewAtom(ctx_, prop);
+  JS_SetProperty(ctx_, global_object_, atom, value);
+  JS_FreeAtom(ctx_, atom);
 }
 
 ExecutionContextData* ExecutingContext::contextData() {
-  return &m_data;
+  return &context_data_;
 }
 
-uint8_t* ExecutingContext::dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
-  JSValue object = JS_Eval(m_ctx, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
-  bool success = handleException(&object);
+uint8_t* ExecutingContext::DumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
+  JSValue object = JS_Eval(ctx_, code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
+  bool success = HandleException(&object);
   if (!success)
     return nullptr;
-  uint8_t* bytes = JS_WriteObject(m_ctx, bytecodeLength, object, JS_WRITE_OBJ_BYTECODE);
-  JS_FreeValue(m_ctx, object);
+  uint8_t* bytes = JS_WriteObject(ctx_, bytecodeLength, object, JS_WRITE_OBJ_BYTECODE);
+  JS_FreeValue(ctx_, object);
   return bytes;
 }
 
-void ExecutingContext::dispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error) {
+void ExecutingContext::DispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error) {
   //  JSContext* ctx = context->ctx();
   //  auto* window = static_cast<Window*>(JS_GetOpaque(context->global(), Window::classId()));
   //
@@ -348,15 +349,15 @@ static void dispatchPromiseRejectionEvent(const char* eventType, ExecutingContex
   //  }
 }
 
-void ExecutingContext::dispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error) {
+void ExecutingContext::DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error) {
   // Trigger onerror event.
-  dispatchGlobalErrorEvent(context, error);
+  DispatchGlobalErrorEvent(context, error);
 
   // Trigger unhandledRejection event.
   dispatchPromiseRejectionEvent("unhandledrejection", context, promise, error);
 }
 
-void ExecutingContext::dispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValue promise, JSValue error) {
+void ExecutingContext::DispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValue promise, JSValue error) {
   // Trigger rejectionhandled event.
   dispatchPromiseRejectionEvent("rejectionhandled", context, promise, error);
 }
@@ -369,27 +370,27 @@ void ExecutingContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   // Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or then(onFulfilled, onRejected) to it,
   // the additional rejectionhandled event is needed to indicate that a promise which was previously rejected should no longer be considered unhandled.
   if (is_handled) {
-    context->m_rejectedPromise.trackHandledPromiseRejection(context, promise, reason);
+    context->rejected_promises_.trackHandledPromiseRejection(context, promise, reason);
   } else {
-    context->m_rejectedPromise.trackUnhandledPromiseRejection(context, promise, reason);
+    context->rejected_promises_.trackUnhandledPromiseRejection(context, promise, reason);
   }
 }
 
-DOMTimerCoordinator* ExecutingContext::timers() {
-  return &m_timers;
+DOMTimerCoordinator* ExecutingContext::Timers() {
+  return &timers_;
 }
 
-ModuleListenerContainer* ExecutingContext::moduleListeners() {
-  return &m_moduleListeners;
+ModuleListenerContainer* ExecutingContext::ModuleListeners() {
+  return &module_listener_container_;
 }
 
-ModuleCallbackCoordinator* ExecutingContext::moduleCallbacks() {
-  return &m_moduleCallbacks;
+ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
+  return &module_callbacks_;
 }
 
-void ExecutingContext::trace(GCVisitor* visitor) {
-  m_timers.trace(visitor);
-  m_moduleListeners.trace(visitor);
+void ExecutingContext::Trace(GCVisitor* visitor) {
+  timers_.trace(visitor);
+  module_listener_container_.trace(visitor);
 }
 
 void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01) {

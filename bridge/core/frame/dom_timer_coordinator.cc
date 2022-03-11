@@ -15,31 +15,31 @@
 namespace kraken {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = timer->context();
 
   if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
-    context->handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(timer->context()->ctx(), "%s", errmsg);
+    context->HandleException(&exception);
     return;
   }
 
   // Trigger timer callbacks.
-  timer->fire();
+  timer->Fire();
 
   // Executing pending async jobs.
-  context->drainPendingPromiseJobs();
+  context->DrainPendingPromiseJobs();
 }
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = timer->context();
 
-  if (!context->isValid())
+  if (!context->IsValid())
     return;
 
   handleTimerCallback(timer, errmsg);
 
-  context->timers()->removeTimeoutById(timer->timerId());
+  context->Timers()->removeTimeoutById(timer->timerId());
 }
 
 void DOMTimerCoordinator::installNewTimer(ExecutingContext* context, int32_t timerId, DOMTimer* timer) {
@@ -66,13 +66,13 @@ DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
 
 void DOMTimerCoordinator::trace(GCVisitor* visitor) {
   for (auto& timer : m_activeTimers) {
-    visitor->Trace(timer.second->ToQuickJS());
+    timer.second->Trace(visitor);
   }
 
   // Recycle all abandoned timers.
   if (!m_abandonedTimers.empty()) {
     for (auto& timer : m_abandonedTimers) {
-      visitor->Trace(timer->ToQuickJS());
+      timer->Trace(visitor);
     }
     // All abandoned timers should be freed at the sweep stage.
     m_abandonedTimers.clear();

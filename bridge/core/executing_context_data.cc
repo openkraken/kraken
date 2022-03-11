@@ -45,7 +45,7 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   JSValue prototypeObject = m_prototypeMap[type] = JS_NewObject(m_context->ctx());
 
   // Make constructor function inherit to Function.prototype
-  JSValue functionConstructor = JS_GetPropertyStr(ctx, m_context->global(), "Function");
+  JSValue functionConstructor = JS_GetPropertyStr(ctx, m_context->Global(), "Function");
   JSValue functionPrototype = JS_GetPropertyStr(ctx, functionConstructor, "prototype");
   JS_SetPrototype(ctx, classObject, functionPrototype);
   JS_FreeValue(ctx, functionPrototype);

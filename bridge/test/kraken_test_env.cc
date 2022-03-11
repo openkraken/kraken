@@ -77,8 +77,8 @@ void TEST_reloadApp(int32_t contextId) {}
 int32_t timerId = 0;
 
 int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  JSRuntime* rt = timer->context()->runtime();
+  auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -94,8 +94,8 @@ int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallbac
 }
 
 int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  JSRuntime* rt = timer->context()->runtime();
+  auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -113,13 +113,13 @@ int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallba
 int32_t callbackId = 0;
 
 uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
-  JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
-  auto* context = static_cast<kraken::ExecutingContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+  JSRuntime* rt = frameCallback->context()->runtime();
+  auto* context = frameCallback->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->handler = handler;
   th->callback = frameCallback;
-  th->contextId = context->getContextId();
+  th->contextId = context->contextid();
   int32_t id = callbackId++;
 
   th->callbackId = id;
@@ -250,7 +250,7 @@ static bool jsPool(kraken::ExecutingContext* context) {
 
 void TEST_runLoop(kraken::ExecutingContext* context) {
   for (;;) {
-    context->drainPendingPromiseJobs();
+    context->DrainPendingPromiseJobs();
     if (jsPool(context))
       break;
   }

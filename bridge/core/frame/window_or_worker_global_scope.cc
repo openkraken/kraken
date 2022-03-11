@@ -9,41 +9,41 @@
 namespace kraken {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = timer->context();
 
   if (errmsg != nullptr) {
-    JSValue exception = JS_ThrowTypeError(timer->ctx(), "%s", errmsg);
-    context->handleException(&exception);
+    JSValue exception = JS_ThrowTypeError(context->ctx(), "%s", errmsg);
+    context->HandleException(&exception);
     return;
   }
 
-  if (context->timers()->getTimerById(timer->timerId()) == nullptr)
+  if (context->Timers()->getTimerById(timer->timerId()) == nullptr)
     return;
 
   // Trigger timer callbacks.
-  timer->fire();
+  timer->Fire();
 
   // Executing pending async jobs.
-  context->drainPendingPromiseJobs();
+  context->DrainPendingPromiseJobs();
 }
 
 static void handleTransientCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = timer->context();
 
-  if (!context->isValid())
+  if (!context->IsValid())
     return;
 
   handleTimerCallback(timer, errmsg);
 
-  context->timers()->removeTimeoutById(timer->timerId());
+  context->Timers()->removeTimeoutById(timer->timerId());
 }
 
 static void handlePersistentCallback(void* ptr, int32_t contextId, const char* errmsg) {
   auto* timer = static_cast<DOMTimer*>(ptr);
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(timer->ctx()));
+  auto* context = timer->context();
 
-  if (!context->isValid())
+  if (!context->IsValid())
     return;
 
   handleTimerCallback(timer, errmsg);
@@ -58,13 +58,13 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction
 #endif
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), handler);
-  auto timerId = context->dartMethodPtr()->setTimeout(timer, context->getContextId(), handleTransientCallback, timeout);
+  auto* timer = makeGarbageCollected<DOMTimer>(context, handler);
+  auto timerId = context->dartMethodPtr()->setTimeout(timer, context->contextid(), handleTransientCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
 
-  context->timers()->installNewTimer(context, timerId, timer);
+  context->Timers()->installNewTimer(context, timerId, timer);
 
   return timerId;
 }
@@ -76,13 +76,13 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunctio
   }
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(context->ctx(), handler);
+  auto* timer = makeGarbageCollected<DOMTimer>(context, handler);
 
-  uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->getContextId(), handlePersistentCallback, timeout);
+  uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->contextid(), handlePersistentCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
-  context->timers()->installNewTimer(context, timerId, timer);
+  context->Timers()->installNewTimer(context, timerId, timer);
 
   return timerId;
 }
@@ -93,9 +93,9 @@ void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t 
     return;
   }
 
-  context->dartMethodPtr()->clearTimeout(context->getContextId(), timerId);
+  context->dartMethodPtr()->clearTimeout(context->contextid(), timerId);
 
-  context->timers()->removeTimeoutById(timerId);
+  context->Timers()->removeTimeoutById(timerId);
 }
 
 }  // namespace kraken

@@ -7,29 +7,28 @@
 
 namespace kraken {
 
-FrameCallback::FrameCallback(JSContext* ctx, JSValue callback) : callback_(callback), ScriptWrappable(ctx) {}
+FrameCallback::FrameCallback(ExecutingContext* context, JSValue callback) : context_(context), callback_(callback) {}
 
 void FrameCallback::Fire(double highResTimeStamp) {
-  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx()));
-  if (!JS_IsFunction(ctx(), callback_))
+  if (!JS_IsFunction(context_->ctx(), callback_))
     return;
 
   /* 'callback' might be destroyed when calling itself (if it frees the
     handler), so must take extra care */
-  JS_DupValue(ctx(), callback_);
+  JS_DupValue(context_->ctx(), callback_);
 
-  JSValue arguments[] = {JS_NewFloat64(ctx(), highResTimeStamp)};
+  JSValue arguments[] = {JS_NewFloat64(context_->ctx(), highResTimeStamp)};
 
-  JSValue returnValue = JS_Call(ctx(), callback_, JS_UNDEFINED, 1, arguments);
+  JSValue returnValue = JS_Call(context_->ctx(), callback_, JS_UNDEFINED, 1, arguments);
 
-  context->drainPendingPromiseJobs();
-  JS_FreeValue(ctx(), callback_);
+  context_->DrainPendingPromiseJobs();
+  JS_FreeValue(context_->ctx(), callback_);
 
   if (JS_IsException(returnValue)) {
-    context->handleException(&returnValue);
+    context_->HandleException(&returnValue);
   }
 
-  JS_FreeValue(ctx(), returnValue);
+  JS_FreeValue(context_->ctx(), returnValue);
 }
 
 void FrameCallback::Trace(GCVisitor* visitor) const {
@@ -37,7 +36,7 @@ void FrameCallback::Trace(GCVisitor* visitor) const {
 }
 
 void FrameCallback::Dispose() const {
-  JS_FreeValueRT(JS_GetRuntime(ctx()), callback_);
+  JS_FreeValueRT(JS_GetRuntime(context_->ctx()), callback_);
 }
 
 void FrameRequestCallbackCollection::RegisterFrameCallback(uint32_t callbackId, FrameCallback* frameCallback) {
@@ -55,15 +54,15 @@ void FrameRequestCallbackCollection::CancelFrameCallback(uint32_t callbackId) {
   frameCallbacks_.erase(callbackId);
 }
 
-void FrameRequestCallbackCollection::Trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
+void FrameRequestCallbackCollection::Trace(GCVisitor* visitor) {
   for (auto& callback : frameCallbacks_) {
-    JS_MarkValue(rt, callback.second->ToQuickJS(), mark_func);
+    callback.second->Trace(visitor);
   }
 
   // Recycle all abandoned callbacks.
   if (!abandonedCallbacks_.empty()) {
     for (auto& callback : abandonedCallbacks_) {
-      JS_MarkValue(rt, callback->ToQuickJS(), mark_func);
+      callback->Trace(visitor);
     }
     // All abandoned timers should be freed at the sweep stage.
     abandonedCallbacks_.clear();

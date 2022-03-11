@@ -12,16 +12,17 @@
 
 namespace kraken {
 
-class DOMTimer : public ScriptWrappable {
-  DEFINE_WRAPPERTYPEINFO();
+class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
-  DOMTimer(JSContext* ctx, QJSFunction* callback);
+  DOMTimer(ExecutingContext* context, QJSFunction* callback);
 
   // Trigger timer callback.
-  void fire();
+  void Fire();
 
-  int32_t timerId();
+  int32_t timerId() const { return timerId_; };
   void setTimerId(int32_t timerId);
+
+  ExecutingContext* context() { return context_; }
 
   [[nodiscard]] FORCE_INLINE const char* GetHumanReadableName() const override { return "DOMTimer"; }
 
@@ -29,6 +30,7 @@ class DOMTimer : public ScriptWrappable {
   void Dispose() const override;
 
  private:
+  ExecutingContext* context_{nullptr};
   int32_t timerId_{-1};
   int32_t isInterval_{false};
   QJSFunction* callback_;

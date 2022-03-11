@@ -41,15 +41,6 @@ class Document;
 
 using JSExceptionHandler = std::function<void(ExecutingContext* context, const char* message)>;
 
-std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
-
-static inline bool isNumberIndex(const std::string& name) {
-  if (name.empty())
-    return false;
-  char f = name[0];
-  return f >= '0' && f <= '9';
-}
-
 struct PromiseContext {
   void* data;
   ExecutingContext* context;
@@ -81,55 +72,54 @@ class ExecutingContext {
   ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
   ~ExecutingContext();
 
-  bool evaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
-  bool evaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine);
-  bool evaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine);
-  bool evaluateByteCode(uint8_t* bytes, size_t byteLength);
-  bool isValid() const;
-  JSValue global();
+  bool EvaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
+  bool EvaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine);
+  bool EvaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine);
+  bool EvaluateByteCode(uint8_t* bytes, size_t byteLength);
+  bool IsValid() const;
+  JSValue Global();
   JSContext* ctx();
   static JSRuntime* runtime();
-  FORCE_INLINE int32_t getContextId() const { return contextId; };
-  void* getOwner();
-  bool handleException(JSValue* exc);
-  bool handleException(ScriptValue* exc);
-  void reportError(JSValueConst error);
-  void drainPendingPromiseJobs();
-  void defineGlobalProperty(const char* prop, JSValueConst value);
+  FORCE_INLINE int32_t contextid() const { return context_id_; };
+  void* owner();
+  bool HandleException(JSValue* exc);
+  bool HandleException(ScriptValue* exc);
+  void ReportError(JSValueConst error);
+  void DrainPendingPromiseJobs();
+  void DefineGlobalProperty(const char* prop, JSValueConst value);
   ExecutionContextData* contextData();
-  uint8_t* dumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength);
+  uint8_t* DumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength);
 
   // Gets the DOMTimerCoordinator which maintains the "active timer
   // list" of tasks created by setTimeout and setInterval. The
   // DOMTimerCoordinator is owned by the ExecutionContext and should
   // not be used after the ExecutionContext is destroyed.
-  DOMTimerCoordinator* timers();
+  DOMTimerCoordinator* Timers();
 
   // Gets the ModuleListeners which registered by `kraken.addModuleListener API`.
-  ModuleListenerContainer* moduleListeners();
+  ModuleListenerContainer* ModuleListeners();
 
   // Gets the ModuleCallbacks which from the 4th parameter of `kraken.invokeModule` function.
-  ModuleCallbackCoordinator* moduleCallbacks();
+  ModuleCallbackCoordinator* ModuleCallbacks();
 
-  FORCE_INLINE Document* document() { return m_document; };
-  FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &m_commandBuffer; };
-  FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return m_dartMethodPtr; }
+  FORCE_INLINE Document* document() { return document_; };
+  FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &ui_command_buffer_; };
+  FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return dart_method_ptr_; }
 
-  void trace(GCVisitor* visitor);
+  void Trace(GCVisitor* visitor);
 
-  std::chrono::time_point<std::chrono::system_clock> timeOrigin;
-  std::unordered_map<std::string, void*> constructorMap;
+  std::chrono::time_point<std::chrono::system_clock> time_origin_;
 
-  int32_t uniqueId;
+  int32_t unique_id_;
   struct list_head node_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
   struct list_head promise_job_list;
   struct list_head native_function_job_list;
 
-  static void dispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
-  static void dispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
-  static void dispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error);
+  static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
+  static void DispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
+  static void DispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error);
 
   // Bytecodes which registered by kraken plugins.
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
@@ -137,21 +127,21 @@ class ExecutingContext {
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
 
-  int32_t contextId;
-  JSExceptionHandler _handler;
-  void* owner;
-  JSValue globalObject{JS_NULL};
-  bool ctxInvalid_{false};
-  JSContext* m_ctx{nullptr};
-  Document* m_document{nullptr};
-  DOMTimerCoordinator m_timers;
-  ModuleListenerContainer m_moduleListeners;
-  ModuleCallbackCoordinator m_moduleCallbacks;
-  ExecutionContextGCTracker* m_gcTracker{nullptr};
-  ExecutionContextData m_data{this};
-  UICommandBuffer m_commandBuffer{this};
-  std::unique_ptr<DartMethodPointer> m_dartMethodPtr = std::make_unique<DartMethodPointer>();
-  RejectedPromises m_rejectedPromise;
+  int32_t context_id_;
+  JSExceptionHandler handler_;
+  void* owner_;
+  JSValue global_object_{JS_NULL};
+  bool ctx_invalid_{false};
+  JSContext* ctx_{nullptr};
+  Document* document_{nullptr};
+  DOMTimerCoordinator timers_;
+  ModuleListenerContainer module_listener_container_;
+  ModuleCallbackCoordinator module_callbacks_;
+  ExecutionContextGCTracker* gc_tracker_{nullptr};
+  ExecutionContextData context_data_{this};
+  UICommandBuffer ui_command_buffer_{this};
+  std::unique_ptr<DartMethodPointer> dart_method_ptr_ = std::make_unique<DartMethodPointer>();
+  RejectedPromises rejected_promises_;
 };
 
 class ObjectProperty {

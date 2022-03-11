@@ -14,8 +14,8 @@ namespace kraken {
 
 void InstallBindings(ExecutingContext* context) {
   QJSWindow::installGlobalFunctions(context);
-  QJSModuleManager::install(context);
-  QJSConsole::install(context);
+  QJSModuleManager::Install(context);
+  QJSConsole::Install(context);
 }
 
 }  // namespace kraken

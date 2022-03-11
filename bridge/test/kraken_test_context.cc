@@ -24,9 +24,9 @@ KrakenTestContext::KrakenTestContext(ExecutingContext* context) : m_context(cont
 }
 
 bool KrakenTestContext::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
-  if (!m_context->isValid())
+  if (!m_context->IsValid())
     return false;
-  return m_context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
+  return m_context->EvaluateJavaScript(code, codeLength, sourceURL, startLine);
 }
 
 bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
@@ -151,7 +151,7 @@ static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, 
   for (int i = 0; i < length; i++) {
     auto mouse = new MousePointer();
     JSValue params = JS_GetPropertyUint32(ctx, inputArrayValue, i);
-    mouse->contextId = context->getContextId();
+    mouse->contextId = context->contextid();
     JSValue xValue = JS_GetPropertyUint32(ctx, params, 0);
     JSValue yValue = JS_GetPropertyUint32(ctx, params, 1);
     JSValue changeValue = JS_GetPropertyUint32(ctx, params, 2);
@@ -225,11 +225,11 @@ static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValu
 static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 
-  JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->global(), "triggerGlobalError");
+  JSValue globalErrorFunc = JS_GetPropertyStr(ctx, context->Global(), "triggerGlobalError");
 
   if (JS_IsFunction(ctx, globalErrorFunc)) {
-    JSValue exception = JS_Call(ctx, globalErrorFunc, context->global(), 0, nullptr);
-    context->handleException(&exception);
+    JSValue exception = JS_Call(ctx, globalErrorFunc, context->Global(), 0, nullptr);
+    context->HandleException(&exception);
     JS_FreeValue(ctx, globalErrorFunc);
   }
 

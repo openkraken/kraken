@@ -38,7 +38,7 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
 }
 
 
-void MemberInstaller::installAttributes(ExecutingContext* context, JSValue root, std::initializer_list<MemberInstaller::AttributeConfig> config) {
+void MemberInstaller::InstallAttributes(ExecutingContext* context, JSValue root, std::initializer_list<MemberInstaller::AttributeConfig> config) {
   JSContext* ctx = context->ctx();
   for (auto& c : config) {
     JSAtom key = JS_NewAtom(ctx, c.name);
@@ -66,7 +66,7 @@ void MemberInstaller::installAttributes(ExecutingContext* context, JSValue root,
   }
 }
 
-void MemberInstaller::installFunctions(ExecutingContext* context, JSValue root, std::initializer_list<FunctionConfig> config) {
+void MemberInstaller::InstallFunctions(ExecutingContext* context, JSValue root, std::initializer_list<FunctionConfig> config) {
   JSContext* ctx = context->ctx();
   for (auto& c : config) {
     JSValue function = JS_NewCFunction(ctx, c.function, c.name, c.length);
