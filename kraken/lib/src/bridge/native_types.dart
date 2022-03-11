@@ -272,7 +272,7 @@ class NativeBoundingClientRect extends Struct {
 }
 
 
-typedef NativeDispatchEvent = Void Function(
+typedef NativeDispatchEvent = Int32 Function(
     Int32 contextId,
     Pointer<NativeBindingObject> nativeBindingObject,
     Pointer<NativeString> eventType,

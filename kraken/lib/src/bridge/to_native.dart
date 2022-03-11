@@ -101,7 +101,7 @@ void invokeModuleEvent(
   freeNativeString(nativeModuleName);
 }
 
-typedef DartDispatchEvent = void Function(
+typedef DartDispatchEvent = int Function(
   int contextId,
   Pointer<NativeBindingObject> nativeBindingObject,
   Pointer<NativeString> eventType,
@@ -118,7 +118,8 @@ void emitUIEvent(
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  event.propagationStopped = propagationStopped == 1 ? true : false;
   freeNativeString(eventTypeString);
 }
 

@@ -94,7 +94,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
     }
 
     // Bubble event to root event target.
-    if (event.bubbles && parentEventTarget != null) {
+    if (event.bubbles && !event.propagationStopped && parentEventTarget != null) {
       parentEventTarget?.internalDispatchEvent(event);
     }
   }

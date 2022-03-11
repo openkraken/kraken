@@ -467,7 +467,7 @@ void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, Event
   referenceNode->m_properties.copyWith(&newNode->m_properties);
 }
 
-void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
+int32_t NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
 
@@ -475,12 +475,12 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
 
   // Should avoid dispatch event is ctx is invalid.
   if (!isContextValid(contextId)) {
-    return;
+    return 1;
   }
 
   // We should avoid trigger event if eventTarget are no long live on heap.
   if (!JS_IsLiveObject(runtime, eventTargetInstance->jsObject)) {
-    return;
+    return 1;
   }
 
   ExecutionContext* context = eventTargetInstance->context();
@@ -493,7 +493,15 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
   EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
   eventInstance->setTarget(eventTargetInstance);
   eventTargetInstance->dispatchEvent(eventInstance);
+
+  bool propagationStopped = eventInstance->propagationStopped();
+
   JS_FreeValue(context->ctx(), eventInstance->jsObject);
+
+  // FIXME: The return value is first propagationStopped instead of cancelable, and then implement a separate method to synchronize propagationStopped.
+  // Dispatches a synthetic event event to target and returns true if either event’s cancelable attribute value is false or its preventDefault() method was not invoked; otherwise false.
+  // https://dom.spec.whatwg.org/#ref-for-dom-eventtarget-dispatchevent%E2%91%A2
+  return propagationStopped ? 1 : 0;
 }
 
 }  // namespace kraken::binding::qjs

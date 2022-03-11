@@ -262,6 +262,7 @@ class Event {
   int timeStamp = DateTime.now().millisecondsSinceEpoch;
   bool defaultPrevented = false;
   bool _immediateBubble = true;
+  bool propagationStopped = false;
 
   Event(this.type, [EventInit? init]) {
     init ??= EventInit();
