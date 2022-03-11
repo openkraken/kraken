@@ -1544,6 +1544,7 @@ abstract class Element
   void click() {
     flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
+    clickEvent.target = this;
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
   }
