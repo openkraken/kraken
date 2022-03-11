@@ -113,7 +113,7 @@ class Document extends Node {
     super.addEventListener(eventType, handler);
 
     // Events listened on document proxy to documentElement which can handle hitTest.
-    documentElement?.addEventListener(eventType, handler);
+    documentElement?.addEventListener(eventType, internalDispatchEvent);
   }
 
   @override

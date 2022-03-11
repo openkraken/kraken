@@ -85,12 +85,12 @@ class Window extends EventTarget {
     switch (eventType) {
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        document.documentElement?.addEventListener(eventType, dispatchEvent);
+        document.documentElement?.addEventListener(eventType, internalDispatchEvent);
         break;
       default:
         // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.addEventListener(eventType, dispatchEvent);
+        document.addEventListener(eventType, internalDispatchEvent);
         break;
     }
   }
