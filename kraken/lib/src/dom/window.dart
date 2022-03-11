@@ -80,25 +80,19 @@ class Window extends EventTarget {
 
   @override
   void addEventListener(String eventType, EventHandler handler) {
+    super.addEventListener(eventType, handler);
+
     switch (eventType) {
-      case EVENT_COLOR_SCHEME_CHANGE:
-      case EVENT_LOAD:
-        return super.addEventListener(eventType, handler);
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        document.documentElement?.addEventListener(eventType, handler);
-        break;
-      case EVENT_RESIZE:
-        // TODO: Fired at the Window when the viewport is resized.
+        document.documentElement?.addEventListener(eventType, dispatchEvent);
         break;
       default:
         // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
         // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.addEventListener(eventType, handler);
+        document.addEventListener(eventType, dispatchEvent);
         break;
     }
-
-    super.addEventListener(eventType, handler);
   }
 
   @override

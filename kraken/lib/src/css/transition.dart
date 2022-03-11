@@ -321,7 +321,9 @@ mixin CSSTransitionMixin on RenderStyle {
       animation.cancel();
 
       // An Event fired when a CSS transition has been cancelled.
-      target.dispatchEvent(Event(EVENT_TRANSITION_CANCEL));
+      Event event = Event(EVENT_TRANSITION_CANCEL);
+      event.target = target;
+      target.dispatchEvent(event);
 
       // Maybe set transition twice in a same frame. should check animationProperties has contains propertyName.
       if (_animationProperties.containsKey(propertyName)) {

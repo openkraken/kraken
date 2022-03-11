@@ -682,7 +682,9 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // Set focus that make it add keyboard listener
       renderEditable!.hasFocus = true;
       activeTextInput();
-      dispatchEvent(Event(EVENT_FOCUS));
+      Event event = Event(EVENT_FOCUS);
+      event.target = this;
+      dispatchEvent(event);
     }
   }
 
@@ -969,6 +971,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       // https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
       String inputType = '';
       InputEvent inputEvent = InputEvent(inputData, inputType: inputType);
+      inputEvent.target = this;
       dispatchEvent(inputEvent);
     }
   }

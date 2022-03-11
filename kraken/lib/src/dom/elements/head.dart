@@ -121,12 +121,16 @@ class LinkElement extends Element {
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_LOAD));
+          Event event = Event(EVENT_LOAD);
+          event.target = this;
+          dispatchEvent(event);
         });
       } catch (e) {
         // An error occurred.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_ERROR));
+          Event event = Event(EVENT_ERROR);
+          event.target = this;
+          dispatchEvent(event);
         });
       }
       SchedulerBinding.instance!.scheduleFrame();
