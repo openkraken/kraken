@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
+import 'package:kraken_example/mock_prescript.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
 
 void main() {
@@ -91,9 +92,12 @@ class _MyHomePageState extends State<MyBrowser> {
         // in the middle of the parent.
         child: _kraken = Kraken(
           devToolsService: ChromeDevToolsService(),
+          onLoad: onJsBundleLoad,
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
+          // bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
+          // hub server 后 ip 更换成 本地
+          bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
         ),
     ));
   }

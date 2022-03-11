@@ -1151,6 +1151,12 @@ class KrakenController {
   Future<void> evalBundle() async {
     assert(!_view._disposed, 'Kraken have already disposed');
     if (bundle != null) {
+      if (onLoad != null) {
+        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+        // module.requestAnimationFrame((_) {
+          onLoad!(this);
+        // });
+      }
       await bundle!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
@@ -1165,12 +1171,12 @@ class KrakenController {
         });
       });
 
-      if (onLoad != null) {
-        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-        module.requestAnimationFrame((_) {
-          onLoad!(this);
-        });
-      }
+      // if (onLoad != null) {
+      //   // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      //   module.requestAnimationFrame((_) {
+      //     onLoad!(this);
+      //   });
+      // }
     }
   }
 }
