@@ -502,7 +502,9 @@ abstract class Element
 
   /// https://drafts.csswg.org/cssom-view/#scrolling-events
   void _dispatchScrollEvent() {
-    dispatchEvent(Event(EVENT_SCROLL));
+    Event event = Event(EVENT_SCROLL);
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
