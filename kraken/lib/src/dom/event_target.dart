@@ -81,6 +81,7 @@ abstract class EventTarget extends BindingObject with _Focusable {
   void dispatchEvent(Event event) {
     if (_disposed) return;
 
+    event.currentTarget = this;
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler != null) {
