@@ -25,7 +25,6 @@ void bindWindow(ExecutionContext* context) {
   context->defineGlobalProperty("__window__", window->jsObject);
 
   context->defineGlobalProperty("__kraken__", JS_NewObject(context->ctx()));
-
 }
 
 JSValue ensureWindowIsGlobal(EventTargetInstance* target) {
