@@ -235,13 +235,17 @@ mixin ElementEventMixin on ElementBase {
     if (_prevAppearState == AppearEventType.appear) return;
     _prevAppearState = AppearEventType.appear;
 
-    dispatchEvent(AppearEvent());
+    Event event = AppearEvent();
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void handleDisappear() {
     if (_prevAppearState == AppearEventType.disappear) return;
     _prevAppearState = AppearEventType.disappear;
-    dispatchEvent(DisappearEvent());
+    Event event = DisappearEvent();
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void handleIntersectionChange(IntersectionObserverEntry entry) {
