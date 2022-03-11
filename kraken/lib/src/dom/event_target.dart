@@ -33,9 +33,6 @@ abstract class EventTarget extends BindingObject with _Focusable {
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler == null) {
       _eventHandlers[eventType] = existHandler = [];
-    } else if (existHandler.contains(eventHandler)) {
-      // To avoid listen more than once.
-      return;
     }
 
     if (existHandler.isEmpty) {
