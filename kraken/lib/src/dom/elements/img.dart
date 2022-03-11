@@ -278,7 +278,9 @@ class ImageElement extends Element {
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
     print('$exception\n$stackTrace');
-    dispatchEvent(Event(EVENT_ERROR));
+    Event event = Event(EVENT_ERROR);
+    event.target = this;
+    dispatchEvent(event);
   }
 
   void _resizeImage() {
