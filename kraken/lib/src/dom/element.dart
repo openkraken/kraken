@@ -646,6 +646,9 @@ class Element extends Node
       disposeRenderObject();
     }
 
+    // Should make sure Scrollable.position are disposed earlier than RenderBoxModel.
+    disposeScrollable();
+
     RenderBoxModel? _renderBoxModel = renderBoxModel;
     Element? _parentElement = parentElement;
 
@@ -661,7 +664,6 @@ class Element extends Node
     renderStyle.detach();
     style.dispose();
     properties.clear();
-    disposeScrollable();
 
     super.dispose();
   }
