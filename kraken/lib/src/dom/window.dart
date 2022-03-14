@@ -9,6 +9,7 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/bridge.dart';
 
 const String WINDOW = 'WINDOW';
 
@@ -76,6 +77,14 @@ class Window extends EventTarget {
     document.documentElement!
       ..flushLayout()
       ..scrollBy(x, y);
+  }
+
+  @override
+  void dispatchEvent(Event event) {
+    if (event == EVENT_DOM_CONTENT_LOADED || event == EVENT_LOAD) {
+      flushUICommand();
+    }
+    super.dispatchEvent(event);
   }
 
   @override
