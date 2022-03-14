@@ -413,18 +413,12 @@ TEST(HostClass, setExoticClassProperty) {
 TEST(HostClass, finalizeShouldNotFree) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    errorCalled = true;
-  });
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-    logCalled = true;
-  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   auto context = bridge->getContext();
   auto* constructor = new ExoticClass(context);
   context->defineGlobalProperty("ExoticClass", constructor->jsObject);
-
-
 
   auto runGC = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
     JS_RunGC(JS_GetRuntime(ctx));
@@ -502,7 +496,6 @@ var handleScroll = function (e) {
   triggerScrollEventAndLoopTimer();
   triggerScrollEventAndLoopTimer();
   triggerScrollEventAndLoopTimer();
-
 
   TEST_dispatchEvent(context->getContextId(), window, "click");
 
