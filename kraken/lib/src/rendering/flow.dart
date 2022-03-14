@@ -515,7 +515,6 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (isInlineBlock && constraints.maxWidth.isInfinite) {
       for (int i = 0; i < _runMetrics.length; ++i) {
         final _RunMetrics metrics = _runMetrics[i];
-
         final Map<int?, RenderBox> runChildren = metrics.runChildren;
         final List<RenderBox> runChildrenList = runChildren.values.toList();
 
@@ -526,9 +525,14 @@ class RenderFlowLayout extends RenderLayoutBox {
             // Element of display block will stretch to the width of its container
             // when its width is not specified.
             if (isChildBlockLevel && child.constraints.maxWidth.isInfinite) {
+              double contentBoxWidth = renderStyle.contentBoxWidth!;
+              // No need to layout child when its width is identical to parent's width.
+              if (child.renderStyle.borderBoxWidth == contentBoxWidth) {
+                continue;
+              }
               BoxConstraints childConstraints = BoxConstraints(
-                minWidth: size.width,
-                maxWidth: size.width,
+                minWidth: contentBoxWidth,
+                maxWidth: contentBoxWidth,
                 minHeight: child.constraints.minHeight,
                 maxHeight: child.constraints.maxHeight,
               );
