@@ -435,7 +435,7 @@ class ImageElement extends Element {
   // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
   void _precacheImage() async {
     final ImageConfiguration config = ImageConfiguration.empty;
-    _resolveSource(src);
+    _resolveResource(src);
     final Uri? resolvedUri = _resolvedUri;
     if (resolvedUri == null) return;
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
@@ -474,7 +474,7 @@ class ImageElement extends Element {
   set src(String value) {
     String prevSrc = src;
     internalSetAttribute('src', value);
-    _resolveSource(value);
+    _resolveResource(value);
     if (prevSrc != src) {
       _complete = false;
     }
@@ -518,10 +518,10 @@ class ImageElement extends Element {
     }
   }
 
-  void _resolveSource(String source) {
+  void _resolveResource(String src) {
     String base = ownerDocument.controller.url;
     try {
-      _resolvedUri = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
+      _resolvedUri = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(src));
     } catch (_) {
       // Ignoring the failure of resolving, but to remove the resolved hyperlink.
       _resolvedUri = null;
