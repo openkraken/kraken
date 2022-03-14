@@ -1,10 +1,18 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
 import 'package:kraken_example/mock_prescript.dart';
 import 'package:kraken_websocket/kraken_websocket.dart';
+
+
+@pragma('vm:entry-point')
+void top() => runApp( MyApp());
+
+@pragma('vm:entry-point')
+void bottom() => runApp( MyApp());
 
 void main() {
   KrakenWebsocket.initialize();
@@ -18,7 +26,33 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kraken Browser',
       // theme: ThemeData.dark(),
-      home: MyBrowser(),
+      home: MyHomePage(title: 'First Page'),
+    );
+  }
+}
+
+class MyHomePage extends StatelessWidget {
+  final String? title;
+  const MyHomePage({Key? key, this.title}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title ?? 'MyHomePage'),
+      ),
+      body: Center(
+        //这是一个IOS风格材质的按钮，需要导入cupertino文件才能引用
+          child: CupertinoButton(
+              color: Colors.blue,
+              child: Text('Push Kraken Page'),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyBrowser(
+                          title: 'Kraken Page',
+                        )));
+              })),
     );
   }
 }
@@ -97,7 +131,10 @@ class _MyHomePageState extends State<MyBrowser> {
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
           // bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
           // hub server 后 ip 更换成 本地
-          bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
+          // bundle: KrakenBundle.fromUrl('https://pre.t.youku.com/yep/page/kraken/m_pre/08a5sb2xno?isNeedBaseImage=1'),
+          bundle: KrakenBundle.fromUrl('http://30.7.203.92:3000/build/demo.init.js'),
+          // bundle: KrakenBundle.fromUrl('https://t.youku.com/yep/page/kraken/m/j73sp0s55m'),
+          // bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
         ),
     ));
   }
