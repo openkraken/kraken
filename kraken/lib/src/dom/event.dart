@@ -252,6 +252,7 @@ mixin ElementEventMixin on ElementBase {
   }
 }
 
+// @TODO: inhert BindingObject to receive value from Cpp side.
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   String type;
