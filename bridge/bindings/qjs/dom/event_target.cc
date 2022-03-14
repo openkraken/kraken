@@ -13,6 +13,7 @@
 #include "element.h"
 #include "event.h"
 #include "kraken_bridge.h"
+#include "foundation/logging.h"
 
 #if UNIT_TEST
 #include "kraken_test_env.h"
@@ -491,7 +492,7 @@ int32_t NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarge
   // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
   auto* nativeEvent = reinterpret_cast<NativeEvent*>(raw->bytes);
   EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-  eventInstance->setTarget(eventTargetInstance);
+
   eventTargetInstance->dispatchEvent(eventInstance);
 
   bool propagationStopped = eventInstance->propagationStopped();
