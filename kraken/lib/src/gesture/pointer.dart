@@ -5,7 +5,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
+import 'package:kraken/dom.dart';
 
 class Pointer {
   Pointer(PointerEvent event) : _event = event;
@@ -17,5 +17,5 @@ class Pointer {
     _event = event;
   }
 
-  RenderPointerListenerMixin? target;
+  Element? target;
 }

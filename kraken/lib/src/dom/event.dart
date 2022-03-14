@@ -133,16 +133,16 @@ mixin ElementEventMixin on ElementBase {
   void handleTouchEvent(String touchType, gesture_pointer.Pointer targetPointer, List<gesture_pointer.Pointer> points) {
     TouchEvent e = TouchEvent(touchType);
     e.target = this;
-    RenderPointerListenerMixin currentTarget = targetPointer.target!;
+    EventTarget currentTarget = targetPointer.target!;
 
     for (int i = 0; i < points.length; i++) {
       gesture_pointer.Pointer pointer = points[i];
       PointerEvent pointerEvent = pointer.event;
-      RenderPointerListenerMixin target = pointer.target!;
+      EventTarget target = pointer.target!;
 
       Touch touch = Touch(
         identifier: pointerEvent.pointer,
-        target: target.getEventTarget!(),
+        target: target,
         screenX: pointerEvent.position.dx,
         screenY: pointerEvent.position.dy,
         clientX: pointerEvent.localPosition.dx,

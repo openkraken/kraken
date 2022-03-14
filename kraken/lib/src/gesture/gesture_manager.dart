@@ -46,16 +46,21 @@ class GestureManager {
 
   final Map<String, GestureRecognizer> _gestures = <String, GestureRecognizer>{};
 
-  final List<RenderBox> _hitTestTargetList = [];
+  final List<EventTarget> _hitTestTargetList = [];
   // Collect the events in the hitTest list.
   final Map<String, bool> _hitTestEventMap = {};
 
   final Map<int, gesture_pointer.Pointer> _pointerIdToPointer = {};
 
-  RenderPointerListenerMixin? _target;
+  Element? _target;
 
   void addTargetToList(RenderBox target) {
-    _hitTestTargetList.add(target);
+    if (target is RenderPointerListenerMixin) {
+      HandleGetEventTarget? getEventTarget = target.getEventTarget;
+      if (getEventTarget != null) {
+        _hitTestTargetList.add(getEventTarget());
+      }
+    }
   }
 
   void addPointer(PointerEvent event) {
@@ -68,13 +73,10 @@ class GestureManager {
       _pointerIdToPointer[event.pointer] = gesture_pointer.Pointer(event);
 
       for (int i = 0; i < _hitTestTargetList.length; i++) {
-        RenderBox renderBox = _hitTestTargetList[i];
-        if (renderBox is RenderPointerListenerMixin) {
-          // Mark event that should propagation in dom tree.
-          renderBox.eventManager.events.forEach((eventType) {
-            _hitTestEventMap[eventType] = true;
-          });
-        }
+        EventTarget eventTarget = _hitTestTargetList[i];
+        eventTarget.getEventHandlers().keys.forEach((eventType) {
+          _hitTestEventMap[eventType] = true;
+        });
       }
 
       touchType = EVENT_TOUCH_START;
@@ -91,11 +93,11 @@ class GestureManager {
       // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
       if (_hitTestTargetList.isNotEmpty) {
         for (int i = 0; i < _hitTestTargetList.length; i++) {
-          RenderBox renderBox = _hitTestTargetList[i];
-          if ((renderBox is RenderBoxModel && !renderBox.isScrollingContentBox) || renderBox is RenderViewportBox) {
+          EventTarget eventTarget = _hitTestTargetList[i];
+          if (eventTarget is Element) {
             gesture_pointer.Pointer? pointer = _pointerIdToPointer[event.pointer];
             if (pointer != null) {
-              pointer.target = renderBox as RenderPointerListenerMixin;
+              pointer.target = eventTarget;
             }
             break;
           }
@@ -122,10 +124,8 @@ class GestureManager {
     // Only dispatch touch event that added.
     bool needDispatch = _hitTestEventMap.containsKey(touchType);
     if (needDispatch && pointer != null) {
-      Function? handleTouchEvent = pointer.target?.handleTouchEvent;
-      if (handleTouchEvent != null) {
-        handleTouchEvent(touchType, _pointerIdToPointer[event.pointer], _pointerIdToPointer.values.toList());
-      }
+      Function? handleTouchEvent = (pointer.target as Element).handleTouchEvent;
+      handleTouchEvent(touchType, _pointerIdToPointer[event.pointer], _pointerIdToPointer.values.toList());
     }
 
     // End of the gesture.

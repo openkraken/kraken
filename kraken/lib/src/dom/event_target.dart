@@ -20,7 +20,6 @@ abstract class EventTarget extends BindingObject with _Focusable {
   @protected
   final Map<String, List<EventHandler>> _eventHandlers = {};
 
-  @protected
   Map<String, List<EventHandler>> getEventHandlers() => _eventHandlers;
 
   @protected
