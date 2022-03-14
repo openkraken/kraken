@@ -102,10 +102,15 @@ class HttpCacheController {
   // Add or update the httpCacheObject to memory cache.
   void putObject(Uri uri, HttpCacheObject cacheObject) {
     if (_caches.length == _maxCachedObjects) {
-        _caches.remove(_caches.lastKey());
+      _caches.remove(_caches.lastKey());
     }
     final String key = _getCacheKey(uri);
     _caches.update(key, (value) => cacheObject, ifAbsent: () => cacheObject);
+  }
+
+  void removeObject(Uri uri) {
+    final String key = _getCacheKey(uri);
+    _caches.remove(key);
   }
 
   Future<HttpClientResponse> interceptResponse(
@@ -132,7 +137,11 @@ class HttpCacheController {
       );
 
       // Cache the object.
-      putObject(request.uri, cacheObject);
+      if (cacheObject.valid) {
+        putObject(request.uri, cacheObject);
+      } else {
+        removeObject(request.uri);
+      }
 
       return HttpClientCachedResponse(response, cacheObject);
     }

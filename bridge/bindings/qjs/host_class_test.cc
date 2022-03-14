@@ -410,4 +410,110 @@ TEST(HostClass, setExoticClassProperty) {
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(HostClass, finalizeShouldNotFree) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
+    errorCalled = true;
+  });
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+  };
+
+  auto context = bridge->getContext();
+  auto* constructor = new ExoticClass(context);
+  context->defineGlobalProperty("ExoticClass", constructor->jsObject);
+
+
+
+  auto runGC = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+    JS_RunGC(JS_GetRuntime(ctx));
+    return JS_NULL;
+  };
+  QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 1);
+
+  std::string code = R"(
+function throttle(func, wait) {
+  var ctx;
+  var args;
+  var rtn;
+  var timeoutID;
+  var last = 0;
+
+  function call() {
+    timeoutID = 0;
+    last = +new Date();
+    rtn = func.apply(ctx, args);
+    ctx = null;
+    // args = null;
+  }
+
+  return function () {
+    ctx = this;
+    args = arguments;
+    var delta = new Date().getTime() - last;
+    if (!timeoutID) if (delta >= wait) call();else timeoutID = setTimeout(call, wait - delta);
+    return rtn;
+  };
+}
+
+var handleScroll = function (e) {
+};
+
+{
+  let div;
+  function initScroll() {
+    div = document.createElement('div');
+    div.style.width = '100px';
+    div.style.height = '300px';
+    div.style.overflow = 'scroll';
+    div.addEventListener('scroll', throttle(handleScroll, 100));
+    document.body.appendChild(div);
+    for(let i = 0; i < 1000; i ++) {
+      div.appendChild(document.createTextNode('abc'));
+    }
+  }
+
+  function triggerScroll() {
+    let scrollEvent = new CustomEvent('scroll');
+    div.dispatchEvent(scrollEvent);
+  }
+
+  initScroll();
+  window.onclick = () => {
+    document.body.removeChild(div)
+    initScroll();
+  };
+  window.addEventListener('trigger', () => {
+    triggerScroll();
+  });
+}
+
+)";
+  context->evaluateJavaScript(code.c_str(), code.size(), "vm://", 0);
+
+  static auto* window = static_cast<EventTargetInstance*>(JS_GetOpaque(context->global(), 1));
+
+  auto triggerScrollEventAndLoopTimer = [&context]() {
+    TEST_dispatchEvent(context->getContextId(), window, "trigger");
+    TEST_runLoop(context);
+  };
+
+  triggerScrollEventAndLoopTimer();
+  triggerScrollEventAndLoopTimer();
+  triggerScrollEventAndLoopTimer();
+
+
+  TEST_dispatchEvent(context->getContextId(), window, "click");
+
+  triggerScrollEventAndLoopTimer();
+  triggerScrollEventAndLoopTimer();
+  triggerScrollEventAndLoopTimer();
+
+  TEST_dispatchEvent(context->getContextId(), window, "click");
+
+  triggerScrollEventAndLoopTimer();
+  triggerScrollEventAndLoopTimer();
+}
+
 }  // namespace kraken::binding::qjs
