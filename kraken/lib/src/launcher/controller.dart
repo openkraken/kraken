@@ -187,7 +187,7 @@ class KrakenViewController
         if (document.focusedElement != null) {
           document.focusedElement!.blur();
         }
-        event.target!.focus();
+        (event.target as Element).focus();
       }
     });
 

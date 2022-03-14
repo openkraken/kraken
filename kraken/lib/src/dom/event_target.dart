@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -11,7 +10,7 @@ import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 
-abstract class EventTarget extends BindingObject with _Focusable {
+abstract class EventTarget extends BindingObject {
   EventTarget(BindingContext? context) : super(context);
 
   bool _disposed = false;
@@ -117,11 +116,4 @@ abstract class EventTarget extends BindingObject with _Focusable {
   }
 
   EventTarget? get parentEventTarget;
-}
-
-// Used for input.
-// @TODO: Should remove it.
-mixin _Focusable {
-  void focus() {}
-  void blur() {}
 }

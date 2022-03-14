@@ -117,7 +117,12 @@ class Window extends EventTarget {
         document.removeEventListener(eventType, internalDispatchEvent);
         break;
     }
+  }
 
+  /// Moves the focus to the window's browsing context, if any.
+  /// https://html.spec.whatwg.org/multipage/interaction.html#dom-window-focus
+  void focus() {
+    // TODO
   }
 
   @override
