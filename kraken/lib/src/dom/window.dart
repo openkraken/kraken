@@ -107,21 +107,17 @@ class Window extends EventTarget {
 
   @override
   void removeEventListener(String eventType, EventHandler handler) {
+    super.removeEventListener(eventType, handler);
+
     switch (eventType) {
-      case EVENT_COLOR_SCHEME_CHANGE:
-      case EVENT_LOAD:
-        return super.removeEventListener(eventType, handler);
       case EVENT_SCROLL:
-        return document.documentElement?.removeEventListener(eventType, handler);
-      case EVENT_RESIZE:
-        // TODO: Fired at the Window when the viewport is resized.
+        document.documentElement?.removeEventListener(eventType, internalDispatchEvent);
         break;
       default:
-        document.removeEventListener(eventType, handler);
+        document.removeEventListener(eventType, internalDispatchEvent);
         break;
     }
 
-    super.addEventListener(eventType, handler);
   }
 
   @override
