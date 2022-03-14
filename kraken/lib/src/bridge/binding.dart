@@ -112,7 +112,7 @@ abstract class BindingBridge {
       _nativeObjects[nativeBindingObject.address] = object;
       if (nativeBindingObject is Pointer<NativeBindingObject>) {
         nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
-      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>){
+      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>) {
         // @TODO: Remove it.
         nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
       }
@@ -123,6 +123,12 @@ abstract class BindingBridge {
     Pointer? nativeBindingObject = castToType<Pointer?>(object.pointer);
     if (nativeBindingObject != null) {
       _nativeObjects.remove(nativeBindingObject.address);
+      if (nativeBindingObject is Pointer<NativeBindingObject>) {
+        nativeBindingObject.ref.invokeBindingMethod = nullptr;
+      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>)  {
+        // @TODO: Remove it.
+        nativeBindingObject.ref.invokeBindingMethod = nullptr;
+      }
     }
   }
 
