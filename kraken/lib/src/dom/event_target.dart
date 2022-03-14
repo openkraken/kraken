@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
  */
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -11,7 +10,7 @@ import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 
-abstract class EventTarget extends BindingObject with _Focusable {
+abstract class EventTarget extends BindingObject {
   EventTarget(BindingContext? context) : super(context);
 
   bool _disposed = false;
@@ -85,15 +84,16 @@ abstract class EventTarget extends BindingObject with _Focusable {
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler != null) {
+      // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
+      event.currentTarget = this;
       for (EventHandler handler in existHandler) {
-        // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
-        event.currentTarget = this;
         handler(event);
       }
+      event.currentTarget = null;
     }
 
     // Bubble event to root event target.
-    if (event.bubbles && !event.propagationStopped && parentEventTarget != null) {
+    if (event.bubbles && !event.propagationStopped) {
       parentEventTarget?.internalDispatchEvent(event);
     }
   }
@@ -115,11 +115,4 @@ abstract class EventTarget extends BindingObject with _Focusable {
   }
 
   EventTarget? get parentEventTarget;
-}
-
-// Used for input.
-// @TODO: Should remove it.
-mixin _Focusable {
-  void focus() {}
-  void blur() {}
 }

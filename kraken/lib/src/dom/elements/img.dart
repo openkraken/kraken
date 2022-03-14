@@ -36,7 +36,7 @@ class ImageElement extends Element {
 
   ImageStream? _cachedImageStream;
   ImageInfo? _cachedImageInfo;
-  Uri? _resolvedSource;
+  Uri? _resolvedUri;
 
   // Width and height set through property.
   double? _propertyWidth;
@@ -150,7 +150,7 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _resolveImage(_resolvedSource);
+    _resolveImage(_resolvedUri);
     _listenToStream();
   }
 
@@ -431,12 +431,12 @@ class ImageElement extends Element {
     _resizeImage();
   }
 
-  // Prefetches an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
+  // Prefetch an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
   // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
   void _precacheImage() async {
     final ImageConfiguration config = ImageConfiguration.empty;
-    _resolveSource(src);
-    final Uri? resolvedUri = _resolvedSource;
+    _resolveResource(src);
+    final Uri? resolvedUri = _resolvedUri;
     if (resolvedUri == null) return;
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
@@ -470,17 +470,17 @@ class ImageElement extends Element {
     internalSetAttribute(SCALING, value);
   }
 
-  String get src => _resolvedSource?.toString() ?? '';
+  String get src => _resolvedUri?.toString() ?? '';
   set src(String value) {
     String prevSrc = src;
     internalSetAttribute('src', value);
-    _resolveSource(value);
+    _resolveResource(value);
     if (prevSrc != src) {
       _complete = false;
     }
     // Update image source if image already attached except image is lazy loading.
     if (isRendererAttached && !_isInLazyLoading) {
-      _resolveImage(_resolvedSource, updateImageProvider: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else {
       _precacheImage();
     }
@@ -501,7 +501,7 @@ class ImageElement extends Element {
     internalSetAttribute('width', value.toString());
     _propertyWidth = value.toDouble();
     if (_shouldScaling) {
-      _resolveImage(_resolvedSource, updateImageProvider: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else {
       _resizeImage();
     }
@@ -512,19 +512,19 @@ class ImageElement extends Element {
     internalSetAttribute('height', value.toString());
     _propertyHeight = value.toDouble();
     if (_shouldScaling) {
-      _resolveImage(_resolvedSource, updateImageProvider: true);
+      _resolveImage(_resolvedUri, updateImageProvider: true);
     } else {
       _resizeImage();
     }
   }
 
-  void _resolveSource(String source) {
+  void _resolveResource(String src) {
     String base = ownerDocument.controller.url;
     try {
-      _resolvedSource = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(source));
+      _resolvedUri = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(src));
     } catch (_) {
       // Ignoring the failure of resolving, but to remove the resolved hyperlink.
-      _resolvedSource = null;
+      _resolvedUri = null;
     }
   }
 
@@ -544,7 +544,7 @@ class ImageElement extends Element {
       }
       // Resize image
       if (_shouldScaling) {
-        _resolveImage(_resolvedSource, updateImageProvider: true);
+        _resolveImage(_resolvedUri, updateImageProvider: true);
       } else {
         _resizeImage();
       }

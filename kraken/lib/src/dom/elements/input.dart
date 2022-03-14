@@ -1266,7 +1266,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
       : 0.0.clamp(rect.right - editableSize.width, rect.left);
     unitOffset = const Offset(1, 0);
 
-    // No overscrolling when encountering tall fonts/scripts that extend past
+    // No over scrolling when encountering tall fonts/scripts that extend past
     // the ascent.
     final double targetOffset = (additionalOffset + _scrollableX.position!.pixels)
       .clamp(

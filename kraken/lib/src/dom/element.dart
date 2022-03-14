@@ -1547,6 +1547,19 @@ abstract class Element
     dispatchEvent(clickEvent);
   }
 
+  /// Moves the focus to the element.
+  /// https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
+  void focus() {
+    // TODO
+  }
+
+  /// Moves the focus to the viewport. Use of this method is discouraged;
+  /// if you want to focus the viewport, call the focus() method on the Document's document element.
+  /// https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
+  void blur() {
+    // TODO
+  }
+
   Future<Uint8List> toBlob({ double? devicePixelRatio }) {
     devicePixelRatio ??= window.devicePixelRatio;
 
