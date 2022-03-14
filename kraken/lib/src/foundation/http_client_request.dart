@@ -158,7 +158,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         }
 
         // Step 3: Handle negotiate cache request header.
-        if (headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        if (cacheObject.valid && headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
           // ETag has higher priority of lastModified.
           if (cacheObject.eTag != null) {
             headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);

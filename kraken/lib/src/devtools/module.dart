@@ -45,7 +45,7 @@ abstract class UIInspectorModule extends _InspectorModule {
 
   @override
   void sendEventToFrontend(InspectorEvent event) {
-    devtoolsService.isolateServerPort!.send(event);
+    devtoolsService.isolateServerPort?.send(event);
   }
 }
 

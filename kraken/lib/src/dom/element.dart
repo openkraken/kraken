@@ -703,7 +703,6 @@ abstract class Element
     style.dispose();
     attributes.clear();
     disposeScrollable();
-
     super.dispose();
   }
 

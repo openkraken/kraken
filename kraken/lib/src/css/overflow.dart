@@ -118,6 +118,8 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableY;
 
   void disposeScrollable() {
+    _scrollableX?.position?.dispose();
+    _scrollableY?.position?.dispose();
     _scrollableX = null;
     _scrollableY = null;
   }
