@@ -290,6 +290,7 @@ class Event {
     Pointer<RawNativeEvent> event = malloc.allocate<RawNativeEvent>(sizeOf<RawNativeEvent>());
 
     EventTarget? _target = target;
+    EventTarget? _currentTarget = currentTarget;
 
     List<int> methods = [
       stringToNativeString(type).address,
@@ -298,7 +299,7 @@ class Event {
       timeStamp,
       defaultPrevented ? 1 : 0,
       (_target != null && _target.pointer != null) ? _target.pointer!.address : nullptr.address,
-      nullptr.address
+      (_currentTarget != null && _currentTarget.pointer != null) ? _currentTarget.pointer!.address : nullptr.address,
     ];
 
     int totalLength = methods.length + extraLength;
