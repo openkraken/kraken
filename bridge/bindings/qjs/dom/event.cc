@@ -189,7 +189,7 @@ void EventInstance::setType(NativeString* type) const {
 #endif
 }
 
-EventTargetInstance * EventInstance::target() const {
+EventTargetInstance* EventInstance::target() const {
   return reinterpret_cast<NativeEventTarget*>(nativeEvent->target)->instance;
 }
 
