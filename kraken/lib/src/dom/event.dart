@@ -252,6 +252,7 @@ mixin ElementEventMixin on ElementBase {
   }
 }
 
+// @TODO: inhert BindingObject to receive value from Cpp side.
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   String type;
@@ -299,7 +300,7 @@ class Event {
       timeStamp,
       defaultPrevented ? 1 : 0,
       (_target != null && _target.pointer != null) ? _target.pointer!.address : nullptr.address,
-      (_currentTarget != null && _currentTarget.pointer != null) ? _currentTarget.pointer!.address : nullptr.address
+      (_currentTarget != null && _currentTarget.pointer != null) ? _currentTarget.pointer!.address : nullptr.address,
     ];
 
     int totalLength = methods.length + extraLength;

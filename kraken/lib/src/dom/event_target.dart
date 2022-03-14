@@ -86,15 +86,16 @@ abstract class EventTarget extends BindingObject with _Focusable {
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler != null) {
+      // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
+      event.currentTarget = this;
       for (EventHandler handler in existHandler) {
-        // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
-        event.currentTarget = this;
         handler(event);
       }
+      event.currentTarget = null;
     }
 
     // Bubble event to root event target.
-    if (event.bubbles && !event.propagationStopped && parentEventTarget != null) {
+    if (event.bubbles && !event.propagationStopped) {
       parentEventTarget?.internalDispatchEvent(event);
     }
   }
