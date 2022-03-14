@@ -104,7 +104,6 @@ class GestureManager {
 
       _hitTestTargetList.clear();
     } else if (event is PointerMoveEvent) {
-      return;
       touchType = EVENT_TOUCH_MOVE;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
