@@ -74,4 +74,12 @@ describe('innerHTML', () => {
 
     expect(document.body.children.length).toEqual(0);
   })
+
+  it('set style should not add head and body', async () => {
+    const style = document.createElement('style');
+    document.head.appendChild(style);
+    style.innerHTML = '.a{color:red}'
+
+    expect(style.children.length).toEqual(0);
+  })
 });
