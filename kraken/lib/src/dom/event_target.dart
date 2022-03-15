@@ -54,25 +54,28 @@ abstract class EventTarget extends BindingObject {
     if (_disposed) return;
 
     event.target = this;
-    internalDispatchEvent(event);
+    _dispatchEventInDOM(event);
   }
 
-  void internalDispatchEvent(Event event) {
+
+  // Refs: https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/EventDispatcher.cpp#L85
+  void _dispatchEventInDOM(Event event) {
+    // TODO: Invoke capturing event listeners in the reverse order.
+
     String eventType = event.type;
     List<EventHandler>? existHandler = _eventHandlers[eventType];
     if (existHandler != null) {
       // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
       event.currentTarget = this;
-      // print('$this $event $existHandler');
       for (EventHandler handler in existHandler) {
         handler(event);
       }
       event.currentTarget = null;
     }
 
-    // Bubble event to root event target.
+    // Invoke bubbling event listeners.
     if (event.bubbles && !event.propagationStopped) {
-      parentEventTarget?.internalDispatchEvent(event);
+      parentEventTarget?._dispatchEventInDOM(event);
     }
   }
 
