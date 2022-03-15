@@ -285,10 +285,10 @@ class GestureManager {
 
     if (eventType == EVENT_TOUCH_MOVE) {
       _throttler.throttle(() {
-        _target?.dispatchEvent(e);
+        currentTarget.dispatchEvent(e);
       });
     } else {
-      _target?.dispatchEvent(e);
+      currentTarget.dispatchEvent(e);
     }
   }
 }
