@@ -18,10 +18,10 @@ class Pointer {
   }
 
   EventTarget? _eventTarget;
-
   EventTarget? get eventTarget => _eventTarget;
 
   void updateEventTarget(EventTarget eventTarget) {
     _eventTarget = eventTarget;
   }
 }
+
