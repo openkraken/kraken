@@ -78,22 +78,34 @@ function getParameterName(name: ts.BindingName) : string {
   return  '';
 }
 
-function getParameterType(type: ts.TypeNode) {
-  if (type.kind === ts.SyntaxKind.StringKeyword) {
+function getParameterType(type: ts.TypeNode): FunctionArgumentType | FunctionArgumentType[] {
+  if (type.kind == ts.SyntaxKind.ArrayType) {
+    let arrayType = type.kind as unknown as ts.ArrayTypeNode;
+    return [getParameterType(arrayType) as FunctionArgumentType];
+  } else if (type.kind === ts.SyntaxKind.StringKeyword) {
     return FunctionArgumentType.string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
-    return FunctionArgumentType.number;
+    return FunctionArgumentType.double;
   } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
     return FunctionArgumentType.boolean;
+  } else if (type.kind === ts.SyntaxKind.AnyKeyword) {
+    return FunctionArgumentType.any;
+  } else if (type.kind === ts.SyntaxKind.ObjectKeyword) {
+    return FunctionArgumentType.object;
   } else if (type.kind === ts.SyntaxKind.TypeReference) {
     let typeReference: ts.TypeReference = type as unknown as ts.TypeReference;
     // @ts-ignore
     let identifier = (typeReference.typeName as ts.Identifier).text;
     if (identifier === 'Function') {
       return FunctionArgumentType.function;
+    } else if (identifier === 'int32') {
+      return FunctionArgumentType.int32;
+    } else if (identifier === 'double') {
+      return FunctionArgumentType.double;
     }
   }
-  return FunctionArgumentType.union;
+
+  return FunctionArgumentType.any;
 }
 
 function paramsNodeToArguments(parameter: ts.ParameterDeclaration): FunctionArguments {

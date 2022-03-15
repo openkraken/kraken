@@ -6,38 +6,97 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_IMPL_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_IMPL_H_
 
+#include <type_traits>
+#include "atom_string.h"
 #include "converter.h"
+#include "native_string_utils.h"
 #include "ts_type.h"
 
 namespace kraken {
 
+// Optional value for pointer value.
 template <typename T>
-struct Converter<TSOptional<T>, typename std::enable_if_t<std::is_pointer<typename Converter<T>::ImplType>>> : public ConverterBase<TSOptional<T>> {
+struct Converter<TSOptional<T>, std::enable_if_t<std::is_pointer<typename Converter<T>::ImplType>::value>> : public ConverterBase<TSOptional<T>> {
   using ImplType = typename Converter<T>::ImplType;
 
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState* exception) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {
     if (JS_IsUndefined(value)) {
       return nullptr;
     }
-    return Converter<T>::FromValue(ctx, value);
+    return Converter<T>::FromValue(ctx, value, exception);
+  }
+};
+
+// Optional value for ScriptValue
+template <typename T>
+struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Converter<T>::ImplType, ScriptValue>>> : public ConverterBase<TSOptional<T>> {
+  using ImplType = typename Converter<T>::ImplType;
+
+  static ScriptValue FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {
+    if (JS_IsUndefined(value)) {
+      return ScriptValue::Empty(ctx);
+    }
+    return Converter<T>::FromValue(ctx, value, exception);
+  }
+};
+
+// Optional value for TSCallback
+template <typename T>
+struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Converter<T>::ImplType, TSCallback::ImplType>>> : public ConverterBase<TSOptional<T>> {
+  using ImplType = typename Converter<T>::ImplType;
+
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {
+    if (JS_IsUndefined(value)) {
+      return nullptr;
+    }
+    return Converter<T>::FromValue(ctx, value, exception);
+  }
+};
+
+// Macro to generate optional template for smart pointer
+#define DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(SMART_POINTER)                                                                                                    \
+  template <typename T>                                                                                                                                          \
+  struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Converter<T>::ImplType, std::SMART_POINTER<T>>>> : public ConverterBase<TSOptional<T>> { \
+    using ImplType = typename Converter<T>::ImplType;                                                                                                            \
+    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {                                                                        \
+      if (JS_IsUndefined(value)) {                                                                                                                               \
+        return nullptr;                                                                                                                                          \
+      }                                                                                                                                                          \
+      return Converter<T>::FromValue(ctx, value, exception);                                                                                                     \
+    }                                                                                                                                                            \
+  };
+
+DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(unique_ptr);
+DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(shared_ptr);
+
+// Optional value for arithmetic value
+template <typename T>
+struct Converter<TSOptional<T>, std::enable_if_t<std::is_arithmetic<typename Converter<T>::ImplType>::value>> : public ConverterBase<TSOptional<T>> {
+  using ImplType = typename Converter<T>::ImplType;
+
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {
+    if (JS_IsUndefined(value)) {
+      return 0;
+    }
+    return Converter<T>::FromValue(ctx, value, exception);
   }
 };
 
 // Any
 template <>
 struct Converter<TSAny> : public ConverterBase<TSAny> {
-  static ImplType FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return ScriptValue(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, const ScriptValue& value) { return value.toQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, const ScriptValue& value) { return value.ToQuickJS(); }
 };
 
 // Boolean
 template <>
 struct Converter<TSBoolean> : public ConverterBase<TSBoolean> {
-  static ImplType FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return JS_ToBool(ctx, value);
   };
@@ -48,7 +107,7 @@ struct Converter<TSBoolean> : public ConverterBase<TSBoolean> {
 // Uint32
 template <>
 struct Converter<TSUint32> : public ConverterBase<TSUint32> {
-  static ImplType FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     uint32_t v;
     JS_ToUint32(ctx, &v, value);
@@ -60,7 +119,7 @@ struct Converter<TSUint32> : public ConverterBase<TSUint32> {
 
 template <>
 struct Converter<TSDouble> : public ConverterBase<TSDouble> {
-  static ImplType FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     double v;
     JS_ToFloat64(ctx, &v, value);
@@ -72,7 +131,7 @@ struct Converter<TSDouble> : public ConverterBase<TSDouble> {
 
 template <>
 struct Converter<TSDOMString> : public ConverterBase<TSDOMString> {
-  static std::unique_ptr<NativeString> FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return jsValueToNativeString(ctx, value);
   }
@@ -82,7 +141,7 @@ struct Converter<TSDOMString> : public ConverterBase<TSDOMString> {
 
 template <>
 struct Converter<TSAtomString> : public ConverterBase<TSAtomString> {
-  static AtomString FromValue(JSContext* ctx, JSValue value) {
+  static AtomString FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     JSAtom atom = JS_ValueToAtom(ctx, value);
     AtomString result = AtomString(ctx, atom);
@@ -95,24 +154,40 @@ struct Converter<TSAtomString> : public ConverterBase<TSAtomString> {
 
 template <typename T>
 struct Converter<TSSequence<T>> : public ConverterBase<TSSequence<T>> {
-  using ImplType = typename TSSequence<T>::ImplType;
+  using ImplType = typename TSSequence<typename Converter<T>::ImplType>::ImplType;
 
-  static ImplType FromValue(JSContext* ctx, JSValue value) {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     assert(JS_IsArray(ctx, value));
 
-    std::vector<T> v;
-    uint32_t length = Converter<TSUint32>::FromValue(ctx, JS_GetPropertyStr(ctx, value, "length"));
+    ImplType v;
+    uint32_t length = Converter<TSUint32>::FromValue(ctx, JS_GetPropertyStr(ctx, value, "length"), exception_state);
 
     v.reserve(length);
     v.resize(length);
 
     for (uint32_t i = 0; i < length; i++) {
-      auto&& item = Converter<T>::FromValue(ctx, JS_GetPropertyUint32(ctx, value, i));
+      auto&& item = Converter<T>::FromValue(ctx, JS_GetPropertyUint32(ctx, value, i), exception_state);
+      if (exception_state.HasException()) {
+        return {};
+      }
+
       v.emplace_back(item);
     }
 
     return v;
+  }
+};
+
+template <>
+struct Converter<TSCallback> : public ConverterBase<TSCallback> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    if (!JS_IsFunction(ctx, value)) {
+      return nullptr;
+    }
+
+    return QJSFunction::Create(ctx, value);
   }
 };
 

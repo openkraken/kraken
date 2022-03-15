@@ -55,8 +55,12 @@ std::string ScriptValue::toCString() {
   return jsValueToStdString(m_ctx, m_value);
 }
 
-bool ScriptValue::isException() {
+bool ScriptValue::IsException() {
   return JS_IsException(m_value);
+}
+
+bool ScriptValue::IsEmpty() {
+  return JS_IsNull(m_value) || JS_IsUndefined(m_value);
 }
 
 }  // namespace kraken

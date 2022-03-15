@@ -23,19 +23,20 @@ struct ModuleCallbackLinker {
 
 // ModuleCallback is an asynchronous callback function, usually from the 4th parameter of `kraken.invokeModule` function.
 // When the asynchronous operation on the Dart side ends, the callback is will called and to return to the JS executing environment.
-class ModuleCallback : public GarbageCollected<ModuleCallback> {
+class ModuleCallback {
  public:
-  explicit ModuleCallback(QJSFunction* function);
+  static std::shared_ptr<ModuleCallback> Create(std::shared_ptr<QJSFunction> function);
+  explicit ModuleCallback(std::shared_ptr<QJSFunction> function);
 
-  QJSFunction* value();
+  std::shared_ptr<QJSFunction> value();
 
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
+  void Trace(GCVisitor* visitor) const;
+  void Dispose() const;
 
   ModuleCallbackLinker linker{this};
 
  private:
-  QJSFunction* function_{nullptr};
+  std::shared_ptr<QJSFunction> function_{nullptr};
 };
 
 }  // namespace kraken

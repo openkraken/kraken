@@ -14,7 +14,11 @@
 
 namespace kraken {
 
-DOMTimer::DOMTimer(ExecutingContext* context, QJSFunction* callback) : context_(context), callback_(callback) {}
+std::shared_ptr<DOMTimer> DOMTimer::create(ExecutingContext* context, std::shared_ptr<QJSFunction> callback) {
+  return std::make_shared<DOMTimer>(context, callback);
+}
+
+DOMTimer::DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback) : context_(context), callback_(callback) {}
 
 void DOMTimer::Fire() {
   if (!callback_->IsFunction(context_->ctx()))
@@ -22,7 +26,7 @@ void DOMTimer::Fire() {
 
   ScriptValue returnValue = callback_->Invoke(context_->ctx(), 0, nullptr);
 
-  if (returnValue.isException()) {
+  if (returnValue.IsException()) {
     context_->HandleException(&returnValue);
   }
 }

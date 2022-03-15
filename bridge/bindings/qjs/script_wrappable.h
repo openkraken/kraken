@@ -32,7 +32,7 @@ namespace kraken {
   static const WrapperTypeInfo& wrapper_type_info_
 
 // ScriptWrappable provides a way to map from/to C++ DOM implementation to/from
-// JavaScript object (platform object).  toQuickJS() converts a ScriptWrappable to
+// JavaScript object (platform object).  ToQuickJS() converts a ScriptWrappable to
 // a QuickJS object and toScriptWrappable() converts a QuickJS object back to
 // a ScriptWrappable.
 class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
@@ -56,6 +56,8 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   JSRuntime* runtime_{nullptr};
 };
 
+// Converts a QuickJS object back to a ScriptWrappable.
+template<typename ScriptWrappable>
 inline ScriptWrappable* toScriptWrappable(JSValue object) {
   return static_cast<ScriptWrappable*>(JS_GetOpaque(object, JSValueGetClassId(object)));
 }

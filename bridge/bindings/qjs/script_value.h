@@ -51,7 +51,8 @@ class ScriptValue final {
   std::unique_ptr<NativeString> toNativeString();
   std::string toCString();
 
-  bool isException();
+  bool IsException();
+  bool IsEmpty();
 
  private:
   JSContext* m_ctx{nullptr};

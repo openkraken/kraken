@@ -42,14 +42,14 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
   context->Timers()->removeTimeoutById(timer->timerId());
 }
 
-void DOMTimerCoordinator::installNewTimer(ExecutingContext* context, int32_t timerId, DOMTimer* timer) {
+void DOMTimerCoordinator::installNewTimer(ExecutingContext* context, int32_t timerId, std::shared_ptr<DOMTimer> timer) {
   m_activeTimers[timerId] = timer;
 }
 
 void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
   if (m_activeTimers.count(timerId) == 0)
     return nullptr;
-  DOMTimer* timer = m_activeTimers[timerId];
+  auto timer = m_activeTimers[timerId];
 
   // Push this timer to abandoned list to mark this timer is deprecated.
   m_abandonedTimers.emplace_back(timer);
@@ -58,7 +58,7 @@ void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
   return nullptr;
 }
 
-DOMTimer* DOMTimerCoordinator::getTimerById(int32_t timerId) {
+std::shared_ptr<DOMTimer> DOMTimerCoordinator::getTimerById(int32_t timerId) {
   if (m_activeTimers.count(timerId) == 0)
     return nullptr;
   return m_activeTimers[timerId];

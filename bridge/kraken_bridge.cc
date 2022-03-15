@@ -99,7 +99,7 @@ int32_t allocateNewPage(int32_t targetContextId) {
   }
 
   assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
-         (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
+         (std::string("can not Allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
   auto* page = new kraken::KrakenPage(targetContextId, nullptr);
   kraken::KrakenPage::pageContextPool[targetContextId] = page;
   return targetContextId;

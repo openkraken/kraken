@@ -7,14 +7,18 @@
 
 namespace kraken {
 
-ModuleListener::ModuleListener(QJSFunction* function) : m_function(function) {}
+std::shared_ptr<ModuleListener> ModuleListener::Create(std::shared_ptr<QJSFunction> function) {
+  return std::make_shared<ModuleListener>(function);
+}
+
+ModuleListener::ModuleListener(std::shared_ptr<QJSFunction> function) : function_(function) {}
 
 void ModuleListener::Trace(GCVisitor* visitor) const {
-  m_function->Trace(visitor);
+  function_->Trace(visitor);
 }
 
 void ModuleListener::Dispose() const {
-  m_function->Dispose();
+  function_->Dispose();
 }
 
 }  // namespace kraken

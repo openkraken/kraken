@@ -12,7 +12,7 @@ ScriptWrappable::ScriptWrappable(JSContext* ctx): ctx_(ctx), runtime_(JS_GetRunt
 
 JSValue ScriptWrappable::ToQuickJS() {
   if (wrapped_) {
-    return jsObject_;
+    return JS_DupValue(ctx_, jsObject_);
   }
 
   // Initialize the corresponding quickjs object.

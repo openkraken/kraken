@@ -1,14 +1,17 @@
 export enum FunctionArgumentType {
+  // Basic types
   string,
-  number,
+  object,
+  int32,
+  double,
   boolean,
   function,
-  union
+  any,
 }
 
 export class FunctionArguments {
   name: string;
-  type: FunctionArgumentType;
+  type: FunctionArgumentType | FunctionArgumentType[];
   required: boolean;
 }
 

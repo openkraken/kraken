@@ -24,18 +24,18 @@ class ExecutingContext;
 class DOMTimerCoordinator {
  public:
   // Creates and installs a new timer. Returns the assigned ID.
-  void installNewTimer(ExecutingContext* context, int32_t timerId, DOMTimer* timer);
+  void installNewTimer(ExecutingContext* context, int32_t timerId, std::shared_ptr<DOMTimer> timer);
 
   // Removes and disposes the timer with the specified ID, if any. This may
   // destroy the timer.
   void* removeTimeoutById(int32_t timerId);
-  DOMTimer* getTimerById(int32_t timerId);
+  std::shared_ptr<DOMTimer> getTimerById(int32_t timerId);
 
   void trace(GCVisitor* visitor);
 
  private:
-  std::unordered_map<int, DOMTimer*> m_activeTimers;
-  std::vector<DOMTimer*> m_abandonedTimers;
+  std::unordered_map<int, std::shared_ptr<DOMTimer>> m_activeTimers;
+  std::vector<std::shared_ptr<DOMTimer>> m_abandonedTimers;
 };
 
 }  // namespace kraken

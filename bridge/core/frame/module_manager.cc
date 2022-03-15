@@ -11,7 +11,7 @@ namespace kraken {
 
 struct ModuleContext {
   ExecutingContext* context;
-  ModuleCallback* callback;
+  std::shared_ptr<ModuleCallback> callback;
 };
 
 void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const char* errmsg, NativeString* json) {
@@ -33,7 +33,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
     ScriptValue arguments[] = {errorObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
-    if (returnValue.isException()) {
+    if (returnValue.IsException()) {
       context->HandleException(&returnValue);
     }
   } else {
@@ -42,7 +42,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
     ScriptValue arguments[] = {jsonObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
-    if (returnValue.isException()) {
+    if (returnValue.IsException()) {
       context->HandleException(&returnValue);
     }
   }
@@ -55,26 +55,28 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t context
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context, ScriptValue& moduleNameValue, ScriptValue& methodValue, ScriptValue& paramsValue, QJSFunction* callback, ExceptionState* exception) {
-  std::unique_ptr<NativeString> moduleName = moduleNameValue.toNativeString();
-  std::unique_ptr<NativeString> method = methodValue.toNativeString();
+ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
+                                                    std::unique_ptr<NativeString> &moduleName,
+                                                    std::unique_ptr<NativeString> &method,
+                                                    ScriptValue& paramsValue,
+                                                    std::shared_ptr<QJSFunction> callback,
+                                                    ExceptionState& exception) {
+
   std::unique_ptr<NativeString> params;
-//  if (!paramsValue.isEmpty()) {
-//    ScriptValue stringifiedValue = paramsValue.ToJSONStringify(exception);
-//    if (exception->HasException()) {
-//      return stringifiedValue;
-//    }
-//
-//    params = stringifiedValue.toNativeString();
-//  }
-//
-//  if (context->dartMethodPtr()->invokeModule == nullptr) {
-//    exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
-//    return ScriptValue(context->ctx());
-//  }
-//
-//  auto* moduleCallback = makeGarbageCollected<ModuleCallback>(callback);
-//  context->moduleCallbacks()->AddModuleCallbacks(moduleCallback);
+  if (!paramsValue.IsEmpty()) {
+    params = paramsValue.ToJSONStringify(&exception).toNativeString();
+    if (exception.HasException()) {
+      return ScriptValue::Empty(context->ctx());
+    }
+  }
+
+  if (context->dartMethodPtr()->invokeModule == nullptr) {
+    exception.ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+    return ScriptValue::Empty(context->ctx());
+  }
+
+  auto moduleCallback = ModuleCallback::Create(callback);
+  context->ModuleCallbacks()->AddModuleCallbacks(moduleCallback);
 //
 //  ModuleContext* moduleContext = new ModuleContext{context, moduleCallback};
 //
@@ -103,8 +105,8 @@ ScriptValue ModuleManager::__kraken_invoke_module__(ExecutingContext* context, S
 //  return resultString;
 }
 
-void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context, QJSFunction* handler, ExceptionState* exception) {
-  auto* listener = makeGarbageCollected<ModuleListener>(handler);
+void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, ExceptionState& exception) {
+  auto listener = ModuleListener::Create(handler);
   context->ModuleListeners()->addModuleListener(listener);
 }
 

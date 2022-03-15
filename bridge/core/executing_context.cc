@@ -30,6 +30,7 @@ void ExecutionContextGCTracker::Trace(GCVisitor* visitor) const {
   context->Trace(visitor);
 }
 void ExecutionContextGCTracker::Dispose() const {}
+const char * ExecutionContextGCTracker::GetHumanReadableName() const { return "GCTracker"; }
 
 ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : context_id_(contextId), handler_(handler), owner_(owner), ctx_invalid_(false), unique_id_(context_unique_id++) {

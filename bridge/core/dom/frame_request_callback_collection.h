@@ -13,7 +13,7 @@ namespace kraken {
 
 // |FrameCallback| is an interface type which generalizes callbacks which are
 // invoked when a script-based animation needs to be resampled.
-class FrameCallback : public GarbageCollected<FrameCallback> {
+class FrameCallback {
  public:
   FrameCallback(ExecutingContext* context, JSValue callback);
 
@@ -21,10 +21,8 @@ class FrameCallback : public GarbageCollected<FrameCallback> {
 
   ExecutingContext* context() { return context_; };
 
-  [[nodiscard]] FORCE_INLINE const char* GetHumanReadableName() const override { return "FrameCallback"; }
-
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
+  void Trace(GCVisitor* visitor) const;
+  void Dispose() const;
 
  private:
   JSValue callback_{JS_NULL};

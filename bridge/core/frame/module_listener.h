@@ -16,15 +16,16 @@ class ModuleListenerContainer;
 
 // ModuleListener is an persistent callback function. Registered from user with `kraken.addModuleListener` method.
 // When module event triggered at dart side, All module listener will be invoked and let user to dispatch further operations.
-class ModuleListener : public GarbageCollected<ModuleListener> {
+class ModuleListener {
  public:
-  explicit ModuleListener(QJSFunction* function);
+  static std::shared_ptr<ModuleListener> Create(std::shared_ptr<QJSFunction> function);
+  explicit ModuleListener(std::shared_ptr<QJSFunction> function);
 
  private:
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
+  void Trace(GCVisitor* visitor) const;
+  void Dispose() const;
 
-  QJSFunction* m_function{nullptr};
+  std::shared_ptr<QJSFunction> function_{nullptr};
 
   friend ModuleListenerContainer;
   friend ModuleCallbackCoordinator;

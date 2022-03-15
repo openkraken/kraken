@@ -21,18 +21,12 @@ class MakeGarbageCollectedTrait;
 class ExecutingContext;
 
 /**
+ * This class are mainly designed as base class for ScriptWrappable. If you wants to implement
+ * a class which have corresponding object in JS environment and have the same memory life circle with JS object, use ScriptWrappable instead.
+ *
  * Base class for GC managed objects. Only descendent types of `GarbageCollected`
  * can be constructed using `MakeGarbageCollected()`. Must be inherited from as
  * left-most base class.
- *
- * \code
- * // Example using final class.
- * class FinalType final : public GarbageCollected<FinalType> {
- *  public:
- *   void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) const {
- *     // Trace all memory wants to collected by GC.
- *   }
- * };
  */
 template <typename T>
 class GarbageCollected {
@@ -65,7 +59,7 @@ class GarbageCollected {
    *
    * @returns a human readable name for the object.
    */
-  [[nodiscard]] FORCE_INLINE virtual const char* GetHumanReadableName() const { return ""; };
+  [[nodiscard]] FORCE_INLINE virtual const char* GetHumanReadableName() const = 0;
 
  protected:
   GarbageCollected(){};
@@ -76,7 +70,7 @@ template <typename T>
 class MakeGarbageCollectedTrait {
  public:
   template <typename... Args>
-  static T* allocate(Args&&... args) {
+  static T* Allocate(Args&&... args) {
     T* object = ::new T(std::forward<Args>(args)...);
     return object;
   }
@@ -89,7 +83,7 @@ T* makeGarbageCollected(Args&&... args) {
   static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
                 "U of GarbageCollected<U> must be a base of T. Check "
                 "GarbageCollected<T> base class inheritance.");
-  return MakeGarbageCollectedTrait<T>::allocate(std::forward<Args>(args)...);
+  return MakeGarbageCollectedTrait<T>::Allocate(std::forward<Args>(args)...);
 }
 
 }  // namespace kraken

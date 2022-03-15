@@ -79,7 +79,19 @@ uint8_t* Blob::bytes() {
   return _data.data();
 }
 
+const char * Blob::GetHumanReadableName() const {
+  return "Blob";
+}
 void Blob::Trace(GCVisitor* visitor) const {}
 void Blob::Dispose() const {}
+
+Blob* Blob::Slice(ExceptionState* exception_state) {
+  return nullptr;
+}
+Blob * Blob::Slice(int64_t start, ExceptionState* exception_state) {
+  return nullptr;
+}
+
+
 
 }  // namespace kraken

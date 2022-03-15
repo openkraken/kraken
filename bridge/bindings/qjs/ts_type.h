@@ -7,11 +7,7 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_TS_TYPE_H_
 
 #include <vector>
-#include "foundation/native_string.h"
 #include "converter.h"
-#include "script_value.h"
-#include "atom_string.h"
-#include "qjs_union_arraybuffer_arraybufferview_blob_string.h"
 
 namespace kraken {
 
@@ -41,8 +37,9 @@ struct TSDouble final : public TSTypeBaseHelper<double> {};
 
 // DOMString is UTF-16 strings.
 // https://stackoverflow.com/questions/35123890/what-is-a-domstring-really
-struct TSDOMString final : public TSTypeBaseHelper<NativeString> {};
+struct TSDOMString final : public TSTypeBaseHelper<std::unique_ptr<NativeString>> {};
 
+class AtomString;
 struct TSAtomString final : public TSTypeBaseHelper<AtomString> {};
 
 // https://developer.mozilla.org/en-US/docs/Web/API/USVString
@@ -50,6 +47,11 @@ struct TSUSVString final : public TSTypeBaseHelper<std::string> {};
 
 // Object
 struct TSObject : public TSTypeBaseHelper<ScriptValue> {};
+
+// Function callback
+struct TSCallback : public TSTypeBaseHelper<std::shared_ptr<QJSFunction>> {
+  using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
+};
 
 // Sequence
 template<typename T>

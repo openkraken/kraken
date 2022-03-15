@@ -16,7 +16,7 @@ class ExecutingContext;
 
 class QJSBlob final {
  public:
-  static void install(ExecutingContext* context);
+  static void Install(ExecutingContext* context);
 
   static WrapperTypeInfo* GetWrapperTypeInfo() {
     return const_cast<WrapperTypeInfo*>(&m_wrapperTypeInfo);
@@ -26,9 +26,9 @@ class QJSBlob final {
   static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
   constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {"Blob", nullptr, ConstructorCallback};
 
-  static void installPrototypeMethods(ExecutingContext* context);
-  static void installPrototypeProperties(ExecutingContext* context);
-  static void installConstructor(ExecutingContext* context);
+  static void InstallPrototypeMethods(ExecutingContext* context);
+  static void InstallPrototypeProperties(ExecutingContext* context);
+  static void InstallConstructor(ExecutingContext* context);
 
   friend class Blob;
 };

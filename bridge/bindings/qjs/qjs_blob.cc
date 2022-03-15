@@ -7,7 +7,8 @@
 #include "member_installer.h"
 #include "core/executing_context.h"
 #include "core/fileapi/blob.h"
-#include "converter.h"
+#include "converter_impl.h"
+#include "qjs_union_arraybuffer_arraybufferview_blob_string.h"
 
 namespace kraken {
 
@@ -149,31 +150,55 @@ const WrapperTypeInfo& Blob::wrapper_type_info_ = QJSBlob::m_wrapperTypeInfo;
 //const WrapperTypeInfo Blob::wrapper_type_info_ = QJSBlob::m_wrapperTypeInfo;
 
 static JSValue arrayBuffer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 static JSValue slice(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* blob = toScriptWrappable<Blob>(this_val);
+  Blob* return_value;
+  ExceptionState exception_state;
 
+  do {
+    if (argc == 0) {
+      return_value = blob->Slice(&exception_state);
+      break;
+    }
+    double args_start = Converter<TSOptional<TSDouble>>::FromValue(ctx, argv[0], exception_state);
+    if (exception_state.HasException()) {
+      return exception_state.ToQuickJS();
+    }
+
+    if (argc <= 1) {
+      return_value = blob->Slice(args_start, &exception_state);
+    }
+
+  } while (false);
+
+  if (exception_state.HasException()) {
+    return exception_state.ToQuickJS();
+  }
+
+  return return_value->ToQuickJS();
 }
 
 static JSValue text(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 static JSValue sizeAttributeGetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 static JSValue sizeAttributeSetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 static JSValue typeAttributeGetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 static JSValue typeAttributeSetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-
+  return JS_NULL;
 }
 
 
@@ -183,7 +208,9 @@ JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue t
     return blob->ToQuickJS();
   }
 
-
+  ExceptionState exception_state;
+  std::vector<std::shared_ptr<QJSUnionArrayBufferOrArrayBufferViewOrBlobOrString>> a =
+      Converter<TSSequence<TSUnionArrayBufferOrArrayBufferViewOrBlobOrString>>::FromValue(ctx, argv[0], exception_state);
 
 //  JSValue arrayValue =  argv[0];
 //  JSValue optionValue = JS_UNDEFINED;
@@ -226,13 +253,13 @@ JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue t
 //  return blob->toQuickJS();
 }
 
-void QJSBlob::install(ExecutingContext* context) {
-  installConstructor(context);
-  installPrototypeMethods(context);
-  installPrototypeProperties(context);
+void QJSBlob::Install(ExecutingContext* context) {
+  InstallConstructor(context);
+  InstallPrototypeMethods(context);
+  InstallPrototypeProperties(context);
 }
 
-void QJSBlob::installConstructor(ExecutingContext* context) {
+void QJSBlob::InstallConstructor(ExecutingContext* context) {
   const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue constructor = context->contextData()->constructorForType(wrapperTypeInfo);
 
@@ -242,7 +269,7 @@ void QJSBlob::installConstructor(ExecutingContext* context) {
   MemberInstaller::InstallAttributes(context, context->Global(), attributeConfig);
 }
 
-void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
+void QJSBlob::InstallPrototypeMethods(ExecutingContext* context) {
   const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
 
@@ -254,7 +281,7 @@ void QJSBlob::installPrototypeMethods(ExecutingContext* context) {
   MemberInstaller::InstallAttributes(context, prototype, attributesConfig);
 }
 
-void QJSBlob::installPrototypeProperties(ExecutingContext* context) {
+void QJSBlob::InstallPrototypeProperties(ExecutingContext* context) {
   const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
   JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
 

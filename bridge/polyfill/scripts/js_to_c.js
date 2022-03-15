@@ -36,7 +36,7 @@ const getPolyFillHeader = (outputName) => `/*
 
 #include "core/executing_context.h"
 
-void initKraken${outputName}(kraken::ExecutionContext *context);
+void initKraken${outputName}(kraken::ExecutingContext *context);
 
 #endif // KRAKEN_${outputName.toUpperCase()}_H
 `;
@@ -51,7 +51,7 @@ uint8_t bytes[${uint8Array.length}] = {${uint8Array.join(',')}}; }`;
 };
 
 const getPolyfillEvalCall = () => {
-  return 'context->evaluateByteCode(bytes, byteLength);';
+  return 'context->EvaluateByteCode(bytes, byteLength);';
 }
 
 const getPolyFillSource = (source, outputName) => `/*
@@ -63,7 +63,7 @@ const getPolyFillSource = (source, outputName) => `/*
 
 ${getPolyFillJavaScriptSource(source)}
 
-void initKraken${outputName}(kraken::ExecutionContext *context) {
+void initKraken${outputName}(kraken::ExecutingContext *context) {
   ${getPolyfillEvalCall()}
 }
   `;

@@ -30,10 +30,6 @@ ScriptValue QJSFunction::Invoke(JSContext* ctx, int32_t argc, ScriptValue* argum
   return ScriptValue(ctx, returnValue);
 }
 
-const char* QJSFunction::GetHumanReadableName() const {
-  return "QJSFunction";
-}
-
 void QJSFunction::Trace(GCVisitor* visitor) const {
   visitor->Trace(function_);
 }

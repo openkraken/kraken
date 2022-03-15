@@ -12,9 +12,10 @@
 
 namespace kraken {
 
-class DOMTimer : public GarbageCollected<DOMTimer> {
+class DOMTimer {
  public:
-  DOMTimer(ExecutingContext* context, QJSFunction* callback);
+  static std::shared_ptr<DOMTimer> create(ExecutingContext* context, std::shared_ptr<QJSFunction> callback);
+  DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback);
 
   // Trigger timer callback.
   void Fire();
@@ -24,16 +25,14 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
   ExecutingContext* context() { return context_; }
 
-  [[nodiscard]] FORCE_INLINE const char* GetHumanReadableName() const override { return "DOMTimer"; }
-
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
+  void Trace(GCVisitor* visitor) const;
+  void Dispose() const;
 
  private:
   ExecutingContext* context_{nullptr};
   int32_t timerId_{-1};
   int32_t isInterval_{false};
-  QJSFunction* callback_;
+  std::shared_ptr<QJSFunction> callback_;
 };
 
 }  // namespace kraken

@@ -7,9 +7,13 @@
 
 namespace kraken {
 
-ModuleCallback::ModuleCallback(QJSFunction* function) : function_(function) {}
+std::shared_ptr<ModuleCallback> ModuleCallback::Create(std::shared_ptr<QJSFunction> function) {
+  return std::make_shared<ModuleCallback>(function);
+}
 
-QJSFunction* ModuleCallback::value() {
+ModuleCallback::ModuleCallback(std::shared_ptr<QJSFunction> function) : function_(function) {}
+
+std::shared_ptr<QJSFunction> ModuleCallback::value() {
   return function_;
 }
 

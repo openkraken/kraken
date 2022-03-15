@@ -9,30 +9,28 @@
 namespace kraken {
 
 JSValue ExecutionContextData::constructorForType(const WrapperTypeInfo* type) {
-  auto it = m_constructorMap.find(type);
-  return it != m_constructorMap.end() ? it->second : constructorForIdSlowCase(type);
+  auto it = constructor_map_.find(type);
+  return it != constructor_map_.end() ? it->second : constructorForIdSlowCase(type);
 }
 
 JSValue ExecutionContextData::prototypeForType(const WrapperTypeInfo* type) {
-  auto it = m_prototypeMap.find(type);
+  auto it = prototype_map_.find(type);
 
   // Constructor not initialized, create it.
-  if (it == m_prototypeMap.end()) {
+  if (it == prototype_map_.end()) {
     constructorForIdSlowCase(type);
-    it = m_prototypeMap.find(type);
+    it = prototype_map_.find(type);
   }
 
-  return it != m_prototypeMap.end() ? it->second : JS_NULL;
+  return it != prototype_map_.end() ? it->second : JS_NULL;
 }
 
 JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* type) {
-  JSRuntime* runtime = m_context->runtime();
   JSContext* ctx = m_context->ctx();
 
-  assert(type->classId == 0 || !JS_HasClassId(runtime, type->classId));
-
+  JSClassID class_id;
   // Allocate a new unique classID from QuickJS.
-  JS_NewClassID(const_cast<JSClassID*>(&type->classId));
+  JS_NewClassID(&class_id);
 
   // Create class template for behavior.
   JSClassDef def{};
@@ -41,8 +39,8 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   JS_NewClass(m_context->runtime(), type->classId, &def);
 
   // Create class object and prototype object.
-  JSValue classObject = m_constructorMap[type] = JS_NewObjectClass(m_context->ctx(), type->classId);
-  JSValue prototypeObject = m_prototypeMap[type] = JS_NewObject(m_context->ctx());
+  JSValue classObject = constructor_map_[type] = JS_NewObjectClass(m_context->ctx(), class_id);
+  JSValue prototypeObject = prototype_map_[type] = JS_NewObject(m_context->ctx());
 
   // Make constructor function inherit to Function.prototype
   JSValue functionConstructor = JS_GetPropertyStr(ctx, m_context->Global(), "Function");
@@ -58,8 +56,8 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
 
   // Inherit to parentClass.
   if (type->parent_class != nullptr) {
-    assert(m_prototypeMap.count(type->parent_class) > 0);
-    JS_SetPrototype(m_context->ctx(), prototypeObject, m_prototypeMap[type->parent_class]);
+    assert(prototype_map_.count(type->parent_class) > 0);
+    JS_SetPrototype(m_context->ctx(), prototypeObject, prototype_map_[type->parent_class]);
   }
 
   // Configure to be called as a constructor.

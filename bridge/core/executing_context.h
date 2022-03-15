@@ -59,6 +59,7 @@ class ExecutionContextGCTracker : public ScriptWrappable {
 
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
+  const char* GetHumanReadableName() const override;
 
  private:
 };

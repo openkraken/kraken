@@ -6,11 +6,7 @@
 #ifndef KRAKENBRIDGE_CONVERTER_H
 #define KRAKENBRIDGE_CONVERTER_H
 
-#include <quickjs/quickjs.h>
-
 #include <cassert>
-
-#include "qjs_engine_patch.h"
 
 namespace kraken {
 

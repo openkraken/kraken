@@ -230,8 +230,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dart_methods.h
     core/fileapi/blob.h
     core/fileapi/blob.cc
-    core/fileapi/dom_array_buffer_view.cc
-    core/fileapi/dom_array_buffer_view.h
     core/frame/console.cc
     core/frame/console.h
     core/frame/dom_timer.cc

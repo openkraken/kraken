@@ -49,7 +49,7 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
   handleTimerCallback(timer, errmsg);
 }
 
-int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
+int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, int32_t timeout, ExceptionState* exception) {
 #if FLUTTER_BACKEND
   if (context->dartMethodPtr()->setTimeout == nullptr) {
     exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
@@ -58,8 +58,8 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction
 #endif
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(context, handler);
-  auto timerId = context->dartMethodPtr()->setTimeout(timer, context->contextid(), handleTransientCallback, timeout);
+  auto timer = DOMTimer::create(context, handler);
+  auto timerId = context->dartMethodPtr()->setTimeout(timer.get(), context->contextid(), handleTransientCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -69,16 +69,16 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, QJSFunction
   return timerId;
 }
 
-int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, QJSFunction* handler, int32_t timeout, ExceptionState* exception) {
+int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, int32_t timeout, ExceptionState* exception) {
   if (context->dartMethodPtr()->setInterval == nullptr) {
     exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
     return -1;
   }
 
   // Create a timer object to keep track timer callback.
-  auto* timer = makeGarbageCollected<DOMTimer>(context, handler);
+  auto timer = DOMTimer::create(context, handler);
 
-  uint32_t timerId = context->dartMethodPtr()->setInterval(timer, context->contextid(), handlePersistentCallback, timeout);
+  uint32_t timerId = context->dartMethodPtr()->setInterval(timer.get(), context->contextid(), handlePersistentCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);

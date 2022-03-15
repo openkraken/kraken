@@ -29,8 +29,8 @@ class ExecutionContextData final {
 
  private:
   JSValue constructorForIdSlowCase(const WrapperTypeInfo* type);
-  std::unordered_map<const WrapperTypeInfo*, JSValue> m_constructorMap;
-  std::unordered_map<const WrapperTypeInfo*, JSValue> m_prototypeMap;
+  std::unordered_map<const WrapperTypeInfo*, JSValue> constructor_map_;
+  std::unordered_map<const WrapperTypeInfo*, JSValue> prototype_map_;
 
   ExecutingContext* m_context;
 };
