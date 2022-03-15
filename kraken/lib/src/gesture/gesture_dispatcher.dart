@@ -105,7 +105,7 @@ class GestureDispatcher {
       for (int i = 0; i < _hitTestTargets.length; i++) {
         EventTarget eventTarget = _hitTestTargets[i];
         Pointer? pointer = _pointerIdToPointer[event.pointer];
-        pointer?.target = eventTarget;
+        pointer?.UpdateEventTarget(eventTarget);
         break;
       }
 
@@ -136,7 +136,7 @@ class GestureDispatcher {
       bool isSinglePointer = _pointerIdToPointer.length == 1;
       Pointer? pointer = _pointerIdToPointer[event.pointer];
       if (isSinglePointer && pointer != null) {
-        _target = pointer.target;
+        _target = pointer.eventTarget;
       } else {
         _target = null;
       }
@@ -253,12 +253,12 @@ class GestureDispatcher {
 
   void handleTouchEvent(String eventType, Pointer targetPointer, List<Pointer> points) {
     TouchEvent e = TouchEvent(eventType);
-    EventTarget currentTarget = targetPointer.target!;
+    EventTarget currentTarget = targetPointer.eventTarget!;
 
     for (int i = 0; i < points.length; i++) {
       Pointer pointer = points[i];
       PointerEvent pointerEvent = pointer.event;
-      EventTarget target = pointer.target!;
+      EventTarget target = pointer.eventTarget!;
 
       Touch touch = Touch(
         identifier: pointerEvent.pointer,
