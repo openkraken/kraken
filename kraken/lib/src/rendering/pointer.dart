@@ -49,7 +49,7 @@ mixin RenderEventListenerMixin on RenderBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    GestureManager.instance().handlePointerEvent(event, this);
+    GestureDispatcher.instance.handlePointerEvent(event, this);
     super.handleEvent(event, entry);
   }
 }

@@ -130,7 +130,7 @@ class RenderViewportBox extends RenderProxyBox
     }
 
     // Add pointer to GestureManager.
-    GestureManager.instance().addPointer(event);
+    GestureDispatcher.instance.addPointer(event);
   }
 
   @override

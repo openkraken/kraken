@@ -8,45 +8,48 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/src/scheduler/throttle.dart';
 
-import '../../scheduler.dart';
 import 'pointer.dart';
 
-class GestureManager {
-  static const int MAX_STEP_MS = 16;
+const int _MAX_STEP_MS = 16;
 
-  static GestureManager? _instance;
+class GestureDispatcher {
 
-  GestureManager._();
-
-  factory GestureManager.instance() {
+  static GestureDispatcher? _instance;
+  static get instance {
     if (_instance == null) {
-      GestureManager instance = _instance = GestureManager._();
-
-      instance._gestures[EVENT_CLICK] = TapGestureRecognizer();
-      (instance._gestures[EVENT_CLICK] as TapGestureRecognizer).onTapUp = instance.onClick;
-
-      instance._gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
-      (instance._gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = instance.onDoubleClick;
-
-      instance._gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
-      (instance._gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = instance.onSwipe;
-
-      instance._gestures[EVENT_PAN] = PanGestureRecognizer();
-      (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onStart = instance.onPanStart;
-      (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = instance.onPanUpdate;
-      (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = instance.onPanEnd;
-
-      instance._gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
-      (instance._gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = instance.onLongPressEnd;
-
-      instance._gestures[EVENT_SCALE] = ScaleGestureRecognizer();
-      (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = instance.onScaleStart;
-      (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = instance.onScaleUpdate;
-      (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = instance.onScaleEnd;
+      GestureDispatcher instance = _instance = GestureDispatcher._();
+      _bindAllGestureRecognizer(instance);
     }
     return _instance!;
   }
+
+  static void _bindAllGestureRecognizer(GestureDispatcher instance) {
+    instance._gestures[EVENT_CLICK] = TapGestureRecognizer();
+    (instance._gestures[EVENT_CLICK] as TapGestureRecognizer).onTapUp = instance.onClick;
+
+    instance._gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
+    (instance._gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = instance.onDoubleClick;
+
+    instance._gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
+    (instance._gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = instance.onSwipe;
+
+    instance._gestures[EVENT_PAN] = PanGestureRecognizer();
+    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onStart = instance.onPanStart;
+    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = instance.onPanUpdate;
+    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = instance.onPanEnd;
+
+    instance._gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
+    (instance._gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = instance.onLongPressEnd;
+
+    instance._gestures[EVENT_SCALE] = ScaleGestureRecognizer();
+    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = instance.onScaleStart;
+    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = instance.onScaleUpdate;
+    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = instance.onScaleEnd;
+  }
+
+  GestureDispatcher._();
 
   final Map<String, GestureRecognizer> _gestures = <String, GestureRecognizer>{};
 
@@ -58,7 +61,7 @@ class GestureManager {
 
   EventTarget? _target;
 
-  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
+  final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
 
   void addEventTarget(EventTarget lowestTarget) {
     if (_hitTestTargets.isNotEmpty) {
@@ -147,7 +150,7 @@ class GestureManager {
     /// pointers), or has its button pressed (for mouse pointers) at this widget's
     /// location.
     if (event is PointerDownEvent && target.getEventTarget != null) {
-      GestureManager.instance().addEventTarget(target.getEventTarget!());
+      GestureDispatcher.instance.addEventTarget(target.getEventTarget!());
     }
   }
 
