@@ -12,7 +12,7 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
 
 class RenderViewportBox extends RenderProxyBox
-    with RenderObjectWithControllerMixin, RenderPointerListenerMixin {
+    with RenderObjectWithControllerMixin, RenderEventListenerMixin {
   RenderViewportBox({
     required Size viewportSize,
     RenderBox? child,
@@ -126,7 +126,6 @@ class RenderViewportBox extends RenderProxyBox
     super.handleEvent(event, entry as BoxHitTestEntry);
     if (event is PointerDownEvent) {
       // Add viewport to hitTest list.
-      GestureManager.instance().addTargetToList(this);
       _verticalDragGestureRecognizer.addPointer(event);
     }
 

@@ -63,6 +63,7 @@ abstract class EventTarget extends BindingObject {
     if (existHandler != null) {
       // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
       event.currentTarget = this;
+      // print('$this $event $existHandler');
       for (EventHandler handler in existHandler) {
         handler(event);
       }

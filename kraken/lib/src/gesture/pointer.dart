@@ -17,5 +17,5 @@ class Pointer {
     _event = event;
   }
 
-  Element? target;
+  EventTarget? target;
 }

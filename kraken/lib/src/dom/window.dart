@@ -8,7 +8,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/bridge.dart';
 
 const String WINDOW = 'WINDOW';
@@ -90,32 +89,24 @@ class Window extends EventTarget {
 
   @override
   void addEventListener(String eventType, EventHandler handler) {
-    super.addEventListener(eventType, handler);
-
     switch (eventType) {
       case EVENT_SCROLL:
         // Fired at the Document or element when the viewport or element is scrolled, respectively.
-        document.documentElement?.addEventListener(eventType, internalDispatchEvent);
+        document.documentElement?.addEventListener(eventType, handler);
         break;
       default:
-        // Events listened on the Window need to be proxy to the Document, because there is a RenderView on the Document, which can handle hitTest.
-        // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/page/VisualViewport.cpp#L61
-        document.addEventListener(eventType, internalDispatchEvent);
-        break;
+        super.addEventListener(eventType, handler);
     }
   }
 
   @override
   void removeEventListener(String eventType, EventHandler handler) {
-    super.removeEventListener(eventType, handler);
-
     switch (eventType) {
       case EVENT_SCROLL:
-        document.documentElement?.removeEventListener(eventType, internalDispatchEvent);
+        document.documentElement?.removeEventListener(eventType, handler);
         break;
       default:
-        document.removeEventListener(eventType, internalDispatchEvent);
-        break;
+        super.removeEventListener(eventType, handler);
     }
   }
 

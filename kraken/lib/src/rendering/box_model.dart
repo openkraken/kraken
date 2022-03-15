@@ -569,7 +569,7 @@ class RenderBoxModel extends RenderBox
     RenderOpacityMixin,
     RenderIntersectionObserverMixin,
     RenderContentVisibilityMixin,
-    RenderPointerListenerMixin,
+    RenderEventListenerMixin,
     RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.renderStyle,
@@ -1431,7 +1431,7 @@ class RenderBoxModel extends RenderBox
   }
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
     if (scrollablePointerListener != null) {
       scrollablePointerListener!(event);

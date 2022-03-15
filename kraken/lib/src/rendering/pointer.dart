@@ -6,8 +6,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/src/gesture/pointer.dart' as gesture_pointer;
+
+import '../../gesture.dart';
 
 typedef GestureCallback = void Function(Event);
 
@@ -33,7 +34,7 @@ typedef HandleTouchEvent = void Function(String type, gesture_pointer.Pointer ta
 
 typedef HandleGetEventTarget = EventTarget Function();
 
-mixin RenderPointerListenerMixin on RenderBox {
+mixin RenderEventListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
 
@@ -46,14 +47,9 @@ mixin RenderPointerListenerMixin on RenderBox {
   HandleGetEventTarget? getEventTarget;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-
-    /// AddPointer when a pointer comes into contact with the screen (for touch
-    /// pointers), or has its button pressed (for mouse pointers) at this widget's
-    /// location.
-    if (event is PointerDownEvent) {
-      GestureManager.instance().addTargetToList(this);
-    }
+    GestureManager.instance().handlePointerEvent(event, this);
+    super.handleEvent(event, entry);
   }
 }

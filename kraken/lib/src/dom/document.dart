@@ -108,19 +108,6 @@ class Document extends Node {
     return super.replaceChild(newNode, oldNode);
   }
 
-  @override
-  void addEventListener(String eventType, EventHandler handler) {
-    super.addEventListener(eventType, handler);
-    // Events listened on document proxy to documentElement which can handle hitTest.
-    documentElement?.addEventListener(eventType, internalDispatchEvent);
-  }
-
-  @override
-  void removeEventListener(String eventType, EventHandler handler) {
-    super.removeEventListener(eventType, handler);
-    documentElement?.removeEventListener(eventType, internalDispatchEvent);
-  }
-
   Element createElement(String type, [context]) {
     Element element = element_registry.createElement(type, context);
     element.ownerDocument = this;

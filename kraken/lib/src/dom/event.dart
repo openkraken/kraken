@@ -7,12 +7,9 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter/gestures.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/scheduler.dart';
-import 'package:kraken/src/gesture/pointer.dart' as gesture_pointer;
 
 enum AppearEventType {
   none,
@@ -72,14 +69,10 @@ const String EVENT_STATE_END = 'end';
 mixin ElementEventMixin on ElementBase {
   AppearEventType _prevAppearState = AppearEventType.none;
 
-  static const int MAX_STEP_MS = 16;
-  final Throttling _throttler = Throttling(duration: Duration(milliseconds: MAX_STEP_MS));
-
-  void clearEventResponder(RenderPointerListenerMixin renderBox) {
+  void clearEventResponder(RenderEventListenerMixin renderBox) {
     renderBox.handleMouseEvent = null;
     renderBox.handleGestureEvent = null;
     renderBox.handleTouchEvent = null;
-    renderBox.getEventTarget = null;
   }
 
   void ensureEventResponderBound() {
@@ -87,9 +80,6 @@ mixin ElementEventMixin on ElementBase {
     RenderBoxModel? renderBox = renderBoxModel;
     if (renderBox != null) {
       // Make sure pointer responder bind.
-      renderBox.handleMouseEvent = handleMouseEvent;
-      renderBox.handleGestureEvent = handleGestureEvent;
-      renderBox.handleTouchEvent = handleTouchEvent;
       renderBox.getEventTarget = getEventTarget;
 
       if (_hasIntersectionObserverEvent()) {
@@ -130,103 +120,9 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-  void handleTouchEvent(String touchType, gesture_pointer.Pointer targetPointer, List<gesture_pointer.Pointer> points) {
-    TouchEvent e = TouchEvent(touchType);
-    e.target = this;
-    EventTarget currentTarget = targetPointer.target!;
 
-    for (int i = 0; i < points.length; i++) {
-      gesture_pointer.Pointer pointer = points[i];
-      PointerEvent pointerEvent = pointer.event;
-      EventTarget target = pointer.target!;
 
-      Touch touch = Touch(
-        identifier: pointerEvent.pointer,
-        target: target,
-        screenX: pointerEvent.position.dx,
-        screenY: pointerEvent.position.dy,
-        clientX: pointerEvent.localPosition.dx,
-        clientY: pointerEvent.localPosition.dy,
-        pageX: pointerEvent.localPosition.dx,
-        pageY: pointerEvent.localPosition.dy,
-        radiusX: pointerEvent.radiusMajor,
-        radiusY: pointerEvent.radiusMinor,
-        rotationAngle: pointerEvent.orientation,
-        force: pointerEvent.pressure,
-      );
 
-      if (targetPointer == pointer) {
-        e.changedTouches.append(touch);
-      }
-
-      if (currentTarget == target) {
-        e.targetTouches.append(touch);
-      }
-
-      e.touches.append(touch);
-    }
-
-    if (touchType == EVENT_TOUCH_MOVE) {
-      _throttler.throttle(() {
-        dispatchEvent(e);
-      });
-    } else {
-      dispatchEvent(e);
-    }
-  }
-
-  void handleMouseEvent(String type, {
-    Offset localPosition = Offset.zero,
-    Offset globalPosition = Offset.zero,
-    bool bubbles = true,
-    bool cancelable = true,
-  }) {
-    RenderBoxModel? root = ownerDocument.documentElement?.renderBoxModel;
-
-    if (root == null) {
-      return;
-    }
-
-    // When Kraken wraps the Flutter Widget, Kraken need to calculate the global coordinates relative to self.
-    Offset globalOffset = root.globalToLocal(Offset(globalPosition.dx, globalPosition.dy));
-    double clientX = globalOffset.dx;
-    double clientY = globalOffset.dy;
-
-    Event event = MouseEvent(type,
-        MouseEventInit(
-          bubbles: bubbles,
-          cancelable: cancelable,
-          clientX: clientX,
-          clientY: clientY,
-          offsetX: localPosition.dx,
-          offsetY: localPosition.dy,
-        )
-    );
-    dispatchEvent(event);
-  }
-
-  void handleGestureEvent(String type, {
-    String state = '',
-    String direction = '',
-    double rotation = 0.0,
-    double deltaX = 0.0,
-    double deltaY = 0.0,
-    double velocityX = 0.0,
-    double velocityY = 0.0,
-    double scale = 0.0
-  }) {
-    Event event = GestureEvent(type, GestureEventInit(
-      state: state,
-      direction: direction,
-      rotation: rotation,
-      deltaX: deltaX,
-      deltaY: deltaY,
-      velocityX: velocityX,
-      velocityY: velocityY,
-      scale: scale,
-    ));
-    dispatchEvent(event);
-  }
 
   void handleAppear() {
     if (_prevAppearState == AppearEventType.appear) return;
