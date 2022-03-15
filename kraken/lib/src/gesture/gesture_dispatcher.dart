@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/src/scheduler/throttle.dart';
 
 import 'pointer.dart';
@@ -17,7 +16,7 @@ const int _MAX_STEP_MS = 16;
 class GestureDispatcher {
 
   static GestureDispatcher? _instance;
-  static get instance {
+  static GestureDispatcher get instance {
     if (_instance == null) {
       GestureDispatcher instance = _instance = GestureDispatcher._();
       _bindAllGestureRecognizer(instance);
@@ -62,17 +61,6 @@ class GestureDispatcher {
   EventTarget? _target;
 
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
-
-  void addEventTarget(EventTarget lowestTarget) {
-    if (_hitTestTargets.isNotEmpty) {
-      return;
-    }
-    EventTarget? target = lowestTarget;
-    while (target != null) {
-      _hitTestTargets.add(target);
-      target = target.parentEventTarget;
-    }
-  }
 
   void addPointer(PointerEvent event) {
     String touchType;
@@ -127,7 +115,7 @@ class GestureDispatcher {
     // Only dispatch touch event that added.
     bool needDispatch = _hitTestEvents.containsKey(touchType);
     if (needDispatch && pointer != null) {
-      handleTouchEvent(touchType, _pointerIdToPointer[event.pointer]!, _pointerIdToPointer.values.toList());
+      _handleTouchEvent(touchType, _pointerIdToPointer[event.pointer]!, _pointerIdToPointer.values.toList());
     }
 
     // End of the gesture.
@@ -145,20 +133,58 @@ class GestureDispatcher {
     }
   }
 
-  void handlePointerEvent(PointerEvent event, RenderEventListenerMixin target) {
-    /// AddPointer when a pointer comes into contact with the screen (for touch
-    /// pointers), or has its button pressed (for mouse pointers) at this widget's
-    /// location.
-    if (event is PointerDownEvent && target.getEventTarget != null) {
-      GestureDispatcher.instance.addEventTarget(target.getEventTarget!());
+  void addEventTarget(EventTarget lowestTarget) {
+    if (_hitTestTargets.isNotEmpty) {
+      return;
+    }
+    EventTarget? target = lowestTarget;
+    while (target != null) {
+      _hitTestTargets.add(target);
+      target = target.parentEventTarget;
     }
   }
 
   void onDoubleClick(TapDownDetails details) {
-    handleMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
+    _handleMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void handleMouseEvent(String type, {
+  void onClick(TapUpDetails details) {
+    _handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
+  }
+
+  void onLongPressEnd(LongPressEndDetails details) {
+    _handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
+  }
+
+  void onSwipe(SwipeDetails details) {
+    _handleGestureEvent(EVENT_SWIPE, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+  }
+
+  void onPanStart(DragStartDetails details) {
+    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+  }
+
+  void onPanUpdate(DragUpdateDetails details) {
+    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+  }
+
+  void onPanEnd(DragEndDetails details) {
+    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+  }
+
+  void onScaleStart(ScaleStartDetails details) {
+    _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_START);
+  }
+
+  void onScaleUpdate(ScaleUpdateDetails details) {
+    _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale);
+  }
+
+  void onScaleEnd(ScaleEndDetails details) {
+    _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_END);
+  }
+
+  void _handleMouseEvent(String type, {
     Offset localPosition = Offset.zero,
     Offset globalPosition = Offset.zero,
     bool bubbles = true,
@@ -192,15 +218,7 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void onClick(TapUpDetails details) {
-    handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
-  }
-
-  void onLongPressEnd(LongPressEndDetails details) {
-    handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
-  }
-
-  void handleGestureEvent(String type, {
+  void _handleGestureEvent(String type, {
     String state = '',
     String direction = '',
     double rotation = 0.0,
@@ -223,35 +241,7 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void onSwipe(SwipeDetails details) {
-    handleGestureEvent(EVENT_SWIPE, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
-  }
-
-  void onPanStart(DragStartDetails details) {
-    handleGestureEvent(EVENT_PAN, state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
-  }
-
-  void onPanUpdate(DragUpdateDetails details) {
-    handleGestureEvent(EVENT_PAN, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
-  }
-
-  void onPanEnd(DragEndDetails details) {
-    handleGestureEvent(EVENT_PAN, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
-  }
-
-  void onScaleStart(ScaleStartDetails details) {
-    handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_START);
-  }
-
-  void onScaleUpdate(ScaleUpdateDetails details) {
-    handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale);
-  }
-
-  void onScaleEnd(ScaleEndDetails details) {
-    handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_END);
-  }
-
-  void handleTouchEvent(String eventType, Pointer targetPointer, List<Pointer> points) {
+  void _handleTouchEvent(String eventType, Pointer targetPointer, List<Pointer> points) {
     TouchEvent e = TouchEvent(eventType);
     EventTarget currentTarget = targetPointer.eventTarget!;
 

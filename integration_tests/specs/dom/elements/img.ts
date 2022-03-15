@@ -313,12 +313,12 @@ describe('Tags img', () => {
       await snapshot(img);
       document.body.removeChild(img);
 
+      // Delay 200ms to play gif.
       setTimeout(async () => {
         // When img re-append to document, to Gif image will continue to play.
         document.body.appendChild(img);
         await snapshot(img);
         done();
-        // Delay 200ms to play gif.
       }, 200);
     };
 

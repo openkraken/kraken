@@ -70,9 +70,7 @@ mixin ElementEventMixin on ElementBase {
   AppearEventType _prevAppearState = AppearEventType.none;
 
   void clearEventResponder(RenderEventListenerMixin renderBox) {
-    renderBox.handleMouseEvent = null;
-    renderBox.handleGestureEvent = null;
-    renderBox.handleTouchEvent = null;
+    renderBox.getEventTarget = null;
   }
 
   void ensureEventResponderBound() {
