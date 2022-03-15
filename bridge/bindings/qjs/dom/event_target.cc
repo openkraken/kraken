@@ -12,7 +12,6 @@
 #include "document.h"
 #include "element.h"
 #include "event.h"
-#include "foundation/logging.h"
 #include "kraken_bridge.h"
 
 #if UNIT_TEST
