@@ -124,20 +124,4 @@ class Window extends EventTarget {
   void focus() {
     // TODO
   }
-
-  @override
-  void addEventsToRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = document.viewport;
-    if (renderBox != null) {
-      renderBox.eventManager.add(eventType);
-    }
-  }
-
-  @override
-  void removeEventsFromRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = document.viewport;
-    if (renderBox != null) {
-      renderBox.eventManager.remove(eventType);
-    }
-  }
 }

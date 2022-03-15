@@ -33,30 +33,6 @@ typedef HandleTouchEvent = void Function(String type, gesture_pointer.Pointer ta
 
 typedef HandleGetEventTarget = EventTarget Function();
 
-class EventManager {
-  EventManager({ List<String>? events }) : _events = events ?? [];
-
-  final List<String> _events;
-
-  List<String> get events => _events;
-
-  void add(String eventType) {
-    _events.add(eventType);
-  }
-
-  void remove(String eventType) {
-    _events.remove(eventType);
-  }
-
-  void clear() {
-    _events.clear();
-  }
-
-  EventManager copyWith() {
-    return EventManager(events: _events);
-  }
-}
-
 mixin RenderPointerListenerMixin on RenderBox {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener? onPointerSignal;
@@ -68,8 +44,6 @@ mixin RenderPointerListenerMixin on RenderBox {
   HandleTouchEvent? handleTouchEvent;
 
   HandleGetEventTarget? getEventTarget;
-
-  EventManager eventManager = EventManager();
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {

@@ -281,22 +281,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  void addEventsToRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = renderer as RenderPointerListenerMixin?;
-    if (renderBox != null) {
-      renderBox.eventManager.add(eventType);
-    }
-  }
-
-  @override
-  void removeEventsFromRenderBoxModel(String eventType) {
-    RenderPointerListenerMixin? renderBox = renderer as RenderPointerListenerMixin?;
-    if (renderBox != null) {
-      renderBox.eventManager.add(eventType);
-    }
-  }
-
-  @override
   EventTarget? get parentEventTarget => parentNode;
 }
 

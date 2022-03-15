@@ -450,7 +450,6 @@ abstract class Element
     // Init render box model.
     if (renderStyle.display != CSSDisplay.none) {
       createRenderer();
-      addAllEventsToRenderBoxModel();
     }
   }
 
@@ -464,8 +463,6 @@ abstract class Element
   @override
   void willDetachRenderer() {
     super.willDetachRenderer();
-
-    removeAllEventsFromRenderBoxModel();
 
     // Cancel running transition.
     renderStyle.cancelRunningTransition();

@@ -33,10 +33,6 @@ abstract class EventTarget extends BindingObject {
       _eventHandlers[eventType] = existHandler = [];
     }
 
-    if (existHandler.isEmpty) {
-      addEventsToRenderBoxModel(eventType);
-    }
-
     existHandler.add(eventHandler);
   }
 
@@ -49,28 +45,9 @@ abstract class EventTarget extends BindingObject {
       currentHandlers.remove(eventHandler);
       if (currentHandlers.isEmpty) {
         _eventHandlers.remove(eventType);
-        removeEventsFromRenderBoxModel(eventType);
       }
     }
   }
-
-  @protected
-  void addAllEventsToRenderBoxModel() {
-    _eventHandlers.keys.forEach(addEventsToRenderBoxModel);
-  }
-
-  @protected
-  void removeAllEventsFromRenderBoxModel() {
-    _eventHandlers.keys.forEach(removeEventsFromRenderBoxModel);
-  }
-
-  // Add event to events of render when listening is required to add corresponding events on the element.
-  @protected
-  void addEventsToRenderBoxModel(String eventType);
-
-  // Remove event from events of render when there is no corresponding event to listen for on the element.
-  @protected
-  void removeEventsFromRenderBoxModel(String eventType);
 
   @mustCallSuper
   void dispatchEvent(Event event) {
