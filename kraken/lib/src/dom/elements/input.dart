@@ -206,8 +206,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
 
   TextInputConfiguration? _textInputConfiguration;
 
-  InputElement({
-    BindingContext? context,
+  InputElement(context, {
     this.textAlign = TextAlign.left,
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
