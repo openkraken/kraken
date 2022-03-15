@@ -14,6 +14,9 @@
 #include "event.h"
 #include "kraken_bridge.h"
 
+#define PROPAGATION_STOPPED 1
+#define PROPAGATION_CONTINUE 0
+
 #if UNIT_TEST
 #include "kraken_test_env.h"
 #endif
@@ -501,7 +504,7 @@ int32_t NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarge
   // FIXME: The return value is first propagationStopped instead of cancelable, and then implement a separate method to synchronize propagationStopped.
   // Dispatches a synthetic event event to target and returns true if either event’s cancelable attribute value is false or its preventDefault() method was not invoked; otherwise false.
   // https://dom.spec.whatwg.org/#ref-for-dom-eventtarget-dispatchevent%E2%91%A2
-  return propagationStopped ? 1 : 0;
+  return propagationStopped ? PROPAGATION_STOPPED : PROPAGATION_CONTINUE;
 }
 
 }  // namespace kraken::binding::qjs
