@@ -591,7 +591,7 @@ class Touch {
   final double azimuthAngle;
   final TouchType touchType;
 
-  Touch({
+  const Touch({
     required this.identifier,
     required this.target,
     this.clientX = 0,
