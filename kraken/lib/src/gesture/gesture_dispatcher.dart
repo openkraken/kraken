@@ -4,6 +4,7 @@
  */
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -13,48 +14,82 @@ import 'pointer.dart';
 
 const int _MAX_STEP_MS = 16;
 
+class _DragEventInfo extends Drag {
+  static _DragEventInfo? _instance;
+  static _DragEventInfo get instance {
+    return _instance ??= _DragEventInfo._();
+  }
+
+  _DragEventInfo._();
+
+  /// The pointer has moved.
+  @override
+  void update(DragUpdateDetails details) {
+    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+  }
+
+  /// The pointer is no longer in contact with the screen.
+  ///
+  /// The velocity at which the pointer was moving when it stopped contacting
+  /// the screen is available in the `details`.
+  @override
+  void end(DragEndDetails details) {
+    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+  }
+
+  /// The input from the pointer is no longer directed towards this receiver.
+  ///
+  /// For example, the user might have been interrupted by a system-modal dialog
+  /// in the middle of the drag.
+  @override
+  void cancel() {
+    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_CANCEL);
+  }
+}
+
 class GestureDispatcher {
 
   static GestureDispatcher? _instance;
   static GestureDispatcher get instance {
     if (_instance == null) {
       GestureDispatcher instance = _instance = GestureDispatcher._();
-      _bindAllGestureRecognizer(instance);
+      _addAllGestureRecognizer(instance);
     }
     return _instance!;
   }
 
-  static void _bindAllGestureRecognizer(GestureDispatcher instance) {
-    instance._gestures[EVENT_CLICK] = TapGestureRecognizer();
-    (instance._gestures[EVENT_CLICK] as TapGestureRecognizer).onTapUp = instance.onClick;
-
-    instance._gestures[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer();
-    (instance._gestures[EVENT_DOUBLE_CLICK] as DoubleTapGestureRecognizer).onDoubleTapDown = instance.onDoubleClick;
-
-    instance._gestures[EVENT_SWIPE] = SwipeGestureRecognizer();
-    (instance._gestures[EVENT_SWIPE] as SwipeGestureRecognizer).onSwipe = instance.onSwipe;
-
-    instance._gestures[EVENT_PAN] = PanGestureRecognizer();
-    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onStart = instance.onPanStart;
-    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onUpdate = instance.onPanUpdate;
-    (instance._gestures[EVENT_PAN] as PanGestureRecognizer).onEnd = instance.onPanEnd;
-
-    instance._gestures[EVENT_LONG_PRESS] = LongPressGestureRecognizer();
-    (instance._gestures[EVENT_LONG_PRESS] as LongPressGestureRecognizer).onLongPressEnd = instance.onLongPressEnd;
-
-    instance._gestures[EVENT_SCALE] = ScaleGestureRecognizer();
-    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onStart = instance.onScaleStart;
-    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onUpdate = instance.onScaleUpdate;
-    (instance._gestures[EVENT_SCALE] as ScaleGestureRecognizer).onEnd = instance.onScaleEnd;
+  static void _addAllGestureRecognizer(GestureDispatcher instance) {
+    Map<String, GestureRecognizer> gestureRecognizers = instance._gestureRecognizers;
+    // Tap Recognizer
+    gestureRecognizers[EVENT_CLICK] = TapGestureRecognizer()..onTapUp = instance._onClick;
+    // DoubleTap Recognizer
+    gestureRecognizers[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer()..onDoubleTapDown = instance._onDoubleClick;
+    // Swipe Recognizer
+    gestureRecognizers[EVENT_SWIPE] = SwipeGestureRecognizer()..onSwipe = instance._onSwipe;
+    // Pan Recognizer
+    gestureRecognizers[EVENT_PAN] = PanGestureRecognizer()
+      ..onStart = instance._onPanStart
+      ..onUpdate = instance._onPanUpdate
+      ..onEnd = instance._onPanEnd;
+    // LongPress Recognizer
+    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPressEnd = instance._onLongPressEnd;
+    // Scale Recognizer
+    gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
+      ..onStart = instance._onScaleStart
+      ..onUpdate = instance._onScaleUpdate
+      ..onEnd = instance._onScaleEnd;
+    // Drag Recognizer
+    gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
+      ..onStart = instance._onDragStart;
   }
 
   GestureDispatcher._();
 
-  final Map<String, GestureRecognizer> _gestures = <String, GestureRecognizer>{};
+  final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
-  final List<EventTarget> _hitTestTargets = [];
-  // Collect the events in the hitTest list.
-  final Map<String, bool> _hitTestEvents = {};
+  List<EventTarget> _eventPath = const [];
+  // Collect the events in the event path list.
+  final Map<String, bool> _eventsInPath = const {};
 
   final Map<int, Pointer> _pointerIdToPointer = {};
 
@@ -62,42 +97,47 @@ class GestureDispatcher {
 
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
 
-  void addPointer(PointerEvent event) {
+  void markEventsInPath() {
+    // Reset the event map when start a new gesture.
+    _eventsInPath.clear();
+
+    for (int i = 0; i < _eventPath.length; i++) {
+      EventTarget eventTarget = _eventPath[i];
+      eventTarget.getEventHandlers().keys.forEach((eventType) {
+        _eventsInPath[eventType] = true;
+      });
+    }
+  }
+
+  void addPointerDownEventToMatchedRecognizers(PointerDownEvent event) {
+    // Add pointer to gestures then register the gesture recognizer to the arena.
+    _gestureRecognizers.forEach((key, gesture) {
+      // Register the recognizer that needs to be monitored.
+      if (_eventsInPath.containsKey(key)) {
+        gesture.addPointer(event);
+      }
+    });
+  }
+
+  void handlePointerEvent(PointerEvent event) {
     String touchType;
 
     if (event is PointerDownEvent) {
-      // Reset the hitTest event map when start a new gesture.
-      _hitTestEvents.clear();
-
-      _pointerIdToPointer[event.pointer] = Pointer(event);
-
-      for (int i = 0; i < _hitTestTargets.length; i++) {
-        EventTarget eventTarget = _hitTestTargets[i];
-        eventTarget.getEventHandlers().keys.forEach((eventType) {
-          _hitTestEvents[eventType] = true;
-        });
-      }
-
       touchType = EVENT_TOUCH_START;
 
-      // Add pointer to gestures then register the gesture recognizer to the arena.
-      _gestures.forEach((key, gesture) {
-        // Register the recognizer that needs to be monitored.
-        if (_hitTestEvents.containsKey(key)) {
-          gesture.addPointer(event);
-        }
-      });
+      _pointerIdToPointer[event.pointer] = Pointer(event);
+      markEventsInPath();
+      addPointerDownEventToMatchedRecognizers(event);
 
       // The target node triggered by the gesture is the bottom node of hitTest.
       // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
-      for (int i = 0; i < _hitTestTargets.length; i++) {
-        EventTarget eventTarget = _hitTestTargets[i];
+      for (int i = 0; i < _eventPath.length; i++) {
+        EventTarget eventTarget = _eventPath[i];
         Pointer? pointer = _pointerIdToPointer[event.pointer];
-        pointer?.UpdateEventTarget(eventTarget);
+        pointer?.updateEventTarget(eventTarget);
         break;
       }
 
-      _hitTestTargets.clear();
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
     } else if (event is PointerUpEvent) {
@@ -113,7 +153,7 @@ class GestureDispatcher {
     if (_pointerIdToPointer[event.pointer] == null) return;
 
     // Only dispatch touch event that added.
-    bool needDispatch = _hitTestEvents.containsKey(touchType);
+    bool needDispatch = _eventsInPath.containsKey(touchType);
     if (needDispatch && pointer != null) {
       _handleTouchEvent(touchType, _pointerIdToPointer[event.pointer]!, _pointerIdToPointer.values.toList());
     }
@@ -133,55 +173,61 @@ class GestureDispatcher {
     }
   }
 
-  void addEventTarget(EventTarget lowestTarget) {
-    if (_hitTestTargets.isNotEmpty) {
-      return;
-    }
-    EventTarget? target = lowestTarget;
-    while (target != null) {
-      _hitTestTargets.add(target);
-      target = target.parentEventTarget;
-    }
+  void resetEventPath() {
+    _eventPath = const [];
   }
 
-  void onDoubleClick(TapDownDetails details) {
+  List<EventTarget> getEventPath() {
+    return _eventPath;
+  }
+
+  void setEventPath(EventTarget target) {
+    _eventPath = target.eventPath;
+  }
+
+  void _onDoubleClick(TapDownDetails details) {
     _handleMouseEvent(EVENT_DOUBLE_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void onClick(TapUpDetails details) {
+  void _onClick(TapUpDetails details) {
     _handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void onLongPressEnd(LongPressEndDetails details) {
+  void _onLongPressEnd(LongPressEndDetails details) {
     _handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void onSwipe(SwipeDetails details) {
+  void _onSwipe(SwipeDetails details) {
     _handleGestureEvent(EVENT_SWIPE, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
-  void onPanStart(DragStartDetails details) {
+  void _onPanStart(DragStartDetails details) {
     _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
-  void onPanUpdate(DragUpdateDetails details) {
+  void _onPanUpdate(DragUpdateDetails details) {
     _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
-  void onPanEnd(DragEndDetails details) {
+  void _onPanEnd(DragEndDetails details) {
     _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
-  void onScaleStart(ScaleStartDetails details) {
+  void _onScaleStart(ScaleStartDetails details) {
     _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_START);
   }
 
-  void onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(ScaleUpdateDetails details) {
     _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_UPDATE, rotation: details.rotation, scale: details.scale);
   }
 
-  void onScaleEnd(ScaleEndDetails details) {
+  void _onScaleEnd(ScaleEndDetails details) {
     _handleGestureEvent(EVENT_SCALE, state: EVENT_STATE_END);
+  }
+
+  Drag? _onDragStart(Offset position) {
+    _handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_START, deltaX: position.dx, deltaY: position.dy);
+    return _DragEventInfo.instance;
   }
 
   void _handleMouseEvent(String type, {
