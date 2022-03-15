@@ -236,8 +236,9 @@ class RenderSliverListLayout extends RenderLayoutBox {
     final Offset currentOffset = Offset(scrollLeft, scrollTop);
 
     // The z-index needs to be sorted, and higher-level nodes are processed first.
-    for (int i = paintingOrder.length - 1; i >= 0; i--) {
-      RenderBox child = paintingOrder[i];
+    List<RenderBox> _paintingOrder = paintingOrder;
+    for (int i = _paintingOrder.length - 1; i >= 0; i--) {
+      RenderBox child = _paintingOrder[i];
       // Ignore detached render object.
       if (!child.attached) continue;
 
