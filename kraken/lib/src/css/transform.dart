@@ -87,21 +87,19 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   CSSOrigin? _transformOrigin;
-  CSSOrigin? get transformOrigin => _transformOrigin;
+  CSSOrigin get transformOrigin => _transformOrigin ?? CSSOrigin(DEFAULT_TRANSFORM_OFFSET, DEFAULT_TRANSFORM_ALIGNMENT);
   set transformOrigin(CSSOrigin? value) {
-
     if (_transformOrigin == value) return;
     _transformOrigin = value;
 
-    if (value == null) return;
     Offset oldOffset = transformOffset;
-    Offset offset = value.offset;
+    Offset offset = transformOrigin.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       transformOffset = offset;
     }
 
-    Alignment alignment = value.alignment;
+    Alignment alignment = transformOrigin.alignment;
     Alignment oldAlignment = transformAlignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {
