@@ -133,7 +133,7 @@ class GestureDispatcher {
       _gatherEventsInPath();
       _addPointerDownEventToMatchedRecognizers(event);
 
-      _target = _eventPath.isNotEmpty ? _eventPath.last : null;
+      _target = _eventPath.isNotEmpty ? _eventPath.first : null;
 
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
