@@ -85,9 +85,9 @@ class GestureDispatcher {
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
-  List<EventTarget> _eventPath = const [];
+  List<EventTarget> _eventPath = [];
   // Collect the events in the event path list.
-  final Map<String, bool> _eventsInPath = const {};
+  final Map<String, bool> _eventsInPath = {};
 
   EventTarget? _target;
 
