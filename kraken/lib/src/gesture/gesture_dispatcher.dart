@@ -149,6 +149,9 @@ class GestureDispatcher {
     Pointer? pointer = _pointerIdToPointer[event.pointer];
     pointer?.updateEvent(event);
 
+    // If the target node is not attached, the event will be ignored.
+    if (_pointerIdToPointer[event.pointer] == null) return;
+
     // Only dispatch touch event that added.
     bool needDispatch = _eventsInPath.containsKey(touchType);
     if (needDispatch && pointer != null) {
