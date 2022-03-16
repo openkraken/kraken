@@ -232,7 +232,7 @@ TEST(Context, accessGetUICommandItemsAfterDisposed) {
   int32_t contextId;
   {
     auto bridge = TEST_init();
-    contextId = bridge->getContext()->contextid();
+    contextId = bridge->getContext()->contextId();
   }
 
   EXPECT_EQ(getUICommandItems(contextId), nullptr);
@@ -245,7 +245,7 @@ TEST(Context, disposeContext) {
   auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
   static bool disposed = false;
   bridge->disposeCallback = [](kraken::KrakenPage* bridge) { disposed = true; };
-  disposePage(bridge->getContext()->contextid());
+  disposePage(bridge->getContext()->contextId());
   EXPECT_EQ(disposed, true);
 }
 

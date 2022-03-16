@@ -27,6 +27,8 @@ class ExecutionContextData final {
   // Returns the prototype object that is appropriately initialized.
   JSValue prototypeForType(const WrapperTypeInfo* type);
 
+  void Dispose();
+
  private:
   JSValue constructorForIdSlowCase(const WrapperTypeInfo* type);
   std::unordered_map<const WrapperTypeInfo*, JSValue> constructor_map_;

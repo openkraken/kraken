@@ -163,7 +163,7 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
   auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
   if (!promiseContext->context->IsValid())
     return;
-  if (promiseContext->context->contextid() != contextId)
+  if (promiseContext->context->contextId() != contextId)
     return;
 
   auto* context = promiseContext->context;

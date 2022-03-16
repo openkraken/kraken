@@ -23,7 +23,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
       contextId,
       [](ExecutingContext* context, const char* message) {
         if (context->dartMethodPtr()->onJsError != nullptr) {
-          context->dartMethodPtr()->onJsError(context->contextid(), message);
+          context->dartMethodPtr()->onJsError(context->contextId(), message);
         }
         KRAKEN_LOG(ERROR) << message << std::endl;
       },

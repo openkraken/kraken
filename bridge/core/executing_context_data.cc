@@ -28,7 +28,7 @@ JSValue ExecutionContextData::prototypeForType(const WrapperTypeInfo* type) {
 JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* type) {
   JSContext* ctx = m_context->ctx();
 
-  JSClassID class_id;
+  JSClassID class_id{0};
   // Allocate a new unique classID from QuickJS.
   JS_NewClassID(&class_id);
 
@@ -36,7 +36,7 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   JSClassDef def{};
   def.class_name = type->className;
   def.call = type->callFunc;
-  JS_NewClass(m_context->runtime(), type->classId, &def);
+  JS_NewClass(m_context->runtime(), class_id, &def);
 
   // Create class object and prototype object.
   JSValue classObject = constructor_map_[type] = JS_NewObjectClass(m_context->ctx(), class_id);
@@ -67,6 +67,16 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   JS_SetOpaque(classObject, (void*)type);
 
   return classObject;
+}
+
+void ExecutionContextData::Dispose() {
+  for(auto& entry: prototype_map_) {
+    JS_FreeValueRT(m_context->runtime(), entry.second);
+  }
+
+  for(auto& entry: constructor_map_) {
+    JS_FreeValueRT(m_context->runtime(), entry.second);
+  }
 }
 
 }  // namespace kraken

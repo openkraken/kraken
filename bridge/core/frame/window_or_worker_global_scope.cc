@@ -59,7 +59,7 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, std::shared
 
   // Create a timer object to keep track timer callback.
   auto timer = DOMTimer::create(context, handler);
-  auto timerId = context->dartMethodPtr()->setTimeout(timer.get(), context->contextid(), handleTransientCallback, timeout);
+  auto timerId = context->dartMethodPtr()->setTimeout(timer.get(), context->contextId(), handleTransientCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -78,7 +78,7 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context, std::share
   // Create a timer object to keep track timer callback.
   auto timer = DOMTimer::create(context, handler);
 
-  uint32_t timerId = context->dartMethodPtr()->setInterval(timer.get(), context->contextid(), handlePersistentCallback, timeout);
+  uint32_t timerId = context->dartMethodPtr()->setInterval(timer.get(), context->contextId(), handlePersistentCallback, timeout);
 
   // Register timerId.
   timer->setTimerId(timerId);
@@ -93,7 +93,7 @@ void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t 
     return;
   }
 
-  context->dartMethodPtr()->clearTimeout(context->contextid(), timerId);
+  context->dartMethodPtr()->clearTimeout(context->contextId(), timerId);
 
   context->Timers()->removeTimeoutById(timerId);
 }

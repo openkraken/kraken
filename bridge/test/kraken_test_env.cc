@@ -119,7 +119,7 @@ uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_
   JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->handler = handler;
   th->callback = frameCallback;
-  th->contextId = context->contextid();
+  th->contextId = context->contextId();
   int32_t id = callbackId++;
 
   th->callbackId = id;

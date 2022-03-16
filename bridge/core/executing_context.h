@@ -81,7 +81,7 @@ class ExecutingContext {
   JSValue Global();
   JSContext* ctx();
   static JSRuntime* runtime();
-  FORCE_INLINE int32_t contextid() const { return context_id_; };
+  FORCE_INLINE int32_t contextId() const { return context_id_; };
   void* owner();
   bool HandleException(JSValue* exc);
   bool HandleException(ScriptValue* exc);

@@ -151,7 +151,7 @@ static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, 
   for (int i = 0; i < length; i++) {
     auto mouse = new MousePointer();
     JSValue params = JS_GetPropertyUint32(ctx, inputArrayValue, i);
-    mouse->contextId = context->contextid();
+    mouse->contextId = context->contextId();
     JSValue xValue = JS_GetPropertyUint32(ctx, params, 0);
     JSValue yValue = JS_GetPropertyUint32(ctx, params, 1);
     JSValue changeValue = JS_GetPropertyUint32(ctx, params, 2);

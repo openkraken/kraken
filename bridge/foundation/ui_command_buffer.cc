@@ -13,7 +13,7 @@ UICommandBuffer::UICommandBuffer(ExecutingContext* context) : m_context(context)
 
 void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
-    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextid());
+    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
     update_batched = true;
   }
 

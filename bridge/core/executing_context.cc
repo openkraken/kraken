@@ -72,6 +72,7 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 
   gc_tracker_ = makeGarbageCollected<ExecutionContextGCTracker>(ctx());
   JS_DefinePropertyValueStr(ctx_, global_object_, "_gc_tracker_", gc_tracker_->ToQuickJS(), JS_PROP_NORMAL);
+  DefineGlobalProperty("__GC_Tracker__", contextData()->constructorForType(ExecutionContextGCTracker::GetStaticWrapperTypeInfo()));
 
   runningContexts++;
 
@@ -202,7 +203,7 @@ bool ExecutingContext::HandleException(JSValue* exc) {
 
 bool ExecutingContext::HandleException(ScriptValue* exc) {
   JSValue value = exc->ToQuickJS();
-  HandleException(&value);
+  return HandleException(&value);
 }
 
 JSValue ExecutingContext::Global() {

@@ -53,21 +53,17 @@ struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Convert
   }
 };
 
-// Macro to generate optional template for smart pointer
-#define DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(SMART_POINTER)                                                                                                    \
-  template <typename T>                                                                                                                                          \
-  struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Converter<T>::ImplType, std::SMART_POINTER<T>>>> : public ConverterBase<TSOptional<T>> { \
-    using ImplType = typename Converter<T>::ImplType;                                                                                                            \
-    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {                                                                        \
-      if (JS_IsUndefined(value)) {                                                                                                                               \
-        return nullptr;                                                                                                                                          \
-      }                                                                                                                                                          \
-      return Converter<T>::FromValue(ctx, value, exception);                                                                                                     \
-    }                                                                                                                                                            \
-  };
+template <typename T>
+struct Converter<TSOptional<T>, std::enable_if_t<std::is_same_v<typename Converter<T>::ImplType, TSDOMString::ImplType>>> : public ConverterBase<TSOptional<T>> {
+  using ImplType = typename Converter<T>::ImplType;
 
-DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(unique_ptr);
-DEFINE_OPTIONAL_SMART_POINTER_TEMPLATE(shared_ptr);
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception) {
+    if (JS_IsUndefined(value)) {
+      return nullptr;
+    }
+    return Converter<T>::FromValue(ctx, value, exception);
+  }
+};
 
 // Optional value for arithmetic value
 template <typename T>
