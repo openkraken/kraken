@@ -541,7 +541,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/ruler-h-50px.png',
+        src: 'assets/css3.png',
         style: {
           display: 'block',
           'object-fit': 'cover',
