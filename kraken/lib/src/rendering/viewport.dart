@@ -75,6 +75,9 @@ class RenderViewportBox extends RenderProxyBox
     if (event is PointerDownEvent) {
       // Set event path at begin stage and reset it at end stage on viewport render box.
       GestureDispatcher.instance.resetEventPath();
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      // Remove Touch when pointer up or cancel.
+      GestureDispatcher.instance.removeTouch(event.pointer);
     }
   }
 

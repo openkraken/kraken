@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/scheduler/throttle.dart';
+import 'package:kraken/rendering.dart';
 
 const int _MAX_STEP_MS = 16;
 
@@ -85,7 +86,7 @@ class GestureDispatcher {
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
-  List<EventTarget> _eventPath = [];
+  List<EventTarget> _eventPath = const [];
   // Collect the events in the event path list.
   final Map<String, bool> _eventsInPath = {};
 
@@ -94,12 +95,31 @@ class GestureDispatcher {
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
 
   final Map<int, Touch> _touches = {};
-  void addTouch(Touch touch) {
-    _touches[touch.identifier] = touch;
+  void addTouchIfNeeded(PointerEvent pointerEvent, RenderEventListenerMixin renderBox) {
+    if (_touches[pointerEvent.pointer] == null) {
+      _touches[pointerEvent.pointer] = _toTouch(pointerEvent, renderBox);
+    }
   }
 
-  void removeTouch(Touch touch) {
-    _touches.remove(touch.identifier);
+  void removeTouch(int pointer) {
+    _touches.remove(pointer);
+  }
+
+  Touch _toTouch(PointerEvent event, RenderEventListenerMixin renderBox) {
+    return Touch(
+      identifier: event.pointer,
+      target: renderBox.getEventTarget!(),
+      screenX: event.position.dx,
+      screenY: event.position.dy,
+      clientX: event.localPosition.dx,
+      clientY: event.localPosition.dy,
+      pageX: event.localPosition.dx,
+      pageY: event.localPosition.dy,
+      radiusX: event.radiusMajor,
+      radiusY: event.radiusMinor,
+      rotationAngle: event.orientation,
+      force: event.pressure,
+    );
   }
 
   void _gatherEventsInPath() {
