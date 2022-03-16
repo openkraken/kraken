@@ -10,8 +10,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/scheduler/throttle.dart';
 
-import 'pointer.dart';
-
 const int _MAX_STEP_MS = 16;
 
 class _DragEventInfo extends Drag {
@@ -87,17 +85,24 @@ class GestureDispatcher {
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
-  List<EventTarget> _eventPath = const [];
+  List<EventTarget> _eventPath = [];
   // Collect the events in the event path list.
-  final Map<String, bool> _eventsInPath = const {};
-
-  final Map<int, Pointer> _pointerIdToPointer = {};
+  final Map<String, bool> _eventsInPath = {};
 
   EventTarget? _target;
 
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
 
-  void markEventsInPath() {
+  final Map<int, Touch> _touches = {};
+  void addTouch(Touch touch) {
+    _touches[touch.identifier] = touch;
+  }
+
+  void removeTouch(Touch touch) {
+    _touches.remove(touch.identifier);
+  }
+
+  void _gatherEventsInPath() {
     // Reset the event map when start a new gesture.
     _eventsInPath.clear();
 
@@ -109,7 +114,7 @@ class GestureDispatcher {
     }
   }
 
-  void addPointerDownEventToMatchedRecognizers(PointerDownEvent event) {
+  void _addPointerDownEventToMatchedRecognizers(PointerDownEvent event) {
     // Add pointer to gestures then register the gesture recognizer to the arena.
     _gestureRecognizers.forEach((key, gesture) {
       // Register the recognizer that needs to be monitored.
@@ -125,18 +130,10 @@ class GestureDispatcher {
     if (event is PointerDownEvent) {
       touchType = EVENT_TOUCH_START;
 
-      _pointerIdToPointer[event.pointer] = Pointer(event);
-      markEventsInPath();
-      addPointerDownEventToMatchedRecognizers(event);
+      _gatherEventsInPath();
+      _addPointerDownEventToMatchedRecognizers(event);
 
-      // The target node triggered by the gesture is the bottom node of hitTest.
-      // The scroll element needs to be judged by isScrollingContentBox to find the real element upwards.
-      for (int i = 0; i < _eventPath.length; i++) {
-        EventTarget eventTarget = _eventPath[i];
-        Pointer? pointer = _pointerIdToPointer[event.pointer];
-        pointer?.updateEventTarget(eventTarget);
-        break;
-      }
+      _target = _eventPath.isNotEmpty ? _eventPath.first : null;
 
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
@@ -146,30 +143,8 @@ class GestureDispatcher {
       touchType = EVENT_TOUCH_CANCEL;
     }
 
-    Pointer? pointer = _pointerIdToPointer[event.pointer];
-    pointer?.updateEvent(event);
-
-    // If the target node is not attached, the event will be ignored.
-    if (_pointerIdToPointer[event.pointer] == null) return;
-
-    // Only dispatch touch event that added.
-    bool needDispatch = _eventsInPath.containsKey(touchType);
-    if (needDispatch && pointer != null) {
-      _handleTouchEvent(touchType, _pointerIdToPointer[event.pointer]!, _pointerIdToPointer.values.toList());
-    }
-
-    // End of the gesture.
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
-      // Multi pointer operations in the web will organize click and other gesture triggers.
-      bool isSinglePointer = _pointerIdToPointer.length == 1;
-      Pointer? pointer = _pointerIdToPointer[event.pointer];
-      if (isSinglePointer && pointer != null) {
-        _target = pointer.eventTarget;
-      } else {
-        _target = null;
-      }
-
-      _pointerIdToPointer.remove(event.pointer);
+    if (_target != null && _eventsInPath.containsKey(touchType)) {
+      _handleTouchEvent(touchType);
     }
   }
 
@@ -287,47 +262,28 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void _handleTouchEvent(String eventType, Pointer targetPointer, List<Pointer> points) {
+  void _handleTouchEvent(String eventType) {
     TouchEvent e = TouchEvent(eventType);
-    EventTarget currentTarget = targetPointer.eventTarget!;
+    List<Touch> touches = _touches.values.toList();
+    for (int i = 0; i < touches.length; i++) {
+      Touch touch = touches[i];
+      EventTarget target = touch.target;
+      // TODO: changedTouches
 
-    for (int i = 0; i < points.length; i++) {
-      Pointer pointer = points[i];
-      PointerEvent pointerEvent = pointer.event;
-      EventTarget target = pointer.eventTarget!;
-
-      Touch touch = Touch(
-        identifier: pointerEvent.pointer,
-        target: target,
-        screenX: pointerEvent.position.dx,
-        screenY: pointerEvent.position.dy,
-        clientX: pointerEvent.localPosition.dx,
-        clientY: pointerEvent.localPosition.dy,
-        pageX: pointerEvent.localPosition.dx,
-        pageY: pointerEvent.localPosition.dy,
-        radiusX: pointerEvent.radiusMajor,
-        radiusY: pointerEvent.radiusMinor,
-        rotationAngle: pointerEvent.orientation,
-        force: pointerEvent.pressure,
-      );
-
-      if (targetPointer == pointer) {
-        e.changedTouches.append(touch);
-      }
-
-      if (currentTarget == target) {
+      if (_target == target) {
+        // A list of Touch objects for every point of contact that is touching the surface
+        // and started on the element that is the target of the current event.
         e.targetTouches.append(touch);
       }
-
       e.touches.append(touch);
     }
 
     if (eventType == EVENT_TOUCH_MOVE) {
       _throttler.throttle(() {
-        currentTarget.dispatchEvent(e);
+        _target?.dispatchEvent(e);
       });
     } else {
-      currentTarget.dispatchEvent(e);
+      _target?.dispatchEvent(e);
     }
   }
 }
