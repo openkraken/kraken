@@ -95,20 +95,18 @@ class GestureDispatcher {
   final Throttling _throttler = Throttling(duration: Duration(milliseconds: _MAX_STEP_MS));
 
   final Map<int, Touch> _touches = {};
-  void addTouchIfNeeded(PointerEvent pointerEvent, RenderEventListenerMixin renderBox) {
-    if (_touches[pointerEvent.pointer] == null) {
-      _touches[pointerEvent.pointer] = _toTouch(pointerEvent, renderBox);
-    }
+  void updateTouch(Touch touch) {
+    _touches[touch.identifier] = touch;
   }
 
-  void removeTouch(int pointer) {
-    _touches.remove(pointer);
+  void removeTouch(int identifier) {
+    _touches.remove(identifier);
   }
 
-  Touch _toTouch(PointerEvent event, RenderEventListenerMixin renderBox) {
+  Touch _toTouch(PointerEvent event, EventTarget eventTarget) {
     return Touch(
       identifier: event.pointer,
-      target: renderBox.getEventTarget!(),
+      target: eventTarget,
       screenX: event.position.dx,
       screenY: event.position.dy,
       clientX: event.localPosition.dx,
@@ -154,17 +152,27 @@ class GestureDispatcher {
       _addPointerDownEventToMatchedRecognizers(event);
 
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
-
     } else if (event is PointerMoveEvent) {
       touchType = EVENT_TOUCH_MOVE;
     } else if (event is PointerUpEvent) {
       touchType = EVENT_TOUCH_END;
+    } else if (event is PointerHoverEvent) {
+      // TODO: handle hover.
+      return;
     } else {
       touchType = EVENT_TOUCH_CANCEL;
     }
 
-    if (_target != null && _eventsInPath.containsKey(touchType)) {
-      _handleTouchEvent(touchType);
+    if (_target != null) {
+      updateTouch(_toTouch(event, _target!));
+
+      if (_eventsInPath.containsKey(touchType)) {
+        _handleTouchEvent(touchType, _touches[event.pointer]!);
+      }
+
+      if (event is PointerUpEvent || event is PointerDownEvent) {
+        removeTouch(event.pointer);
+      }
     }
   }
 
@@ -282,13 +290,12 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void _handleTouchEvent(String eventType) {
+  void _handleTouchEvent(String eventType, Touch currentTouch) {
     TouchEvent e = TouchEvent(eventType);
     List<Touch> touches = _touches.values.toList();
     for (int i = 0; i < touches.length; i++) {
       Touch touch = touches[i];
       EventTarget target = touch.target;
-      // TODO: changedTouches
 
       if (_target == target) {
         // A list of Touch objects for every point of contact that is touching the surface
@@ -299,10 +306,13 @@ class GestureDispatcher {
     }
 
     if (eventType == EVENT_TOUCH_MOVE) {
+
+
       _throttler.throttle(() {
         _target?.dispatchEvent(e);
       });
     } else {
+      e.changedTouches.append(currentTouch);
       _target?.dispatchEvent(e);
     }
   }

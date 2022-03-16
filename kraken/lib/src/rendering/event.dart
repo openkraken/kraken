@@ -25,8 +25,6 @@ mixin RenderEventListenerMixin on RenderBox {
         if (GestureDispatcher.instance.getEventPath().isEmpty) {
           GestureDispatcher.instance.setEventPath(getEventTarget!());
         }
-        // Try add Touch when pointer down.
-        GestureDispatcher.instance.addTouchIfNeeded(event, this);
       }
     }
 
