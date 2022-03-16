@@ -95,6 +95,31 @@ describe('Tags img', () => {
         document.body.appendChild(img);
       });
     });
+
+    it('should work with value change to empty string', async (done) => {
+      let image;
+      image = createElement(
+        'img',
+        {
+          src: 'assets/ruler-h-50px.png',
+          style: {
+            display: 'block',
+            'object-fit': 'cover',
+            'object-position': 'right bottom',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'yellow'
+          },
+        },
+      );
+      BODY.appendChild(image);
+   
+      requestAnimationFrame(async () => {
+        image.style.objectPosition = '';
+        await snapshot(0.1);
+        done();
+      });
+    });
   });
 
   it('set src property setter', async () => {
