@@ -152,7 +152,7 @@ class GestureDispatcher {
     _touchPoints[touchPoint.id] = touchPoint;
   }
   void _removePoint(TouchPoint touchPoint) {
-    _touchPoints[touchPoint.id];
+    _touchPoints.remove(touchPoint.id);
   }
 
   EventTarget? _target;
@@ -215,9 +215,9 @@ class GestureDispatcher {
       if (_target != null) {
         _bindEventTargetWithTouchPoint(touchPoint, _target!);
       }
-    }
 
-    _addPoint(touchPoint);
+      _addPoint(touchPoint);
+    }
 
     _handleTouchEvent(touchPoint);
 
