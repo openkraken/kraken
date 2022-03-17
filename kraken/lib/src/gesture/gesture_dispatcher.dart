@@ -219,7 +219,7 @@ class GestureDispatcher {
       _addPoint(touchPoint);
     }
 
-    _handleTouchEvent(touchPoint);
+    _handleTouchPoint(touchPoint);
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _removePoint(touchPoint);
@@ -341,7 +341,7 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void _handleTouchEvent(TouchPoint touchPoint) {
+  void _handleTouchPoint(TouchPoint touchPoint) {
     String eventType;
     if (touchPoint.state == PointState.Down) {
       eventType = EVENT_TOUCH_START;
@@ -355,13 +355,13 @@ class GestureDispatcher {
 
     if (_eventsInPath.containsKey(eventType)) {
       TouchEvent e = TouchEvent(eventType);
-      List<TouchPoint> points = _touchPoints.values.toList();
+      List<TouchPoint> touchPoints = _touchPoints.values.toList();
 
-      for (int i = 0; i < points.length; i++) {
-        TouchPoint touchPoint = points[i];
-        Touch touch = _toTouch(touchPoint);
+      for (int i = 0; i < touchPoints.length; i++) {
+        TouchPoint anotherTouchPoint = touchPoints[i];
+        Touch touch = _toTouch(anotherTouchPoint);
 
-        if (_pointTargets[touchPoint.id] == _pointTargets[touchPoint.id]) {
+        if (_pointTargets[touchPoint.id] == _pointTargets[anotherTouchPoint.id]) {
           // A list of Touch objects for every point of contact that is touching the surface
           // and started on the element that is the target of the current event.
           e.targetTouches.append(touch);
