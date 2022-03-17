@@ -633,13 +633,9 @@ class CSSRenderStyle
           RenderStyle parentRenderStyle = renderStyle.parent!;
           RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
-          // Use parent's tight constraints if constraints is tight and width not exist.
-          if (parent.hasSize && parent.constraints.hasTightWidth) {
-            logicalWidth = parent.constraints.maxWidth;
-
           // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
           // Replaced element also stretch in flex layout if align-items is stretch.
-          } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
+          if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
             RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
             // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
             if (ancestorRenderStyle != null) {
@@ -766,18 +762,12 @@ class CSSRenderStyle
       } else {
         if (renderStyle.parent != null) {
           RenderStyle parentRenderStyle = renderStyle.parent!;
-          RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
           if (renderStyle.isHeightStretch) {
-            // Use parent's tight constraints if constraints is tight and height not exist.
-            if (parent.hasSize && parent.constraints.hasTightHeight) {
-              logicalHeight = parent.constraints.maxHeight;
-            } else {
-              logicalHeight = parentRenderStyle.contentBoxLogicalHeight;
-              // Should subtract vertical margin of own from its parent content height.
-              if (logicalHeight != null) {
-                logicalHeight -= renderStyle.margin.vertical;
-              }
+            logicalHeight = parentRenderStyle.contentBoxLogicalHeight;
+            // Should subtract vertical margin of own from its parent content height.
+            if (logicalHeight != null) {
+              logicalHeight -= renderStyle.margin.vertical;
             }
           }
         }
@@ -914,6 +904,11 @@ class CSSRenderStyle
     return _contentBoxLogicalWidth;
   }
 
+  set contentBoxLogicalWidth(double? value) {
+    if (_contentBoxLogicalWidth == value) return;
+    _contentBoxLogicalWidth = value;
+  }
+
   // Content height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // Use double.infinity refers to the value is not computed yet.
@@ -926,6 +921,11 @@ class CSSRenderStyle
       computeContentBoxLogicalHeight();
     }
     return _contentBoxLogicalHeight;
+  }
+
+  set contentBoxLogicalHeight(double? value) {
+    if (_contentBoxLogicalHeight == value) return;
+    _contentBoxLogicalHeight = value;
   }
 
   // Padding box width calculated from renderStyle tree.
