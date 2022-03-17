@@ -51,7 +51,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   RenderFlowLayout({
     List<RenderBox>? children,
     required CSSRenderStyle renderStyle,
-    Function? handleEvent,
   }) : super(renderStyle: renderStyle) {
     addAll(children);
   }
