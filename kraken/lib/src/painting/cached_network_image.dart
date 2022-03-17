@@ -162,6 +162,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     // Try to get to end of the frame callbacks of the next frame, and then
     // check again.
     if (_recommendDeferredLoading()) {
+      // @TODO!
       count++;
       print('delay $count');
       SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -176,7 +177,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
 
   // Return true if recommend deferred to load the file.
   bool _recommendDeferredLoading() {
-    return true;
+    return false;
   }
 
   static int count = 0;
