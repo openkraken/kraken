@@ -4,10 +4,11 @@ import {
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
-  FunctionObject,
+  FunctionObject, PropsDeclaration,
   ReturnType
 } from "./declaration";
-import {addIndent, getClassName} from "./utils";
+import {addIndent, getClassName, getMethodName} from "./utils";
+import {ParameterType} from "./analyzer";
 
 enum PropType {
   hostObject,
@@ -15,7 +16,7 @@ enum PropType {
   Event
 }
 
-function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObject | FunctionObject) {
+function generateMethodArgumentsCheck(m: FunctionDeclaration) {
   if (m.args.length == 0) return '';
 
   let requiredArgsCount = 0;
@@ -29,81 +30,102 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration, object: ClassObjec
 `;
 }
 
-function generateTypeConverter(type: FunctionArgumentType | FunctionArgumentType[]): string {
+function generateTypeConverter(type: ParameterType | ParameterType[]): string {
   if (Array.isArray(type)) {
-    return `TSSequence<${generateTypeConverter(type[0])}>`;
+    return `IDLSequence<${generateTypeConverter(type[0])}>`;
+  }
+
+  if (typeof type === 'string') {
+    return type;
   }
 
   switch(type) {
     case FunctionArgumentType.int32:
-      return `TSInt32`;
+      return `IDLInt32`;
     case FunctionArgumentType.double:
-      return `TSDouble`;
+      return `IDLDouble`;
     case FunctionArgumentType.function:
-      return `TSCallback`;
+      return `IDLCallback`;
     case FunctionArgumentType.boolean:
-      return `TSBoolean`;
+      return `IDLBoolean`;
     case FunctionArgumentType.string:
-      return `TSDOMString`;
+      return `IDLDOMString`;
     case FunctionArgumentType.object:
-      return `TSObject`;
+      return `IDLObject`;
     default:
     case FunctionArgumentType.any:
-      return `TSAny`;
+      return `IDLAny`;
   }
 }
 
-function generateFunctionValueInit(object: FunctionObject) {
+function generateFunctionValueInit(declare: FunctionDeclaration) {
   function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
     let type = generateTypeConverter(argument.type);
     return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);`;
   }
 
   function generateInitBody(argument: FunctionArguments, argsIndex: number) {
-    function generateInitParams(type: FunctionArgumentType | FunctionArgumentType[]) {
-      if (type == FunctionArgumentType.any) {
-        return 'ctx';
-      }
+    function generateInitParams(type: ParameterType | ParameterType[]) {
       return '';
     }
 
-      return `Converter<TSOptional<${generateTypeConverter(argument.type)}>>::ImplType args_${argument.name}{${generateInitParams(argument.type)}};
+      return `Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::ImplType args_${argument.name}{${generateInitParams(argument.type)}};
 if (argc > ${argsIndex}) {
-  args_${argument.name} = Converter<TSOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
+  args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
 }`
   }
 
-  return object.declare.args.map((a, i) => {
+  return declare.args.map((a, i) => {
     let body = a.required ? generateRequiredInitBody(a, i) : generateInitBody(a, i);
     return addIndent(body, 2);
   });
 }
 
-function generateCoreModuleCall(blob: Blob, object: FunctionObject) {
-  let params = object.declare.args.map(a => `args_${a.name}`);
+function generateFunctionCall(blob: Blob, declare: FunctionDeclaration, staticMethod: boolean) {
+  let params = declare.args.map(a => `args_${a.name}`);
   let coreClassName = getClassName(blob);
   let returnValue = '';
 
-  if (object.declare.returnType != ReturnType.void) {
-    returnValue = 'ScriptValue returnValue = '
+  if (declare.returnType != ReturnType.void) {
+    returnValue = `auto&& returnValue = `
+  }
+
+  let callParams = [];
+
+  if (staticMethod) {
+    callParams.push('context');
+  }
+
+  if (params.length > 0) {
+    callParams = callParams.concat(params);
+  }
+
+  callParams.push('exception');
+
+  let callCode = '';
+  if (staticMethod) {
+    callCode = `${returnValue}${coreClassName}::${declare.name === 'constructor' ? 'Create' : declare.name}(${callParams.join(',')});`;
+  } else {
+    callCode = `auto&& ${blob.filename} = toScriptWrappable<${getClassName(blob)}>(this_val);
+ ${returnValue} qjs_blob->${declare.name}(${callParams.join(',')});`;
   }
 
   return addIndent(`
 auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 ExceptionState exception;
 
-${returnValue}${coreClassName}::${object.declare.name}(context, ${params.join(', ')}, exception);
+${callCode}
 
 if (exception.HasException()) {
   return exception.ToQuickJS();
 }
-${returnValue ? 'return returnValue.ToQuickJS();' : 'return JS_NULL; '}`, 2);
+${returnValue ? 'return returnValue->ToQuickJS();' : 'return JS_NULL; '}`, 2);
 }
 
 function generateFunctionSource(blob: Blob, object: FunctionObject) {
-  let paramCheck = generateMethodArgumentsCheck(object.declare, object);
-  let varInit = generateFunctionValueInit(object);
-  let moduleCall = generateCoreModuleCall(blob, object);
+  let paramCheck = generateMethodArgumentsCheck(object.declare);
+  let varInit = generateFunctionValueInit(object.declare);
+  let moduleCall = generateFunctionCall(blob, object.declare, true);
   return `static JSValue ${object.declare.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
 ${paramCheck}
   ExceptionState exception_state;
@@ -113,15 +135,148 @@ ${moduleCall}
 }`;
 }
 
+function generateClassConstructorCallback(blob: Blob, declare: FunctionDeclaration) {
+  let paramCheck = generateMethodArgumentsCheck(declare);
+  let varInit = generateFunctionValueInit(declare);
+  let moduleCall = generateFunctionCall(blob, declare, true);
+
+  return `JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
+  ${paramCheck}
+  ExceptionState exception_state;
+
+${varInit.join('\n')}
+${moduleCall}
+}
+`;
+}
+
+function generatePropertyGetterCallback(blob: Blob, prop: PropsDeclaration) {
+  return `static JSValue ${prop.name}AttributeGetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* ${blob.filename} = toScriptWrappable<${getClassName(blob)}>(this_val);
+  assert(${blob.filename} != nullptr);
+  return Converter<${generateTypeConverter(prop.type)}>::ToValue(ctx, ${blob.filename}->${prop.name}());
+}`;
+}
+
+function generatePropertySetterCallback(blob: Blob, prop: PropsDeclaration) {
+  return `static JSValue ${prop.name}AttributeSetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* ${blob.filename} = toScriptWrappable<${getClassName(blob)}>(this_val);
+  ExceptionState exception_state;
+  auto&& v = Converter<${generateTypeConverter(prop.type)}>::FromValue(ctx, argv[0], exception_state);
+  if (exception_state.HasException()) {
+    return exception_state.ToQuickJS();
+  }
+  qjs_blob->set${prop.name[0].toUpperCase() + prop.name.slice(1)}(v);
+}`;
+}
+
+function generateMethodCallback(blob: Blob, methods: FunctionDeclaration[]): string[] {
+  return methods.map(method => {
+    let paramCheck = generateMethodArgumentsCheck(method);
+    let varInit = generateFunctionValueInit(method);
+    let moduleCall = generateFunctionCall(blob, method, false);
+
+    return `static JSValue ${method.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  ${paramCheck}
+  ExceptionState exception_state;
+
+${varInit.join('\n')}
+${moduleCall}
+}`;
+  });
+}
+
+function generateClassSource(blob: Blob, object: ClassObject) {
+  let constructorCallback = generateClassConstructorCallback(blob, object.construct);
+  let getterCallbacks: string[] = [];
+  let setterCallbacks: string[] = [];
+  let methodCallback = generateMethodCallback(blob, object.methods);
+
+  object.props.forEach(prop => {
+    getterCallbacks.push(generatePropertyGetterCallback(blob, prop));
+    if (!prop.readonly) {
+      setterCallbacks.push(generatePropertySetterCallback(blob, prop))
+    }
+  });
+
+  return [
+    constructorCallback,
+    getterCallbacks.join('\n'),
+    setterCallbacks.join('\n'),
+    methodCallback.join('\n')
+  ].join('\n');
+}
+
+function generateInstallGlobalFunctions(blob: Blob, installList: string[]) {
+  return `void QJS${getClassName(blob)}::InstallGlobalFunctions(ExecutingContext* context) {
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
+    ${installList.join(',\n')}
+  };
+
+  MemberInstaller::InstallFunctions(context, context->Global(), functionConfig);
+}`;
+}
+
+function generateConstructorInstaller(blob: Blob) {
+  return `void QJS${getClassName(blob)}::InstallConstructor(ExecutingContext* context) {
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
+  JSValue constructor = context->contextData()->constructorForType(wrapperTypeInfo);
+
+  std::initializer_list<MemberInstaller::AttributeConfig> attributeConfig {
+    {"${getClassName(blob)}", nullptr, nullptr, constructor}
+  };
+  MemberInstaller::InstallAttributes(context, context->Global(), attributeConfig);
+}`;
+}
+
+function generatePrototypeMethodsInstaller(blob: Blob, installList: string[]) {
+  return `void QJS${getClassName(blob)}::InstallPrototypeMethods(ExecutingContext* context) {
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
+  JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
+
+  std::initializer_list<MemberInstaller::AttributeConfig> attributesConfig {
+    ${installList.join(',\n')}
+  };
+
+  MemberInstaller::InstallAttributes(context, prototype, attributesConfig);
+}
+`;
+}
+
+function generatePrototypePropsInstaller(blob: Blob, installList: string[]) {
+  return `void QJS${getClassName(blob)}::InstallPrototypeProperties(ExecutingContext* context) {
+  const WrapperTypeInfo* wrapperTypeInfo = GetWrapperTypeInfo();
+  JSValue prototype = context->contextData()->prototypeForType(wrapperTypeInfo);
+
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
+    ${installList.join(',\n')}
+  };
+
+  MemberInstaller::InstallFunctions(context, prototype, functionConfig);
+}
+`;
+}
+
 export function generateCppSource(blob: Blob) {
-  let installList: string[] = [];
+  let functionInstallList: string[] = [];
+  let classMethodsInstallList: string[] = [];
+  let classPropsInstallList: string[] = [];
+  let wrapperTypeInfoInit = '';
 
   let sources = blob.objects.map(o => {
     if (o instanceof FunctionObject) {
-      installList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}},`);
+      functionInstallList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}},`);
       return generateFunctionSource(blob, o);
+    } else {
+      o.props.forEach(prop => {
+        classMethodsInstallList.push(`{"${prop.name}", ${prop.name}AttributeGetCallback, ${prop.readonly ? 'nullptr' : `${prop.name}AttributeSetCallback`}}`)
+      });
+      o.methods.forEach(method => {
+        classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
+      });
+      wrapperTypeInfoInit = `const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::m_wrapperTypeInfo;`;
+      return generateClassSource(blob, o);
     }
-    return '';
   });
 
   return `/*
@@ -138,18 +293,20 @@ export function generateCppSource(blob: Blob) {
 
 namespace kraken {
 
+${wrapperTypeInfoInit}
+
 ${sources.join('\n')}
 
 void QJS${getClassName(blob)}::Install(ExecutingContext* context) {
   InstallGlobalFunctions(context);
+  InstallConstructor(context);
+  InstallPrototypeMethods(context);
+  InstallPrototypeProperties(context);
 }
 
-void QJS${getClassName(blob)}::InstallGlobalFunctions(ExecutingContext* context) {
-  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig {
-    ${installList.join('\n')}
-  };
-
-  MemberInstaller::InstallFunctions(context, context->Global(), functionConfig);
-}
+${generateInstallGlobalFunctions(blob, functionInstallList)}
+${generateConstructorInstaller(blob)}
+${generatePrototypeMethodsInstaller(blob, classMethodsInstallList)}
+${generatePrototypePropsInstaller(blob, classPropsInstallList)}
 }`;
 }

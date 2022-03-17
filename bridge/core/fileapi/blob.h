@@ -11,30 +11,33 @@
 #include "bindings/qjs/macros.h"
 #include "bindings/qjs/qjs_blob.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "blob_part.h"
+#include "blob_property_bag.h"
 
 namespace kraken {
 
-class BlobBuilder;
-
 class Blob : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
-  static Blob* create(JSContext* ctx);
-  static Blob* create(JSContext* ctx, std::vector<uint8_t>&& data);
-  static Blob* create(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime);
+  static Blob* Create(ExecutingContext* context,
+                      std::vector<std::shared_ptr<BlobPart>> data,
+                      std::shared_ptr<BlobPropertyBag> property,
+                      ExceptionState& exception_state);
 
   Blob() = delete;
-  explicit Blob(JSContext* ctx): ScriptWrappable(ctx) {};
-  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx) {};
-  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime) : mimeType(mime), _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx){};
+  explicit Blob(JSContext* ctx) : ScriptWrappable(ctx){};
+  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data) : _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx){};
+  explicit Blob(JSContext* ctx, std::vector<uint8_t>&& data, std::string& mime) : mime_type_(mime), _size(data.size()), _data(std::move(data)), ScriptWrappable(ctx){};
 
   /// get an pointer of bytes data from JSBlob
   uint8_t* bytes();
   /// get bytes data's length
   int32_t size();
+  std::string type();
 
-  Blob* Slice(ExceptionState* exception_state);
-  Blob* Slice(int64_t start, ExceptionState* exception_state);
+  Blob* slice(ExceptionState& exception_state);
+  Blob* slice(int64_t start, ExceptionState* exception_state);
 
   const char* GetHumanReadableName() const override;
   void Trace(GCVisitor* visitor) const override;
@@ -42,9 +45,8 @@ class Blob : public ScriptWrappable {
 
  private:
   size_t _size;
-  std::string mimeType;
+  std::string mime_type_;
   std::vector<uint8_t> _data;
-  friend BlobBuilder;
   friend QJSBlob;
 };
 

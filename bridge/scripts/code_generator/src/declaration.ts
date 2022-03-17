@@ -1,3 +1,5 @@
+import {ParameterType} from "./analyzer";
+
 export enum FunctionArgumentType {
   // Basic types
   string,
@@ -11,22 +13,12 @@ export enum FunctionArgumentType {
 
 export class FunctionArguments {
   name: string;
-  type: FunctionArgumentType | FunctionArgumentType[];
+  type: ParameterType | ParameterType[];
   required: boolean;
 }
 
-export enum PropsDeclarationKind {
-  none,
-  string,
-  double,
-  int64,
-  boolean,
-  object,
-  function
-}
-
 export class PropsDeclaration {
-  kind: PropsDeclarationKind;
+  type: ParameterType | ParameterType[];
   name: string;
   readonly: boolean;
 }
@@ -43,9 +35,10 @@ export class FunctionDeclaration extends PropsDeclaration {
 
 export class ClassObject {
   name: string;
-  type: string;
+  parent: string;
   props: PropsDeclaration[] = [];
   methods: FunctionDeclaration[] = [];
+  construct: FunctionDeclaration;
 }
 
 export class FunctionObject {

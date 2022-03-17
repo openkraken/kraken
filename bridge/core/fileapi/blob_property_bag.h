@@ -3,16 +3,20 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_QJS_BLOB_PROPERTY_BAG_H
-#define KRAKENBRIDGE_QJS_BLOB_PROPERTY_BAG_H
+#ifndef KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_
+#define KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_
 
+#include <memory>
+#include <quickjs/quickjs.h>
 #include "core/executing_context.h"
 
 namespace kraken {
 
 class BlobPropertyBag final {
  public:
-  static BlobPropertyBag* create(ExecutingContext* context, JSValue value, ExceptionState* exceptionState);
+  using ImplType = std::shared_ptr<BlobPropertyBag>;
+
+  static std::shared_ptr<BlobPropertyBag> Create(JSContext* ctx, JSValue value, ExceptionState& exceptionState);
 
   const std::string& type() const { return m_type; }
 
@@ -23,4 +27,5 @@ class BlobPropertyBag final {
 
 }
 
-#endif  // KRAKENBRIDGE_QJS_BLOB_PROPERTY_BAG_H
+
+#endif  // KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_

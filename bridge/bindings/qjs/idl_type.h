@@ -11,51 +11,54 @@
 
 namespace kraken {
 
-struct TSTypeBase {
+struct IDLTypeBase {
   using ImplType = void;
 };
 
 template<typename T>
-struct TSTypeBaseHelper {
+struct IDLTypeBaseHelper {
   using ImplType = T;
 };
 
+class ScriptValue;
 // Any
-struct TSAny final : public TSTypeBaseHelper<ScriptValue> {};
+struct IDLAny final : public IDLTypeBaseHelper<ScriptValue> {};
 
 template<typename T>
-struct TSOptional final : public TSTypeBase {
+struct IDLOptional final : public IDLTypeBase {
   using ImplType = typename Converter<T>::ImplType;
 };
 
 // Bool
-struct TSBoolean final : public TSTypeBaseHelper<bool> {};
+struct IDLBoolean final : public IDLTypeBaseHelper<bool> {};
 
 // Primitive types
-struct TSUint32 final : public TSTypeBaseHelper<uint32_t> {};
-struct TSDouble final : public TSTypeBaseHelper<double> {};
+struct IDLUint32 final : public IDLTypeBaseHelper<uint32_t> {};
+struct IDLDouble final : public IDLTypeBaseHelper<double> {};
 
+class NativeString;
 // DOMString is UTF-16 strings.
 // https://stackoverflow.com/questions/35123890/what-is-a-domstring-really
-struct TSDOMString final : public TSTypeBaseHelper<std::unique_ptr<NativeString>> {};
+struct IDLDOMString final : public IDLTypeBaseHelper<std::unique_ptr<NativeString>> {};
 
 class AtomString;
-struct TSAtomString final : public TSTypeBaseHelper<AtomString> {};
+struct IDLAtomString final : public IDLTypeBaseHelper<AtomString> {};
 
 // https://developer.mozilla.org/en-US/docs/Web/API/USVString
-struct TSUSVString final : public TSTypeBaseHelper<std::string> {};
+struct IDLUSVString final : public IDLTypeBaseHelper<std::string> {};
 
 // Object
-struct TSObject : public TSTypeBaseHelper<ScriptValue> {};
+struct IDLObject : public IDLTypeBaseHelper<ScriptValue> {};
 
+class QJSFunction;
 // Function callback
-struct TSCallback : public TSTypeBaseHelper<std::shared_ptr<QJSFunction>> {
+struct IDLCallback : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
   using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
 };
 
 // Sequence
 template<typename T>
-struct TSSequence final : public TSTypeBase {
+struct IDLSequence final : public IDLTypeBase {
   using ImplType = typename std::vector<T>;
 };
 

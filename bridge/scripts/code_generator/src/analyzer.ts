@@ -7,7 +7,6 @@ import {
   FunctionDeclaration,
   FunctionObject,
   PropsDeclaration,
-  PropsDeclarationKind,
   ReturnType
 } from './declaration';
 import {generatorSource} from './generator';
@@ -31,25 +30,6 @@ function getHeritageType(heritage: HeritageClause) {
     return (expression as ts.Identifier).escapedText;
   }
   return null;
-}
-
-function getPropKind(type: ts.TypeNode): PropsDeclarationKind {
-  if (type.kind === ts.SyntaxKind.StringKeyword) {
-    return PropsDeclarationKind.string;
-  } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
-    return PropsDeclarationKind.double;
-  } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
-    return PropsDeclarationKind.boolean;
-  } else if (type.kind === ts.SyntaxKind.FunctionType) {
-    return PropsDeclarationKind.function;
-  } else if (type.kind === ts.SyntaxKind.TypeReference) {
-    // @ts-ignore
-    let typeName = (type as ts.TypeReference).typeName;
-    if (typeName.escapedText === 'int64') {
-      return PropsDeclarationKind.int64;
-    }
-  }
-  return PropsDeclarationKind.object;
 }
 
 function getFunctionReturnType(keyword: ts.TypeNode): ReturnType {
@@ -78,10 +58,12 @@ function getParameterName(name: ts.BindingName) : string {
   return  '';
 }
 
-function getParameterType(type: ts.TypeNode): FunctionArgumentType | FunctionArgumentType[] {
+export type ParameterType =  FunctionArgumentType | string;
+
+function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
   if (type.kind == ts.SyntaxKind.ArrayType) {
-    let arrayType = type.kind as unknown as ts.ArrayTypeNode;
-    return [getParameterType(arrayType) as FunctionArgumentType];
+    let arrayType = type as unknown as ts.ArrayTypeNode;
+    return [getParameterType(arrayType.elementType) as FunctionArgumentType];
   } else if (type.kind === ts.SyntaxKind.StringKeyword) {
     return FunctionArgumentType.string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
@@ -92,6 +74,7 @@ function getParameterType(type: ts.TypeNode): FunctionArgumentType | FunctionArg
     return FunctionArgumentType.any;
   } else if (type.kind === ts.SyntaxKind.ObjectKeyword) {
     return FunctionArgumentType.object;
+    // @ts-ignore
   } else if (type.kind === ts.SyntaxKind.TypeReference) {
     let typeReference: ts.TypeReference = type as unknown as ts.TypeReference;
     // @ts-ignore
@@ -103,6 +86,8 @@ function getParameterType(type: ts.TypeNode): FunctionArgumentType | FunctionArg
     } else if (identifier === 'double') {
       return FunctionArgumentType.double;
     }
+
+    return identifier;
   }
 
   return FunctionArgumentType.any;
@@ -125,13 +110,12 @@ function walkProgram(statement: ts.Statement) {
   switch(statement.kind) {
     case ts.SyntaxKind.InterfaceDeclaration: {
       let interfaceName = getInterfaceName(statement);
-      if (interfaceName === 'HostObject' || interfaceName === 'HostClass' || interfaceName === 'Element' || interfaceName === 'Event') return;
       let s = (statement as ts.InterfaceDeclaration);
       let obj = new ClassObject();
       if (s.heritageClauses) {
         let heritage = s.heritageClauses[0];
         let heritageType = getHeritageType(heritage);
-        if (heritageType) obj.type = heritageType.toString();
+        if (heritageType) obj.parent = heritageType.toString();
       }
 
       obj.name = s.name.escapedText.toString();
@@ -146,8 +130,8 @@ function walkProgram(statement: ts.Statement) {
 
             let propKind = m.type;
             if (propKind) {
-              prop.kind = getPropKind(propKind);
-              if (prop.kind === PropsDeclarationKind.function) {
+              prop.type = getParameterType(propKind);
+              if (prop.type === FunctionArgumentType.function) {
                 let f = (m.type as ts.FunctionTypeNode);
                 let functionProps = prop as FunctionDeclaration;
                 functionProps.args = [];
@@ -160,20 +144,31 @@ function walkProgram(statement: ts.Statement) {
                 obj.props.push(prop);
               }
             }
-
             break;
           }
           case ts.SyntaxKind.MethodSignature: {
             let m = (member as ts.MethodSignature);
             let f = new FunctionDeclaration();
             f.name = getPropName(m.name);
-            f.kind = PropsDeclarationKind.function;
             f.args = [];
             m.parameters.forEach(params => {
               let p = paramsNodeToArguments(params);
               f.args.push(p);
             });
             obj.methods.push(f);
+            break;
+          }
+          case ts.SyntaxKind.ConstructSignature: {
+            let m = (member as unknown as ts.ConstructorTypeNode);
+            let c = new FunctionDeclaration();
+            c.name = 'constructor';
+            c.args = [];
+            m.parameters.forEach(params => {
+              let p = paramsNodeToArguments(params);
+              c.args.push(p);
+            });
+            obj.construct = c;
+            break;
           }
         }
       });

@@ -17,3 +17,7 @@ export function getClassName(blob: Blob) {
 
   return `${raw[0].toUpperCase() + raw.slice(1)}`;
 }
+
+export function getMethodName(name: string) {
+  return name[0].toUpperCase() + name.slice(1);
+}
