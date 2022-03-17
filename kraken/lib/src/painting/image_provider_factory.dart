@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
-import 'package:quiver/collection.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
