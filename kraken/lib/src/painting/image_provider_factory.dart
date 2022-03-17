@@ -419,10 +419,12 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
+  String localPath = uri.replace(scheme: '').toString()
+      .replaceFirst('//', '');
   return KrakenResizeImage.resizeIfNeeded(
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    AssetImage(uri.toString())
+    AssetImage(localPath)
   );
 }
