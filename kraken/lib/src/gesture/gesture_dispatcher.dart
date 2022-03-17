@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/scheduler/throttle.dart';
-import 'package:kraken/rendering.dart';
 
 const int _MAX_STEP_MS = 16;
 
@@ -307,14 +306,14 @@ class GestureDispatcher {
     double clientY = globalOffset.dy;
 
     Event event = MouseEvent(type,
-        MouseEventInit(
-          bubbles: bubbles,
-          cancelable: cancelable,
-          clientX: clientX,
-          clientY: clientY,
-          offsetX: localPosition.dx,
-          offsetY: localPosition.dy,
-        )
+      MouseEventInit(
+        bubbles: bubbles,
+        cancelable: cancelable,
+        clientX: clientX,
+        clientY: clientY,
+        offsetX: localPosition.dx,
+        offsetY: localPosition.dy,
+      )
     );
     _target?.dispatchEvent(event);
   }
