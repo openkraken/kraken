@@ -341,13 +341,13 @@ class GestureDispatcher {
     _target?.dispatchEvent(event);
   }
 
-  void _handleTouchPoint(TouchPoint touchPoint) {
+  void _handleTouchPoint(TouchPoint currentTouchPoint) {
     String eventType;
-    if (touchPoint.state == PointState.Down) {
+    if (currentTouchPoint.state == PointState.Down) {
       eventType = EVENT_TOUCH_START;
-    } else if (touchPoint.state == PointState.Move) {
+    } else if (currentTouchPoint.state == PointState.Move) {
       eventType = EVENT_TOUCH_MOVE;
-    } else if (touchPoint.state == PointState.Up) {
+    } else if (currentTouchPoint.state == PointState.Up) {
       eventType = EVENT_TOUCH_END;
     } else {
       eventType = EVENT_TOUCH_CANCEL;
@@ -358,10 +358,14 @@ class GestureDispatcher {
       List<TouchPoint> touchPoints = _touchPoints.values.toList();
 
       for (int i = 0; i < touchPoints.length; i++) {
-        TouchPoint anotherTouchPoint = touchPoints[i];
-        Touch touch = _toTouch(anotherTouchPoint);
+        TouchPoint touchPoint = touchPoints[i];
+        Touch touch = _toTouch(touchPoint);
 
-        if (_pointTargets[touchPoint.id] == _pointTargets[anotherTouchPoint.id]) {
+        if (currentTouchPoint.id == touchPoint.id) {
+          // TODO: add pointEvent list for handle pointEvent at the current frame and support changedTouches.
+          e.changedTouches.append(touch);
+        }
+        if (_pointTargets[touchPoint.id] == _pointTargets[currentTouchPoint.id]) {
           // A list of Touch objects for every point of contact that is touching the surface
           // and started on the element that is the target of the current event.
           e.targetTouches.append(touch);
@@ -369,12 +373,13 @@ class GestureDispatcher {
         e.touches.append(touch);
       }
 
+
       if (eventType == EVENT_TOUCH_MOVE) {
         _throttler.throttle(() {
-          _pointTargets[touchPoint.id]?.dispatchEvent(e);
+          _pointTargets[currentTouchPoint.id]?.dispatchEvent(e);
         });
       } else {
-        _pointTargets[touchPoint.id]?.dispatchEvent(e);
+        _pointTargets[currentTouchPoint.id]?.dispatchEvent(e);
       }
     }
   }
