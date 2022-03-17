@@ -156,7 +156,7 @@ class GestureDispatcher {
     _touchPoints[touchPoint.id];
   }
 
-  TouchPoint? _currentTouchPoint;
+  EventTarget? _target;
 
   Touch _toTouch(TouchPoint touchPoint) {
     return Touch(
@@ -205,25 +205,26 @@ class GestureDispatcher {
     }
 
     // Stores the current TouchPoint to trigger the corresponding event.
-    _currentTouchPoint = _toTouchPoint(event);
+    TouchPoint touchPoint = _toTouchPoint(event);
 
     if (event is PointerDownEvent) {
       _gatherEventsInPath();
       _addPointerDownEventToMatchedRecognizers(event);
 
-      EventTarget? target = _eventPath.isNotEmpty ? _eventPath.first : null;
-      if (target != null) {
-        _bindEventTargetWithTouchPoint(_currentTouchPoint!, target);
+      // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
+      _target = _eventPath.isNotEmpty ? _eventPath.first : null;
+      if (_target != null) {
+        _bindEventTargetWithTouchPoint(touchPoint, _target!);
       }
     }
 
-    _addPoint(_currentTouchPoint!);
+    _addPoint(touchPoint);
 
-    _handleTouchEvent();
+    _handleTouchEvent(touchPoint);
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _removePoint(_currentTouchPoint!);
-      _unbindEventTargetWithTouchPoint(_currentTouchPoint!);
+      _removePoint(touchPoint);
+      _unbindEventTargetWithTouchPoint(touchPoint);
     }
   }
 
@@ -290,12 +291,11 @@ class GestureDispatcher {
     bool bubbles = true,
     bool cancelable = true,
   }) {
-    EventTarget? eventTarget = _pointTargets[_currentTouchPoint?.id];
-    if (eventTarget == null) {
+    if (_target == null) {
       return;
     }
     // @TODO
-    RenderBox? root = (eventTarget as Node).ownerDocument.renderer;
+    RenderBox? root = (_target as Node).ownerDocument.renderer;
 
     if (root == null) {
       return;
@@ -316,7 +316,7 @@ class GestureDispatcher {
           offsetY: localPosition.dy,
         )
     );
-    eventTarget.dispatchEvent(event);
+    _target?.dispatchEvent(event);
   }
 
   void _handleGestureEvent(String type, {
@@ -339,17 +339,16 @@ class GestureDispatcher {
       velocityY: velocityY,
       scale: scale,
     ));
-    EventTarget? eventTarget = _pointTargets[_currentTouchPoint?.id];
-    eventTarget?.dispatchEvent(event);
+    _target?.dispatchEvent(event);
   }
 
-  void _handleTouchEvent() {
+  void _handleTouchEvent(TouchPoint touchPoint) {
     String eventType;
-    if (_currentTouchPoint?.state == PointState.Down) {
+    if (touchPoint.state == PointState.Down) {
       eventType = EVENT_TOUCH_START;
-    } else if (_currentTouchPoint?.state == PointState.Move) {
+    } else if (touchPoint.state == PointState.Move) {
       eventType = EVENT_TOUCH_MOVE;
-    } else if (_currentTouchPoint?.state == PointState.Up) {
+    } else if (touchPoint.state == PointState.Up) {
       eventType = EVENT_TOUCH_END;
     } else {
       eventType = EVENT_TOUCH_CANCEL;
@@ -363,7 +362,7 @@ class GestureDispatcher {
         TouchPoint touchPoint = points[i];
         Touch touch = _toTouch(touchPoint);
 
-        if (_pointTargets[touchPoint.id] == _pointTargets[_currentTouchPoint?.id]) {
+        if (_pointTargets[touchPoint.id] == _pointTargets[touchPoint.id]) {
           // A list of Touch objects for every point of contact that is touching the surface
           // and started on the element that is the target of the current event.
           e.targetTouches.append(touch);
@@ -373,10 +372,10 @@ class GestureDispatcher {
 
       if (eventType == EVENT_TOUCH_MOVE) {
         _throttler.throttle(() {
-          _pointTargets[_currentTouchPoint?.id]?.dispatchEvent(e);
+          _pointTargets[touchPoint.id]?.dispatchEvent(e);
         });
       } else {
-        _pointTargets[_currentTouchPoint?.id]?.dispatchEvent(e);
+        _pointTargets[touchPoint.id]?.dispatchEvent(e);
       }
     }
   }
