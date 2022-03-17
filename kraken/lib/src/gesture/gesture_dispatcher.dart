@@ -129,7 +129,7 @@ class GestureDispatcher {
       pointState = PointState.Down;
     } else if (pointerEvent is PointerMoveEvent) {
       pointState = PointState.Move;
-    } else if (pointerEvent is PointerDownEvent) {
+    } else if (pointerEvent is PointerUpEvent) {
       pointState = PointState.Up;
     } else {
       pointState = PointState.Cancel;
