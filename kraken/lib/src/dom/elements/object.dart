@@ -157,7 +157,7 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   /// called when Element following properties change
   /// width,height
   /// [dataType] indicate the content type of the resource specified by data.
-  /// [data] indicate the address of the resource as a valid URL.
+  /// [rawBytes] indicate the address of the resource as a valid URL.
   ///
   /// NOTE:
   /// At least one of data and type must be defined.
