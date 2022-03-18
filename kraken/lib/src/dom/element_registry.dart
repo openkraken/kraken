@@ -20,7 +20,7 @@ class _UnknownElement extends Element {
   _UnknownElement([BindingContext? context]) : super(context);
 }
 
-Element createElement(String name, [context]){
+Element createElement(String name, [BindingContext? context]){
   ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
     print('Unexpected element "$name"');
