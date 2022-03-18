@@ -2097,17 +2097,12 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (!isChildAlignmentStretch) return false;
 
-    // Stretch does not work in following cases:
-    // 1. Flex container has auto length in the cross axis.
-    // 2. Flex item has not auto length in the cross axis.
+    // Stretch does not work when flex item has not auto length in the cross axis.
     if (child is RenderBoxModel) {
-      bool isParentLengthNotAuto = _isHorizontalFlexDirection
-        ? renderStyle.height.isNotAuto
-        : renderStyle.width.isNotAuto;
       bool isChildLengthAuto = _isHorizontalFlexDirection
         ? child.renderStyle.height.isAuto
         : child.renderStyle.width.isAuto;
-      return isParentLengthNotAuto && isChildLengthAuto;
+      return isChildLengthAuto;
     }
     return false;
   }
