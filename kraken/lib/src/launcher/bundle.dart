@@ -59,8 +59,8 @@ abstract class KrakenBundle {
   // Unique resource locator.
   final String src;
 
-  // Customize the parsed uri by uriParser.
-  Uri? uri;
+  // Uri parsed by uriParser, assigned after resolving.
+  Uri? _uri;
 
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
@@ -77,17 +77,33 @@ abstract class KrakenBundle {
   // Bundle contentType.
   ContentType contentType = ContentType.binary;
 
+  bool get isEmpty => src.isEmpty && content == null && bytecode == null;
+
+  Uri? get resolvedUri {
+    if (isResolved) {
+      return _uri;
+    }
+    return null;
+  }
+
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
-    uri = Uri.parse(src);
-    if (contextId != null) {
+    if (isResolved) return;
+
+    // Source is input by user, do not trust it's a valid URL.
+    _uri = Uri.tryParse(src);
+    if (contextId != null && _uri != null) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null && !isAssetAbsolutePath(src)) {
-        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
+        _uri = controller.uriParser!.resolve(Uri.parse(controller.url), _uri!);
       }
+      isResolved = true;
     }
+  }
 
-    isResolved = true;
+  Future<void> resolveAndEvaluate(int? contextId) async {
+    await resolve(contextId);
+    eval(contextId);
   }
 
   static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
@@ -107,8 +123,11 @@ abstract class KrakenBundle {
   }
 
 
-  Future<void> eval(int? contextId) async {
-    if (!isResolved) await resolve(contextId);
+  void eval(int? contextId) {
+    if (!isResolved) {
+      debugPrint('The kraken bundle $this is not resolved to evaluate.');
+      return;
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
@@ -174,7 +193,7 @@ class NetworkBundle extends KrakenBundle {
   Future<void> resolve(int? contextId) async {
     super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-    Uri baseUrl = Uri.parse(controller.href);
+    Uri baseUrl = Uri.parse(controller.url);
     NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
     bundle.httpClient.userAgent = NavigatorModule.getUserAgent();
     String absoluteURL = src;

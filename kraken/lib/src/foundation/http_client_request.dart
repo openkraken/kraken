@@ -119,7 +119,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       //   "data" URI.  A user agent MUST NOT send a Referer header field in an
       //   unsecured HTTP request if the referring page was received with a
       //   secure protocol.
-      Uri referrer = getReferrer(contextId);
+      Uri referrer = getEntrypointUri(contextId);
       bool isUnsafe = referrer.isScheme('https') && !uri.isScheme('https');
       bool isLocalRequest = uri.isScheme('file') || uri.isScheme('data') || uri.isScheme('assets');
       if (!isUnsafe && !isLocalRequest) {

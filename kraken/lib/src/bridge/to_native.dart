@@ -101,25 +101,26 @@ void invokeModuleEvent(
   freeNativeString(nativeModuleName);
 }
 
-typedef DartDispatchEvent = void Function(
+typedef DartDispatchEvent = int Function(
   int contextId,
-  Pointer<NativeEventTarget> nativeEventTarget,
+  Pointer<NativeBindingObject> nativeBindingObject,
   Pointer<NativeString> eventType,
   Pointer<Void> nativeEvent,
   int isCustomEvent
 );
 
 void emitUIEvent(
-    int contextId, Pointer<NativeEventTarget> nativeEventTarget, Event event) {
+    int contextId, Pointer<NativeBindingObject> nativeBindingObject, Event event) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
-  DartDispatchEvent dispatchEvent =
-      nativeEventTarget.ref.dispatchEvent.asFunction();
+  DartDispatchEvent dispatchEvent = nativeBindingObject.ref.dispatchEvent.asFunction();
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  dispatchEvent(contextId, nativeEventTarget, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  // @TODO: Make Event inhert BindingObject to pass value from bridge to dart.
+  int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+  event.propagationStopped = propagationStopped == 1 ? true : false;
   freeNativeString(eventTypeString);
 }
 
@@ -325,8 +326,8 @@ enum UICommandType {
   removeNode,
   insertAdjacentNode,
   setStyle,
-  setProperty,
-  removeProperty,
+  setAttribute,
+  removeAttribute,
   cloneNode,
   removeEvent,
   createDocumentFragment,
@@ -515,15 +516,15 @@ void flushUICommand() {
         switch (commandType) {
           case UICommandType.createElement:
             controller.view.createElement(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(
-                id, nativePtr.cast<NativeEventTarget>(), command.args[0]);
+                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
             break;
           case UICommandType.createComment:
             controller.view
-                .createComment(id, nativePtr.cast<NativeEventTarget>());
+                .createComment(id, nativePtr.cast<NativeBindingObject>());
             break;
           case UICommandType.disposeEventTarget:
             controller.view.disposeEventTarget(id);
@@ -552,18 +553,18 @@ void flushUICommand() {
             controller.view.setInlineStyle(id, key, value);
             pendingStylePropertiesTargets[id] = true;
             break;
-          case UICommandType.setProperty:
+          case UICommandType.setAttribute:
             String key = command.args[0];
             String value = command.args[1];
-            controller.view.setProperty(id, key, value);
+            controller.view.setAttribute(id, key, value);
             break;
-          case UICommandType.removeProperty:
+          case UICommandType.removeAttribute:
             String key = command.args[0];
-            controller.view.removeProperty(id, key);
+            controller.view.removeAttribute(id, key);
             break;
           case UICommandType.createDocumentFragment:
             controller.view.createDocumentFragment(
-                id, nativePtr.cast<NativeEventTarget>());
+                id, nativePtr.cast<NativeBindingObject>());
             break;
           default:
             break;

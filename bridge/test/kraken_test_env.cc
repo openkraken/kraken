@@ -271,7 +271,7 @@ void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, con
   NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
 }
 
-void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
+void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
 
 std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
 std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {

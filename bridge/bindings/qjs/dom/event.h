@@ -54,6 +54,7 @@ void bindEvent(ExecutionContext* context);
 
 class EventInstance;
 class EventTargetInstance;
+class NativeEventTarget;
 
 using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
@@ -150,9 +151,9 @@ class EventInstance : public Instance {
 #endif
   };
   void setType(NativeString* type) const;
-  FORCE_INLINE EventTargetInstance* target() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->target); }
+  EventTargetInstance* target() const;
   void setTarget(EventTargetInstance* target) const;
-  FORCE_INLINE EventTargetInstance* currentTarget() { return reinterpret_cast<EventTargetInstance*>(nativeEvent->currentTarget); }
+  EventTargetInstance* currentTarget() const;
   void setCurrentTarget(EventTargetInstance* target) const;
 
  protected:

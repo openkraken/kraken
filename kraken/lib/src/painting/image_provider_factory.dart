@@ -223,7 +223,7 @@ class KrakenResizeImage extends ResizeImage {
   BoxFit? objectFit;
 
   static final LinkedLruHashMap<dynamic, Size> _imageNaturalSize = LinkedLruHashMap(maximumSize: 100);
-  static Size? getImageNaturalSize(dynamic key) {
+  static Size? getImageNaturalSize(key) {
     return _imageNaturalSize[key];
   }
 
