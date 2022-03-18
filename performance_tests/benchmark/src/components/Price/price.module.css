@@ -1,0 +1,45 @@
+.preText {
+    font-size: 20rpx;
+    line-height: 28rpx;
+    font-weight: bold;
+  }
+  
+.price {
+  font-size: 32rpx;
+  line-height: 36rpx;
+  font-weight: bold;
+}
+
+.postText {
+  font-size: 20rpx;
+  line-height: 28rpx;
+  font-weight: bold;
+}
+
+.common {
+  color: #ff4444;
+    flex-direction: row;
+  align-items: baseline;
+}
+
+.container {
+  margin-top: 8rpx;
+  padding: 10rpx 0;
+  overflow: hidden;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.want {
+  color: #a3a3a3;
+  font-size: 20rpx;
+  line-height: 28rpx;
+}
+
+.priceIcon {
+  font-size: 20rpx;
+  line-height: 28rpx;
+  font-weight: bold;
+  margin-right: 4rpx;
+}
+  
