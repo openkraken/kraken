@@ -727,6 +727,10 @@ class RenderFlexLayout extends RenderLayoutBox {
             maxHeight: double.infinity,
           );
         }
+
+        if (child is RenderBoxModel) {
+          child.clearOverrideContentSize();
+        }
         child.layout(childConstraints, parentUsesSize: true);
 
         if (kProfileMode && PerformanceTiming.enabled()) {
@@ -1227,9 +1231,12 @@ class RenderFlexLayout extends RenderLayoutBox {
         double flexGrow = _getFlexGrow(child);
         double flexShrink = _getFlexShrink(child);
         // Whether child need to layout.
-        bool isChildNeedsLayout = (isFlexGrow && flexGrow > 0) ||
-          (isFlexShrink && flexShrink > 0) ||
-          isStretchSelf;
+        bool isChildNeedsLayout = child is RenderBoxModel
+          && (
+            (isFlexGrow && flexGrow > 0)
+            || (isFlexShrink && flexShrink > 0)
+            || isStretchSelf
+          );
 
         if (!isChildNeedsLayout) {
           continue;
@@ -1261,126 +1268,34 @@ class RenderFlexLayout extends RenderLayoutBox {
   // Get constraints of flex items which needs to change size due to
   // flex-grow/flex-shrink or align-items stretch.
   BoxConstraints _getChildConstraints(
-    RenderBox child,
+    RenderBoxModel child,
     _RunMetrics metrics,
     double runBetweenSpace, {
     bool isFlexGrow = false,
     bool isFlexShrink = false,
     bool isStretchSelf = false,
   }) {
-    BoxConstraints oldConstraints = child.constraints;
-    double minConstraintWidth = oldConstraints.minWidth;
-    double maxConstraintWidth = oldConstraints.maxWidth;
-    double minConstraintHeight = oldConstraints.minHeight;
-    double maxConstraintHeight = oldConstraints.maxHeight;
-
-    if (child is RenderBoxModel) {
-      RenderStyle? childRenderStyle = child.renderStyle;
-      Size? childSize = _getChildSize(child);
-      double flexGrow = _getFlexGrow(child);
-      double flexShrink = _getFlexShrink(child);
-      // Change main axis constraints
-      if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
-        double mainSize = metrics.runChildren[child.hashCode]!.adjustedMainSize;
-        if (_isHorizontalFlexDirection) {
-          maxConstraintWidth = mainSize;
-          _updateChildContentBoxLogicalWidth(child, maxConstraintWidth);
-        } else {
-          maxConstraintHeight = mainSize;
-          _updateChildContentBoxLogicalHeight(child, maxConstraintHeight);
-        }
-      }
-      // Change cross axis constraints.
-      if (isStretchSelf) {
-        bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap ||
-            renderStyle.flexWrap == FlexWrap.wrapReverse;
-        final double runCrossAxisExtent = metrics.crossAxisExtent;
-        if (_isHorizontalFlexDirection) {
-          CSSLengthValue marginTop = childRenderStyle.marginTop;
-          CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
-
-          // Margin auto alignment takes priority over align-items stretch,
-          // it will not stretch child in vertical direction.
-          if (marginTop.isAuto || marginBottom.isAuto) {
-            maxConstraintHeight = childSize!.height;
-            _updateChildContentBoxLogicalHeight(child, maxConstraintHeight);
-          } else {
-            double flexLineHeight =
-                _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
-            // Should subtract margin when layout child.
-            double marginVertical = marginTop.computedValue + marginBottom.computedValue;
-            double childCrossSize = flexLineHeight - marginVertical;
-            double stretchedHeight;
-            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap.
-            if (!isFlexWrap && hasMaxConstraints) {
-              double verticalBorderLength = renderStyle.border.vertical;
-              double verticalPaddingLength = renderStyle.padding.vertical;
-              stretchedHeight = math.min(
-                constraints.maxHeight -
-                  verticalBorderLength -
-                  verticalPaddingLength,
-                childCrossSize);
-            } else {
-              stretchedHeight = childCrossSize;
-            }
-            maxConstraintHeight = stretchedHeight;
-            _updateChildContentBoxLogicalHeight(child, maxConstraintHeight);
-          }
-
-          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
-          if (child is RenderIntrinsic &&
-            child.renderStyle.width.isAuto &&
-            child.renderStyle.minWidth.isAuto &&
-            child.renderStyle.intrinsicRatio != null
-          ) {
-            maxConstraintWidth = maxConstraintHeight / child.renderStyle.intrinsicRatio!;
-            _updateChildContentBoxLogicalWidth(child, maxConstraintWidth);
-          }
-        } else {
-          CSSLengthValue marginLeft = childRenderStyle.marginLeft;
-          CSSLengthValue marginRight = childRenderStyle.marginRight;
-          bool hasMaxConstraints = constraints.maxHeight != double.infinity;
-          // Margin auto alignment takes priority over align-items stretch,
-          // it will not stretch child in horizontal direction.
-          if (marginLeft.isAuto || marginRight.isAuto) {
-            maxConstraintWidth = childSize!.width;
-            _updateChildContentBoxLogicalWidth(child, maxConstraintWidth);
-          } else {
-            double flexLineHeight =
-                _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
-            // Should subtract margin when layout child.
-            double marginHorizontal = marginLeft.computedValue + marginRight.computedValue;
-            double childCrossSize = flexLineHeight - marginHorizontal;
-            double stretchedWidth;
-            // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap.
-            if (!isFlexWrap && hasMaxConstraints) {
-              double horizontalBorderLength = renderStyle.border.horizontal;
-              double horizontalPaddingLength = renderStyle.padding.horizontal;
-              stretchedWidth = math.min(
-                constraints.maxWidth -
-                  horizontalBorderLength -
-                  horizontalPaddingLength,
-                childCrossSize);
-            } else {
-              stretchedWidth = childCrossSize;
-            }
-            maxConstraintWidth = stretchedWidth;
-            _updateChildContentBoxLogicalWidth(child, maxConstraintWidth);
-          }
-
-          // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
-          if (child is RenderIntrinsic &&
-            child.renderStyle.height.isAuto &&
-            child.renderStyle.minHeight.isAuto &&
-            child.renderStyle.intrinsicRatio != null
-          ) {
-            maxConstraintHeight = maxConstraintWidth * child.renderStyle.intrinsicRatio!;
-            _updateChildContentBoxLogicalHeight(child, maxConstraintHeight);
-          }
-        }
-      }
+    if (isFlexGrow || isFlexShrink) {
+      _overrideChildMainAxisLength(child, metrics, isFlexGrow, isFlexShrink);
     }
+    if (isStretchSelf) {
+      _overrideChildCrossAxisLength(child, metrics, runBetweenSpace);
+    }
+
+    _overrideReplacedChildLength(child);
+
+    BoxConstraints oldConstraints = child.constraints;
+
+    double maxConstraintWidth = child.hasOverrideContentLogicalWidth
+      ? child.renderStyle.borderBoxLogicalWidth!
+      : oldConstraints.maxWidth;
+    double maxConstraintHeight = child.hasOverrideContentLogicalHeight
+      ? child.renderStyle.borderBoxLogicalHeight!
+      : oldConstraints.maxHeight;
+    double minConstraintWidth = oldConstraints.minWidth > maxConstraintWidth
+      ? maxConstraintWidth : oldConstraints.minWidth;
+    double minConstraintHeight = oldConstraints.minHeight > maxConstraintHeight
+      ? maxConstraintHeight : oldConstraints.minHeight;
 
     BoxConstraints childConstraints = BoxConstraints(
       minWidth: minConstraintWidth,
@@ -1388,23 +1303,173 @@ class RenderFlexLayout extends RenderLayoutBox {
       minHeight: minConstraintHeight,
       maxHeight: maxConstraintHeight,
     );
-    print('child------------ $child ${child.constraints} $childConstraints');
 
     return childConstraints;
   }
 
-  // Update child content box logical width when flex-grow/flex-shrink/align-items has changed
-  // child's size.
-  void _updateChildContentBoxLogicalWidth(RenderBoxModel child, double maxConstraintWidth) {
-    child.renderStyle.contentBoxLogicalWidth =
-      child.renderStyle.deflatePaddingBorderWidth(maxConstraintWidth);
+  // Override child length is the main axis when flex-grow/flex-shrink is effective.
+  void _overrideChildMainAxisLength(
+    RenderBoxModel child,
+    _RunMetrics metrics,
+    bool isFlexGrow,
+    bool isFlexShrink,
+  ) {
+    double flexGrow = _getFlexGrow(child);
+    double flexShrink = _getFlexShrink(child);
+    // Change main axis constraints by flex-grow/flex-shrink.
+    if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
+      double mainSize = metrics.runChildren[child.hashCode]!.adjustedMainSize;
+      if (_isHorizontalFlexDirection) {
+        double maxConstraintWidth = mainSize;
+        _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
+      } else {
+        double maxConstraintHeight = mainSize;
+        _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+      }
+    }
   }
 
-  // Update child content box logical height when flex-grow/flex-shrink/align-items has changed
+  // Override child length is the main axis when align-self/align-items is stretch.
+  void _overrideChildCrossAxisLength(
+    RenderBoxModel child,
+    _RunMetrics metrics,
+    double runBetweenSpace
+  ) {
+    RenderStyle? childRenderStyle = child.renderStyle;
+    Size? childSize = _getChildSize(child);
+    bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap ||
+      renderStyle.flexWrap == FlexWrap.wrapReverse;
+    final double runCrossAxisExtent = metrics.crossAxisExtent;
+    if (_isHorizontalFlexDirection) {
+      CSSLengthValue marginTop = childRenderStyle.marginTop;
+      CSSLengthValue marginBottom = childRenderStyle.marginBottom;
+      bool hasMaxConstraints = constraints.maxHeight != double.infinity;
+
+      // Margin auto alignment takes priority over align-items stretch,
+      // it will not stretch child in vertical direction.
+      if (marginTop.isAuto || marginBottom.isAuto) {
+        double maxConstraintHeight = childSize!.height;
+        _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+      } else {
+        double flexLineHeight =
+        _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
+        // Should subtract margin when layout child.
+        double marginVertical = marginTop.computedValue + marginBottom.computedValue;
+        double childCrossSize = flexLineHeight - marginVertical;
+        double stretchedHeight;
+        // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap.
+        if (!isFlexWrap && hasMaxConstraints) {
+          double verticalBorderLength = renderStyle.border.vertical;
+          double verticalPaddingLength = renderStyle.padding.vertical;
+          stretchedHeight = math.min(
+            constraints.maxHeight -
+              verticalBorderLength -
+              verticalPaddingLength,
+            childCrossSize);
+        } else {
+          stretchedHeight = childCrossSize;
+        }
+        double maxConstraintHeight = stretchedHeight;
+        _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+      }
+    } else {
+      CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+      CSSLengthValue marginRight = childRenderStyle.marginRight;
+      bool hasMaxConstraints = constraints.maxHeight != double.infinity;
+      // Margin auto alignment takes priority over align-items stretch,
+      // it will not stretch child in horizontal direction.
+      if (marginLeft.isAuto || marginRight.isAuto) {
+        double maxConstraintWidth = childSize!.width;
+        _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
+      } else {
+        double flexLineHeight =
+        _getFlexLineHeight(runCrossAxisExtent, runBetweenSpace);
+        // Should subtract margin when layout child.
+        double marginHorizontal = marginLeft.computedValue + marginRight.computedValue;
+        double childCrossSize = flexLineHeight - marginHorizontal;
+        double stretchedWidth;
+        // Flex line height should not exceed container's cross size if specified when flex-wrap is nowrap.
+        if (!isFlexWrap && hasMaxConstraints) {
+          double horizontalBorderLength = renderStyle.border.horizontal;
+          double horizontalPaddingLength = renderStyle.padding.horizontal;
+          stretchedWidth = math.min(
+            constraints.maxWidth -
+              horizontalBorderLength -
+              horizontalPaddingLength,
+            childCrossSize);
+        } else {
+          stretchedWidth = childCrossSize;
+        }
+        double maxConstraintWidth = stretchedWidth;
+        _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
+      }
+    }
+  }
+
+  // When replaced element is stretched or shrinked only in one direction and
+  // length is not specified in the other direction, the length needs to be
+  // overrided in the other direction.
+  void _overrideReplacedChildLength(
+    RenderBoxModel child,
+  ) {
+    if (child is RenderIntrinsic && child.renderStyle.intrinsicRatio != null) {
+      if (child.hasOverrideContentLogicalWidth
+        && !child.hasOverrideContentLogicalHeight
+        && child.renderStyle.height.isAuto
+      ) {
+        double maxConstraintWidth = child.renderStyle.borderBoxLogicalWidth!;
+        double maxConstraintHeight = maxConstraintWidth * child.renderStyle.intrinsicRatio!;
+        // Clamp replaced element height by min/max height.
+        if (child.renderStyle.minHeight.isNotAuto) {
+          double minHeight = child.renderStyle.minHeight.computedValue;
+          maxConstraintHeight = maxConstraintHeight < minHeight
+            ? minHeight : maxConstraintHeight;
+        }
+        if (child.renderStyle.maxHeight.isNotNone) {
+          double maxHeight = child.renderStyle.maxHeight.computedValue;
+          maxConstraintHeight = maxConstraintHeight > maxHeight
+            ? maxHeight : maxConstraintHeight;
+        }
+        _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+      }
+
+      // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
+      if (!child.hasOverrideContentLogicalWidth
+        && child.hasOverrideContentLogicalHeight
+        && child.renderStyle.width.isAuto
+      ) {
+        double maxConstraintHeight = child.renderStyle.borderBoxLogicalHeight!;
+        double maxConstraintWidth = maxConstraintHeight / child.renderStyle.intrinsicRatio!;
+        // Clamp replaced element width by min/max width.
+        if (child.renderStyle.minWidth.isNotAuto) {
+          double minWidth = child.renderStyle.minWidth.computedValue;
+          maxConstraintWidth = maxConstraintWidth < minWidth
+            ? minWidth : maxConstraintWidth;
+        }
+        if (child.renderStyle.maxWidth.isNotNone) {
+          double maxWidth = child.renderStyle.maxWidth.computedValue;
+          maxConstraintWidth = maxConstraintWidth > maxWidth
+            ? maxWidth : maxConstraintWidth;
+        }
+        _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
+      }
+    }
+  }
+
+  // Override content box logical width of child when flex-grow/flex-shrink/align-items has changed
   // child's size.
-  void _updateChildContentBoxLogicalHeight(RenderBoxModel child, double maxConstraintHeight) {
+  void _overrideChildContentBoxLogicalWidth(RenderBoxModel child, double maxConstraintWidth) {
+    child.renderStyle.contentBoxLogicalWidth =
+      child.renderStyle.deflatePaddingBorderWidth(maxConstraintWidth);
+    child.hasOverrideContentLogicalWidth = true;
+  }
+
+  // Override content box logical height of child when flex-grow/flex-shrink/align-items has changed
+  // child's size.
+  void _overrideChildContentBoxLogicalHeight(RenderBoxModel child, double maxConstraintHeight) {
     child.renderStyle.contentBoxLogicalHeight =
       child.renderStyle.deflatePaddingBorderHeight(maxConstraintHeight);
+    child.hasOverrideContentLogicalHeight = true;
   }
 
   // Set flex container size according to children size.
@@ -2032,12 +2097,17 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     if (!isChildAlignmentStretch) return false;
 
-    // If child length is auto in cross axis, stretch does not work.
+    // Stretch does not work in following cases:
+    // 1. Flex container has auto length in the cross axis.
+    // 2. Flex item has not auto length in the cross axis.
     if (child is RenderBoxModel) {
-      bool isLengthAuto = _isHorizontalFlexDirection
+      bool isParentLengthNotAuto = _isHorizontalFlexDirection
+        ? renderStyle.height.isNotAuto
+        : renderStyle.width.isNotAuto;
+      bool isChildLengthAuto = _isHorizontalFlexDirection
         ? child.renderStyle.height.isAuto
         : child.renderStyle.width.isAuto;
-      return isLengthAuto;
+      return isParentLengthNotAuto && isChildLengthAuto;
     }
     return false;
   }

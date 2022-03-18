@@ -101,20 +101,14 @@ abstract class RenderStyle {
   // BoxModel
   double? get borderBoxLogicalWidth;
   double? get borderBoxLogicalHeight;
-  double? get borderBoxConstraintsWidth;
-  double? get borderBoxConstraintsHeight;
   double? get borderBoxWidth;
   double? get borderBoxHeight;
   double? get paddingBoxLogicalWidth;
   double? get paddingBoxLogicalHeight;
-  double? get paddingBoxConstraintsWidth;
-  double? get paddingBoxConstraintsHeight;
   double? get paddingBoxWidth;
   double? get paddingBoxHeight;
   double? get contentBoxLogicalWidth;
   double? get contentBoxLogicalHeight;
-  double? get contentBoxConstraintsWidth;
-  double? get contentBoxConstraintsHeight;
   double? get contentBoxWidth;
   double? get contentBoxHeight;
   CSSPositionType get position;
@@ -1040,72 +1034,6 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxHeight!
-      - paddingTop.computedValue
-      - paddingBottom.computedValue;
-  }
-
-  // Border box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get borderBoxConstraintsWidth {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightWidth
-    ) {
-      return renderBoxModel!.constraints.maxWidth;
-    }
-    return null;
-  }
-
-  // Border box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get borderBoxConstraintsHeight {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightHeight
-    ) {
-      return renderBoxModel!.constraints.maxHeight;
-    }
-    return null;
-  }
-
-  // Padding box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get paddingBoxConstraintsWidth {
-    if (borderBoxConstraintsWidth == null) {
-      return null;
-    }
-    return borderBoxConstraintsWidth!
-      - effectiveBorderLeftWidth.computedValue
-      - effectiveBorderRightWidth.computedValue;
-  }
-
-  // Padding box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get paddingBoxConstraintsHeight {
-    if (borderBoxConstraintsHeight == null) {
-      return null;
-    }
-    return borderBoxConstraintsHeight!
-      - effectiveBorderTopWidth.computedValue
-      - effectiveBorderBottomWidth.computedValue;
-  }
-
-  // Content box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get contentBoxConstraintsWidth {
-    if (paddingBoxConstraintsWidth == null) {
-      return null;
-    }
-    return paddingBoxConstraintsWidth!
-      - paddingLeft.computedValue
-      - paddingRight.computedValue;
-  }
-
-  // Content box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get contentBoxConstraintsHeight {
-    if (paddingBoxConstraintsHeight == null) {
-      return null;
-    }
-    return paddingBoxConstraintsHeight!
       - paddingTop.computedValue
       - paddingBottom.computedValue;
   }
