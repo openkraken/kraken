@@ -14,7 +14,16 @@ namespace kraken {
 
 class ModuleManager {
  public:
-  static ScriptValue __kraken_invoke_module__(ExecutingContext* context,
+  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
+                                              std::unique_ptr<NativeString> &moduleName,
+                                              std::unique_ptr<NativeString> &method,
+                                              ExceptionState& exception);
+  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
+                                              std::unique_ptr<NativeString> &moduleName,
+                                              std::unique_ptr<NativeString> &method,
+                                              ScriptValue& params,
+                                              ExceptionState& exception);
+  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
                                               std::unique_ptr<NativeString> &moduleName,
                                               std::unique_ptr<NativeString> &method,
                                               ScriptValue& params,

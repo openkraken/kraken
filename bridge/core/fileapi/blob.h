@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include "bindings/qjs/macros.h"
-#include "bindings/qjs/qjs_blob.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "blob_part.h"
 #include "blob_property_bag.h"
@@ -20,6 +19,8 @@ class Blob : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  static Blob* Create(ExecutingContext* context);
+  static Blob* Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, ExceptionState& exception_state);
   static Blob* Create(ExecutingContext* context,
                       std::vector<std::shared_ptr<BlobPart>> data,
                       std::shared_ptr<BlobPropertyBag> property,

@@ -4,9 +4,16 @@
  */
 
 #include "blob.h"
-#include "bindings/qjs/qjs_blob.h"
 
 namespace kraken {
+
+Blob * Blob::Create(ExecutingContext* context) {
+
+}
+
+Blob * Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, ExceptionState& exception_state) {
+
+}
 
 Blob* Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, std::shared_ptr<BlobPropertyBag> property, ExceptionState& exception_state) {
   //  return makeGarbageCollected<Blob>(ctx, std::forward<std::vector<uint8_t>>(data), mime);

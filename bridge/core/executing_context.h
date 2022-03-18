@@ -73,6 +73,8 @@ class ExecutingContext {
   ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
   ~ExecutingContext();
 
+  static ExecutingContext* From(JSContext* ctx);
+
   bool EvaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine);
   bool EvaluateJavaScript(const char16_t* code, size_t length, const char* sourceURL, int startLine);
   bool EvaluateJavaScript(const char* code, size_t codeLength, const char* sourceURL, int startLine);

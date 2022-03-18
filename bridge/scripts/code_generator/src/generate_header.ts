@@ -50,7 +50,7 @@ class QJS${getClassName(blob)} final {
   static void Install(ExecutingContext* context);
 
   ${interfaceDefines[0]}
-    ${interfaceDefines[1]}
+  ${interfaceDefines[1]}
  private:
   static void InstallGlobalFunctions(ExecutingContext* context);
   ${interfaceDefines[2]}

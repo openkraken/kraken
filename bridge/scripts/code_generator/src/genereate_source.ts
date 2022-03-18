@@ -4,10 +4,11 @@ import {
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
-  FunctionObject, PropsDeclaration,
+  FunctionObject,
+  PropsDeclaration,
   ReturnType
 } from "./declaration";
-import {addIndent, getClassName, getMethodName} from "./utils";
+import {addIndent, getClassName} from "./utils";
 import {ParameterType} from "./analyzer";
 
 enum PropType {
@@ -58,94 +59,96 @@ function generateTypeConverter(type: ParameterType | ParameterType[]): string {
   }
 }
 
-function generateFunctionValueInit(declare: FunctionDeclaration) {
-  function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
-    let type = generateTypeConverter(argument.type);
-    return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);`;
-  }
-
-  function generateInitBody(argument: FunctionArguments, argsIndex: number) {
-    function generateInitParams(type: ParameterType | ParameterType[]) {
-      return '';
-    }
-
-      return `Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::ImplType args_${argument.name}{${generateInitParams(argument.type)}};
-if (argc > ${argsIndex}) {
-  args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
-}`
-  }
-
-  return declare.args.map((a, i) => {
-    let body = a.required ? generateRequiredInitBody(a, i) : generateInitBody(a, i);
-    return addIndent(body, 2);
-  });
+function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
+  let type = generateTypeConverter(argument.type);
+  return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);`;
 }
 
-function generateFunctionCall(blob: Blob, declare: FunctionDeclaration, staticMethod: boolean) {
-  let params = declare.args.map(a => `args_${a.name}`);
-  let coreClassName = getClassName(blob);
-  let returnValue = '';
-
-  if (declare.returnType != ReturnType.void) {
-    returnValue = `auto&& returnValue = `
-  }
-
-  let callParams = [];
-
-  if (staticMethod) {
-    callParams.push('context');
-  }
-
-  if (params.length > 0) {
-    callParams = callParams.concat(params);
-  }
-
-  callParams.push('exception');
-
-  let callCode = '';
-  if (staticMethod) {
-    callCode = `${returnValue}${coreClassName}::${declare.name === 'constructor' ? 'Create' : declare.name}(${callParams.join(',')});`;
-  } else {
-    callCode = `auto&& ${blob.filename} = toScriptWrappable<${getClassName(blob)}>(this_val);
- ${returnValue} qjs_blob->${declare.name}(${callParams.join(',')});`;
-  }
-
-  return addIndent(`
-auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
-ExceptionState exception;
-
-${callCode}
-
-if (exception.HasException()) {
-  return exception.ToQuickJS();
-}
-${returnValue ? 'return returnValue->ToQuickJS();' : 'return JS_NULL; '}`, 2);
+function generateOptionalInitBody(blob: Blob, declare: FunctionDeclaration, argument: FunctionArguments, argsIndex: number, previousArguments: string[]) {
+  return `auto&& args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
+if (exception_state.HasException()) {
+  return exception_state.ToQuickJS();
 }
 
-function generateFunctionSource(blob: Blob, object: FunctionObject) {
-  let paramCheck = generateMethodArgumentsCheck(object.declare);
-  let varInit = generateFunctionValueInit(object.declare);
-  let moduleCall = generateFunctionCall(blob, object.declare, true);
-  return `static JSValue ${object.declare.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-${paramCheck}
-  ExceptionState exception_state;
-
-${varInit.join('\n')}
-${moduleCall}
+if (argc <= ${argsIndex}) {
+  return_value = ${getClassName(blob)}::${declare.name}(context, ${[...previousArguments, `args_${argument.name}`].join(',')}, exception_state);
+  break;
 }`;
 }
 
-function generateClassConstructorCallback(blob: Blob, declare: FunctionDeclaration) {
+function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration) {
+  let minimalRequiredArgc = 0;
+  declaration.args.forEach(m => {
+    if (m.required) minimalRequiredArgc++;
+  });
+
+  let requiredArguments: string[] = [];
+  let requiredArgumentsInit: string[] = [];
+  if (minimalRequiredArgc > 0) {
+    requiredArgumentsInit = declaration.args.filter((a, i) => a.required).map((a, i) => {
+      requiredArguments.push(`args_${a.name}`);
+      return generateRequiredInitBody(a, i);
+    });
+  }
+
+  let optionalArgumentsInit: string[] = [];
+  let totalArguments: string[] = requiredArguments.slice();
+
+  for (let i = minimalRequiredArgc; i < declaration.args.length; i ++) {
+    optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i + 1, totalArguments));
+    totalArguments.push(`args_${declaration.args[i].name}`);
+  }
+
+  requiredArguments.push('exception_state');
+
+  return `${requiredArgumentsInit.join('\n')}
+if (argc <= ${minimalRequiredArgc}) {
+  return_value = ${getClassName(blob)}::${declaration.name}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});
+  break;
+}
+
+${optionalArgumentsInit.join('\n')}
+`;
+}
+
+function generateGlobalFunctionSource(blob: Blob, object: FunctionObject) {
+  let body = generateFunctionBody(blob, object.declare);
+  return `static JSValue ${object.declare.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+${body}
+}`;
+}
+
+function generateFunctionBody(blob: Blob, declare: FunctionDeclaration) {
   let paramCheck = generateMethodArgumentsCheck(declare);
-  let varInit = generateFunctionValueInit(declare);
-  let moduleCall = generateFunctionCall(blob, declare, true);
+  let callBody = generateFunctionCallBody(blob, declare);
+  let returnValue = '';
+  if (declare.returnType != ReturnType.void) {
+    returnValue = 'return_value->ToQuickJS();';
+  } else {
+    returnValue = 'JS_NULL';
+  }
 
-  return `JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
-  ${paramCheck}
+  return `${paramCheck}
+
   ExceptionState exception_state;
+  ${getClassName(blob)}* return_value = nullptr;
+  ExecutingContext* context = ExecutingContext::From(ctx);
 
-${varInit.join('\n')}
-${moduleCall}
+  do {  // Dummy loop for use of 'break'.
+${addIndent(callBody, 4)}
+  } while (false);
+
+  if (exception_state.HasException()) {
+    return exception_state.ToQuickJS();
+  }
+
+  return ${returnValue};
+`;
+}
+
+function generateClassConstructorCallback(blob: Blob, declare: FunctionDeclaration) {
+  return `JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
+${generateFunctionBody(blob, declare)}
 }
 `;
 }
@@ -172,17 +175,7 @@ function generatePropertySetterCallback(blob: Blob, prop: PropsDeclaration) {
 
 function generateMethodCallback(blob: Blob, methods: FunctionDeclaration[]): string[] {
   return methods.map(method => {
-    let paramCheck = generateMethodArgumentsCheck(method);
-    let varInit = generateFunctionValueInit(method);
-    let moduleCall = generateFunctionCall(blob, method, false);
-
-    return `static JSValue ${method.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  ${paramCheck}
-  ExceptionState exception_state;
-
-${varInit.join('\n')}
-${moduleCall}
-}`;
+    return generateFunctionBody(blob, method);
   });
 }
 
@@ -266,7 +259,7 @@ export function generateCppSource(blob: Blob) {
   let sources = blob.objects.map(o => {
     if (o instanceof FunctionObject) {
       functionInstallList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}},`);
-      return generateFunctionSource(blob, o);
+      return generateGlobalFunctionSource(blob, o);
     } else {
       o.props.forEach(prop => {
         classMethodsInstallList.push(`{"${prop.name}", ${prop.name}AttributeGetCallback, ${prop.readonly ? 'nullptr' : `${prop.name}AttributeSetCallback`}}`)
@@ -279,6 +272,8 @@ export function generateCppSource(blob: Blob) {
     }
   });
 
+  let haveInterfaceDefine = !!blob.objects.find(object => object instanceof ClassObject);
+
   return `/*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -288,6 +283,7 @@ export function generateCppSource(blob: Blob) {
 #include "bindings/qjs/member_installer.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/converter_impl.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "core/executing_context.h"
 #include "core/${blob.implement}.h"
 
@@ -299,14 +295,15 @@ ${sources.join('\n')}
 
 void QJS${getClassName(blob)}::Install(ExecutingContext* context) {
   InstallGlobalFunctions(context);
-  InstallConstructor(context);
+  ${haveInterfaceDefine ? `InstallConstructor(context);
   InstallPrototypeMethods(context);
-  InstallPrototypeProperties(context);
+  InstallPrototypeProperties(context)` : ''};
 }
 
 ${generateInstallGlobalFunctions(blob, functionInstallList)}
-${generateConstructorInstaller(blob)}
+
+${haveInterfaceDefine ? `${generateConstructorInstaller(blob)}
 ${generatePrototypeMethodsInstaller(blob, classMethodsInstallList)}
-${generatePrototypePropsInstaller(blob, classPropsInstallList)}
+${generatePrototypePropsInstaller(blob, classPropsInstallList)}` : ''}
 }`;
 }

@@ -142,6 +142,10 @@ ExecutingContext::~ExecutingContext() {
   ctx_ = nullptr;
 }
 
+ExecutingContext * ExecutingContext::From(JSContext* ctx) {
+  return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
+}
+
 bool ExecutingContext::EvaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
   JSValue result = JS_Eval(ctx_, utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);

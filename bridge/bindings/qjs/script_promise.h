@@ -16,6 +16,12 @@ namespace kraken {
 // memory leaks since it has a reference from C++ to QuickJS.
 class ScriptPromise final {
   KRAKEN_DISALLOW_NEW();
+
+ public:
+
+ private:
+
+
 };
 
 }
