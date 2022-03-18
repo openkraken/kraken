@@ -57,7 +57,6 @@ abstract class EventTarget extends BindingObject {
     _dispatchEventInDOM(event);
   }
 
-
   // Refs: https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/EventDispatcher.cpp#L85
   void _dispatchEventInDOM(Event event) {
     // TODO: Invoke capturing event listeners in the reverse order.
@@ -96,4 +95,14 @@ abstract class EventTarget extends BindingObject {
   }
 
   EventTarget? get parentEventTarget;
+
+  List<EventTarget> get eventPath {
+    List<EventTarget> path = [];
+    EventTarget? current = this;
+    while (current != null) {
+      path.add(current);
+      current = current.parentEventTarget;
+    }
+    return path;
+  }
 }

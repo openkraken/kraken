@@ -137,7 +137,6 @@ class KrakenViewController
       viewport = RenderViewportBox(
         background: background,
         viewportSize: Size(viewportWidth, viewportHeight),
-        gestureListener: gestureListener,
         controller: rootController
       );
     }
@@ -178,6 +177,10 @@ class KrakenViewController
 
       if (listener.onTouchEnd != null) {
         document.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
+      }
+
+      if (listener.onDrag != null) {
+        document.addEventListener(EVENT_DRAG, (Event event) => listener.onDrag!(event as GestureEvent));
       }
     }
 

@@ -65,14 +65,13 @@ const String EVENT_RESIZE = 'resize';
 const String EVENT_STATE_START = 'start';
 const String EVENT_STATE_UPDATE = 'update';
 const String EVENT_STATE_END = 'end';
+const String EVENT_STATE_CANCEL = 'cancel';
 
 mixin ElementEventMixin on ElementBase {
   AppearEventType _prevAppearState = AppearEventType.none;
 
   void clearEventResponder(RenderEventListenerMixin renderBox) {
-    renderBox.handleMouseEvent = null;
-    renderBox.handleGestureEvent = null;
-    renderBox.handleTouchEvent = null;
+    renderBox.getEventTarget = null;
   }
 
   void ensureEventResponderBound() {
@@ -120,10 +119,6 @@ mixin ElementEventMixin on ElementBase {
     return this;
   }
 
-
-
-
-
   void handleAppear() {
     if (_prevAppearState == AppearEventType.appear) return;
     _prevAppearState = AppearEventType.appear;
@@ -148,7 +143,7 @@ mixin ElementEventMixin on ElementBase {
   }
 }
 
-// @TODO: inhert BindingObject to receive value from Cpp side.
+// @TODO: inherit BindingObject to receive value from Cpp side.
 /// reference: https://developer.mozilla.org/zh-CN/docs/Web/API/Event
 class Event {
   String type;
@@ -596,7 +591,7 @@ class Touch {
   final double azimuthAngle;
   final TouchType touchType;
 
-  Touch({
+  const Touch({
     required this.identifier,
     required this.target,
     this.clientX = 0,

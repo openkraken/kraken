@@ -5,11 +5,13 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 import 'package:kraken/widget.dart';
+
 
 class Document extends Node {
   final KrakenController controller;
@@ -108,25 +110,25 @@ class Document extends Node {
     return super.replaceChild(newNode, oldNode);
   }
 
-  Element createElement(String type, [context]) {
+  Element createElement(String type, [BindingContext? context]) {
     Element element = element_registry.createElement(type, context);
     element.ownerDocument = this;
     return element;
   }
 
-  TextNode createTextNode(String data, [context]) {
+  TextNode createTextNode(String data, [BindingContext? context]) {
     TextNode textNode = TextNode(data, context);
     textNode.ownerDocument = this;
     return textNode;
   }
 
-  DocumentFragment createDocumentFragment([context]) {
+  DocumentFragment createDocumentFragment([BindingContext? context]) {
     DocumentFragment documentFragment = DocumentFragment(context);
     documentFragment.ownerDocument = this;
     return documentFragment;
   }
 
-  Comment createComment([context]) {
+  Comment createComment([BindingContext? context]) {
     Comment comment = Comment(context);
     comment.ownerDocument = this;
     return comment;
