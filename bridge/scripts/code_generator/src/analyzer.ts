@@ -7,7 +7,6 @@ import {
   FunctionDeclaration,
   FunctionObject,
   PropsDeclaration,
-  ReturnType
 } from './declaration';
 import {generatorSource} from './generator';
 
@@ -30,14 +29,6 @@ function getHeritageType(heritage: HeritageClause) {
     return (expression as ts.Identifier).escapedText;
   }
   return null;
-}
-
-function getFunctionReturnType(keyword: ts.TypeNode): ReturnType {
-  switch (keyword.kind) {
-    case ts.SyntaxKind.VoidKeyword:
-      return ReturnType.void;
-  }
-  return ReturnType.null;
 }
 
 function getPropName(propName: ts.PropertyName) {
@@ -75,6 +66,8 @@ function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
   } else if (type.kind === ts.SyntaxKind.ObjectKeyword) {
     return FunctionArgumentType.object;
     // @ts-ignore
+  } else if (type.kind === ts.SyntaxKind.VoidKeyword) {
+    return FunctionArgumentType.void;
   } else if (type.kind === ts.SyntaxKind.TypeReference) {
     let typeReference: ts.TypeReference = type as unknown as ts.TypeReference;
     // @ts-ignore
@@ -83,6 +76,8 @@ function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
       return FunctionArgumentType.function;
     } else if (identifier === 'int32') {
       return FunctionArgumentType.int32;
+    } else if (identifier === 'int64') {
+      return FunctionArgumentType.int64;
     } else if (identifier === 'double') {
       return FunctionArgumentType.double;
     }
@@ -156,6 +151,9 @@ function walkProgram(statement: ts.Statement) {
               f.args.push(p);
             });
             obj.methods.push(f);
+            if (m.type) {
+              f.returnType = getParameterType(m.type);
+            }
             break;
           }
           case ts.SyntaxKind.ConstructSignature: {
@@ -184,7 +182,7 @@ function walkProgram(statement: ts.Statement) {
       functionObject.declare = new FunctionDeclaration();
       if (type?.kind == ts.SyntaxKind.FunctionType) {
         functionObject.declare.args = (type as ts.FunctionTypeNode).parameters.map(param => paramsNodeToArguments(param));
-        functionObject.declare.returnType = getFunctionReturnType((type as ts.FunctionTypeNode).type);
+        functionObject.declare.returnType = getParameterType((type as ts.FunctionTypeNode).type);
         functionObject.declare.name = methodName.toString();
       }
 

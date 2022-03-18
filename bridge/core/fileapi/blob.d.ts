@@ -1,8 +1,10 @@
+type int64 = void;
+
 interface Blob {
   readonly size: number;
   readonly type: string;
   arrayBuffer(): Promise<ArrayBuffer>;
-  slice(start?: number, end?: number, contentType?: string): Blob;
+  slice(start?: int64, end?: int64, contentType?: string): Blob;
   text(): Promise<string>;
   new(blobParts?: BlobPart[], options?: BlobPropertyBag): Blob;
 }

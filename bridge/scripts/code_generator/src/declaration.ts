@@ -5,9 +5,11 @@ export enum FunctionArgumentType {
   string,
   object,
   int32,
+  int64,
   double,
   boolean,
   function,
+  void,
   any,
 }
 
@@ -23,14 +25,9 @@ export class PropsDeclaration {
   readonly: boolean;
 }
 
-export enum ReturnType {
-  void,
-  null
-}
-
 export class FunctionDeclaration extends PropsDeclaration {
   args: FunctionArguments[];
-  returnType: ReturnType;
+  returnType: ParameterType | ParameterType[];
 }
 
 export class ClassObject {

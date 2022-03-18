@@ -32,6 +32,10 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
     }
     return Converter<T>::FromValue(ctx, value, exception);
   }
+
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    return Converter<T>::ToValue(ctx, value);
+  }
 };
 
 template <typename T>
@@ -43,6 +47,10 @@ struct Converter<IDLOptional<T>, std::enable_if_t<is_shared_ptr<typename Convert
       return nullptr;
     }
     return Converter<T>::FromValue(ctx, value, exception);
+  }
+
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    return Converter<T>::ToValue(ctx, value);
   }
 };
 
@@ -57,6 +65,10 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_arithmetic<typename Co
     }
     return Converter<T>::FromValue(ctx, value, exception);
   }
+
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    return Converter<T>::ToValue(ctx, value);
+  }
 };
 
 // Any
@@ -67,13 +79,18 @@ struct Converter<IDLAny> : public ConverterBase<IDLAny> {
     return ScriptValue(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, const ScriptValue& value) { return value.ToQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, ScriptValue value) { return value.ToQuickJS(); }
 };
+
 template<>
 struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return ScriptValue(ctx, value);
+  }
+
+  static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) {
+    return Converter<IDLAny>::ToValue(ctx, value);
   }
 };
 
@@ -101,6 +118,31 @@ struct Converter<IDLUint32> : public ConverterBase<IDLUint32> {
   static JSValue ToValue(JSContext* ctx, uint32_t v) { return JS_NewUint32(ctx, v); }
 };
 
+// Int32
+template<>
+struct Converter<IDLInt32> : public ConverterBase<IDLInt32> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    int32_t v;
+    JS_ToInt32(ctx, &v, value);
+    return v;
+  }
+  static JSValue ToValue(JSContext* ctx, uint32_t v) { return JS_NewInt32(ctx, v); }
+};
+
+
+// Int64
+template<>
+struct Converter<IDLInt64> : public ConverterBase<IDLInt64> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    int64_t v;
+    JS_ToInt64(ctx, &v, value);
+    return v;
+  }
+  static JSValue ToValue(JSContext* ctx, uint32_t v) { return JS_NewInt64(ctx, v); }
+};
+
 template <>
 struct Converter<IDLDouble> : public ConverterBase<IDLDouble> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
@@ -120,8 +162,23 @@ struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
     return jsValueToNativeString(ctx, value);
   }
 
+  static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
   static JSValue ToValue(JSContext* ctx, const std::string& str) { return JS_NewString(ctx, str.c_str());}
+};
+
+template<>
+struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsUndefined(value)) return nullptr;
+    return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
+  }
+
+  static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return Converter<IDLDOMString>::ToValue(ctx, bytes, length); }
+  static JSValue ToValue(JSContext* ctx, const std::string& str) { return Converter<IDLDOMString>::ToValue(ctx, str); }
+  static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) {
+    return Converter<IDLDOMString>::ToValue(ctx, value);
+  }
 };
 
 template <>

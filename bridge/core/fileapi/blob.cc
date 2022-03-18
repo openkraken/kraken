@@ -7,13 +7,9 @@
 
 namespace kraken {
 
-Blob * Blob::Create(ExecutingContext* context) {
+Blob* Blob::Create(ExecutingContext* context) {}
 
-}
-
-Blob * Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, ExceptionState& exception_state) {
-
-}
+Blob* Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, ExceptionState& exception_state) {}
 
 Blob* Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>> data, std::shared_ptr<BlobPropertyBag> property, ExceptionState& exception_state) {
   //  return makeGarbageCollected<Blob>(ctx, std::forward<std::vector<uint8_t>>(data), mime);
@@ -86,15 +82,27 @@ const char* Blob::GetHumanReadableName() const {
 void Blob::Trace(GCVisitor* visitor) const {}
 void Blob::Dispose() const {}
 
-Blob* Blob::slice(ExceptionState& exception_state) {
+Blob* Blob::slice() {
   return nullptr;
 }
-Blob* Blob::slice(int64_t start, ExceptionState* exception_state) {
+Blob* Blob::slice(int64_t start, ExceptionState& exception_state) {
   return nullptr;
+}
+Blob* Blob::slice(int64_t start, int64_t end, ExceptionState& exception_state) {}
+Blob * Blob::slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& content_type, ExceptionState& exception_state) {
+
 }
 
 std::string Blob::type() {
   return mime_type_;
+}
+
+ScriptPromise Blob::arrayBuffer() {
+  return ScriptPromise();
+}
+
+ScriptPromise Blob::text() {
+
 }
 
 }  // namespace kraken

@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_H_
 
+#include <quickjs/quickjs.h>
 #include "foundation/macros.h"
 
 namespace kraken {
@@ -19,6 +20,7 @@ class ScriptPromise final {
 
  public:
 
+  JSValue ToQuickJS();
  private:
 
 

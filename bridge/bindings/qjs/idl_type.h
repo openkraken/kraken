@@ -33,6 +33,8 @@ struct IDLOptional final : public IDLTypeBase {
 struct IDLBoolean final : public IDLTypeBaseHelper<bool> {};
 
 // Primitive types
+struct IDLInt32 final : public IDLTypeBaseHelper<int32_t> {};
+struct IDLInt64 final : public IDLTypeBaseHelper<int32_t> {};
 struct IDLUint32 final : public IDLTypeBaseHelper<uint32_t> {};
 struct IDLDouble final : public IDLTypeBaseHelper<double> {};
 

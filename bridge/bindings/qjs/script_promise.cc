@@ -4,3 +4,11 @@
  */
 
 #include "script_promise.h"
+
+namespace kraken {
+
+JSValue ScriptPromise::ToQuickJS() {
+  return JS_NULL;
+}
+
+}

@@ -6,7 +6,6 @@ import {
   FunctionDeclaration,
   FunctionObject,
   PropsDeclaration,
-  ReturnType
 } from "./declaration";
 import {addIndent, getClassName} from "./utils";
 import {ParameterType} from "./analyzer";
@@ -43,6 +42,8 @@ function generateTypeConverter(type: ParameterType | ParameterType[]): string {
   switch(type) {
     case FunctionArgumentType.int32:
       return `IDLInt32`;
+    case FunctionArgumentType.int64:
+      return 'IDLInt64';
     case FunctionArgumentType.double:
       return `IDLDouble`;
     case FunctionArgumentType.function:
@@ -64,19 +65,33 @@ function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number
   return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);`;
 }
 
-function generateOptionalInitBody(blob: Blob, declare: FunctionDeclaration, argument: FunctionArguments, argsIndex: number, previousArguments: string[]) {
+function generateCallMethodName(name: string) {
+  if (name === 'constructor') return 'Create';
+  return name;
+}
+
+function generateOptionalInitBody(blob: Blob, declare: FunctionDeclaration, argument: FunctionArguments, argsIndex: number, previousArguments: string[], options: GenFunctionBodyOptions) {
+  let call = '';
+  if (options.isInstanceMethod) {
+    call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
+return_value = self->${generateCallMethodName(declare.name)}(${[...previousArguments, `args_${argument.name}`, 'exception_state'].join(',')});`;
+  } else {
+    call = `return_value = ${getClassName(blob)}::${generateCallMethodName(declare.name)}(context, ${[...previousArguments, `args_${argument.name}`].join(',')}, exception_state);`;
+  }
+
+
   return `auto&& args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
 if (exception_state.HasException()) {
   return exception_state.ToQuickJS();
 }
 
 if (argc <= ${argsIndex}) {
-  return_value = ${getClassName(blob)}::${declare.name}(context, ${[...previousArguments, `args_${argument.name}`].join(',')}, exception_state);
+  ${call}
   break;
 }`;
 }
 
-function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration) {
+function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
   let minimalRequiredArgc = 0;
   declaration.args.forEach(m => {
     if (m.required) minimalRequiredArgc++;
@@ -95,15 +110,23 @@ function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration) 
   let totalArguments: string[] = requiredArguments.slice();
 
   for (let i = minimalRequiredArgc; i < declaration.args.length; i ++) {
-    optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i + 1, totalArguments));
+    optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i + 1, totalArguments, options));
     totalArguments.push(`args_${declaration.args[i].name}`);
   }
 
   requiredArguments.push('exception_state');
 
+  let call = '';
+  if (options.isInstanceMethod) {
+    call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
+return_value = self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+  } else {
+    call = `return_value = ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+  }
+
   return `${requiredArgumentsInit.join('\n')}
 if (argc <= ${minimalRequiredArgc}) {
-  return_value = ${getClassName(blob)}::${declaration.name}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});
+  ${call}
   break;
 }
 
@@ -118,20 +141,51 @@ ${body}
 }`;
 }
 
-function generateFunctionBody(blob: Blob, declare: FunctionDeclaration) {
-  let paramCheck = generateMethodArgumentsCheck(declare);
-  let callBody = generateFunctionCallBody(blob, declare);
-  let returnValue = '';
-  if (declare.returnType != ReturnType.void) {
-    returnValue = 'return_value->ToQuickJS();';
-  } else {
-    returnValue = 'JS_NULL';
+function generateReturnValueInit(blob: Blob, type: ParameterType | ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
+  if (type == FunctionArgumentType.void) return '';
+
+  if (options.isConstructor) {
+    return `${getClassName(blob)}* return_value = nullptr;`
   }
+  if (typeof type === 'string') {
+    if (type === 'Promise') {
+      return 'ScriptPromise return_value;';
+    } else {
+      return `${type}* return_value = nullptr;`;
+    }
+  }
+  return `Converter<${generateTypeConverter(type)}>::ImplType return_value;`;
+}
+
+function generateReturnValueResult(blob: Blob, type: ParameterType | ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
+  if (type == FunctionArgumentType.void) return 'JS_NULL';
+  if (options.isConstructor) {
+    return `return_value->ToQuickJS()`;
+  }
+
+  if (typeof type === 'string') {
+    if (type === 'Promise') {
+      return 'return_value.ToQuickJS()';
+    } else {
+      return `return_value->ToQuickJS()`;
+    }
+  }
+
+  return `Converter<${generateTypeConverter(type)}>::ToValue(ctx, return_value)`;
+}
+
+type GenFunctionBodyOptions = {isConstructor?: boolean, isInstanceMethod?: boolean};
+
+function generateFunctionBody(blob: Blob, declare: FunctionDeclaration, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod : false}) {
+  let paramCheck = generateMethodArgumentsCheck(declare);
+  let callBody = generateFunctionCallBody(blob, declare, options);
+  let returnValueInit = generateReturnValueInit(blob, declare.returnType, options);
+  let returnValueResult = generateReturnValueResult(blob, declare.returnType, options);
 
   return `${paramCheck}
 
   ExceptionState exception_state;
-  ${getClassName(blob)}* return_value = nullptr;
+  ${returnValueInit}
   ExecutingContext* context = ExecutingContext::From(ctx);
 
   do {  // Dummy loop for use of 'break'.
@@ -141,14 +195,13 @@ ${addIndent(callBody, 4)}
   if (exception_state.HasException()) {
     return exception_state.ToQuickJS();
   }
-
-  return ${returnValue};
+  return ${returnValueResult};
 `;
 }
 
 function generateClassConstructorCallback(blob: Blob, declare: FunctionDeclaration) {
   return `JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
-${generateFunctionBody(blob, declare)}
+${generateFunctionBody(blob, declare, {isConstructor: true})}
 }
 `;
 }
@@ -175,7 +228,9 @@ function generatePropertySetterCallback(blob: Blob, prop: PropsDeclaration) {
 
 function generateMethodCallback(blob: Blob, methods: FunctionDeclaration[]): string[] {
   return methods.map(method => {
-    return generateFunctionBody(blob, method);
+    return `static JSValue ${method.name}(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+    ${ generateFunctionBody(blob, method, {isInstanceMethod: true}) }
+}`;
   });
 }
 
@@ -284,6 +339,7 @@ export function generateCppSource(blob: Blob) {
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/converter_impl.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/script_promise.h"
 #include "core/executing_context.h"
 #include "core/${blob.implement}.h"
 

@@ -10,6 +10,7 @@
 #include <vector>
 #include "bindings/qjs/macros.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/script_promise.h"
 #include "blob_part.h"
 #include "blob_property_bag.h"
 
@@ -37,8 +38,13 @@ class Blob : public ScriptWrappable {
   int32_t size();
   std::string type();
 
-  Blob* slice(ExceptionState& exception_state);
-  Blob* slice(int64_t start, ExceptionState* exception_state);
+  ScriptPromise arrayBuffer();
+  ScriptPromise text();
+
+  Blob* slice();
+  Blob* slice(int64_t start, ExceptionState& exception_state);
+  Blob* slice(int64_t start, int64_t end, ExceptionState& exception_state);
+  Blob* slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& content_type, ExceptionState& exception_state);
 
   const char* GetHumanReadableName() const override;
   void Trace(GCVisitor* visitor) const override;
