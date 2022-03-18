@@ -33,21 +33,20 @@ class ImageElement extends Element {
   // The render box to draw image.
   KrakenRenderImage? _renderImage;
 
+  ui.ImageDescriptor? _currentImageDescriptor;
   ImageProvider? _currentImageProvider;
 
   ImageStream? _cachedImageStream;
   ImageInfo? _cachedImageInfo;
+
+  _ImageRequest? _currentRequest;
+  _ImageRequest? _pendingRequest;
+
+  // Current image source.
   Uri? _resolvedUri;
 
-  // Width and height set through property.
-  double? _propertyWidth;
-  double? _propertyHeight;
-
-  // Width and height set through style.
-  double? _styleWidth;
-  double? _styleHeight;
-
-  ui.Image? get image => _cachedImageInfo?.image;
+  // Current rendering image ([ui.Image]).
+  ui.Image? get image => _renderImage?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
@@ -173,6 +172,16 @@ class ImageElement extends Element {
     style.removeStyleChangeListener(_stylePropertyChanged);
 
     _stopListeningStream(keepStreamAlive: true);
+
+    _currentImageProvider?.evict();
+    _currentImageProvider = null;
+
+    _cachedImageInfo?.dispose();
+    _cachedImageInfo = null;
+
+    _renderImage?.dispose();
+    _renderImage = null;
+
   }
 
   ImageStreamListener? _imageStreamListener;
@@ -200,14 +209,31 @@ class ImageElement extends Element {
     super.dispose();
     _stopListeningStream();
     _completerHandle?.dispose();
+    _completerHandle = null;
     _replaceImage(info: null);
     _currentImageProvider?.evict();
     _currentImageProvider = null;
   }
 
+  // Width and height set through style.
+  double? get _styleWidth => renderStyle.width.value;
+  double? get _styleHeight => renderStyle.height.value;
+
+  double ? get _propertyWidth {
+    if (hasAttribute(WIDTH)) {
+      return CSSLength.toDouble(getAttribute(WIDTH));
+    }
+  }
+
+  double ? get _propertyHeight {
+    if (hasAttribute(HEIGHT)) {
+      return CSSLength.toDouble(getAttribute(HEIGHT));
+    }
+  }
+
   int get width {
     // Width calc priority: style > property > intrinsic.
-    double borderBoxWidth = _styleWidth
+    final double borderBoxWidth = _styleWidth
       ?? _propertyWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
@@ -216,7 +242,7 @@ class ImageElement extends Element {
 
   int get height {
     // Height calc priority: style > property > intrinsic.
-    double borderBoxHeight = _styleHeight
+    final double borderBoxHeight = _styleHeight
       ?? _propertyHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
@@ -225,11 +251,11 @@ class ImageElement extends Element {
 
   // Read the original image width of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.
-  int get naturalWidth => _imageDescriptor?.width ?? 0;
+  int get naturalWidth => _currentImageDescriptor?.width ?? 0;
 
   // Read the original image height of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.
-  int get naturalHeight => _imageDescriptor?.height ?? 0;
+  int get naturalHeight => _currentImageDescriptor?.height ?? 0;
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
@@ -289,14 +315,10 @@ class ImageElement extends Element {
   }
 
   KrakenRenderImage _createRenderImageBox() {
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    BoxFit objectFit = renderStyle.objectFit;
-    Alignment objectPosition = renderStyle.objectPosition;
-
     return KrakenRenderImage(
       image: _cachedImageInfo?.image,
-      fit: objectFit,
-      alignment: objectPosition,
+      fit: renderStyle.objectFit,
+      alignment: renderStyle.objectPosition,
     );
   }
 
@@ -327,6 +349,7 @@ class ImageElement extends Element {
     }
 
     _cachedImageStream?.removeListener(_getListener());
+    _imageStreamListener = null;
     _isListeningStream = false;
   }
 
@@ -360,13 +383,7 @@ class ImageElement extends Element {
       if (updateImageProvider || provider == null) {
         // Image should be resized based on different ratio according to object-fit value.
         BoxFit objectFit = renderStyle.objectFit;
-        provider = _currentImageProvider = BoxFitImage(descriptor: _imageDescriptor!, boxFit: objectFit);
-        // getImageProvider(
-        //   _currentRequest,
-        //   objectFit: objectFit,
-        //   cachedWidth: cachedWidth,
-        //   cachedHeight: cachedHeight,
-        // );
+        provider = _currentImageProvider = BoxFitImage(descriptor: _currentImageDescriptor!, boxFit: objectFit);
       }
 
       ImageConfiguration imageConfiguration = cachedWidth != null && cachedHeight != null
@@ -377,6 +394,7 @@ class ImageElement extends Element {
   }
 
   void _replaceImage({required ImageInfo? info}) {
+    _cachedImageInfo?.dispose();
     _cachedImageInfo = info;
   }
 
@@ -385,9 +403,8 @@ class ImageElement extends Element {
     assert(isRendererAttached);
     assert(_renderImage != null);
     if (_cachedImageInfo == null) return;
-    _renderImage!.image = image?.clone();
+    _renderImage!.image = _cachedImageInfo!.image.clone();
   }
-
 
   // Callback when image are loaded, encoded and available to use.
   // This callback may fire multiple times when image have multiple frames (such as an animated GIF).
@@ -426,17 +443,12 @@ class ImageElement extends Element {
     });
   }
 
-  _ImageRequest? _currentRequest;
-  _ImageRequest? _pendingRequest;
-
-  ui.ImageDescriptor? _imageDescriptor;
-
   // To load the resource, and dispatch load event.
   // https://html.spec.whatwg.org/multipage/images.html#when-to-obtain-images
   Future<_ImageRequest> _obtainImage() async {
-    _ImageRequest request = _currentRequest = _ImageRequest(currentURL: _resolvedUri!);
+    _ImageRequest request = _currentRequest = _ImageRequest(currentUri: _resolvedUri!);
     try {
-      _imageDescriptor = await request._obtainImage(contextId);
+      _currentImageDescriptor = await request._obtainImage(contextId);
       _dispatchLoadEvent();
     } catch (error) {
       _dispatchErrorEvent();
@@ -457,8 +469,7 @@ class ImageElement extends Element {
 
   set width(int value) {
     if (value.isNegative) value = 0;
-    internalSetAttribute('width', value.toString());
-    _propertyWidth = value.toDouble();
+    internalSetAttribute(WIDTH, value.toString());
     if (_shouldScaling) {
       _decode(updateImageProvider: true);
     } else {
@@ -468,8 +479,7 @@ class ImageElement extends Element {
 
   set height(int value) {
     if (value.isNegative) value = 0;
-    internalSetAttribute('height', value.toString());
-    _propertyHeight = value.toDouble();
+    internalSetAttribute(HEIGHT, value.toString());
     if (_shouldScaling) {
       _decode(updateImageProvider: true);
     } else {
@@ -495,11 +505,13 @@ class ImageElement extends Element {
         // To avoid resolved auto, which computed value is infinity, we can not calculate
         // infinite double as valid number, mark null to let width/height resized by decode
         // size.
-        _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
+        resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
+        renderStyle.width = CSSLengthValue(resolveStyleWidth, CSSLengthType.PX);
       } else if (property == HEIGHT) {
         double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
           ? null : renderStyle.height.computedValue;
-        _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
+        resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
+        renderStyle.height = CSSLengthValue(resolveStyleHeight, CSSLengthType.PX);
       }
       // Resize image
       if (_shouldScaling) {
@@ -540,24 +552,15 @@ enum _ImageRequestState {
 // https://html.spec.whatwg.org/multipage/images.html#image-request
 class _ImageRequest {
   _ImageRequest({
-    required this.currentURL,
+    required this.currentUri,
     this.state = _ImageRequestState.unavailable,
-    this.rawBytes,
   });
 
+  /// The request uri.
+  Uri currentUri;
+
+  /// Current state of image request.
   _ImageRequestState state;
-
-  Uri currentURL;
-
-  Uint8List? rawBytes;
-
-  // The decoded data.
-  Uint8List? data;
-
-  int currentPixelDensity = 1;
-
-  // preferred density-corrected dimensions
-  Size? preferredSize;
 
   /// When an image request's state is either partially available or completely available,
   /// the image request is said to be available.
@@ -576,7 +579,6 @@ class _ImageRequest {
       state = _ImageRequestState.broken;
     }
 
-    rawBytes = bytes;
     buffer.dispose();
     return descriptor;
   }
@@ -589,7 +591,7 @@ class _ImageRequest {
 
     if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
       try {
-        HttpCacheObject? cacheObject = await cacheController.getCacheObject(currentURL);
+        HttpCacheObject? cacheObject = await cacheController.getCacheObject(currentUri);
         bytes = await cacheObject.toBinaryContent();
       } catch (error, stackTrace) {
         print('Error while reading cache, $error\n$stackTrace');
@@ -603,7 +605,7 @@ class _ImageRequest {
   }
 
   Future<Uint8List> _fetchResourceBytes(HttpCacheController cacheController) async {
-    final Uri resolved = currentURL;
+    final Uri resolved = currentUri;
     final HttpClientRequest request = await _httpClient.getUrl(resolved);
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
