@@ -201,7 +201,7 @@ void parseHTML(int contextId, String code) {
   }
   Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
-    _parseHTML(contextId, nativeCode, code.length);
+    _parseHTML(contextId, nativeCode, nativeCode.length);
   } catch (e, stack) {
     print('$e\n$stack');
   }
