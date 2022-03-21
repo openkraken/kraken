@@ -220,7 +220,7 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             minHeight: '50px',
@@ -249,7 +249,7 @@ describe('min-height', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             minHeight: '200px',

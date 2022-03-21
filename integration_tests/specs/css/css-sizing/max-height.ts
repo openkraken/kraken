@@ -205,7 +205,7 @@ describe('max-height', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             maxHeight: '50px',
@@ -234,7 +234,7 @@ describe('max-height', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             maxHeight: '200px',

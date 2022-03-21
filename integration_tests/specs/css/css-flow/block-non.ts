@@ -330,7 +330,7 @@ describe('block-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '200',
           height: '200',
           alt: 'Image download support must be enabled',
@@ -339,7 +339,7 @@ describe('block-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '200',
           height: '200',
           alt: 'Image download support must be enabled',

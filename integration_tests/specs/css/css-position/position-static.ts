@@ -32,7 +32,7 @@ describe('position-static', () => {
           style: {},
         }),
         createElement('img', {
-          src: 'assets/swatch-blue.png',
+          src: '/assets/swatch-blue.png',
           width: '192',
           height: '172',
           alt: 'Image download support must be enabled',

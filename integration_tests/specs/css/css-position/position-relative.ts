@@ -277,7 +277,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -286,7 +286,7 @@ describe('position-relative', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-yellow.png',
+          src: '/assets/swatch-yellow.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -304,7 +304,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-white.png',
+          src: '/assets/swatch-white.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -313,7 +313,7 @@ describe('position-relative', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-blue.png',
+          src: '/assets/swatch-blue.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -417,7 +417,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -426,7 +426,7 @@ describe('position-relative', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -860,7 +860,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -878,7 +878,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-blue.png',
+          src: '/assets/swatch-blue.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -1020,7 +1020,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-green.png',
+          src: '/assets/swatch-green.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -2257,7 +2257,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-blue.png',
+          src: '/assets/swatch-blue.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -2346,7 +2346,7 @@ describe('position-relative', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-blue.png',
+          src: '/assets/swatch-blue.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',

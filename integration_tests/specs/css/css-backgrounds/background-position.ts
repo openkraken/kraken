@@ -15,7 +15,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/cat.png)',
+        'url(/assets/cat.png)',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
     });
@@ -39,7 +39,7 @@ describe('Background-position', () => {
     setElementStyle(position2, {
       width: '360px',
       height: '200px',
-      backgroundImage: 'url(assets/rabbit.png)',
+      backgroundImage: 'url(/assets/rabbit.png)',
       backgroundPosition: 'left',
       backgroundRepeat: 'no-repeat',
     });
@@ -65,7 +65,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rabbit.png)',
+        'url(/assets/rabbit.png)',
       backgroundPosition: 'top',
       backgroundRepeat: 'no-repeat',
     });
@@ -91,7 +91,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rabbit.png)',
+        'url(/assets/rabbit.png)',
       backgroundPosition: 'right',
       backgroundRepeat: 'no-repeat',
     });
@@ -116,7 +116,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rabbit.png)',
+        'url(/assets/rabbit.png)',
       backgroundPosition: 'bottom',
       backgroundRepeat: 'no-repeat',
     });
@@ -139,7 +139,7 @@ describe('Background-position', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(assets/rabbit.png)',
+        'url(/assets/rabbit.png)',
       backgroundPosition: 'right center',
       backgroundRepeat: 'no-repeat',
     });
@@ -153,7 +153,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) no-repeat yellow',
+      background: 'url(/assets/cat.png) no-repeat yellow',
       backgroundPosition: '40px 60px',
     });
     append(BODY, position1);
@@ -165,7 +165,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) repeat yellow',
+      background: 'url(/assets/cat.png) repeat yellow',
       backgroundPosition: '40px 60px',
     });
     append(BODY, position1);
@@ -177,7 +177,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) 80% 40% no-repeat yellow',
+      background: 'url(/assets/cat.png) 80% 40% no-repeat yellow',
     });
     append(BODY, position1);
     await snapshot(0.1);
@@ -188,7 +188,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) 80% 40px no-repeat yellow',
+      background: 'url(/assets/cat.png) 80% 40px no-repeat yellow',
     });
     append(BODY, position1);
     await snapshot(0.1);
@@ -199,7 +199,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) 40px top no-repeat yellow',
+      background: 'url(/assets/cat.png) 40px top no-repeat yellow',
     });
     append(BODY, position1);
     await snapshot(0.1);
@@ -210,7 +210,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) 30% bottom no-repeat yellow',
+      background: 'url(/assets/cat.png) 30% bottom no-repeat yellow',
     });
     append(BODY, position1);
     await snapshot(0.1);
@@ -221,7 +221,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '60px',
       height: '80px',
-      background: 'url(assets/cat.png) 20px bottom no-repeat yellow',
+      background: 'url(/assets/cat.png) 20px bottom no-repeat yellow',
     });
     append(BODY, position1);
     await snapshot(0.1);
@@ -232,7 +232,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) no-repeat yellow',
+      background: 'url(/assets/cat.png) no-repeat yellow',
       backgroundPositionX: '50px',
     });
     append(BODY, position1);
@@ -244,7 +244,7 @@ describe('Background-position', () => {
     setElementStyle(position1, {
       width: '120px',
       height: '120px',
-      background: 'url(assets/cat.png) no-repeat yellow',
+      background: 'url(/assets/cat.png) no-repeat yellow',
       backgroundPositionY: 'bottom',
     });
     append(BODY, position1);

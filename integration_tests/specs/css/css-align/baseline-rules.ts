@@ -217,7 +217,7 @@ describe('Baseline-rules flexbox', () => {
         (div4 = createElement(
           'img',
           {
-            src: 'assets/100x100-green.png',
+            src: '/assets/100x100-green.png',
             style: {
               display: 'inline-block',
               'align-self': 'baseline',
@@ -344,7 +344,7 @@ describe('Baseline-rules flexbox', () => {
         (div4 = createElement(
           'img',
           {
-            src: 'assets/100x100-green.png',
+            src: '/assets/100x100-green.png',
             style: {
               display: 'inline-block',
               'align-self': 'baseline',
@@ -469,7 +469,7 @@ describe('Baseline-rules flexbox', () => {
         (div4 = createElement(
           'img',
           {
-            src: 'assets/100x100-green.png',
+            src: '/assets/100x100-green.png',
             style: {
               display: 'inline-block',
               'align-self': 'baseline',
@@ -594,7 +594,7 @@ describe('Baseline-rules flexbox', () => {
         (div4 = createElement(
           'img',
           {
-            src: 'assets/100x100-green.png',
+            src: '/assets/100x100-green.png',
             style: {
               display: 'inline-block',
               'align-self': 'baseline',

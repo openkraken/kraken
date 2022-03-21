@@ -220,7 +220,7 @@ describe('min-width', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             minWidth: '50px',
@@ -249,7 +249,7 @@ describe('min-width', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             'background-color': 'green',
             minWidth: '200px',

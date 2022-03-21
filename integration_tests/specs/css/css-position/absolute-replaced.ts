@@ -34,7 +34,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {},
         }),
@@ -85,7 +85,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             'margin-bottom': 'auto',
             'margin-top': 'auto',
@@ -135,14 +135,14 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             'box-sizing': 'border-box',
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             'box-sizing': 'border-box',
@@ -192,7 +192,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             height: 'auto',
             position: 'absolute',
@@ -255,7 +255,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'Image download support must be enabled',
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           style: {
             height: 'auto',
             position: 'absolute',
@@ -502,7 +502,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -510,7 +510,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -687,7 +687,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: 'auto',
             height: 'auto',
@@ -748,7 +748,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: 'auto',
             height: 'auto',
@@ -846,7 +846,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: 'auto',
             height: 'auto',
@@ -1107,7 +1107,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -1115,7 +1115,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -1258,7 +1258,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -1317,7 +1317,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -1567,7 +1567,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             'margin-bottom': 'auto',
@@ -1626,7 +1626,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -1687,7 +1687,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -1945,7 +1945,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '48px',
             'margin-bottom': '48px',
@@ -2004,7 +2004,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -2065,7 +2065,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             bottom: '96px',
             height: 'auto',
@@ -2338,7 +2338,7 @@ describe('absolute-replaced', () => {
       [
         (abspos = createElement('img', {
           class: 'abspos one',
-          src: 'assets/swatch-white.png',
+          src: '/assets/swatch-white.png',
           alt: 'FAIL: image support required',
           style: {
             position: 'absolute',
@@ -2352,7 +2352,7 @@ describe('absolute-replaced', () => {
         })),
         (abspos_1 = createElement('img', {
           class: 'abspos two',
-          src: 'assets/swatch-white.png',
+          src: '/assets/swatch-white.png',
           alt: 'FAIL: image support required',
           style: {
             position: 'absolute',
@@ -2366,7 +2366,7 @@ describe('absolute-replaced', () => {
         })),
         (abspos_2 = createElement('img', {
           class: 'abspos three',
-          src: 'assets/swatch-white.png',
+          src: '/assets/swatch-white.png',
           alt: 'FAIL: image support required',
           style: {
             position: 'absolute',
@@ -2437,14 +2437,14 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2489,7 +2489,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -2540,7 +2540,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2549,7 +2549,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2591,7 +2591,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2600,7 +2600,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2744,7 +2744,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2754,7 +2754,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2797,7 +2797,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2806,7 +2806,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -2854,7 +2854,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -2912,7 +2912,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -2972,7 +2972,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -3026,7 +3026,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3035,7 +3035,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3084,7 +3084,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -3137,7 +3137,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3148,7 +3148,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3199,7 +3199,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -3253,7 +3253,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3264,7 +3264,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3315,7 +3315,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -3369,7 +3369,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3379,7 +3379,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3422,7 +3422,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3432,7 +3432,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3475,7 +3475,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3486,7 +3486,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3530,7 +3530,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3540,7 +3540,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3590,7 +3590,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -3652,7 +3652,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -3713,7 +3713,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -3775,7 +3775,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3785,7 +3785,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3845,7 +3845,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -3908,7 +3908,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3918,7 +3918,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3969,7 +3969,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -3980,7 +3980,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -4032,7 +4032,7 @@ describe('absolute-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -4042,7 +4042,7 @@ describe('absolute-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             display: 'block',
@@ -4102,7 +4102,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -4175,7 +4175,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             'margin-left': 'auto',
             'margin-right': 'auto',
@@ -4247,7 +4247,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': 'auto',
@@ -4320,7 +4320,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             'margin-left': '24px',
             'margin-right': 'auto',
@@ -4392,7 +4392,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             'margin-left': '24px',
@@ -4465,7 +4465,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             left: '24px',
             'margin-left': '24px',
@@ -4537,7 +4537,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             left: '24px',
@@ -4610,7 +4610,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             left: '24px',
             'margin-left': '24px',
@@ -4682,7 +4682,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             left: '24px',
@@ -4755,7 +4755,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 96x96',
-          src: 'assets/blue96x96.png',
+          src: '/assets/blue96x96.png',
           style: {
             left: '48px',
             'margin-left': '48px',
@@ -4827,7 +4827,7 @@ describe('absolute-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             left: '48px',

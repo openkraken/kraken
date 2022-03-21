@@ -25,7 +25,7 @@ describe('right-applies', () => {
       },
       [
         createElement('img', {
-          src: 'assets/1x1-green.png',
+          src: '/assets/1x1-green.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',

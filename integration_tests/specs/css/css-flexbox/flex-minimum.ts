@@ -212,7 +212,7 @@ describe('flex-minimum', () => {
       },
       [
         createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {},
         }),
       ]
@@ -252,7 +252,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'assets/60x60-green.png',
+          src: '/assets/60x60-green.png',
           style: {
             height: '100px',
           },
@@ -294,7 +294,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             height: '100px',
           },
@@ -355,7 +355,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'assets/60x60-green.png',
+          src: '/assets/60x60-green.png',
           style: {
             width: '100px',
           },
@@ -417,7 +417,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             width: '100px',
           },
@@ -1329,7 +1329,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'assets/300x150-green.png',
+          '/assets/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             height: '50px',
@@ -1377,7 +1377,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'assets/300x150-green.png',
+          '/assets/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             height: '2000px',

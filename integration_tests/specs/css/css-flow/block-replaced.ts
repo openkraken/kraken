@@ -28,7 +28,7 @@ describe('block-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             'vertical-align': 'top',
@@ -72,7 +72,7 @@ describe('block-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             display: 'block',
             'margin-top': 'auto',
@@ -122,14 +122,14 @@ describe('block-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             'box-sizing': 'border-box',
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             'box-sizing': 'border-box',
@@ -177,7 +177,7 @@ describe('block-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             display: 'inline',
             height: 'auto',
@@ -378,7 +378,7 @@ describe('block-replaced', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -386,7 +386,7 @@ describe('block-replaced', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -435,7 +435,7 @@ describe('block-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           style: {
             display: 'block',
             'margin-left': 'auto',
@@ -887,7 +887,7 @@ describe('block-replaced', () => {
       [
         createElement('img', {
           alt: 'blue 15x15',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50%',
           style: {
             display: 'block',

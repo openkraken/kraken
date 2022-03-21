@@ -22,7 +22,7 @@ describe('custom widget element', () => {
 
   it('use flutter asset image', async () => {
     const image = document.createElement('flutter-asset-image');
-    image.setAttribute('src', 'assets/rabbit.png');
+    image.setAttribute('src', '/assets/rabbit.png');
     document.body.appendChild(image);
 
     await snapshot(0.1);
@@ -30,7 +30,7 @@ describe('custom widget element', () => {
 
   it('work with click event', async (done) => {
     const image = document.createElement('flutter-asset-image');
-    image.setAttribute('src', 'assets/rabbit.png');
+    image.setAttribute('src', '/assets/rabbit.png');
     document.body.appendChild(image);
 
     image.addEventListener('click', function (e) {

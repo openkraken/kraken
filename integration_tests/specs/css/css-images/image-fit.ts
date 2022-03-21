@@ -23,7 +23,7 @@ describe('image-fit', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-green.png',
+          src: '/assets/swatch-green.png',
           alt: 'Failed: image missing',
           style: {
             background: 'red',
@@ -59,7 +59,7 @@ describe('image-fit', () => {
       },
       [
         createElement('img', {
-          src: 'assets/intrinsic-size.png',
+          src: '/assets/intrinsic-size.png',
           alt: 'Failed: image missing',
           style: {
             border: '5px solid blue',

@@ -65,7 +65,7 @@ describe('auto-margins', () => {
     document.body.appendChild(div_1);
 
     await snapshot();
-    img.src = 'assets/300x150-green.png';
+    img.src = '/assets/300x150-green.png';
 
     img.onload = async () => {
       await snapshot();

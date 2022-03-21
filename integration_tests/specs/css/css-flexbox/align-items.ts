@@ -1182,7 +1182,7 @@ describe('align-items', () => {
       },
       [
         (createElement('img', {
-          src: 'assets/100x100-green.png',
+          src: '/assets/100x100-green.png',
           style: {
             "marginLeft": "20px",
           },

@@ -48,7 +48,7 @@ describe('image-items', () => {
       },
       [
         createElement('img', {
-          src: 'assets/200x200-green.png',
+          src: '/assets/200x200-green.png',
           style: {
             'box-sizing': 'border-box',
             width: '100px',

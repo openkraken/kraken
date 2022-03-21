@@ -20,7 +20,7 @@ describe('percentage', () => {
         createElement(
           'img',
           {
-            src: 'assets/100x100-green.png',
+            src: '/assets/100x100-green.png',
             style: {
               width: '50px',
               height: '50px',

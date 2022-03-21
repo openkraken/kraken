@@ -31,7 +31,7 @@ describe('abspos-025', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-green.png',
+          src: '/assets/swatch-green.png',
           alt: 'Image download support must be enabled',
           style: {
             left: '56px',

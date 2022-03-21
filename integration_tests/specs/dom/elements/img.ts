@@ -8,7 +8,7 @@ describe('Tags img', () => {
     img.style.width = '60px';
     img.setAttribute(
       'src',
-      'assets/100x100-green.png'
+      '/assets/100x100-green.png'
     );
 
     document.body.appendChild(img);
@@ -99,17 +99,17 @@ describe('Tags img', () => {
 
   it('set src property setter', async (done) => {
     const img = createElement('img', {
-      src: 'assets/rabbit.png'
+      src: '/assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
     let src = img.src;
-    expect(src).toBe('assets/rabbit.png');
+    expect(src).toBe('/assets/rabbit.png');
     // have to wait for asset load?
     await snapshot(0.1);
-    img.src = 'assets/solidblue.png';
+    img.src = '/assets/solidblue.png';
     await snapshot(0.1);
     src = img.src;
-    expect(src).toBe('assets/solidblue.png');
+    expect(src).toBe('/assets/solidblue.png');
     done();
   });
 
@@ -121,17 +121,17 @@ describe('Tags img', () => {
       await snapshot();
       done();
     };
-    img.src = 'assets/rabbit.png';
+    img.src = '/assets/rabbit.png';
     BODY.appendChild(img);
   });
 
   it('change image src dynamically', async (done) => {
     const img = createElement('img', {
-      src: 'assets/rabbit.png'
+      src: '/assets/rabbit.png'
     }) as HTMLImageElement;
     BODY.appendChild(img);
     await snapshot(0.2);
-    img.src = 'assets/300x150-green.png';
+    img.src = '/assets/300x150-green.png';
     await snapshot(0.2);
     done();
   });
@@ -183,7 +183,7 @@ describe('Tags img', () => {
     const img = document.createElement('img');
     // Make image loading=lazy.
     img.setAttribute('loading', 'lazy');
-    img.src = 'assets/100x100-green.png';
+    img.src = '/assets/100x100-green.png';
     img.style.width = '60px';
 
     document.body.appendChild(img);
@@ -283,7 +283,7 @@ describe('Tags img', () => {
   });
 
   it('same image src should only trigger once event', async (done) => {
-    const imageURL = 'assets/100x100-green.png';
+    const imageURL = '/assets/100x100-green.png';
     const img = document.createElement('img');
     img.src = imageURL;
 
@@ -306,7 +306,7 @@ describe('Tags img', () => {
   });
 
   it('gif can not replay by remove nodes', async (done) => {
-    const imageURL = 'assets/sample-gif-40k.gif';
+    const imageURL = '/assets/sample-gif-40k.gif';
     const img = document.createElement('img');
 
     img.onload = async () => {
@@ -328,7 +328,7 @@ describe('Tags img', () => {
 
   it('width property change should work when width of style is not set', async (done) => {
     let img = createElement('img', {
-      src: 'assets/300x150-green.png',
+      src: '/assets/300x150-green.png',
       width: 100,
       height: 100,
     });
@@ -343,7 +343,7 @@ describe('Tags img', () => {
 
   it('width property should not work when width of style is auto', async (done) => {
     let img = createElement('img', {
-      src: 'assets/300x150-green.png',
+      src: '/assets/300x150-green.png',
       width: 100,
       height: 100,
       style: {
@@ -364,9 +364,9 @@ describe('Tags img', () => {
 
     const colors = ['red', 'yellow', 'black', 'blue', 'green'];
     const images = [
-      'assets/100x100-green.png',
-      'assets/200x200-green.png',
-      'assets/60x60-gg-rr.png',
+      '/assets/100x100-green.png',
+      '/assets/200x200-green.png',
+      '/assets/60x60-gg-rr.png',
     ];
 
     let loadedCount = 0;
@@ -400,7 +400,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/100x100-green.png',
+        src: '/assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -418,7 +418,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/100x100-green.png',
+        src: '/assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -437,7 +437,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/100x100-green.png',
+        src: '/assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',
@@ -456,7 +456,7 @@ describe('Tags img', () => {
     image = createElement(
       'img',
       {
-        src: 'assets/100x100-green.png',
+        src: '/assets/100x100-green.png',
         style: {
           border: '10px solid black',
           padding: '20px',

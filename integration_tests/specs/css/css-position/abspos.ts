@@ -1155,7 +1155,7 @@ describe('abspos', () => {
         ),
         createText(`. `),
         createElement('img', {
-          src: 'assets/swatch-green.png',
+          src: '/assets/swatch-green.png',
           alt: 'FAIL',
           style: {
             position: 'absolute',
@@ -1197,7 +1197,7 @@ describe('abspos', () => {
         ),
         createText(`. `),
         createElement('img', {
-          src: 'assets/swatch-red.png',
+          src: '/assets/swatch-red.png',
           alt: 'FAIL',
           style: {
             position: 'absolute',

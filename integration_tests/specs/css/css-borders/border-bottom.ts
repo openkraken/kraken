@@ -504,7 +504,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000_color.png")',
+        background: 'url("/assets/000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -513,7 +513,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000_color.png")',
+        background: 'url("/assets/000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -626,7 +626,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010101_color.png")',
+        background: 'url("/assets/010101_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -635,7 +635,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010101_color.png")',
+        background: 'url("/assets/010101_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -706,7 +706,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/999_color.png")',
+        background: 'url("/assets/999_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -715,7 +715,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/999_color.png")',
+        background: 'url("/assets/999_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -776,7 +776,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/fefefe_color.png")',
+        background: 'url("/assets/fefefe_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -785,7 +785,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/fefefe_color.png")',
+        background: 'url("/assets/fefefe_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -857,7 +857,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000_color.png")',
+        background: 'url("/assets/000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -866,7 +866,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000_color.png")',
+        background: 'url("/assets/000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -995,7 +995,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010000_color.png")',
+        background: 'url("/assets/010000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1004,7 +1004,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010000_color.png")',
+        background: 'url("/assets/010000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1153,7 +1153,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/fe0000_color.png")',
+        background: 'url("/assets/fe0000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1162,7 +1162,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/fe0000_color.png")',
+        background: 'url("/assets/fe0000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1232,7 +1232,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/f00_color.png")',
+        background: 'url("/assets/f00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1241,7 +1241,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/f00_color.png")',
+        background: 'url("/assets/f00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1340,7 +1340,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000100_color.png")',
+        background: 'url("/assets/000100_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1349,7 +1349,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000100_color.png")',
+        background: 'url("/assets/000100_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1419,7 +1419,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/090_color.png")',
+        background: 'url("/assets/090_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1428,7 +1428,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/090_color.png")',
+        background: 'url("/assets/090_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1498,7 +1498,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00fe00_color.png")',
+        background: 'url("/assets/00fe00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1507,7 +1507,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00fe00_color.png")',
+        background: 'url("/assets/00fe00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1577,7 +1577,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0f0_color.png")',
+        background: 'url("/assets/0f0_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1586,7 +1586,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0f0_color.png")',
+        background: 'url("/assets/0f0_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1685,7 +1685,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000001_color.png")',
+        background: 'url("/assets/000001_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1694,7 +1694,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/000001_color.png")',
+        background: 'url("/assets/000001_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1764,7 +1764,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/009_color.png")',
+        background: 'url("/assets/009_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1773,7 +1773,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/009_color.png")',
+        background: 'url("/assets/009_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1843,7 +1843,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0000fe_color.png")',
+        background: 'url("/assets/0000fe_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1852,7 +1852,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0000fe_color.png")',
+        background: 'url("/assets/0000fe_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1922,7 +1922,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00f_color.png")',
+        background: 'url("/assets/00f_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -1931,7 +1931,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00f_color.png")',
+        background: 'url("/assets/00f_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2102,7 +2102,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/111_color.png")',
+        background: 'url("/assets/111_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2111,7 +2111,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/111_color.png")',
+        background: 'url("/assets/111_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2181,7 +2181,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/999_color.png")',
+        background: 'url("/assets/999_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2190,7 +2190,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/999_color.png")',
+        background: 'url("/assets/999_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2260,7 +2260,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/eee_color.png")',
+        background: 'url("/assets/eee_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2269,7 +2269,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/eee_color.png")',
+        background: 'url("/assets/eee_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2415,7 +2415,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/100_color.png")',
+        background: 'url("/assets/100_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2424,7 +2424,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/100_color.png")',
+        background: 'url("/assets/100_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2537,7 +2537,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/e00_color.png")',
+        background: 'url("/assets/e00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2546,7 +2546,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/e00_color.png")',
+        background: 'url("/assets/e00_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2688,7 +2688,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010_color.png")',
+        background: 'url("/assets/010_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2697,7 +2697,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/010_color.png")',
+        background: 'url("/assets/010_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2769,7 +2769,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/090_color.png")',
+        background: 'url("/assets/090_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2778,7 +2778,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/090_color.png")',
+        background: 'url("/assets/090_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2848,7 +2848,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0e0_color.png")',
+        background: 'url("/assets/0e0_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2857,7 +2857,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/0e0_color.png")',
+        background: 'url("/assets/0e0_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -2999,7 +2999,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/001_color.png")',
+        background: 'url("/assets/001_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -3008,7 +3008,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/001_color.png")',
+        background: 'url("/assets/001_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -3121,7 +3121,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00e_color.png")',
+        background: 'url("/assets/00e_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -3130,7 +3130,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/00e_color.png")',
+        background: 'url("/assets/00e_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -3695,7 +3695,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/808080_color.png")',
+        background: 'url("/assets/808080_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -3704,7 +3704,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/808080_color.png")',
+        background: 'url("/assets/808080_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -4456,7 +4456,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/800000_color.png")',
+        background: 'url("/assets/800000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -4465,7 +4465,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/800000_color.png")',
+        background: 'url("/assets/800000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -5422,7 +5422,7 @@ describe('border-bottom', () => {
     div = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/008000_color.png")',
+        background: 'url("/assets/008000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',
@@ -5431,7 +5431,7 @@ describe('border-bottom', () => {
     div_1 = createElement('div', {
       xmlns: 'http://www.w3.org/1999/xhtml',
       style: {
-        background: 'url("assets/008000_color.png")',
+        background: 'url("/assets/008000_color.png")',
         height: '100px',
         'margin-top': '10px',
         width: '100px',

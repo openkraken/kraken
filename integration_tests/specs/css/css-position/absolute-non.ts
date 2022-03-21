@@ -91,7 +91,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -211,7 +211,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/1x1-white.png',
+          src: '/assets/1x1-white.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -220,7 +220,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -439,7 +439,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/1x1-white.png',
+          src: '/assets/1x1-white.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100px',
@@ -448,7 +448,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '150px',
@@ -562,7 +562,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100px',
@@ -570,7 +570,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100px',
@@ -668,7 +668,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '96px',
@@ -681,7 +681,7 @@ describe('absolute-non', () => {
         }),
         (blue = createElement('img', {
           id: 'blue',
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '192px',
@@ -774,7 +774,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100px',
@@ -782,7 +782,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100px',
@@ -1173,7 +1173,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -1282,7 +1282,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '288',
           height: '48',
           alt: 'Image download support must be enabled',
@@ -1568,7 +1568,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -1577,7 +1577,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -1689,7 +1689,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '96',
           height: '48',
           alt: 'Image download support must be enabled',
@@ -1701,7 +1701,7 @@ describe('absolute-non', () => {
           style: {},
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '96',
           height: '240',
           alt: 'Image download support must be enabled',
@@ -1799,7 +1799,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/swatch-orange.png',
+          src: '/assets/swatch-orange.png',
           width: '100',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -1808,7 +1808,7 @@ describe('absolute-non', () => {
           },
         }),
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -2191,7 +2191,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -2319,7 +2319,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -2747,7 +2747,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -3324,7 +3324,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/blue15x15.png',
+          src: '/assets/blue15x15.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -4323,7 +4323,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/green-rectangle-50wideBy10tall.png',
+          src: '/assets/green-rectangle-50wideBy10tall.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100%',
