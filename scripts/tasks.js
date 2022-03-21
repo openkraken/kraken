@@ -817,25 +817,25 @@ task('build-benchmark-app', async (doen) => {
 task('run-benchmark', async (done) => {
   let androidDevices = getDevicesInfo();
   
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests,env: { KRAKEN_PERFORMANCE_TEST_DIR: performanceTests }});
+  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
   done();
 });
