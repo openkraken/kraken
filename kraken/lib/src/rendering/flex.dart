@@ -1256,33 +1256,21 @@ class RenderFlexLayout extends RenderLayoutBox {
       _overrideChildContentBoxLogicalHeight(child, childMainSize);
     }
 
-    bool childMainSizeChanged =
-      childFlexedMainSize != null && childFlexedMainSize != childOldMainSize;
-    bool childCrossSizeChanged =
-      childStretchedCrossSize != null && childStretchedCrossSize != childOldCrossSize;
-    _overrideReplacedChildLength(
-      child,
-      childMainSizeChanged,
-      childCrossSizeChanged
-    );
+    if (child is RenderIntrinsic && child.renderStyle.intrinsicRatio != null) {
+      _overrideReplacedChildLength(
+        child,
+        childFlexedMainSize,
+        childStretchedCrossSize
+      );
+    }
 
     BoxConstraints oldConstraints = child.constraints;
-    double maxConstraintWidth = oldConstraints.maxWidth;
-    double maxConstraintHeight = oldConstraints.maxHeight;
-    if (childMainSizeChanged) {
-      if (_isHorizontalFlexDirection) {
-        maxConstraintWidth = childFlexedMainSize;
-      } else {
-        maxConstraintHeight = childFlexedMainSize;
-      }
-    }
-    if (childCrossSizeChanged) {
-      if (_isHorizontalFlexDirection) {
-        maxConstraintHeight = childStretchedCrossSize;
-      } else {
-        maxConstraintWidth = childStretchedCrossSize;
-      }
-    }
+    double maxConstraintWidth = child.hasOverrideContentLogicalWidth
+      ? child.renderStyle.borderBoxLogicalWidth!
+      : oldConstraints.maxWidth;
+    double maxConstraintHeight = child.hasOverrideContentLogicalHeight
+      ? child.renderStyle.borderBoxLogicalHeight!
+      : oldConstraints.maxHeight;
 
     double minConstraintWidth = oldConstraints.minWidth > maxConstraintWidth
       ? maxConstraintWidth : oldConstraints.minWidth;
@@ -1301,53 +1289,70 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // When replaced element is stretched or shrinked only on one axis and
   // length is not specified on the other axis, the length needs to be
-  // overrided in the other direction.
+  // overrided in the other axis.
   void _overrideReplacedChildLength(
-    RenderBoxModel child,
-    bool childMainSizeChanged,
-    bool childCrossSizeChanged,
+    RenderIntrinsic child,
+    double? childFlexedMainSize,
+    double? childStretchedCrossSize,
   ) {
-    if (child is RenderIntrinsic && child.renderStyle.intrinsicRatio != null) {
-      if (childMainSizeChanged
-        && !childCrossSizeChanged
-        && child.renderStyle.height.isAuto
-      ) {
-        double maxConstraintWidth = child.renderStyle.borderBoxLogicalWidth!;
-        double maxConstraintHeight = maxConstraintWidth * child.renderStyle.intrinsicRatio!;
-        // Clamp replaced element height by min/max height.
-        if (child.renderStyle.minHeight.isNotAuto) {
-          double minHeight = child.renderStyle.minHeight.computedValue;
-          maxConstraintHeight = maxConstraintHeight < minHeight
-            ? minHeight : maxConstraintHeight;
-        }
-        if (child.renderStyle.maxHeight.isNotNone) {
-          double maxHeight = child.renderStyle.maxHeight.computedValue;
-          maxConstraintHeight = maxConstraintHeight > maxHeight
-            ? maxHeight : maxConstraintHeight;
-        }
-        _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+    if (childFlexedMainSize != null && childStretchedCrossSize == null) {
+      if (_isHorizontalFlexDirection) {
+        _overrideReplacedChildHeight(child);
+      } else {
+        _overrideReplacedChildWidth(child);
       }
+    }
 
-      // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
-      if (!childMainSizeChanged
-        && childCrossSizeChanged
-        && child.renderStyle.width.isAuto
-      ) {
-        double maxConstraintHeight = child.renderStyle.borderBoxLogicalHeight!;
-        double maxConstraintWidth = maxConstraintHeight / child.renderStyle.intrinsicRatio!;
-        // Clamp replaced element width by min/max width.
-        if (child.renderStyle.minWidth.isNotAuto) {
-          double minWidth = child.renderStyle.minWidth.computedValue;
-          maxConstraintWidth = maxConstraintWidth < minWidth
-            ? minWidth : maxConstraintWidth;
-        }
-        if (child.renderStyle.maxWidth.isNotNone) {
-          double maxWidth = child.renderStyle.maxWidth.computedValue;
-          maxConstraintWidth = maxConstraintWidth > maxWidth
-            ? maxWidth : maxConstraintWidth;
-        }
-        _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
+    if (childFlexedMainSize == null && childStretchedCrossSize != null) {
+      if (_isHorizontalFlexDirection) {
+        _overrideReplacedChildWidth(child);
+      } else {
+        _overrideReplacedChildHeight(child);
       }
+    }
+  }
+
+  // Override replaced child height when its height is auto.
+  void _overrideReplacedChildHeight(
+    RenderIntrinsic child,
+  ) {
+    if (child.renderStyle.height.isAuto) {
+      double maxConstraintWidth = child.renderStyle.borderBoxLogicalWidth!;
+      double maxConstraintHeight = maxConstraintWidth * child.renderStyle.intrinsicRatio!;
+      // Clamp replaced element height by min/max height.
+      if (child.renderStyle.minHeight.isNotAuto) {
+        double minHeight = child.renderStyle.minHeight.computedValue;
+        maxConstraintHeight = maxConstraintHeight < minHeight
+          ? minHeight : maxConstraintHeight;
+      }
+      if (child.renderStyle.maxHeight.isNotNone) {
+        double maxHeight = child.renderStyle.maxHeight.computedValue;
+        maxConstraintHeight = maxConstraintHeight > maxHeight
+          ? maxHeight : maxConstraintHeight;
+      }
+      _overrideChildContentBoxLogicalHeight(child, maxConstraintHeight);
+    }
+  }
+
+  // Override replaced child width when its width is auto.
+  void _overrideReplacedChildWidth(
+    RenderIntrinsic child,
+    ) {
+    if (child.renderStyle.width.isAuto) {
+      double maxConstraintHeight = child.renderStyle.borderBoxLogicalHeight!;
+      double maxConstraintWidth = maxConstraintHeight / child.renderStyle.intrinsicRatio!;
+      // Clamp replaced element width by min/max width.
+      if (child.renderStyle.minWidth.isNotAuto) {
+        double minWidth = child.renderStyle.minWidth.computedValue;
+        maxConstraintWidth = maxConstraintWidth < minWidth
+          ? minWidth : maxConstraintWidth;
+      }
+      if (child.renderStyle.maxWidth.isNotNone) {
+        double maxWidth = child.renderStyle.maxWidth.computedValue;
+        maxConstraintWidth = maxConstraintWidth > maxWidth
+          ? maxWidth : maxConstraintWidth;
+      }
+      _overrideChildContentBoxLogicalWidth(child, maxConstraintWidth);
     }
   }
 
