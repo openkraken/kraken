@@ -32,7 +32,7 @@ describe('abspos-024', () => {
       },
       [
         createElement('img', {
-          src: '/assets/1x1-green.png',
+          src: 'assets/1x1-green.png',
           width: '64',
           height: '16',
           alt: 'Image download support must be enabled',

@@ -217,7 +217,7 @@ describe('containing-block', () => {
         createText(`Test passes if there is a filled blue square in the upper-right corner of the
 		page.`),
         createElement('img', {
-          src: '/assets/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -315,7 +315,7 @@ describe('containing-block', () => {
       },
       [
         createElement('img', {
-          src: '/assets/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -422,7 +422,7 @@ describe('containing-block', () => {
       },
       [
         createElement('img', {
-          src: '/assets/blue96x96.png',
+          src: 'assets/blue96x96.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -935,7 +935,7 @@ describe('containing-block', () => {
       },
       [
         createElement('img', {
-          src: '/assets/blue96x96.png',
+          src: 'assets/blue96x96.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -1053,7 +1053,7 @@ describe('containing-block', () => {
       },
       [
         img = createElement('img', {
-          src: '/assets/blue96x96.png',
+          src: 'assets/blue96x96.png',
           width: '96',
           height: '96',
           alt: 'Image download support must be enabled',

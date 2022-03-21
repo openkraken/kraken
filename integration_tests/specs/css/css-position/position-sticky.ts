@@ -112,7 +112,7 @@ describe('position-sticky', () => {
     spacer = createElementWithStyle('div', {
       height: '200vh',
       'background-image':
-        'url(/assets/ruler-v-50px.png)',
+        'url(assets/ruler-v-50px.png)',
       'background-repeat': 'repeat',
       'box-sizing': 'border-box',
     });
@@ -136,7 +136,7 @@ describe('position-sticky', () => {
         width: '200px',
         height: '200px',
         'background-image':
-          'url(/assets/ruler-v-50px.png)',
+          'url(assets/ruler-v-50px.png)',
         'background-repeat': 'repeat',
         'box-sizing': 'border-box',
       },
@@ -247,7 +247,7 @@ describe('position-sticky', () => {
         (spacer = createElementWithStyle('div', {
           height: '400px',
           'background-image':
-            'url(/assets/ruler-v-50px.png)',
+            'url(assets/ruler-v-50px.png)',
           'background-repeat': 'repeat',
           'box-sizing': 'border-box',
         })),
@@ -2959,7 +2959,7 @@ describe('position-sticky', () => {
           },
         }, [
           createElement('img', {
-            src: '/assets/200x200-green.png',
+            src: 'assets/200x200-green.png',
             style: {
                 backgroundColor: 'green',
                 width: '4vw',

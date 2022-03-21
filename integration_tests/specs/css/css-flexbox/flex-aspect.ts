@@ -29,7 +29,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',
@@ -72,7 +72,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/300x150-green.png',
+          src: 'assets/300x150-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',
@@ -106,7 +106,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',
@@ -136,7 +136,7 @@ describe('flex-aspect', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'max-width': '100px',
             height: '50px',
@@ -173,7 +173,7 @@ describe('flex-aspect', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'max-width': '100px',
             width: '500px',
@@ -225,7 +225,7 @@ describe('flex-aspect', () => {
       },
       [
         createElement('img', {
-          src: '/assets/20x50-green.png',
+          src: 'assets/20x50-green.png',
           style: {
             'padding-left': '5%',
             'min-width': '40px',
@@ -268,7 +268,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',
@@ -309,7 +309,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',
@@ -350,7 +350,7 @@ describe('flex-aspect', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             'min-width': '0',
             'min-height': '0',

@@ -35,7 +35,7 @@ describe('left-004', () => {
       },
       [
         createElement('img', {
-          src: '/assets/swatch-orange.png',
+          src: 'assets/swatch-orange.png',
           width: '5',
           height: '96',
           alt: 'Image download support must be enabled',
@@ -44,7 +44,7 @@ describe('left-004', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '5',
           height: '96',
           alt: 'Image download support must be enabled',

@@ -4,7 +4,7 @@ describe('Background-color-padding-box', function() {
     height: '250px',
     padding: '10px',
     backgroundImage:
-      'url("/assets/orange_color.png"), url("/assets/white_color.png")',
+      'url("assets/orange_color.png"), url("assets/white_color.png")',
     'background-repeat': 'no-repeat',
     'background-clip': 'border-box, border-box, padding-box',
     'background-position': '30px 30px, 60px 60px, 90px 90px',

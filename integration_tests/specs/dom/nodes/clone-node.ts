@@ -110,7 +110,7 @@ describe('Clone node', () => {
     const img = document.createElement('img');
     img.style.width = '100px';
     img.style.height = '100px';
-    img.src = "/assets/kraken.png";
+    img.src = "assets/kraken.png";
     document.body.appendChild(img);
     const img2 = img.cloneNode(false);
     document.body.appendChild(img2);

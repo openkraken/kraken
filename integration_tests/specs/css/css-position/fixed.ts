@@ -122,7 +122,7 @@ describe('Position fixed', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             width: '100px',
             height: '100px',
@@ -369,7 +369,7 @@ describe('Position fixed', () => {
           backgroundColor: 'green'
        },
       });
-
+    
     BODY.appendChild(div1);
     await snapshot();
   });

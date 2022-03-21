@@ -26,7 +26,7 @@ describe('css-flexbox', () => {
       },
       [
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '48px',
             'flex-grow': '1',
@@ -36,7 +36,7 @@ describe('css-flexbox', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '48px',
             'flex-grow': '1',
@@ -46,7 +46,7 @@ describe('css-flexbox', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '48px',
             'flex-grow': '1',
@@ -168,7 +168,7 @@ describe('css-flexbox', () => {
       },
       [
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '98px',
             height: '48px',
@@ -178,7 +178,7 @@ describe('css-flexbox', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '98px',
             height: '48px',
@@ -188,7 +188,7 @@ describe('css-flexbox', () => {
           },
         }),
         createElement('img', {
-          src: '/assets/solidblue.png',
+          src: 'assets/solidblue.png',
           style: {
             width: '98px',
             height: '48px',

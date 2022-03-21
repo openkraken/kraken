@@ -4,7 +4,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-h-50px.png',
+        src: 'assets/ruler-h-50px.png',
         style: {
           display: 'block',
           'object-fit': 'fill',
@@ -15,7 +15,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -24,7 +24,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'fill',
@@ -35,7 +35,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -44,7 +44,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-h-50px.png',
+        src: 'assets/ruler-h-50px.png',
         style: {
           display: 'block',
           'object-fit': 'cover',
@@ -55,7 +55,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -64,7 +64,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-h-50px.png',
+        src: 'assets/ruler-h-50px.png',
         style: {
           display: 'block',
           'object-fit': 'cover',
@@ -75,7 +75,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -84,7 +84,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'cover',
@@ -95,7 +95,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -104,7 +104,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'cover',
@@ -115,7 +115,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -124,7 +124,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-h-50px.png',
+        src: 'assets/ruler-h-50px.png',
         style: {
           display: 'block',
           'object-fit': 'contain',
@@ -135,7 +135,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -144,7 +144,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-h-50px.png',
+        src: 'assets/ruler-h-50px.png',
         style: {
           display: 'block',
           'object-fit': 'contain',
@@ -155,7 +155,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -164,7 +164,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'contain',
@@ -175,7 +175,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -184,7 +184,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'contain',
@@ -195,7 +195,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -205,7 +205,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'none',
@@ -216,7 +216,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -225,7 +225,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'scale-down',
@@ -236,7 +236,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -245,7 +245,7 @@ describe('object-fit', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/ruler-v-100px.png',
+        src: 'assets/ruler-v-100px.png',
         style: {
           display: 'block',
           'object-fit': 'scale-down',
@@ -256,7 +256,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
-
+ 
     await snapshot(0.1);
   });
 
@@ -266,7 +266,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-h-50px.png',
+          src: 'assets/ruler-h-50px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -278,7 +278,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -287,7 +287,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -299,7 +299,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -308,7 +308,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-h-50px.png',
+          src: 'assets/ruler-h-50px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -320,7 +320,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -329,7 +329,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-h-50px.png',
+          src: 'assets/ruler-h-50px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -341,7 +341,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -350,7 +350,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -362,7 +362,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -371,7 +371,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -383,7 +383,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -392,7 +392,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-h-50px.png',
+          src: 'assets/ruler-h-50px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -404,7 +404,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -413,7 +413,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-h-50px.png',
+          src: 'assets/ruler-h-50px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -425,7 +425,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -434,7 +434,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -446,7 +446,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -455,7 +455,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -467,7 +467,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -477,7 +477,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -489,7 +489,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -498,7 +498,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -510,7 +510,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
 
@@ -519,7 +519,7 @@ describe('object-fit', () => {
       image = createElement(
         'img',
         {
-          src: '/assets/ruler-v-100px.png',
+          src: 'assets/ruler-v-100px.png',
           scaling: 'scale',
           style: {
             display: 'block',
@@ -531,7 +531,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-
+  
       await snapshot(0.1);
     });
   });

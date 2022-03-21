@@ -47,7 +47,7 @@ describe('border_radius', () => {
           }
         }, [
           createElement('img', {
-            src: '/assets/100x100-green.png',
+            src: 'assets/100x100-green.png',
             style: {
                 width: '100px',
                 height: '250px',
@@ -84,7 +84,7 @@ describe('border_radius', () => {
           }
         }, [
           createElement('img', {
-            src: '/assets/100x100-green.png',
+            src: 'assets/100x100-green.png',
             style: {
                 width: '100px',
                 height: '250px',
@@ -196,7 +196,7 @@ describe('border_radius', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/100x100-green.png',
+        src: 'assets/100x100-green.png',
         style: {
           'border-radius': '20px',
         },
@@ -212,7 +212,7 @@ describe('border_radius', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/100x100-green.png',
+        src: 'assets/100x100-green.png',
         style: {
           'border-radius': '30px',
           border: '10px solid red',
@@ -231,7 +231,7 @@ describe('border_radius', () => {
     image = createElement(
       'img',
       {
-        src: '/assets/100x100-green.png',
+        src: 'assets/100x100-green.png',
         style: {
           'border-radius': '30px',
           border: '10px solid red',

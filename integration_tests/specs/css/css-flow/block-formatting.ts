@@ -389,7 +389,7 @@ describe('block-formatting', () => {
       },
       [
         createElement('img', {
-          src: '/assets/200x200-green.png',
+          src: 'assets/200x200-green.png',
           width: '200',
           height: '100',
           alt: 'Image download support must be enabled',

@@ -12,7 +12,7 @@ describe('Background-origin', () => {
             backgroundColor: '#f40',
             padding: '10px',
             backgroundImage:
-              'url(/assets/cat.png)',
+              'url(assets/cat.png)',
             backgroundRepeat: 'no-repeat',
             height: '50px',
             width: '100px',
@@ -37,7 +37,7 @@ describe('Background-origin', () => {
             backgroundColor: '#f40',
             padding: '10px',
             backgroundImage:
-              'url(/assets/cat.png)',
+              'url(assets/cat.png)',
             backgroundRepeat: 'no-repeat',
             backgroundOrigin: 'border-box',
             height: '50px',
@@ -63,7 +63,7 @@ describe('Background-origin', () => {
             backgroundColor: '#f40',
             padding: '10px',
             backgroundImage:
-              'url(/assets/cat.png)',
+              'url(assets/cat.png)',
             backgroundRepeat: 'no-repeat',
             backgroundOrigin: 'padding-box',
             height: '50px',
@@ -89,7 +89,7 @@ describe('Background-origin', () => {
             backgroundColor: '#f40',
             padding: '10px',
             backgroundImage:
-              'url(/assets/cat.png)',
+              'url(assets/cat.png)',
             backgroundRepeat: 'no-repeat',
             backgroundOrigin: 'content-box',
             height: '50px',

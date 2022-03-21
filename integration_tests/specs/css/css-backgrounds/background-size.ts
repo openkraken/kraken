@@ -12,7 +12,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: 'contain'
          },
@@ -36,7 +36,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: 'cover'
          },
@@ -60,7 +60,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: 'auto'
          },
@@ -70,7 +70,7 @@ describe('Background-size', () => {
     append(BODY, div);
     await snapshot(0.1);
   });
-
+  
   it('should works with auto of two values', async () => {
     let div1;
     let div = createElement(
@@ -84,7 +84,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: 'auto auto'
          },
@@ -108,7 +108,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: 'auto 130px'
          },
@@ -132,7 +132,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '80px auto'
          },
@@ -156,7 +156,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '120px'
          },
@@ -180,7 +180,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '120px 60px'
          },
@@ -203,7 +203,7 @@ describe('Background-size', () => {
          style: {
            height: '150px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '20%'
          },
@@ -226,7 +226,7 @@ describe('Background-size', () => {
          style: {
            height: '150px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '70% 30%'
          },
@@ -250,7 +250,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '70% 110px'
          },
@@ -274,7 +274,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/test-bl.png)',
+           backgroundImage: 'url(assets/test-bl.png)',
            backgroundRepeat: 'repeat',
            backgroundSize: '120px'
          },
@@ -298,7 +298,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/test-bl.png)',
+           backgroundImage: 'url(assets/test-bl.png)',
            backgroundRepeat: 'repeat',
            backgroundSize: '40%'
          },
@@ -322,7 +322,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '180px',
          },
@@ -346,7 +346,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '280px 120px',
          },
@@ -370,7 +370,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/bg.jpg)',
+           backgroundImage: 'url(assets/bg.jpg)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '250px',
          },
@@ -380,7 +380,7 @@ describe('Background-size', () => {
     append(BODY, div);
     await snapshot(0.1);
   });
-
+  
   it('should not work with negative value', async () => {
     let div1;
     let div = createElement(
@@ -394,7 +394,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '170px -50px'
          },
@@ -418,7 +418,7 @@ describe('Background-size', () => {
            height: '150px',
            width: '200px',
            backgroundColor: '#999',
-           backgroundImage: 'url(/assets/100x100-green.png)',
+           backgroundImage: 'url(assets/100x100-green.png)',
            backgroundRepeat: 'no-repeat',
            backgroundSize: '120px 30px',
            backgroundPosition: '10px 10px'

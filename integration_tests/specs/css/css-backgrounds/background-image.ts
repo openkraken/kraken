@@ -15,7 +15,7 @@ describe('background image', function() {
             width: '200px',
             height: '200px',
             backgroundRepeat: 'no-repeat',
-            backgroundImage: 'url(/assets/100x100-green.png)'
+            backgroundImage: 'url(assets/100x100-green.png)'
           }
         }),
       ]

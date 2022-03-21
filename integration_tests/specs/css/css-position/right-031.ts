@@ -31,7 +31,7 @@ describe('right-031', () => {
       },
       [
         createElement('img', {
-          src: '/assets/black15x15.png',
+          src: 'assets/black15x15.png',
           width: '16',
           height: '96',
           alt: 'Image download support must be enabled',

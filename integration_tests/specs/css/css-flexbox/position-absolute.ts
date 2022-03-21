@@ -202,7 +202,7 @@ describe('flexbox-position-absolute', () => {
        }
     }, [
         createElement('img', {
-            src: '/assets/100x100-green.png',
+            src: 'assets/100x100-green.png',
             style: {
                 position: 'absolute',
                 height: '200px'

@@ -4,7 +4,7 @@ describe('background-shorthand', () => {
     setElementStyle(div, {
       width: '360px',
       height: '200px',
-      background: 'left top / contain repeat url(/assets/rabbit.png)'
+      background: 'left top / contain repeat url(assets/rabbit.png)'
     });
     document.body.appendChild(div);
     await sleep(0.5);

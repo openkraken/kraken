@@ -175,7 +175,7 @@ describe('flexbox flex-shrink', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
         }),
       ]
     );
@@ -201,7 +201,7 @@ describe('flexbox flex-shrink', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             minHeight: '30px'
           }
@@ -230,7 +230,7 @@ describe('flexbox flex-shrink', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             width: '30px'
           }
@@ -809,13 +809,13 @@ describe('flexbox flex-shrink', () => {
       },
       [
         (createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             "marginLeft": "20px"
           },
         })),
         (createElement('img', {
-          src: '/assets/100x100-blue-and-orange.png',
+          src: 'assets/100x100-blue-and-orange.png',
           style: {
             "width": "100px",
             "height": "100px",
@@ -848,7 +848,7 @@ describe('flexbox flex-shrink', () => {
       },
       [
         (createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             "display": "flex",
             "position": "relative",
@@ -904,7 +904,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -917,7 +917,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -930,7 +930,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -943,7 +943,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -956,11 +956,11 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
           ])
       ]);
-
+    
     BODY.appendChild(div);
 
     await snapshot();
@@ -998,7 +998,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -1011,7 +1011,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -1024,7 +1024,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -1037,7 +1037,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
               createElement(
               'div',
@@ -1050,11 +1050,11 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-
+                  
               ]),
           ])
       ]);
-
+    
     BODY.appendChild(div);
 
     await snapshot();

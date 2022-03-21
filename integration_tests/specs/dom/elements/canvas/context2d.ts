@@ -385,6 +385,6 @@ describe('Canvas context 2d', () => {
       await snapshot(canvas);
       done();
     };
-    img.src = '/assets/rabbit.png';
+    img.src = 'assets/rabbit.png';
   });
 });

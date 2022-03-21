@@ -15,7 +15,7 @@ describe('block-fit', () => {
         (child = createElement('img', {
           class: 'child',
           src:
-            '/assets/60x60-green.png',
+            'assets/60x60-green.png',
           style: {
             'box-sizing': 'border-box',
           },
@@ -42,7 +42,7 @@ describe('block-fit', () => {
         (child = createElement('img', {
           class: 'child',
           src:
-            '/assets/60x60-green.png',
+            'assets/60x60-green.png',
           style: {
             'max-height': '100%',
             'box-sizing': 'border-box',

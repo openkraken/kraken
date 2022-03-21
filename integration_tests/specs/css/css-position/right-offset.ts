@@ -32,7 +32,7 @@ describe('right-offset', () => {
           },
           [
             createElement('img', {
-              src: '/assets/1x1-white.png',
+              src: 'assets/1x1-white.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -41,7 +41,7 @@ describe('right-offset', () => {
               },
             }),
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -58,7 +58,7 @@ describe('right-offset', () => {
           },
           [
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -67,7 +67,7 @@ describe('right-offset', () => {
               },
             }),
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -282,7 +282,7 @@ describe('right-offset', () => {
       },
       [
         createElement('img', {
-          src: '/assets/100x100-red.png',
+          src: 'assets/100x100-red.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -290,7 +290,7 @@ describe('right-offset', () => {
         }),
         (relPosOverlappingGreen = createElement('img', {
           id: 'rel-pos-overlapping-green',
-          src: '/assets/swatch-green.png',
+          src: 'assets/swatch-green.png',
           width: '100',
           height: '100',
           alt: 'Image download support must be enabled',
@@ -333,7 +333,7 @@ describe('right-offset', () => {
       },
       [
         createElement('img', {
-          src: '/assets/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',

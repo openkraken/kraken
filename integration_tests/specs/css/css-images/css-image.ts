@@ -72,7 +72,7 @@ describe('css-image', () => {
         height: '200px',
         color: 'white',
         'background-color': 'red',
-        'background-image': 'image("/assets/1x1-green.png")',
+        'background-image': 'image("assets/1x1-green.png")',
         'box-sizing': 'border-box',
       },
     });
@@ -100,7 +100,7 @@ describe('css-image', () => {
         height: '200px',
         'background-color': 'red',
         'background-image':
-          'image("1x1-green.svg", "/assets/1x1-green.png","/assets/1x1-green.gif")',
+          'image("1x1-green.svg", "assets/1x1-green.png","assets/1x1-green.gif")',
         'box-sizing': 'border-box',
       },
     });
@@ -128,7 +128,7 @@ describe('css-image', () => {
         height: '200px',
         'background-color': 'red',
         'background-image':
-          'image("1x1-green.svg", "1x1-green.png", "/assets/1x1-green.gif")',
+          'image("1x1-green.svg", "1x1-green.png", "assets/1x1-green.gif")',
         'box-sizing': 'border-box',
       },
     });
@@ -160,7 +160,7 @@ describe('css-image', () => {
         height: '200px',
         'background-color': 'red',
         'background-image':
-          'image(rgba(0,0,255,0.5)), url("/assets/1x1-green.png")',
+          'image(rgba(0,0,255,0.5)), url("assets/1x1-green.png")',
         'box-sizing': 'border-box',
       },
     });
@@ -249,7 +249,7 @@ describe('css-image', () => {
       },
       [
         (image1 = createElement('img', {
-          src: '/assets/100x100-green.png',
+          src: 'assets/100x100-green.png',
           style: {
             height: '50%',
             width: '50%',
@@ -262,7 +262,7 @@ describe('css-image', () => {
 
     setTimeout(async () => {
       let image2 = createElement('img', {
-        src: '/assets/100x100-green.png',
+        src: 'assets/100x100-green.png',
         style: {
           height: '50%',
           width: '50%',

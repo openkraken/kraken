@@ -15,7 +15,7 @@ describe('background-repeat', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url("/assets/rabbit.png")',
+        'url("assets/rabbit.png")',
     });
     repeat.appendChild(div1);
     document.body.appendChild(repeat);
@@ -39,7 +39,7 @@ describe('background-repeat', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(/assets/rabbit.png)',
+        'url(assets/rabbit.png)',
       backgroundRepeat: 'no-repeat',
     });
     repeat.appendChild(div1);
@@ -63,7 +63,7 @@ describe('background-repeat', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(/assets/rabbit.png)',
+        'url(assets/rabbit.png)',
       backgroundRepeat: 'repeat-x',
     });
     repeat.appendChild(div2);
@@ -87,7 +87,7 @@ describe('background-repeat', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(/assets/rabbit.png)',
+        'url(assets/rabbit.png)',
       backgroundRepeat: 'repeat-y',
     });
     repeat.appendChild(div3);
@@ -111,7 +111,7 @@ describe('background-repeat', () => {
       width: '360px',
       height: '200px',
       backgroundImage:
-        'url(/assets/rabbit.png)',
+        'url(assets/rabbit.png)',
       backgroundRepeat: 'repeat',
     });
     repeat.appendChild(div4);

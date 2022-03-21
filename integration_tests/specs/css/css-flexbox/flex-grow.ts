@@ -594,7 +594,7 @@ describe('flex-grow', () => {
           },
         }, [
           createElement('img', {
-            src: '/assets/50x50-green.png',
+            src: 'assets/50x50-green.png',
             style: {
               width: '4vw',
               height: '4vw'
@@ -613,7 +613,7 @@ describe('flex-grow', () => {
           },
         }, [
           createElement('img', {
-            src: '/assets/60x60-red.png',
+            src: 'assets/60x60-red.png',
             style: {
               width: '4vw',
               height: '4vw'
@@ -648,7 +648,7 @@ describe('flex-grow', () => {
         ]),
 
         createElement('img', {
-          src: '/assets/60x60-red.png',
+          src: 'assets/60x60-red.png',
           style: {
             width: '24vw',
             height: '24vw'

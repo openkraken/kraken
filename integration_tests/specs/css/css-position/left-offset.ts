@@ -32,7 +32,7 @@ describe('left-offset', () => {
           },
           [
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -41,7 +41,7 @@ describe('left-offset', () => {
               },
             }),
             createElement('img', {
-              src: '/assets/1x1-white.png',
+              src: 'assets/1x1-white.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -58,7 +58,7 @@ describe('left-offset', () => {
           },
           [
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -67,7 +67,7 @@ describe('left-offset', () => {
               },
             }),
             createElement('img', {
-              src: '/assets/blue15x15.png',
+              src: 'assets/blue15x15.png',
               width: '50',
               height: '50',
               alt: 'Image download support must be enabled',
@@ -208,7 +208,7 @@ describe('left-offset', () => {
       },
       [
         createElement('img', {
-          src: '/assets/black15x15.png',
+          src: 'assets/black15x15.png',
           width: '48',
           height: '48',
           alt: 'Image download support must be enabled',
@@ -309,7 +309,7 @@ describe('left-offset', () => {
       },
       [
         createElement('img', {
-          src: '/assets/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',

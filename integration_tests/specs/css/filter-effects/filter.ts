@@ -4,7 +4,7 @@ describe('CSS Filter Effects', () => {
     setElementStyle(div, {
       width: '360px',
       height: '200px',
-      background: 'left top / contain repeat url(/assets/rabbit.png)'
+      background: 'left top / contain repeat url(assets/rabbit.png)'
     });
     document.body.appendChild(div);
     div.style.filter = 'grayscale(1)';
@@ -17,7 +17,7 @@ describe('CSS Filter Effects', () => {
     setElementStyle(div, {
       width: '360px',
       height: '200px',
-      background: 'left top / contain repeat url(/assets/rabbit.png)'
+      background: 'left top / contain repeat url(assets/rabbit.png)'
     });
     document.body.appendChild(div);
     div.style.filter = 'blur(2px)';
