@@ -36,6 +36,7 @@ class ScriptValue final {
   // Wrap an Quickjs JSValue to ScriptValue.
   explicit ScriptValue(JSContext* ctx, JSValue value) : m_ctx(ctx), m_value(JS_DupValue(ctx, value)){};
   explicit ScriptValue(JSContext* ctx) : m_ctx(ctx){};
+  ScriptValue() = default;
 
   ScriptValue& operator=(const ScriptValue& other) {
     if (&other != this) {

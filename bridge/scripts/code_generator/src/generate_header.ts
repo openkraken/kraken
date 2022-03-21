@@ -30,6 +30,7 @@ function generateInterfaceAdditionalHeader(object: any): [string, string, string
 export function generateCppHeader(blob: Blob) {
   let classObject = blob.objects.find(object => object instanceof ClassObject);
   let interfaceDefines = generateInterfaceAdditionalHeader(classObject);
+  let haveInterfaceBase = !!classObject;
   return `/*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.
  * Author: Kraken Team.
@@ -40,12 +41,14 @@ export function generateCppHeader(blob: Blob) {
 
 #include <quickjs/quickjs.h>
 #include "bindings/qjs/wrapper_type_info.h"
+#include "bindings/qjs/qjs_interface_bridge.h"
+#include "core/${blob.implement}.h"
 
 namespace kraken {
 
 class ExecutingContext;
 
-class QJS${getClassName(blob)} final {
+class QJS${getClassName(blob)} ${haveInterfaceBase ? `: public QJSInterfaceBridge<QJS${getClassName(blob)}, ${getClassName(blob)}>` : 'final'} {
  public:
   static void Install(ExecutingContext* context);
 

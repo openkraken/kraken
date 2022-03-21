@@ -72,11 +72,15 @@ function generateCallMethodName(name: string) {
 
 function generateOptionalInitBody(blob: Blob, declare: FunctionDeclaration, argument: FunctionArguments, argsIndex: number, previousArguments: string[], options: GenFunctionBodyOptions) {
   let call = '';
+  let returnValueAssignment = '';
+  if (declare.returnType != FunctionArgumentType.void) {
+    returnValueAssignment = 'return_value =';
+  }
   if (options.isInstanceMethod) {
     call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
-return_value = self->${generateCallMethodName(declare.name)}(${[...previousArguments, `args_${argument.name}`, 'exception_state'].join(',')});`;
+${returnValueAssignment} self->${generateCallMethodName(declare.name)}(${[...previousArguments, `args_${argument.name}`, 'exception_state'].join(',')});`;
   } else {
-    call = `return_value = ${getClassName(blob)}::${generateCallMethodName(declare.name)}(context, ${[...previousArguments, `args_${argument.name}`].join(',')}, exception_state);`;
+    call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declare.name)}(context, ${[...previousArguments, `args_${argument.name}`].join(',')}, exception_state);`;
   }
 
 
@@ -117,11 +121,15 @@ function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration, 
   requiredArguments.push('exception_state');
 
   let call = '';
+  let returnValueAssignment = '';
+  if (declaration.returnType != FunctionArgumentType.void) {
+    returnValueAssignment = 'return_value =';
+  }
   if (options.isInstanceMethod) {
     call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
-return_value = self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
   } else {
-    call = `return_value = ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+    call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
   }
 
   return `${requiredArgumentsInit.join('\n')}
@@ -171,7 +179,7 @@ function generateReturnValueResult(blob: Blob, type: ParameterType | ParameterTy
     }
   }
 
-  return `Converter<${generateTypeConverter(type)}>::ToValue(ctx, return_value)`;
+  return `Converter<${generateTypeConverter(type)}>::ToValue(ctx, std::move(return_value))`;
 }
 
 type GenFunctionBodyOptions = {isConstructor?: boolean, isInstanceMethod?: boolean};
@@ -313,7 +321,7 @@ export function generateCppSource(blob: Blob) {
 
   let sources = blob.objects.map(o => {
     if (o instanceof FunctionObject) {
-      functionInstallList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}},`);
+      functionInstallList.push(` {"${o.declare.name}", ${o.declare.name}, ${o.declare.args.length}}`);
       return generateGlobalFunctionSource(blob, o);
     } else {
       o.props.forEach(prop => {
@@ -341,7 +349,6 @@ export function generateCppSource(blob: Blob) {
 #include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/script_promise.h"
 #include "core/executing_context.h"
-#include "core/${blob.implement}.h"
 
 namespace kraken {
 

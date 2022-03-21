@@ -7,7 +7,9 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_H_
 
 #include <quickjs/quickjs.h>
+#include "core/executing_context.h"
 #include "foundation/macros.h"
+#include "script_value.h"
 
 namespace kraken {
 
@@ -17,13 +19,15 @@ namespace kraken {
 // memory leaks since it has a reference from C++ to QuickJS.
 class ScriptPromise final {
   KRAKEN_DISALLOW_NEW();
-
  public:
+
+  ScriptPromise() = default;
+  ScriptPromise(ExecutingContext* context, JSValue promise);
 
   JSValue ToQuickJS();
  private:
-
-
+  ExecutingContext* context_;
+  ScriptValue promise_;
 };
 
 }

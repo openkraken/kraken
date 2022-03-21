@@ -203,6 +203,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/script_value.h
     bindings/qjs/script_promise.cc
     bindings/qjs/script_promise.h
+    bindings/qjs/qjs_interface_bridge.cc
+    bindings/qjs/qjs_interface_bridge.h
+    bindings/qjs/script_promise_resolver.cc
+    bindings/qjs/script_promise_resolver.h
     bindings/qjs/atom_string.cc
     bindings/qjs/atom_string.h
     bindings/qjs/exception_state.cc

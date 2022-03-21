@@ -21,7 +21,7 @@ class BlobPropertyBag final {
   const std::string& type() const { return m_type; }
 
  private:
-  void fillMemberFromQuickjsObject(ExecutingContext* context, JSValue value, ExceptionState* exceptionState);
+  void FillMemberFromQuickjsObject(JSContext* ctx, JSValue value, ExceptionState& exceptionState);
   std::string m_type;
 };
 

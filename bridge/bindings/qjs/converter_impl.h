@@ -177,7 +177,7 @@ struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString>
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return Converter<IDLDOMString>::ToValue(ctx, bytes, length); }
   static JSValue ToValue(JSContext* ctx, const std::string& str) { return Converter<IDLDOMString>::ToValue(ctx, str); }
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) {
-    return Converter<IDLDOMString>::ToValue(ctx, value);
+    return Converter<IDLDOMString>::ToValue(ctx, std::move(value));
   }
 };
 

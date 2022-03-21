@@ -80,13 +80,13 @@ std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingC
   if (!paramsValue.IsEmpty()) {
     params = paramsValue.ToJSONStringify(&exception).toNativeString();
     if (exception.HasException()) {
-      return ScriptValue::Empty(context->ctx());
+      return nullptr;
     }
   }
 
   if (context->dartMethodPtr()->invokeModule == nullptr) {
     exception.ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
-    return ScriptValue::Empty(context->ctx());
+    return nullptr;
   }
 
   auto moduleCallback = ModuleCallback::Create(callback);

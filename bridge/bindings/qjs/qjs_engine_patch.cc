@@ -320,6 +320,27 @@ bool JS_IsProxy(JSValue value) {
   return p->class_id == JS_CLASS_PROXY;
 }
 
+bool JS_IsPromise(JSValue value) {
+  if (!JS_IsObject(value))
+    return false;
+  JSObject* p = JS_VALUE_GET_OBJ(value);
+  return p->class_id == JS_CLASS_PROMISE;
+}
+
+bool JS_IsArrayBuffer(JSValue value) {
+  if (!JS_IsObject(value))
+    return false;
+  JSObject* p = JS_VALUE_GET_OBJ(value);
+  return p->class_id == JS_CLASS_ARRAY_BUFFER;
+}
+
+bool JS_IsArrayBufferView(JSValue value) {
+  if (!JS_IsObject(value))
+    return false;
+  JSObject* p = JS_VALUE_GET_OBJ(value);
+  return p->class_id >= JS_CLASS_UINT8C_ARRAY && p->class_id <= JS_CLASS_DATAVIEW;
+}
+
 bool JS_HasClassId(JSRuntime* runtime, JSClassID classId) {
   if (runtime->class_count <= classId)
     return false;
