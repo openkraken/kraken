@@ -46,7 +46,7 @@ void main() async {
   // Set render font family AlibabaPuHuiTi to resolve rendering difference.
   CSSText.DEFAULT_FONT_FAMILY_FALLBACK = ['AlibabaPuHuiTi'];
 
-  final String specTarget = '.specs/core.build.js';
+  final String specTarget = 'assets/core.build.js';
   final String specUrl = 'assets:///$specTarget';
   final File spec = File(path.join(testDirectory, specTarget));
   KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
