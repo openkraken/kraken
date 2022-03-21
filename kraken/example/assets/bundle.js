@@ -1,4 +1,4 @@
-var text1 = document.createTextNode('Welcome to Kraken!');
+var text1 = document.createTextNode('Hello Kraken!');
 var br = document.createElement('br');
 var text2 = document.createTextNode('你好，北海！');
 var p = document.createElement('p');

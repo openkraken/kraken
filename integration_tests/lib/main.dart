@@ -54,6 +54,7 @@ void main() async {
     return 'method: ' + method;
   };
 
+  // This is a virtual location for test program to test [Location] functionality.
   final String specUrl = 'assets:///test.js';
   late Kraken kraken;
 
