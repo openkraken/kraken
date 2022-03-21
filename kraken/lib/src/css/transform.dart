@@ -87,7 +87,7 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   CSSOrigin? _transformOrigin;
-  CSSOrigin get transformOrigin => _transformOrigin ?? CSSOrigin(DEFAULT_TRANSFORM_OFFSET, DEFAULT_TRANSFORM_ALIGNMENT);
+  CSSOrigin get transformOrigin => _transformOrigin ?? const CSSOrigin(DEFAULT_TRANSFORM_OFFSET, DEFAULT_TRANSFORM_ALIGNMENT);
   set transformOrigin(CSSOrigin? value) {
     if (_transformOrigin == value) return;
     _transformOrigin = value;
