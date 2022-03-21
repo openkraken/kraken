@@ -26,12 +26,15 @@ class HistoryModule extends BaseModule {
   Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
   Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
-  String get href {
-    if (_previousStack.isEmpty) return '';
-    return _previousStack.first.bundle.src;
+  KrakenBundle? get stackTop {
+    if (_previousStack.isEmpty) {
+      return null;
+    } else {
+      return _previousStack.first.bundle;
+    }
   }
 
-  set bundle(KrakenBundle bundle) {
+  void add(KrakenBundle bundle) {
     HistoryItem history = HistoryItem(bundle, null, true);
     _addItem(history);
   }
@@ -105,7 +108,7 @@ class HistoryModule extends BaseModule {
     await navigationModule.goTo(targetUrl);
   }
 
-  void _dispatchPopStateEvent(dynamic state) {
+  void _dispatchPopStateEvent(state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
     moduleManager!.controller.view.window.dispatchEvent(popStateEvent);
@@ -123,7 +126,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '
@@ -149,7 +152,7 @@ class HistoryModule extends BaseModule {
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '

@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
-import 'package:quiver/collection.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
@@ -187,31 +186,6 @@ ImageProviderFactory _getImageProviderFactory(ImageType imageType) {
   }
 }
 
-void setCustomImageProviderFactory(
-    ImageType imageType, ImageProviderFactory customImageProviderFactory) {
-  switch (imageType) {
-    case ImageType.cached:
-      _cachedProviderFactory = customImageProviderFactory;
-      break;
-    case ImageType.network:
-      _networkProviderFactory = customImageProviderFactory;
-      break;
-    case ImageType.file:
-      _fileProviderFactory = customImageProviderFactory;
-      break;
-    case ImageType.dataUrl:
-      _dataUrlProviderFactory = customImageProviderFactory;
-      break;
-    case ImageType.blob:
-      _blobProviderFactory = customImageProviderFactory;
-      break;
-    case ImageType.assets:
-    default:
-      _assetsProviderFactory = customImageProviderFactory;
-      break;
-  }
-}
-
 class KrakenResizeImage extends ResizeImage {
   KrakenResizeImage(
     ImageProvider<Object> imageProvider, {
@@ -222,13 +196,8 @@ class KrakenResizeImage extends ResizeImage {
 
   BoxFit? objectFit;
 
-  static final LinkedLruHashMap<dynamic, Size> _imageNaturalSize = LinkedLruHashMap(maximumSize: 100);
-  static Size? getImageNaturalSize(dynamic key) {
-    return _imageNaturalSize[key];
-  }
-
   static ImageProvider<Object> resizeIfNeeded(
-      int? cacheWidth, int? cacheHeight, BoxFit? objectFit, ImageProvider<Object> provider) {
+      int? cacheWidth, int? cacheHeight, BoxFit? objectFit, ImageProvider provider) {
     if (cacheWidth != null || cacheHeight != null) {
       return KrakenResizeImage(provider,
           width: cacheWidth, height: cacheHeight, objectFit: objectFit);
@@ -274,12 +243,8 @@ class KrakenResizeImage extends ResizeImage {
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
     final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
 
-    // Cache the image's original size for element.naturalWidth and element.naturalHeight API.
-    dynamic key = await obtainKey(ImageConfiguration.empty);
-
     double naturalWidth = descriptor.width.toDouble();
     double naturalHeight = descriptor.height.toDouble();
-    _imageNaturalSize[key] = Size(naturalWidth, naturalHeight);
 
     int? targetWidth;
     int? targetHeight;
@@ -350,15 +315,6 @@ class KrakenResizeImage extends ResizeImage {
       targetWidth: targetWidth,
       targetHeight: targetHeight,
     );
-  }
-
-  @override
-  Future<bool> evict({ImageCache? cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
-    Future<bool> result = super.evict(cache: cache, configuration: configuration);
-    // Clear _imageNaturalSize when imageProvider evicted.
-    final key = await obtainKey(configuration);
-    _imageNaturalSize.remove(key);
-    return result;
   }
 }
 

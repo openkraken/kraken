@@ -16,8 +16,11 @@
 #include "event_listener_map.h"
 
 #if UNIT_TEST
-void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
+void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
 #endif
+
+#define GetPropertyMagic "%g"
+#define SetPropertyMagic "%s"
 
 namespace kraken::binding::qjs {
 
@@ -52,21 +55,21 @@ class EventTarget : public HostClass {
   friend EventTargetInstance;
 };
 
-using NativeDispatchEvent = void (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
-using CallNativeMethods = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
+using NativeDispatchEvent = int32_t (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
+using InvokeBindingMethod = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
 
 struct NativeEventTarget {
   NativeEventTarget() = delete;
-  explicit NativeEventTarget(EventTargetInstance* _instance) : instance(_instance), dispatchEvent(NativeEventTarget::dispatchEventImpl){};
+  explicit NativeEventTarget(EventTargetInstance* _instance) : instance(_instance), dispatchEvent(reinterpret_cast<NativeDispatchEvent>(NativeEventTarget::dispatchEventImpl)){};
 
   // Add more memory valid check with contextId.
-  static void dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
+  static int32_t dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
   EventTargetInstance* instance{nullptr};
   NativeDispatchEvent dispatchEvent{nullptr};
 #if UNIT_TEST
-  CallNativeMethods callNativeMethods{reinterpret_cast<CallNativeMethods>(TEST_callNativeMethod)};
+  InvokeBindingMethod invokeBindingMethod{reinterpret_cast<InvokeBindingMethod>(TEST_invokeBindingMethod)};
 #else
-  CallNativeMethods callNativeMethods{nullptr};
+  InvokeBindingMethod invokeBindingMethod{nullptr};
 #endif
 };
 
@@ -92,8 +95,10 @@ class EventTargetInstance : public Instance {
   static inline JSClassID classId();
   inline int32_t eventTargetId() const { return m_eventTargetId; }
 
-  JSValue callNativeMethods(const char* method, int32_t argc, NativeValue* argv);
-  JSValue getNativeProperty(const char* prop);
+  // @TODO: Should move to BindingObject.
+  JSValue invokeBindingMethod(const char* method, int32_t argc, NativeValue* argv);
+  JSValue getBindingProperty(const char* prop);
+  void setBindingProperty(const char* prop, NativeValue value);
 
   NativeEventTarget* nativeEventTarget{new NativeEventTarget(this)};
 
@@ -107,8 +112,8 @@ class EventTargetInstance : public Instance {
   // https://html.spec.whatwg.org/C/#event-handler-attributes
   EventHandlerMap m_eventHandlerMap{m_ctx};
 
-  // When javascript code set a property on EventTarget instance, EventTarget::setProperty callback will be called when
-  // property are not defined by Object.defineProperty or setProperty.
+  // When javascript code set a property on EventTarget instance, EventTarget::setAttribute callback will be called when
+  // property are not defined by Object.defineProperty or setAttribute.
   // We store there values in here.
   EventTargetProperties m_properties{m_ctx};
 

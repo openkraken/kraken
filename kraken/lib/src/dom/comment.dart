@@ -6,8 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 
 class Comment extends Node {
-  Comment(EventTargetContext? context)
-      : super(NodeType.COMMENT_NODE, context);
+  Comment([context]) : super(NodeType.COMMENT_NODE, context);
 
   @override
   String get nodeName => '#comment';

@@ -1695,4 +1695,105 @@ describe('align-self', () => {
       done();
     });
   });
+
+  it('stretch should not work with positioned child of no top bottom', async () => {
+    let item = createElement('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'row',
+            height: '50px',
+            backgroundColor: 'coral',
+        }
+    }, [
+        createElement('div', {
+            style: {
+                position: 'absolute',
+                alignSelf: 'stretch',
+                backgroundColor: 'lightblue',
+            }
+        }, [
+            createText('stretch')
+        ]),
+    ]);
+
+    BODY.appendChild(item);
+    
+    await snapshot();
+  });
+
+  it('flex-start should work with positioned child of no top bottom', async () => {
+    let item = createElement('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            height: '50px',
+            backgroundColor: 'coral',
+        }
+    }, [
+        createElement('div', {
+            style: {
+                position: 'absolute',
+                alignSelf: 'flex-start',
+                backgroundColor: 'lightblue',
+            }
+        }, [
+            createText('flex-start')
+        ]),
+    ]);
+
+    BODY.appendChild(item);
+    
+    await snapshot();
+  });
+  
+  it('center should work with positioned child of no top bottom', async () => {
+    let item = createElement('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'row',
+            height: '50px',
+            backgroundColor: 'coral',
+        }
+    }, [
+        createElement('div', {
+            style: {
+                position: 'absolute',
+                alignSelf: 'center',
+                backgroundColor: 'lightblue',
+            }
+        }, [
+            createText('center')
+        ]),
+    ]);
+
+    BODY.appendChild(item);
+    
+    await snapshot();
+  });
+
+  it('flex-end should work with positioned child of no top bottom', async () => {
+    let item = createElement('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'row',
+            height: '50px',
+            backgroundColor: 'coral',
+        }
+    }, [
+        createElement('div', {
+            style: {
+                position: 'absolute',
+                alignSelf: 'flex-end',
+                backgroundColor: 'lightblue',
+            }
+        }, [
+            createText('flex-end')
+        ]),
+    ]);
+
+    BODY.appendChild(item);
+    
+    await snapshot();
+  });
 });

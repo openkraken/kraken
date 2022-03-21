@@ -11,10 +11,11 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/foundation.dart';
 
 class CachedNetworkImageKey {
-  CachedNetworkImageKey({
+  const CachedNetworkImageKey({
     required this.url,
     required this.scale
   });
@@ -62,9 +63,9 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     return client;
   }
 
-  Future<Uint8List> loadFile(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Uint8List> _getRawImageBytes(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
     HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getReferrer(contextId)));
+        getOrigin(getEntrypointUri(contextId)));
 
     Uri uri = Uri.parse(url);
     Uint8List? bytes;
@@ -79,22 +80,18 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     }
 
     // Fallback to network
-    bytes ??= await fetchFile(key, chunkEvents, cacheController);
+    bytes ??= await _fetchImageBytes(key, chunkEvents, cacheController);
 
     return bytes;
   }
 
-  Future<Codec?> _loadImage(
+  Future<Codec> _loadAsync(
       CachedNetworkImageKey key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
-    Uint8List bytes = await loadFile(key, chunkEvents);
-
-    if (bytes.isNotEmpty) {
-      return decode(bytes);
-    }
-    return null;
+    Uint8List bytes = await _getRawImageBytes(key, chunkEvents);
+    return decode(bytes);
   }
 
-  Future<Uint8List> fetchFile(CachedNetworkImageKey key,
+  Future<Uint8List> _fetchImageBytes(CachedNetworkImageKey key,
       StreamController<ImageChunkEvent> chunkEvents,
       HttpCacheController cacheController) async {
     try {
@@ -141,6 +138,51 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
   }
 
   @override
+  void resolveStreamForKey(
+    ImageConfiguration configuration,
+    ImageStream stream,
+    CachedNetworkImageKey key,
+    ImageErrorListener handleError,
+  ) {
+    // Something managed to complete the stream, or it's already in the image
+    // cache. Notify the wrapped provider and expect it to behave by not
+    // reloading the image since it's already resolved.
+    // Do this even if the context has gone out of the tree, since it will
+    // update LRU information about the cache. Even though we never showed the
+    // image, it was still touched more recently.
+    // Do this before checking scrolling, so that if the bytes are available we
+    // render them even though we're scrolling fast - there's no additional
+    // allocations to do for texture memory, it's already there.
+    if (stream.completer != null || PaintingBinding.instance!.imageCache!.containsKey(key)) {
+      super.resolveStreamForKey(configuration, stream, key, handleError);
+      return;
+    }
+    // Something still wants this image, but check if the context is scrolling
+    // too fast before scheduling work that might never show on screen.
+    // Try to get to end of the frame callbacks of the next frame, and then
+    // check again.
+    if (_recommendDeferredLoading()) {
+      // @TODO!
+      count++;
+      print('delay $count');
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
+      });
+      return;
+    }
+    // We are in the tree, we're not scrolling too fast, the cache doesn't
+    // have our image, and no one has otherwise completed the stream.  Go.
+    super.resolveStreamForKey(configuration, stream, key, handleError);
+  }
+
+  // Return true if recommend deferred to load the file.
+  bool _recommendDeferredLoading() {
+    return false;
+  }
+
+  static int count = 0;
+
+  @override
   ImageStreamCompleter load(CachedNetworkImageKey key, DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
@@ -148,7 +190,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-        codec: _loadImage(key, decode, chunkEvents).then((value) => value!),
+        codec: _loadAsync(key, decode, chunkEvents),
         chunkEvents: chunkEvents.stream,
         scale: key.scale,
         informationCollector: () {

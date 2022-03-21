@@ -38,7 +38,7 @@ class NavigationModule extends BaseModule {
 
   // Navigate kraken page to target Url.
   Future<void> goTo(String targetUrl) async {
-    String? sourceUrl = moduleManager!.controller.href;
+    String? sourceUrl = moduleManager!.controller.url;
 
     Uri targetUri = Uri.parse(targetUrl);
     Uri sourceUri = Uri.parse(sourceUrl);
@@ -47,7 +47,7 @@ class NavigationModule extends BaseModule {
   }
 
   @override
-  String invoke(String method, dynamic params, callback) {
+  String invoke(String method, params, callback) {
     if (method == 'goTo') {
       assert(params is String, 'URL must be string.');
       goTo(params);
