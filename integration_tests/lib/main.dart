@@ -103,7 +103,7 @@ void main() async {
     addJSErrorListener(contextId, print);
     // Preload load test cases
     String code = spec.readAsStringSync();
-    evaluateTestScripts(contextId, codeInjection + code, url: 'assets:///.specs/core.build.js');
+    evaluateTestScripts(contextId, codeInjection + code, url: specUrl);
     String result = await executeTest(contextId);
     // Manual dispose context for memory leak check.
     disposePage(kraken.controller!.view.contextId);
