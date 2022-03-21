@@ -109,7 +109,7 @@ describe('Tags img', () => {
     img.src = 'assets/solidblue.png';
     await snapshot(0.1);
     src = img.src;
-    expect(src).toBe('assets/solidblue.png');
+    expect(src).toBe('assets:///assets/solidblue.png');
     done();
   });
 

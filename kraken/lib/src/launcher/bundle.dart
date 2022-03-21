@@ -280,7 +280,7 @@ class AssetsBundle extends KrakenBundle {
   }
 
   /// Get flutter asset name from uri scheme asset.
-  ///   eg: assets://foo/bar.html -> foo/bar.html
+  ///   eg: assets:///foo/bar.html -> foo/bar.html
   static String getAssetName(Uri resolvedUri) {
     String assetName = resolvedUri.path;
 
