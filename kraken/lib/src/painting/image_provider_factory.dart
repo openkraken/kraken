@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
@@ -109,7 +110,7 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
+ImageType parseImageUrl(Uri resolvedUri, {String cache = 'auto'}) {
   if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
     return (cache == 'store' || cache == 'auto')
         ? ImageType.cached
@@ -120,8 +121,10 @@ ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
     return ImageType.dataUrl;
   } else if (resolvedUri.isScheme('BLOB')) {
     return ImageType.blob;
-  } else {
+  } else if (resolvedUri.isScheme('ASSETS')) {
     return ImageType.assets;
+  } else {
+    throw FlutterError('Uri must have it\'s scheme. $resolvedUri');
   }
 }
 

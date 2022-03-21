@@ -103,7 +103,7 @@ describe('Tags img', () => {
     }) as HTMLImageElement;
     BODY.appendChild(img);
     let src = img.src;
-    expect(src).toBe('assets/rabbit.png');
+    expect(src).toBe('assets:///assets/rabbit.png');
     // have to wait for asset load?
     await snapshot(0.1);
     img.src = 'assets/solidblue.png';

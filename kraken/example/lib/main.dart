@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyBrowser> {
     final TextEditingController textEditingController = TextEditingController();
 
     Kraken? _kraken;
+    PaintingBinding.instance!.imageCache!.maximumSize = 1;
     AppBar appBar = AppBar(
         backgroundColor: Colors.black87,
         titleSpacing: 10.0,

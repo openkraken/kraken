@@ -21,7 +21,8 @@ const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
-const String ASSETS_PROTOCOL = 'assets://';
+const String DEFAULT_URL = 'about:blank';
+const String ASSETS_PROTOCOL = 'assets:';
 final ContentType css = ContentType('text', 'css', charset: 'utf-8');
 
 String? getBundleURLFromEnv() {
@@ -110,14 +111,13 @@ abstract class KrakenBundle {
     }
   }
 
-  static KrakenBundle fromContent(String content, { String url = '' }) {
+  static KrakenBundle fromContent(String content, { String url = DEFAULT_URL }) {
     return RawBundle.fromString(content, url);
   }
 
-  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = '' }) {
+  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = DEFAULT_URL }) {
     return RawBundle.fromBytecode(bytecode, url);
   }
-
 
   void eval(int? contextId) {
     if (!isResolved) {
@@ -281,10 +281,11 @@ class AssetsBundle extends KrakenBundle {
 
   /// Get flutter asset name from uri scheme asset.
   ///   eg: assets:///foo/bar.html -> foo/bar.html
-  static String getAssetName(Uri resolvedUri) {
-    String assetName = resolvedUri.path;
+  ///       assets:foo/bar.html -> foo/bar.html
+  static String getAssetName(Uri assetUri) {
+    String assetName = assetUri.path;
 
-    // Remove leading `/`
+    // Remove leading `/`.
     if (assetName.startsWith('/')) {
       assetName = assetName.substring(1);
     }
