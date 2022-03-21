@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyBrowser> {
           child: _kraken = Kraken(
             viewportWidth: viewportSize.width - queryData.padding.horizontal,
             viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-            bundle: KrakenBundle.fromUrl('https://kraken.oss-cn-hangzhou.aliyuncs.com/data/cvd3r6f068.js'),
+            bundle: KrakenBundle.fromUrl('assets://benchmark/build/kraken/home.kbc1'),
             onLoad: (KrakenController controller) {
               Timer(Duration(seconds: 4), () {
                 exit(0);
