@@ -16,14 +16,12 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
 
-import 'manifest.dart';
-
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
-const String ASSETS_PROROCOL = 'assets://';
+const String ASSETS_PROTOCOL = 'assets://';
 final ContentType css = ContentType('text', 'css', charset: 'utf-8');
 
 String? getBundleURLFromEnv() {
@@ -50,7 +48,7 @@ String getAcceptHeader() {
 }
 
 bool isAssetAbsolutePath(String path) {
-  return path.startsWith(ASSETS_PROROCOL);
+  return path.startsWith(ASSETS_PROTOCOL);
 }
 
 abstract class KrakenBundle {
@@ -69,8 +67,6 @@ abstract class KrakenBundle {
   String? content;
   // JS line offset, default to 0.
   int lineOffset = 0;
-  // Kraken bundle manifest
-  AppManifest? manifest;
 
   bool isResolved = false;
 
@@ -275,12 +271,23 @@ class AssetsBundle extends KrakenBundle {
   @override
   Future<KrakenBundle> resolve(int? contextId) async {
     super.resolve(contextId);
-    // JSBundle get default bundle manifest.
-    manifest = AppManifest();
-    if (isAssetAbsolutePath(src)) {
-      String localPath = src.substring(ASSETS_PROROCOL.length);
-      rawBundle = await rootBundle.load(localPath);
+    final Uri? _resolvedUri = resolvedUri;
+    if (_resolvedUri != null) {
+      final String assetName = getAssetName(_resolvedUri);
+      rawBundle = await rootBundle.load(assetName);
     }
     return this;
+  }
+
+  /// Get flutter asset name from uri scheme asset.
+  ///   eg: assets://foo/bar.html -> foo/bar.html
+  static String getAssetName(Uri resolvedUri) {
+    String assetName = resolvedUri.path;
+
+    // Remove leading `/`
+    if (assetName.startsWith('/')) {
+      assetName = assetName.substring(1);
+    }
+    return assetName;
   }
 }
