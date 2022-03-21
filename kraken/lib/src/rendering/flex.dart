@@ -606,11 +606,11 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Compute spacing before and between each flex line.
     Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
 
-    // Adjust children size based on flex properties which may affect children size.
-    _adjustChildrenSize(_runMetrics, _runSpacingMap);
-
     // Set flex container size.
     _setContainerSize(_runMetrics);
+
+    // Adjust children size based on flex properties which may affect children size.
+    _adjustChildrenSize(_runMetrics, _runSpacingMap);
 
     // Set children offset based on flex alignment properties.
     _setChildrenOffset(_runMetrics, _runSpacingMap);
@@ -1666,7 +1666,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getFlexLineCrossSize(
     double runCrossAxisExtent,
     double runBetweenSpace,
-    { bool beforeSetSize = true }
   ) {
     // Flex line of align-content stretch should includes between space.
     bool isMultiLineStretch = (renderStyle.flexWrap == FlexWrap.wrap ||
@@ -1677,8 +1676,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         renderStyle.flexWrap != FlexWrap.wrapReverse);
 
     if (isSingleLine) {
-      // Use content size if container size is not set yet.
-      return beforeSetSize ? runCrossAxisExtent : _getContentCrossSize();
+      return _getContentCrossSize();
     } else if (isMultiLineStretch) {
       return runCrossAxisExtent + runBetweenSpace;
     } else {
@@ -2093,7 +2091,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     double flexLineCrossSize = _getFlexLineCrossSize(
       runCrossAxisExtent,
       runBetweenSpace,
-      beforeSetSize: false
     );
     double childCrossAxisStartMargin = flowAwareChildCrossAxisMargin(child)!;
     double crossStartAddedOffset = crossAxisStartPadding +
