@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -573,7 +574,7 @@ class RenderBoxModel extends RenderBox
     RenderOpacityMixin,
     RenderIntersectionObserverMixin,
     RenderContentVisibilityMixin,
-    RenderPointerListenerMixin,
+    RenderEventListenerMixin,
     RenderObjectWithControllerMixin {
   RenderBoxModel({
     required this.renderStyle,
@@ -702,16 +703,8 @@ class RenderBoxModel extends RenderBox
       ..scrollOffsetX = scrollOffsetX
       ..scrollOffsetY = scrollOffsetY
 
-      // Copy pointer listener
+      // Copy event hook
       ..getEventTarget = getEventTarget
-      ..dispatchEvent = dispatchEvent
-      ..getEventHandlers = getEventHandlers
-      ..onClick = onClick
-      ..onSwipe = onSwipe
-      ..onPan = onPan
-      ..onScale = onScale
-      ..onLongPress = onLongPress
-      ..onPointerSignal = onPointerSignal
 
       // Copy renderPositionHolder
       ..renderPositionPlaceholder = renderPositionPlaceholder
@@ -960,17 +953,16 @@ class RenderBoxModel extends RenderBox
   Size? _contentSize;
   Size get contentSize => _contentSize ?? Size.zero;
 
-  double get clientWidth {
+  int get clientWidth {
     double width = contentSize.width;
     width += renderStyle.padding.horizontal;
-    return width;
+    return width.toInt();
   }
 
-  double get clientHeight {
+  int get clientHeight {
     double height = contentSize.height;
     height += renderStyle.padding.vertical;
-
-    return height;
+    return height.toInt();
   }
 
   // Base layout methods to compute content constraints before content box layout.
@@ -1307,12 +1299,16 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-
   /// Called when its corresponding element disposed
   @override
   @mustCallSuper
   void dispose() {
-    super.dispose();
+    // Ensure pending layout/compositeBitsUpdate/paint render object to be finished.
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      // Call dispose method of renderBoxModel when it is detached from tree.
+      super.dispose();
+    });
+
     // Clear renderObjects in list when disposed to avoid memory leak
     if (fixedChildren.isNotEmpty) {
       fixedChildren.clear();
@@ -1443,7 +1439,7 @@ class RenderBoxModel extends RenderBox
   }
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
     if (scrollablePointerListener != null) {
       scrollablePointerListener!(event);

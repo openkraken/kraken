@@ -27,11 +27,11 @@ abstract class ObjectElementClient {
 
   dynamic handleJSCall(String method, List argv);
 
-  void setStyle(String key, dynamic value);
+  void setStyle(String key, value);
 
   void dispose();
 
-  void setProperty(String key, dynamic value);
+  void setProperty(String key, value);
 
   dynamic getProperty(String key);
 

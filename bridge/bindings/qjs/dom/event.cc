@@ -188,18 +188,28 @@ void EventInstance::setType(NativeString* type) const {
   nativeEvent->type = type;
 #endif
 }
+
+EventTargetInstance* EventInstance::target() const {
+  return reinterpret_cast<NativeEventTarget*>(nativeEvent->target)->instance;
+}
+
 void EventInstance::setTarget(EventTargetInstance* target) const {
 #if ANDROID_32_BIT
   nativeEvent->target = reinterpret_cast<int64_t>(target);
 #else
-  nativeEvent->target = target;
+  nativeEvent->target = target->nativeEventTarget;
 #endif
 }
+
+EventTargetInstance* EventInstance::currentTarget() const {
+  return reinterpret_cast<NativeEventTarget*>(nativeEvent->currentTarget)->instance;
+}
+
 void EventInstance::setCurrentTarget(EventTargetInstance* currentTarget) const {
 #if ANDROID_32_BIT
   nativeEvent->currentTarget = reinterpret_cast<int64_t>(currentTarget);
 #else
-  nativeEvent->currentTarget = currentTarget;
+  nativeEvent->currentTarget = currentTarget->nativeEventTarget;
 #endif
 }
 

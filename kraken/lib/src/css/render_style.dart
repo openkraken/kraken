@@ -172,7 +172,7 @@ abstract class RenderStyle {
   // for class that extends [AbstractRenderStyle].
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
 
-  Size get viewportSize => target.ownerDocument.viewport.viewportSize;
+  Size get viewportSize => target.ownerDocument.viewport!.viewportSize;
 
   double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
 

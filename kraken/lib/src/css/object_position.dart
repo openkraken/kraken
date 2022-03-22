@@ -8,9 +8,9 @@ import 'package:kraken/css.dart';
 
 mixin CSSObjectPositionMixin on RenderStyle {
   @override
-  Alignment get objectPosition => _objectPosition;
-  Alignment _objectPosition = Alignment.center;
-  set objectPosition(Alignment value) {
+  Alignment get objectPosition => _objectPosition ?? Alignment.center;
+  Alignment? _objectPosition;
+  set objectPosition(Alignment? value) {
     if (_objectPosition == value) return;
     _objectPosition = value;
     renderBoxModel?.markNeedsLayout();
