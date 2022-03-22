@@ -25,7 +25,7 @@ mixin CSSDisplayMixin on RenderStyle {
 
   @override
   CSSDisplay get display => _display ?? CSSDisplay.inline;
-  set display(CSSDisplay value) {
+  set display(CSSDisplay? value) {
     if (_display != value) {
       _display = value;
       renderBoxModel?.markNeedsLayout();
