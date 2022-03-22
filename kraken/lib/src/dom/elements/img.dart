@@ -110,7 +110,7 @@ class ImageElement extends Element {
   void setBindingProperty(String key, value) {
     switch (key) {
       case 'src': src = castToType<String>(value); break;
-      case 'loading': loading = castToType<bool>(value); break;
+      case 'loading': loading = castToType<String>(value); break;
       case 'width': width = castToType<int>(value); break;
       case 'height': height = castToType<int>(value); break;
       case 'scaling': scaling = castToType<String>(value); break;
@@ -123,7 +123,7 @@ class ImageElement extends Element {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
       case 'src': src = attributeToProperty<String>(value); break;
-      case 'loading': loading = attributeToProperty<bool>(value); break;
+      case 'loading': loading = attributeToProperty<String>(value); break;
       case 'width': width = attributeToProperty<int>(value); break;
       case 'height': height = attributeToProperty<int>(value); break;
       case 'scaling': scaling = attributeToProperty<String>(value); break;
@@ -503,12 +503,11 @@ class ImageElement extends Element {
   }
 
   // ReadOnly additional property.
-  bool get loading => hasAttribute('loading');
-  set loading(bool value) {
-    if (value) {
-      internalSetAttribute('loading', '');
-    } else {
-      removeAttribute('loading');
+  String get loading => getAttribute(LOADING) ?? '';
+  set loading(String value) {
+    internalSetAttribute(SCALING, value);
+    if (_isInLazyLoading) {
+      _removeIntersectionChangeListener();
     }
   }
 
