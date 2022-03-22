@@ -194,7 +194,7 @@ class CSSBackgroundImage {
 
         Uri uri = Uri.parse(url);
         if (url.isNotEmpty) {
-          uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+          uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
           return getImageProvider(uri, contextId: controller.view.contextId);
         }
       }

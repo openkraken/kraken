@@ -69,7 +69,7 @@ class InspectCSSModule extends UIInspectorModule {
     if (element != null) {
       InlinedStyle inlinedStyle = InlinedStyle(
         inlineStyle: buildInlineStyle(element),
-        attributesStyle: buildAttributesStyle(element.properties),
+        attributesStyle: buildAttributesStyle(element.attributes),
       );
       sendToFrontend(id, inlinedStyle);
     }

@@ -14,6 +14,9 @@
 #include "event.h"
 #include "kraken_bridge.h"
 
+#define PROPAGATION_STOPPED 1
+#define PROPAGATION_CONTINUE 0
+
 #if UNIT_TEST
 #include "kraken_test_env.h"
 #endif
@@ -22,7 +25,6 @@ namespace kraken::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
-#define GetPropertyCallPreFix "_getProperty_"
 
 void bindEventTarget(ExecutionContext* context) {
   auto* constructor = EventTarget::instance(context);
@@ -149,12 +151,18 @@ JSValue EventTarget::dispatchEvent(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue eventValue = argv[0];
   auto eventInstance = reinterpret_cast<EventInstance*>(JS_GetOpaque(eventValue, EventTarget::classId(eventValue)));
+#if ANDROID_32_BIT
+  eventInstance->nativeEvent->target = reinterpret_cast<int64_t>(eventTargetInstance);
+#else
   eventInstance->nativeEvent->target = eventTargetInstance;
+#endif
   return JS_NewBool(ctx, eventTargetInstance->dispatchEvent(eventInstance));
 }
 
 bool EventTargetInstance::dispatchEvent(EventInstance* event) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
+  auto* pEventType = reinterpret_cast<NativeString*>(event->nativeEvent->type);
+
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(pEventType->string), pEventType->length);
   std::string eventType = toUTF8(u16EventType);
 
   // protect this util event trigger finished.
@@ -162,34 +170,18 @@ bool EventTargetInstance::dispatchEvent(EventInstance* event) {
 
   internalDispatchEvent(event);
 
-  // Bubble event to root event target.
-  if (event->nativeEvent->bubbles == 1 && !event->propagationStopped()) {
-    auto node = reinterpret_cast<NodeInstance*>(this);
-    auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(node->parentNode, Node::classId(node->parentNode)));
-
-    if (parent != nullptr) {
-      parent->dispatchEvent(event);
-    } else {
-      // Window does not inherit from Node, so it is not in the Node tree and needs to continue passing to the Window when it bubbles to Document.
-      JSValue globalObjectValue = JS_GetGlobalObject(m_context->ctx());
-      auto* window = static_cast<WindowInstance*>(JS_GetOpaque(globalObjectValue, Window::classId()));
-      window->internalDispatchEvent(event);
-      JS_FreeValue(m_ctx, globalObjectValue);
-    }
-  }
-
   JS_FreeValue(m_ctx, jsObject);
 
   return event->cancelled();
 }
 
 bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->nativeEvent->type->string), eventInstance->nativeEvent->type->length);
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(eventInstance->type()->string), eventInstance->type()->length);
   std::string eventTypeStr = toUTF8(u16EventType);
   JSAtom eventType = JS_NewAtom(m_ctx, eventTypeStr.c_str());
 
   // Modify the currentTarget to this.
-  eventInstance->nativeEvent->currentTarget = this;
+  eventInstance->setCurrentTarget(this);
 
   // Dispatch event listeners writen by addEventListener
   auto _dispatchEvent = [&eventInstance, this](JSValue handler) {
@@ -336,7 +328,7 @@ JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom ato
       JS_FreeCString(eventTarget->m_ctx, cmethod);
       return JS_UNDEFINED;
     }
-    JSValue result = eventTarget->getNativeProperty(cmethod);
+    JSValue result = eventTarget->getBindingProperty(cmethod);
     JS_FreeCString(ctx, cmethod);
     return result;
   }
@@ -378,7 +370,7 @@ int EventTargetInstance::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, J
     if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject) && !p->is_wide_char && p->u.str8[0] != '_') {
       std::unique_ptr<NativeString> args_01 = atomToNativeString(ctx, atom);
       std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, value);
-      eventTarget->m_context->uiCommandBuffer()->addCommand(eventTarget->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+      eventTarget->m_context->uiCommandBuffer()->addCommand(eventTarget->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
     }
   }
 
@@ -391,9 +383,9 @@ int EventTargetInstance::deleteProperty(JSContext* ctx, JSValue obj, JSAtom prop
   return 0;
 }
 
-JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc, NativeValue* argv) {
-  if (nativeEventTarget->callNativeMethods == nullptr) {
-    return JS_ThrowTypeError(m_ctx, "Failed to call native dart methods: callNativeMethods not initialized.");
+JSValue EventTargetInstance::invokeBindingMethod(const char* method, int32_t argc, NativeValue* argv) {
+  if (nativeEventTarget->invokeBindingMethod == nullptr) {
+    return JS_ThrowTypeError(m_ctx, "Failed to call dart method: invokeBindingMethod not initialized.");
   }
 
   std::u16string methodString;
@@ -402,7 +394,7 @@ JSValue EventTargetInstance::callNativeMethods(const char* method, int32_t argc,
   NativeString m{reinterpret_cast<const uint16_t*>(methodString.c_str()), static_cast<uint32_t>(methodString.size())};
 
   NativeValue nativeValue{};
-  nativeEventTarget->callNativeMethods(nativeEventTarget, &nativeValue, &m, argc, argv);
+  nativeEventTarget->invokeBindingMethod(nativeEventTarget, &nativeValue, &m, argc, argv);
   JSValue returnValue = nativeValueToJSValue(m_context, nativeValue);
   return returnValue;
 }
@@ -448,11 +440,17 @@ void EventTargetInstance::finalize(JSRuntime* rt, JSValue val) {
   delete eventTarget;
 }
 
-JSValue EventTargetInstance::getNativeProperty(const char* prop) {
-  std::string method = GetPropertyCallPreFix + std::string(prop);
+JSValue EventTargetInstance::getBindingProperty(const char* prop) {
   getDartMethod()->flushUICommand();
-  JSValue result = callNativeMethods(method.c_str(), 0, nullptr);
-  return result;
+  NativeValue args[] = {Native_NewCString(prop)};
+  return invokeBindingMethod(GetPropertyMagic, 1, args);
+}
+
+void EventTargetInstance::setBindingProperty(const char* prop, NativeValue value) {
+  // If not flush UICommands, the element may not be created.
+  getDartMethod()->flushUICommand();
+  NativeValue args[] = {Native_NewCString(prop), value};
+  invokeBindingMethod(SetPropertyMagic, 2, args);
 }
 
 // JSValues are stored in this class are no visible to QuickJS GC.
@@ -472,7 +470,7 @@ void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, Event
   referenceNode->m_properties.copyWith(&newNode->m_properties);
 }
 
-void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
+int32_t NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* nativeEventType, void* rawEvent, int32_t isCustomEvent) {
   assert_m(nativeEventTarget->instance != nullptr, "NativeEventTarget should have owner");
   EventTargetInstance* eventTargetInstance = nativeEventTarget->instance;
 
@@ -480,12 +478,12 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
 
   // Should avoid dispatch event is ctx is invalid.
   if (!isContextValid(contextId)) {
-    return;
+    return 1;
   }
 
   // We should avoid trigger event if eventTarget are no long live on heap.
   if (!JS_IsLiveObject(runtime, eventTargetInstance->jsObject)) {
-    return;
+    return 1;
   }
 
   ExecutionContext* context = eventTargetInstance->context();
@@ -496,9 +494,17 @@ void NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarget* 
   // So we can reinterpret_cast raw bytes pointer to NativeEvent type directly.
   auto* nativeEvent = reinterpret_cast<NativeEvent*>(raw->bytes);
   EventInstance* eventInstance = Event::buildEventInstance(eventType, context, nativeEvent, isCustomEvent == 1);
-  eventInstance->nativeEvent->target = eventTargetInstance;
+
   eventTargetInstance->dispatchEvent(eventInstance);
+
+  bool propagationStopped = eventInstance->propagationStopped();
+
   JS_FreeValue(context->ctx(), eventInstance->jsObject);
+
+  // FIXME: The return value is first propagationStopped instead of cancelable, and then implement a separate method to synchronize propagationStopped.
+  // Dispatches a synthetic event event to target and returns true if either event’s cancelable attribute value is false or its preventDefault() method was not invoked; otherwise false.
+  // https://dom.spec.whatwg.org/#ref-for-dom-eventtarget-dispatchevent%E2%91%A2
+  return propagationStopped ? PROPAGATION_STOPPED : PROPAGATION_CONTINUE;
 }
 
 }  // namespace kraken::binding::qjs

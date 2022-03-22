@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/foundation.dart';
 
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
@@ -12,29 +13,26 @@ const String RETURN_CHAR = '\r';
 const String TAB_CHAR = '\t';
 
 class TextNode extends Node {
-  TextNode(this._data, EventTargetContext? context)
-      : super(NodeType.TEXT_NODE, context);
+  static const String NORMAL_SPACE = '\u0020';
+
+  TextNode(this._data, [BindingContext? context]) : super(NodeType.TEXT_NODE, context);
 
   // Must be existed after text node is attached, and all text update will after text attached.
   RenderTextBox? _renderTextBox;
 
-  static const String NORMAL_SPACE = '\u0020';
   // The text string.
-  String? _data;
-  String get data => (_data == null || _data!.isEmpty) ? '' : _data!;
-
-  set data(String? newData) {
-    assert(newData != null);
-
-    String oldData = _data!;
+  String _data = '';
+  String get data => _data;
+  set data(String newData) {
+    String oldData = data;
     if (oldData == newData) return;
 
     _data = newData;
 
     // Empty string of textNode should not attach to render tree.
-    if (oldData.isNotEmpty && newData!.isEmpty) {
-      detach();
-    } else if (oldData.isEmpty && newData!.isNotEmpty) {
+    if (oldData.isNotEmpty && newData.isEmpty) {
+      _detachRenderTextBox();
+    } else if (oldData.isEmpty && newData.isNotEmpty) {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
@@ -74,7 +72,7 @@ class TextNode extends Node {
   @override
   void attachTo(Element parent, { RenderBox? after }) {
     // Empty string of TextNode should not attach to render tree.
-    if (_data == null || _data!.isEmpty) return;
+    if (_data.isEmpty) return;
 
     createRenderer();
 
@@ -87,7 +85,7 @@ class TextNode extends Node {
   }
 
   // Detach renderObject of current node from parent
-  void detach() {
+  void _detachRenderTextBox() {
     if (isRendererAttached) {
       RenderTextBox renderTextBox = _renderTextBox!;
       ContainerRenderObjectMixin parent = renderTextBox.parent as ContainerRenderObjectMixin;
@@ -97,8 +95,8 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void disposeRenderObject({ bool deep = false }) {
-    detach();
+  void unmountRenderObject({ bool deep = false }) {
+    _detachRenderTextBox();
     _renderTextBox = null;
   }
 
@@ -114,7 +112,7 @@ class TextNode extends Node {
   void dispose() {
     super.dispose();
 
-    disposeRenderObject();
+    unmountRenderObject();
 
     assert(_renderTextBox == null);
   }

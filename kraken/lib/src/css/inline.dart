@@ -26,9 +26,9 @@ enum VerticalAlign {
 
 mixin CSSInlineMixin on RenderStyle {
   @override
-  VerticalAlign get verticalAlign => _verticalAlign;
-  VerticalAlign _verticalAlign = VerticalAlign.baseline;
-  set verticalAlign(VerticalAlign value) {
+  VerticalAlign get verticalAlign => _verticalAlign ?? VerticalAlign.baseline;
+  VerticalAlign? _verticalAlign;
+  set verticalAlign(VerticalAlign? value) {
     if (_verticalAlign != value) {
       _verticalAlign = value;
       renderBoxModel?.markNeedsLayout();

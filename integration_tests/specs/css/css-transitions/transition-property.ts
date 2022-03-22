@@ -15,11 +15,6 @@ describe('Transition property', () => {
         backgroundColor: 'red',
       });
 
-      // Get snapshot in animation.
-      setTimeout(async () => {
-        await snapshot();
-      }, 500);
-
       // Wait for animation finished.
       setTimeout(async () => {
         await snapshot();

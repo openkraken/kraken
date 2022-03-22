@@ -16,7 +16,7 @@ class NavigatorModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(String method, dynamic params, callback) {
+  String invoke(String method, params, callback) {
     switch (method) {
       case 'getUserAgent':
         return getUserAgent();
@@ -41,7 +41,7 @@ class NavigatorModule extends BaseModule {
     return Platform.operatingSystem;
   }
 
-  static String getLanguage() { 
+  static String getLanguage() {
     return PlatformDispatcher.instance.locale.toLanguageTag();
   }
 

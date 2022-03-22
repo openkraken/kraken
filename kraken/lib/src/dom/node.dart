@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
 
@@ -21,7 +22,7 @@ enum NodeType {
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
 abstract class RenderObjectNode {
-  RenderBox? get renderer => throw FlutterError('This node has no render object implemented.');
+  RenderBox? get renderer;
 
   /// Creates an instance of the [RenderObject] class that this
   /// [RenderObjectNode] represents, using the configuration described by this
@@ -53,7 +54,7 @@ abstract class RenderObjectNode {
   void didDetachRenderer();
 }
 
-/// Lifecycles that triggered when NodeTree changes.
+/// Lifecycle that triggered when node tree changes.
 /// Ref: https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-lifecycle-callbacks
 abstract class LifecycleCallbacks {
   // Invoked each time the custom element is appended into a document-connected element.
@@ -81,7 +82,8 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   NodeType nodeType;
   String get nodeName;
 
-  // The read-only ownerDocument property of the Node interface returns the top-level document object of the node.
+  // FIXME: The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
+  // https://dom.spec.whatwg.org/#dom-node-ownerdocument
   late Document ownerDocument;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
@@ -101,8 +103,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return _children;
   }
 
-  Node(this.nodeType, EventTargetContext? context)
-      : super(context);
+  Node(this.nodeType, [BindingContext? context]) : super(context);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
@@ -140,19 +141,15 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   /// Attach a renderObject to parent.
   void attachTo(Element parent, {RenderBox? after}) {}
 
-  /// Release any resources held by referenced render object.
-  void disposeRenderObject({ bool deep = false}) {}
+  /// Unmount referenced render object.
+  void unmountRenderObject({ bool deep = false}) {}
 
   /// Release any resources held by this node.
   @override
   void dispose() {
+    parentNode?.removeChild(this);
+    assert(!isRendererAttached, 'Should unmount $this before calling dispose.');
     super.dispose();
-
-    parentNode = null;
-    for (int i = 0; i < childNodes.length; i ++) {
-      childNodes[i].parentNode = null;
-    }
-    childNodes.clear();
   }
 
   @override
@@ -213,6 +210,14 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @mustCallSuper
   Node removeChild(Node child) {
+
+    // Not remove node type which is not present in RenderObject tree such as Comment
+    // Only append node types which is visible in RenderObject tree
+    // Only remove childNode when it has parent
+    if (child.isRendererAttached) {
+      child.unmountRenderObject();
+    }
+
     if (childNodes.contains(child)) {
       bool isConnected = child.isConnected;
       childNodes.remove(child);
@@ -232,6 +237,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       bool isOldNodeConnected = oldNode.isConnected;
       int referenceIndex = childNodes.indexOf(oldNode);
       oldNode.parentNode = null;
+      newNode.parentNode = this;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
 
@@ -272,29 +278,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void dispatchEvent(Event event) {
     if (disposed) return;
     super.dispatchEvent(event);
-
-    // Dispatch listener for widget.
-    var gestureListener = ownerDocument.gestureListener;
-    if (gestureListener != null) {
-      Function? onTouchStart = gestureListener.onTouchStart;
-      if (onTouchStart != null && event.type == EVENT_TOUCH_START) {
-        onTouchStart(event as TouchEvent);
-      }
-
-      Function? onTouchMove = gestureListener.onTouchMove;
-      if (onTouchMove != null && event.type == EVENT_TOUCH_MOVE) {
-        onTouchMove(event as TouchEvent);
-      }
-
-      Function? onTouchEnd = gestureListener.onTouchEnd;
-      if (onTouchEnd != null && event.type == EVENT_TOUCH_END) {
-        onTouchEnd(event as TouchEvent);
-      }
-    }
-
-    // Dispatch listener for document to do someting such as shift the focus.
-    ownerDocument.controller.dispatchEvent(event);
   }
+
+  @override
+  EventTarget? get parentEventTarget => parentNode;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

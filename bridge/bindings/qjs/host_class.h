@@ -83,9 +83,6 @@ class HostClass {
   friend Instance;
   static void proxyFinalize(JSRuntime* rt, JSValue val) {
     auto hostObject = static_cast<HostClass*>(JS_GetOpaque(val, ExecutionContext::kHostClassClassId));
-    if (hostObject->context()->isValid()) {
-      JS_FreeValue(hostObject->m_ctx, hostObject->jsObject);
-    }
     delete hostObject;
   };
   static JSValue proxyCall(JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) {
