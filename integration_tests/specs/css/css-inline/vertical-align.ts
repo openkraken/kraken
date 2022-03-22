@@ -274,4 +274,48 @@ describe('vertical-align', () => {
     BODY.appendChild(container);
     await snapshot();
   });
+
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          background: 'yellow',
+        },
+      },
+      [
+        (item = createElement('div', {
+          style: {
+            display: 'inline-block',
+            verticalAlign: 'top',
+            width: '100px',
+            height: '50px',
+            backgroundColor: 'green'
+          }
+        })),
+        (createElement('div', {
+          style: {
+            display: 'inline-block',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'blue'
+          }
+        }))
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.verticalAlign = '';
+      await snapshot();
+      done();
+    });
+  });
 });

@@ -156,7 +156,7 @@ static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc
     arguments[i] = jsValueToNativeValue(ctx, argv[i]);
   }
 
-  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  JSValue returnValue = eventTarget->invokeBindingMethod(call_params.c_str(), argc, arguments);
   delete[] arguments;
   return returnValue;
 }
@@ -214,7 +214,7 @@ static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int
     arguments[i + 3] = jsValueToNativeValue(ctx, argv[i]);
   }
 
-  eventTarget->callNativeMethods(call_params.c_str(), argc + 3, arguments);
+  eventTarget->invokeBindingMethod(call_params.c_str(), argc + 3, arguments);
   delete[] arguments;
 
   return promise;

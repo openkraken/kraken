@@ -72,4 +72,39 @@ describe('Opacity', () => {
    });
   });
 
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          background: 'yellow',
+        },
+      },
+      [
+        (item = createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+            opacity: 0,
+          }
+        }))
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.opacity = '';
+      await snapshot();
+      done();
+    });
+  });
+
 });
