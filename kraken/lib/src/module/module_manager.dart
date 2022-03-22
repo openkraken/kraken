@@ -9,11 +9,11 @@ abstract class BaseModule {
   String get name;
   final ModuleManager? moduleManager;
   BaseModule(this.moduleManager);
-  String invoke(String method, dynamic params, InvokeModuleCallback callback);
+  String invoke(String method, params, InvokeModuleCallback callback);
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function({String ?error, dynamic data});
+typedef InvokeModuleCallback = void Function({String ?error, Object? data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
 typedef ModuleCreator = BaseModule Function(ModuleManager? moduleManager);
 
@@ -62,7 +62,7 @@ class ModuleManager {
     bridge.emitModuleEvent(contextId, moduleName, event, jsonEncode(data));
   }
 
-  String invokeModule(String moduleName, String method, dynamic params, InvokeModuleCallback callback) {
+  String invokeModule(String moduleName, String method, params, InvokeModuleCallback callback) {
     ModuleCreator? creator = _creatorMap[moduleName];
     if (creator == null) {
       throw Exception('ModuleManager: Can not find module of name: $moduleName');

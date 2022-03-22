@@ -40,7 +40,7 @@ enum JSPointerType {
   NativeFunctionContext,
   NativeBoundingClientRect,
   NativeCanvasRenderingContext2D,
-  NativeEventTarget
+  NativeBindingObject
 }
 
 typedef AnonymousNativeFunction = dynamic Function(List<dynamic> args);
@@ -68,7 +68,7 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
   if (nativeValue == nullptr) return null;
 
   JSValueType type = JSValueType.values[nativeValue.ref.tag];
-  switch(type) {
+  switch (type) {
     case JSValueType.TAG_STRING:
       Pointer<NativeString> nativeString = Pointer.fromAddress(nativeValue.ref.u);
       String result = nativeStringToString(nativeString);
@@ -89,8 +89,8 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
           return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBoundingClientRect>();
         case JSPointerType.NativeCanvasRenderingContext2D:
           return Pointer.fromAddress(nativeValue.ref.u).cast<NativeCanvasRenderingContext2D>();
-        case JSPointerType.NativeEventTarget:
-          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeEventTarget>();
+        case JSPointerType.NativeBindingObject:
+          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBindingObject>();
         default:
           return Pointer.fromAddress(nativeValue.ref.u);
       }
@@ -105,8 +105,7 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
   }
 }
 
-void toNativeValue(Pointer<NativeValue> target, dynamic value) {
-
+void toNativeValue(Pointer<NativeValue> target, value) {
   if (value == null) {
     target.ref.tag = JSValueType.TAG_NULL.index;
   } else if (value is int) {
@@ -128,8 +127,8 @@ void toNativeValue(Pointer<NativeValue> target, dynamic value) {
       target.ref.float64 = JSPointerType.NativeBoundingClientRect.index.toDouble();
     } else if (value is Pointer<NativeCanvasRenderingContext2D>) {
       target.ref.float64 = JSPointerType.NativeCanvasRenderingContext2D.index.toDouble();
-    } else if (value is Pointer<NativeEventTarget>) {
-      target.ref.float64 = JSPointerType.NativeEventTarget.index.toDouble();
+    } else if (value is Pointer<NativeBindingObject>) {
+      target.ref.float64 = JSPointerType.NativeBindingObject.index.toDouble();
     }
   } else if (value is AsyncAnonymousNativeFunction) {
     int id = _functionId++;

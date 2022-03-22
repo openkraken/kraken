@@ -122,7 +122,7 @@ describe('Tags img', () => {
     });
   });
 
-  it('set src property setter', async () => {
+  it('set src property setter', async (done) => {
     const img = createElement('img', {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
@@ -130,13 +130,12 @@ describe('Tags img', () => {
     let src = img.src;
     expect(src).toBe('assets/rabbit.png');
     // have to wait for asset load?
-    await sleep(0.1);
-    await snapshot();
+    await snapshot(0.1);
     img.src = 'assets/solidblue.png';
-    await sleep(0.1);
-    await snapshot();
+    await snapshot(0.1);
     src = img.src;
     expect(src).toBe('assets/solidblue.png');
+    done();
   });
 
   it('read image size through property', async (done) => {
@@ -151,7 +150,7 @@ describe('Tags img', () => {
     BODY.appendChild(img);
   });
 
-  it('change image src dynamically', async () => {
+  it('change image src dynamically', async (done) => {
     const img = createElement('img', {
       src: 'assets/rabbit.png'
     }) as HTMLImageElement;
@@ -159,16 +158,18 @@ describe('Tags img', () => {
     await snapshot(0.2);
     img.src = 'assets/300x150-green.png';
     await snapshot(0.2);
+    done();
   });
 
-  it('support base64 data url', async () => {
+  it('support base64 data url', async (done) => {
     var img = document.createElement('img');
     img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAACJJREFUKFNjZGD4z0AKAKomHpGgFOQK4g0eVY01rEZCCAIAC+rSL3tdVQUAAAAASUVORK5CYII=';
     document.body.appendChild(img);
     await snapshot(0.2);
+    done();
   });
 
-  it('minwidth and minheight of image is 0', async () => {
+  it('minwidth and minheight of image is 0', async (done) => {
     var img = document.createElement('img');
     img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
     img.style.minWidth = '0';
@@ -176,6 +177,7 @@ describe('Tags img', () => {
     img.style.display = 'inline';
     document.body.appendChild(img);
     await snapshot(0.2);
+    done();
   });
 
   it('image size and image natural size', (done) => {
@@ -234,7 +236,7 @@ describe('Tags img', () => {
 
     img.onload = async () => {
       window.scroll(0, 2000);
-      await snapshot();
+      await snapshot(0.1);
       done();
     };
     img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
@@ -325,7 +327,7 @@ describe('Tags img', () => {
       } else {
         done('load event should only trigger once.');
       }
-    }, 100);
+    }, 200);
   });
 
   it('gif can not replay by remove nodes', async (done) => {
@@ -336,12 +338,12 @@ describe('Tags img', () => {
       await snapshot(img);
       document.body.removeChild(img);
 
+      // Delay 200ms to play gif.
       setTimeout(async () => {
         // When img re-append to document, to Gif image will continue to play.
         document.body.appendChild(img);
         await snapshot(img);
         done();
-        // Delay 200ms to play gif.
       }, 200);
     };
 
@@ -356,7 +358,7 @@ describe('Tags img', () => {
       height: 100,
     });
     BODY.appendChild(img);
- 
+
     requestAnimationFrame(async () => {
       img.width = 200;
       await snapshot(0.1);
@@ -364,7 +366,7 @@ describe('Tags img', () => {
     });
   });
 
-  it('width property should not work when width of style is auto', async () => {
+  it('width property should not work when width of style is auto', async (done) => {
     let img = createElement('img', {
       src: 'assets/300x150-green.png',
       width: 100,
@@ -374,8 +376,9 @@ describe('Tags img', () => {
       }
     });
     BODY.appendChild(img);
- 
+
     await snapshot(0.1);
+    done();
   });
 
   it('can get natualSize from repeat image url', async (done) => {
@@ -417,7 +420,7 @@ describe('Tags img', () => {
     }
   });
 
-  it('works with padding border exist and width height not exist', async () => {
+  it('works with padding border exist and width height not exist', async (done) => {
     let image;
     image = createElement(
       'img',
@@ -432,9 +435,10 @@ describe('Tags img', () => {
     BODY.appendChild(image);
 
     await snapshot(0.1);
+    done();
   });
 
-  it('works with padding border width exist and height not exist', async () => {
+  it('works with padding border width exist and height not exist', async (done) => {
     let image;
     image = createElement(
       'img',
@@ -450,9 +454,10 @@ describe('Tags img', () => {
     BODY.appendChild(image);
 
     await snapshot(0.1);
+    done();
   });
 
-  it('works with padding border height exist and width not exist', async () => {
+  it('works with padding border height exist and width not exist', async (done) => {
     let image;
     image = createElement(
       'img',
@@ -468,9 +473,10 @@ describe('Tags img', () => {
     BODY.appendChild(image);
 
     await snapshot(0.1);
+    done();
   });
 
-  it('works with padding border width height both exist', async () => {
+  it('works with padding border width height both exist', async (done) => {
     let image;
     image = createElement(
       'img',
@@ -487,6 +493,7 @@ describe('Tags img', () => {
     BODY.appendChild(image);
 
     await snapshot(0.1);
+    done();
   });
 
 });

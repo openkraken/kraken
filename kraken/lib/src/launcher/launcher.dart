@@ -32,19 +32,29 @@ void launch({
   VoidCallback? _ordinaryOnMetricsChanged = window.onMetricsChanged;
 
   Future<void> _initKrakenApp() async {
+    KrakenNativeChannel channel = KrakenNativeChannel();
+
+    if (bundle == null) {
+      String? backendEntrypointUrl = getBundleURLFromEnv() ?? getBundlePathFromEnv();
+      backendEntrypointUrl ??= await channel.getUrl();
+      if (backendEntrypointUrl != null) {
+        bundle = KrakenBundle.fromUrl(backendEntrypointUrl);
+      }
+    }
+
     KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
       background: background,
       showPerformanceOverlay: showPerformanceOverlay ?? Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-      methodChannel: KrakenNativeChannel(),
+      methodChannel: channel,
+      entrypoint: bundle,
       devToolsService: devToolsService,
-      httpClientInterceptor: httpClientInterceptor
+      httpClientInterceptor: httpClientInterceptor,
+      autoExecuteEntrypoint: false,
     );
 
     controller.view.attachTo(RendererBinding.instance!.renderView);
 
-    await controller.loadBundle(bundle: bundle);
-
-    await controller.evalBundle();
+    await controller.executeEntrypoint();
   }
 
   // window.physicalSize are Size.zero when app first loaded. This only happened on Android and iOS physical devices with release build.
