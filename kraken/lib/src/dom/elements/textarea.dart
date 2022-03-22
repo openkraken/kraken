@@ -15,13 +15,13 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class TextareaElement extends TextFormControlElement {
-  TextareaElement(EventTargetContext? context)
+  TextareaElement(context)
     : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   double? get _defaultWidth {
     // cols defaults to 20.
     // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-cols
-    return avgCharWidth * double.parse(properties[COLS] ?? '20');
+    return avgCharWidth * double.parse(attributes[COLS] ?? '20');
   }
 
   double? get _defaultHeight {
@@ -31,7 +31,7 @@ class TextareaElement extends TextFormControlElement {
       ? renderStyle.lineHeight.computedValue
       : avgCharHeight;
 
-    return computedLineHeight * double.parse(properties[ROWS] ?? '2');
+    return computedLineHeight * double.parse(attributes[ROWS] ?? '2');
   }
 
   // The concatenation of the data of all the Text node descendants of node.

@@ -136,7 +136,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
 
-  TextFormControlElement(EventTargetContext? context, {
+  TextFormControlElement(context, {
     this.isMultiline = false,
     this.defaultStyle,
     this.isIntrinsicBox,
@@ -195,7 +195,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
 
-  String get placeholderText => properties['placeholder'] ?? '';
+  String get placeholderText => attributes['placeholder'] ?? '';
 
   TextSpan get placeholderTextSpan {
     // TODO: support ::placeholder pseudo element
