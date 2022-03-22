@@ -74,11 +74,11 @@ class _RunChild {
   _RunChild(
     RenderBox child,
     double originalMainSize,
-    double adjustedMainSize,
+    double flexedMainSize,
     bool frozen,
   )   : _child = child,
         _originalMainSize = originalMainSize,
-        _adjustedMainSize = adjustedMainSize,
+        _flexedMainSize = flexedMainSize,
         _frozen = frozen;
 
   // Render object of flex item.
@@ -102,12 +102,12 @@ class _RunChild {
   }
 
   // Adjusted main size after flexible length resolve algorithm.
-  double get adjustedMainSize => _adjustedMainSize;
-  double _adjustedMainSize;
+  double get flexedMainSize => _flexedMainSize;
+  double _flexedMainSize;
 
-  set adjustedMainSize(double value) {
-    if (_adjustedMainSize != value) {
-      _adjustedMainSize = value;
+  set flexedMainSize(double value) {
+    if (_flexedMainSize != value) {
+      _flexedMainSize = value;
     }
   }
 
@@ -186,7 +186,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end padding in the main axis according to flex direction.
-  double flowAwareMainAxisPadding({bool isEnd = false}) {
+  double _flowAwareMainAxisPadding({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
       return isEnd ? renderStyle.paddingRight.computedValue : renderStyle.paddingLeft.computedValue;
     } else {
@@ -195,7 +195,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end padding in the cross axis according to flex direction.
-  double flowAwareCrossAxisPadding({bool isEnd = false}) {
+  double _flowAwareCrossAxisPadding({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
       return isEnd ? renderStyle.paddingBottom.computedValue : renderStyle.paddingTop.computedValue;
     } else {
@@ -204,7 +204,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end border in the main axis according to flex direction.
-  double flowAwareMainAxisBorder({bool isEnd = false}) {
+  double _flowAwareMainAxisBorder({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
       return isEnd ? renderStyle.effectiveBorderRightWidth.computedValue : renderStyle.effectiveBorderLeftWidth.computedValue;
     } else {
@@ -213,7 +213,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end border in the cross axis according to flex direction.
-  double flowAwareCrossAxisBorder({bool isEnd = false}) {
+  double _flowAwareCrossAxisBorder({bool isEnd = false}) {
     if (_isHorizontalFlexDirection) {
       return isEnd ? renderStyle.effectiveBorderBottomWidth.computedValue : renderStyle.effectiveBorderTopWidth.computedValue;
     } else {
@@ -222,7 +222,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end margin of child in the main axis according to flex direction.
-  double? flowAwareChildMainAxisMargin(RenderBox child, {bool isEnd = false}) {
+  double? _flowAwareChildMainAxisMargin(RenderBox child, {bool isEnd = false}) {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
@@ -245,7 +245,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Get start/end margin of child in the cross axis according to flex direction.
-  double? flowAwareChildCrossAxisMargin(RenderBox child, {bool isEnd = false}) {
+  double? _flowAwareChildCrossAxisMargin(RenderBox child, {bool isEnd = false}) {
     RenderBoxModel? childRenderBoxModel;
     if (child is RenderBoxModel) {
       childRenderBoxModel = child;
@@ -1003,7 +1003,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       double computedSize = originalMainSize;
 
       // Computed size by flex factor.
-      double adjustedSize = originalMainSize;
+      double flexedMainSize = originalMainSize;
 
       // Adjusted size after min and max size clamp.
       double flexGrow = _getFlexGrow(child);
@@ -1029,20 +1029,20 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
       }
 
-      adjustedSize = computedSize;
+      flexedMainSize = computedSize;
 
       // Find all the violations by comparing min and max size of flex items.
       if (child is RenderBoxModel && !_isChildMainAxisClip(child)) {
         double minMainAxisSize = _getMinMainAxisSize(child)!;
         double maxMainAxisSize = _getMaxMainAxisSize(child);
         if (computedSize < minMainAxisSize) {
-          adjustedSize = minMainAxisSize;
+          flexedMainSize = minMainAxisSize;
         } else if (computedSize > maxMainAxisSize) {
-          adjustedSize = maxMainAxisSize;
+          flexedMainSize = maxMainAxisSize;
         }
       }
 
-      double violation = adjustedSize - computedSize;
+      double violation = flexedMainSize - computedSize;
 
       // Collect all the flex items with violations.
       if (violation > 0) {
@@ -1050,7 +1050,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else if (violation < 0) {
         maxViolations.add(runChild);
       }
-      runChild.adjustedMainSize = adjustedSize;
+      runChild.flexedMainSize = flexedMainSize;
       totalViolation += violation;
     });
 
@@ -1070,7 +1070,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         runChild.frozen = true;
         RenderBox child = runChild.child;
         runMetric.remainingFreeSpace -=
-            runChild.adjustedMainSize - runChild.originalMainSize;
+            runChild.flexedMainSize - runChild.originalMainSize;
 
         double flexGrow = _getFlexGrow(child);
         double flexShrink = _getFlexShrink(child);
@@ -1181,7 +1181,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Child main size adjusted due to flex-grow/flex-shrink style.
         double? childFlexedMainSize;
         if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
-          childFlexedMainSize = runChild.adjustedMainSize;
+          childFlexedMainSize = runChild.flexedMainSize;
         }
         // Child cross size adjusted due to align-items/align-self style.
         double? childStretchedCrossSize = _getChildStretchedCrossSize(
@@ -1630,8 +1630,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableMainSizeOfChildren =
-      maxScrollableMainSizeOfLines + flowAwareMainAxisPadding()
-      + (isScrollContainer ? flowAwareMainAxisPadding(isEnd: true) : 0);
+      maxScrollableMainSizeOfLines + _flowAwareMainAxisPadding()
+      + (isScrollContainer ? _flowAwareMainAxisPadding(isEnd: true) : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -1641,8 +1641,8 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableCrossSizeOfChildren =
-      maxScrollableCrossSizeOfLines + flowAwareCrossAxisPadding()
-      + (isScrollContainer ? flowAwareCrossAxisPadding(isEnd: true) : 0);
+      maxScrollableCrossSizeOfLines + _flowAwareCrossAxisPadding()
+      + (isScrollContainer ? _flowAwareCrossAxisPadding(isEnd: true) : 0);
 
     double containerContentWidth = size.width -
         container.renderStyle.effectiveBorderLeftWidth.computedValue -
@@ -1801,11 +1801,11 @@ class RenderFlexLayout extends RenderLayoutBox {
         betweenSpace = 0.0;
       }
 
-      double mainAxisStartPadding = flowAwareMainAxisPadding();
-      double crossAxisStartPadding = flowAwareCrossAxisPadding();
+      double mainAxisStartPadding = _flowAwareMainAxisPadding();
+      double crossAxisStartPadding = _flowAwareCrossAxisPadding();
 
-      double mainAxisStartBorder = flowAwareMainAxisBorder();
-      double crossAxisStartBorder = flowAwareCrossAxisBorder();
+      double mainAxisStartBorder = _flowAwareMainAxisBorder();
+      double crossAxisStartBorder = _flowAwareCrossAxisBorder();
 
       // Main axis position of child on layout.
       double childMainPosition = flipMainAxis
@@ -1817,7 +1817,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       for (_RunChild runChild in runChildrenList) {
         RenderBox child = runChild.child;
-        double childMainAxisMargin = flowAwareChildMainAxisMargin(child)!;
+        double childMainAxisMargin = _flowAwareChildMainAxisMargin(child)!;
         // Add start margin of main axis when setting offset.
         childMainPosition += childMainAxisMargin;
         double? childCrossPosition;
@@ -2105,7 +2105,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       runCrossAxisExtent,
       runBetweenSpace,
     );
-    double childCrossAxisStartMargin = flowAwareChildCrossAxisMargin(child)!;
+    double childCrossAxisStartMargin = _flowAwareChildCrossAxisMargin(child)!;
     double crossStartAddedOffset = crossAxisStartPadding +
       crossAxisStartBorder +
       childCrossAxisStartMargin;
