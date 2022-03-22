@@ -9,9 +9,9 @@ import 'package:kraken/css.dart';
 mixin CSSObjectFitMixin on RenderStyle {
 
   @override
-  BoxFit get objectFit => _objectFit;
-  BoxFit _objectFit = BoxFit.fill;
-  set objectFit(BoxFit value) {
+  BoxFit get objectFit => _objectFit ?? BoxFit.fill;
+  BoxFit? _objectFit;
+  set objectFit(BoxFit? value) {
     if (_objectFit == value) return;
     _objectFit = value;
     renderBoxModel?.markNeedsLayout();
