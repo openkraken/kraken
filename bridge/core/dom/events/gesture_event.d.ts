@@ -1,5 +1,3 @@
-interface Event {}
-
 interface GestureEvent extends Event {
   readonly state: string;
   readonly direction: string;

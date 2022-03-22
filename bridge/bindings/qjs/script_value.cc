@@ -31,36 +31,40 @@ ScriptValue ScriptValue::Empty(JSContext* ctx) {
 }
 
 JSValue ScriptValue::ToQuickJS() const {
-  return m_value;
+  return value_;
 }
 
 ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) {
-  JSValue stringifyedValue = JS_JSONStringify(m_ctx, m_value, JS_NULL, JS_NULL);
-  ScriptValue result = ScriptValue(m_ctx);
+  JSValue stringifyedValue = JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL);
+  ScriptValue result = ScriptValue(ctx_);
   // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
   if (JS_IsException(stringifyedValue)) {
-    exception->ThrowException(m_ctx, stringifyedValue);
+    exception->ThrowException(ctx_, stringifyedValue);
   } else {
-    result = ScriptValue(m_ctx, stringifyedValue);
+    result = ScriptValue(ctx_, stringifyedValue);
   }
 
   return result;
 }
 
 std::unique_ptr<NativeString> ScriptValue::toNativeString() {
-  return jsValueToNativeString(m_ctx, m_value);
+  return jsValueToNativeString(ctx_, value_);
 }
 
 std::string ScriptValue::toCString() {
-  return jsValueToStdString(m_ctx, m_value);
+  return jsValueToStdString(ctx_, value_);
 }
 
 bool ScriptValue::IsException() {
-  return JS_IsException(m_value);
+  return JS_IsException(value_);
 }
 
 bool ScriptValue::IsEmpty() {
-  return JS_IsNull(m_value) || JS_IsUndefined(m_value);
+  return JS_IsNull(value_) || JS_IsUndefined(value_);
+}
+
+void ScriptValue::Trace(GCVisitor* visitor) {
+  visitor->Trace(value_);
 }
 
 }  // namespace kraken

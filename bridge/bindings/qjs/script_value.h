@@ -12,6 +12,7 @@
 #include "exception_state.h"
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
+#include "gc_visitor.h"
 
 namespace kraken {
 
@@ -34,17 +35,17 @@ class ScriptValue final {
   // Create an empty ScriptValue;
   static ScriptValue Empty(JSContext* ctx);
   // Wrap an Quickjs JSValue to ScriptValue.
-  explicit ScriptValue(JSContext* ctx, JSValue value) : m_ctx(ctx), m_value(JS_DupValue(ctx, value)){};
-  explicit ScriptValue(JSContext* ctx) : m_ctx(ctx){};
+  explicit ScriptValue(JSContext* ctx, JSValue value) : ctx_(ctx), value_(JS_DupValue(ctx, value)){};
+  explicit ScriptValue(JSContext* ctx) : ctx_(ctx){};
   ScriptValue() = default;
 
   ScriptValue& operator=(const ScriptValue& other) {
     if (&other != this) {
-      m_value = JS_DupValue(m_ctx, other.m_value);
+      value_ = JS_DupValue(ctx_, other.value_);
     }
     return *this;
   };
-  ~ScriptValue() { JS_FreeValue(m_ctx, m_value); };
+  ~ScriptValue() { JS_FreeValue(ctx_, value_); };
 
   JSValue ToQuickJS() const;
   // Create a new ScriptValue from call JSON.stringify to current value.
@@ -55,9 +56,11 @@ class ScriptValue final {
   bool IsException();
   bool IsEmpty();
 
+  void Trace(GCVisitor* visitor);
+
  private:
-  JSContext* m_ctx{nullptr};
-  JSValue m_value{JS_NULL};
+  JSContext* ctx_{nullptr};
+  JSValue value_{JS_NULL};
 };
 
 }  // namespace kraken

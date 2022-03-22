@@ -16,41 +16,41 @@ RejectedPromises::Message::~Message() {
   JS_FreeValueRT(m_runtime, m_reason);
 }
 
-void RejectedPromises::trackUnhandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
+void RejectedPromises::TrackUnhandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
   void* ptr = JS_VALUE_GET_PTR(promise);
-  if (m_unhandledRejections.count(ptr) == 0) {
-    m_unhandledRejections[ptr] = std::make_unique<Message>(context, promise, reason);
+  if (unhandled_rejections_.count(ptr) == 0) {
+    unhandled_rejections_[ptr] = std::make_unique<Message>(context, promise, reason);
   }
   // One promise will never have more than one unhandled rejection.
 }
 
-void RejectedPromises::trackHandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
+void RejectedPromises::TrackHandledPromiseRejection(ExecutingContext* context, JSValue promise, JSValue reason) {
   void* ptr = JS_VALUE_GET_PTR(promise);
 
   // Unhandled promise are handled in a sync script call. It's file so we remove the recording of this promise.
-  if (m_unhandledRejections.count(ptr) > 0) {
-    m_unhandledRejections.erase(ptr);
+  if (unhandled_rejections_.count(ptr) > 0) {
+    unhandled_rejections_.erase(ptr);
   } else {
     // This promise are handled in the next script call, we save this operation to trigger handledRejection event.
-    m_reportHandledRejection.push_back(std::make_unique<Message>(context, promise, reason));
+    report_handled_rejection_.push_back(std::make_unique<Message>(context, promise, reason));
   }
 }
 
-void RejectedPromises::process(ExecutingContext* context) {
+void RejectedPromises::Process(ExecutingContext* context) {
   // Copy m_unhandledRejections to avoid endless recursion call.
   std::unordered_map<void*, std::unique_ptr<Message>> unhandledRejections;
-  for (auto& entry : m_unhandledRejections) {
-    unhandledRejections[entry.first] = std::unique_ptr<Message>(m_unhandledRejections[entry.first].release());
+  for (auto& entry : unhandled_rejections_) {
+    unhandledRejections[entry.first] = std::unique_ptr<Message>(unhandled_rejections_[entry.first].release());
   }
-  m_unhandledRejections.clear();
+  unhandled_rejections_.clear();
 
   // Copy m_reportHandledRejection to avoid endless recursion call.
   std::vector<std::unique_ptr<Message>> reportHandledRejection;
   reportHandledRejection.reserve(reportHandledRejection.size());
-  for (auto& entry : m_reportHandledRejection) {
+  for (auto& entry : report_handled_rejection_) {
     reportHandledRejection.push_back(std::unique_ptr<Message>(entry.release()));
   }
-  m_reportHandledRejection.clear();
+  report_handled_rejection_.clear();
 
   // Dispatch unhandled rejectionEvents.
   for (auto& entry : unhandledRejections) {

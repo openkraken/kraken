@@ -19,6 +19,7 @@
 #include "bindings/qjs/binding_initializer.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/rejected_promises.h"
+#include "bindings/qjs/pending_promises.h"
 #include "bindings/qjs/script_value.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
@@ -40,15 +41,6 @@ class ExecutingContext;
 class Document;
 
 using JSExceptionHandler = std::function<void(ExecutingContext* context, const char* message)>;
-
-struct PromiseContext {
-  void* data;
-  ExecutingContext* context;
-  JSValue resolveFunc;
-  JSValue rejectFunc;
-  JSValue promise;
-  list_head link;
-};
 
 bool isContextValid(int32_t contextId);
 
@@ -105,6 +97,9 @@ class ExecutingContext {
   // Gets the ModuleCallbacks which from the 4th parameter of `kraken.invokeModule` function.
   ModuleCallbackCoordinator* ModuleCallbacks();
 
+  // Get all pending promises which are not resolved or rejected.
+  PendingPromises* GetPendingPromises() { return &pending_promises_; };
+
   FORCE_INLINE Document* document() { return document_; };
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &ui_command_buffer_; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return dart_method_ptr_; }
@@ -145,6 +140,7 @@ class ExecutingContext {
   UICommandBuffer ui_command_buffer_{this};
   std::unique_ptr<DartMethodPointer> dart_method_ptr_ = std::make_unique<DartMethodPointer>();
   RejectedPromises rejected_promises_;
+  PendingPromises pending_promises_;
 };
 
 class ObjectProperty {

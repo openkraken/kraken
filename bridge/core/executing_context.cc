@@ -22,7 +22,7 @@ std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExc
 
 static JSRuntime* runtime_{nullptr};
 
-ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx): ScriptWrappable(ctx) {}
+ExecutionContextGCTracker::ExecutionContextGCTracker(JSContext* ctx) : ScriptWrappable(ctx) {}
 const WrapperTypeInfo& ExecutionContextGCTracker::wrapper_type_info_{"GCTracker"};
 
 void ExecutionContextGCTracker::Trace(GCVisitor* visitor) const {
@@ -30,7 +30,9 @@ void ExecutionContextGCTracker::Trace(GCVisitor* visitor) const {
   context->Trace(visitor);
 }
 void ExecutionContextGCTracker::Dispose() const {}
-const char * ExecutionContextGCTracker::GetHumanReadableName() const { return "GCTracker"; }
+const char* ExecutionContextGCTracker::GetHumanReadableName() const {
+  return "GCTracker";
+}
 
 ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : context_id_(contextId), handler_(handler), owner_(owner), ctx_invalid_(false), unique_id_(context_unique_id++) {
@@ -100,15 +102,15 @@ ExecutingContext::~ExecutingContext() {
   ctx_invalid_ = true;
 
   // Free unresolved promise.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &promise_job_list) {
-      auto* promiseContext = list_entry(el, PromiseContext, link);
-      JS_FreeValue(ctx_, promiseContext->resolveFunc);
-      JS_FreeValue(ctx_, promiseContext->rejectFunc);
-      delete promiseContext;
-    }
-  }
+  //  {
+  //    struct list_head *el, *el1;
+  //    list_for_each_safe(el, el1, &promise_job_list) {
+  //      auto* promiseContext = list_entry(el, PromiseContext, link);
+  //      JS_FreeValue(ctx_, promiseContext->resolveFunc);
+  //      JS_FreeValue(ctx_, promiseContext->rejectFunc);
+  //      delete promiseContext;
+  //    }
+  //  }
 
   // Free unreleased native_functions.
   {
@@ -142,7 +144,7 @@ ExecutingContext::~ExecutingContext() {
   ctx_ = nullptr;
 }
 
-ExecutingContext * ExecutingContext::From(JSContext* ctx) {
+ExecutingContext* ExecutingContext::From(JSContext* ctx) {
   return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 }
 
@@ -270,7 +272,7 @@ void ExecutingContext::DrainPendingPromiseJobs() {
   }
 
   // Throw error when promise are not handled.
-  rejected_promises_.process(this);
+  rejected_promises_.Process(this);
 }
 
 void ExecutingContext::DefineGlobalProperty(const char* prop, JSValue value) {
@@ -376,9 +378,9 @@ void ExecutingContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSV
   // Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or then(onFulfilled, onRejected) to it,
   // the additional rejectionhandled event is needed to indicate that a promise which was previously rejected should no longer be considered unhandled.
   if (is_handled) {
-    context->rejected_promises_.trackHandledPromiseRejection(context, promise, reason);
+    context->rejected_promises_.TrackHandledPromiseRejection(context, promise, reason);
   } else {
-    context->rejected_promises_.trackUnhandledPromiseRejection(context, promise, reason);
+    context->rejected_promises_.TrackUnhandledPromiseRejection(context, promise, reason);
   }
 }
 
@@ -393,6 +395,10 @@ ModuleListenerContainer* ExecutingContext::ModuleListeners() {
 ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
   return &module_callbacks_;
 }
+
+//PendingPromises* ExecutingContext::PendingPromises() {
+//  return &pending_promises_;
+//}
 
 void ExecutingContext::Trace(GCVisitor* visitor) {
   timers_.trace(visitor);

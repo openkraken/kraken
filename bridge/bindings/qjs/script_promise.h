@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_H_
 
 #include <quickjs/quickjs.h>
-#include "core/executing_context.h"
 #include "foundation/macros.h"
+#include "gc_visitor.h"
 #include "script_value.h"
 
 namespace kraken {
@@ -22,11 +22,14 @@ class ScriptPromise final {
  public:
 
   ScriptPromise() = default;
-  ScriptPromise(ExecutingContext* context, JSValue promise);
+  ScriptPromise(JSContext* ctx, JSValue promise);
 
   JSValue ToQuickJS();
+
+  void Trace(GCVisitor* visitor);
+
  private:
-  ExecutingContext* context_;
+  JSContext* ctx_;
   ScriptValue promise_;
 };
 

@@ -3,10 +3,50 @@
  * Author: Kraken Team.
  */
 
+#include <string>
 #include "blob.h"
 #include "bindings/qjs/script_promise_resolver.h"
+#include "core/executing_context.h"
 
 namespace kraken {
+
+class BlobReaderClient {
+ public:
+  enum ReadType { kReadAsText, kReadAsArrayBuffer };
+
+  BlobReaderClient(ExecutingContext* context, Blob* blob, ScriptPromiseResolver* resolver, ReadType read_type) : context_(context), blob_(blob), resolver_(resolver), read_type_(read_type) {
+    Start();
+  };
+
+  void Start();
+  void DidFinishLoading();
+
+ private:
+  ExecutingContext* context_;
+  Blob* blob_;
+  ScriptPromiseResolver* resolver_;
+  ReadType read_type_;
+};
+
+void BlobReaderClient::Start() {
+  // Use setTimeout to simulate async data loading.
+  // TODO: Blob are part of File API in W3C standard, but not supported by Kraken from now on.
+  // Needs to remove this after File API had landed.
+  auto callback = [](void* ptr, int32_t contextId, const char* errmsg) -> void {
+    auto* client = static_cast<BlobReaderClient*>(ptr);
+    client->DidFinishLoading();
+  };
+  context_->dartMethodPtr()->setTimeout(this, context_->contextId(), callback, 0);
+}
+
+void BlobReaderClient::DidFinishLoading() {
+  if (read_type_ == ReadType::kReadAsText) {
+    resolver_->Resolve<std::string>(blob_->StringResult());
+  } else if (read_type_ == ReadType::kReadAsArrayBuffer) {
+    resolver_->Resolve<ArrayBufferData>(blob_->ArrayBufferResult());
+  }
+  delete this;
+}
 
 Blob* Blob::Create(ExecutingContext* context) {
   return makeGarbageCollected<Blob>(context->ctx());
@@ -54,14 +94,32 @@ Blob* Blob::slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& con
   return newBlob;
 }
 
+std::string Blob::StringResult() {
+  return std::string(bytes(), bytes() + size());
+}
+
+ArrayBufferData Blob::ArrayBufferResult() {
+  return ArrayBufferData{
+    bytes(),
+    size()
+  };
+}
+
 std::string Blob::type() {
   return mime_type_;
 }
 
-ScriptPromise Blob::arrayBuffer() {
+ScriptPromise Blob::arrayBuffer(ExceptionState& exception_state) {
+  auto* resolver = ScriptPromiseResolver::Create(context());
+  new BlobReaderClient(context(), this, resolver, BlobReaderClient::ReadType::kReadAsArrayBuffer);
+  return resolver->Promise();
 }
 
-ScriptPromise Blob::text() {}
+ScriptPromise Blob::text(ExceptionState& exception_state) {
+  auto* resolver = ScriptPromiseResolver::Create(context());
+  new BlobReaderClient(context(), this, resolver, BlobReaderClient::ReadType::kReadAsText);
+  return resolver->Promise();
+}
 
 void Blob::PopulateBlobData(std::vector<std::shared_ptr<BlobPart>>& data) {
   for (auto& item : data) {

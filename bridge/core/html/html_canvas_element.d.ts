@@ -1,7 +1,4 @@
-interface HostObject {}
-interface Element {}
-
-interface CanvasRenderingContext2D extends HostObject {
+interface CanvasRenderingContext2D {
   fillStyle: string;
   direction: string;
   font: string;

@@ -127,7 +127,7 @@ function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration, 
   }
   if (options.isInstanceMethod) {
     call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
-${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : 'exception_state'});`;
   } else {
     call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
   }
@@ -243,7 +243,10 @@ function generateMethodCallback(blob: Blob, methods: FunctionDeclaration[]): str
 }
 
 function generateClassSource(blob: Blob, object: ClassObject) {
-  let constructorCallback = generateClassConstructorCallback(blob, object.construct);
+  let constructorCallback = '';
+  if (object.construct) {
+    constructorCallback = generateClassConstructorCallback(blob, object.construct);
+  }
   let getterCallbacks: string[] = [];
   let setterCallbacks: string[] = [];
   let methodCallback = generateMethodCallback(blob, object.methods);

@@ -1,6 +1,3 @@
-interface HostObject {}
-interface Element {}
-
 interface InputElement extends Element {
   width: number;
   height: number;

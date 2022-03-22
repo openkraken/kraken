@@ -13,6 +13,7 @@
 #include "bindings/qjs/script_wrappable.h"
 #include "blob_part.h"
 #include "blob_property_bag.h"
+#include "array_buffer_data.h"
 
 namespace kraken {
 
@@ -40,13 +41,16 @@ class Blob : public ScriptWrappable {
   int32_t size();
   std::string type();
 
-  ScriptPromise arrayBuffer();
-  ScriptPromise text();
+  ScriptPromise arrayBuffer(ExceptionState& exception_state);
+  ScriptPromise text(ExceptionState& exception_state);
 
   Blob* slice(ExceptionState& exception_state);
   Blob* slice(int64_t start, ExceptionState& exception_state);
   Blob* slice(int64_t start, int64_t end, ExceptionState& exception_state);
   Blob* slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& content_type, ExceptionState& exception_state);
+
+  std::string StringResult();
+  ArrayBufferData ArrayBufferResult();
 
   const char* GetHumanReadableName() const override;
   void Trace(GCVisitor* visitor) const override;

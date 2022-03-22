@@ -35,7 +35,7 @@ export class ClassObject {
   parent: string;
   props: PropsDeclaration[] = [];
   methods: FunctionDeclaration[] = [];
-  construct: FunctionDeclaration;
+  construct?: FunctionDeclaration;
 }
 
 export class FunctionObject {

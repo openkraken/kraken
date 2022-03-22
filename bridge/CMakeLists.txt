@@ -203,6 +203,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/script_value.h
     bindings/qjs/script_promise.cc
     bindings/qjs/script_promise.h
+    bindings/qjs/to_quickjs.h
     bindings/qjs/qjs_interface_bridge.cc
     bindings/qjs/qjs_interface_bridge.h
     bindings/qjs/script_promise_resolver.cc
@@ -215,6 +216,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/gc_visitor.h
     bindings/qjs/rejected_promises.h
     bindings/qjs/rejected_promises.cc
+    bindings/qjs/pending_promises.cc
+    bindings/qjs/pending_promises.h
     bindings/qjs/qjs_window.cc
     bindings/qjs/qjs_window.h
     bindings/qjs/qjs_page.cc

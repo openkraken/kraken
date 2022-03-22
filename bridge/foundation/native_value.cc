@@ -160,34 +160,34 @@ static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc
 }
 
 void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int32_t contextId, const char* errmsg) {
-  auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
-  if (!promiseContext->context->IsValid())
-    return;
-  if (promiseContext->context->contextId() != contextId)
-    return;
-
-  auto* context = promiseContext->context;
-
-  if (nativeValue != nullptr) {
-    JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
-    JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->Global(), 1, &value);
-    context->DrainPendingPromiseJobs();
-    context->HandleException(&returnValue);
-    JS_FreeValue(context->ctx(), value);
-    JS_FreeValue(context->ctx(), returnValue);
-  } else if (errmsg != nullptr) {
-    JSValue error = JS_NewError(context->ctx());
-    JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->Global(), 1, &error);
-    context->DrainPendingPromiseJobs();
-    context->HandleException(&returnValue);
-    JS_FreeValue(context->ctx(), error);
-    JS_FreeValue(context->ctx(), returnValue);
-  }
-
-  JS_FreeValue(context->ctx(), promiseContext->resolveFunc);
-  JS_FreeValue(context->ctx(), promiseContext->rejectFunc);
-  list_del(&promiseContext->link);
+//  auto* promiseContext = static_cast<PromiseContext*>(callbackContext);
+//  if (!promiseContext->context->IsValid())
+//    return;
+//  if (promiseContext->context->contextId() != contextId)
+//    return;
+//
+//  auto* context = promiseContext->context;
+//
+//  if (nativeValue != nullptr) {
+//    JSValue value = nativeValueToJSValue(promiseContext->context, *nativeValue);
+//    JSValue returnValue = JS_Call(context->ctx(), promiseContext->resolveFunc, context->Global(), 1, &value);
+//    context->DrainPendingPromiseJobs();
+//    context->HandleException(&returnValue);
+//    JS_FreeValue(context->ctx(), value);
+//    JS_FreeValue(context->ctx(), returnValue);
+//  } else if (errmsg != nullptr) {
+//    JSValue error = JS_NewError(context->ctx());
+//    JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
+//    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->Global(), 1, &error);
+//    context->DrainPendingPromiseJobs();
+//    context->HandleException(&returnValue);
+//    JS_FreeValue(context->ctx(), error);
+//    JS_FreeValue(context->ctx(), returnValue);
+//  }
+//
+//  JS_FreeValue(context->ctx(), promiseContext->resolveFunc);
+//  JS_FreeValue(context->ctx(), promiseContext->rejectFunc);
+//  list_del(&promiseContext->link);
 }
 
 static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
