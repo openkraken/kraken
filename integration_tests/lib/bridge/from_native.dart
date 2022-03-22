@@ -147,7 +147,6 @@ typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBy
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
 KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
 
-
 void registerDartTestMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);

@@ -52,7 +52,7 @@ mixin CSSOverflowMixin on RenderStyle {
   @override
   CSSOverflowType get overflowX => _overflowX ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowX;
-  set overflowX(CSSOverflowType value) {
+  set overflowX(CSSOverflowType? value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
@@ -60,7 +60,7 @@ mixin CSSOverflowMixin on RenderStyle {
   @override
   CSSOverflowType get overflowY => _overflowY ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowY;
-  set overflowY(CSSOverflowType value) {
+  set overflowY(CSSOverflowType? value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }
@@ -118,6 +118,8 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableY;
 
   void disposeScrollable() {
+    _scrollableX?.position?.dispose();
+    _scrollableY?.position?.dispose();
     _scrollableX = null;
     _scrollableY = null;
   }
@@ -348,9 +350,20 @@ mixin ElementOverflowMixin on ElementBase {
     }
     return 0.0;
   }
-
   set scrollTop(double value) {
-    scrollTo(y: value);
+    _scrollTo(y: value);
+  }
+
+  void scroll(double x, double y) {
+    _scrollTo(x: x, y: y, withAnimation: false);
+  }
+
+  void scrollBy(double x, double y) {
+    _scrollBy(dx: x, dy: y, withAnimation: false);
+  }
+
+  void scrollTo(double x, double y) {
+    _scrollTo(x: x, y: y, withAnimation: false);
   }
 
   double get scrollLeft {
@@ -360,32 +373,55 @@ mixin ElementOverflowMixin on ElementBase {
     }
     return 0.0;
   }
-
   set scrollLeft(double value) {
-    scrollTo(x: value);
+    _scrollTo(x: value);
   }
 
-  double get scrollHeight {
+  int get scrollHeight {
     KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
     if (scrollable?.position?.maxScrollExtent != null) {
       // Viewport height + maxScrollExtent
-      return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent;
+      return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent.toInt();
     }
 
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
-    return scrollContainerSize.height;
+    return scrollContainerSize.height.toInt();
   }
 
-  double get scrollWidth {
+  int get scrollWidth {
     KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
     if (scrollable?.position?.maxScrollExtent != null) {
-      return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent;
+      return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent.toInt();
     }
     Size scrollContainerSize = renderBoxModel!.scrollableSize;
-    return scrollContainerSize.width;
+    return scrollContainerSize.width.toInt();
   }
 
-  void scrollBy({ num dx = 0.0, num dy = 0.0, bool? withAnimation }) {
+  int get clientTop => renderBoxModel?.renderStyle.effectiveBorderTopWidth.computedValue.toInt() ?? 0;
+
+  int get clientLeft => renderBoxModel?.renderStyle.effectiveBorderLeftWidth.computedValue.toInt() ?? 0;
+
+  int get clientWidth => renderBoxModel?.clientWidth ?? 0;
+
+  int get clientHeight => renderBoxModel?.clientHeight ?? 0;
+
+  int get offsetWidth {
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox == null) {
+      return 0;
+    }
+    return renderBox.hasSize ? renderBox.size.width.toInt() : 0;
+  }
+
+  int get offsetHeight {
+    RenderBoxModel? renderBox = renderBoxModel;
+    if (renderBox == null) {
+      return 0;
+    }
+    return renderBox.hasSize ? renderBox.size.height.toInt() : 0;
+  }
+
+  void _scrollBy({ double dx = 0.0, double dy = 0.0, bool? withAnimation }) {
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -394,7 +430,8 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
-  void scrollTo({ num? x, num? y, bool? withAnimation }) {
+
+  void _scrollTo({ double? x, double? y, bool? withAnimation }) {
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -425,11 +462,9 @@ mixin ElementOverflowMixin on ElementBase {
       double distance = aim.toDouble();
 
       // Apply scroll effect after layout.
-      assert(renderer is RenderBox && isRendererAttached, 'Overflow can only be added to a RenderBox.');
-      RenderBox renderBox = renderer as RenderBox;
-      if (!renderBox.hasSize) {
-        renderBox.owner!.flushLayout();
-      }
+      assert(isRendererAttached, 'Overflow can only be added to a RenderBox.');
+      renderer!.owner!.flushLayout();
+
       scrollable.position!.moveTo(distance,
         duration: withAnimation == true ? SCROLL_DURATION : null,
         curve: withAnimation == true ? Curves.easeOut : null,

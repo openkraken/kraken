@@ -16,14 +16,13 @@ import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/css.dart';
 
-import 'manifest.dart';
-
 const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
 const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
 const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 
-const String ASSETS_PROROCOL = 'assets://';
+const String DEFAULT_URL = 'about:blank';
+const String ASSETS_PROTOCOL = 'assets:';
 final ContentType css = ContentType('text', 'css', charset: 'utf-8');
 
 String? getBundleURLFromEnv() {
@@ -50,7 +49,7 @@ String getAcceptHeader() {
 }
 
 bool isAssetAbsolutePath(String path) {
-  return path.startsWith(ASSETS_PROROCOL);
+  return path.startsWith(ASSETS_PROTOCOL);
 }
 
 abstract class KrakenBundle {
@@ -59,8 +58,8 @@ abstract class KrakenBundle {
   // Unique resource locator.
   final String src;
 
-  // Customize the parsed uri by uriParser.
-  Uri? uri;
+  // Uri parsed by uriParser, assigned after resolving.
+  Uri? _uri;
 
   late ByteData rawBundle;
   // JS Content in UTF-8 bytes.
@@ -69,25 +68,39 @@ abstract class KrakenBundle {
   String? content;
   // JS line offset, default to 0.
   int lineOffset = 0;
-  // Kraken bundle manifest
-  AppManifest? manifest;
 
   bool isResolved = false;
 
   // Bundle contentType.
   ContentType contentType = ContentType.binary;
 
+  bool get isEmpty => src.isEmpty && content == null && bytecode == null;
+
+  Uri? get resolvedUri {
+    if (isResolved) {
+      return _uri;
+    }
+    return null;
+  }
+
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
-    uri = Uri.parse(src);
-    if (contextId != null) {
+    if (isResolved) return;
+
+    // Source is input by user, do not trust it's a valid URL.
+    _uri = Uri.tryParse(src);
+    if (contextId != null && _uri != null) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null && !isAssetAbsolutePath(src)) {
-        uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri!);
+        _uri = controller.uriParser!.resolve(Uri.parse(controller.url), _uri!);
       }
+      isResolved = true;
     }
+  }
 
-    isResolved = true;
+  Future<void> resolveAndEvaluate(int? contextId) async {
+    await resolve(contextId);
+    eval(contextId);
   }
 
   static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
@@ -98,17 +111,19 @@ abstract class KrakenBundle {
     }
   }
 
-  static KrakenBundle fromContent(String content, { String url = '' }) {
+  static KrakenBundle fromContent(String content, { String url = DEFAULT_URL }) {
     return RawBundle.fromString(content, url);
   }
 
-  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = '' }) {
+  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = DEFAULT_URL }) {
     return RawBundle.fromBytecode(bytecode, url);
   }
 
-
-  Future<void> eval(int? contextId) async {
-    if (!isResolved) await resolve(contextId);
+  void eval(int? contextId) {
+    if (!isResolved) {
+      debugPrint('The kraken bundle $this is not resolved to evaluate.');
+      return;
+    }
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
@@ -174,7 +189,7 @@ class NetworkBundle extends KrakenBundle {
   Future<void> resolve(int? contextId) async {
     super.resolve(contextId);
     KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
-    Uri baseUrl = Uri.parse(controller.href);
+    Uri baseUrl = Uri.parse(controller.url);
     NetworkAssetBundle bundle = NetworkAssetBundle(controller.uriParser!.resolve(baseUrl, Uri.parse(src)), contextId: contextId, additionalHttpHeaders: additionalHttpHeaders);
     bundle.httpClient.userAgent = NavigatorModule.getUserAgent();
     String absoluteURL = src;
@@ -256,12 +271,24 @@ class AssetsBundle extends KrakenBundle {
   @override
   Future<KrakenBundle> resolve(int? contextId) async {
     super.resolve(contextId);
-    // JSBundle get default bundle manifest.
-    manifest = AppManifest();
-    if (isAssetAbsolutePath(src)) {
-      String localPath = src.substring(ASSETS_PROROCOL.length);
-      rawBundle = await rootBundle.load(localPath);
+    final Uri? _resolvedUri = resolvedUri;
+    if (_resolvedUri != null) {
+      final String assetName = getAssetName(_resolvedUri);
+      rawBundle = await rootBundle.load(assetName);
     }
     return this;
+  }
+
+  /// Get flutter asset name from uri scheme asset.
+  ///   eg: assets:///foo/bar.html -> foo/bar.html
+  ///       assets:foo/bar.html -> foo/bar.html
+  static String getAssetName(Uri assetUri) {
+    String assetName = assetUri.path;
+
+    // Remove leading `/`.
+    if (assetName.startsWith('/')) {
+      assetName = assetName.substring(1);
+    }
+    return assetName;
   }
 }

@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 const String BODY = 'BODY';
 
@@ -12,22 +13,14 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement(EventTargetContext? context)
+  BodyElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 
   @override
-  void addEvent(String eventType) {
+  void addEventListener(String eventType, EventHandler eventHandler) {
     // Scroll event not working on body.
     if (eventType == EVENT_SCROLL) return;
 
-    // Event of Body should set to documentElement.
-    // The Render Object of element which set position may be at the same level as the Render Object of body,
-    // resulting in the failure to get events handlers.
-    ownerDocument.documentElement?.addEvent(eventType);
-  }
-
-  @override
-  void removeEvent(String eventType) {
-    ownerDocument.documentElement?.removeEvent(eventType);
+    super.addEventListener(eventType, eventHandler);
   }
 }

@@ -233,7 +233,7 @@ mixin CSSFlexboxMixin on RenderStyle {
   @override
   AlignSelf get alignSelf => _alignSelf ?? AlignSelf.auto;
   AlignSelf? _alignSelf;
-  set alignSelf(AlignSelf value) {
+  set alignSelf(AlignSelf? value) {
     if (_alignSelf == value) return;
     _alignSelf = value;
     if (renderBoxModel?.parent is RenderFlexLayout) {

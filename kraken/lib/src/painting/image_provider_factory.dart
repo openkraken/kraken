@@ -7,9 +7,10 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/launcher.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
 import 'package:quiver/collection.dart';
@@ -109,7 +110,7 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
+ImageType parseImageUrl(Uri resolvedUri, {String cache = 'auto'}) {
   if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
     return (cache == 'store' || cache == 'auto')
         ? ImageType.cached
@@ -120,8 +121,10 @@ ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
     return ImageType.dataUrl;
   } else if (resolvedUri.isScheme('BLOB')) {
     return ImageType.blob;
-  } else {
+  } else if (resolvedUri.isScheme('ASSETS')) {
     return ImageType.assets;
+  } else {
+    throw FlutterError('Uri must have it\'s scheme. $resolvedUri');
   }
 }
 
@@ -223,7 +226,7 @@ class KrakenResizeImage extends ResizeImage {
   BoxFit? objectFit;
 
   static final LinkedLruHashMap<dynamic, Size> _imageNaturalSize = LinkedLruHashMap(maximumSize: 100);
-  static Size? getImageNaturalSize(dynamic key) {
+  static Size? getImageNaturalSize(key) {
     return _imageNaturalSize[key];
   }
 
@@ -419,10 +422,11 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
+  final String assetName = AssetsBundle.getAssetName(uri);
   return KrakenResizeImage.resizeIfNeeded(
     params.cachedWidth,
     params.cachedHeight,
     params.objectFit,
-    AssetImage(uri.toString())
+    AssetImage(assetName)
   );
 }

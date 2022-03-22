@@ -177,7 +177,7 @@ abstract class RenderStyle {
   // for class that extends [AbstractRenderStyle].
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
 
-  Size get viewportSize => target.ownerDocument.viewport.viewportSize;
+  Size get viewportSize => target.ownerDocument.viewport!.viewportSize;
 
   double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
 
@@ -832,6 +832,15 @@ class CSSRenderStyle
     bool isFlexNoWrap = false;
     bool isChildStretchSelf = false;
     if (isParentFlex) {
+      // The absolutely-positioned box is considered to be “fixed-size”, a value of stretch
+      // is treated the same as flex-start.
+      // https://www.w3.org/TR/css-flexbox-1/#abspos-items
+      bool isPositioned = renderStyle.position == CSSPositionType.absolute
+        || renderStyle.position == CSSPositionType.fixed;
+      if (isPositioned) {
+        return false;
+      }
+
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(parentRenderStyle.flexDirection);
       isFlexNoWrap = parentRenderStyle.flexWrap != FlexWrap.wrap &&
         parentRenderStyle.flexWrap != FlexWrap.wrapReverse;

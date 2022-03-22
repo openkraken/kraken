@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#text_content
 const String UL = 'UL';
@@ -59,68 +60,68 @@ const Map<String, dynamic> _lDefaultStyle = {
 
 
 class DivElement extends Element {
-  DivElement(EventTargetContext? context)
+  DivElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class FigureElement extends Element {
-  FigureElement(EventTargetContext? context)
+  FigureElement([BindingContext? context])
       : super(context, defaultStyle: _bDefaultStyle);
 }
 
 class FigureCaptionElement extends Element {
-  FigureCaptionElement(EventTargetContext? context)
+  FigureCaptionElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class BlockQuotationElement extends Element {
-  BlockQuotationElement(EventTargetContext? context)
+  BlockQuotationElement([BindingContext? context])
       : super(context, defaultStyle: _bDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlparagraphelement
 class ParagraphElement extends Element {
   static Map<String, dynamic> defaultStyle = _pDefaultStyle;
-  ParagraphElement(EventTargetContext? context)
+  ParagraphElement([BindingContext? context])
       : super(context, defaultStyle: defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlulistelement
 class UListElement extends Element {
-  UListElement(EventTargetContext? context)
+  UListElement([BindingContext? context])
       : super(context, defaultStyle: _lDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlolistelement
 class OListElement extends Element {
-  OListElement(EventTargetContext? context)
+  OListElement([BindingContext? context])
       : super(context, defaultStyle: _lDefaultStyle);
 }
 
 class LIElement extends Element {
-  LIElement(EventTargetContext? context)
+  LIElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 class PreElement extends Element {
-  PreElement(EventTargetContext? context)
+  PreElement([BindingContext? context])
       : super(context, defaultStyle: _preDefaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dd
 class DDElement extends Element {
-  DDElement(EventTargetContext? context)
+  DDElement([BindingContext? context])
       : super(context, defaultStyle: _ddDefaultStyle);
 }
 
 class DTElement extends Element {
-  DTElement(EventTargetContext? context)
+  DTElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmldlistelement
 class DListElement extends Element {
-  DListElement(EventTargetContext? context)
+  DListElement([BindingContext? context])
       : super(context, defaultStyle: _pDefaultStyle);
 }

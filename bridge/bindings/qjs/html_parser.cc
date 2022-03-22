@@ -19,6 +19,37 @@ inline std::string trim(std::string& str) {
   return str;
 }
 
+// Parse html,isHTMLFragment should be false if need to automatically complete html, head, and body when they are missing.
+GumboOutput* parse(std::string& html, bool isHTMLFragment = false) {
+  // Gumbo-parser parse HTML.
+  GumboOutput* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html.length());
+
+  if (isHTMLFragment) {
+    // Find body.
+    const GumboVector* children = &htmlTree->root->v.element.children;
+    for (int i = 0; i < children->length; ++i) {
+      auto* child = (GumboNode*)children->data[i];
+      if (child->type == GUMBO_NODE_ELEMENT) {
+        std::string tagName;
+        if (child->v.element.tag != GUMBO_TAG_UNKNOWN) {
+          tagName = gumbo_normalized_tagname(child->v.element.tag);
+        } else {
+          GumboStringPiece piece = child->v.element.original_tag;
+          gumbo_tag_from_original_text(&piece);
+          tagName = std::string(piece.data, piece.length);
+        }
+
+        if (tagName.compare("body") == 0) {
+          htmlTree->root = child;
+          break;
+        }
+      }
+    }
+  }
+
+  return htmlTree;
+}
+
 void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   ExecutionContext* context = root->context();
   JSContext* ctx = context->ctx();
@@ -72,14 +103,13 @@ void HTMLParser::traverseHTML(NodeInstance* root, GumboNode* node) {
   }
 }
 
-bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isHTMLFragment) {
   if (rootNode != nullptr) {
     rootNode->internalClearChild();
 
     if (!trim(html).empty()) {
-      // Gumbo-parser parse HTML.
-      size_t html_length = html.length();
-      auto* htmlTree = gumbo_parse_with_options(&kGumboDefaultOptions, html.c_str(), html_length);
+      GumboOutput* htmlTree = parse(html, isHTMLFragment);
+
       traverseHTML(rootNode, htmlTree->root);
       // Free gumbo parse nodes.
       gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
@@ -91,9 +121,18 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
   return true;
 }
 
+bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode) {
+  return parseHTML(html, rootNode, false);
+}
+
 bool HTMLParser::parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode) {
   std::string html = std::string(code, codeLength);
-  return parseHTML(html, rootNode);
+  return parseHTML(html, rootNode, false);
+}
+
+bool HTMLParser::parseHTMLFragment(const char* code, size_t codeLength, NodeInstance* rootNode) {
+  std::string html = std::string(code, codeLength);
+  return parseHTML(html, rootNode, true);
 }
 
 void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElement) {

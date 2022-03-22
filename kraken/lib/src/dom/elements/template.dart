@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 const String TEMPLATE = 'TEMPLATE';
 
@@ -12,6 +13,6 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class TemplateElement extends Element {
-  TemplateElement(EventTargetContext? context)
+  TemplateElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
