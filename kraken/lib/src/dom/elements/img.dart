@@ -289,7 +289,7 @@ class ImageElement extends Element {
 
   void _resizeImage() {
     // Only need to resize image after image is fully loaded.
-    if (!complete) return;
+    if (!_complete) return;
 
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
