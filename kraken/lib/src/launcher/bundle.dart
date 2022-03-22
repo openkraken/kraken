@@ -47,7 +47,7 @@ String getAcceptHeader() {
   return 'text/html,application/javascript,$krakenKbcAccept';
 }
 
-bool _isSchemeAsset(String path) {
+bool _isSchemeAssets(String path) {
   return path.startsWith('assets:');
 }
 
@@ -119,12 +119,12 @@ abstract class KrakenBundle {
   }
 
   static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
-    if (_isSchemeAsset(url)) {
+    if (_isSchemeHttp(url)) {
+      return NetworkBundle(url, additionalHttpHeaders: additionalHttpHeaders);
+    } else if (_isSchemeAssets(url)) {
       return AssetsBundle(url);
     } else if (_isSchemeFile(url)) {
       return FileBundle(url);
-    } else if (_isSchemeHttp(url)) {
-      return NetworkBundle(url, additionalHttpHeaders: additionalHttpHeaders);
     } else if (_isSchemeAbout(url)) {
       return _EmptyBundle(url);
     } else {
