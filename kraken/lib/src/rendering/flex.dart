@@ -2030,6 +2030,19 @@ class RenderFlexLayout extends RenderLayoutBox {
           maxCrossSizeConstraints - crossAxisBorder - crossAxisPadding,
           childStretchedCrossSize);
       }
+
+      // Constrain stretched size by max-width/max-height.
+      double? maxCrossSize;
+      if (_isHorizontalFlexDirection && child.renderStyle.maxHeight.isNotNone) {
+        maxCrossSize = child.renderStyle.maxHeight.computedValue;
+      } else if (!_isHorizontalFlexDirection && child.renderStyle.maxWidth.isNotNone) {
+        maxCrossSize = child.renderStyle.maxWidth.computedValue;
+      }
+      if (maxCrossSize != null) {
+        childStretchedCrossSize = childStretchedCrossSize > maxCrossSize
+          ? maxCrossSize : childStretchedCrossSize;
+      }
+
       return childStretchedCrossSize;
     }
 
