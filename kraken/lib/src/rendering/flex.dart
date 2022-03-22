@@ -1237,23 +1237,20 @@ class RenderFlexLayout extends RenderLayoutBox {
     double? childFlexedMainSize,
     double? childStretchedCrossSize,
   ) {
-    // Original size of child.
-    double childOldMainSize = _isHorizontalFlexDirection
-      ? child.size.width : child.size.height;
-    double childOldCrossSize = _isHorizontalFlexDirection
-      ? child.size.height : child.size.width;
+    if (childFlexedMainSize != null) {
+      if (_isHorizontalFlexDirection) {
+        _overrideChildContentBoxLogicalWidth(child, childFlexedMainSize);
+      } else {
+        _overrideChildContentBoxLogicalHeight(child, childFlexedMainSize);
+      }
+    }
 
-    double childMainSize = childFlexedMainSize ?? childOldMainSize;
-    double childCrossSize = childStretchedCrossSize ?? childOldCrossSize;
-
-    // Need to override both logical width and height even if size on only one axis is changed
-    // cause logical width/height has been overrided on child's first layout.
-    if (_isHorizontalFlexDirection) {
-      _overrideChildContentBoxLogicalWidth(child, childMainSize);
-      _overrideChildContentBoxLogicalHeight(child, childCrossSize);
-    } else {
-      _overrideChildContentBoxLogicalWidth(child, childCrossSize);
-      _overrideChildContentBoxLogicalHeight(child, childMainSize);
+    if (childStretchedCrossSize != null) {
+      if (_isHorizontalFlexDirection) {
+        _overrideChildContentBoxLogicalHeight(child, childStretchedCrossSize);
+      } else {
+        _overrideChildContentBoxLogicalWidth(child, childStretchedCrossSize);
+      }
     }
 
     if (child is RenderIntrinsic && child.renderStyle.intrinsicRatio != null) {
