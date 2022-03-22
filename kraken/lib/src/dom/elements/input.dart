@@ -17,6 +17,35 @@ class InputElement extends TextFormControlElement {
   InputElement(context)
     : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
+  @override
+  void setAttribute(String qualifiedName, String val) {
+    super.setAttribute(qualifiedName, val);
+    switch (qualifiedName) {
+      case 'value':
+        value = attributeToProperty<String>(val);
+        break;
+      case 'size':
+        size = attributeToProperty<int>(val);
+        break;
+    }
+  }
+
+  @override
+  String get defaultValue => getAttribute('value') ?? '';
+
+  @override
+  set value(String? text) {
+    String value = setAndFormatValue(text);
+    internalSetAttribute('value', value);
+  }
+
+  int get size => int.tryParse(getAttribute('size') ?? '') ?? 0;
+  set size(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('size', value.toString());
+    _updateDefaultWidth();
+  }
+
   double? get _defaultWidth {
     // size defaults to 20.
     // https://html.spec.whatwg.org/multipage/input.html#attr-input-size
@@ -25,15 +54,6 @@ class InputElement extends TextFormControlElement {
 
   // Width set through style.
   double? _styleWidth;
-
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-
-    if (key == SIZE) {
-      _updateDefaultWidth();
-    }
-  }
 
   @override
   void willAttachRenderer() {

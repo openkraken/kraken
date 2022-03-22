@@ -40,9 +40,7 @@ class TextNode extends Node {
       // so it needs to set defaultValue property of textarea element directly.
       if (parentElement is TextareaElement) {
         TextareaElement textareaElement = parentElement as TextareaElement;
-        if (!textareaElement.properties.containsKey(VALUE)) {
-          textareaElement.setProperty(DEFAULT_VALUE, textareaElement.textContent);
-        }
+        textareaElement.defaultValue = textareaElement.textContent;
       }
     }
   }

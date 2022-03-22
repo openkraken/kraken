@@ -589,7 +589,7 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
       dom.Element? focusedElement = _findFocusedElement(focusableElements);
       // Currently only input element is focusable.
       if (focused) {
-        if (dom.TextFormControlElement.focusedTextFormControlElement == null) {
+        if (rootElement.ownerDocument.focusedElement == null) {
           (focusableElements[0] as dom.TextFormControlElement).focus();
         }
       } else {

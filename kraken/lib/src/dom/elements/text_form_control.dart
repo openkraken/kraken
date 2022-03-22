@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
@@ -217,87 +218,275 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     return value.text;
   }
 
-  static TextFormControlElement? focusedTextFormControlElement;
-
-  static void clearFocus() {
-    if (TextFormControlElement.focusedTextFormControlElement != null) {
-      TextFormControlElement.focusedTextFormControlElement!.blurTextFormControl();
-    }
-
-    TextFormControlElement.focusedTextFormControlElement = null;
-  }
-
-  static void setFocus(TextFormControlElement textFormControlElement) {
-    if (TextFormControlElement.focusedTextFormControlElement != textFormControlElement) {
-      // Focus kraken widget to get focus from other widgets.
-      WidgetDelegate? widgetDelegate = textFormControlElement.ownerDocument.widgetDelegate;
-      if (widgetDelegate != null) {
-        widgetDelegate.requestFocus();
-      }
-
-      clearFocus();
-      TextFormControlElement.focusedTextFormControlElement = textFormControlElement;
-      textFormControlElement.focusTextFormControl();
-    }
-  }
-
   static String obscuringCharacter = '•';
 
+  // Bindings.
   @override
-  getProperty(String key) {
-    switch(key) {
-      // @TODO: Apply algorithm of text form control element property width and height.
-      case 'width':
-      case 'height':
-        return 0.0;
-      case 'value':
-        return _getValue();
-      case 'accept':
-      case 'autocomplete':
-      case 'autofocus':
-      case 'required':
-      case 'readonly':
-      case 'pattern':
-      case 'step':
-      case 'name':
-      case 'multiple':
-      case 'checked':
-      case 'disabled':
-      case 'min':
-      case 'max':
-      case 'minlength':
-      case 'maxlength':
-      case 'size':
-        return properties[jsMethodToKey(key)];
-      case 'placeholder':
-        return placeholderText;
-      case 'type':
-        return _getType();
+  getBindingProperty(String key) {
+    switch (key) {
+      case 'width': return width;
+      case 'height': return height;
+      case 'value': return value;
+      case 'defaultValue': return defaultValue;
+      case 'accept': return accept;
+      case 'autocomplete': return autocomplete;
+      case 'autofocus': return autofocus;
+      case 'required': return required;
+      case 'readonly': return readOnly;
+      case 'pattern': return pattern;
+      case 'step': return step;
+      case 'name': return name;
+      case 'multiple': return multiple;
+      case 'checked': return checked;
+      case 'disabled': return disabled;
+      case 'min': return min;
+      case 'max': return max;
+      case 'maxLength': return maxLength;
+      case 'placeholder': return placeholder;
+      case 'type': return type;
+      case 'mode': return mode;
+      default: return super.getBindingProperty(key);
     }
-    return super.getProperty(key);
+  }
+
+  @override
+  void setBindingProperty(String key, val) {
+    switch (key) {
+      case 'width': width = castToType<num>(val).toInt(); break;
+      case 'height': height = castToType<num>(val).toInt(); break;
+      case 'value': value = castToType<String?>(val); break;
+      case 'defaultValue': defaultValue = castToType<String?>(val); break;
+      case 'accept': accept = castToType<String>(val); break;
+      case 'autocomplete': autocomplete = castToType<String>(val); break;
+      case 'autofocus': autofocus = castToType<bool>(val); break;
+      case 'required': required = castToType<bool>(val); break;
+      case 'readonly': readOnly = castToType<bool>(val); break;
+      case 'pattern': pattern = castToType<String>(val); break;
+      case 'step': step = castToType<String>(val); break;
+      case 'name': name = castToType<String>(val); break;
+      case 'multiple': multiple = castToType<bool>(val); break;
+      case 'checked': checked = castToType<bool>(val); break;
+      case 'disabled': disabled = castToType<bool>(val); break;
+      case 'min': min = castToType<String>(val); break;
+      case 'max': max = castToType<String>(val); break;
+      case 'maxLength': maxLength = castToType<num>(val).toInt(); break;
+      case 'placeholder': placeholder = castToType<String>(val); break;
+      case 'type': type = castToType<String>(val); break;
+      case 'mode': mode = castToType<String>(val); break;
+      default: super.setBindingProperty(key, value);
+    }
+  }
+
+  @override
+  void setAttribute(String qualifiedName, String val) {
+    super.setAttribute(qualifiedName, val);
+    switch (qualifiedName) {
+      case 'width': width = attributeToProperty<int>(val); break;
+      case 'height': height = attributeToProperty<int>(val); break;
+      case 'accept': accept = attributeToProperty<String>(val); break;
+      case 'autocomplete': autocomplete = attributeToProperty<String>(val); break;
+      case 'autofocus': autofocus = attributeToProperty<bool>(val); break;
+      case 'required': required = attributeToProperty<bool>(val); break;
+      case 'readonly': readOnly = attributeToProperty<bool>(val); break;
+      case 'pattern': pattern = attributeToProperty<String>(val); break;
+      case 'step': step = attributeToProperty<String>(val); break;
+      case 'name': name = attributeToProperty<String>(val); break;
+      case 'multiple': multiple = attributeToProperty<bool>(val); break;
+      case 'checked': checked = attributeToProperty<bool>(val); break;
+      case 'disabled': disabled = attributeToProperty<bool>(val); break;
+      case 'min': min = attributeToProperty<String>(val); break;
+      case 'max': max = attributeToProperty<String>(val); break;
+      case 'maxLength': maxLength = attributeToProperty<int>(val); break;
+      case 'placeholder': placeholder = attributeToProperty<String>(val); break;
+      case 'type': type = attributeToProperty<String>(val); break;
+      case 'mode': mode = attributeToProperty<String>(val); break;
+    }
+  }
+
+  int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
+  set width(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('width', value.toString());
+  }
+
+  int get height => int.tryParse(getAttribute('height') ?? '') ?? 0;
+  set height(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('height', value.toString());
+  }
+
+  // Whether value has been set manually.
+  bool _hasValueSet = false;
+
+  String get value => _getValue();
+
+  set value(String? text) {
+    setAndFormatValue(text);
+    _hasValueSet = true;
+  }
+
+  String setAndFormatValue(String? text) {
+    text ??= '';
+    if (text.length > _maxLength) {
+      // Slice to max length.
+      text = text.substring(0, _maxLength);
+    }
+    TextRange composing = _textSelectionDelegate._textEditingValue.composing;
+    TextSelection selection = TextSelection.collapsed(offset: text.length);
+    TextEditingValue newTextEditingValue = TextEditingValue(
+      text: text,
+      selection: selection,
+      composing: composing,
+    );
+    _formatAndSetValue(newTextEditingValue);
+    return text;
+  }
+
+  String get defaultValue => '';
+
+  set defaultValue(String? text) {
+    // Default value is only valid when value property is not set.
+    if (!_hasValueSet) {
+      setAndFormatValue(text);
+    }
+  }
+
+  String get accept => getAttribute('accept') ?? '';
+  set accept(String value) {
+    internalSetAttribute('accept', value);
+  }
+
+  String get autocomplete => getAttribute('autocomplete') ?? '';
+  set autocomplete(String value) {
+    internalSetAttribute('autocomplete', value);
+  }
+
+  bool get autofocus => hasAttribute('autofocus');
+  set autofocus(bool value) {
+    if (value) {
+      internalSetAttribute('autofocus', '');
+    } else {
+      removeAttribute('autofocus');
+    }
+  }
+
+  bool get required => hasAttribute('required');
+  set required(bool value) {
+    if (value) {
+      internalSetAttribute('required', '');
+    } else {
+      removeAttribute('required');
+    }
+  }
+
+  bool get readOnly => hasAttribute('readonly');
+  set readOnly(bool value) {
+    if (value) {
+      internalSetAttribute('readonly', '');
+    } else {
+      removeAttribute('readonly');
+    }
+  }
+
+  String get pattern => getAttribute('pattern') ?? '';
+  set pattern(String value) {
+    internalSetAttribute('pattern', value);
+  }
+
+  String get step => getAttribute('step') ?? '';
+  set step(String value) {
+    internalSetAttribute('step', value);
+  }
+
+  String get name => getAttribute('name') ?? '';
+  set name(String value) {
+    internalSetAttribute('name', value);
+  }
+
+  bool get multiple => hasAttribute('multiple');
+  set multiple(bool value) {
+    if (value) {
+      internalSetAttribute('multiple', '');
+    } else {
+      removeAttribute('multiple');
+    }
+  }
+
+  bool get checked => hasAttribute('checked');
+  set checked(bool value) {
+    if (value) {
+      internalSetAttribute('checked', '');
+    } else {
+      removeAttribute('checked');
+    }
+  }
+
+  bool get disabled => hasAttribute('disabled');
+  set disabled(bool value) {
+    if (value) {
+      internalSetAttribute('disabled', '');
+    } else {
+      removeAttribute('disabled');
+    }
+  }
+
+  String get min => getAttribute('min') ?? '';
+  set min(String value) {
+    internalSetAttribute('min', value);
+  }
+
+  String get max => getAttribute('max') ?? '';
+  set max(String value) {
+    internalSetAttribute('max', value);
+  }
+
+  int get maxLength => int.tryParse(getAttribute('maxlength') ?? '') ?? -1; // Default to -1.
+  set maxLength(int value) {
+    if (value.isNegative || value == 0) value = -1;
+    internalSetAttribute('maxlength', value.toString());
+  }
+
+  String get placeholder => getAttribute('placeholder') ?? '';
+  set placeholder(String value) {
+    internalSetAttribute('placeholder', value);
+    // Update placeholder text.
+    _rebuildTextSpan();
+  }
+
+  String get type => getAttribute('type') ?? '';
+  set type(String value) {
+    internalSetAttribute('type', value);
+    _setType(value);
+  }
+
+  // Additional inputmode.
+  String get mode => getAttribute('mode') ?? '';
+  set mode(String value) {
+    internalSetAttribute('mode', value);
+    _setInputMode(value);
   }
 
   @override
   void focus() {
-    setFocus(this);
+    if (ownerDocument.focusedElement != this) {
+      // Blur current focused element.
+      ownerDocument.focusedElement?.blur();
+      // Focus kraken widget to get focus from other widgets.
+      WidgetDelegate? widgetDelegate = ownerDocument.widgetDelegate;
+      widgetDelegate?.requestFocus();
+      ownerDocument.focusedElement = this;
+
+      focusTextFormControl();
+    }
   }
 
   @override
   void blur() {
-    clearFocus();
-  }
+    if (ownerDocument.focusedElement == this) {
+      ownerDocument.focusedElement = null;
 
-  @override
-  handleJSCall(String method, List argv) {
-    switch(method) {
-      case 'focus':
-        focus();
-        break;
-      case 'blur':
-        blur();
-        break;
+      blurTextFormControl();
     }
-    return super.handleJSCall(method, argv);
   }
 
   @override
@@ -305,12 +494,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     super.didAttachRenderer();
 
     // Make element listen to click event to trigger focus.
-    addEvent(EVENT_TOUCH_START);
-    addEvent(EVENT_TOUCH_MOVE);
-    addEvent(EVENT_TOUCH_END);
-    addEvent(EVENT_CLICK);
-    addEvent(EVENT_DOUBLE_CLICK);
-    addEvent(EVENT_LONG_PRESS);
+    addEventListener(EVENT_TOUCH_START, _handleEditable);
+    addEventListener(EVENT_TOUCH_MOVE, _handleEditable);
+    addEventListener(EVENT_TOUCH_END, _handleEditable);
+    addEventListener(EVENT_CLICK, _handleEditable);
+    addEventListener(EVENT_DOUBLE_CLICK, _handleEditable);
+    addEventListener(EVENT_LONG_PRESS, _handleEditable);
 
     AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
@@ -319,7 +508,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       if (_autoFocus) {
-        TextFormControlElement.setFocus(this);
+        focus();
       }
     });
   }
@@ -333,7 +522,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   @override
   void willDetachRenderer() {
     super.willDetachRenderer();
-    TextFormControlElement.clearFocus();
+    blur();
     _cursorTimer?.cancel();
     if (_textInputConnection != null && _textInputConnection!.attached) {
       _textInputConnection!.close();
@@ -461,9 +650,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   // Whether gesture is dragging.
   bool _isDragging = false;
 
-  @override
-  void dispatchEvent(Event event) {
-    super.dispatchEvent(event);
+  void _handleEditable(Event event) {
     if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
 
@@ -528,7 +715,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       renderEditable!.handleDoubleTap();
       // Focus element on double click.
-      TextFormControlElement.setFocus(this);
+      focus();
       _textSelectionDelegate.showToolbar();
       _isDragging = false;
     }
@@ -560,7 +747,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextInputAction _textInputAction = TextInputAction.done;
 
   void activeTextInput() {
-    _inputValueAtBegin = properties[VALUE];
+    _inputValueAtBegin = value;
 
     _textInputConfiguration ??= TextInputConfiguration(
       inputType: _textInputType,
@@ -602,9 +789,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _stopCursorTimer();
   }
 
-  bool get _hasFocus => TextFormControlElement.focusedTextFormControlElement == this;
-  // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
-  int _maxLength = 9007199254740992;
+  bool get _hasFocus => ownerDocument.focusedElement == this;
+  int get _maxLength {
+    if (maxLength > 0) return maxLength;
+    // The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).
+    return 9007199254740992;
+  }
 
   RenderEditable createRenderEditable() {
     _actualText ??= _buildTextSpan();
@@ -673,10 +863,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
         if (!isMultiline)
-          TextFormControlElement.clearFocus();
+          blur();
         break;
       case TextInputAction.done:
-        TextFormControlElement.clearFocus();
+        blur();
         break;
       case TextInputAction.none:
         // TODO: Handle this case.
@@ -795,7 +985,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     if (textChanged) {
       _handleTextChanged(value.text, userInteraction, cause);
       // Sync value to the text form control element property.
-      properties[valueKey] = value.text;
+      if (value == VALUE) {
+        this.value = value.text;
+      } else if (value == DEFAULT_VALUE) {
+        defaultValue = value.text;
+      }
     }
 
     if (renderEditable != null) {
@@ -971,38 +1165,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     }
   }
 
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-
-    if (key == VALUE || key == DEFAULT_VALUE) {
-      value = properties[VALUE] ?? properties[DEFAULT_VALUE];
-      String text = value?.toString() ?? '';
-      TextRange composing = _textSelectionDelegate._textEditingValue.composing;
-      TextSelection selection = TextSelection.collapsed(offset: text.length);
-      TextEditingValue newTextEditingValue = TextEditingValue(
-        text: text,
-        selection: selection,
-        composing: composing,
-      );
-      _formatAndSetValue(newTextEditingValue, valueKey: key);
-    } else if (key == 'placeholder') {
-      // Update placeholder text.
-      _rebuildTextSpan();
-    } else if (key == 'autofocus') {
-      _autoFocus = value != null;
-    } else if (key == 'type') {
-      _setType(value);
-    } else if (key == 'inputmode') {
-      _setInputMode(value);
-    } else if (key == 'maxlength') {
-      value = int.tryParse(value);
-      if (value > 0) {
-        _maxLength = value;
-      }
-    }
-  }
-
   TextInputType _textInputType = TextInputType.text;
 
   TextInputType get textInputType => _textInputType;
@@ -1036,21 +1198,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         break;
       // @TODO: more types.
     }
-  }
-  String _getType() {
-    if (textInputType == TextInputType.text) {
-      return 'text';
-    } else if (textInputType == TextInputType.number) {
-      return 'number';
-    } else if (textInputType == TextInputType.phone) {
-      return 'tel';
-    } else if (textInputType == TextInputType.emailAddress) {
-      return 'email';
-    } else if (textInputType == TextInputType.text && obscureText) {
-      return 'password';
-    }
-    // @TODO: more types.
-    return '';
   }
 
   bool _hideVirtualKeyboard = false;
@@ -1189,7 +1336,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       unitOffset = const Offset(0, 1);
     }
 
-    // No overscrolling when encountering tall fonts/scripts that extend past
+    // No over scrolling when encountering tall fonts/scripts that extend past
     // the ascent.
     final double targetOffset = (additionalOffset + _scrollable.position!.pixels)
       .clamp(

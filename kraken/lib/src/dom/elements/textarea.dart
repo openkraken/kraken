@@ -18,6 +18,36 @@ class TextareaElement extends TextFormControlElement {
   TextareaElement(context)
     : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
+  @override
+  void setAttribute(String qualifiedName, String val) {
+    super.setAttribute(qualifiedName, val);
+    switch (qualifiedName) {
+      case 'rows':
+        rows = attributeToProperty<int>(val);
+        break;
+      case 'cols':
+        cols = attributeToProperty<int>(val);
+        break;
+    }
+  }
+
+  @override
+  String get defaultValue => textContent;
+
+  int get rows => int.tryParse(getAttribute('rows') ?? '') ?? 0;
+  set rows(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('rows', value.toString());
+    _updateDefaultHeight();
+  }
+
+  int get cols => int.tryParse(getAttribute('cols') ?? '') ?? 0;
+  set cols(int value) {
+    if (value < 0) value = 0;
+    internalSetAttribute('cols', value.toString());
+    _updateDefaultWidth();
+  }
+
   double? get _defaultWidth {
     // cols defaults to 20.
     // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-cols
@@ -50,17 +80,6 @@ class TextareaElement extends TextFormControlElement {
   // Width and height set through style.
   double? _styleWidth;
   double? _styleHeight;
-
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-
-    if (key == ROWS) {
-      _updateDefaultHeight();
-    } else if (key == COLS) {
-      _updateDefaultWidth();
-    }
-  }
 
   @override
   void willAttachRenderer() {
@@ -121,10 +140,8 @@ class TextareaElement extends TextFormControlElement {
   }
 
   void updateDefaultValue() {
-    // Text content of textarea acts as default value when defaultValue property is not set.
-    if (!properties.containsKey(VALUE)) {
-      setProperty(DEFAULT_VALUE, textContent);
-    }
+    // Text content of textarea acts as default value when value is not set manually.
+    defaultValue = textContent;
   }
 }
 

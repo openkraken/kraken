@@ -11,8 +11,8 @@ interface TextareaElement extends Element {
   autofocus: boolean;
   autocomplete: string;
   disabled: boolean;
-  minlength: number;
-  maxlength: number;
+  minLength: number;
+  maxLength: number;
   name: string;
   placeholder: string;
   readonly: boolean;
