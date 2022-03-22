@@ -1141,6 +1141,8 @@ class KrakenController {
       if (onLoadError != null) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
+      // Not to dismiss this error.
+      rethrow;
     }
 
     if (kProfileMode) {
