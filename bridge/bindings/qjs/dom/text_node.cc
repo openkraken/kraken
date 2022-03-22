@@ -81,6 +81,6 @@ void TextNodeInstance::internalSetTextContent(JSValue content) {
   std::string key = "data";
   std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, content);
-  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
+  m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
 }
 }  // namespace kraken::binding::qjs

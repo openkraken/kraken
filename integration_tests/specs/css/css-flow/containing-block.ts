@@ -1018,7 +1018,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  it('020-ref', async () => {
+  it('020-ref', async (done) => {
     let p;
     let div;
     p = createElement(
@@ -1064,8 +1064,9 @@ describe('containing-block', () => {
     BODY.appendChild(div);
 
     await snapshot(0.1);
+    done();
   });
-  it('020', async () => {
+  it('020', async (done) => {
     let p;
     let span1;
     let div;
@@ -1135,6 +1136,7 @@ describe('containing-block', () => {
     BODY.appendChild(div);
 
     await snapshot();
+    done();
   });
   it('021', async () => {
     let p;

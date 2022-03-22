@@ -1,11 +1,13 @@
+/*
+ * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
+
+// Modified from Flutter gesture/monodrag.dart.
 // Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-// Single finger drag gestures.
-// Modified from Flutter gesture/monodrag.dart.
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -22,7 +24,7 @@ typedef GestureEventListener = void Function(GestureEvent event);
 
 typedef TouchEventListener = void Function(TouchEvent event);
 
-/// Widget can user EventClient to add event lisnter on view port.
+/// Widget can user EventClient to add event listener on viewport.
 class GestureListener {
   GestureEventListener? onDrag;
   TouchEventListener? onTouchStart;

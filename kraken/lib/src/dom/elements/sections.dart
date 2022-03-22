@@ -4,6 +4,7 @@
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#content_sectioning
 
@@ -26,41 +27,41 @@ const Map<String, dynamic> _addressDefaultStyle = {
 };
 
 class AddressElement extends Element {
-  AddressElement(EventTargetContext? context)
+  AddressElement([BindingContext? context])
       : super(context, defaultStyle: _addressDefaultStyle);
 }
 
 class ArticleElement extends Element {
-  ArticleElement(EventTargetContext? context)
+  ArticleElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class AsideElement extends Element {
-  AsideElement(EventTargetContext? context)
+  AsideElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class FooterElement extends Element {
-  FooterElement(EventTargetContext? context)
+  FooterElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class HeaderElement extends Element {
-  HeaderElement(EventTargetContext? context)
+  HeaderElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class MainElement extends Element {
-  MainElement(EventTargetContext? context)
+  MainElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class NavElement extends Element {
-  NavElement(EventTargetContext? context)
+  NavElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class SectionElement extends Element {
-  SectionElement(EventTargetContext? context)
+  SectionElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }

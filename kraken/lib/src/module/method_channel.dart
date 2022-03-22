@@ -6,7 +6,7 @@ import 'package:kraken/kraken.dart';
 
 import 'module_manager.dart';
 
-typedef MethodCallCallback = Future<dynamic> Function(String method, dynamic arguments);
+typedef MethodCallCallback = Future<dynamic> Function(String method, Object? arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
 const String CONTROLLER_NOT_INITIALIZED = 'Kraken controller not initialized.';
 const String METHOD_CHANNEL_NAME = 'MethodChannel';
@@ -20,7 +20,7 @@ class MethodChannelModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(String method, dynamic params, callback) {
+  String invoke(String method, params, callback) {
     if (method == 'invokeMethod') {
       _invokeMethodFromJavaScript(moduleManager!.controller, params[0], params[1]).then((result) {
         callback(data: result);
@@ -35,7 +35,7 @@ class MethodChannelModule extends BaseModule {
 void setJSMethodCallCallback(KrakenController controller) {
   if (controller.methodChannel == null) return;
 
-  controller.methodChannel!._onJSMethodCall = (String method, dynamic arguments) async {
+  controller.methodChannel!._onJSMethodCall = (String method, arguments) async {
     try {
       controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
     } catch (e, stack) {
@@ -55,14 +55,14 @@ abstract class KrakenMethodChannel {
   Future<dynamic> invokeMethodFromJavaScript(String method, List arguments);
 
   static void setJSMethodCallCallback(KrakenController controller) {
-    controller.methodChannel?._onJSMethodCall = (String method, dynamic arguments) async {
+    controller.methodChannel?._onJSMethodCall = (String method, arguments) async {
       controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
     };
   }
 }
 
 class KrakenJavaScriptChannel extends KrakenMethodChannel {
-  Future<dynamic> invokeMethod(String method, dynamic arguments) async {
+  Future<dynamic> invokeMethod(String method, arguments) async {
     MethodCallCallback? jsMethodCallCallback = _onJSMethodCallCallback;
     if (jsMethodCallCallback != null) {
       return jsMethodCallCallback(method, arguments);

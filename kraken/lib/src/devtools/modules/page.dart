@@ -198,7 +198,7 @@ class InspectPageModule extends UIInspectorModule {
   String get name => 'Page';
 
   @override
-  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) {
+  void receiveFromFrontend(int? id, String method, Map<String, dynamic>? params) async {
     switch (method) {
       case 'startScreencast':
         sendToFrontend(id, null);
@@ -213,8 +213,9 @@ class InspectPageModule extends UIInspectorModule {
         handleScreencastFrameAck(params!);
         break;
       case 'getResourceContent':
+        String? url = params!['url'];
         sendToFrontend(id, JSONEncodableMap({
-          'content': devtoolsService.controller?.bundle?.content,
+          'content': devtoolsService.controller?.getResourceContent(url),
           'base64Encoded': false
         }));
         break;
@@ -248,8 +249,8 @@ class InspectPageModule extends UIInspectorModule {
           ScreencastFrameMetadata(
             0,
             1,
-            document.viewport.viewportSize.width,
-            document.viewport.viewportSize.height,
+            document.viewport!.viewportSize.width,
+            document.viewport!.viewportSize.height,
             root.offsetLeft,
             root.offsetTop,
             timestamp: timeStamp.inMilliseconds,
