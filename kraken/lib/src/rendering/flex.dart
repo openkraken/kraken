@@ -291,13 +291,16 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   AlignSelf _getAlignSelf(RenderBox child) {
-    // Flex shrink has no effect on placeholder of positioned element.
-    if (child is RenderPositionPlaceholder) {
-      return AlignSelf.auto;
+    RenderBoxModel? childRenderBoxModel;
+    if (child is RenderBoxModel) {
+      childRenderBoxModel = child;
+    } else if (child is RenderPositionPlaceholder) {
+      childRenderBoxModel = child.positioned;
     }
-    return child is RenderBoxModel
-        ? child.renderStyle.alignSelf
-        : AlignSelf.auto;
+    if (childRenderBoxModel != null) {
+      return childRenderBoxModel.renderStyle.alignSelf;
+    }
+    return AlignSelf.auto;
   }
 
   double _getMaxMainAxisSize(RenderBox child) {
@@ -1982,6 +1985,14 @@ class RenderFlexLayout extends RenderLayoutBox {
   bool needToStretchChildCrossSize(RenderBox child) {
     // Position placeholder and BR element has size of zero, so they can not be stretched.
     if (child is RenderPositionPlaceholder || child is RenderLineBreak) return false;
+
+    // The absolutely-positioned box is considered to be “fixed-size”, a value of stretch
+    // is treated the same as flex-start.
+    // https://www.w3.org/TR/css-flexbox-1/#abspos-items
+    final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
+    if (child is RenderBoxModel && childParentData.isPositioned) {
+      return false;
+    }
 
     AlignSelf alignSelf = _getAlignSelf(child);
     bool isChildAlignmentStretch = alignSelf != AlignSelf.auto

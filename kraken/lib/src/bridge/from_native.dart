@@ -92,8 +92,8 @@ String invokeModule(
   String result = '';
 
   try {
-    void invokeModuleCallback({String ?error, dynamic data}) {
-      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side. 
+    void invokeModuleCallback({String ?error, data}) {
+      // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side.
       // We should make callback always async.
       Future.microtask(() {
         if (error != null) {
@@ -357,19 +357,19 @@ void _flushUICommand() {
 
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
-typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
-typedef DartInitWindow = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
+typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
+typedef DartInitWindow = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
 
-void _initWindow(int contextId, Pointer<NativeEventTarget> nativePtr) {
+void _initWindow(int contextId, Pointer<NativeBindingObject> nativePtr) {
   KrakenViewController.windowNativePtrMap[contextId] = nativePtr;
 }
 
 final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
 
-typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeEventTarget> nativePtr);
-typedef DartInitDocument = void Function(int contextId, Pointer<NativeEventTarget> nativePtr);
+typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
+typedef DartInitDocument = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
 
-void _initDocument(int contextId, Pointer<NativeEventTarget> nativePtr) {
+void _initDocument(int contextId, Pointer<NativeBindingObject> nativePtr) {
   KrakenViewController.documentNativePtrMap[contextId] = nativePtr;
 }
 

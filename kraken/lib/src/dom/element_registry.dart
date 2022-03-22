@@ -3,23 +3,29 @@
  * Author: Kraken Team.
  */
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
-typedef ElementCreator = Element Function(EventTargetContext? context);
+typedef ElementCreator = Element Function(BindingContext? context);
 
 final Map<String, ElementCreator> _elementRegistry = {};
 
 void defineElement(String name, ElementCreator creator) {
   if (_elementRegistry.containsKey(name)) {
-    throw Exception('A element with name "$name" has already been defined.');
+    throw Exception('An element with name "$name" has already been defined.');
   }
   _elementRegistry[name] = creator;
 }
 
-Element createElement(String name, EventTargetContext? context){
+class _UnknownElement extends Element {
+  _UnknownElement([BindingContext? context]) : super(context);
+}
+
+Element createElement(String name, [BindingContext? context]){
   ElementCreator? creator = _elementRegistry[name];
   if (creator == null) {
-    print('ERROR: unexpected element type "$name"');
-    return Element(context);
+    print('Unexpected element "$name"');
+
+    return _UnknownElement(context);
   }
 
   Element element = creator(context);
@@ -109,3 +115,4 @@ void defineBuiltInElements() {
   defineElement(IMAGE, (context) => ImageElement(context));
   defineElement(CANVAS, (context) => CanvasElement(context));
 }
+

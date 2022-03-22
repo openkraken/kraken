@@ -4,7 +4,6 @@
  */
 import 'dart:io';
 import 'dart:ui';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
@@ -87,72 +86,12 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
-  loadBundle(KrakenBundle bundle) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
+  Future<void> load(KrakenBundle bundle) async {
+    await controller?.load(bundle);
   }
 
-  @deprecated
-  loadContent(String bundleContent) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromContent(bundleContent)
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadByteCode(Uint8List bundleByteCode) async {
-    await controller!.unload();
-    await controller!.loadBundle(
-        bundle: KrakenBundle.fromBytecode(bundleByteCode)
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadURL(String bundleURL, { String? bundleContent, Uint8List? bundleByteCode }) async {
-    await controller!.unload();
-
-    KrakenBundle bundle;
-    if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundleURL);
-    } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromContent(bundleContent, url: bundleURL);
-    } else {
-      bundle = KrakenBundle.fromUrl(bundleURL);
-    }
-
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  @deprecated
-  loadPath(String bundlePath, { String? bundleContent, Uint8List? bundleByteCode }) async {
-    await controller!.unload();
-
-    KrakenBundle bundle;
-    if (bundleByteCode != null) {
-      bundle = KrakenBundle.fromBytecode(bundleByteCode, url: bundlePath);
-    } else if (bundleContent != null) {
-      bundle = KrakenBundle.fromContent(bundleContent, url: bundlePath);
-    } else {
-      bundle = KrakenBundle.fromUrl(bundlePath);
-    }
-
-    await controller!.loadBundle(
-        bundle: bundle
-    );
-    _evalBundle(controller!, animationController);
-  }
-
-  reload() async {
-    await controller!.reload();
+  Future<void> reload() async {
+    await controller?.reload();
   }
 
   Kraken({
@@ -234,7 +173,6 @@ class _KrakenState extends State<Kraken> with RouteAware {
     super.dispose();
   }
 
-
   @override
   void deactivate() {
     // Deactivate all WidgetElements in Kraken when Kraken Widget is deactivated.
@@ -277,7 +215,9 @@ This situation often happened when you trying creating kraken when FlutterView n
         viewportHeight,
         background: _krakenWidget.background,
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
-        bundle: _krakenWidget.bundle,
+        entrypoint: _krakenWidget.bundle,
+        // Execute entrypoint when mount manually.
+        autoExecuteEntrypoint: false,
         onLoad: _krakenWidget.onLoad,
         onLoadError: _krakenWidget.onLoadError,
         onJSError: _krakenWidget.onJSError,
@@ -351,10 +291,7 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
     // We should make sure every flutter elements created under kraken can be walk up to the root.
     // So we bind _KrakenRenderObjectElement into KrakenController, and widgetElements created by controller can follow this to the root.
     controller.rootFlutterElement = this;
-
-    await controller.loadBundle();
-
-    _evalBundle(controller, widget._krakenWidget.animationController);
+    await controller.executeEntrypoint(animationController: widget._krakenWidget.animationController);
   }
 
   // RenderObjects created by kraken are manager by kraken itself. There are no needs to operate renderObjects on _KrakenRenderObjectElement.
@@ -367,18 +304,4 @@ class _KrakenRenderObjectElement extends SingleChildRenderObjectElement {
 
   @override
   KrakenRenderObjectWidget get widget => super.widget as KrakenRenderObjectWidget;
-}
-
-void _evalBundle(KrakenController controller, AnimationController? animationController) async {
-  // Execute JavaScript scripts will block the Flutter UI Threads.
-  // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
-  if (animationController != null) {
-    animationController.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        controller.evalBundle();
-      }
-    });
-  } else {
-    await controller.evalBundle();
-  }
 }

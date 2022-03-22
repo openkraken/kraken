@@ -14,10 +14,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-import 'package:kraken/src/dom/element_event.dart';
-import 'package:kraken/src/dom/element_view.dart';
 import 'package:meta/meta.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
@@ -79,20 +78,19 @@ typedef GetViewportSize = Size Function();
 /// Get the render box model of current element.
 typedef GetRenderBoxModel = RenderBoxModel? Function();
 
-class Element extends Node
-    with
-        ElementBase,
-        ElementViewMixin,
-        ElementEventMixin,
-        ElementOverflowMixin {
-
-  final Map<String, dynamic> properties = <String, dynamic>{};
-
+abstract class Element
+    extends Node
+    with ElementBase,
+         ElementEventMixin,
+         ElementOverflowMixin {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
   /// Is element an intrinsic box.
   final bool _isIntrinsicBox;
+
+  // The attrs.
+  final Map<String, String> attributes = <String, String>{};
 
   /// The style of the element, not inline style.
   late CSSStyleDeclaration style;
@@ -105,9 +103,8 @@ class Element extends Node
 
   /// The Element.classList is a read-only property that returns a collection of the class attributes of the element.
   final List<String> _classList = [];
-  List<String> get classList {
-    return _classList;
-  }
+
+  List<String> get classList => _classList;
 
   set className(String className) {
     _classList.clear();
@@ -117,6 +114,7 @@ class Element extends Node
     }
     recalculateStyle();
   }
+
   String get className => _classList.join(_ONE_SPACE);
 
   final bool _isDefaultRepaintBoundary;
@@ -147,7 +145,7 @@ class Element extends Node
   }
 
   Element(
-    EventTargetContext? context,
+    BindingContext? context,
     {
       Map<String, dynamic>? defaultStyle,
       // Whether element allows children.
@@ -181,6 +179,58 @@ class Element extends Node
     return renderBoxModel!;
   }
 
+  // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
+  // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
+  @override
+  getBindingProperty(String key) {
+    switch (key) {
+      case 'offsetTop': return offsetTop;
+      case 'offsetLeft': return offsetLeft;
+      case 'offsetWidth': return offsetWidth;
+      case 'offsetHeight': return offsetHeight;
+
+      case 'scrollTop': return scrollTop;
+      case 'scrollLeft': return scrollLeft;
+      case 'scrollWidth': return scrollWidth;
+      case 'scrollHeight': return scrollHeight;
+
+      case 'clientTop': return clientTop;
+      case 'clientLeft': return clientLeft;
+      case 'clientWidth': return clientWidth;
+      case 'clientHeight': return clientHeight;
+
+      case 'className': return className;
+      case 'classList': return classList;
+
+      default: return super.getBindingProperty(key);
+    }
+  }
+
+  @override
+  void setBindingProperty(String key, value) {
+    switch (key) {
+      case 'scrollTop': scrollTop = castToType<double>(value); break;
+      case 'scrollLeft': scrollLeft = castToType<double>(value); break;
+
+      case 'className': className = castToType<String>(value); break;
+
+      default: super.setBindingProperty(key, value);
+    }
+  }
+
+  @override
+  invokeBindingMethod(String method, List args) {
+    switch (method) {
+      case 'getBoundingClientRect': return getBoundingClientRect().toNative();
+      case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'click': return click();
+
+      default: super.invokeBindingMethod(method, args);
+    }
+  }
+
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
     if (_isIntrinsicBox) {
@@ -207,8 +257,9 @@ class Element extends Node
         }
       }
       renderBoxModel = nextRenderBoxModel;
+
       // Ensure that the event responder is bound.
-      _ensureEventResponderBound();
+      ensureEventResponderBound();
     }
   }
 
@@ -412,6 +463,7 @@ class Element extends Node
   @override
   void willDetachRenderer() {
     super.willDetachRenderer();
+
     // Cancel running transition.
     renderStyle.cancelRunningTransition();
 
@@ -426,8 +478,8 @@ class Element extends Node
     // Remove renderBox.
     _renderBoxModel.detachFromContainingBlock();
 
-    // Remove pointer listener
-    removeEventResponder(renderBoxModel!);
+    // Clear pointer listener
+    clearEventResponder(renderBoxModel!);
   }
 
   @override
@@ -435,9 +487,11 @@ class Element extends Node
     style.reset();
   }
 
+  BoundingClientRect getBoundingClientRect() => boundingClientRect;
+
   bool _shouldConsumeScrollTicker = false;
   void _consumeScrollTicker(_) {
-    if (_shouldConsumeScrollTicker && eventHandlers.containsKey(EVENT_SCROLL)) {
+    if (_shouldConsumeScrollTicker && hasEventListener(EVENT_SCROLL)) {
       _dispatchScrollEvent();
       _shouldConsumeScrollTicker = false;
     }
@@ -642,27 +696,10 @@ class Element extends Node
 
   @override
   void dispose() {
-    if (isRendererAttached) {
-      disposeRenderObject();
-    }
-
-    RenderBoxModel? _renderBoxModel = renderBoxModel;
-    Element? _parentElement = parentElement;
-
-    // Call dispose method of renderBoxModel when GC auto dispose element
-    if (_renderBoxModel != null) {
-      _renderBoxModel.dispose();
-    }
-
-    if (_parentElement != null) {
-      _parentElement.removeChild(this);
-    }
-
     renderStyle.detach();
     style.dispose();
-    properties.clear();
+    attributes.clear();
     disposeScrollable();
-
     super.dispose();
   }
 
@@ -687,7 +724,7 @@ class Element extends Node
     }
 
     if (renderer != null) {
-      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      // If element attach WidgetElement, render object should be attach to render tree when mount.
       if (parent is! WidgetElement) {
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }
@@ -699,9 +736,9 @@ class Element extends Node
     }
   }
 
-  /// Release any resources held by [renderBoxModel].
+  /// Unmount [renderBoxModel].
   @override
-  void disposeRenderObject({ bool deep = false }) {
+  void unmountRenderObject({ bool deep = false }) {
     if (renderBoxModel == null) return;
 
     willDetachRenderer();
@@ -709,14 +746,12 @@ class Element extends Node
     // Dispose all renderObject when deep.
     if (deep) {
       for (Node child in childNodes) {
-        child.disposeRenderObject(deep: true);
+        child.unmountRenderObject(deep: true);
       }
     }
 
     didDetachRenderer();
-
-    // Call dispose method of renderBoxModel when it is detached from tree.
-    renderBoxModel!.dispose();
+    renderBoxModel?.dispose();
     renderBoxModel = null;
   }
 
@@ -771,18 +806,13 @@ class Element extends Node
   @override
   @mustCallSuper
   Node removeChild(Node child) {
-    // Not remove node type which is not present in RenderObject tree such as Comment
-    // Only append node types which is visible in RenderObject tree
-    // Only remove childNode when it has parent
-    if (child.isRendererAttached) {
-      child.disposeRenderObject();
-    }
+    super.removeChild(child);
+
     // Update renderStyle tree.
     if (child is Element) {
       child.renderStyle.detach();
     }
 
-    super.removeChild(child);
     return child;
   }
 
@@ -874,9 +904,43 @@ class Element extends Node
     return containingBlockRenderBox;
   }
 
+  @mustCallSuper
+  String? getAttribute(String qualifiedName) {
+    return attributes[qualifiedName];
+  }
+
+  @mustCallSuper
+  void setAttribute(String qualifiedName, String value) {
+    if (_STYLE_PROPERTY == qualifiedName) {
+      // @TODO: Parse inline style css text.
+    } else if (_CLASS_NAME == qualifiedName) {
+      className = value;
+    }
+    internalSetAttribute(qualifiedName, value);
+  }
+
+  void internalSetAttribute(String qualifiedName, String value) {
+    attributes[qualifiedName] = value;
+  }
+
+  @mustCallSuper
+  void removeAttribute(String qualifiedName) {
+    if (qualifiedName == _STYLE_PROPERTY) {
+      _removeInlineStyle();
+    } else if (qualifiedName == _CLASS_NAME) {
+      className = EMPTY_STRING;
+    }
+    attributes.remove(qualifiedName);
+  }
+
+  @mustCallSuper
+  bool hasAttribute(String qualifiedName) {
+    return attributes.containsKey(qualifiedName);
+  }
+
   // FIXME: only compatible with kraken plugins
   @deprecated
-  void setStyle(String property, dynamic value) {
+  void setStyle(String property, value) {
     setRenderStyle(property, value);
   }
 
@@ -887,7 +951,7 @@ class Element extends Node
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
-      disposeRenderObject();
+      unmountRenderObject();
       return;
     }
 
@@ -910,7 +974,7 @@ class Element extends Node
     }
   }
 
-  void setRenderStyleProperty(String name, dynamic value) {
+  void setRenderStyleProperty(String name, value) {
     // Memorize the variable value to renderStyle object.
     if (CSSVariable.isVariable(name)) {
       renderStyle.setCSSVariable(name, value.toString());
@@ -1275,7 +1339,7 @@ class Element extends Node
 
   void _applyDefaultStyle(CSSStyleDeclaration style) {
     if (_defaultStyle.isNotEmpty) {
-      _defaultStyle.forEach((propertyName, dynamic value) {
+      _defaultStyle.forEach((propertyName, value) {
         style.setProperty(propertyName, value);
       });
     }
@@ -1283,7 +1347,7 @@ class Element extends Node
 
   void _applyInlineStyle(CSSStyleDeclaration style) {
     if (inlineStyle.isNotEmpty) {
-      inlineStyle.forEach((propertyName, dynamic value) {
+      inlineStyle.forEach((propertyName, value) {
         // Force inline style to be applied as important priority.
         style.setProperty(propertyName, value, true);
       });
@@ -1360,39 +1424,6 @@ class Element extends Node
     });
   }
 
-  @mustCallSuper
-  void setProperty(String key, dynamic value) {
-    if (value == null || value == EMPTY_STRING) {
-      return removeProperty(key);
-    }
-
-    if (key == _CLASS_NAME) {
-      className = value;
-    } else {
-      properties[key] = value;
-    }
-  }
-
-  @mustCallSuper
-  dynamic getProperty(String key) {
-    if (key == _CLASS_NAME) {
-      return className;
-    } else {
-      return properties[key];
-    }
-  }
-
-  @mustCallSuper
-  void removeProperty(String key) {
-    if (key == _STYLE_PROPERTY) {
-      _removeInlineStyle();
-    } else if (key == _CLASS_NAME) {
-      className = EMPTY_STRING;
-    } else {
-      properties.remove(key);
-    }
-  }
-
   void _removeInlineStyle() {
     inlineStyle.forEach((String property, _) {
       _removeInlineStyleProperty(property);
@@ -1411,6 +1442,7 @@ class Element extends Node
   BoundingClientRect get boundingClientRect {
     BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
     if (isRendererAttached) {
+      flushLayout();
       RenderBox sizedBox = renderBoxModel!;
       // Force flush layout.
       if (!sizedBox.hasSize) {
@@ -1439,12 +1471,15 @@ class Element extends Node
   // The HTMLElement.offsetLeft read-only property returns the number of pixels that the upper left corner
   // of the current element is offset to the left within the HTMLElement.offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsetleft
-  double get offsetLeft {
-    double offset = 0;
+  int get offsetLeft {
+    int offset = 0;
+    if (!isRendererAttached) {
+      return offset;
+    }
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dx;
+      offset += relative.dx.toInt();
     }
     return offset;
   }
@@ -1452,12 +1487,15 @@ class Element extends Node
   // The HTMLElement.offsetTop read-only property returns the distance of the outer border
   // of the current element relative to the inner border of the top of the offsetParent node.
   // https://drafts.csswg.org/cssom-view/#dom-htmlelement-offsettop
-  double get offsetTop {
-    double offset = 0;
+  int get offsetTop {
+    int offset = 0;
+    if (!isRendererAttached) {
+      return offset;
+    }
     RenderBoxModel selfRenderBoxModel = renderBoxModel!;
     if (selfRenderBoxModel.attached) {
       Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dy;
+      offset += relative.dy.toInt();
     }
     return offset;
   }
@@ -1499,49 +1537,24 @@ class Element extends Node
     return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
   }
 
-  void _ensureEventResponderBound() {
-    // Must bind event responder on render box model whatever there is no event listener.
-    RenderBoxModel? _renderBoxModel = renderBoxModel;
-    if (_renderBoxModel != null) {
-      // Make sure pointer responder bind.
-      addEventResponder(_renderBoxModel);
-      if (_hasIntersectionObserverEvent(eventHandlers)) {
-        _renderBoxModel.addIntersectionChangeListener(handleIntersectionChange);
-        // Mark the compositing state for this render object as dirty
-        // cause it will create new layer.
-        _renderBoxModel.markNeedsCompositingBitsUpdate();
-      }
-    }
-  }
-
-  void addEvent(String eventType) {
-    if (eventHandlers.containsKey(eventType)) return; // Only listen once.
-    addEventListener(eventType, dispatchEvent);
-    _ensureEventResponderBound();
-  }
-
-  void removeEvent(String eventType) {
-    if (!eventHandlers.containsKey(eventType)) return; // Only listen once.
-    removeEventListener(eventType, dispatchEvent);
-
-    RenderBoxModel? selfRenderBoxModel = renderBoxModel;
-    if (selfRenderBoxModel != null) {
-      if (eventHandlers.isEmpty) {
-        // Remove pointer responder if there is no event handler.
-        removeEventResponder(selfRenderBoxModel);
-      }
-
-      // Remove listener when no intersection related event
-      if (_isIntersectionObserverEvent(eventType) && !_hasIntersectionObserverEvent(eventHandlers)) {
-        selfRenderBoxModel.removeIntersectionChangeListener(handleIntersectionChange);
-      }
-    }
-  }
-
   void click() {
+    flushLayout();
     Event clickEvent = MouseEvent(EVENT_CLICK, MouseEventInit(bubbles: true, cancelable: true));
     // If element not in tree, click is fired and only response to itself.
     dispatchEvent(clickEvent);
+  }
+
+  /// Moves the focus to the element.
+  /// https://html.spec.whatwg.org/multipage/interaction.html#dom-focus
+  void focus() {
+    // TODO
+  }
+
+  /// Moves the focus to the viewport. Use of this method is discouraged;
+  /// if you want to focus the viewport, call the focus() method on the Document's document element.
+  /// https://html.spec.whatwg.org/multipage/interaction.html#dom-blur
+  void blur() {
+    // TODO
   }
 
   Future<Uint8List> toBlob({ double? devicePixelRatio }) {
@@ -1554,6 +1567,12 @@ class Element extends Node
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
+
+      // If prev flush paint with error, render object keeps NEEDS-PAINT flag,
+      // will cause layer not exists.
+      assert(!_renderBoxModel.debugNeedsPaint, () {
+        debugPrint('Failed toBlob at $this, flush painting may raise error.');
+      });
       if (_renderBoxModel.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
@@ -1616,16 +1635,6 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
   return parent;
 }
 
-bool _isIntersectionObserverEvent(String eventType) {
-  return eventType == EVENT_APPEAR || eventType == EVENT_DISAPPEAR || eventType == EVENT_INTERSECTION_CHANGE;
-}
-
-bool _hasIntersectionObserverEvent(Map eventHandlers) {
-  return eventHandlers.containsKey('appear') ||
-      eventHandlers.containsKey('disappear') ||
-      eventHandlers.containsKey('intersectionchange');
-}
-
 // Cache fixed renderObject to root element
 void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
   rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
@@ -1641,5 +1650,25 @@ void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootR
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.remove(childRenderBoxModel);
+  }
+}
+
+// Reflect attribute type as property.
+// String: Any input.
+// Bool: Any input is true.
+// Int: Any valid input, or 0.
+// Double: Any valid input, or 0.0.
+T attributeToProperty<T>(String value) {
+  // The most using type.
+  if (T == String) {
+    return value as T;
+  } else if (T == bool) {
+    return true as T;
+  } else if (T == int) {
+    return (int.tryParse(value) ?? 0) as T;
+  } else if (T == double) {
+    return (double.tryParse(value) ?? 0.0) as T;
+  } else {
+    return value as T;
   }
 }

@@ -93,11 +93,11 @@ class DocumentInstance : public NodeInstance {
   int32_t requestAnimationFrame(FrameCallback* frameCallback);
   void cancelAnimationFrame(uint32_t callbackId);
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
+  ElementInstance* getDocumentElement();
 
  private:
   void removeElementById(JSAtom id, ElementInstance* element);
   void addElementById(JSAtom id, ElementInstance* element);
-  ElementInstance* getDocumentElement();
   std::unordered_map<JSAtom, std::vector<ElementInstance*>> m_elementMapById;
   ElementInstance* m_documentElement{nullptr};
   std::unique_ptr<DocumentCookie> m_cookie;

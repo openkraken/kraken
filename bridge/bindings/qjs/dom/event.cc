@@ -33,7 +33,11 @@ JSValue Event::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue thi
   JSValue eventTypeValue = argv[0];
   std::string eventType = jsValueToStdString(ctx, eventTypeValue);
 
+#if ANDROID_32_BIT
+  auto* nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(stringToNativeString(eventType).release())};
+#else
   auto* nativeEvent = new NativeEvent{stringToNativeString(eventType).release()};
+#endif
   auto* event = Event::buildEventInstance(eventType, m_context, nativeEvent, false);
   return event->jsObject;
 }
@@ -42,7 +46,8 @@ std::unordered_map<std::string, EventCreator> Event::m_eventCreatorMap{};
 
 IMPL_PROPERTY_GETTER(Event, type)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  return JS_NewUnicodeString(ExecutionContext::runtime(), eventInstance->context()->ctx(), eventInstance->nativeEvent->type->string, eventInstance->nativeEvent->type->length);
+  auto* pType = reinterpret_cast<NativeString*>(eventInstance->nativeEvent->type);
+  return JS_NewUnicodeString(ExecutionContext::runtime(), eventInstance->context()->ctx(), pType->string, pType->length);
 }
 
 IMPL_PROPERTY_GETTER(Event, bubbles)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -68,9 +73,8 @@ IMPL_PROPERTY_GETTER(Event, defaultPrevented)(JSContext* ctx, JSValue this_val, 
 IMPL_PROPERTY_GETTER(Event, target)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
 
-  if (eventInstance->nativeEvent->target != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, ensureWindowIsGlobal(instance));
+  if (eventInstance->target() != nullptr) {
+    return JS_DupValue(ctx, ensureWindowIsGlobal(eventInstance->target()));
   }
   return JS_NULL;
 }
@@ -78,9 +82,8 @@ IMPL_PROPERTY_GETTER(Event, target)(JSContext* ctx, JSValue this_val, int argc, 
 IMPL_PROPERTY_GETTER(Event, srcElement)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
 
-  if (eventInstance->nativeEvent->target != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->target);
-    return JS_DupValue(ctx, ensureWindowIsGlobal(instance));
+  if (eventInstance->target() != nullptr) {
+    return JS_DupValue(ctx, ensureWindowIsGlobal(eventInstance->target()));
   }
   return JS_NULL;
 }
@@ -88,9 +91,8 @@ IMPL_PROPERTY_GETTER(Event, srcElement)(JSContext* ctx, JSValue this_val, int ar
 IMPL_PROPERTY_GETTER(Event, currentTarget)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* eventInstance = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
 
-  if (eventInstance->nativeEvent->currentTarget != nullptr) {
-    auto instance = reinterpret_cast<EventTargetInstance*>(eventInstance->nativeEvent->currentTarget);
-    return JS_DupValue(ctx, ensureWindowIsGlobal(instance));
+  if (eventInstance->currentTarget() != nullptr) {
+    return JS_DupValue(ctx, ensureWindowIsGlobal(eventInstance->currentTarget()));
   }
   return JS_NULL;
 }
@@ -164,7 +166,7 @@ JSValue Event::initEvent(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
   }
 
   auto* event = static_cast<EventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
-  event->nativeEvent->type = jsValueToNativeString(ctx, typeValue).release();
+  event->setType(jsValueToNativeString(ctx, typeValue).release());
 
   if (!JS_IsNull(bubblesValue)) {
     event->nativeEvent->bubbles = JS_IsBool(bubblesValue) ? 1 : 0;
@@ -179,10 +181,46 @@ EventInstance* EventInstance::fromNativeEvent(Event* event, NativeEvent* nativeE
   return new EventInstance(event, nativeEvent);
 }
 
+void EventInstance::setType(NativeString* type) const {
+#if ANDROID_32_BIT
+  nativeEvent->type = reinterpret_cast<int64_t>(type);
+#else
+  nativeEvent->type = type;
+#endif
+}
+
+EventTargetInstance* EventInstance::target() const {
+  return reinterpret_cast<NativeEventTarget*>(nativeEvent->target)->instance;
+}
+
+void EventInstance::setTarget(EventTargetInstance* target) const {
+#if ANDROID_32_BIT
+  nativeEvent->target = reinterpret_cast<int64_t>(target);
+#else
+  nativeEvent->target = target->nativeEventTarget;
+#endif
+}
+
+EventTargetInstance* EventInstance::currentTarget() const {
+  return reinterpret_cast<NativeEventTarget*>(nativeEvent->currentTarget)->instance;
+}
+
+void EventInstance::setCurrentTarget(EventTargetInstance* currentTarget) const {
+#if ANDROID_32_BIT
+  nativeEvent->currentTarget = reinterpret_cast<int64_t>(currentTarget);
+#else
+  nativeEvent->currentTarget = currentTarget->nativeEventTarget;
+#endif
+}
+
 EventInstance::EventInstance(Event* event, NativeEvent* nativeEvent) : nativeEvent(nativeEvent), Instance(event, "Event", nullptr, Event::kEventClassID, finalizer) {}
 EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit) : Instance(jsEvent, "Event", nullptr, Event::kEventClassID, finalizer) {
   JSValue v = JS_AtomToValue(m_ctx, eventType);
+#if ANDROID_32_BIT
+  nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(jsValueToNativeString(m_ctx, v).release())};
+#else
   nativeEvent = new NativeEvent{jsValueToNativeString(m_ctx, v).release()};
+#endif
   JS_FreeValue(m_ctx, v);
 
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -206,9 +244,6 @@ EventInstance::EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit
 
 void EventInstance::finalizer(JSRuntime* rt, JSValue val) {
   auto* event = static_cast<EventInstance*>(JS_GetOpaque(val, Event::kEventClassID));
-  if (event->context()->isValid()) {
-    JS_FreeValue(event->m_ctx, event->jsObject);
-  }
   delete event;
 }
 

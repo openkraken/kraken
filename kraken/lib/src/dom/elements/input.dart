@@ -14,13 +14,13 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class InputElement extends TextFormControlElement {
-  InputElement(EventTargetContext? context)
+  InputElement(context)
     : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true);
 
   double? get _defaultWidth {
     // size defaults to 20.
     // https://html.spec.whatwg.org/multipage/input.html#attr-input-size
-    return avgCharWidth * double.parse(properties[SIZE] ?? '20');
+    return avgCharWidth * double.parse(attributes[SIZE] ?? '20');
   }
 
   // Width set through style.

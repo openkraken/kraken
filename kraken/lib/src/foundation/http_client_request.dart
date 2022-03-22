@@ -119,7 +119,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       //   "data" URI.  A user agent MUST NOT send a Referer header field in an
       //   unsecured HTTP request if the referring page was received with a
       //   secure protocol.
-      Uri referrer = getReferrer(contextId);
+      Uri referrer = getEntrypointUri(contextId);
       bool isUnsafe = referrer.isScheme('https') && !uri.isScheme('https');
       bool isLocalRequest = uri.isScheme('file') || uri.isScheme('data') || uri.isScheme('assets');
       if (!isUnsafe && !isLocalRequest) {
@@ -158,7 +158,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         }
 
         // Step 3: Handle negotiate cache request header.
-        if (headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        if (cacheObject.valid && headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
           // ETag has higher priority of lastModified.
           if (cacheObject.eTag != null) {
             headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
@@ -170,8 +170,10 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
       request = await _createBackendClientRequest();
       // Send the real data to backend client.
-      request.add(_data);
-      _data.clear();
+      if (_data.isNotEmpty) {
+        await request.addStream(Stream.value(_data));
+        _data.clear();
+      }
 
       // Step 4: Lifecycle of shouldInterceptRequest
       HttpClientResponse? response;
@@ -222,8 +224,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
     } else {
       request = await _createBackendClientRequest();
-      request.add(_data);
-      _data.clear();
+      // Not using request.add, because large data will cause core exception.
+      if (_data.isNotEmpty) {
+        await request.addStream(Stream.value(_data));
+        _data.clear();
+      }
     }
 
     return _requestQueue.add(request.close);

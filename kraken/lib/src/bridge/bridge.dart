@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/module.dart';
 
+import 'binding.dart';
 import 'from_native.dart';
 import 'to_native.dart';
 
@@ -26,6 +27,9 @@ int initBridge() {
 
   // Register methods first to share ptrs for bridge polyfill.
   registerDartMethodsToCpp();
+
+  // Setup binding bridge.
+  BindingBridge.setup();
 
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_END);

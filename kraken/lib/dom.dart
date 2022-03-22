@@ -28,6 +28,7 @@ export 'src/dom/elements/edits.dart';
 export 'src/dom/elements/a.dart';
 export 'src/dom/elements/body.dart';
 export 'src/dom/elements/canvas/canvas.dart';
+export 'src/dom/elements/canvas/canvas_context_2d.dart';
 export 'src/dom/elements/img.dart';
 export 'src/dom/elements/input.dart';
 export 'src/dom/elements/text_form_control.dart';
