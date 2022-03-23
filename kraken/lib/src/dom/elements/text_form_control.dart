@@ -723,7 +723,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
       // @FIXME: dblclick event will be dispatched before the second touchEnd event currently,
       // so do not add selection on touchend to avoid cancel the selection added by dblclick.
-      if (event.type == EVENT_TOUCH_MOVE) {
+      if (event.type == EVENT_TOUCH_MOVE && _selectStartPosition != _selectEndPosition) {
         renderEditable!.selectPositionAt(
           from: _selectStartPosition!,
           to: _selectEndPosition,
