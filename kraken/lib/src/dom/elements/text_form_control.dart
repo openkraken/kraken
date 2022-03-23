@@ -688,6 +688,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
           kind: PointerDeviceKind.touch,
         );
         renderEditable!.handleTapDown(details);
+        renderEditable!.selectPositionAt(
+          from: _selectStartPosition!,
+          to: _selectStartPosition,
+          cause: SelectionChangedCause.drag,
+        );
+        focus();
       }
 
       // Cache text size on touch start to be used in touch move and touch end.
@@ -718,11 +724,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         return;
       }
 
-      renderEditable!.selectPositionAt(
-        from: _selectStartPosition!,
-        to: _selectEndPosition,
-        cause: SelectionChangedCause.drag,
-      );
+      if (event.type == EVENT_TOUCH_MOVE) {
+        renderEditable!.selectPositionAt(
+          from: _selectStartPosition!,
+          to: _selectEndPosition,
+          cause: SelectionChangedCause.drag,
+        );
+      }
       _isDragging = true;
     } else if (event.type == EVENT_CLICK) {
       renderEditable!.handleTap();
@@ -733,8 +741,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       _isDragging = false;
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       renderEditable!.handleDoubleTap();
-      // Focus element on double click.
-      focus();
       _textSelectionDelegate.showToolbar();
       _isDragging = false;
     }

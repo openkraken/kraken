@@ -206,9 +206,10 @@ class GestureDispatcher {
     // Stores the current TouchPoint to trigger the corresponding event.
     TouchPoint touchPoint = _toTouchPoint(event);
 
+    _addPoint(touchPoint);
+
     if (event is PointerDownEvent) {
       _gatherEventsInPath();
-      _addPointerDownEventToMatchedRecognizers(event);
 
       // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
@@ -217,9 +218,12 @@ class GestureDispatcher {
       }
     }
 
-    _addPoint(touchPoint);
-
     _handleTouchPoint(touchPoint);
+
+    // Make sure gesture event is dispatched after touchstart event.
+    if (event is PointerDownEvent) {
+      _addPointerDownEventToMatchedRecognizers(event);
+    }
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _removePoint(touchPoint);
