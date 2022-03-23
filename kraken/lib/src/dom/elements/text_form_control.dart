@@ -721,6 +721,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         return;
       }
 
+      // @FIXME: dblclick event will be dispatched before the second touchEnd event currently,
+      // so do not add selection on touchend to avoid cancel the selection added by dblclick.
       if (event.type == EVENT_TOUCH_MOVE) {
         renderEditable!.selectPositionAt(
           from: _selectStartPosition!,
@@ -1015,8 +1017,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
-    // Sync value to the text form control element property.
-    value = text;
     if (renderEditable != null) {
       if (text.isEmpty) {
         renderEditable!.text = placeholderTextSpan;
