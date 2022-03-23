@@ -231,7 +231,7 @@ class NetworkBundle extends KrakenBundle {
   }
 }
 
-Future<String> _resolveStringFromData(List<int> data, { Codec codec = utf8 }) {
+Future<String> _resolveStringFromData(List<int> data, { Codec codec = utf8 }) async {
   // Utf8 decode is fast enough with dart 2.10
   // reference: https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/asset_bundle.dart#L71
   // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
