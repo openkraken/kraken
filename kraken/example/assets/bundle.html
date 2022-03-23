@@ -1,18 +1,26 @@
+<!doctype html>
 <html>
   <head>
     <style>
-      .title {
+      .container {
+        margin: 64px 0 32px;
         text-align: center;
       }
+      .logo {
+        width: 128px;
+      }
       .p {
-        color: red;
+        color: #ff6633;
+        line-height: 1.7em;
       }
     </style>
   </head>
   <body>
-    <h1 class="title">Rendering in HTML.</h1>
+    <div class="container">
+      <img class="logo" src="./kraken.png" />
+    </div>
     <script>
-      console.log('Hello World!');
+      console.log('Welcome to Kraken!');
     </script>
     <script src="./bundle.js" ></script>
   </body>

@@ -43,7 +43,7 @@ class CanvasElement extends Element {
   CanvasElement([BindingContext? context])
       : super(
           context,
-          isIntrinsicBox: true,
+          isReplacedElement: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
         ) {

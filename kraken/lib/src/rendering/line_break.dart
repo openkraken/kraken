@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderLineBreak extends RenderIntrinsic {
+class RenderLineBreak extends RenderReplaced {
   RenderLineBreak(
     CSSRenderStyle renderStyle,
   ) : super(

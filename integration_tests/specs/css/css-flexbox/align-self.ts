@@ -1696,6 +1696,42 @@ describe('align-self', () => {
     });
   });
 
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          display: 'flex',
+          width: '200px',
+          height: '200px',
+          background: 'yellow',
+        },
+      },
+      [
+        (item = createElement('div', {
+          style: {
+            alignSelf: 'center',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green'
+          }
+        }))
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.alignSelf = '';
+      await snapshot();
+      done();
+    });
+  });
+
   it('stretch should not work with positioned child of no top bottom', async () => {
     let item = createElement('div', {
         style: {

@@ -211,7 +211,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
     this.textDirection = TextDirection.ltr,
     this.minLines = 1,
     this.maxLines = 1,
-  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+  }) : super(context, defaultStyle: _defaultStyle, isReplacedElement: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     scrollOffsetX = _scrollableX.position;
   }
@@ -798,7 +798,7 @@ class InputElement extends Element implements TextInputClient, TickerProvider {
   }
 
   RenderInputLeaderLayer createRenderBox() {
-    assert(renderBoxModel is RenderIntrinsic);
+    assert(renderBoxModel is RenderReplaced);
     RenderEditable renderEditable = createRenderEditable();
 
     _renderInputBox = RenderInputBox(
@@ -1395,8 +1395,8 @@ class RenderInputLeaderLayer extends RenderLeaderLayer {
   }
 
   Offset? get _offset {
-    RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
-    RenderStyle renderStyle = renderIntrinsic.renderStyle;
+    RenderReplaced renderReplaced = parent as RenderReplaced;
+    RenderStyle renderStyle = renderReplaced.renderStyle;
 
     double intrinsicInputHeight = renderEditable!.preferredLineHeight
       + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
@@ -1438,8 +1438,8 @@ class RenderInputBox extends RenderProxyBox {
         constraints.maxWidth : childSize.width;
 
       RenderInputLeaderLayer renderLeaderLayer = parent as RenderInputLeaderLayer;
-      RenderIntrinsic renderIntrinsic = renderLeaderLayer.parent as RenderIntrinsic;
-      RenderStyle renderStyle = renderIntrinsic.renderStyle;
+      RenderReplaced renderReplaced = renderLeaderLayer.parent as RenderReplaced;
+      RenderStyle renderStyle = renderReplaced.renderStyle;
 
       double height;
       // Height priority: height > max(line-height, child height) > child height

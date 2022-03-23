@@ -10,9 +10,12 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderIntrinsic extends RenderBoxModel
+/// RenderBox of a replaced element whose content is outside the scope of the CSS formatting model,
+/// such as an image or embedded document.
+/// https://drafts.csswg.org/css-display/#replaced-element
+class RenderReplaced extends RenderBoxModel
     with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
-  RenderIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
+  RenderReplaced(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
 
   @override
   BoxSizeType get widthSizeType {
@@ -25,6 +28,11 @@ class RenderIntrinsic extends RenderBoxModel
     bool heightDefined = renderStyle.height.isNotAuto || renderStyle.minHeight.isNotAuto;
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
+
+  // Whether the renderObject of replaced element is in lazy rendering.
+  // Set true when the renderObject is not rendered yet and set false after
+  // the renderObject is rendered.
+  bool isInLazyRendering = false;
 
   @override
   void setupParentData(RenderBox child) {
@@ -116,6 +124,13 @@ class RenderIntrinsic extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
+    // Should not paint other style such as box decoration when renderObject
+    // is in lazy loading and not rendered yet.
+    if (isInLazyRendering) {
+      paintIntersectionObserver(context, offset, performPaint);
+      return;
+    }
+
     if (shouldPaint) {
       paintBoxModel(context, offset);
     }
@@ -142,10 +157,10 @@ class RenderIntrinsic extends RenderBoxModel
     }
   }
 
-  RenderRepaintBoundaryIntrinsic toRepaintBoundaryIntrinsic() {
+  RenderRepaintBoundaryReplaced toRepaintBoundaryReplaced() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderRepaintBoundaryIntrinsic newChild = RenderRepaintBoundaryIntrinsic(renderStyle);
+    RenderRepaintBoundaryReplaced newChild = RenderRepaintBoundaryReplaced(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
@@ -159,16 +174,16 @@ class RenderIntrinsic extends RenderBoxModel
   }
 }
 
-class RenderRepaintBoundaryIntrinsic extends RenderIntrinsic {
-  RenderRepaintBoundaryIntrinsic(CSSRenderStyle renderStyle) : super(renderStyle);
+class RenderRepaintBoundaryReplaced extends RenderReplaced {
+  RenderRepaintBoundaryReplaced(CSSRenderStyle renderStyle) : super(renderStyle);
 
   @override
   bool get isRepaintBoundary => true;
 
-  RenderIntrinsic toIntrinsic() {
+  RenderReplaced toReplaced() {
     RenderObject? childRenderObject = child;
     child = null;
-    RenderIntrinsic newChild = RenderIntrinsic(renderStyle);
+    RenderReplaced newChild = RenderReplaced(renderStyle);
     newChild.child = childRenderObject as RenderBox?;
     return copyWith(newChild);
   }
