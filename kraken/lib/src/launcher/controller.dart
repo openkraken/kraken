@@ -1153,7 +1153,7 @@ class KrakenController {
   }
 
   // Execute the content from entrypoint bundle.
-  void _evaluateEntrypoint({ AnimationController? animationController }) {
+  void _evaluateEntrypoint({ AnimationController? animationController }) async {
     // @HACK: Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
     if (animationController != null) {
@@ -1167,7 +1167,7 @@ class KrakenController {
 
     assert(!_view._disposed, 'Kraken have already disposed');
     if (_entrypoint != null) {
-      _entrypoint!.eval(_view.contextId);
+      await _entrypoint!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);

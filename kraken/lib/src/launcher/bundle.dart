@@ -128,7 +128,7 @@ abstract class KrakenBundle {
     return DataBundle(data, url, contentType: bytecode1);
   }
 
-  void eval(int? contextId) {
+  Future<void> eval(int? contextId) async {
     if (!isResolved) {
       debugPrint('The kraken bundle $this is not resolved to evaluate.');
       return;
@@ -142,13 +142,13 @@ abstract class KrakenBundle {
       Uint8List data = this.data!;
       if (_isHTML) {
         // parse html.
-        parseHTML(contextId, _resolveStringFromData(data));
+        parseHTML(contextId, await _resolveStringFromData(data));
       } else if (_isJSString) {
-        evaluateScripts(contextId, _resolveStringFromData(data), url, 0);
+        evaluateScripts(contextId, await _resolveStringFromData(data), url, 0);
       } else if (_isJSBytecode) {
         evaluateQuickjsByteCode(contextId, data);
       } else if (_isCSS) {
-        _addCSSStyleSheet(_resolveStringFromData(data), contextId: contextId);
+        _addCSSStyleSheet(await _resolveStringFromData(data), contextId: contextId);
       } else {
         // The resource type can not be evaluated.
         throw FlutterError('Can\'t evaluate content of $url');
@@ -158,6 +158,9 @@ abstract class KrakenBundle {
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
     }
+
+    // To release memory.
+    data = null;
   }
 
   bool get _isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
@@ -228,9 +231,17 @@ class NetworkBundle extends KrakenBundle {
   }
 }
 
-String _resolveStringFromData(List<int> data, { Codec codec = utf8 }) {
+Future<String> _resolveStringFromData(List<int> data, { Codec codec = utf8 }) {
   // Utf8 decode is fast enough with dart 2.10
-  return codec.decode(data);
+  // reference: https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/asset_bundle.dart#L71
+  // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
+  // on a Pixel 4.
+  if (data.length < 50 * 1024) {
+    return codec.decode(data);
+  }
+  // For strings larger than 50 KB, run the computation in an isolate to
+  // avoid causing main thread jank.
+  return compute((data) => codec.decode(data), data);
 }
 
 class AssetsBundle extends KrakenBundle {
