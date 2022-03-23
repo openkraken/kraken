@@ -22,21 +22,12 @@ class InputElement extends TextFormControlElement {
     super.setAttribute(qualifiedName, val);
     switch (qualifiedName) {
       case 'value':
-        value = attributeToProperty<String>(val);
+        defaultValue = attributeToProperty<String>(val);
         break;
       case 'size':
         size = attributeToProperty<int>(val);
         break;
     }
-  }
-
-  @override
-  String get defaultValue => getAttribute('value') ?? '';
-
-  @override
-  set value(String? text) {
-    String value = setAndFormatValue(text);
-    internalSetAttribute('value', value);
   }
 
   int get size => int.tryParse(getAttribute('size') ?? '') ?? 0;

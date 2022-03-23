@@ -254,7 +254,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     switch (key) {
       case 'width': width = castToType<num>(val).toInt(); break;
       case 'height': height = castToType<num>(val).toInt(); break;
-      case 'value': value = castToType<String?>(val); break;
+      case 'value':
+        value = castToType<String?>(val);
+        hasDirtyValue = true;
+        break;
       case 'defaultValue': defaultValue = castToType<String?>(val); break;
       case 'accept': accept = castToType<String>(val); break;
       case 'autocomplete': autocomplete = castToType<String>(val); break;
@@ -315,40 +318,46 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     internalSetAttribute('height', value.toString());
   }
 
-  // Whether value has been set manually.
-  bool _hasValueSet = false;
+  // Whether value has been changed by user.
+  bool hasDirtyValue = false;
 
   String get value => _getValue();
 
   set value(String? text) {
-    setAndFormatValue(text);
-    _hasValueSet = true;
+    setValue(text);
   }
 
-  String setAndFormatValue(String? text) {
+  String _defaultValue = '';
+  String get defaultValue => _defaultValue;
+
+  set defaultValue(String? text) {
+    text ??= '';
+    if (!hasDirtyValue) {
+      _defaultValue = text;
+      value = text;
+    }
+  }
+
+  String sanitizeValue(String? text) {
     text ??= '';
     if (text.length > _maxLength) {
       // Slice to max length.
       text = text.substring(0, _maxLength);
     }
+    return text;
+  }
+
+  String setValue(String? text) {
+    String newValue = sanitizeValue(text);
     TextRange composing = _textSelectionDelegate._textEditingValue.composing;
-    TextSelection selection = TextSelection.collapsed(offset: text.length);
+    TextSelection selection = TextSelection.collapsed(offset: newValue.length);
     TextEditingValue newTextEditingValue = TextEditingValue(
-      text: text,
+      text: newValue,
       selection: selection,
       composing: composing,
     );
     _formatAndSetValue(newTextEditingValue);
-    return text;
-  }
-
-  String get defaultValue => '';
-
-  set defaultValue(String? text) {
-    // Default value is only valid when value property is not set.
-    if (!_hasValueSet) {
-      setAndFormatValue(text);
-    }
+    return newValue;
   }
 
   String get accept => getAttribute('accept') ?? '';

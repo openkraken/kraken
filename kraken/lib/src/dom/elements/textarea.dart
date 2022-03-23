@@ -31,9 +31,6 @@ class TextareaElement extends TextFormControlElement {
     }
   }
 
-  @override
-  String get defaultValue => textContent;
-
   int get rows => int.tryParse(getAttribute('rows') ?? '') ?? 0;
   set rows(int value) {
     if (value < 0) value = 0;
@@ -140,7 +137,6 @@ class TextareaElement extends TextFormControlElement {
   }
 
   void updateDefaultValue() {
-    // Text content of textarea acts as default value when value is not set manually.
     defaultValue = textContent;
   }
 }
