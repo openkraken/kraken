@@ -282,6 +282,15 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   @override
+  invokeBindingMethod(String method, List args) {
+    switch (method) {
+      case 'focus': return focus();
+      case 'blur': return blur();
+      default: return super.invokeBindingMethod(method, args);
+    }
+  }
+
+  @override
   void setAttribute(String qualifiedName, String val) {
     super.setAttribute(qualifiedName, val);
     switch (qualifiedName) {
@@ -320,6 +329,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   // Whether value has been changed by user.
+  // https://www.w3.org/TR/2010/WD-html5-20101019/the-input-element.html#concept-input-value-dirty-flag
   bool hasDirtyValue = false;
 
   String get value => _getValue();
