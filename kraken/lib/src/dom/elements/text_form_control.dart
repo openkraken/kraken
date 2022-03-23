@@ -83,7 +83,6 @@ class EditableTextDelegate implements TextSelectionDelegate {
     if (_selectionOverlay == null || _selectionOverlay.toolbarIsVisible) {
       return false;
     }
-
     _selectionOverlay.showToolbar();
     return true;
   }
@@ -670,12 +669,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   Size? _textSize;
 
-  // Whether gesture is dragging.
-  bool _isDragging = false;
-
   void _handleEditable(Event event) {
     if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
+      _textSelectionDelegate.hideToolbar(false);
 
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
@@ -694,7 +691,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         renderEditable!.handleTapDown(details);
         renderEditable!.selectPositionAt(
           from: _selectStartPosition!,
-          to: _selectStartPosition,
           cause: SelectionChangedCause.drag,
         );
         focus();
@@ -704,10 +700,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     } else if (event.type == EVENT_TOUCH_MOVE ||
       event.type == EVENT_TOUCH_END
     ) {
-      if (event.type == EVENT_TOUCH_END) {
-        _textSelectionDelegate.hideToolbar(false);
-      }
-
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
 
@@ -721,27 +713,23 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         return;
       }
 
-      // @FIXME: dblclick event will be dispatched before the second touchEnd event currently,
-      // so do not add selection on touchend to avoid cancel the selection added by dblclick.
-      if (event.type == EVENT_TOUCH_MOVE && _selectStartPosition != _selectEndPosition) {
+      bool isToolbarVisible = _selectionOverlay != null && _selectionOverlay!.toolbarIsVisible;
+      // Only enable text selection when toolbar is visible.
+      if (event.type == EVENT_TOUCH_MOVE && _selectStartPosition != _selectEndPosition && isToolbarVisible) {
         renderEditable!.selectPositionAt(
           from: _selectStartPosition!,
           to: _selectEndPosition,
           cause: SelectionChangedCause.drag,
         );
       }
-      _isDragging = true;
     } else if (event.type == EVENT_CLICK) {
       renderEditable!.handleTap();
-      _isDragging = false;
-    } else if (!_isDragging && event.type == EVENT_LONG_PRESS) {
+    } else if (event.type == EVENT_LONG_PRESS) {
       renderEditable!.handleLongPress();
       _textSelectionDelegate.showToolbar();
-      _isDragging = false;
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       renderEditable!.handleDoubleTap();
       _textSelectionDelegate.showToolbar();
-      _isDragging = false;
     }
   }
 
