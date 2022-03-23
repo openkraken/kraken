@@ -345,7 +345,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         ? minWidth
         : minHeight;
 
-    if (child is RenderIntrinsic &&
+    if (child is RenderReplaced &&
         childRenderStyle.intrinsicRatio != null &&
         _isHorizontalFlexDirection &&
         childRenderStyle.width.isAuto) {
@@ -353,7 +353,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           ? childRenderStyle.height.computedValue * childRenderStyle.intrinsicRatio!
           : childRenderStyle.intrinsicWidth;
       minMainSize = math.min(contentSize, transferredSize);
-    } else if (child is RenderIntrinsic &&
+    } else if (child is RenderReplaced &&
         childRenderStyle.intrinsicRatio != null &&
         !_isHorizontalFlexDirection &&
         childRenderStyle.height.isAuto) {
@@ -436,7 +436,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildMainAxisClip(RenderBoxModel renderBoxModel) {
-    if (renderBoxModel is RenderIntrinsic) {
+    if (renderBoxModel is RenderReplaced) {
       return false;
     }
     if (_isHorizontalFlexDirection) {
@@ -1253,7 +1253,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       }
     }
 
-    if (child is RenderIntrinsic && child.renderStyle.intrinsicRatio != null) {
+    if (child is RenderReplaced && child.renderStyle.intrinsicRatio != null) {
       _overrideReplacedChildLength(
         child,
         childFlexedMainSize,
@@ -1288,7 +1288,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   // length is not specified on the other axis, the length needs to be
   // overrided in the other axis.
   void _overrideReplacedChildLength(
-    RenderIntrinsic child,
+    RenderReplaced child,
     double? childFlexedMainSize,
     double? childStretchedCrossSize,
   ) {
@@ -1311,7 +1311,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Override replaced child height when its height is auto.
   void _overrideReplacedChildHeight(
-    RenderIntrinsic child,
+    RenderReplaced child,
   ) {
     if (child.renderStyle.height.isAuto) {
       double maxConstraintWidth = child.renderStyle.borderBoxLogicalWidth!;
@@ -1333,7 +1333,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   // Override replaced child width when its width is auto.
   void _overrideReplacedChildWidth(
-    RenderIntrinsic child,
+    RenderReplaced child,
     ) {
     if (child.renderStyle.width.isAuto) {
       double maxConstraintHeight = child.renderStyle.borderBoxLogicalHeight!;
