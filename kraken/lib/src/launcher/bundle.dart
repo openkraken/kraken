@@ -23,7 +23,7 @@ const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
 
 final ContentType css = ContentType('text', 'css', charset: 'utf-8');
-// https://mathiasbynens.be/demo/javascript-mime-type
+// MIME types suits JavaScript: https://mathiasbynens.be/demo/javascript-mime-type
 final ContentType javascript = ContentType('text', 'javascript', charset: 'utf-8');
 final ContentType applicationJavascript = ContentType('application', 'javascript', charset: 'utf-8');
 final ContentType applicationXJavascript = ContentType('application', 'x-javascript', charset: 'utf-8');
