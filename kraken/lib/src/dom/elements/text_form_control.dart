@@ -625,7 +625,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       textDirection: TextDirection.ltr
     );
 
-    textPainter.layout();
+    double maxWidth = isMultiline
+      ? renderEditable!.size.width
+      : double.infinity;
+
+    textPainter.layout(maxWidth: maxWidth);
 
     return textPainter.size;
   }
@@ -695,7 +699,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         );
         focus();
       }
-
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
     } else if (event.type == EVENT_TOUCH_MOVE ||
@@ -711,16 +714,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       Touch touch = touches.item(0);
       Offset _selectEndPosition = Offset(touch.screenX, touch.screenY);
 
-      // Disable text selection and enable scrolling when text size is larger than text form control element size.
-      if (_textSize!.width > renderEditable!.size.width
-       || _textSize!.height > renderEditable!.size.height) {
-        if (event.type == EVENT_TOUCH_END && _selectStartPosition == _selectEndPosition) {
-          renderEditable!.selectPositionAt(
-            from: _selectStartPosition!,
-            to: _selectEndPosition,
-            cause: SelectionChangedCause.drag,
-          );
-        }
+      // Disable text selection and enable scrolling when text size is larger than
+      // text form control element size.
+      if ((!isMultiline && (_textSize!.width > renderEditable!.size.width))
+       || (isMultiline && (_textSize!.height > renderEditable!.size.height))) {
         return;
       }
 
