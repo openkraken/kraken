@@ -177,6 +177,35 @@ mixin CSSSizingMixin on RenderStyle {
     // renderBoxModel has tight constraints which will prevent parent from marking.
     if (boxModel.parent is RenderBoxModel) {
       (boxModel.parent as RenderBoxModel).markNeedsLayout();
+
+      // For positioned element with no left&right or top&bottom, the offset of its positioned placeholder will change
+      // when its size has changed in flex layout.
+      //
+      // Take following html for example, div of id=2 should reposition to align center in horizontal direction
+      // when its width has changed.
+      // <div style="display: flex; height: 100px; justify-content: center;">
+      //   <div id=2 style="position: absolute; width: 50px; height: 50px;">
+      //   </div>
+      // </div>
+      //
+      // The renderBox of position element and its positioned placeholder will not always share the same parent,
+      // so it needs to mark the positioned placeholder as needs layout additionally to mark sure the renderBox
+      // of position element can get the updated offset of its positioned placeholder when it is layouted.
+      RenderStyle renderStyle = boxModel.renderStyle;
+      RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
+
+      RenderPositionPlaceholder? renderPositionPlaceholder = boxModel.renderPositionPlaceholder;
+      if (renderPositionPlaceholder != null
+        && renderPositionPlaceholder.parent is RenderFlexLayout
+        && childParentData.isPositioned
+        && ((renderStyle.left.isAuto && renderStyle.right.isAuto)
+          || (renderStyle.top.isAuto && renderStyle.bottom.isAuto))
+      ) {
+        RenderLayoutBox? placeholderParent = renderPositionPlaceholder.parent as RenderLayoutBox;
+        // Mark parent as _needsLayout directly as RenderPositionHolder has tight constraints which will
+        // prevent the _needsLayout flag to bubble up the renderObject tree.
+        placeholderParent.markNeedsLayout();
+      }
     }
   }
 

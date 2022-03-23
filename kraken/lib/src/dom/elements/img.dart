@@ -52,7 +52,15 @@ class ImageElement extends Element {
   int _frameCount = 0;
 
   bool _isListeningStream = false;
-  bool _isInLazyLoading = false;
+
+  bool get _isInLazyLoading {
+    RenderReplaced? renderReplaced;
+    if (renderBoxModel != null) {
+      renderReplaced = renderBoxModel as RenderReplaced;
+    }
+    return renderReplaced != null && renderReplaced.isInLazyRendering;
+  }
+
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
   // A boolean value which indicates whether or not the image has completely loaded.
   bool _complete = false;
@@ -78,7 +86,7 @@ class ImageElement extends Element {
   ImageElement([BindingContext? context])
       : super(
       context,
-      isIntrinsicBox: true,
+      isReplacedElement: true,
       defaultStyle: _defaultStyle) {
   }
 
@@ -102,7 +110,7 @@ class ImageElement extends Element {
   void setBindingProperty(String key, value) {
     switch (key) {
       case 'src': src = castToType<String>(value); break;
-      case 'loading': loading = castToType<bool>(value); break;
+      case 'loading': loading = castToType<String>(value); break;
       case 'width': width = castToType<int>(value); break;
       case 'height': height = castToType<int>(value); break;
       case 'scaling': scaling = castToType<String>(value); break;
@@ -115,7 +123,7 @@ class ImageElement extends Element {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
       case 'src': src = attributeToProperty<String>(value); break;
-      case 'loading': loading = attributeToProperty<bool>(value); break;
+      case 'loading': loading = attributeToProperty<String>(value); break;
       case 'width': width = attributeToProperty<int>(value); break;
       case 'height': height = attributeToProperty<int>(value); break;
       case 'scaling': scaling = attributeToProperty<String>(value); break;
@@ -136,10 +144,11 @@ class ImageElement extends Element {
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
-        _isInLazyLoading = true;
+        RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+        renderReplaced.isInLazyRendering = true;
 
         // When detach renderer, all listeners will be cleared.
-        renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
+        renderReplaced.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _loadImage();
       }
@@ -241,13 +250,12 @@ class ImageElement extends Element {
     // When appear
     if (entry.isIntersecting) {
       // Once appear remove the listener
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _loadImage();
     }
   }
 
-  void _resetLazyLoading() {
-    _isInLazyLoading = false;
+  void _removeIntersectionChangeListener() {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -280,6 +288,9 @@ class ImageElement extends Element {
   }
 
   void _resizeImage() {
+    // Only need to resize image after image is fully loaded.
+    if (!_complete) return;
+
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
@@ -322,7 +333,7 @@ class ImageElement extends Element {
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _stopListeningStream(keepStreamAlive: true);
     }
   }
@@ -424,6 +435,11 @@ class ImageElement extends Element {
       forceToRepaintBoundary = true;
     }
 
+    if (renderBoxModel != null) {
+      RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+      renderReplaced.isInLazyRendering = false;
+    }
+
     // Image may be detached when image frame loaded.
     if (!isRendererAttached) return;
 
@@ -487,12 +503,11 @@ class ImageElement extends Element {
   }
 
   // ReadOnly additional property.
-  bool get loading => hasAttribute('loading');
-  set loading(bool value) {
-    if (value) {
-      internalSetAttribute('loading', '');
-    } else {
-      removeAttribute('loading');
+  String get loading => getAttribute(LOADING) ?? '';
+  set loading(String value) {
+    internalSetAttribute(SCALING, value);
+    if (_isInLazyLoading) {
+      _removeIntersectionChangeListener();
     }
   }
 

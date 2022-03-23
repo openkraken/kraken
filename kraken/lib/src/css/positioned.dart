@@ -58,7 +58,7 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if (left.isNotAuto && right.isNotAuto &&
-    (child is! RenderIntrinsic || width.isNotAuto)) {
+    (child is! RenderReplaced || width.isNotAuto)) {
     if (marginLeft.isAuto) {
       double leftValue = left.computedValue;
       double rightValue = right.computedValue;
@@ -73,7 +73,7 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   }
 
   if (top.isNotAuto && bottom.isNotAuto &&
-    (child is! RenderIntrinsic || height.isNotAuto)) {
+    (child is! RenderReplaced || height.isNotAuto)) {
     if (marginTop.isAuto) {
       double topValue = top.computedValue;
       double bottomValue = bottom.computedValue;

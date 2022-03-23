@@ -252,4 +252,79 @@ describe('flexbox-position-absolute', () => {
 
     await snapshot();
   });
+
+  it('positioned child of no left and right should reposition when its size changed', async (done) => {
+    let child;
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '200px',
+          height: '200px',
+          backgroundColor: 'yellow',
+          textAlign: 'center'
+        },
+      }, [
+        (child = createElement('div', {
+          style: {
+            position: 'absolute',
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green'
+          }
+        }))
+      ]
+    );
+    document.body.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      child.style.width = '50px';
+      await snapshot();
+      done();
+    });
+
+    await snapshot();
+  });
+
+  it('positioned image of no left and right should reposition when its size changed', async (done) => {  
+    const imageURL = 'assets/100x100-green.png';
+    const img = document.createElement('img');
+    img.style.position = 'absolute';
+    img.style.border = '5px solid black';
+    img.style.width = '80px';
+    img.style.height = '80px';
+    img.setAttribute('loading', 'lazy');
+    img.setAttribute(
+      'src',
+      imageURL
+    );
+    img.addEventListener('load', async () => {
+      await snapshot();
+      done();
+    });
+
+    let div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'yellow'
+        },
+      }
+    );
+
+    document.body.appendChild(div);
+
+    div.appendChild(img);
+
+    await snapshot();
+  });
+
 });
