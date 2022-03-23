@@ -187,7 +187,8 @@ class KrakenViewController
     // Blur input element when new input focused.
     window.addEventListener(EVENT_CLICK, (event) {
       if (event.target is Element) {
-        if (document.focusedElement != null) {
+        Element? focusedElement = document.focusedElement;
+        if (focusedElement != null && focusedElement != event.target) {
           document.focusedElement!.blur();
         }
         (event.target as Element).focus();
