@@ -140,8 +140,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextFormControlElement(context, {
     this.isMultiline = false,
     this.defaultStyle,
-    this.isIntrinsicBox,
-  }) : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true) {
+    this.isReplacedElement,
+  }) : super(context, defaultStyle: _defaultStyle, isReplacedElement: true) {
     _textSelectionDelegate = EditableTextDelegate(this);
     _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
     _scrollable = KrakenScrollable(
@@ -210,8 +210,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextInputConfiguration? _textInputConfiguration;
 
   Map<String, dynamic>? defaultStyle;
-  // Whether element allows children.
-  bool? isIntrinsicBox = false;
+
+  // Is element an replaced element.
+  bool? isReplacedElement = false;
 
   String _getValue() {
     TextEditingValue value = _textSelectionDelegate._textEditingValue;

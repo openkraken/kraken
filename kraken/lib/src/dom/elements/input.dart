@@ -15,7 +15,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class InputElement extends TextFormControlElement {
   InputElement(context)
-    : super(context, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+    : super(context, defaultStyle: _defaultStyle, isReplacedElement: true);
 
   @override
   void setAttribute(String qualifiedName, String val) {

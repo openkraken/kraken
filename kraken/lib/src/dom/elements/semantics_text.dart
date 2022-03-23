@@ -69,7 +69,7 @@ class BRElement extends Element {
   RenderLineBreak? _renderLineBreak;
 
   BRElement([BindingContext? context])
-      : super(context, isIntrinsicBox: true);
+      : super(context, isReplacedElement: true);
 
   @override
   RenderBoxModel? get renderBoxModel => _renderLineBreak;

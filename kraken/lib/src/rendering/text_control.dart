@@ -43,8 +43,8 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
       return Offset(0, 0);
     }
 
-    RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
-    RenderStyle renderStyle = renderIntrinsic.renderStyle;
+    RenderReplaced renderReplaced = parent as RenderReplaced;
+    RenderStyle renderStyle = renderReplaced.renderStyle;
 
     double intrinsicHeight = (child as RenderEditable).preferredLineHeight
       + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
@@ -72,8 +72,8 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
       child!.layout(constraints, parentUsesSize: true);
       Size childSize = child!.size;
 
-      RenderIntrinsic renderIntrinsic = parent as RenderIntrinsic;
-      RenderStyle renderStyle = renderIntrinsic.renderStyle;
+      RenderReplaced renderReplaced = parent as RenderReplaced;
+      RenderStyle renderStyle = renderReplaced.renderStyle;
 
       double width;
       if (constraints.maxWidth != double.infinity) {

@@ -16,7 +16,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class TextareaElement extends TextFormControlElement {
   TextareaElement(context)
-    : super(context, isMultiline: true, defaultStyle: _defaultStyle, isIntrinsicBox: true);
+    : super(context, isMultiline: true, defaultStyle: _defaultStyle, isReplacedElement: true);
 
   @override
   void setAttribute(String qualifiedName, String val) {
