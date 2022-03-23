@@ -13,9 +13,9 @@ interface InputElement extends Element {
   disabled: boolean;
   min: string;
   max: string;
-  minLength: number;
-  maxLength: number;
-  size: number;
+  minLength: long;
+  maxLength: long;
+  size: long;
   multiple: boolean;
   name: string;
   step: string;
