@@ -215,9 +215,9 @@ class GestureDispatcher {
       if (_target != null) {
         _bindEventTargetWithTouchPoint(touchPoint, _target!);
       }
-
-      _addPoint(touchPoint);
     }
+
+    _addPoint(touchPoint);
 
     _handleTouchPoint(touchPoint);
 
