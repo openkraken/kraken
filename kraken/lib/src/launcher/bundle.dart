@@ -39,7 +39,7 @@ String? getBundlePathFromEnv() {
 
 List<String> _supportedByteCodeVersions = ['1'];
 
-bool _isByteCodeSupported(String mimeType, Uri uri) {
+bool _isBytecodeSupported(String mimeType, Uri uri) {
   for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
     if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
     if (uri.path.endsWith('.kbc' + _supportedByteCodeVersions[i])) return true;
@@ -143,9 +143,9 @@ abstract class KrakenBundle {
       if (_isHTML) {
         // parse html.
         parseHTML(contextId, await _resolveStringFromData(data));
-      } else if (_isJSString) {
+      } else if (_isJavascript) {
         evaluateScripts(contextId, await _resolveStringFromData(data), url, 0);
-      } else if (_isJSBytecode) {
+      } else if (_isBytecode) {
         evaluateQuickjsByteCode(contextId, data);
       } else if (_isCSS) {
         _addCSSStyleSheet(await _resolveStringFromData(data), contextId: contextId);
@@ -165,11 +165,11 @@ abstract class KrakenBundle {
 
   bool get _isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
   bool get _isCSS => contentType.mimeType == css.mimeType || _isUriExt('.css');
-  bool get _isJSString => contentType.mimeType == javascript.mimeType ||
+  bool get _isJavascript => contentType.mimeType == javascript.mimeType ||
                           contentType.mimeType == applicationJavascript.mimeType ||
                           contentType.mimeType == applicationXJavascript.mimeType ||
                           _isUriExt('.js');
-  bool get _isJSBytecode => _isByteCodeSupported(contentType.mimeType, _uri!);
+  bool get _isBytecode => _isBytecodeSupported(contentType.mimeType, _uri!);
 
   bool _isUriExt(String ext) {
     Uri? uri = resolvedUri;
@@ -293,7 +293,7 @@ class FileBundle extends KrakenBundle {
       data = await file.readAsBytes();
       if (_isHTML) {
         contentType = ContentType.html;
-      } else if (_isJSBytecode) {
+      } else if (_isBytecode) {
         contentType = bytecode1;
       } else if (_isCSS) {
         contentType = css;
