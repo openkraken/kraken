@@ -119,7 +119,7 @@ abstract class KrakenBundle {
     } else if (_isFileScheme(url)) {
       return FileBundle(url);
     } else if (_isDefaultUrl(url)) {
-      return DataBundle.fromString('', url);
+      return DataBundle.fromString('', url, contentType: javascript);
     } else {
       throw FlutterError('Unsupported url. $url');
     }
