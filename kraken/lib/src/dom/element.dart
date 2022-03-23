@@ -1568,11 +1568,6 @@ abstract class Element
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
 
-      // If prev flush paint with error, render object keeps NEEDS-PAINT flag,
-      // will cause layer not exists.
-      assert(!_renderBoxModel.debugNeedsPaint, () {
-        debugPrint('Failed toBlob at $this, flush painting may raise error.');
-      });
       if (_renderBoxModel.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
