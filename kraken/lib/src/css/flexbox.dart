@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
@@ -218,18 +217,6 @@ mixin CSSFlexboxMixin on RenderStyle {
     if (renderBoxModel is RenderFlexLayout) {
       renderBoxModel!.markNeedsLayout();
     }
-  }
-
-  @override
-  AlignItems get effectiveAlignItems {
-    if (CSSFlex.isVerticalFlexDirection(flexDirection)) {
-      if (textAlign == TextAlign.right) {
-        return AlignItems.flexEnd;
-      } else if (textAlign == TextAlign.center) {
-        return AlignItems.center;
-      }
-    }
-    return alignItems;
   }
 
   @override

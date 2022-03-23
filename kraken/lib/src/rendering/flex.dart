@@ -1857,7 +1857,7 @@ class RenderFlexLayout extends RenderLayoutBox {
             alignment = 'baseline';
             break;
           case AlignSelf.auto:
-            switch (renderStyle.effectiveAlignItems) {
+            switch (renderStyle.alignItems) {
               case AlignItems.flexStart:
               case AlignItems.start:
               case AlignItems.stretch:
@@ -1882,6 +1882,26 @@ class RenderFlexLayout extends RenderLayoutBox {
                 break;
             }
             break;
+        }
+
+        // Text-align should only work for text node.
+        // @TODO: Need to implement flex formatting context to unify with W3C spec.
+        // Each contiguous sequence of child text runs is wrapped in an anonymous block container flex item.
+        // Text is aligned in anonymous block container rather than flexbox container.
+        // https://www.w3.org/TR/css-flexbox-1/#flex-items
+
+        if (renderStyle.alignItems == AlignItems.stretch
+          && child is RenderTextBox
+          && !_isHorizontalFlexDirection
+        ) {
+          TextAlign textAlign = renderStyle.textAlign;
+          if (textAlign == TextAlign.start) {
+            alignment = 'start';
+          } else if (textAlign == TextAlign.end) {
+            alignment = 'end';
+          } else if (textAlign == TextAlign.center) {
+            alignment = 'center';
+          }
         }
 
         childCrossPosition = _getChildCrossAxisOffset(
@@ -2006,7 +2026,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     AlignSelf alignSelf = _getAlignSelf(child);
     bool isChildAlignmentStretch = alignSelf != AlignSelf.auto
       ? alignSelf == AlignSelf.stretch
-      : renderStyle.effectiveAlignItems == AlignItems.stretch;
+      : renderStyle.alignItems == AlignItems.stretch;
 
     if (!isChildAlignmentStretch) return false;
 
