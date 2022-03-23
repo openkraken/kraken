@@ -345,7 +345,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         ? minWidth
         : minHeight;
 
-    if (child is RenderIntrinsic &&
+    if (child is RenderReplaced &&
         childRenderStyle.intrinsicRatio != null &&
         _isHorizontalFlexDirection &&
         childRenderStyle.width.isAuto) {
@@ -353,7 +353,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           ? childRenderStyle.height.computedValue * childRenderStyle.intrinsicRatio!
           : childRenderStyle.intrinsicWidth;
       minMainSize = math.min(contentSize, transferredSize);
-    } else if (child is RenderIntrinsic &&
+    } else if (child is RenderReplaced &&
         childRenderStyle.intrinsicRatio != null &&
         !_isHorizontalFlexDirection &&
         childRenderStyle.height.isAuto) {
@@ -436,7 +436,7 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   bool _isChildMainAxisClip(RenderBoxModel renderBoxModel) {
-    if (renderBoxModel is RenderIntrinsic) {
+    if (renderBoxModel is RenderReplaced) {
       return false;
     }
     if (_isHorizontalFlexDirection) {
@@ -1326,7 +1326,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
-          if (child is RenderIntrinsic &&
+          if (child is RenderReplaced &&
             child.renderStyle.width.isAuto &&
             child.renderStyle.minWidth.isAuto &&
             child.renderStyle.intrinsicRatio != null
@@ -1364,7 +1364,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           // Replaced element in flexbox with no size in cross axis should stretch according the intrinsic ratio.
-          if (child is RenderIntrinsic &&
+          if (child is RenderReplaced &&
             child.renderStyle.height.isAuto &&
             child.renderStyle.minHeight.isAuto &&
             child.renderStyle.intrinsicRatio != null

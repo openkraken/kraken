@@ -1048,7 +1048,7 @@ class RenderBoxModel extends RenderBox
 
   /// [RenderLayoutBox] real paint things after basiclly paint box model.
   /// Override which to paint layout or intrinsic things.
-  /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
+  /// Used by [RenderReplaced], [RenderFlowLayout], [RenderFlexLayout].
   void performPaint(PaintingContext context, Offset offset) {
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }

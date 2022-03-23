@@ -639,7 +639,7 @@ class CSSRenderStyle
 
           // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
           // Replaced element also stretch in flex layout if align-items is stretch.
-          } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
+          } else if (current is! RenderReplaced || parent is RenderFlexLayout) {
             RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
             // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
             if (ancestorRenderStyle != null) {
@@ -661,7 +661,7 @@ class CSSRenderStyle
         // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
         } else if ((renderStyle.position == CSSPositionType.absolute ||
           renderStyle.position == CSSPositionType.fixed)
-          && current is! RenderIntrinsic
+          && current is! RenderReplaced
           && renderStyle.width.isAuto
           && renderStyle.left.isNotAuto
           && renderStyle.right.isNotAuto
@@ -742,7 +742,7 @@ class CSSRenderStyle
       // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
       } else if ((renderStyle.position == CSSPositionType.absolute ||
         renderStyle.position == CSSPositionType.fixed)
-        && current is! RenderIntrinsic
+        && current is! RenderReplaced
         && renderStyle.height.isAuto
         && renderStyle.top.isNotAuto
         && renderStyle.bottom.isNotAuto
