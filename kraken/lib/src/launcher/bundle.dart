@@ -231,18 +231,20 @@ class NetworkBundle extends KrakenBundle {
   }
 }
 
-Future<String> _resolveStringFromData(List<int> data, { Codec codec = utf8 }) async {
+Future<String> _resolveStringFromData(final List<int> data) async {
   // Utf8 decode is fast enough with dart 2.10
   // reference: https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/services/asset_bundle.dart#L71
   // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
   // on a Pixel 4.
   if (data.length < 50 * 1024) {
-    return codec.decode(data);
+    return utf8.decode(data);
   }
   // For strings larger than 50 KB, run the computation in an isolate to
   // avoid causing main thread jank.
-  return compute((data) => codec.decode(data), data);
+  return compute(_utf8decode, data);
 }
+
+String _utf8decode(List<int> data) => utf8.decode(data);
 
 class AssetsBundle extends KrakenBundle {
   AssetsBundle(String url) : super(url);
