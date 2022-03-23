@@ -1056,7 +1056,7 @@ class KrakenController {
 
   String? getResourceContent(String? url) {
     KrakenBundle? entrypoint = _entrypoint;
-    if (url == this.url && entrypoint != null && entrypoint.isNotEmpty) {
+    if (url == this.url && entrypoint != null && entrypoint.isResolved) {
       return utf8.decode(entrypoint.data!);
     }
   }
@@ -1131,8 +1131,8 @@ class KrakenController {
     }
 
     KrakenBundle? bundleToLoad = _entrypoint;
-    if (bundleToLoad == null || bundleToLoad.isEmpty) {
-      // Do nothing if bundle is empty.
+    if (bundleToLoad == null) {
+      // Do nothing if bundle is null.
       return;
     }
 

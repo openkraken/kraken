@@ -29,7 +29,6 @@ void main() {
       await bundle.resolve(1);
 
       expect(bundle.isResolved, true);
-      expect(bundle.isEmpty, false);
     });
 
     test('DataBundle string', () async {

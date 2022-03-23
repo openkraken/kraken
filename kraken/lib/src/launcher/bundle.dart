@@ -86,16 +86,11 @@ abstract class KrakenBundle {
   // The bundle data of raw.
   Uint8List? data;
 
-  // Indicate the bundle is resolve.
-  bool get isResolved => _uri != null;
+  // Indicate the bundle is resolved.
+  bool get isResolved => _uri != null && data != null;
 
   // Content type for data.
   ContentType contentType = ContentType.binary;
-
-  // Indicate the bundle is empty.
-  bool get isEmpty => data == null || data!.isEmpty;
-
-  bool get isNotEmpty => !isEmpty;
 
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
@@ -143,7 +138,7 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    if (contextId != null && !isEmpty) {
+    if (contextId != null) {
       Uint8List data = this.data!;
       if (_isHTML) {
         // parse html.
