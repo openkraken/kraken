@@ -40,7 +40,7 @@ class HistoryModule extends BaseModule {
   }
 
   void _addItem(HistoryItem historyItem) {
-    if (_previousStack.isNotEmpty && historyItem.bundle.src == _previousStack.first.bundle.src) return;
+    if (_previousStack.isNotEmpty && historyItem.bundle.url == _previousStack.first.bundle.url) return;
 
     _previousStack.addFirst(historyItem);
 
@@ -57,7 +57,7 @@ class HistoryModule extends BaseModule {
       _previousStack.removeFirst();
       _nextStack.addFirst(currentItem);
 
-      await _goTo(_previousStack.first.bundle.src);
+      await _goTo(_previousStack.first.bundle.url);
 
       dynamic state = _previousStack.first.state;
       _dispatchPopStateEvent(state);
@@ -70,7 +70,7 @@ class HistoryModule extends BaseModule {
       _nextStack.removeFirst();
       _previousStack.addFirst(currentItem);
 
-      _goTo(currentItem.bundle.src);
+      _goTo(currentItem.bundle.url);
       _dispatchPopStateEvent(currentItem.state);
     }
   }
@@ -99,7 +99,7 @@ class HistoryModule extends BaseModule {
       }
     }
 
-    _goTo(_previousStack.first.bundle.src);
+    _goTo(_previousStack.first.bundle.url);
     _dispatchPopStateEvent(_previousStack.first.state);
   }
 
@@ -122,7 +122,7 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.bundle.src;
+      String currentUrl = _previousStack.first.bundle.url;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
@@ -148,7 +148,7 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.bundle.src;
+      String currentUrl = _previousStack.first.bundle.url;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);

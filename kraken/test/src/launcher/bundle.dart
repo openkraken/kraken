@@ -16,8 +16,8 @@ void main() {
       var bundle = NetworkBundle(uri.toString());
       // Using contextId to active cache.
       await bundle.resolve(1);
-      ByteData data = await bundle.rawBundle!;
-      var code = utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+      Uint8List data = await bundle.data!;
+      var code = utf8.decode(data);
 
       expect(bundle.isResolved, true);
       expect(code.length > 128 * 1024, true);
@@ -29,23 +29,23 @@ void main() {
       await bundle.resolve(1);
 
       expect(bundle.isResolved, true);
-      expect(bundle.content!.isNotEmpty, true);
+      expect(bundle.isEmpty, false);
     });
 
-    test('RawBundle string', () async {
+    test('DataBundle string', () async {
       var content = 'hello world';
-      var bundle = RawBundle.fromString(content, 'about:blank');
+      var bundle = DataBundle.fromString(content, 'about:blank');
       await bundle.resolve(1);
       expect(bundle.isResolved, true);
-      expect(bundle.content, content);
+      expect(utf8.decode(bundle.data!), content);
     });
 
-    test('RawBundle bytecode', () async {
+    test('DataBundle data', () async {
       Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
-      var bundle = RawBundle.fromBytecode(bytecode, 'about:blank');
+      var bundle = DataBundle(bytecode, 'about:blank');
       await bundle.resolve(1);
       expect(bundle.isResolved, true);
-      expect(bundle.bytecode, bytecode);
+      expect(bundle.data, bytecode);
     });
   });
 }

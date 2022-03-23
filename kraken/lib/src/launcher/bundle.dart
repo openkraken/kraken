@@ -23,6 +23,11 @@ const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
 
 final ContentType css = ContentType('text', 'css', charset: 'utf-8');
+// https://mathiasbynens.be/demo/javascript-mime-type
+final ContentType javascript = ContentType('text', 'javascript', charset: 'utf-8');
+final ContentType applicationJavascript = ContentType('application', 'javascript', charset: 'utf-8');
+final ContentType applicationXJavascript = ContentType('application', 'x-javascript', charset: 'utf-8');
+final ContentType bytecode1 = ContentType('application', 'vnd.kraken.bc1');
 
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -34,33 +39,34 @@ String? getBundlePathFromEnv() {
 
 List<String> _supportedByteCodeVersions = ['1'];
 
-bool isByteCodeSupported(String mimeType, String filename) {
+bool _isByteCodeSupported(String mimeType, Uri uri) {
   for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
     if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
-    if (filename.contains('kbc' + _supportedByteCodeVersions[i])) return true;
+    if (uri.path.endsWith('.kbc' + _supportedByteCodeVersions[i])) return true;
   }
   return false;
 }
 
-String getAcceptHeader() {
-  String krakenKbcAccept = _supportedByteCodeVersions.map((String str) => 'application/vnd.kraken.bc$str').join(',');
-  return 'text/html,application/javascript,$krakenKbcAccept';
+// The default accept request header.
+String _acceptHeader() {
+  String bc = _supportedByteCodeVersions.map((String v) => 'application/vnd.kraken.bc$v').join(',');
+  return 'text/html,application/javascript,$bc';
 }
 
-bool _isSchemeAssets(String path) {
+bool _isAssetsScheme(String path) {
   return path.startsWith('assets:');
 }
 
-bool _isSchemeFile(String path) {
+bool _isFileScheme(String path) {
   return path.startsWith('file:');
 }
 
-bool _isSchemeHttp(String path) {
+bool _isHttpScheme(String path) {
   return path.startsWith('http:') || path.startsWith('https:');
 }
 
-bool _isSchemeAbout(String url) {
-  return url.startsWith('about:');
+bool _isDefaultUrl(String url) {
+  return url == DEFAULT_URL;
 }
 
 void _failedToResolveBundle(String url) {
@@ -68,76 +74,63 @@ void _failedToResolveBundle(String url) {
 }
 
 abstract class KrakenBundle {
-  KrakenBundle(this.src);
+  KrakenBundle(this.url);
 
   // Unique resource locator.
-  final String src;
+  final String url;
 
   // Uri parsed by uriParser, assigned after resolving.
   Uri? _uri;
+  Uri? get resolvedUri => _uri;
 
-  ByteData? rawBundle;
-  // JS Content in UTF-8 bytes.
-  Uint8List? bytecode;
-  // JS Content is String
-  String? content;
-  // JS line offset, default to 0.
-  int lineOffset = 0;
+  // The bundle data of raw.
+  Uint8List? data;
 
-  bool isResolved = false;
+  // Indicate the bundle is resolve.
+  bool get isResolved => _uri != null;
 
-  // Bundle contentType.
+  // Content type for data.
   ContentType contentType = ContentType.binary;
 
-  bool get isEmpty => src.isEmpty && content == null && bytecode == null;
+  // Indicate the bundle is empty.
+  bool get isEmpty => data == null || data!.isEmpty;
 
-  Uri? get resolvedUri {
-    if (isResolved) {
-      return _uri;
-    }
-    return null;
-  }
+  bool get isNotEmpty => !isEmpty;
 
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
     if (isResolved) return;
 
     // Source is input by user, do not trust it's a valid URL.
-    _uri = Uri.tryParse(src);
+    _uri = Uri.tryParse(url);
     if (contextId != null && _uri != null) {
       KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
       if (controller != null) {
         _uri = controller.uriParser!.resolve(Uri.parse(controller.url), _uri!);
       }
-      isResolved = true;
     }
   }
 
-  Future<void> resolveAndEvaluate(int? contextId) async {
-    await resolve(contextId);
-    eval(contextId);
-  }
-
   static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
-    if (_isSchemeHttp(url)) {
+    if (_isHttpScheme(url)) {
       return NetworkBundle(url, additionalHttpHeaders: additionalHttpHeaders);
-    } else if (_isSchemeAssets(url)) {
+    } else if (_isAssetsScheme(url)) {
       return AssetsBundle(url);
-    } else if (_isSchemeFile(url)) {
+    } else if (_isFileScheme(url)) {
       return FileBundle(url);
-    } else if (_isSchemeAbout(url)) {
-      return _EmptyBundle(url);
+    } else if (_isDefaultUrl(url)) {
+      return DataBundle.fromString('', url);
     } else {
       throw FlutterError('Unsupported url. $url');
     }
   }
 
   static KrakenBundle fromContent(String content, { String url = DEFAULT_URL }) {
-    return RawBundle.fromString(content, url);
+    return DataBundle.fromString(content, url, contentType: javascript);
   }
 
-  static KrakenBundle fromBytecode(Uint8List bytecode, { String url = DEFAULT_URL }) {
-    return RawBundle.fromBytecode(bytecode, url);
+  static KrakenBundle fromBytecode(Uint8List data, { String url = DEFAULT_URL }) {
+    return DataBundle(data, url, contentType: bytecode1);
   }
 
   void eval(int? contextId) {
@@ -150,29 +143,20 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
     }
 
-    if (contextId != null) {
-      // For raw javascript code or bytecode from API directly.
-      if (content != null) {
-        evaluateScripts(contextId, content!, src, lineOffset);
-      } else if (bytecode != null) {
-        evaluateQuickjsByteCode(contextId, bytecode!);
-      }
-
-      // For javascript code, HTML or bytecode from networks and hardware disk.
-      else if (contentType.mimeType == ContentType.html.mimeType || src.contains('.html')) {
-        String code = _resolveStringFromData(rawBundle!);
+    if (contextId != null && !isEmpty) {
+      Uint8List data = this.data!;
+      if (_isHTML) {
         // parse html.
-        parseHTML(contextId, code);
-      } else if (contentType.mimeType == css.mimeType || src.contains('.css')) {
-        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-        controller?.view.document.addStyleSheet(CSSStyleSheet(_resolveStringFromData(rawBundle!)));
-      } else if (isByteCodeSupported(contentType.mimeType, src)) {
-        Uint8List buffer = rawBundle!.buffer.asUint8List();
-        evaluateQuickjsByteCode(contextId, buffer);
+        parseHTML(contextId, _resolveStringFromData(data));
+      } else if (_isJSString) {
+        evaluateScripts(contextId, _resolveStringFromData(data), url, 0);
+      } else if (_isJSBytecode) {
+        evaluateQuickjsByteCode(contextId, data);
+      } else if (_isCSS) {
+        _addCSSStyleSheet(_resolveStringFromData(data), contextId: contextId);
       } else {
-        String code = _resolveStringFromData(rawBundle!);
-        // eval JavaScript.
-        evaluateScripts(contextId, code, src, lineOffset);
+        // The resource type can not be evaluated.
+        throw FlutterError('Can\'t evaluate content of $url');
       }
     }
 
@@ -180,24 +164,39 @@ abstract class KrakenBundle {
       PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
     }
   }
+
+  bool get _isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
+  bool get _isCSS => contentType.mimeType == css.mimeType || _isUriExt('.css');
+  bool get _isJSString => contentType.mimeType == javascript.mimeType ||
+                          contentType.mimeType == applicationJavascript.mimeType ||
+                          contentType.mimeType == applicationXJavascript.mimeType ||
+                          _isUriExt('.js');
+  bool get _isJSBytecode => _isByteCodeSupported(contentType.mimeType, _uri!);
+
+  bool _isUriExt(String ext) {
+    Uri? uri = resolvedUri;
+    if (uri != null) {
+      return uri.path.endsWith(ext);
+    }
+    return false;
+  }
+
+  void _addCSSStyleSheet(String css, { int? contextId }) {
+    KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+    controller?.view.document.addStyleSheet(CSSStyleSheet(css));
+  }
 }
 
-// The bundle that output input content.
-class RawBundle extends KrakenBundle {
-  RawBundle.fromString(String content, String url)
-      : super(url) {
-    this.content = content;
+// The bundle that output input data.
+class DataBundle extends KrakenBundle {
+  DataBundle(Uint8List data, String url, { ContentType? contentType }) : super(url) {
+    this.data = data;
+    this.contentType = contentType ?? ContentType.binary;
   }
 
-  RawBundle.fromBytecode(Uint8List bytecode, String url)
-      : super(url) {
-    this.bytecode = bytecode;
-  }
-
-  @override
-  Future<void> resolve(int? contextId) async {
-    super.resolve(contextId);
-    isResolved = true;
+  DataBundle.fromString(String content, String url, { ContentType? contentType }) : super(url) {
+    data = Uint8List.fromList(content.codeUnits);
+    this.contentType = contentType ?? ContentType.text;
   }
 }
 
@@ -216,7 +215,7 @@ class NetworkBundle extends KrakenBundle {
     final HttpClientRequest request = await _sharedHttpClient.getUrl(_uri!);
 
     // Prepare request headers.
-    request.headers.set('Accept', getAcceptHeader());
+    request.headers.set('Accept', _acceptHeader());
     additionalHttpHeaders?.forEach(request.headers.set);
     if (contextId != null) {
       KrakenHttpOverrides.setContextHeader(request.headers, contextId);
@@ -225,20 +224,18 @@ class NetworkBundle extends KrakenBundle {
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Unable to load asset: $src'),
+        ErrorSummary('Unable to load asset: $url'),
         IntProperty('HTTP status code', response.statusCode),
       ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    data = bytes.buffer.asUint8List();
     contentType = response.headers.contentType ?? ContentType.binary;
-    rawBundle = bytes.buffer.asByteData();
-    contentType = response.headers.contentType ?? ContentType.binary;
-    isResolved = true;
   }
 }
 
-String _resolveStringFromData(ByteData data) {
+String _resolveStringFromData(List<int> data, { Codec codec = utf8 }) {
   // Utf8 decode is fast enough with dart 2.10
-  return utf8.decode(data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+  return codec.decode(data);
 }
 
 class AssetsBundle extends KrakenBundle {
@@ -250,9 +247,10 @@ class AssetsBundle extends KrakenBundle {
     final Uri? _resolvedUri = resolvedUri;
     if (_resolvedUri != null) {
       final String assetName = getAssetName(_resolvedUri);
-      rawBundle = await rootBundle.load(assetName);
+      ByteData byteData = await rootBundle.load(assetName);
+      data = byteData.buffer.asUint8List();
     } else {
-      _failedToResolveBundle(src);
+      _failedToResolveBundle(url);
     }
     return this;
   }
@@ -282,28 +280,22 @@ class FileBundle extends KrakenBundle {
     Uri uri = _uri!;
     final String path = uri.path;
     File file = File(path);
+
     if (await file.exists()) {
-      if (path.endsWith('.html')) {
+      data = await file.readAsBytes();
+      if (_isHTML) {
         contentType = ContentType.html;
-        content = await file.readAsString();
-      } else if (isByteCodeSupported('', path)) {
-        contentType = ContentType.binary;
-        bytecode = await file.readAsBytes();
+      } else if (_isJSBytecode) {
+        contentType = bytecode1;
+      } else if (_isCSS) {
+        contentType = css;
       } else {
-        contentType = ContentType.text;
-        content = await file.readAsString();
+        // Fallback to javascript.
+        contentType = javascript;
       }
     } else {
-      _failedToResolveBundle(src);
+      _failedToResolveBundle(url);
     }
     return this;
   }
-}
-
-/// The bundle that store nothing.
-class _EmptyBundle extends KrakenBundle {
-  _EmptyBundle(String url) : super(url);
-
-  @override
-  String get content => '';
 }

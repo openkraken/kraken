@@ -5,6 +5,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
@@ -1054,8 +1055,8 @@ class KrakenController {
   }
 
   String? getResourceContent(String? url) {
-    if (url == this.url) {
-      return _entrypoint?.content;
+    if (url == this.url && _entrypoint != null && !_entrypoint!.isEmpty) {
+      return utf8.decode(_entrypoint!.data!);
     }
   }
 
