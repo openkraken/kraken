@@ -163,7 +163,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
   AnimationController? _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
-  bool _autoFocus = false;
 
   late KrakenScrollable _scrollable;
 
@@ -527,7 +526,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     addChild(createRenderBox());
 
     SchedulerBinding.instance!.addPostFrameCallback((_) {
-      if (_autoFocus) {
+      if (autofocus) {
         focus();
       }
     });
@@ -977,7 +976,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void _formatAndSetValue(TextEditingValue value, {
     bool userInteraction = false,
     SelectionChangedCause? cause,
-    String valueKey = VALUE
   }) {
     if (userInteraction && value.text.length > _maxLength) return;
 
@@ -1004,12 +1002,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     if (textChanged) {
       _handleTextChanged(value.text, userInteraction, cause);
-      // Sync value to the text form control element property.
-      if (value == VALUE) {
-        this.value = value.text;
-      } else if (value == DEFAULT_VALUE) {
-        defaultValue = value.text;
-      }
     }
 
     if (renderEditable != null) {
@@ -1020,6 +1012,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   void _handleTextChanged(String text, bool userInteraction, SelectionChangedCause? cause) {
+    // Sync value to the text form control element property.
+    value = text;
     if (renderEditable != null) {
       if (text.isEmpty) {
         renderEditable!.text = placeholderTextSpan;
