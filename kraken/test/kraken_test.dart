@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 
 import 'local_http_server.dart';
 
@@ -33,6 +34,9 @@ void main() {
   LocalHttpServer.basePath = 'test/fixtures';
   var httpServer = LocalHttpServer.getInstance();
   print('Local HTTP Server started at ${httpServer.getUri()}');
+
+  // Inject a custom user agent, to avoid reading from bridge.
+  NavigatorModule.setCustomUserAgent('kraken/test');
 
   // Work around with path_provider.
   Directory tempDirectory = Directory('./temp');

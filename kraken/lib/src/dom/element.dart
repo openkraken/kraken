@@ -1558,8 +1558,6 @@ abstract class Element
   }
 
   Future<Uint8List> toBlob({ double? devicePixelRatio }) {
-    devicePixelRatio ??= window.devicePixelRatio;
-
     Completer<Uint8List> completer = Completer();
     forceToRepaintBoundary = true;
     renderBoxModel!.owner!.flushLayout();
@@ -1568,16 +1566,11 @@ abstract class Element
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
 
-      // If prev flush paint with error, render object keeps NEEDS-PAINT flag,
-      // will cause layer not exists.
-      assert(!_renderBoxModel.debugNeedsPaint, () {
-        debugPrint('Failed toBlob at $this, flush painting may raise error.');
-      });
       if (_renderBoxModel.hasSize && _renderBoxModel.size.isEmpty) {
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image = await _renderBoxModel.toImage(pixelRatio: devicePixelRatio!);
+        Image image = await _renderBoxModel.toImage(pixelRatio: devicePixelRatio ?? window.devicePixelRatio);
         ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData!.buffer.asUint8List();
       }

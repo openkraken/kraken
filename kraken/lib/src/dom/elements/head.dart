@@ -117,7 +117,7 @@ class LinkElement extends Element {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
-        bundle.eval(contextId);
+        await bundle.eval(contextId);
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -278,7 +278,7 @@ class ScriptElement extends Element {
       try {
         KrakenBundle bundle = KrakenBundle.fromUrl(src.toString());
         await bundle.resolve(contextId);
-        bundle.eval(contextId);
+        await bundle.eval(contextId);
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -309,7 +309,7 @@ class ScriptElement extends Element {
         if (controller != null) {
           KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.url);
           await bundle.resolve(contextId);
-          bundle.eval(contextId);
+          await bundle.eval(contextId);
         }
       }
     }
