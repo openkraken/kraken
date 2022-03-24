@@ -1558,8 +1558,6 @@ abstract class Element
   }
 
   Future<Uint8List> toBlob({ double? devicePixelRatio }) {
-    devicePixelRatio ??= window.devicePixelRatio;
-
     Completer<Uint8List> completer = Completer();
     forceToRepaintBoundary = true;
     renderBoxModel!.owner!.flushLayout();
@@ -1572,7 +1570,7 @@ abstract class Element
         // Return a blob with zero length.
         captured = Uint8List(0);
       } else {
-        Image image = await _renderBoxModel.toImage(pixelRatio: devicePixelRatio!);
+        Image image = await _renderBoxModel.toImage(pixelRatio: devicePixelRatio ?? window.devicePixelRatio);
         ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
         captured = byteData!.buffer.asUint8List();
       }

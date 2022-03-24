@@ -5,6 +5,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
@@ -1054,8 +1055,9 @@ class KrakenController {
   }
 
   String? getResourceContent(String? url) {
-    if (url == this.url) {
-      return _entrypoint?.content;
+    KrakenBundle? entrypoint = _entrypoint;
+    if (url == this.url && entrypoint != null && entrypoint.isResolved) {
+      return utf8.decode(entrypoint.data!);
     }
   }
 
@@ -1129,8 +1131,8 @@ class KrakenController {
     }
 
     KrakenBundle? bundleToLoad = _entrypoint;
-    if (bundleToLoad == null || bundleToLoad.isEmpty) {
-      // Do nothing if bundle is empty.
+    if (bundleToLoad == null) {
+      // Do nothing if bundle is null.
       return;
     }
 
@@ -1141,6 +1143,8 @@ class KrakenController {
       if (onLoadError != null) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
+      // Not to dismiss this error.
+      rethrow;
     }
 
     if (kProfileMode) {
@@ -1149,7 +1153,7 @@ class KrakenController {
   }
 
   // Execute the content from entrypoint bundle.
-  void _evaluateEntrypoint({ AnimationController? animationController }) {
+  void _evaluateEntrypoint({ AnimationController? animationController }) async {
     // @HACK: Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
     if (animationController != null) {
@@ -1163,7 +1167,7 @@ class KrakenController {
 
     assert(!_view._disposed, 'Kraken have already disposed');
     if (_entrypoint != null) {
-      _entrypoint!.eval(_view.contextId);
+      await _entrypoint!.eval(_view.contextId);
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
