@@ -3,6 +3,5 @@
  * Author: Kraken Team.
  */
 
-export 'src/launcher/bundle.dart';
 export 'src/launcher/launcher.dart';
 export 'src/launcher/controller.dart';

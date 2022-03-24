@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -14,6 +13,7 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
+
 
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
@@ -583,8 +583,20 @@ class _ImageRequest {
       || state == _ImageRequestState.partiallyAvailable;
 
   Future<ui.ImageDescriptor> _obtainImage(int? contextId) async {
-    Uint8List bytes = await _getResourceBytes(contextId);
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+    final KrakenBundle bundle = KrakenBundle.fromUrl(currentUri.toString());
+    await bundle.resolve(contextId);
+
+    if (!bundle.isResolved) {
+      throw FlutterError('Failed to load $currentUri');
+    }
+
+    final Uint8List data = bundle.data!;
+
+    // Free the bundle memory.
+    bundle.dispose();
+
+    // Decode size of raw image.
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
     final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
 
     // State available at least the image dimensions are available.
@@ -596,63 +608,5 @@ class _ImageRequest {
 
     buffer.dispose();
     return descriptor;
-  }
-
-  Future<Uint8List> _getResourceBytes(int? contextId) async {
-    HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getEntrypointUri(contextId)));
-
-    Uint8List? bytes;
-
-    if (HttpCacheController.mode != HttpCacheMode.NO_CACHE) {
-      try {
-        HttpCacheObject? cacheObject = await cacheController.getCacheObject(currentUri);
-        bytes = await cacheObject.toBinaryContent();
-      } catch (error, stackTrace) {
-        print('Error while reading cache, $error\n$stackTrace');
-      }
-    }
-
-    // Fallback to network
-    bytes ??= await _fetchResourceBytes(cacheController);
-
-    return bytes;
-  }
-
-  Future<Uint8List> _fetchResourceBytes(HttpCacheController cacheController) async {
-    final Uri resolved = currentUri;
-    final HttpClientRequest request = await _httpClient.getUrl(resolved);
-    final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok) {
-      throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
-    }
-
-    HttpCacheObject cacheObject = HttpCacheObject.fromResponse(
-        resolved.toString(),
-        response,
-        (await HttpCacheController.getCacheDirectory()).path);
-    cacheController.putObject(resolved, cacheObject);
-
-    HttpClientResponse _response = HttpClientCachedResponse(response, cacheObject);
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(_response);
-
-    if (bytes.lengthInBytes == 0) throw Exception('Image from network is an empty file: $resolved');
-
-    return bytes;
-  }
-
-  // Do not access this field directly; use [_httpClient] instead.
-  // We set `autoUncompress` to false to ensure that we can trust the value of
-  // the `Content-CSSLength` HTTP header. We automatically uncompress the content
-  // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
-
-  static HttpClient get _httpClient {
-    HttpClient client = _sharedHttpClient;
-    assert(() {
-      if (debugNetworkImageHttpClientProvider != null) client = debugNetworkImageHttpClientProvider!();
-      return true;
-    }());
-    return client;
   }
 }

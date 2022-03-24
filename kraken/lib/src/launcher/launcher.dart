@@ -12,8 +12,6 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/launcher/controller.dart';
 
-import 'bundle.dart';
-
 typedef ConnectedCallback = void Function();
 
 const _white = Color(0xFFFFFFFF);

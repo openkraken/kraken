@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
-import 'package:kraken/launcher.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
 
