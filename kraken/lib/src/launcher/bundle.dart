@@ -22,16 +22,13 @@ const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
 
-const String _cssMimeType = 'text/css';
+final ContentType _cssContentType = ContentType('text', 'css', charset: 'utf-8');
 // MIME types suits JavaScript: https://mathiasbynens.be/demo/javascript-mime-type
-const String _javascriptMimeType = 'text/javascript';
-const String _javascriptApplicationMimeType = 'application/javascript';
-const String _xJavascriptMimeType = 'application/x-javascript';
-const String _krakenBc1MimeType = 'application/vnd.kraken.bc1';
+final ContentType _javascriptContentType = ContentType('text', 'javascript', charset: 'utf-8');
+final ContentType _javascriptApplicationContentType = ContentType('application', 'javascript', charset: 'utf-8');
+final ContentType _xJavascriptContentType = ContentType('application', 'x-javascript', charset: 'utf-8');
+final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.kraken.bc1');
 
-final ContentType _javascriptContentType = ContentType.parse(_javascriptMimeType);
-final ContentType _cssContentType = ContentType.parse(_cssMimeType);
-final ContentType _krakenBc1ContentType = ContentType.parse(_krakenBc1MimeType);
 
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -168,11 +165,11 @@ abstract class KrakenBundle {
   }
 
   bool get _isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
-  bool get _isCSS => contentType.mimeType == _cssMimeType || _isUriExt('.css');
-  bool get _isJavascript => contentType.mimeType == _javascriptMimeType ||
-                          contentType.mimeType == _javascriptApplicationMimeType ||
-                          contentType.mimeType == _xJavascriptMimeType ||
-                          _isUriExt('.js');
+  bool get _isCSS => contentType.mimeType == _cssContentType.mimeType || _isUriExt('.css');
+  bool get _isJavascript => contentType.mimeType == _javascriptContentType.mimeType ||
+                            contentType.mimeType == _javascriptApplicationContentType.mimeType ||
+                            contentType.mimeType == _xJavascriptContentType.mimeType ||
+                            _isUriExt('.js');
   bool get _isBytecode => _isBytecodeSupported(contentType.mimeType, _uri!);
 
   bool _isUriExt(String ext) {
