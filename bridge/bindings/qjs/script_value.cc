@@ -43,7 +43,7 @@ ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) {
   } else {
     result = ScriptValue(ctx_, stringifyedValue);
   }
-
+  JS_FreeValue(ctx_, stringifyedValue);
   return result;
 }
 

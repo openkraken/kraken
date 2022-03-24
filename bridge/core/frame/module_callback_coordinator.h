@@ -20,10 +20,8 @@ class ModuleCallbackCoordinator final {
  public:
   ModuleCallbackCoordinator();
 
-  void AddModuleCallbacks(std::shared_ptr<ModuleCallback> callback);
+  void AddModuleCallbacks(std::shared_ptr<ModuleCallback>&& callback);
   void RemoveModuleCallbacks(std::shared_ptr<ModuleCallback> callback);
-
-  void Trace(GCVisitor* visitor);
 
  private:
   std::forward_list<std::shared_ptr<ModuleCallback>> listeners_;

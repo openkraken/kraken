@@ -15,7 +15,7 @@ namespace kraken {
 class PendingPromises {
  public:
   PendingPromises() = default;
-  void TrackPendingPromises(ScriptPromise promise);
+  void TrackPendingPromises(ScriptPromise&& promise);
 
  private:
   std::vector<ScriptPromise> promises_;

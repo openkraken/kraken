@@ -13,11 +13,10 @@ namespace kraken {
 
 class ModuleListenerContainer final {
  public:
-  void addModuleListener(std::shared_ptr<ModuleListener> listener);
-  void trace(GCVisitor* visitor);
+  void AddModuleListener(const std::shared_ptr<ModuleListener>& listener);
 
  private:
-  std::forward_list<std::shared_ptr<ModuleListener>> m_listeners;
+  std::forward_list<std::shared_ptr<ModuleListener>> listeners_;
   friend ModuleListener;
 };
 

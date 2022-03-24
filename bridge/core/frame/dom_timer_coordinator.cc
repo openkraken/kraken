@@ -64,19 +64,4 @@ std::shared_ptr<DOMTimer> DOMTimerCoordinator::getTimerById(int32_t timerId) {
   return m_activeTimers[timerId];
 }
 
-void DOMTimerCoordinator::trace(GCVisitor* visitor) {
-  for (auto& timer : m_activeTimers) {
-    timer.second->Trace(visitor);
-  }
-
-  // Recycle all abandoned timers.
-  if (!m_abandonedTimers.empty()) {
-    for (auto& timer : m_abandonedTimers) {
-      timer->Trace(visitor);
-    }
-    // All abandoned timers should be freed at the sweep stage.
-    m_abandonedTimers.clear();
-  }
-}
-
 }  // namespace kraken

@@ -18,12 +18,10 @@ class ModuleListenerContainer;
 // When module event triggered at dart side, All module listener will be invoked and let user to dispatch further operations.
 class ModuleListener {
  public:
-  static std::shared_ptr<ModuleListener> Create(std::shared_ptr<QJSFunction> function);
+  static std::shared_ptr<ModuleListener> Create(const std::shared_ptr<QJSFunction>& function);
   explicit ModuleListener(std::shared_ptr<QJSFunction> function);
 
  private:
-  void Trace(GCVisitor* visitor) const;
-  void Dispose() const;
 
   std::shared_ptr<QJSFunction> function_{nullptr};
 

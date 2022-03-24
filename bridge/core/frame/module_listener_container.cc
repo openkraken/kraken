@@ -7,14 +7,8 @@
 
 namespace kraken {
 
-void ModuleListenerContainer::addModuleListener(std::shared_ptr<ModuleListener> listener) {
-  m_listeners.insert_after(m_listeners.end(), listener);
-}
-
-void ModuleListenerContainer::trace(GCVisitor* visitor) {
-  for (auto& listener : m_listeners) {
-    listener->function_->Trace(visitor);
-  }
+void ModuleListenerContainer::AddModuleListener(const std::shared_ptr<ModuleListener>& listener) {
+  listeners_.push_front(listener);
 }
 
 }  // namespace kraken

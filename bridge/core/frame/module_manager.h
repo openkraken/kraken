@@ -29,7 +29,7 @@ class ModuleManager {
                                               ScriptValue& params,
                                               std::shared_ptr<QJSFunction> callback,
                                               ExceptionState& exception);
-  static void __kraken_add_module_listener__(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, ExceptionState& exception);
+  static void __kraken_add_module_listener__(ExecutingContext* context, const std::shared_ptr<QJSFunction>& handler, ExceptionState& exception);
 };
 
 }  // namespace kraken

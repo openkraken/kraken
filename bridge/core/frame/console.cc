@@ -13,7 +13,7 @@ void Console::__kraken_print__(ExecutingContext* context, std::unique_ptr<Native
   std::stringstream stream;
   std::string buffer = nativeStringToStdString(log.get());
   stream << buffer;
-  printLog(context->contextId(), stream, nativeStringToStdString(level.get()), nullptr);
+  printLog(context->contextId(), stream, level != nullptr ? nativeStringToStdString(level.get()) : "info", nullptr);
 }
 
 void Console::__kraken_print__(ExecutingContext* context, std::unique_ptr<NativeString>& log, ExceptionState& exception_state) {

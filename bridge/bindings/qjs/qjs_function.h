@@ -12,19 +12,20 @@
 namespace kraken {
 
 // https://webidl.spec.whatwg.org/#dfn-callback-interface
+// QJSFunction memory are auto managed by std::shared_ptr.
 class QJSFunction {
  public:
   static std::shared_ptr<QJSFunction> Create(JSContext* ctx, JSValue function) { return std::make_shared<QJSFunction>(ctx, function); }
-  explicit QJSFunction(JSContext* ctx, JSValue function) : function_(JS_DupValue(ctx, function)) {};
+  explicit QJSFunction(JSContext* ctx, JSValue function) : ctx_(ctx), function_(JS_DupValue(ctx, function)) {};
+  ~QJSFunction() {
+    JS_FreeValue(ctx_, function_);
+  }
 
   bool IsFunction(JSContext* ctx);
 
   // Performs "invoke".
   // https://webidl.spec.whatwg.org/#invoke-a-callback-function
   ScriptValue Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
-
-  void Trace(GCVisitor* visitor) const;
-  void Dispose() const;
 
  private:
   JSContext* ctx_{nullptr};

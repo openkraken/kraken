@@ -25,9 +25,6 @@ class DOMTimer {
 
   ExecutingContext* context() { return context_; }
 
-  void Trace(GCVisitor* visitor) const;
-  void Dispose() const;
-
  private:
   ExecutingContext* context_{nullptr};
   int32_t timerId_{-1};

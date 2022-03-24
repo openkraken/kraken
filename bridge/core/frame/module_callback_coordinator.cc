@@ -7,7 +7,7 @@
 
 namespace kraken {
 
-void ModuleCallbackCoordinator::AddModuleCallbacks(std::shared_ptr<ModuleCallback> callback) {
+void ModuleCallbackCoordinator::AddModuleCallbacks(std::shared_ptr<ModuleCallback>&& callback) {
   listeners_.push_front(callback);
 }
 
@@ -16,12 +16,6 @@ void ModuleCallbackCoordinator::RemoveModuleCallbacks(std::shared_ptr<ModuleCall
 }
 
 ModuleCallbackCoordinator::ModuleCallbackCoordinator() {
-}
-
-void ModuleCallbackCoordinator::Trace(GCVisitor* visitor) {
-  for(auto& listener: listeners_) {
-    listener->Trace(visitor);
-  }
 }
 
 }  // namespace kraken

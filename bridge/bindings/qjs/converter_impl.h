@@ -90,7 +90,7 @@ struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) {
-    return Converter<IDLAny>::ToValue(ctx, value);
+    return Converter<IDLAny>::ToValue(ctx, std::move(value));
   }
 };
 

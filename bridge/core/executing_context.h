@@ -24,6 +24,7 @@
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
 
+#include "script_state.h"
 #include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
@@ -44,18 +45,6 @@ using JSExceptionHandler = std::function<void(ExecutingContext* context, const c
 
 bool isContextValid(int32_t contextId);
 
-class ExecutionContextGCTracker : public ScriptWrappable {
-  DEFINE_WRAPPERTYPEINFO();
- public:
-  explicit ExecutionContextGCTracker(JSContext* ctx);
-
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
-  const char* GetHumanReadableName() const override;
-
- private:
-};
-
 // An environment in which script can execute. This class exposes the common
 // properties of script execution environments on the kraken.
 // Window : Document : ExecutionContext = 1 : 1 : 1 at any point in time.
@@ -74,7 +63,6 @@ class ExecutingContext {
   bool IsValid() const;
   JSValue Global();
   JSContext* ctx();
-  static JSRuntime* runtime();
   FORCE_INLINE int32_t contextId() const { return context_id_; };
   void* owner();
   bool HandleException(JSValue* exc);
@@ -100,11 +88,12 @@ class ExecutingContext {
   // Get all pending promises which are not resolved or rejected.
   PendingPromises* GetPendingPromises() { return &pending_promises_; };
 
+  // Get current script state.
+  ScriptState* GetScriptState() { return &script_state_; }
+
   FORCE_INLINE Document* document() { return document_; };
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &ui_command_buffer_; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return dart_method_ptr_; }
-
-  void Trace(GCVisitor* visitor);
 
   std::chrono::time_point<std::chrono::system_clock> time_origin_;
 
@@ -112,7 +101,6 @@ class ExecutingContext {
   struct list_head node_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
-  struct list_head promise_job_list;
   struct list_head native_function_job_list;
 
   static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
@@ -125,17 +113,20 @@ class ExecutingContext {
  private:
   static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
 
+  // From C++ standard, https://isocpp.org/wiki/faq/dtors#order-dtors-for-members
+  // Members first initialized and destructed at the last.
+  // Always keep ScriptState at the top of all stack allocated members to make sure it destructed in the last.
+  ScriptState script_state_;
+
   int32_t context_id_;
   JSExceptionHandler handler_;
   void* owner_;
   JSValue global_object_{JS_NULL};
   bool ctx_invalid_{false};
-  JSContext* ctx_{nullptr};
   Document* document_{nullptr};
   DOMTimerCoordinator timers_;
   ModuleListenerContainer module_listener_container_;
   ModuleCallbackCoordinator module_callbacks_;
-  ExecutionContextGCTracker* gc_tracker_{nullptr};
   ExecutionContextData context_data_{this};
   UICommandBuffer ui_command_buffer_{this};
   std::unique_ptr<DartMethodPointer> dart_method_ptr_ = std::make_unique<DartMethodPointer>();

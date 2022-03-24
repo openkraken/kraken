@@ -226,6 +226,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     # Core sources
     core/executing_context.cc
     core/executing_context.h
+    core/script_state.cc
+    core/script_state.h
     core/page.h
     core/page.cc
     core/executing_context_data.cc

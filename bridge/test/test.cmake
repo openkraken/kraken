@@ -18,6 +18,7 @@ list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.h
   ./core/executing_context_test.cc
   ./core/frame/console_test.cc
+  ./core/frame/module_manager_test.cc
   #  ./bindings/qjs/bom/timer_test.cc
 #  ./bindings/qjs/qjs_patch_test.cc
 #  ./bindings/qjs/garbage_collected_test.cc
@@ -94,6 +95,7 @@ add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
 target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken)
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
+  ./test
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

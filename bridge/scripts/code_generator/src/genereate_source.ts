@@ -89,7 +89,7 @@ if (exception_state.HasException()) {
   return exception_state.ToQuickJS();
 }
 
-if (argc <= ${argsIndex}) {
+if (argc <= ${argsIndex + 1}) {
   ${call}
   break;
 }`;
@@ -114,7 +114,7 @@ function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration, 
   let totalArguments: string[] = requiredArguments.slice();
 
   for (let i = minimalRequiredArgc; i < declaration.args.length; i ++) {
-    optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i + 1, totalArguments, options));
+    optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i, totalArguments, options));
     totalArguments.push(`args_${declaration.args[i].name}`);
   }
 

@@ -67,7 +67,11 @@ NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, Native
     callback(callbackContext, contextId, nativeStringToStdString(method).c_str(), nullptr);
   }
 
-  return nullptr;
+  if (module == "MethodChannel") {
+    callback(callbackContext, contextId, nullptr, stringToNativeString("{\"result\": 1234}").release());
+  }
+
+  return stringToNativeString(module).release();
 };
 
 void TEST_requestBatchUpdate(int32_t contextId){};
@@ -77,7 +81,7 @@ void TEST_reloadApp(int32_t contextId) {}
 int32_t timerId = 0;
 
 int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = timer->context()->runtime();
+  JSRuntime* rt = ScriptState::runtime();
   auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
@@ -94,7 +98,7 @@ int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallbac
 }
 
 int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = timer->context()->runtime();
+  JSRuntime* rt = ScriptState::runtime();
   auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
@@ -113,7 +117,7 @@ int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallba
 int32_t callbackId = 0;
 
 uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
-  JSRuntime* rt = frameCallback->context()->runtime();
+  JSRuntime* rt = ScriptState::runtime();
   auto* context = frameCallback->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
@@ -132,14 +136,14 @@ uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_
 void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->getContext();
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_frameCallbacks.erase(id);
 }
 
 void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->getContext();
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_timers.erase(timerId);
 }
 
@@ -185,7 +189,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->getContext();
   JSThreadState* th = new JSThreadState();
-  JS_SetRuntimeOpaque(context->runtime(), th);
+  JS_SetRuntimeOpaque(ScriptState::runtime(), th);
 
   TEST_mockDartMethods(contextId, onJsError);
 
@@ -203,7 +207,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
 }
 
 static bool jsPool(kraken::ExecutingContext* context) {
-  JSRuntime* rt = context->runtime();
+  JSRuntime* rt = ScriptState::runtime();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
   struct list_head* el;

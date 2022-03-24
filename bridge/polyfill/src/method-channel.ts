@@ -22,13 +22,16 @@ export const methodChannel = {
   clearMethodCallHandler() {
     methodCallHandlers.length = 0;
   },
-  invokeMethod(method: string, ...args: any[]): Promise<string> {
-    return new Promise((resolve, reject) => {
-      krakenInvokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
-        if (e) return reject(e);
-        resolve(data);
+  invokeMethod(method: string, ...args: any[]): string {
+    // return new Promise((resolve, reject) => {
+    //   krakenInvokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
+    //     if (e) return reject(e);
+    //     resolve(data);
+    //   });
+    // });
+      return  krakenInvokeModule('MethodChannel', 'invokeMethod', [method, args], function aaa(e, data) {
+        console.log('1234');
       });
-    });
   },
 };
 

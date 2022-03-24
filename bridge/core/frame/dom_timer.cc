@@ -31,14 +31,6 @@ void DOMTimer::Fire() {
   }
 }
 
-void DOMTimer::Trace(GCVisitor* visitor) const {
-  callback_->Trace(visitor);
-}
-
-void DOMTimer::Dispose() const {
-  callback_->Dispose();
-}
-
 void DOMTimer::setTimerId(int32_t timerId) {
   timerId_ = timerId;
 }

@@ -9,7 +9,7 @@
 namespace kraken {
 
 RejectedPromises::Message::Message(ExecutingContext* context, JSValue promise, JSValue reason)
-    : m_runtime(context->runtime()), m_promise(JS_DupValue(context->ctx(), promise)), m_reason(JS_DupValue(context->ctx(), reason)) {}
+    : m_runtime(ScriptState::runtime()), m_promise(JS_DupValue(context->ctx(), promise)), m_reason(JS_DupValue(context->ctx(), reason)) {}
 
 RejectedPromises::Message::~Message() {
   JS_FreeValueRT(m_runtime, m_promise);

@@ -52,7 +52,7 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
 int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, int32_t timeout, ExceptionState* exception) {
 #if FLUTTER_BACKEND
   if (context->dartMethodPtr()->setTimeout == nullptr) {
-    exception->throwException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
+    exception->ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
     return -1;
   }
 #endif

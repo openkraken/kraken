@@ -29,12 +29,4 @@ ScriptValue QJSFunction::Invoke(JSContext* ctx, int32_t argc, ScriptValue* argum
 
   return ScriptValue(ctx, returnValue);
 }
-
-void QJSFunction::Trace(GCVisitor* visitor) const {
-  visitor->Trace(function_);
-}
-
-void QJSFunction::Dispose() const {
-  JS_FreeValueRT(JS_GetRuntime(ctx_), function_);
-}
 }  // namespace kraken

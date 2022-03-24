@@ -22,14 +22,11 @@ JSValue ScriptWrappable::ToQuickJS() {
 }
 
 void ScriptWrappable::InitializeQuickJSObject() {
-  auto* wrapperTypeInfo = const_cast<WrapperTypeInfo*>(GetWrapperTypeInfo());
+  auto* wrapperTypeInfo = GetWrapperTypeInfo();
   JSRuntime* runtime = runtime_;
 
-  /// When classId is 0, it means this class are not initialized. We should Create a JSClassDef to describe the behavior of this class and associate with classID.
   /// ClassId should be a static ToQuickJS to make sure JSClassDef when this class are created at the first class.
-  if (wrapperTypeInfo->classId == 0 || !JS_HasClassId(runtime, wrapperTypeInfo->classId)) {
-    /// Allocate a new unique classID from QuickJS.
-    JS_NewClassID(&wrapperTypeInfo->classId);
+  if (!JS_HasClassId(runtime, wrapperTypeInfo->classId)) {
     /// Basic template to describe the behavior about this class.
     JSClassDef def{};
 

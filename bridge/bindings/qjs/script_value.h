@@ -39,12 +39,36 @@ class ScriptValue final {
   explicit ScriptValue(JSContext* ctx) : ctx_(ctx){};
   ScriptValue() = default;
 
-  ScriptValue& operator=(const ScriptValue& other) {
-    if (&other != this) {
-      value_ = JS_DupValue(ctx_, other.value_);
+  // Copy and assignment
+  ScriptValue(ScriptValue const &value) {
+    if (&value != this) {
+      value_ = JS_DupValue(ctx_, value.value_);
     }
-    return *this;
+    ctx_ = value.ctx_;
   };
+  ScriptValue& operator=(const ScriptValue& value) {
+    if (&value != this) {
+      value_ = JS_DupValue(ctx_, value.value_);
+    }
+    ctx_ = value.ctx_;
+    return *this;
+  }
+
+  // Move operations
+  ScriptValue(ScriptValue&& value) noexcept {
+    if (&value != this) {
+      value_ = JS_DupValue(ctx_, value.value_);
+    }
+    ctx_ = value.ctx_;
+  };
+  ScriptValue& operator=(ScriptValue&& value) noexcept {
+    if (&value != this) {
+      value_ = JS_DupValue(ctx_, value.value_);
+    }
+    ctx_ = value.ctx_;
+    return *this;
+  }
+
   ~ScriptValue() { JS_FreeValue(ctx_, value_); };
 
   JSValue ToQuickJS() const;

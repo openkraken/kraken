@@ -31,8 +31,6 @@ class DOMTimerCoordinator {
   void* removeTimeoutById(int32_t timerId);
   std::shared_ptr<DOMTimer> getTimerById(int32_t timerId);
 
-  void trace(GCVisitor* visitor);
-
  private:
   std::unordered_map<int, std::shared_ptr<DOMTimer>> m_activeTimers;
   std::vector<std::shared_ptr<DOMTimer>> m_abandonedTimers;

@@ -10,7 +10,7 @@ import { console } from './console';
 // import { asyncStorage } from './async-storage';
 // import { URLSearchParams } from './url-search-params';
 // import { URL } from './url';
-// import { kraken } from './kraken';
+import { kraken } from './kraken';
 // import { ErrorEvent, PromiseRejectionEvent } from './events';
 
 // defineGlobalProperty('ErrorEvent', ErrorEvent);
@@ -28,7 +28,7 @@ defineGlobalProperty('console', console);
 // defineGlobalProperty('asyncStorage', asyncStorage);
 // defineGlobalProperty('URLSearchParams', URLSearchParams);
 // defineGlobalProperty('URL', URL);
-// defineGlobalProperty('kraken', kraken);
+defineGlobalProperty('kraken', kraken);
 // defineGlobalProperty('ErrorEvent', ErrorEvent);
 
 function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = true) {

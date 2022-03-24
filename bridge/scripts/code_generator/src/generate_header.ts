@@ -3,7 +3,7 @@ import {uniqBy} from "lodash";
 import {Blob} from "./blob";
 import {addIndent, getClassName} from "./utils";
 
-function generateInterfaceAdditionalHeader(object: any): [string, string, string] {
+function generateInterfaceAdditionalHeader(blob: Blob, object: any): [string, string, string] {
   if (!(object instanceof ClassObject)) {
     return ['', '', ''];
   }
@@ -13,7 +13,7 @@ function generateInterfaceAdditionalHeader(object: any): [string, string, string
   }`;
 
   let wrapperTypeDefine = `static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
-  constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {"Blob", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ConstructorCallback};
+  constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {JS_CLASS_${getClassName(blob).toUpperCase()}, "Blob", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ConstructorCallback};
 `;
 
   let installFunctions = `static void InstallPrototypeMethods(ExecutingContext* context);
@@ -29,7 +29,7 @@ function generateInterfaceAdditionalHeader(object: any): [string, string, string
 
 export function generateCppHeader(blob: Blob) {
   let classObject = blob.objects.find(object => object instanceof ClassObject);
-  let interfaceDefines = generateInterfaceAdditionalHeader(classObject);
+  let interfaceDefines = generateInterfaceAdditionalHeader(blob, classObject);
   let haveInterfaceBase = !!classObject;
   return `/*
  * Copyright (C) 2021 Alibaba Inc. All rights reserved.

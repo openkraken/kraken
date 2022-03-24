@@ -114,11 +114,12 @@ static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int arg
 }
 
 static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+  auto* context = ExecutingContext::From(ctx);
 #if FLUTTER_BACKEND
-  if (getDartMethod()->environment == nullptr) {
+  if (context->dartMethodPtr()->environment == nullptr) {
     return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
   }
-  const char* env = getDartMethod()->environment();
+  const char* env = context->dartMethodPtr()->environment();
   return JS_ParseJSON(ctx, env, strlen(env), "");
 #else
   return JS_NewObject(ctx);

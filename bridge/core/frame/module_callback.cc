@@ -17,12 +17,4 @@ std::shared_ptr<QJSFunction> ModuleCallback::value() {
   return function_;
 }
 
-void ModuleCallback::Trace(GCVisitor* visitor) const {
-  function_->Trace(visitor);
-}
-
-void ModuleCallback::Dispose() const {
-  function_->Dispose();
-}
-
 }  // namespace kraken
