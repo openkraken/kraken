@@ -22,12 +22,16 @@ const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
 const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
 
-final ContentType _cssMimeType = ContentType('text', 'css', charset: 'utf-8');
+const String _cssMimeType = 'text/css';
 // MIME types suits JavaScript: https://mathiasbynens.be/demo/javascript-mime-type
-final ContentType _javascriptMimeType = ContentType('text', 'javascript', charset: 'utf-8');
-final ContentType _javascriptApplicationMimeType = ContentType('application', 'javascript', charset: 'utf-8');
-final ContentType _xJavascriptMimeType = ContentType('application', 'x-javascript', charset: 'utf-8');
-final ContentType _krakenBc1MimeType = ContentType('application', 'vnd.kraken.bc1');
+const String _javascriptMimeType = 'text/javascript';
+const String _javascriptApplicationMimeType = 'application/javascript';
+const String _xJavascriptMimeType = 'application/x-javascript';
+const String _krakenBc1MimeType = 'application/vnd.kraken.bc1';
+
+final ContentType _javascriptContentType = ContentType.parse(_javascriptMimeType);
+final ContentType _cssContentType = ContentType.parse(_cssMimeType);
+final ContentType _krakenBc1ContentType = ContentType.parse(_krakenBc1MimeType);
 
 String? getBundleURLFromEnv() {
   return Platform.environment[BUNDLE_URL];
@@ -114,18 +118,18 @@ abstract class KrakenBundle {
     } else if (_isFileScheme(url)) {
       return FileBundle(url);
     } else if (_isDefaultUrl(url)) {
-      return DataBundle.fromString('', url, contentType: _javascriptMimeType);
+      return DataBundle.fromString('', url, contentType: _javascriptContentType);
     } else {
       throw FlutterError('Unsupported url. $url');
     }
   }
 
   static KrakenBundle fromContent(String content, { String url = DEFAULT_URL }) {
-    return DataBundle.fromString(content, url, contentType: _javascriptMimeType);
+    return DataBundle.fromString(content, url, contentType: _javascriptContentType);
   }
 
   static KrakenBundle fromBytecode(Uint8List data, { String url = DEFAULT_URL }) {
-    return DataBundle(data, url, contentType: _krakenBc1MimeType);
+    return DataBundle(data, url, contentType: _javascriptContentType);
   }
 
   Future<void> eval(int? contextId) async {
@@ -164,10 +168,10 @@ abstract class KrakenBundle {
   }
 
   bool get _isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
-  bool get _isCSS => contentType.mimeType == _cssMimeType.mimeType || _isUriExt('.css');
-  bool get _isJavascript => contentType.mimeType == _javascriptMimeType.mimeType ||
-                          contentType.mimeType == _javascriptApplicationMimeType.mimeType ||
-                          contentType.mimeType == _xJavascriptMimeType.mimeType ||
+  bool get _isCSS => contentType.mimeType == _cssMimeType || _isUriExt('.css');
+  bool get _isJavascript => contentType.mimeType == _javascriptMimeType ||
+                          contentType.mimeType == _javascriptApplicationMimeType ||
+                          contentType.mimeType == _xJavascriptMimeType ||
                           _isUriExt('.js');
   bool get _isBytecode => _isBytecodeSupported(contentType.mimeType, _uri!);
 
@@ -294,12 +298,12 @@ class FileBundle extends KrakenBundle {
       if (_isHTML) {
         contentType = ContentType.html;
       } else if (_isBytecode) {
-        contentType = _krakenBc1MimeType;
+        contentType = _krakenBc1ContentType;
       } else if (_isCSS) {
-        contentType = _cssMimeType;
+        contentType = _cssContentType;
       } else {
         // Fallback to javascript.
-        contentType = _javascriptMimeType;
+        contentType = _javascriptContentType;
       }
     } else {
       _failedToResolveBundle(url);
