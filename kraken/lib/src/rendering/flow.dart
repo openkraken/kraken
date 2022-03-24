@@ -1361,9 +1361,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-    List<RenderBox> _paintingOrder = paintingOrder;
-    for (int i = 0; i < _paintingOrder.length; i++) {
-      RenderObject child = _paintingOrder[i];
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderObject child = paintingOrder[i];
       if (child is! RenderPositionPlaceholder) {
         late DateTime childPaintStart;
         if (kProfileMode && PerformanceTiming.enabled()) {
