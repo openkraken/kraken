@@ -113,8 +113,8 @@ class LinkElement extends Element {
   void _fetchAndApplyCSSStyle() async {
     if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected) {
       String url = _resolvedHyperlink.toString();
+      KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
-        KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
         assert(bundle.isResolved, 'Failed to obtain $url');
         final String cssString = await resolveStringFromData(bundle.data!);
@@ -129,6 +129,8 @@ class LinkElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
+      } finally {
+        bundle.dispose();
       }
       SchedulerBinding.instance!.scheduleFrame();
     }
@@ -280,11 +282,11 @@ class ScriptElement extends Element {
           || _type == _MIME_X_APPLICATION_JAVASCRIPT
           || _type == _JAVASCRIPT_MODULE
     )) {
-      try {
-        String url = src.toString();
+      String url = src.toString();
 
-        // Obtain bundle.
-        KrakenBundle bundle = KrakenBundle.fromUrl(url);
+      // Obtain bundle.
+      KrakenBundle bundle = KrakenBundle.fromUrl(url);
+      try {
         await bundle.resolve(contextId);
         assert(bundle.isResolved, 'Failed to obtain $url');
 
@@ -308,6 +310,8 @@ class ScriptElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
+      } finally {
+        bundle.dispose();
       }
       SchedulerBinding.instance!.scheduleFrame();
     }

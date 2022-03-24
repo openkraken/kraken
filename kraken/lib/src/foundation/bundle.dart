@@ -138,41 +138,6 @@ abstract class KrakenBundle {
     return DataBundle(data, url, contentType: _javascriptContentType);
   }
 
-  // Future<void> eval(int? contextId) async {
-  //   if (!isResolved) {
-  //     debugPrint('The kraken bundle $this is not resolved to evaluate.');
-  //     return;
-  //   }
-  //
-  //   if (kProfileMode) {
-  //     PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
-  //   }
-  //
-  //   if (contextId != null) {
-  //     Uint8List data = this.data!;
-  //     if (_isHTML) {
-  //       // parse html.
-  //       parseHTML(contextId, await _resolveStringFromData(data));
-  //     } else if (_isJavascript) {
-  //       evaluateScripts(contextId, await _resolveStringFromData(data), url, 0);
-  //     } else if (_isBytecode) {
-  //       evaluateQuickjsByteCode(contextId, data);
-  //     } else if (_isCSS) {
-  //       _addCSSStyleSheet(await _resolveStringFromData(data), contextId: contextId);
-  //     } else {
-  //       // The resource type can not be evaluated.
-  //       throw FlutterError('Can\'t evaluate content of $url');
-  //     }
-  //   }
-  //
-  //   if (kProfileMode) {
-  //     PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
-  //   }
-  //
-  //   // To release memory.
-  //   dispose();
-  // }
-
   bool get isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
   bool get isCSS => contentType.mimeType == _cssContentType.mimeType || _isUriExt('.css');
   bool get isJavascript => contentType.mimeType == _javascriptContentType.mimeType ||
