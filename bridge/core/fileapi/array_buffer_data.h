@@ -13,6 +13,6 @@ struct ArrayBufferData {
   int32_t length;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_FILEAPI_ARRAY_BUFFER_DATA_H_

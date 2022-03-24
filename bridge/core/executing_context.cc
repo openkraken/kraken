@@ -342,7 +342,7 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
   return &module_callbacks_;
 }
 
-//PendingPromises* ExecutingContext::PendingPromises() {
+// PendingPromises* ExecutingContext::PendingPromises() {
 //  return &pending_promises_;
 //}
 

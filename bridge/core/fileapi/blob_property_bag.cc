@@ -26,4 +26,4 @@ void BlobPropertyBag::FillMemberFromQuickjsObject(JSContext* ctx, JSValue value,
   JS_FreeValue(ctx, typeValue);
 }
 
-}
+}  // namespace kraken

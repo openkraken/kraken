@@ -12,4 +12,4 @@ void PendingPromises::TrackPendingPromises(ScriptPromise&& promise) {
   promises_.emplace_back(promise);
 }
 
-}
+}  // namespace kraken

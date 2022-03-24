@@ -21,6 +21,6 @@ class PendingPromises {
   std::vector<ScriptPromise> promises_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_PENDING_PROMISES_H_

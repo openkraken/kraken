@@ -15,7 +15,7 @@ struct IDLTypeBase {
   using ImplType = void;
 };
 
-template<typename T>
+template <typename T>
 struct IDLTypeBaseHelper {
   using ImplType = T;
 };
@@ -24,7 +24,7 @@ class ScriptValue;
 // Any
 struct IDLAny final : public IDLTypeBaseHelper<ScriptValue> {};
 
-template<typename T>
+template <typename T>
 struct IDLOptional final : public IDLTypeBase {
   using ImplType = typename Converter<T>::ImplType;
 };
@@ -59,11 +59,11 @@ struct IDLCallback : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
 };
 
 // Sequence
-template<typename T>
+template <typename T>
 struct IDLSequence final : public IDLTypeBase {
   using ImplType = typename std::vector<T>;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_TS_TYPE_H_

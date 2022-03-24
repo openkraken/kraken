@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-ScriptWrappable::ScriptWrappable(JSContext* ctx): ctx_(ctx), runtime_(JS_GetRuntime(ctx)) {}
+ScriptWrappable::ScriptWrappable(JSContext* ctx) : ctx_(ctx), runtime_(JS_GetRuntime(ctx)) {}
 
 JSValue ScriptWrappable::ToQuickJS() {
   if (wrapped_) {
@@ -70,4 +70,4 @@ void ScriptWrappable::InitializeQuickJSObject() {
   wrapped_ = true;
 }
 
-}
+}  // namespace kraken

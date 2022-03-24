@@ -4,10 +4,10 @@
  */
 
 #include "script_value.h"
-#include "native_string_utils.h"
-#include "qjs_engine_patch.h"
 #include <vector>
 #include "core/executing_context.h"
+#include "native_string_utils.h"
+#include "qjs_engine_patch.h"
 
 namespace kraken {
 

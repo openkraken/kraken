@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_RESOLVER_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_RESOLVER_H_
 
-#include "script_promise.h"
 #include "converter_impl.h"
+#include "script_promise.h"
 #include "to_quickjs.h"
 
 namespace kraken {
@@ -47,7 +47,7 @@ class ScriptPromiseResolver {
 
   template <typename T>
   void ResolveOrReject(T value, ResolutionState new_state) {
-    if (state_ != kPending || !context_->IsValid() || !context_ )
+    if (state_ != kPending || !context_->IsValid() || !context_)
       return;
     assert(new_state == kResolving || new_state == kRejecting);
     state_ = new_state;
@@ -63,6 +63,6 @@ class ScriptPromiseResolver {
   JSValue reject_func_{JS_NULL};
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_RESOLVER_H_

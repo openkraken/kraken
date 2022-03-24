@@ -31,9 +31,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
 
   if (errmsg != nullptr) {
     ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
-    ScriptValue arguments[] = {
-      errorObject
-    };
+    ScriptValue arguments[] = {errorObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.IsException()) {
       context->HandleException(&returnValue);
@@ -42,9 +40,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string), json->length);
     std::string utf8Arguments = toUTF8(argumentString);
     ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
-    ScriptValue arguments[] = {
-      jsonObject
-    };
+    ScriptValue arguments[] = {jsonObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
     if (returnValue.IsException()) {
       context->HandleException(&returnValue);
@@ -62,28 +58,27 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t context
 }
 
 std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                    std::unique_ptr<NativeString> &moduleName,
-                                                    std::unique_ptr<NativeString> &method,
-                                                    ExceptionState& exception) {
+                                                                      std::unique_ptr<NativeString>& moduleName,
+                                                                      std::unique_ptr<NativeString>& method,
+                                                                      ExceptionState& exception) {
   ScriptValue empty = ScriptValue::Empty(context->ctx());
   return __kraken_invoke_module__(context, moduleName, method, empty, nullptr, exception);
 }
 
 std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                    std::unique_ptr<NativeString> &moduleName,
-                                                    std::unique_ptr<NativeString> &method,
-                                                    ScriptValue& paramsValue,
-                                                    ExceptionState& exception) {
+                                                                      std::unique_ptr<NativeString>& moduleName,
+                                                                      std::unique_ptr<NativeString>& method,
+                                                                      ScriptValue& paramsValue,
+                                                                      ExceptionState& exception) {
   return __kraken_invoke_module__(context, moduleName, method, paramsValue, nullptr, exception);
 }
 
 std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                    std::unique_ptr<NativeString> &moduleName,
-                                                    std::unique_ptr<NativeString> &method,
-                                                    ScriptValue& paramsValue,
-                                                    std::shared_ptr<QJSFunction> callback,
-                                                    ExceptionState& exception) {
-
+                                                                      std::unique_ptr<NativeString>& moduleName,
+                                                                      std::unique_ptr<NativeString>& method,
+                                                                      ScriptValue& paramsValue,
+                                                                      std::shared_ptr<QJSFunction> callback,
+                                                                      ExceptionState& exception) {
   std::unique_ptr<NativeString> params;
   if (!paramsValue.IsEmpty()) {
     params = paramsValue.ToJSONStringify(&exception).toNativeString();

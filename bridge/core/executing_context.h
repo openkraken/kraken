@@ -17,19 +17,19 @@
 #include <mutex>
 #include <unordered_map>
 #include "bindings/qjs/binding_initializer.h"
-#include "bindings/qjs/script_wrappable.h"
-#include "bindings/qjs/rejected_promises.h"
 #include "bindings/qjs/pending_promises.h"
+#include "bindings/qjs/rejected_promises.h"
 #include "bindings/qjs/script_value.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
 
-#include "script_state.h"
 #include "dart_methods.h"
 #include "executing_context_data.h"
 #include "frame/dom_timer_coordinator.h"
 #include "frame/module_callback_coordinator.h"
 #include "frame/module_listener_container.h"
+#include "script_state.h"
 
 namespace kraken {
 

@@ -8,8 +8,9 @@
 
 namespace kraken {
 
-ScriptPromise::ScriptPromise(JSContext* ctx, JSValue promise): ctx_(ctx) {
-  if (JS_IsUndefined(promise) || JS_IsNull(promise)) return;
+ScriptPromise::ScriptPromise(JSContext* ctx, JSValue promise) : ctx_(ctx) {
+  if (JS_IsUndefined(promise) || JS_IsNull(promise))
+    return;
 
   if (!JS_IsPromise(promise)) {
     return;
@@ -22,7 +23,6 @@ JSValue ScriptPromise::ToQuickJS() {
   return JS_NULL;
 }
 
-void ScriptPromise::Trace(GCVisitor* visitor) {
-}
+void ScriptPromise::Trace(GCVisitor* visitor) {}
 
-}
+}  // namespace kraken

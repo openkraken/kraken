@@ -15,7 +15,6 @@ void ModuleCallbackCoordinator::RemoveModuleCallbacks(std::shared_ptr<ModuleCall
   listeners_.remove(callback);
 }
 
-ModuleCallbackCoordinator::ModuleCallbackCoordinator() {
-}
+ModuleCallbackCoordinator::ModuleCallbackCoordinator() {}
 
 }  // namespace kraken

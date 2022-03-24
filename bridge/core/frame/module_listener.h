@@ -22,7 +22,6 @@ class ModuleListener {
   explicit ModuleListener(std::shared_ptr<QJSFunction> function);
 
  private:
-
   std::shared_ptr<QJSFunction> function_{nullptr};
 
   friend ModuleListenerContainer;

@@ -10,9 +10,7 @@ namespace kraken {
 
 TEST(ModuleManager, ShouldReturnCorrectValue) {
   bool static errorCalled = false;
-  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    errorCalled = true;
-  });
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
   auto context = bridge->getContext();

@@ -4,8 +4,8 @@
  */
 
 #include "script_promise_resolver.h"
-#include "pending_promises.h"
 #include "core/executing_context.h"
+#include "pending_promises.h"
 
 namespace kraken {
 
@@ -13,7 +13,7 @@ ScriptPromiseResolver* ScriptPromiseResolver::Create(ExecutingContext* context) 
   return new ScriptPromiseResolver(context);
 }
 
-ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context): context_(context) {
+ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context) : context_(context) {
   JSValue resolving_funcs[2];
   promise_ = JS_NewPromiseCapability(context->ctx(), resolving_funcs);
   resolve_func_ = resolving_funcs[0];
@@ -36,9 +36,9 @@ void ScriptPromiseResolver::ResolveOrRejectImmediately(JSValue value) {
       assert(state_ == kRejecting);
       JSValue arguments[] = {value};
       JSValue return_value = JS_Call(context_->ctx(), reject_func_, JS_NULL, 1, arguments);
-      JS_FreeValue(context_->ctx() , return_value);
+      JS_FreeValue(context_->ctx(), return_value);
     }
   }
 }
 
-}
+}  // namespace kraken

@@ -19,16 +19,12 @@ namespace kraken {
 // All the derived classes of ScriptWrappable, regardless of directly or
 // indirectly, must write this macro in the class definition as long as the
 // class has a corresponding .idl file.
-#define DEFINE_WRAPPERTYPEINFO()                               \
- public:                                                       \
-  const WrapperTypeInfo* GetWrapperTypeInfo() const override { \
-    return &wrapper_type_info_;                                \
-  }                                                            \
-  static const WrapperTypeInfo* GetStaticWrapperTypeInfo() {   \
-    return &wrapper_type_info_;                                \
-  }                                                            \
-                                                               \
- private:                                                      \
+#define DEFINE_WRAPPERTYPEINFO()                                                             \
+ public:                                                                                     \
+  const WrapperTypeInfo* GetWrapperTypeInfo() const override { return &wrapper_type_info_; } \
+  static const WrapperTypeInfo* GetStaticWrapperTypeInfo() { return &wrapper_type_info_; }   \
+                                                                                             \
+ private:                                                                                    \
   static const WrapperTypeInfo& wrapper_type_info_
 
 // ScriptWrappable provides a way to map from/to C++ DOM implementation to/from
@@ -57,11 +53,11 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
 };
 
 // Converts a QuickJS object back to a ScriptWrappable.
-template<typename ScriptWrappable>
+template <typename ScriptWrappable>
 inline ScriptWrappable* toScriptWrappable(JSValue object) {
   return static_cast<ScriptWrappable*>(JS_GetOpaque(object, JSValueGetClassId(object)));
 }
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_SCRIPT_WRAPPABLE_H

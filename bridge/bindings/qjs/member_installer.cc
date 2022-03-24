@@ -3,10 +3,10 @@
  * Author: Kraken Team.
  */
 
-#include <quickjs/quickjs.h>
 #include "member_installer.h"
-#include "qjs_engine_patch.h"
+#include <quickjs/quickjs.h>
 #include "core/executing_context.h"
+#include "qjs_engine_patch.h"
 
 namespace kraken {
 
@@ -36,7 +36,6 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
   }
   return result;
 }
-
 
 void MemberInstaller::InstallAttributes(ExecutingContext* context, JSValue root, std::initializer_list<MemberInstaller::AttributeConfig> config) {
   JSContext* ctx = context->ctx();

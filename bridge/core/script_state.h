@@ -22,10 +22,11 @@ class ScriptState {
 
   inline JSContext* ctx() { return ctx_; }
   static JSRuntime* runtime();
+
  private:
   JSContext* ctx_{nullptr};
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_SCRIPT_STATE_H_

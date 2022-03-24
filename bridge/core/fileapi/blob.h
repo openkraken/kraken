@@ -8,12 +8,12 @@
 
 #include <string>
 #include <vector>
+#include "array_buffer_data.h"
 #include "bindings/qjs/macros.h"
 #include "bindings/qjs/script_promise.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "blob_part.h"
 #include "blob_property_bag.h"
-#include "array_buffer_data.h"
 
 namespace kraken {
 

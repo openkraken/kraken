@@ -33,9 +33,7 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
     return Converter<T>::FromValue(ctx, value, exception);
   }
 
-  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
-    return Converter<T>::ToValue(ctx, value);
-  }
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) { return Converter<T>::ToValue(ctx, value); }
 };
 
 template <typename T>
@@ -49,9 +47,7 @@ struct Converter<IDLOptional<T>, std::enable_if_t<is_shared_ptr<typename Convert
     return Converter<T>::FromValue(ctx, value, exception);
   }
 
-  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
-    return Converter<T>::ToValue(ctx, value);
-  }
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) { return Converter<T>::ToValue(ctx, value); }
 };
 
 // Optional value for arithmetic value
@@ -66,9 +62,7 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_arithmetic<typename Co
     return Converter<T>::FromValue(ctx, value, exception);
   }
 
-  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
-    return Converter<T>::ToValue(ctx, value);
-  }
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) { return Converter<T>::ToValue(ctx, value); }
 };
 
 // Any
@@ -82,16 +76,14 @@ struct Converter<IDLAny> : public ConverterBase<IDLAny> {
   static JSValue ToValue(JSContext* ctx, ScriptValue value) { return value.ToQuickJS(); }
 };
 
-template<>
+template <>
 struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return ScriptValue(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) {
-    return Converter<IDLAny>::ToValue(ctx, std::move(value));
-  }
+  static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) { return Converter<IDLAny>::ToValue(ctx, std::move(value)); }
 };
 
 // Boolean
@@ -119,7 +111,7 @@ struct Converter<IDLUint32> : public ConverterBase<IDLUint32> {
 };
 
 // Int32
-template<>
+template <>
 struct Converter<IDLInt32> : public ConverterBase<IDLInt32> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -130,9 +122,8 @@ struct Converter<IDLInt32> : public ConverterBase<IDLInt32> {
   static JSValue ToValue(JSContext* ctx, uint32_t v) { return JS_NewInt32(ctx, v); }
 };
 
-
 // Int64
-template<>
+template <>
 struct Converter<IDLInt64> : public ConverterBase<IDLInt64> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -164,21 +155,20 @@ struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
 
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
-  static JSValue ToValue(JSContext* ctx, const std::string& str) { return JS_NewString(ctx, str.c_str());}
+  static JSValue ToValue(JSContext* ctx, const std::string& str) { return JS_NewString(ctx, str.c_str()); }
 };
 
-template<>
+template <>
 struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    if (JS_IsUndefined(value)) return nullptr;
+    if (JS_IsUndefined(value))
+      return nullptr;
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
 
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return Converter<IDLDOMString>::ToValue(ctx, bytes, length); }
   static JSValue ToValue(JSContext* ctx, const std::string& str) { return Converter<IDLDOMString>::ToValue(ctx, str); }
-  static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) {
-    return Converter<IDLDOMString>::ToValue(ctx, std::move(value));
-  }
+  static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) { return Converter<IDLDOMString>::ToValue(ctx, std::move(value)); }
 };
 
 template <>
@@ -220,7 +210,7 @@ struct Converter<IDLSequence<T>> : public ConverterBase<IDLSequence<T>> {
   }
 };
 
-template<typename T>
+template <typename T>
 struct Converter<IDLOptional<IDLSequence<T>>> : public ConverterBase<IDLSequence<T>> {
   using ImplType = typename IDLSequence<typename Converter<T>::ImplType>::ImplType;
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
@@ -255,9 +245,9 @@ struct Converter<BlobPart> : public ConverterBase<BlobPart> {
   static JSValue ToValue(JSContext* ctx, BlobPart* data) { return data->ToQuickJS(ctx); }
 };
 
-template<>
+template <>
 struct Converter<BlobPropertyBag> : public ConverterBase<BlobPropertyBag> {
-  using ImplType  = BlobPropertyBag::ImplType;
+  using ImplType = BlobPropertyBag::ImplType;
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return BlobPropertyBag::Create(ctx, value, exception_state);

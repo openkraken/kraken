@@ -40,7 +40,7 @@ class ScriptValue final {
   ScriptValue() = default;
 
   // Copy and assignment
-  ScriptValue(ScriptValue const &value) {
+  ScriptValue(ScriptValue const& value) {
     if (&value != this) {
       value_ = JS_DupValue(ctx_, value.value_);
     }

@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_
 #define KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_
 
-#include <memory>
 #include <quickjs/quickjs.h>
+#include <memory>
 #include "core/executing_context.h"
 
 namespace kraken {
@@ -25,7 +25,6 @@ class BlobPropertyBag final {
   std::string m_type;
 };
 
-}
-
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_FILEAPI_BLOB_PROPERTY_BAG_H_

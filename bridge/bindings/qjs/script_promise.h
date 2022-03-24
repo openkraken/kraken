@@ -19,8 +19,8 @@ namespace kraken {
 // memory leaks since it has a reference from C++ to QuickJS.
 class ScriptPromise final {
   KRAKEN_DISALLOW_NEW();
- public:
 
+ public:
   ScriptPromise() = default;
   ScriptPromise(JSContext* ctx, JSValue promise);
 
@@ -33,6 +33,6 @@ class ScriptPromise final {
   ScriptValue promise_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_SCRIPT_PROMISE_H_

@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#include <string>
 #include "blob.h"
+#include <string>
 #include "bindings/qjs/script_promise_resolver.h"
 #include "core/executing_context.h"
 
@@ -99,10 +99,7 @@ std::string Blob::StringResult() {
 }
 
 ArrayBufferData Blob::ArrayBufferResult() {
-  return ArrayBufferData{
-    bytes(),
-    size()
-  };
+  return ArrayBufferData{bytes(), size()};
 }
 
 std::string Blob::type() {

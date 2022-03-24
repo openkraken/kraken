@@ -70,11 +70,11 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
 }
 
 void ExecutionContextData::Dispose() {
-  for(auto& entry: prototype_map_) {
+  for (auto& entry : prototype_map_) {
     JS_FreeValueRT(ScriptState::runtime(), entry.second);
   }
 
-  for(auto& entry: constructor_map_) {
+  for (auto& entry : constructor_map_) {
     JS_FreeValueRT(ScriptState::runtime(), entry.second);
   }
 }

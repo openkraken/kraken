@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_DOM_TIMER_H
 #define KRAKENBRIDGE_DOM_TIMER_H
 
-#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/qjs_function.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "dom_timer_coordinator.h"
 
 namespace kraken {

@@ -28,11 +28,11 @@
   TypeName(TypeName&&) = delete;       \
   TypeName& operator=(TypeName&&) = delete
 
-#define KRAKEN_STATIC_ONLY(Type)                          \
-  Type() = delete;                                        \
-  Type(const Type&) = delete;                             \
-  Type& operator=(const Type&) = delete;                  \
-  void* operator new(size_t) = delete;                    \
+#define KRAKEN_STATIC_ONLY(Type)         \
+  Type() = delete;                       \
+  Type(const Type&) = delete;            \
+  Type& operator=(const Type&) = delete; \
+  void* operator new(size_t) = delete;   \
   void* operator new(size_t, void*) = delete
 
 // KRAKEN_DISALLOW_NEW(): Cannot be allocated with new operators but can be a

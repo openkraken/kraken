@@ -49,7 +49,7 @@ std::shared_ptr<BlobPart> BlobPart::Create(JSContext* ctx, JSValue value, Except
 }
 
 JSValue BlobPart::ToQuickJS(JSContext* ctx) const {
-  switch(content_type_) {
+  switch (content_type_) {
     case ContentType::kString: {
       return JS_NewString(ctx, member_string_.c_str());
     }
@@ -83,4 +83,4 @@ Blob* BlobPart::GetBlob() const {
   return blob_;
 }
 
-}
+}  // namespace kraken

@@ -15,17 +15,14 @@ namespace kraken {
 class AtomString final {
   // ScriptAtom should only allocate at stack.
   KRAKEN_DISALLOW_NEW();
+
  public:
-  explicit AtomString(JSContext* ctx, const char* string): ctx_(ctx), atom_(JS_NewAtom(ctx, string)) {}
-  explicit AtomString(JSContext* ctx, JSAtom atom): ctx_(ctx), atom_(JS_DupAtom(ctx, atom)) {};
+  explicit AtomString(JSContext* ctx, const char* string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string)) {}
+  explicit AtomString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(JS_DupAtom(ctx, atom)){};
 
-  ~AtomString() {
-    JS_FreeAtom(ctx_, atom_);
-  }
+  ~AtomString() { JS_FreeAtom(ctx_, atom_); }
 
-  JSValue ToQuickJS() const {
-    return JS_AtomToValue(ctx_, atom_);
-  }
+  JSValue ToQuickJS() const { return JS_AtomToValue(ctx_, atom_); }
 
   AtomString& operator=(const AtomString& other) {
     if (&other != this) {
@@ -40,7 +37,6 @@ class AtomString final {
   JSAtom atom_{JS_ATOM_NULL};
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_ATOM_STRING_H_

@@ -20,7 +20,7 @@ ScriptState::ScriptState() {
   ctx_ = JS_NewContext(runtime_);
 }
 
-JSRuntime * ScriptState::runtime() {
+JSRuntime* ScriptState::runtime() {
   return runtime_;
 }
 
@@ -38,4 +38,4 @@ ScriptState::~ScriptState() {
 #endif
   ctx_ = nullptr;
 }
-}
+}  // namespace kraken
