@@ -306,9 +306,16 @@ list(APPEND BRIDGE_LINK_LIBS gumbo_parse_static)
 
 if (${IS_ANDROID})
   find_library(log-lib log)
+
+  if (${ANDROID_ABI} MATCHES "armeabi-v7a" OR ${ANDROID_ABI} MATCHES "x86")
+    add_definitions(-DANDROID_32_BIT=1)
+  endif()
+
   add_definitions(-DIS_ANDROID=1)
   list(APPEND BRIDGE_LINK_LIBS ${log-lib})
-endif ()
+elseif(${IS_IOS})
+  add_definitions(-DIS_IOS=1)
+endif()
 
 ### Kraken
 target_include_directories(kraken PRIVATE
@@ -377,6 +384,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
     MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken-bridge
+    MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
     PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
     )
 
@@ -387,6 +396,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
       FRAMEWORK TRUE
       FRAMEWORK_VERSION C
       MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
+      MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
       PUBLIC_HEADER ${QUICKJS_PUBLIC_HEADERS}
       )
   endif()

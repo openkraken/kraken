@@ -1,15 +1,20 @@
+type double = number;
+type int64 = number;
+
 interface CanvasRenderingContext2D {
   fillStyle: string;
   direction: string;
   font: string;
   strokeStyle: string;
   lineCap: string;
-  lineDashOffset: string;
+  lineDashOffset: double;
   lineJoin: string;
-  lineWidth: string;
-  miterLimit: string;
+  lineWidth: double;
+  miterLimit: double;
   textAlign: string;
   textBaseline: string;
+  // @TODO: Following number should be double.
+  // Reference https://html.spec.whatwg.org/multipage/canvas.html
   arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
   arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void;
   beginPath(): void;
@@ -42,7 +47,7 @@ interface CanvasRenderingContext2D {
 }
 
 interface CanvasElement extends Element {
-  width: string;
-  height: string;
+  width: int64;
+  height: int64;
   getContext: (contextType: string) => CanvasRenderingContext2D;
 }

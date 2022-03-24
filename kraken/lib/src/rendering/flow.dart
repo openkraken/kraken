@@ -242,8 +242,14 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Set container size.
     _setContainerSize(_runMetrics);
 
+    // Adjust children size which depends on the container size.
+    _adjustChildrenSize(_runMetrics);
+
     // Set children offset based on alignment properties.
     _setChildrenOffset(_runMetrics);
+
+    // Set the size of scrollable overflow area for flow layout.
+    _setMaxScrollableSize(_runMetrics, children);
   }
 
   // Layout children in normal flow order to calculate metrics of lines according to its constraints
@@ -484,7 +490,58 @@ class RenderFlowLayout extends RenderLayoutBox {
       contentHeight: 0,
     );
     setMaxScrollableSize(layoutContentSize);
-    size = getBoxSize(layoutContentSize);
+    size = scrollableSize = getBoxSize(layoutContentSize);
+  }
+
+  // Children may need to relayout when its display is block which depends on
+  // the size of its container whose display is inline-block.
+  // Take following as example, div of id="2" need to relayout after its container is
+  // stretched by sibling div of id="1".
+  //
+  // <div style="display: inline-block;">
+  //   <div id="1" style="width: 100px;">
+  //   </div>
+  //   <div id="2">
+  //   </div>
+  // </div>
+  void _adjustChildrenSize(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    if (_runMetrics.isEmpty) return;
+
+    // Element of inline-block will shrink to its maximum children size
+    // when its width is not specified.
+    bool isInlineBlock = renderStyle.effectiveDisplay == CSSDisplay.inlineBlock;
+    if (isInlineBlock && constraints.maxWidth.isInfinite) {
+      for (int i = 0; i < _runMetrics.length; ++i) {
+        final _RunMetrics metrics = _runMetrics[i];
+        final Map<int?, RenderBox> runChildren = metrics.runChildren;
+        final List<RenderBox> runChildrenList = runChildren.values.toList();
+
+        for (RenderBox child in runChildrenList) {
+          if (child is RenderBoxModel) {
+            bool isChildBlockLevel = child.renderStyle.effectiveDisplay == CSSDisplay.block
+              || child.renderStyle.effectiveDisplay == CSSDisplay.flex;
+            // Element of display block will stretch to the width of its container
+            // when its width is not specified.
+            if (isChildBlockLevel && child.constraints.maxWidth.isInfinite) {
+              double contentBoxWidth = renderStyle.contentBoxWidth!;
+              // No need to layout child when its width is identical to parent's width.
+              if (child.renderStyle.borderBoxWidth == contentBoxWidth) {
+                continue;
+              }
+              BoxConstraints childConstraints = BoxConstraints(
+                minWidth: contentBoxWidth,
+                maxWidth: contentBoxWidth,
+                minHeight: child.constraints.minHeight,
+                maxHeight: child.constraints.maxHeight,
+              );
+              child.layout(childConstraints, parentUsesSize: true);
+            }
+          }
+        }
+      }
+    }
   }
 
   // Set children offset based on alignment properties.
@@ -666,8 +723,6 @@ class RenderFlowLayout extends RenderLayoutBox {
 
       crossAxisOffset += runCrossAxisExtent + runBetweenSpace;
     }
-
-    _setMaxScrollableSizeForFlow(_runMetrics);
   }
 
   // Compute distance to baseline of flow layout.
@@ -837,7 +892,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // Set the size of scrollable overflow area for flow layout.
   // https://drafts.csswg.org/css-overflow-3/#scrollable
-  void _setMaxScrollableSizeForFlow(List<_RunMetrics> runMetrics) {
+  void _setMaxScrollableSize(List<_RunMetrics> runMetrics, List<RenderBox> children) {
     // Scrollable main size collection of each line.
     List<double> scrollableMainSizeOfLines = [];
     // Scrollable cross size collection of each line.
@@ -881,8 +936,10 @@ class RenderFlowLayout extends RenderLayoutBox {
           // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
 
           // Add offset of margin.
-          childOffsetX += childRenderStyle.marginLeft.computedValue;
-          childOffsetY += _getChildMarginTop(child);
+          childOffsetX += childRenderStyle.marginLeft.computedValue
+            + childRenderStyle.marginRight.computedValue;
+          childOffsetY += _getChildMarginTop(child)
+            + _getChildMarginBottom(child);
 
           // Add offset of position relative.
           // Offset of position absolute and fixed is added in layout stage of positioned renderBox.
@@ -939,10 +996,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         renderStyle.effectiveOverflowX != CSSOverflowType.visible ||
         renderStyle.effectiveOverflowY != CSSOverflowType.visible;
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableMainSizeOfChildren = isScrollContainer
-        ? maxScrollableMainSizeOfLines
-        : container.renderStyle.paddingLeft.computedValue + maxScrollableMainSizeOfLines;
+    // Padding in the end direction of axis should be included in scroll container.
+    double maxScrollableMainSizeOfChildren =
+      maxScrollableMainSizeOfLines + renderStyle.paddingLeft.computedValue
+      + (isScrollContainer ? renderStyle.paddingRight.computedValue : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -950,10 +1007,10 @@ class RenderFlowLayout extends RenderLayoutBox {
       return curr > next ? curr : next;
     });
 
-    // No need to add padding for scrolling content box.
-    double maxScrollableCrossSizeOfChildren = isScrollContainer
-        ? maxScrollableCrossSizeOfLines
-        : container.renderStyle.paddingTop.computedValue + maxScrollableCrossSizeOfLines;
+    // Padding in the end direction of axis should be included in scroll container.
+    double maxScrollableCrossSizeOfChildren =
+      maxScrollableCrossSizeOfLines + renderStyle.paddingTop.computedValue
+      + (isScrollContainer ? renderStyle.paddingBottom.computedValue : 0);
 
     double maxScrollableMainSize = math.max(
         size.width -

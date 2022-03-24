@@ -43,7 +43,7 @@ class LocalHttpServer {
           data.addAll(chunk);
 
           if (data.length >= 4) {
-            var lastFour = data.sublist(chunk.length - 4, chunk.length);
+            var lastFour = data.sublist(data.length - 4, data.length);
 
             // Ends with \r\n\r\n or
             // @TODO: content-length.

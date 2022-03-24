@@ -7,9 +7,10 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/launcher.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/src/module/navigator.dart';
 import 'package:quiver/collection.dart';
@@ -19,30 +20,33 @@ import 'package:quiver/collection.dart';
 class ImageProviderParams {
   int? cachedWidth;
   int? cachedHeight;
+  BoxFit objectFit = BoxFit.fill;
 
-  ImageProviderParams({this.cachedWidth, this.cachedHeight});
+  ImageProviderParams({this.cachedWidth, this.cachedHeight, required this.objectFit});
 }
 
 class CachedNetworkImageProviderParams extends ImageProviderParams {
   int? contextId;
 
   CachedNetworkImageProviderParams(this.contextId,
-      {int? cachedWidth, int? cachedHeight})
-      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
 class FileImageProviderParams extends ImageProviderParams {
   File file;
 
-  FileImageProviderParams(this.file, {int? cachedWidth, int? cachedHeight})
-      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+  FileImageProviderParams(this.file,
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
 class DataUrlImageProviderParams extends ImageProviderParams {
   Uint8List bytes;
 
-  DataUrlImageProviderParams(this.bytes, {int? cachedWidth, int? cachedHeight})
-      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+  DataUrlImageProviderParams(this.bytes,
+      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
+      : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
 /// A factory function allow user to build an customized ImageProvider class.
@@ -106,7 +110,7 @@ ImageProviderFactory _dataUrlProviderFactory = defaultDataUrlProviderFactory;
 ImageProviderFactory _blobProviderFactory = defaultBlobProviderFactory;
 ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
-ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
+ImageType parseImageUrl(Uri resolvedUri, {String cache = 'auto'}) {
   if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
     return (cache == 'store' || cache == 'auto')
         ? ImageType.cached
@@ -117,13 +121,15 @@ ImageType parseImageUrl(Uri resolvedUri, {cache = 'auto'}) {
     return ImageType.dataUrl;
   } else if (resolvedUri.isScheme('BLOB')) {
     return ImageType.blob;
-  } else {
+  } else if (resolvedUri.isScheme('ASSETS')) {
     return ImageType.assets;
+  } else {
+    throw FlutterError('Uri must have it\'s scheme. $resolvedUri');
   }
 }
 
 ImageProvider? getImageProvider(Uri resolvedUri,
-    {int? contextId, cache = 'auto', int? cachedWidth, int? cachedHeight}) {
+    {int? contextId, cache = 'auto', BoxFit objectFit = BoxFit.fill, int? cachedWidth, int? cachedHeight}) {
   ImageType imageType = parseImageUrl(resolvedUri, cache: cache);
   ImageProviderFactory factory = _getImageProviderFactory(imageType);
 
@@ -132,18 +138,18 @@ ImageProvider? getImageProvider(Uri resolvedUri,
       return factory(
           resolvedUri,
           CachedNetworkImageProviderParams(contextId,
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
     case ImageType.network:
       return factory(
           resolvedUri,
           CachedNetworkImageProviderParams(contextId,
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
     case ImageType.file:
       File file = File.fromUri(resolvedUri);
       return factory(
           resolvedUri,
           FileImageProviderParams(file,
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
     case ImageType.dataUrl:
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
@@ -152,7 +158,7 @@ ImageProvider? getImageProvider(Uri resolvedUri,
         return factory(
             resolvedUri,
             DataUrlImageProviderParams(data.contentAsBytes(),
-                cachedWidth: cachedWidth, cachedHeight: cachedHeight));
+                cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
       }
       return null;
     case ImageType.blob:
@@ -162,7 +168,7 @@ ImageProvider? getImageProvider(Uri resolvedUri,
       return factory(
           resolvedUri,
           ImageProviderParams(
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight));
+              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
   }
 }
 
@@ -214,18 +220,21 @@ class KrakenResizeImage extends ResizeImage {
     ImageProvider<Object> imageProvider, {
     int? width,
     int? height,
+    this.objectFit,
   }) : super(imageProvider, width: width, height: height);
 
+  BoxFit? objectFit;
+
   static final LinkedLruHashMap<dynamic, Size> _imageNaturalSize = LinkedLruHashMap(maximumSize: 100);
-  static Size? getImageNaturalSize(dynamic key) {
+  static Size? getImageNaturalSize(key) {
     return _imageNaturalSize[key];
   }
 
   static ImageProvider<Object> resizeIfNeeded(
-      int? cacheWidth, int? cacheHeight, ImageProvider<Object> provider) {
+      int? cacheWidth, int? cacheHeight, BoxFit? objectFit, ImageProvider<Object> provider) {
     if (cacheWidth != null || cacheHeight != null) {
       return KrakenResizeImage(provider,
-          width: cacheWidth, height: cacheHeight);
+          width: cacheWidth, height: cacheHeight, objectFit: objectFit);
     }
     return provider;
   }
@@ -267,22 +276,82 @@ class KrakenResizeImage extends ResizeImage {
 
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
     final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
-    if (!allowUpscaling) {
-      if (cacheWidth != null && cacheWidth > descriptor.width) {
-        cacheWidth = descriptor.width;
-      }
-      if (cacheHeight != null && cacheHeight > descriptor.height) {
-        cacheHeight = descriptor.height;
-      }
-    }
 
     // Cache the image's original size for element.naturalWidth and element.naturalHeight API.
     dynamic key = await obtainKey(ImageConfiguration.empty);
-    _imageNaturalSize[key] = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
+
+    double naturalWidth = descriptor.width.toDouble();
+    double naturalHeight = descriptor.height.toDouble();
+    _imageNaturalSize[key] = Size(naturalWidth, naturalHeight);
+
+    int? targetWidth;
+    int? targetHeight;
+
+    // Image will be resized according to its aspect radio if object-fit is not fill.
+    // https://www.w3.org/TR/css-images-3/#propdef-object-fit
+    if (cacheWidth != null && cacheHeight != null) {
+      // When targetWidth or targetHeight is not set at the same time,
+      // image will be resized according to its aspect radio.
+      // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/painting/box_fit.dart#L152
+      if (objectFit == BoxFit.contain) {
+        if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
+          targetHeight = cacheHeight;
+        } else {
+          targetWidth = cacheWidth;
+        }
+
+      // Resized image should maintain its intrinsic aspect radio event if object-fit is fill
+      // which behaves just like object-fit cover otherwise the cached resized image with
+      // distorted aspect ratio will not work when object-fit changes to not fill.
+      } else if (objectFit == BoxFit.fill || objectFit == BoxFit.cover) {
+        if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
+          targetWidth = cacheWidth;
+        } else {
+          targetHeight = cacheHeight;
+        }
+
+      // Image should maintain its aspect radio and not resized if object-fit is none.
+      } else if (objectFit == BoxFit.none) {
+        targetWidth = descriptor.width;
+        targetHeight = descriptor.height;
+
+      // If image size is smaller than its natural size when object-fit is contain,
+      // scale-down is parsed as none, otherwise parsed as contain.
+      } else if (objectFit == BoxFit.scaleDown) {
+        if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
+          if (cacheHeight > descriptor.height * window.devicePixelRatio) {
+            targetWidth = descriptor.width;
+            targetHeight = descriptor.height;
+          } else {
+            targetHeight = cacheHeight;
+          }
+        } else {
+          if (cacheWidth > descriptor.width * window.devicePixelRatio) {
+            targetWidth = descriptor.width;
+            targetHeight = descriptor.height;
+          } else {
+            targetWidth = cacheWidth;
+          }
+        }
+      }
+    } else {
+      targetWidth = cacheWidth;
+      targetHeight = cacheHeight;
+    }
+
+    // Resize image size should not be larger than its natural size.
+    if (!allowUpscaling) {
+      if (targetWidth != null && targetWidth > descriptor.width * window.devicePixelRatio) {
+        targetWidth = descriptor.width;
+      }
+      if (targetHeight != null && targetHeight > descriptor.height * window.devicePixelRatio) {
+        targetHeight = descriptor.height;
+      }
+    }
 
     return descriptor.instantiateCodec(
-      targetWidth: cacheWidth,
-      targetHeight: cacheHeight,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
     );
   }
 
@@ -300,10 +369,12 @@ class KrakenResizeImage extends ResizeImage {
 ImageProvider defaultCachedProviderFactory(
     Uri uri, ImageProviderParams params) {
   return KrakenResizeImage.resizeIfNeeded(
-      params.cachedWidth,
-      params.cachedHeight,
-      CachedNetworkImage(uri.toString(),
-          contextId: (params as CachedNetworkImageProviderParams).contextId));
+    params.cachedWidth,
+    params.cachedHeight,
+    params.objectFit,
+    CachedNetworkImage(uri.toString(),
+        contextId: (params as CachedNetworkImageProviderParams).contextId)
+  );
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
@@ -315,22 +386,32 @@ ImageProvider defaultNetworkProviderFactory(
         (params as CachedNetworkImageProviderParams).contextId.toString(),
   });
   return KrakenResizeImage.resizeIfNeeded(
-      params.cachedWidth, params.cachedHeight, networkImage);
+    params.cachedWidth,
+    params.cachedHeight,
+    params.objectFit,
+    networkImage
+  );
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
-  return KrakenResizeImage.resizeIfNeeded(params.cachedWidth,
-      params.cachedHeight, FileImage((params as FileImageProviderParams).file));
+  return KrakenResizeImage.resizeIfNeeded(
+    params.cachedWidth,
+    params.cachedHeight,
+    params.objectFit,
+    FileImage((params as FileImageProviderParams).file)
+  );
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
 ImageProvider? defaultDataUrlProviderFactory(
     Uri uri, ImageProviderParams params) {
   return KrakenResizeImage.resizeIfNeeded(
-      params.cachedWidth,
-      params.cachedHeight,
-      MemoryImage((params as DataUrlImageProviderParams).bytes));
+    params.cachedWidth,
+    params.cachedHeight,
+    params.objectFit,
+    MemoryImage((params as DataUrlImageProviderParams).bytes)
+  );
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
@@ -341,6 +422,11 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
+  final String assetName = AssetsBundle.getAssetName(uri);
   return KrakenResizeImage.resizeIfNeeded(
-      params.cachedWidth, params.cachedHeight, AssetImage(uri.toString()));
+    params.cachedWidth,
+    params.cachedHeight,
+    params.objectFit,
+    AssetImage(assetName)
+  );
 }

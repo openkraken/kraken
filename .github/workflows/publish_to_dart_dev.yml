@@ -1,6 +1,9 @@
 name: Publish Kraken To pub.dev
 
-on: [workflow_dispatch]
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

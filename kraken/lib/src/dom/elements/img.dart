@@ -9,12 +9,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
 
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
 const String NATURAL_HEIGHT = 'naturalHeight';
+const String LOADING = 'loading';
+const String SCALING = 'scaling';
+const String LAZY = 'lazy';
+const String SCALE = 'scale';
 
 // FIXME: should be inline default.
 const Map<String, dynamic> _defaultStyle = {
@@ -47,19 +52,82 @@ class ImageElement extends Element {
   int _frameCount = 0;
 
   bool _isListeningStream = false;
-  bool _isInLazyLoading = false;
+
+  bool get _isInLazyLoading {
+    RenderReplaced? renderReplaced;
+    if (renderBoxModel != null) {
+      renderReplaced = renderBoxModel as RenderReplaced;
+    }
+    return renderReplaced != null && renderReplaced.isInLazyRendering;
+  }
+
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
   // A boolean value which indicates whether or not the image has completely loaded.
-  bool complete = false;
+  bool _complete = false;
 
-  bool get _shouldLazyLoading => properties['loading'] == 'lazy';
+  // The attribute directs the user agent to fetch a resource immediately or to defer fetching
+  // until some conditions associated with the element are met, according to the attribute's
+  // current state.
+  // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes
+  bool get _shouldLazyLoading => getAttribute(LOADING) == LAZY;
+
+  // Custom attribute defined by Kraken, used to scale the origin image down to fit the box model
+  // to reduce the image size which will save the image painting time significantly when the image
+  // size is too large.
+  //
+  // Note this attribute should be set with caution cause scaling the image size will invalidate
+  // the image cache when width or height is changed and add more images to the cache.
+  // So the best practice to improve image painting performance is scaling the image manually before
+  // used in source code rather than relying Kraken to do the scaling job.
+  bool get _shouldScaling => getAttribute(SCALING) == SCALE;
+
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement(EventTargetContext? context)
+  ImageElement([BindingContext? context])
       : super(
       context,
-      isIntrinsicBox: true,
+      isReplacedElement: true,
       defaultStyle: _defaultStyle) {
+  }
+
+  // Bindings.
+  @override
+  getBindingProperty(String key) {
+    switch (key) {
+      case 'src': return src;
+      case 'loading': return loading;
+      case 'width': return width;
+      case 'height': return height;
+      case 'scaling': return scaling;
+      case 'naturalWidth': return naturalWidth;
+      case 'naturalHeight': return naturalHeight;
+      case 'complete': return _complete;
+      default: return super.getBindingProperty(key);
+    }
+  }
+
+  @override
+  void setBindingProperty(String key, value) {
+    switch (key) {
+      case 'src': src = castToType<String>(value); break;
+      case 'loading': loading = castToType<String>(value); break;
+      case 'width': width = castToType<int>(value); break;
+      case 'height': height = castToType<int>(value); break;
+      case 'scaling': scaling = castToType<String>(value); break;
+      default: super.setBindingProperty(key, value);
+    }
+  }
+
+  @override
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'src': src = attributeToProperty<String>(value); break;
+      case 'loading': loading = attributeToProperty<String>(value); break;
+      case 'width': width = attributeToProperty<int>(value); break;
+      case 'height': height = attributeToProperty<int>(value); break;
+      case 'scaling': scaling = attributeToProperty<String>(value); break;
+    }
   }
 
   @override
@@ -76,10 +144,11 @@ class ImageElement extends Element {
     if (!_isInLazyLoading || _renderImage == null) {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
-        _isInLazyLoading = true;
+        RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+        renderReplaced.isInLazyRendering = true;
 
         // When detach renderer, all listeners will be cleared.
-        renderBoxModel!.addIntersectionChangeListener(_handleIntersectionChange);
+        renderReplaced.addIntersectionChangeListener(_handleIntersectionChange);
       } else {
         _loadImage();
       }
@@ -90,7 +159,6 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _resizeImage();
     _resolveImage(_resolvedUri);
     _listenToStream();
   }
@@ -134,61 +202,60 @@ class ImageElement extends Element {
     _imageProviderKey = null;
   }
 
-  double get width {
+  int get width {
     // Width calc priority: style > property > intrinsic.
     double borderBoxWidth = _styleWidth
       ?? _propertyWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
-    return borderBoxWidth;
+    return borderBoxWidth.round();
   }
 
-  double get height {
+  int get height {
     // Height calc priority: style > property > intrinsic.
     double borderBoxHeight = _styleHeight
       ?? _propertyHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
-    return borderBoxHeight;
+    return borderBoxHeight.round();
   }
 
   // Read the original image width of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  double get naturalWidth {
+  int get naturalWidth {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
       Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
       if (size != null) {
-        return size.width;
+        return size.width.toInt();
       }
     }
-    return image?.width.toDouble() ?? 0;
+    return image?.width ?? 0;
   }
 
   // Read the original image height of loaded image.
   // The getter must be called after image had loaded, otherwise will return 0.0.
-  double get naturalHeight {
+  int get naturalHeight {
     ImageProvider? imageProvider = _cachedImageProvider;
     if (imageProvider is KrakenResizeImage) {
       Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
       if (size != null) {
-        return size.height;
+        return size.height.toInt();
       }
     }
-    return image?.height.toDouble() ?? 0;
+    return image?.height ?? 0;
   }
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
     if (entry.isIntersecting) {
       // Once appear remove the listener
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _loadImage();
     }
   }
 
-  void _resetLazyLoading() {
-    _isInLazyLoading = false;
+  void _removeIntersectionChangeListener() {
     renderBoxModel!.removeIntersectionChangeListener(_handleIntersectionChange);
   }
 
@@ -216,11 +283,13 @@ class ImageElement extends Element {
   }
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
+    print('$exception\n$stackTrace');
     dispatchEvent(Event(EVENT_ERROR));
   }
 
   void _resizeImage() {
-    assert(isRendererAttached);
+    // Only need to resize image after image is fully loaded.
+    if (!_complete) return;
 
     if (_styleWidth == null && _propertyWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
@@ -231,13 +300,13 @@ class ImageElement extends Element {
       renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
     }
 
-    renderStyle.intrinsicWidth = naturalWidth;
-    renderStyle.intrinsicHeight = naturalHeight;
+    renderStyle.intrinsicWidth = naturalWidth.toDouble();
+    renderStyle.intrinsicHeight = naturalHeight.toDouble();
 
     // Try to update image size if image already resolved.
     // Set size to RenderImage is needs, to avoid makeNeedsLayout when update image.
-    _renderImage?.width = width;
-    _renderImage?.height = height;
+    _renderImage?.width = width.toDouble();
+    _renderImage?.height = height.toDouble();
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
       renderStyle.intrinsicRatio = null;
@@ -259,12 +328,12 @@ class ImageElement extends Element {
   }
 
   @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
+  void removeAttribute(String key) {
+    super.removeAttribute(key);
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
     } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
-      _resetLazyLoading();
+      _removeIntersectionChangeListener();
       _stopListeningStream(keepStreamAlive: true);
     }
   }
@@ -288,15 +357,6 @@ class ImageElement extends Element {
     _isListeningStream = false;
   }
 
-  Uri? _resolveSrc() {
-    String? src = properties['src'];
-    if (src != null && src.isNotEmpty) {
-      Uri base = Uri.parse(ownerDocument.controller.href);
-      return ownerDocument.controller.uriParser!.resolve(base, Uri.parse(src));
-    }
-    return null;
-  }
-
   void _updateSourceStream(ImageStream newStream) {
     if (_cachedImageStream?.key == newStream.key) return;
 
@@ -313,7 +373,7 @@ class ImageElement extends Element {
   }
 
   // Obtain image resource from resolvedUri, and create an ImageStream that loads the image streams.
-  // If imageElement has propertySize or width,height properties on renderStyle,
+  // If imageElement has propertySize or width/height property on renderStyle,
   // The image will be encoded into a small size for better rasterization performance.
   void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) async {
     if (resolvedUri == null) return;
@@ -324,8 +384,14 @@ class ImageElement extends Element {
 
     ImageProvider? provider = _cachedImageProvider;
     if (updateImageProvider || provider == null) {
-      // When cachedWidth or cachedHeight is not null, KrakenResizeImage will be returned.
-      provider = _cachedImageProvider = getImageProvider(resolvedUri, cachedWidth: cachedWidth, cachedHeight: cachedHeight);
+      // Image should be resized based on different ratio according to object-fit value.
+      BoxFit objectFit = renderStyle.objectFit;
+      provider = _cachedImageProvider = getImageProvider(
+        resolvedUri,
+        objectFit: objectFit,
+        cachedWidth: cachedWidth,
+        cachedHeight: cachedHeight,
+      );
     }
     if (provider == null) return;
 
@@ -354,8 +420,8 @@ class ImageElement extends Element {
     _replaceImage(info: imageInfo);
     _frameCount++;
 
-    if (!complete) {
-      complete = true;
+    if (!_complete) {
+      _complete = true;
       if (synchronousCall) {
         // `synchronousCall` happens when caches image and calling `addListener`.
         scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -369,15 +435,24 @@ class ImageElement extends Element {
       forceToRepaintBoundary = true;
     }
 
+    if (renderBoxModel != null) {
+      RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
+      renderReplaced.isInLazyRendering = false;
+    }
+
+    // Image may be detached when image frame loaded.
+    if (!isRendererAttached) return;
+
     _attachImage();
     _resizeImage();
   }
 
-  // Prefetches an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
+  // Prefetch an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
   // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
   void _precacheImage() async {
     final ImageConfiguration config = ImageConfiguration.empty;
-    final Uri? resolvedUri = _resolvedUri = _resolveSrc();
+    _resolveResource(src);
+    final Uri? resolvedUri = _resolvedUri;
     if (resolvedUri == null) return;
     final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
     if (provider == null) return;
@@ -390,8 +465,8 @@ class ImageElement extends Element {
         _replaceImage(info: imageInfo);
         _frameCount++;
 
-        if (!complete && !_shouldLazyLoading) {
-          complete = true;
+        if (!_complete && !_shouldLazyLoading) {
+          _complete = true;
           if (sync) {
             // `synchronousCall` happens when caches image and calling `addListener`.
             scheduleMicrotask(_handleEventAfterImageLoaded);
@@ -406,42 +481,66 @@ class ImageElement extends Element {
     stream.addListener(listener);
   }
 
-  @override
-  void setProperty(String key, dynamic value) {
-    bool propertyChanged = properties[key] != value;
-    super.setProperty(key, value);
-    if (key == 'src' && propertyChanged) {
-      final Uri? resolvedUri = _resolvedUri =  _resolveSrc();
-      // Update image source if image already attached except image is lazy loading.
-      if (isRendererAttached && !_isInLazyLoading) {
-        _resolveImage(resolvedUri, updateImageProvider: true);
-      } else {
-        _precacheImage();
-      }
-    } else if (key == 'loading' && propertyChanged && _isInLazyLoading) {
-      _resetLazyLoading();
-    } else if (key == WIDTH) {
-      _propertyWidth = CSSNumber.parseNumber(value);
+  String get scaling => getAttribute(SCALING) ?? '';
+  set scaling(String value) {
+    internalSetAttribute(SCALING, value);
+  }
+
+  String get src => _resolvedUri?.toString() ?? '';
+  set src(String value) {
+    String prevSrc = src;
+    internalSetAttribute('src', value);
+    _resolveResource(value);
+    if (prevSrc != src) {
+      _complete = false;
+    }
+    // Update image source if image already attached except image is lazy loading.
+    if (isRendererAttached && !_isInLazyLoading) {
       _resolveImage(_resolvedUri, updateImageProvider: true);
-    } else if (key == HEIGHT) {
-      _propertyHeight = CSSNumber.parseNumber(value);
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+    } else {
+      _precacheImage();
     }
   }
 
-  @override
-  dynamic getProperty(String key) {
-    switch (key) {
-      case WIDTH:
-        return width;
-      case HEIGHT:
-        return height;
-      case NATURAL_WIDTH:
-        return naturalWidth;
-      case NATURAL_HEIGHT:
-        return naturalHeight;
+  // ReadOnly additional property.
+  String get loading => getAttribute(LOADING) ?? '';
+  set loading(String value) {
+    internalSetAttribute(SCALING, value);
+    if (_isInLazyLoading) {
+      _removeIntersectionChangeListener();
     }
-    return super.getProperty(key);
+  }
+
+  set width(int value) {
+    if (value.isNegative) value = 0;
+    internalSetAttribute('width', value.toString());
+    _propertyWidth = value.toDouble();
+    if (_shouldScaling) {
+      _resolveImage(_resolvedUri, updateImageProvider: true);
+    } else {
+      _resizeImage();
+    }
+  }
+
+  set height(int value) {
+    if (value.isNegative) value = 0;
+    internalSetAttribute('height', value.toString());
+    _propertyHeight = value.toDouble();
+    if (_shouldScaling) {
+      _resolveImage(_resolvedUri, updateImageProvider: true);
+    } else {
+      _resizeImage();
+    }
+  }
+
+  void _resolveResource(String src) {
+    String base = ownerDocument.controller.url;
+    try {
+      _resolvedUri = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(src));
+    } catch (_) {
+      // Ignoring the failure of resolving, but to remove the resolved hyperlink.
+      _resolvedUri = null;
+    }
   }
 
   void _stylePropertyChanged(String property, String? original, String present) {
@@ -459,7 +558,11 @@ class ImageElement extends Element {
         _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
       }
       // Resize image
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      if (_shouldScaling) {
+        _resolveImage(_resolvedUri, updateImageProvider: true);
+      } else {
+        _resizeImage();
+      }
     } else if (property == OBJECT_FIT && _renderImage != null) {
       _renderImage!.fit = renderBoxModel!.renderStyle.objectFit;
     } else if (property == OBJECT_POSITION && _renderImage != null) {

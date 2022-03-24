@@ -149,8 +149,8 @@ class InspectorDocument extends JSONEncodable {
         'nodeName': '#document',
         'childNodeCount': 1,
         'children': [child.toJson()],
-        'baseURL': owner.controller.href,
-        'documentURL': owner.controller.href,
+        'baseURL': owner.controller.url,
+        'documentURL': owner.controller.url,
       },
     };
   }
@@ -212,7 +212,7 @@ class InspectorNode extends JSONEncodable {
     if (referencedNode.nodeType == NodeType.ELEMENT_NODE) {
       List<String> attrs = [];
       Element el = referencedNode as Element;
-      el.properties.forEach((key, value) {
+      el.attributes.forEach((key, value) {
         attrs.add(key);
         attrs.add(value.toString());
       });

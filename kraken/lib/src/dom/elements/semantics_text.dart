@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/foundation.dart';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics
 const String SPAN = 'SPAN';
@@ -67,8 +68,8 @@ const Map<String, dynamic> _defaultStyle = {
 class BRElement extends Element {
   RenderLineBreak? _renderLineBreak;
 
-  BRElement(EventTargetContext? context)
-      : super(context, isIntrinsicBox: true);
+  BRElement([BindingContext? context])
+      : super(context, isReplacedElement: true);
 
   @override
   RenderBoxModel? get renderBoxModel => _renderLineBreak;
@@ -85,99 +86,99 @@ class BRElement extends Element {
 }
 
 class BringElement extends Element {
-  BringElement(EventTargetContext? context)
+  BringElement([BindingContext? context])
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class AbbreviationElement extends Element {
-  AbbreviationElement(EventTargetContext? context)
+  AbbreviationElement([BindingContext? context])
       : super(context, defaultStyle: _abbrDefaultStyle);
 }
 
 class EmphasisElement extends Element {
-  EmphasisElement(EventTargetContext? context)
+  EmphasisElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class CitationElement extends Element {
-  CitationElement(EventTargetContext? context)
+  CitationElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class DefinitionElement extends Element {
-  DefinitionElement(EventTargetContext? context)
+  DefinitionElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
 class IdiomaticElement extends Element {
-  IdiomaticElement(EventTargetContext? context)
+  IdiomaticElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class CodeElement extends Element {
-  CodeElement(EventTargetContext? context)
+  CodeElement([BindingContext? context])
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SampleElement extends Element {
-  SampleElement(EventTargetContext? context)
+  SampleElement([BindingContext? context])
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class KeyboardElement extends Element {
-  KeyboardElement(EventTargetContext? context)
+  KeyboardElement([BindingContext? context])
       : super(context, defaultStyle: _codeDefaultStyle);
 }
 
 class SpanElement extends Element {
-  SpanElement(EventTargetContext? context)
+  SpanElement([BindingContext? context])
       : super(context);
 }
 
 class DataElement extends Element {
-  DataElement(EventTargetContext? context)
+  DataElement([BindingContext? context])
       : super(context);
 }
 
 // TODO: enclosed text is a short inline quotation
 class QuoteElement extends Element {
-  QuoteElement(EventTargetContext? context)
+  QuoteElement([BindingContext? context])
       : super(context);
 }
 
 class StrongElement extends Element {
-  StrongElement(EventTargetContext? context)
+  StrongElement([BindingContext? context])
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class TimeElement extends Element {
-  TimeElement(EventTargetContext? context)
+  TimeElement([BindingContext? context])
       : super(context, defaultStyle: _boldDefaultStyle);
 }
 
 class SmallElement extends Element {
-  SmallElement(EventTargetContext? context)
+  SmallElement([BindingContext? context])
       : super(context, defaultStyle: _smallDefaultStyle);
 }
 
 class StrikethroughElement extends Element {
-  StrikethroughElement(EventTargetContext? context)
+  StrikethroughElement([BindingContext? context])
       : super(context, defaultStyle: _sDefaultStyle);
 }
 
 // https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-u-element
 class UnarticulatedElement extends Element {
-  UnarticulatedElement(EventTargetContext? context)
+  UnarticulatedElement([BindingContext? context])
       : super(context, defaultStyle: _uDefaultStyle);
 }
 
 class VariableElement extends Element {
-  VariableElement(EventTargetContext? context)
+  VariableElement([BindingContext? context])
       : super(context, defaultStyle: _defaultStyle);
 }
 
 class MarkElement extends Element {
-  MarkElement(EventTargetContext? context)
+  MarkElement([BindingContext? context])
       : super(context, defaultStyle: _markDefaultStyle);
 }

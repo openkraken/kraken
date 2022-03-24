@@ -49,26 +49,42 @@ void bindWindow(std::unique_ptr<ExecutionContext>& context) {
   context->defineGlobalProperty("__window__", window->toQuickJS());
 }
 
-IMPL_FUNCTION(Window, open)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto window = static_cast<Window*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+JSValue ensureWindowIsGlobal(EventTargetInstance* target) {
+  if (target == target->context()->window()) {
+    return target->context()->global();
+  }
+  return target->jsObject;
+}
+
+JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
   NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0])};
-  return window->callNativeMethods("open", 1, arguments);
+  return window->invokeBindingMethod("open", 1, arguments);
 }
 
 IMPL_FUNCTION(Window, scrollTo)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 #if FLUTTER_BACKEND
+  getDartMethod()->flushUICommand();
   auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
-  return window->callNativeMethods("scroll", 2, arguments);
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
+  return window->invokeBindingMethod("scroll", 2, arguments);
 #else
   return JS_UNDEFINED;
 #endif
 }
-
-IMPL_FUNCTION(Window, scrollBy)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto window = static_cast<Window*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
-  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0]), jsValueToNativeValue(ctx, argv[1])};
-  return window->callNativeMethods("scrollBy", 2, arguments);
+JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  getDartMethod()->flushUICommand();
+  auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
+  double arg0 = 0;
+  double arg1 = 0;
+  JS_ToFloat64(ctx, &arg0, argv[0]);
+  JS_ToFloat64(ctx, &arg1, argv[1]);
+  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
+  return window->invokeBindingMethod("scrollBy", 2, arguments);
 }
 
 IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
@@ -78,11 +94,9 @@ IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue messageEventInitValue = JS_NewObject(ctx);
 
-  // TODO: convert originValue to current src.
-  JSValue messageOriginValue = JS_NewString(ctx, "");
-
   JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", messageOriginValue);
+  // TODO: convert originValue to current src.
+  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", JS_NewString(ctx, ""));
 
   JSValue messageType = JS_NewString(ctx, "message");
   JSValue arguments[] = {messageType, messageEventInitValue};
@@ -94,7 +108,6 @@ IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, J
   JS_FreeValue(ctx, messageEventValue);
   JS_FreeValue(ctx, messageEventInitValue);
   JS_FreeValue(ctx, globalObjectValue);
-  JS_FreeValue(ctx, messageOriginValue);
   return JS_NULL;
 }
 
@@ -238,13 +251,13 @@ IMPL_PROPERTY_GETTER(Window, parent)(JSContext* ctx, JSValue this_val, int argc,
 }
 
 IMPL_PROPERTY_GETTER(Window, scrollX)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* window = static_cast<Window*>(JS_GetOpaque(this_val, 1));
-  return window->callNativeMethods("scrollX", 0, nullptr);
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("scrollX");
 }
 
 IMPL_PROPERTY_GETTER(Window, scrollY)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* window = static_cast<Window*>(JS_GetOpaque(this_val, 1));
-  return window->callNativeMethods("scrollY", 0, nullptr);
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("scrollY");
 }
 
 IMPL_PROPERTY_GETTER(Window, onerror)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

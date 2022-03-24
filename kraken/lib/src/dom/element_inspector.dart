@@ -180,7 +180,7 @@ mixin ElementInspectorService {
   ///
   /// This will be called automatically for service extensions registered via
   /// [registerBoolServiceExtension].
-  void _postExtensionStateChangedEvent(String name, dynamic value) {
+  void _postExtensionStateChangedEvent(String name, value) {
     postEvent(
       'Flutter.ServiceExtensionStateChanged',
       <String, dynamic>{

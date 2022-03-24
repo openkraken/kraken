@@ -29,6 +29,20 @@ TEST(Context, evalWithError) {
   EXPECT_EQ(errorHandlerExecuted, true);
 }
 
+TEST(Context, recursionThrowError) {
+  static bool errorHandlerExecuted = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
+  auto bridge = TEST_init(errorHandler);
+  const char* code =
+      "addEventListener('error', (evt) => {\n"
+      "  console.log('tagName', evt.target.tagName());\n"
+      "});\n"
+      "\n"
+      "throw Error('foo');";
+  bridge->evaluateScript(code, strlen(code), "file://", 0);
+  EXPECT_EQ(errorHandlerExecuted, true);
+}
+
 TEST(Context, unrejectPromiseError) {
   static bool errorHandlerExecuted = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) {
@@ -52,6 +66,25 @@ TEST(Context, unrejectPromiseError) {
   EXPECT_EQ(errorHandlerExecuted, true);
 }
 
+TEST(Context, globalErrorHandlerTargetReturnToWindow) {
+  static bool logCalled = false;
+  auto errorHandler = [](int32_t contextId, const char* errmsg) {};
+  auto bridge = TEST_init(errorHandler);
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+
+    EXPECT_STREQ(message.c_str(), "true");
+  };
+
+  std::string code = R"(
+window.addEventListener('error', (e) => { console.log(e.target === window) });
+throw new Error('1234');
+)";
+  bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
+  EXPECT_EQ(logCalled, true);
+  kraken::KrakenPage::consoleMessageHandler = nullptr;
+}
+
 TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
@@ -65,7 +98,7 @@ TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
   };
   auto bridge = TEST_init(errorHandler);
   static int logIndex = 0;
-  static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}}"};
+  static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}} true"};
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
@@ -73,7 +106,7 @@ TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
 
   std::string code = R"(
 window.onunhandledrejection = (e) => {
-  console.log('unhandled event', e);
+  console.log('unhandled event', e, e.target === window);
 };
 window.onerror = (e) => {
   console.log('error event', e);
@@ -225,7 +258,7 @@ TEST(Context, unrejectPromiseErrorWithMultipleContext) {
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   bridge2->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, true);
-  EXPECT_EQ(errorCalledCount, 2);
+  EXPECT_EQ(errorCalledCount, 4);
 }
 
 TEST(Context, accessGetUICommandItemsAfterDisposed) {

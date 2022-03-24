@@ -26,18 +26,21 @@ class HistoryModule extends BaseModule {
   Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
   Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
-  String get href {
-    if (_previousStack.isEmpty) return '';
-    return _previousStack.first.bundle.src;
+  KrakenBundle? get stackTop {
+    if (_previousStack.isEmpty) {
+      return null;
+    } else {
+      return _previousStack.first.bundle;
+    }
   }
 
-  set bundle(KrakenBundle bundle) {
+  void add(KrakenBundle bundle) {
     HistoryItem history = HistoryItem(bundle, null, true);
     _addItem(history);
   }
 
   void _addItem(HistoryItem historyItem) {
-    if (_previousStack.isNotEmpty && historyItem.bundle.src == _previousStack.first.bundle.src) return;
+    if (_previousStack.isNotEmpty && historyItem.bundle.url == _previousStack.first.bundle.url) return;
 
     _previousStack.addFirst(historyItem);
 
@@ -54,7 +57,7 @@ class HistoryModule extends BaseModule {
       _previousStack.removeFirst();
       _nextStack.addFirst(currentItem);
 
-      await _goTo(_previousStack.first.bundle.src);
+      await _goTo(_previousStack.first.bundle.url);
 
       dynamic state = _previousStack.first.state;
       _dispatchPopStateEvent(state);
@@ -67,7 +70,7 @@ class HistoryModule extends BaseModule {
       _nextStack.removeFirst();
       _previousStack.addFirst(currentItem);
 
-      _goTo(currentItem.bundle.src);
+      _goTo(currentItem.bundle.url);
       _dispatchPopStateEvent(currentItem.state);
     }
   }
@@ -96,7 +99,7 @@ class HistoryModule extends BaseModule {
       }
     }
 
-    _goTo(_previousStack.first.bundle.src);
+    _goTo(_previousStack.first.bundle.url);
     _dispatchPopStateEvent(_previousStack.first.state);
   }
 
@@ -105,7 +108,7 @@ class HistoryModule extends BaseModule {
     await navigationModule.goTo(targetUrl);
   }
 
-  void _dispatchPopStateEvent(dynamic state) {
+  void _dispatchPopStateEvent(state) {
     PopStateEventInit init = PopStateEventInit(state);
     PopStateEvent popStateEvent = PopStateEvent(init);
     moduleManager!.controller.view.window.dispatchEvent(popStateEvent);
@@ -119,11 +122,11 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.bundle.src;
+      String currentUrl = _previousStack.first.bundle.url;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '
@@ -145,11 +148,11 @@ class HistoryModule extends BaseModule {
     if (params[2] != null) {
       url = params[2];
 
-      String currentUrl = _previousStack.first.bundle.src;
+      String currentUrl = _previousStack.first.bundle.url;
       Uri currentUri = Uri.parse(currentUrl);
 
       Uri uri = Uri.parse(url!);
-      uri = controller.uriParser!.resolve(Uri.parse(controller.href), uri);
+      uri = controller.uriParser!.resolve(Uri.parse(controller.url), uri);
 
       if (uri.host.isNotEmpty && uri.host != currentUri.host) {
         print('Failed to execute \'pushState\' on \'History\': '

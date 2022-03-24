@@ -205,4 +205,72 @@ describe('Color text', () => {
     append(BODY, test);
     await snapshot(test);
   });
+
+  it('change text style which will not affect parent size before rendered', async () => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+           width: '100px',
+           height: '100px',
+           backgroundColor: 'yellow'
+         },
+      },
+      [
+        (div2 = createElement('div', {
+            style: {
+              display: 'inline-block',
+              backgroundColor: 'green',
+              fontFamily: 'Songti SC',
+              fontSize: '24px',
+              color: 'red',
+              fontStyle: 'italic',
+              textShadow: '5px 5px blue'
+            }
+        }, [
+          createText('foo bar')
+        ]))
+      ]
+    );
+    BODY.appendChild(div);
+    await snapshot();
+  });
+  
+  it('change text style which will not affect parent size after rendered', async (done) => {
+    let div2;
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+           width: '100px',
+           height: '100px',
+           backgroundColor: 'yellow'
+         },
+      },
+      [
+        (div2 = createElement('div', {
+            style: {
+              display: 'inline-block',
+              backgroundColor: 'green',
+              fontFamily: 'Songti SC',
+              fontSize: '24px'
+            }
+        }, [
+          createText('foo bar')
+        ]))
+      ]
+    );
+    BODY.appendChild(div);
+
+    requestAnimationFrame(async () => {
+      div2.style.color = 'red';
+      div2.style.fontStyle = 'italic';
+      div2.style.textShadow = '5px 5px blue';
+      await snapshot();
+      done();
+    });
+  });
 });

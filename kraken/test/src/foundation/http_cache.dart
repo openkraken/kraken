@@ -51,7 +51,7 @@ void main() {
       var res = await req.close();
       expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
-      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      HttpCacheController cacheController = HttpCacheController.instance('local');
       var cacheObject = await cacheController.getCacheObject(req.uri);
       await cacheObject.read();
 
@@ -81,7 +81,7 @@ void main() {
       expect(res2.headers.value(HttpHeaders.lastModifiedHeader), httpDateNow);
 
       // Check cache object updated.
-      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      HttpCacheController cacheController = HttpCacheController.instance('local');
       var cacheObject = await cacheController.getCacheObject(req.uri);
       assert(cacheObject.lastModified != null);
       // Difference <= 1ms.
@@ -98,7 +98,7 @@ void main() {
       var res = await req.close();
       expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
-      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      HttpCacheController cacheController = HttpCacheController.instance('local');
       var cacheObject = await cacheController.getCacheObject(req.uri);
       await cacheObject.read();
 
@@ -165,7 +165,7 @@ void main() {
       expect(bytes.lengthInBytes, res.contentLength);
 
       // Assert cache object.
-      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      HttpCacheController cacheController = HttpCacheController.instance('local');
       var cacheObject = await cacheController.getCacheObject(req.uri);
       await cacheObject.read();
       assert(cacheObject.valid);
@@ -187,7 +187,7 @@ void main() {
       expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res)), 'CachedData');
 
       // Assert cache object.
-      HttpCacheController cacheController = HttpCacheController.instance(req.headers.value('origin')!);
+      HttpCacheController cacheController = HttpCacheController.instance('local');
       var cacheObject = await cacheController.getCacheObject(req.uri);
       await cacheObject.read();
       assert(cacheObject.valid);

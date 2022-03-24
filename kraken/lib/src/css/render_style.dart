@@ -101,20 +101,14 @@ abstract class RenderStyle {
   // BoxModel
   double? get borderBoxLogicalWidth;
   double? get borderBoxLogicalHeight;
-  double? get borderBoxConstraintsWidth;
-  double? get borderBoxConstraintsHeight;
   double? get borderBoxWidth;
   double? get borderBoxHeight;
   double? get paddingBoxLogicalWidth;
   double? get paddingBoxLogicalHeight;
-  double? get paddingBoxConstraintsWidth;
-  double? get paddingBoxConstraintsHeight;
   double? get paddingBoxWidth;
   double? get paddingBoxHeight;
   double? get contentBoxLogicalWidth;
   double? get contentBoxLogicalHeight;
-  double? get contentBoxConstraintsWidth;
-  double? get contentBoxConstraintsHeight;
   double? get contentBoxWidth;
   double? get contentBoxHeight;
   CSSPositionType get position;
@@ -134,7 +128,6 @@ abstract class RenderStyle {
   FlexWrap get flexWrap;
   JustifyContent get justifyContent;
   AlignItems get alignItems;
-  AlignItems get effectiveAlignItems;
   AlignContent get alignContent;
   AlignSelf get alignSelf;
   CSSLengthValue? get flexBasis;
@@ -178,7 +171,7 @@ abstract class RenderStyle {
   // for class that extends [AbstractRenderStyle].
   RenderBoxModel? get renderBoxModel => target.renderBoxModel;
 
-  Size get viewportSize => target.ownerDocument.viewport.viewportSize;
+  Size get viewportSize => target.ownerDocument.viewport!.viewportSize;
 
   double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
 
@@ -633,13 +626,9 @@ class CSSRenderStyle
           RenderStyle parentRenderStyle = renderStyle.parent!;
           RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
-          // Use parent's tight constraints if constraints is tight and width not exist.
-          if (parent.hasSize && parent.constraints.hasTightWidth) {
-            logicalWidth = parent.constraints.maxWidth;
-
           // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
           // Replaced element also stretch in flex layout if align-items is stretch.
-          } else if (current is! RenderIntrinsic || parent is RenderFlexLayout) {
+          if (current is! RenderReplaced || parent is RenderFlexLayout) {
             RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
             // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
             if (ancestorRenderStyle != null) {
@@ -661,7 +650,7 @@ class CSSRenderStyle
         // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
         } else if ((renderStyle.position == CSSPositionType.absolute ||
           renderStyle.position == CSSPositionType.fixed)
-          && current is! RenderIntrinsic
+          && current is! RenderReplaced
           && renderStyle.width.isAuto
           && renderStyle.left.isNotAuto
           && renderStyle.right.isNotAuto
@@ -742,7 +731,7 @@ class CSSRenderStyle
       // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
       } else if ((renderStyle.position == CSSPositionType.absolute ||
         renderStyle.position == CSSPositionType.fixed)
-        && current is! RenderIntrinsic
+        && current is! RenderReplaced
         && renderStyle.height.isAuto
         && renderStyle.top.isNotAuto
         && renderStyle.bottom.isNotAuto
@@ -766,18 +755,12 @@ class CSSRenderStyle
       } else {
         if (renderStyle.parent != null) {
           RenderStyle parentRenderStyle = renderStyle.parent!;
-          RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
           if (renderStyle.isHeightStretch) {
-            // Use parent's tight constraints if constraints is tight and height not exist.
-            if (parent.hasSize && parent.constraints.hasTightHeight) {
-              logicalHeight = parent.constraints.maxHeight;
-            } else {
-              logicalHeight = parentRenderStyle.contentBoxLogicalHeight;
-              // Should subtract vertical margin of own from its parent content height.
-              if (logicalHeight != null) {
-                logicalHeight -= renderStyle.margin.vertical;
-              }
+            logicalHeight = parentRenderStyle.contentBoxLogicalHeight;
+            // Should subtract vertical margin of own from its parent content height.
+            if (logicalHeight != null) {
+              logicalHeight -= renderStyle.margin.vertical;
             }
           }
         }
@@ -833,12 +816,21 @@ class CSSRenderStyle
     bool isFlexNoWrap = false;
     bool isChildStretchSelf = false;
     if (isParentFlex) {
+      // The absolutely-positioned box is considered to be “fixed-size”, a value of stretch
+      // is treated the same as flex-start.
+      // https://www.w3.org/TR/css-flexbox-1/#abspos-items
+      bool isPositioned = renderStyle.position == CSSPositionType.absolute
+        || renderStyle.position == CSSPositionType.fixed;
+      if (isPositioned) {
+        return false;
+      }
+
       isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(parentRenderStyle.flexDirection);
       isFlexNoWrap = parentRenderStyle.flexWrap != FlexWrap.wrap &&
         parentRenderStyle.flexWrap != FlexWrap.wrapReverse;
       isChildStretchSelf = renderStyle.alignSelf != AlignSelf.auto
         ? renderStyle.alignSelf == AlignSelf.stretch
-        : parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
+        : parentRenderStyle.alignItems == AlignItems.stretch;
     }
 
     CSSLengthValue marginTop = renderStyle.marginTop;
@@ -905,6 +897,11 @@ class CSSRenderStyle
     return _contentBoxLogicalWidth;
   }
 
+  set contentBoxLogicalWidth(double? value) {
+    if (_contentBoxLogicalWidth == value) return;
+    _contentBoxLogicalWidth = value;
+  }
+
   // Content height calculated from renderStyle tree.
   // https://www.w3.org/TR/css-box-3/#valdef-box-content-box
   // Use double.infinity refers to the value is not computed yet.
@@ -917,6 +914,11 @@ class CSSRenderStyle
       computeContentBoxLogicalHeight();
     }
     return _contentBoxLogicalHeight;
+  }
+
+  set contentBoxLogicalHeight(double? value) {
+    if (_contentBoxLogicalHeight == value) return;
+    _contentBoxLogicalHeight = value;
   }
 
   // Padding box width calculated from renderStyle tree.
@@ -1031,72 +1033,6 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxHeight!
-      - paddingTop.computedValue
-      - paddingBottom.computedValue;
-  }
-
-  // Border box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get borderBoxConstraintsWidth {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightWidth
-    ) {
-      return renderBoxModel!.constraints.maxWidth;
-    }
-    return null;
-  }
-
-  // Border box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get borderBoxConstraintsHeight {
-    if (renderBoxModel!.hasSize &&
-      renderBoxModel!.constraints.hasTightHeight
-    ) {
-      return renderBoxModel!.constraints.maxHeight;
-    }
-    return null;
-  }
-
-  // Padding box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get paddingBoxConstraintsWidth {
-    if (borderBoxConstraintsWidth == null) {
-      return null;
-    }
-    return borderBoxConstraintsWidth!
-      - effectiveBorderLeftWidth.computedValue
-      - effectiveBorderRightWidth.computedValue;
-  }
-
-  // Padding box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get paddingBoxConstraintsHeight {
-    if (borderBoxConstraintsHeight == null) {
-      return null;
-    }
-    return borderBoxConstraintsHeight!
-      - effectiveBorderTopWidth.computedValue
-      - effectiveBorderBottomWidth.computedValue;
-  }
-
-  // Content box width of renderBoxModel calculated from tight width constraints.
-  @override
-  double? get contentBoxConstraintsWidth {
-    if (paddingBoxConstraintsWidth == null) {
-      return null;
-    }
-    return paddingBoxConstraintsWidth!
-      - paddingLeft.computedValue
-      - paddingRight.computedValue;
-  }
-
-  // Content box height of renderBoxModel calculated from tight height constraints.
-  @override
-  double? get contentBoxConstraintsHeight {
-    if (paddingBoxConstraintsHeight == null) {
-      return null;
-    }
-    return paddingBoxConstraintsHeight!
       - paddingTop.computedValue
       - paddingBottom.computedValue;
   }

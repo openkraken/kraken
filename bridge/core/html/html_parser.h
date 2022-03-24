@@ -6,8 +6,6 @@
 #ifndef KRAKENBRIDGE_HTML_PARSER_H
 #define KRAKENBRIDGE_HTML_PARSER_H
 
-#include "bindings/qjs/dom/element.h"
-#include "executing_context.h"
 #include "foundation/native_string.h"
 #include "third_party/gumbo-parser/src/gumbo.h"
 
@@ -15,13 +13,16 @@ namespace kraken {
 
 class HTMLParser {
  public:
-  static bool parseHTML(const char* code, size_t codeLength, Node* rootNode);
-  static bool parseHTML(std::string html, Node* rootNode);
+  static bool parseHTML(const char* code, size_t codeLength, NodeInstance* rootNode);
+  static bool parseHTML(std::string html, NodeInstance* rootNode);
+  static bool parseHTMLFragment(const char* code, size_t codeLength, NodeInstance* rootNode);
 
  private:
   ExecutionContext* m_context;
-  static void traverseHTML(Node* root, GumboNode* node);
-  static void parseProperty(Element* element, GumboElement* gumboElement);
+  static void traverseHTML(NodeInstance* root, GumboNode* node);
+  static void parseProperty(ElementInstance* element, GumboElement* gumboElement);
+
+  static bool parseHTML(std::string html, NodeInstance* rootNode, bool isHTMLFragment);
 };
 }  // namespace kraken
 

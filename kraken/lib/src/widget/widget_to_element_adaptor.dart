@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/foundation.dart';
 
 import 'element_to_widget_adaptor.dart';
 
@@ -171,9 +172,9 @@ abstract class WidgetElement extends dom.Element {
   late Widget _widget;
   _KrakenAdapterWidgetState? _state;
 
-  WidgetElement(dom.EventTargetContext? context, {
+  WidgetElement(BindingContext? context, {
     Map<String, dynamic>? defaultStyle,
-    bool isIntrinsicBox = false,
+    bool isReplacedElement = false,
     // WidgetElement Adds repaintBoundary by default to prevent the internal paint process from affecting the outside.
     // If a lot of WidgetElement is used in a scene, you need to modify the default repaintBoundary according to the scene analysis.
     // Otherwise it will cause performance problems by creating most layers.
@@ -181,11 +182,11 @@ abstract class WidgetElement extends dom.Element {
   }) : super(
     context,
     defaultStyle: defaultStyle,
-    isIntrinsicBox: isIntrinsicBox,
+    isReplacedElement: isReplacedElement,
     isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();
-    _state = _KrakenAdapterWidgetState(this, properties, childNodes);
+    _state = _KrakenAdapterWidgetState(this, attributes, childNodes);
     _widget = _KrakenAdapterWidget(_state!);
   }
 
@@ -204,18 +205,18 @@ abstract class WidgetElement extends dom.Element {
   }
 
   @override
-  void removeProperty(String key) {
-    super.removeProperty(key);
+  void removeAttribute(String key) {
+    super.removeAttribute(key);
     if (_state != null) {
-      _state!.onAttributeChanged(properties);
+      _state!.onAttributeChanged(attributes);
     }
   }
 
   @override
-  void setProperty(String key, dynamic value) {
-    super.setProperty(key, value);
+  void setAttribute(String key, value) {
+    super.setAttribute(key, value);
     if (_state != null) {
-      _state!.onAttributeChanged(properties);
+      _state!.onAttributeChanged(attributes);
     }
   }
 
@@ -247,10 +248,12 @@ abstract class WidgetElement extends dom.Element {
     RenderObjectElement rootFlutterElement = ownerDocument.controller.rootFlutterElement;
 
     KrakenRenderObjectToWidgetAdapter adaptor = KrakenRenderObjectToWidgetAdapter(
-        child: widget,
-        container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
-            ContainerBoxParentData<RenderBox>>
+      child: widget,
+      container: renderBoxModel as ContainerRenderObjectMixin<RenderBox,
+        ContainerBoxParentData<RenderBox>>
     );
+
+    ownerDocument.controller.view.addWidgetElement(this);
 
     Element? parentFlutterElement;
     if (parentNode is WidgetElement) {
@@ -260,6 +263,16 @@ abstract class WidgetElement extends dom.Element {
     }
 
     renderObjectElement = adaptor.attachToRenderTree(rootFlutterElement.owner!, (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement, parentFlutterElement == null);
+  }
+
+  void deactivate() {
+    assert(renderObjectElement != null);
+    deactivateRecursively(renderObjectElement!);
+  }
+
+  void deactivateRecursively(Element element) {
+    element.deactivate();
+    element.visitChildren(deactivateRecursively);
   }
 }
 

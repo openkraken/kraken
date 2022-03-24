@@ -461,4 +461,106 @@ describe('dynamic-change', () => {
       done();
     });
   });
+
+  it('height of flex item with flex-grow should expand when its content changes', async (done) => {
+    let div;
+    let child;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          display: 'flex',
+          backgroundColor: 'grey',
+          padding: '10px'
+        },
+      },
+      [
+        (createElement('div', {
+          style: {
+            width: '50px',
+            height: '100px',
+            backgroundColor: 'yellow',
+          }
+        })),
+        (child = createElement('div', {
+          style: {
+            flexGrow: 1,
+            display: 'flex',
+            backgroundColor: 'green',
+            padding: '10px'
+          }
+        }, [
+          (item = createElement('div', {
+            style: {
+              flex: 1,
+              backgroundColor: 'coral',
+            }
+          }))
+        ])
+        )
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.height = '200px';
+      await snapshot();
+      done();
+    });
+  });
+
+ it('width of flex item with flex-grow should expand when its content changes', async (done) => {
+    let div;
+    let child;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          display: 'inline-flex',
+          flexDirection: 'column',
+          backgroundColor: 'grey',
+          padding: '10px'
+        },
+      },
+      [
+        (createElement('div', {
+          style: {
+            width: '100px',
+            height: '50px',
+            backgroundColor: 'yellow',
+          }
+        })),
+        (child = createElement('div', {
+          style: {
+            flexGrow: 1,
+            backgroundColor: 'green',
+            padding: '10px'
+          }
+        }, [
+          (item = createElement('div', {
+            style: {
+              height: '100px',
+              backgroundColor: 'coral',
+            }
+          }))
+        ])
+        )
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+    
+    requestAnimationFrame(async () => {
+      item.style.width = '300px';
+      await snapshot();
+      done();
+    });
+  });
 });

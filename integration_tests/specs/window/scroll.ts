@@ -61,4 +61,27 @@ describe('window scroll API', () => {
       doneFn();
     });
   });
+
+  it('document scroll should bubble to window', async (done) => {
+    const container = document.createElement('div');
+
+    for (let i = 0; i < 100; i++) {
+      const item = document.createElement('div');
+      Object.assign(item.style, {
+        height: '145px',
+        background: 'red',
+        marginBottom: '10px',
+      });
+      container.appendChild(item);
+    }
+    document.body.appendChild(container);
+
+    function scrollListener() {
+      done();
+    }
+
+    window.addEventListener('scroll', scrollListener);
+
+    window.scrollTo(0, 100)
+  });
 });

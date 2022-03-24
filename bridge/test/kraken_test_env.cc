@@ -168,7 +168,9 @@ void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
 #if ENABLE_PROFILE
-NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {}
+NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
+  return nullptr;
+}
 #endif
 
 std::once_flag testInitOnceFlag;

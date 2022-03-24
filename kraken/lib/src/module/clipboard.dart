@@ -26,7 +26,7 @@ class ClipBoardModule extends BaseModule {
   void dispose() {}
 
   @override
-  String invoke(String method, dynamic params, callback) {
+  String invoke(String method, params, callback) {
     if (method == 'readText') {
       ClipBoardModule.readText().then((String value) {
         callback(data: value);

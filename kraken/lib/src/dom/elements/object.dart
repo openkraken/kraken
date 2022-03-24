@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/foundation.dart';
 
 const String OBJECT = 'OBJECT';
 const String PARAM = 'PARAM';
@@ -21,7 +22,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement(EventTargetContext? context)
+  ParamElement([BindingContext? context])
       : super(context, defaultStyle: _paramStyle);
 }
 
@@ -35,8 +36,8 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement(EventTargetContext? context)
-      : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+  ObjectElement([BindingContext? context])
+      : super(context, defaultStyle: _objectStyle, isReplacedElement: true) {
     initObjectClient();
     initElementClient();
   }
@@ -48,34 +49,39 @@ class ObjectElement extends Element implements ObjectElementHost {
 
   Future initElementClient() async {
     try {
-      await _objectElementClient.initElementClient(properties);
+      await _objectElementClient.initElementClient(attributes);
     } catch (error, stackTrace) {
       print('$error\n$stackTrace');
     }
   }
 
   @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    switch (key) {
-      case 'type':
-        _objectElementClient.setProperty(key, value);
-        break;
-      case 'data':
-        _objectElementClient.setProperty(key, value);
-        break;
-      default:
-        break;
-    }
+  invokeBindingMethod(String method, List args) {
+    return handleJSCall(method, args) ?? super.invokeBindingMethod(method, args);
   }
 
   @override
-  handleJSCall(String method, List argv) {
-    var result = _objectElementClient.handleJSCall(method, argv);
-    if (result == null) {
-      return super.handleJSCall(method, argv);
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'type': type = attributeToProperty<String>(value); break;
+      case 'data': data = attributeToProperty(value); break;
     }
-    return result;
+  }
+
+  String get type => _objectElementClient.getProperty('type');
+  set type(String value) {
+    internalSetAttribute('type', value);
+    _objectElementClient.setProperty('type', value);
+  }
+
+  get data => _objectElementClient.getProperty('data');
+  set data(value) {
+    _objectElementClient.setProperty('data', value);
+  }
+
+  handleJSCall(String method, List argv) {
+    return _objectElementClient.handleJSCall(method, argv);
   }
 
   @override

@@ -32,14 +32,14 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   @override
   final String reasonPhrase;
 
-  final Map<String, String> _responseHeaders;
+  final Map<String, List<String>> _responseHeaders;
 
   HttpHeaders? _httpHeaders;
 
   HttpClientStreamResponse(this._data, {
     this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
-    Map<String, String> responseHeaders = const {},
+    Map<String, List<String>> responseHeaders = const {},
   }) : _responseHeaders = responseHeaders;
 
   @override

@@ -9,7 +9,7 @@
 #include <sstream>
 #include <string>
 
-#define KRAKEN_LOG_STREAM(severity) ::kraken::LogMessage(::kraken::LOG_##severity, __FILE__, __LINE__, nullptr).stream()
+#define KRAKEN_LOG_STREAM(severity) ::kraken::LogMessage(::kraken::severity, __FILE__, __LINE__, nullptr).stream()
 
 #define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : ::kraken::LogMessageVoidify() & (stream)
 
@@ -17,20 +17,20 @@
 
 #define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
 
-#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::kraken::LogMessage(::kraken::LOG_FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
+#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::kraken::LogMessage(::kraken::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
 
 namespace kraken {
 
 typedef int LogSeverity;
 
 // Default log levels. Negative values can be used for verbose log levels.
-constexpr LogSeverity LOG_VERBOSE = 0;
-constexpr LogSeverity LOG_INFO = 1;
-constexpr LogSeverity LOG_WARN = 2;
-constexpr LogSeverity LOG_DEBUG_ = 3;
-constexpr LogSeverity LOG_ERROR = 4;
-constexpr LogSeverity LOG_NUM_SEVERITIES = 5;
-constexpr LogSeverity LOG_FATAL = 6;
+constexpr LogSeverity VERBOSE = 0;
+constexpr LogSeverity INFO = 1;
+constexpr LogSeverity WARN = 2;
+constexpr LogSeverity DEBUG = 3;
+constexpr LogSeverity ERROR = 4;
+constexpr LogSeverity NUM_SEVERITIES = 5;
+constexpr LogSeverity FATAL = 6;
 
 class LogMessageVoidify {
  public:

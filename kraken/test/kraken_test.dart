@@ -4,10 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 
 import 'local_http_server.dart';
 
 import 'src/foundation/http_cache.dart' as http_cache;
+import 'src/foundation/http_client.dart' as http_client;
 import 'src/foundation/http_client_interceptor.dart' as http_client_interceptor;
 import 'src/foundation/environment.dart' as environment;
 import 'src/foundation/uri_parser.dart' as uri_parser;
@@ -20,6 +22,8 @@ import 'src/css/values.dart' as css_values;
 
 import 'src/gesture/scroll_physics.dart' as scroll_physics;
 
+import 'src/launcher/bundle.dart' as bundle;
+
 // The main entry for kraken unit test.
 // Setup all common logic.
 void main() {
@@ -30,6 +34,9 @@ void main() {
   LocalHttpServer.basePath = 'test/fixtures';
   var httpServer = LocalHttpServer.getInstance();
   print('Local HTTP Server started at ${httpServer.getUri()}');
+
+  // Inject a custom user agent, to avoid reading from bridge.
+  NavigatorModule.setCustomUserAgent('kraken/test');
 
   // Work around with path_provider.
   Directory tempDirectory = Directory('./temp');
@@ -43,6 +50,7 @@ void main() {
   // Start tests.
   group('foundation', () {
     http_cache.main();
+    http_client.main();
     http_client_interceptor.main();
     environment.main();
     uri_parser.main();
@@ -60,6 +68,10 @@ void main() {
 
   group('gesture', () {
     scroll_physics.main();
+  });
+
+  group('launcher', () {
+    bundle.main();
   });
 
   tearDownAll(() {

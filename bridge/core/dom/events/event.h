@@ -6,10 +6,9 @@
 #ifndef KRAKENBRIDGE_EVENT_H
 #define KRAKENBRIDGE_EVENT_H
 
-#include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/macros.h"
+#include "bindings/qjs/host_class.h"
 
-namespace kraken {
+namespace kraken::binding::qjs {
 
 #define EVENT_CLICK "click"
 #define EVENT_INPUT "input"
@@ -53,39 +52,32 @@ namespace kraken {
 
 void bindEvent(ExecutionContext* context);
 
-class Event;
+class EventInstance;
+class EventTargetInstance;
+class NativeEventTarget;
 
-using EventCreator = Event* (*)(JSContext* ctx, void* nativeEvent);
+using EventCreator = EventInstance* (*)(ExecutionContext* context, void* nativeEvent);
 
-struct NativeEvent {
-  NativeString* type{nullptr};
-  int64_t bubbles{0};
-  int64_t cancelable{0};
-  int64_t timeStamp{0};
-  int64_t defaultPrevented{0};
-  // The pointer address of target EventTargetInstance object.
-  void* target{nullptr};
-  // The pointer address of current target EventTargetInstance object.
-  void* currentTarget{nullptr};
-};
-
-struct RawEvent {
-  uint64_t* bytes;
-  int64_t length;
-};
-
-class Event : public GarbageCollected<Event> {
+class Event : public HostClass {
  public:
-  static JSClassID classId;
-  static Event* create(JSContext* ctx);
-  static Event* create(JSContext* ctx, NativeEvent* nativeEvent);
-  static JSValue constructor(ExecutionContext* context);
-  static JSValue prototype(ExecutionContext* context);
+  static JSClassID kEventClassID;
 
-  explicit Event(NativeEvent* nativeEvent);
-  explicit Event(JSValue eventType, JSValue eventInit);
+  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  Event() = delete;
+  explicit Event(ExecutionContext* context);
 
+  static EventInstance* buildEventInstance(std::string& eventType, ExecutionContext* context, void* nativeEvent, bool isCustomEvent);
   static void defineEvent(const std::string& eventType, EventCreator creator);
+
+  OBJECT_INSTANCE(Event);
+
+  static JSValue stopPropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue stopImmediatePropagation(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue preventDefault(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue initEvent(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+
+ private:
+  static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
 
   DEFINE_PROTOTYPE_READONLY_PROPERTY(type);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(bubbles);
@@ -98,43 +90,84 @@ class Event : public GarbageCollected<Event> {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(returnValue);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(cancelBubble);
 
-  DEFINE_FUNCTION(stopPropagation);
-  DEFINE_FUNCTION(stopImmediatePropagation);
-  DEFINE_FUNCTION(preventDefault);
-  DEFINE_FUNCTION(initEvent);
+  DEFINE_PROTOTYPE_FUNCTION(stopPropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(stopImmediatePropagation, 0);
+  DEFINE_PROTOTYPE_FUNCTION(preventDefault, 1);
+  DEFINE_PROTOTYPE_FUNCTION(initEvent, 3);
 
-  inline const bool propagationStopped() { return m_propagationStopped; }
-  inline const bool cancelled() { return m_cancelled; }
-  inline void cancelled(bool v) { m_cancelled = v; }
-  inline const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
+  friend EventInstance;
+};
 
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
-  void dispose() const override;
+// Dart generated nativeEvent member are force align to 64-bit system. So all members in NativeEvent should have 64 bit width.
+#if ANDROID_32_BIT
+struct NativeEvent {
+  int64_t type{0};
+  int64_t bubbles{0};
+  int64_t cancelable{0};
+  int64_t timeStamp{0};
+  int64_t defaultPrevented{0};
+  // The pointer address of target EventTargetInstance object.
+  int64_t target{0};
+  // The pointer address of current target EventTargetInstance object.
+  int64_t currentTarget{0};
+};
+#else
+// Use pointer instead of int64_t on 64 bit system can help compiler to choose best register for better running performance.
+struct NativeEvent {
+  NativeString* type{nullptr};
+  int64_t bubbles{0};
+  int64_t cancelable{0};
+  int64_t timeStamp{0};
+  int64_t defaultPrevented{0};
+  // The pointer address of target EventTargetInstance object.
+  void* target{nullptr};
+  // The pointer address of current target EventTargetInstance object.
+  void* currentTarget{nullptr};
+};
+#endif
 
+struct RawEvent {
+  uint64_t* bytes;
+  int64_t length;
+};
+
+class EventInstance : public Instance {
+ public:
+  EventInstance() = delete;
+  ~EventInstance() override { delete nativeEvent; }
+
+  static EventInstance* fromNativeEvent(Event* event, NativeEvent* nativeEvent);
   NativeEvent* nativeEvent{nullptr};
 
- private:
-  static std::unordered_map<std::string, EventCreator> m_eventCreatorMap;
+  FORCE_INLINE const bool propagationStopped() { return m_propagationStopped; }
+  FORCE_INLINE const bool cancelled() { return m_cancelled; }
+  FORCE_INLINE void cancelled(bool v) { m_cancelled = v; }
+  FORCE_INLINE const bool propagationImmediatelyStopped() { return m_propagationImmediatelyStopped; }
+  FORCE_INLINE NativeString* type() {
+#if ANDROID_32_BIT
+    return reinterpret_cast<NativeString*>(nativeEvent->type);
+#else
+    return nativeEvent->type;
+#endif
+  };
+  void setType(NativeString* type) const;
+  EventTargetInstance* target() const;
+  void setTarget(EventTargetInstance* target) const;
+  EventTargetInstance* currentTarget() const;
+  void setCurrentTarget(EventTargetInstance* target) const;
+
+ protected:
+  explicit EventInstance(Event* jsEvent, JSAtom eventType, JSValue eventInit);
+  explicit EventInstance(Event* jsEvent, NativeEvent* nativeEvent);
   bool m_cancelled{false};
   bool m_propagationStopped{false};
   bool m_propagationImmediatelyStopped{false};
+
+ private:
+  static void finalizer(JSRuntime* rt, JSValue val);
+  friend Event;
 };
 
-auto eventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
-  if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to construct 'Event': 1 argument required, but only 0 present.");
-  }
-
-  JSValue eventTypeValue = argv[0];
-  auto nativeEventType = jsValueToNativeString(ctx, eventTypeValue);
-  auto* nativeEvent = new NativeEvent{nativeEventType.release()};
-
-  auto* event = Event::create(ctx, nativeEvent);
-  return event->toQuickJS();
-};
-
-const WrapperTypeInfo eventTypeInfo = {"Event", nullptr, eventCreator};
-
-}  // namespace kraken
+}  // namespace kraken::binding::qjs
 
 #endif  // KRAKENBRIDGE_EVENT_H

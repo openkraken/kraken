@@ -3,27 +3,22 @@
  * Author: Kraken Team.
  */
 
-import 'dart:ffi';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
+import 'package:kraken/foundation.dart';
 
 import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
-const double ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300.0;
-const double ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150.0;
+const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;
+const int _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150;
 
 const Map<String, dynamic> _defaultStyle = {
   DISPLAY: INLINE_BLOCK,
 };
-
-final Pointer<NativeFunction<NativeCanvasGetContext>> nativeGetContext =
-    Pointer.fromFunction(CanvasElement._getContext);
 
 class RenderCanvasPaint extends RenderCustomPaint {
   @override
@@ -45,17 +40,10 @@ class CanvasElement extends Element {
   // The custom paint render object.
   RenderCustomPaint? renderCustomPaint;
 
-  static Pointer<NativeCanvasRenderingContext2D> _getContext(
-      Pointer<NativeEventTarget> nativeCanvasElement, Pointer<NativeString> contextId) {
-    CanvasElement canvasElement = EventTarget.getEventTargetByPointer(nativeCanvasElement) as CanvasElement;
-    canvasElement.getContext(nativeStringToString(contextId));
-    return canvasElement.painter.context!.nativeCanvasRenderingContext2D;
-  }
-
-  CanvasElement(EventTargetContext? context)
+  CanvasElement([BindingContext? context])
       : super(
           context,
-          isIntrinsicBox: true,
+          isReplacedElement: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
         ) {
@@ -64,6 +52,33 @@ class CanvasElement extends Element {
 
   // Currently only 2d rendering context for canvas is supported.
   CanvasRenderingContext2D? context2d;
+
+  // Bindings.
+  @override
+  getBindingProperty(String key) {
+    switch (key) {
+      case 'width': return width;
+      case 'height': return height;
+      default: return super.getBindingProperty(key);
+    }
+  }
+
+  @override
+  void setBindingProperty(String key, value) {
+    switch (key) {
+      case 'width': width = castToType<int>(value); break;
+      case 'height': height = castToType<int>(value); break;
+      default: super.setBindingProperty(key, value);
+    }
+  }
+
+  @override
+  invokeBindingMethod(String method, List args) {
+    switch (method) {
+      case 'getContext': return getContext(castToType<String>(args[0])).toNative();
+      default: return super.invokeBindingMethod(method, args);
+    }
+  }
 
   @override
   void willAttachRenderer() {
@@ -78,12 +93,6 @@ class CanvasElement extends Element {
   }
 
   @override
-  void didAttachRenderer() {
-    super.didAttachRenderer();
-    context2d ??= CanvasRenderingContext2D();
-  }
-
-  @override
   void didDetachRenderer() {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_styleChangedListener);
@@ -91,18 +100,16 @@ class CanvasElement extends Element {
     renderCustomPaint = null;
   }
 
-  // RenderingContext? getContext(DOMString contextId, optional any options = null);
-  CanvasRenderingContext2D getContext(String contextId, {dynamic options}) {
-    switch (contextId) {
+  CanvasRenderingContext2D getContext(String type, { options }) {
+    switch (type) {
       case '2d':
         if (painter.context == null) {
-          context2d ??= CanvasRenderingContext2D();
-          context2d!.canvas = this;
+          context2d ??= CanvasRenderingContext2D(this);
           painter.context = context2d;
         }
         return painter.context!;
       default:
-        throw FlutterError('CanvasRenderingContext $contextId not supported!');
+        throw FlutterError('CanvasRenderingContext $type not supported!');
     }
   }
 
@@ -127,14 +134,14 @@ class CanvasElement extends Element {
       height = styleHeight;
     }
 
-    // [_attrWidth/_attrHeight] has default value, should not be null.
+    // [width/height] has default value, should not be null.
     if (height == null && width == null) {
-      width = _attrWidth;
-      height = _attrHeight;
+      width = this.width.toDouble();
+      height = this.height.toDouble();
     } else if (width == null && height != null) {
-      width = _attrHeight / height * _attrWidth;
+      width = this.height / height * this.width;
     } else if (width != null && height == null) {
-      height = _attrWidth / width * _attrHeight;
+      height = this.width / width * this.height;
     }
 
     return Size(width!, height!);
@@ -159,10 +166,10 @@ class CanvasElement extends Element {
       double? scaleX;
       double? scaleY;
       if (styleWidth != null) {
-        scaleX = paintingBounding.width / _attrWidth;
+        scaleX = paintingBounding.width / width;
       }
       if (styleHeight != null) {
-        scaleY = paintingBounding.height / _attrHeight;
+        scaleY = paintingBounding.height / height;
       }
       if (painter.scaleX != scaleX || painter.scaleY != scaleY) {
         painter
@@ -175,55 +182,73 @@ class CanvasElement extends Element {
     }
   }
 
-  /// Element attribute width
-  double _attrWidth = ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
-  double get attrWidth => _attrWidth;
-  set attrWidth(double? value) {
-    if (value != null && value != _attrWidth) {
-      _attrWidth = value;
-      resize();
+  /// Element property width.
+  int get width {
+    String? attrWidth = getAttribute(WIDTH);
+    if (attrWidth != null) {
+      return attributeToProperty<int>(attrWidth);
+    } else {
+      return _ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
     }
   }
+  set width(int value) {
+    _setDimensions(value, null);
+  }
 
-  /// Element attribute height
-  double _attrHeight = ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
-  double get attrHeight => _attrHeight;
-  set attrHeight(double? value) {
-    if (value != null && value != _attrHeight) {
-      _attrHeight = value;
-      resize();
+  /// Element property height.
+  int get height {
+    String? attrHeight = getAttribute(HEIGHT);
+    if (attrHeight != null) {
+      return attributeToProperty<int>(attrHeight);
+    } else {
+      return _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
+    }
+  }
+  set height(int value) {
+    _setDimensions(null, value);
+  }
+
+  void _setDimensions(num? width, num? height) {
+    // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
+    // 1. Reset the rendering context to its default state.
+    context2d?.dispose();
+    context2d = null;
+    // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
+    resize();
+    // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
+    context2d = CanvasRenderingContext2D(this);
+    // 4. If the numeric value of canvas's width content attribute differs from width,
+    // then set canvas's width content attribute to the shortest possible string representing width as
+    // a valid non-negative integer.
+    if (width != null && width.toString() != getAttribute(WIDTH)) {
+      if (width < 0) width = 0;
+      internalSetAttribute(WIDTH, width.toString());
+    }
+    // 5. If the numeric value of canvas's height content attribute differs from height,
+    // then set canvas's height content attribute to the shortest possible string representing height as
+    // a valid non-negative integer.
+    if (height != null && height.toString() != getAttribute(HEIGHT)) {
+      if (height < 0) height = 0;
+      internalSetAttribute(HEIGHT, height.toString());
     }
   }
 
   void _styleChangedListener(String key, String? original, String present) {
     switch (key) {
-      case 'width':
-      case 'height':
+      case WIDTH:
+      case HEIGHT:
         resize();
         break;
     }
   }
 
   @override
-  getProperty(String key) {
-    switch(key) {
-      case 'width':
-        return attrWidth;
-      case 'height':
-        return attrHeight;
+  void setAttribute(String qualifiedName, String value) {
+    super.setAttribute(qualifiedName, value);
+    switch (qualifiedName) {
+      case 'width': width = attributeToProperty<int>(value); break;
+      case 'height': height = attributeToProperty<int>(value); break;
     }
-
-    return super.getProperty(key);
-  }
-
-  @override
-  dynamic handleJSCall(String method, List argv) {
-    switch(method) {
-      case 'getContext':
-        return getContext(argv[0]).nativeCanvasRenderingContext2D;
-    }
-
-    return super.handleJSCall(method, argv);
   }
 
   @override
@@ -232,37 +257,6 @@ class CanvasElement extends Element {
     // If not getContext and element is disposed that context is not existed.
     if (painter.context != null) {
       painter.context!.dispose();
-    }
-  }
-
-  @override
-  void setProperty(String key, value) {
-    super.setProperty(key, value);
-    // TODO:
-    // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
-    //
-    // 1. Reset the rendering context to its default state.
-    //
-    // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
-    //
-    // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
-    //
-    // 4. If the numeric value of canvas's width content attribute differs from width,
-    // then set canvas's width content attribute to the shortest possible string representing width as
-    // a valid non-negative integer.
-    //
-    // 5. If the numeric value of canvas's height content attribute differs from height,
-    // then set canvas's height content attribute to the shortest possible string representing height as
-    // a valid non-negative integer.
-    switch (key) {
-      case WIDTH:
-        // The width of the coordinate space in CSS pixels. Defaults to 300.
-        attrWidth = double.tryParse(value);
-        break;
-      case HEIGHT:
-        // The height of the coordinate space in CSS pixels. Defaults to 150.
-        attrHeight = double.tryParse(value);
-        break;
     }
   }
 }
