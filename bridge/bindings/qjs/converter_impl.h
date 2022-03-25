@@ -9,9 +9,9 @@
 #include <type_traits>
 #include "atom_string.h"
 #include "converter.h"
+#include "core/dom/events/event_target.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
-#include "core/dom/events/event_target.h"
 #include "idl_type.h"
 #include "native_string_utils.h"
 
@@ -38,7 +38,7 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
 };
 
 // Nullable value for pointer value
-template<typename T>
+template <typename T>
 struct Converter<IDLNullable<T>, std::enable_if<std::is_pointer<typename Converter<T>::ImplType>::value>> : public ConverterBase<IDLNullable<T>> {
   using ImplType = typename Converter<T>::ImplType;
 
@@ -49,7 +49,7 @@ struct Converter<IDLNullable<T>, std::enable_if<std::is_pointer<typename Convert
     return Converter<T>::FromValue(ctx, value, exception_state);
   }
 
-  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value){ return Converter<T>::ToValue(ctx, value); }
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) { return Converter<T>::ToValue(ctx, value); }
 };
 
 template <typename T>
@@ -102,7 +102,7 @@ struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) { return Converter<IDLAny>::ToValue(ctx, std::move(value)); }
 };
 
-template<>
+template <>
 struct Converter<IDLNullable<IDLAny>> : public ConverterBase<IDLNullable<IDLAny>> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -196,7 +196,7 @@ struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString>
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) { return Converter<IDLDOMString>::ToValue(ctx, std::move(value)); }
 };
 
-template<>
+template <>
 struct Converter<IDLNullable<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     if (JS_IsNull(value))
@@ -301,7 +301,7 @@ struct Converter<BlobPropertyBag> : public ConverterBase<BlobPropertyBag> {
 };
 
 // EventListener
-template<>
+template <>
 struct Converter<EventListener> : public ConverterBase<EventListener> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -312,7 +312,7 @@ struct Converter<EventListener> : public ConverterBase<EventListener> {
     return QJSFunction::Create(ctx, value);
   }
 };
-template<>
+template <>
 struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListener> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -324,28 +324,24 @@ struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListene
   }
 };
 
-template<>
+template <>
 struct Converter<EventTarget> : public ConverterBase<EventTarget> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return toScriptWrappable<EventTarget>(value);
   }
 
-  static JSValue ToValue(JSContext* ctx, ImplType value) {
-    return value->ToQuickJS();
-  }
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
 };
 
-template<>
+template <>
 struct Converter<IDLNullable<EventTarget>> : public ConverterBase<EventTarget> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return Converter<EventTarget>::FromValue(ctx, value, exception_state);
   }
 
-  static JSValue ToValue(JSContext* ctx, ImplType value) {
-    return Converter<EventTarget>::ToValue(ctx, value);
-  }
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return Converter<EventTarget>::ToValue(ctx, value); }
 };
 
 }  // namespace kraken

@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_ATOM_STRING_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_ATOM_STRING_H_
 
-#include <memory>
 #include <quickjs/quickjs.h>
+#include <memory>
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "native_string_utils.h"

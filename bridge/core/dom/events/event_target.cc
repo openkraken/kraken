@@ -20,9 +20,7 @@ EventTarget* EventTarget::Create(ExecutingContext* context) {
 
 EventTarget::EventTarget(ExecutingContext* context) : ScriptWrappable(context->ctx()) {}
 
-bool addEventListener(std::unique_ptr<NativeString> &event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state) {
-
-}
+bool addEventListener(std::unique_ptr<NativeString>& event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state) {}
 
 void EventTarget::Trace(GCVisitor* visitor) const {}
 

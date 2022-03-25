@@ -8,8 +8,8 @@
 
 #include <cinttypes>
 #include "bindings/qjs/script_wrappable.h"
-#include "foundation/native_string.h"
 #include "core/executing_context.h"
+#include "foundation/native_string.h"
 
 namespace kraken {
 
@@ -54,8 +54,7 @@ class Event : public ScriptWrappable {
 
  public:
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
-  static Event* From(ExecutingContext* context, NativeEvent* native_event) {
-  }
+  static Event* From(ExecutingContext* context, NativeEvent* native_event) {}
 
   Event() = delete;
   explicit Event(ExecutingContext* context);
@@ -76,9 +75,7 @@ class Event : public ScriptWrappable {
   EventTarget* currentTarget() const;
   void SetCurrentTarget(EventTarget* target);
 
-  bool cancelBubble() const {
-    return propagationStopped();
-  }
+  bool cancelBubble() const { return propagationStopped(); }
   void setCancelBubble(bool cancel) {
     if (cancel) {
       propagation_stopped_ = true;
@@ -89,13 +86,9 @@ class Event : public ScriptWrappable {
   EventTarget* srcElement() const;
 
   void stopPropagation() { propagation_stopped_ = true; }
-  void SetStopPropagation(bool stop_propagation) {
-    propagation_stopped_ = stop_propagation;
-  }
+  void SetStopPropagation(bool stop_propagation) { propagation_stopped_ = stop_propagation; }
   void stopImmediatePropagation(ExceptionState& exception_state) { propagation_immediately_stopped_ = true; }
-  void SetStopImmediatePropagation(bool stop_immediate_propagation) {
-    propagation_immediately_stopped_ = stop_immediate_propagation;
-  }
+  void SetStopImmediatePropagation(bool stop_immediate_propagation) { propagation_immediately_stopped_ = stop_immediate_propagation; }
 
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);

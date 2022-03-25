@@ -30,7 +30,7 @@ struct IDLOptional final : public IDLTypeBase {
 };
 
 // Nullable
-template<typename T>
+template <typename T>
 struct IDLNullable final : public IDLTypeBase {
   using ImplType = typename Converter<T>::ImplType;
 };

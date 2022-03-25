@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
-#include "foundation/native_string.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "event_listener_map.h"
+#include "foundation/native_string.h"
 
 #if UNIT_TEST
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
@@ -27,6 +27,7 @@ namespace kraken {
 // the target to which an event is dispatched when something has occurred.
 class EventTarget : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = EventTarget*;
 
@@ -35,7 +36,7 @@ class EventTarget : public ScriptWrappable {
   EventTarget() = delete;
   explicit EventTarget(ExecutingContext* context);
 
-  bool addEventListener(std::unique_ptr<NativeString> &event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state);
+  bool addEventListener(std::unique_ptr<NativeString>& event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state);
 
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
@@ -48,58 +49,34 @@ class EventTarget : public ScriptWrappable {
 // Macros to define an attribute event listener.
 //  |lower_name| - Lower-cased event type name.  e.g. |focus|
 //  |symbol_name| - C++ symbol name in event_type_names namespace. e.g. |kFocus|
-#define DEFINE_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)        \
-  EventListener* on##lower_name() {                                     \
-    return GetAttributeEventListener(event_type_names::symbol_name);    \
-  }                                                                     \
-  void setOn##lower_name(EventListener* listener) {                     \
-    SetAttributeEventListener(event_type_names::symbol_name, listener); \
+#define DEFINE_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)                                       \
+  EventListener* on##lower_name() { return GetAttributeEventListener(event_type_names::symbol_name); } \
+  void setOn##lower_name(EventListener* listener) { SetAttributeEventListener(event_type_names::symbol_name, listener); }
+
+#define DEFINE_STATIC_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)                                                                           \
+  static EventListener* on##lower_name(EventTarget& eventTarget) { return eventTarget.GetAttributeEventListener(event_type_names::symbol_name); } \
+  static void setOn##lower_name(EventTarget& eventTarget, EventListener* listener) { eventTarget.SetAttributeEventListener(event_type_names::symbol_name, listener); }
+
+#define DEFINE_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)                                                    \
+  EventListener* on##lower_name() { return GetDocument().GetWindowAttributeEventListener(event_type_names::symbol_name); } \
+  void setOn##lower_name(EventListener* listener) { GetDocument().SetWindowAttributeEventListener(event_type_names::symbol_name, listener); }
+
+#define DEFINE_STATIC_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)                      \
+  static EventListener* on##lower_name(EventTarget& eventTarget) {                                  \
+    if (Node* node = eventTarget.ToNode()) {                                                        \
+      return node->GetDocument().GetWindowAttributeEventListener(event_type_names::symbol_name);    \
+    }                                                                                               \
+    DCHECK(eventTarget.ToLocalDOMWindow());                                                         \
+    return eventTarget.GetAttributeEventListener(event_type_names::symbol_name);                    \
+  }                                                                                                 \
+  static void setOn##lower_name(EventTarget& eventTarget, EventListener* listener) {                \
+    if (Node* node = eventTarget.ToNode()) {                                                        \
+      node->GetDocument().SetWindowAttributeEventListener(event_type_names::symbol_name, listener); \
+    } else {                                                                                        \
+      DCHECK(eventTarget.ToLocalDOMWindow());                                                       \
+      eventTarget.SetAttributeEventListener(event_type_names::symbol_name, listener);               \
+    }                                                                                               \
   }
-
-#define DEFINE_STATIC_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)  \
-  static EventListener* on##lower_name(EventTarget& eventTarget) {       \
-    return eventTarget.GetAttributeEventListener(                        \
-        event_type_names::symbol_name);                                  \
-  }                                                                      \
-  static void setOn##lower_name(EventTarget& eventTarget,                \
-                                EventListener* listener) {               \
-    eventTarget.SetAttributeEventListener(event_type_names::symbol_name, \
-                                          listener);                     \
-  }
-
-
-#define DEFINE_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name) \
-  EventListener* on##lower_name() {                                     \
-    return GetDocument().GetWindowAttributeEventListener(               \
-        event_type_names::symbol_name);                                 \
-  }                                                                     \
-  void setOn##lower_name(EventListener* listener) {                     \
-    GetDocument().SetWindowAttributeEventListener(                      \
-        event_type_names::symbol_name, listener);                       \
-  }
-
-#define DEFINE_STATIC_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name) \
-  static EventListener* on##lower_name(EventTarget& eventTarget) {             \
-    if (Node* node = eventTarget.ToNode()) {                                   \
-      return node->GetDocument().GetWindowAttributeEventListener(              \
-          event_type_names::symbol_name);                                      \
-    }                                                                          \
-    DCHECK(eventTarget.ToLocalDOMWindow());                                    \
-    return eventTarget.GetAttributeEventListener(                              \
-        event_type_names::symbol_name);                                        \
-  }                                                                            \
-  static void setOn##lower_name(EventTarget& eventTarget,                      \
-                                EventListener* listener) {                     \
-    if (Node* node = eventTarget.ToNode()) {                                   \
-      node->GetDocument().SetWindowAttributeEventListener(                     \
-          event_type_names::symbol_name, listener);                            \
-    } else {                                                                   \
-      DCHECK(eventTarget.ToLocalDOMWindow());                                  \
-      eventTarget.SetAttributeEventListener(event_type_names::symbol_name,     \
-                                            listener);                         \
-    }                                                                          \
-  }
-
 
 //
 // using NativeDispatchEvent = int32_t (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
