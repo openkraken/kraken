@@ -120,7 +120,7 @@ describe('line-height', () => {
         style: {
           'line-height': '20px',
           'box-sizing': 'border-box',
-          'backgroundColor': 'green',
+          'background-color': 'green',
           fontSize: '16px',
           width: '200px',
           height: '100px',
@@ -132,7 +132,7 @@ describe('line-height', () => {
           {
             style: {
               display: 'inline-block',
-              'backgroundColor': 'yellow',
+              'background-color': 'yellow',
               width: '200px',
               height: '50px',
             },

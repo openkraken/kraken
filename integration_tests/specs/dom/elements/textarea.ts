@@ -528,33 +528,23 @@ describe('Tags textarea', () => {
       }
     }, [
       (text = createText('hello world'))
-    ]);
+    ]) as HTMLTextAreaElement;
     document.body.appendChild(textarea);
 
     text.data = 'text content value';
-    // @ts-ignore
     expect(textarea.defaultValue).toBe('text content value');
-    // @ts-ignore
     expect(textarea.value).toBe('text content value');
 
-    // @ts-ignore
     textarea.defaultValue = 'default value';
-    // @ts-ignore
     expect(textarea.defaultValue).toBe('default value');
-    // @ts-ignore
     expect(textarea.value).toBe('default value');
 
-    // @ts-ignore
     textarea.value = 'property value';
-    // @ts-ignore
     expect(textarea.defaultValue).toBe('default value');
-    // @ts-ignore
     expect(textarea.value).toBe('property value');
 
     text.data = 'text content value 2';
-    // @ts-ignore
     expect(textarea.defaultValue).toBe('text content value 2');
-    // @ts-ignore
     expect(textarea.value).toBe('property value');
   });
 });
