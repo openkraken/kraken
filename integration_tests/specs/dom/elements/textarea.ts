@@ -516,4 +516,45 @@ describe('Tags textarea', () => {
     textarea.value = null;
     expect(textarea.value).toBe('');
   });
+
+  it('textarea attribute and property value priority', () => {
+    let text;
+    const textarea = createElement('textarea', {
+      rows: 10, 
+      cols: 10,
+      placeholder: '9999999',
+      style: {
+        height: '200px',
+      }
+    }, [
+      (text = createText('hello world'))
+    ]);
+    document.body.appendChild(textarea);
+
+    text.data = 'text content value';
+    // @ts-ignore
+    expect(textarea.defaultValue).toBe('text content value');
+    // @ts-ignore
+    expect(textarea.value).toBe('text content value');
+
+    // @ts-ignore
+    textarea.defaultValue = 'default value';
+    // @ts-ignore
+    expect(textarea.defaultValue).toBe('default value');
+    // @ts-ignore
+    expect(textarea.value).toBe('default value');
+
+    // @ts-ignore
+    textarea.value = 'property value';
+    // @ts-ignore
+    expect(textarea.defaultValue).toBe('default value');
+    // @ts-ignore
+    expect(textarea.value).toBe('property value');
+
+    text.data = 'text content value 2';
+    // @ts-ignore
+    expect(textarea.defaultValue).toBe('text content value 2');
+    // @ts-ignore
+    expect(textarea.value).toBe('property value');
+  });
 });

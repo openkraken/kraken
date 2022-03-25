@@ -253,10 +253,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     switch (key) {
       case 'width': width = castToType<num>(val).toInt(); break;
       case 'height': height = castToType<num>(val).toInt(); break;
-      case 'value':
-        value = castToType<String?>(val);
-        hasDirtyValue = true;
-        break;
+      case 'value': value = castToType<String?>(val); break;
       case 'defaultValue': defaultValue = castToType<String?>(val); break;
       case 'accept': accept = castToType<String>(val); break;
       case 'autocomplete': autocomplete = castToType<String>(val); break;
@@ -334,6 +331,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   set value(String? text) {
     setValue(text);
+    hasDirtyValue = true;
   }
 
   String _defaultValue = '';
@@ -341,9 +339,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   set defaultValue(String? text) {
     text ??= '';
+    _defaultValue = text;
+    // Only set value when dirty flag is false.
     if (!hasDirtyValue) {
-      _defaultValue = text;
-      value = text;
+      setValue(text);
     }
   }
 

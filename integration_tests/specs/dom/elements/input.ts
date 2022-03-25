@@ -469,4 +469,40 @@ describe('Tags input', () => {
     input.value = null;
     expect(input.value).toBe('');
   });
+
+  it('input attribute and property value priority', () => {
+    const input = createElement('input', {
+      placeholder: 'hello world',
+      style: {
+        height: '50px',
+      }
+    });
+    document.body.appendChild(input);
+
+    input.setAttribute('value', 'attribute value');
+    // @ts-ignore
+    expect(input.defaultValue).toBe('attribute value');
+    // @ts-ignore
+    expect(input.value).toBe('attribute value');
+
+    // @ts-ignore
+    input.defaultValue = 'default value';
+    // @ts-ignore
+    expect(input.defaultValue).toBe('default value');
+    // @ts-ignore
+    expect(input.value).toBe('default value'); 
+
+    // @ts-ignore
+    input.value = 'property value';
+    // @ts-ignore
+    expect(input.defaultValue).toBe('default value');
+    // @ts-ignore
+    expect(input.value).toBe('property value'); 
+ 
+    input.setAttribute('value', 'attribute value 2');
+    // @ts-ignore
+    expect(input.defaultValue).toBe('attribute value 2');
+    // @ts-ignore
+    expect(input.value).toBe('property value'); 
+  });
 });
