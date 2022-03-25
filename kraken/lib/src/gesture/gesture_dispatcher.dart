@@ -94,7 +94,7 @@ class GestureDispatcher {
       ..onUpdate = instance._onPanUpdate
       ..onEnd = instance._onPanEnd;
     // LongPress Recognizer
-    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPressEnd = instance._onLongPressEnd;
+    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPress = instance._onLongPress;
     // Scale Recognizer
     gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
       ..onStart = instance._onScaleStart
@@ -251,8 +251,8 @@ class GestureDispatcher {
     _handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void _onLongPressEnd(LongPressEndDetails details) {
-    _handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
+  void _onLongPress() {
+    _handleMouseEvent(EVENT_LONG_PRESS);
   }
 
   void _onSwipe(SwipeDetails details) {

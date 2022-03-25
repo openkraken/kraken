@@ -19,7 +19,7 @@ export 'package:flutter/gestures.dart'
         GestureLongPressStartCallback,
         GestureLongPressMoveUpdateCallback,
         GestureLongPressUpCallback,
-        GestureLongPressEndCallback,
+        GestureLongPressCallback,
         GestureDragDownCallback,
         GestureDragStartCallback,
         GestureDragUpdateCallback,
