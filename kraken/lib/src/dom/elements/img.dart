@@ -45,8 +45,8 @@ class ImageElement extends Element {
   // Current image source.
   Uri? _resolvedUri;
 
-  // Current rendering image ([ui.Image]).
-  ui.Image? get image => _renderImage?.image;
+  // Current image data([ui.Image]).
+  ui.Image? get image => _cachedImageInfo?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
   int _frameCount = 0;
@@ -194,19 +194,13 @@ class ImageElement extends Element {
   }
 
   ImageStreamListener? _imageStreamListener;
-  ImageStreamListener _getListener() {
-    _imageStreamListener ??= ImageStreamListener(
-      _handleImageFrame,
-      onError: _onImageError
-    );
-    return _imageStreamListener!;
-  }
+  ImageStreamListener get _listener => _imageStreamListener ??= ImageStreamListener(_handleImageFrame, onError: _onImageError);
 
   void _listenToStream() {
     if (_isListeningStream)
       return;
 
-    _cachedImageStream?.addListener(_getListener());
+    _cachedImageStream?.addListener(_listener);
     _completerHandle?.dispose();
     _completerHandle = null;
 
@@ -359,7 +353,7 @@ class ImageElement extends Element {
       _completerHandle = _cachedImageStream!.completer!.keepAlive();
     }
 
-    _cachedImageStream?.removeListener(_getListener());
+    _cachedImageStream?.removeListener(_listener);
     _imageStreamListener = null;
     _isListeningStream = false;
   }
@@ -368,14 +362,14 @@ class ImageElement extends Element {
     if (_cachedImageStream?.key == newStream.key) return;
 
     if (_isListeningStream) {
-      _cachedImageStream?.removeListener(_getListener());
+      _cachedImageStream?.removeListener(_listener);
     }
 
     _frameCount = 0;
     _cachedImageStream = newStream;
 
     if (_isListeningStream) {
-      _cachedImageStream!.addListener(_getListener());
+      _cachedImageStream!.addListener(_listener);
     }
   }
 
@@ -383,7 +377,7 @@ class ImageElement extends Element {
   // Create an ImageStream that decodes the obtained image.
   // If imageElement has property size or width/height property on [renderStyle],
   // The image will be encoded into a small size for better rasterization performance.
-  void _decode({ bool updateImageProvider = false }) async {
+  void _decode({ bool updateImageProvider = false }) {
     _ImageRequest? request = _currentRequest;
     if (request != null && request.available) {
       // Try to make sure that this image can be encoded into a smaller size.
@@ -407,6 +401,11 @@ class ImageElement extends Element {
   void _replaceImage({required ImageInfo? info}) {
     _cachedImageInfo?.dispose();
     _cachedImageInfo = info;
+
+    if (_currentRequest?.state != _ImageRequestState.completelyAvailable) {
+      _currentRequest?.state = _ImageRequestState.completelyAvailable;
+      scheduleMicrotask(() => _dispatchLoadEvent());
+    }
   }
 
   // Attach image to renderImage box.
@@ -450,13 +449,18 @@ class ImageElement extends Element {
     internalSetAttribute('src', value);
     _resolveResourceUri(value);
 
-    _obtainImage()
-    .then((_) {
-      // Update image source if image already attached except image is lazy loading.
-      if (isRendererAttached && !_isInLazyLoading) {
-        _decode(updateImageProvider: true);
-      }
-    });
+    _updateImageData();
+  }
+
+  // https://html.spec.whatwg.org/multipage/images.html#update-the-image-data
+  void _updateImageData() async {
+    await _obtainImage();
+
+    // Update image source if image already attached except image is lazy loading.
+    if (!_isInLazyLoading) {
+      _listenToStream();
+      _decode(updateImageProvider: true);
+    }
   }
 
   // To load the resource, and dispatch load event.
@@ -465,7 +469,6 @@ class ImageElement extends Element {
     _ImageRequest request = _currentRequest = _ImageRequest(currentUri: _resolvedUri!);
     try {
       _currentImageDescriptor = await request._obtainImage(contextId);
-      _dispatchLoadEvent();
     } catch (error) {
       _dispatchErrorEvent();
     } finally {
@@ -473,7 +476,6 @@ class ImageElement extends Element {
     }
   }
 
-  // ReadOnly additional property.
   String get loading => getAttribute(LOADING) ?? '';
   set loading(String value) {
     internalSetAttribute(SCALING, value);
@@ -601,7 +603,7 @@ class _ImageRequest {
 
     // State available at least the image dimensions are available.
     if (descriptor.width != 0 && descriptor.height != 0) {
-      state = _ImageRequestState.completelyAvailable;
+      state = _ImageRequestState.partiallyAvailable;
     } else {
       state = _ImageRequestState.broken;
     }
