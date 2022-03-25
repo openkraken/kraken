@@ -2,7 +2,7 @@ import {ParameterType} from "./analyzer";
 
 export enum FunctionArgumentType {
   // Basic types
-  string,
+  dom_string,
   object,
   int32,
   int64,
@@ -11,23 +11,26 @@ export enum FunctionArgumentType {
   function,
   void,
   any,
+  null,
+  undefined,
+  array,
 }
 
 export class FunctionArguments {
   name: string;
-  type: ParameterType | ParameterType[];
+  type: ParameterType[] = [];
   required: boolean;
 }
 
 export class PropsDeclaration {
-  type: ParameterType | ParameterType[];
+  type: ParameterType[] = [];
   name: string;
   readonly: boolean;
 }
 
 export class FunctionDeclaration extends PropsDeclaration {
-  args: FunctionArguments[];
-  returnType: ParameterType | ParameterType[];
+  args: FunctionArguments[] =  [];
+  returnType: ParameterType[] = [];
 }
 
 export class ClassObject {

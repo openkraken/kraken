@@ -6,6 +6,8 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
+#include "foundation/native_string.h"
+#include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "event_listener_map.h"
 
@@ -23,34 +25,17 @@ namespace kraken {
 // EventTarget objects allow us to add and remove an event
 // listeners of a specific event type. Each EventTarget object also represents
 // the target to which an event is dispatched when something has occurred.
-// All nodes are EventTargets, some other event targets include: XMLHttpRequest,
-// AudioNode and AudioContext.
-
-// To make your class an EventTarget, follow these steps:
-// - Make your IDL interface inherit from EventTarget.
-// - Inherit from EventTargetWithInlineData (only in rare cases should you
-//   use EventTarget directly).
-// - In your class declaration, EventTargetWithInlineData must come first in
-//   the base class list. If your class is non-final, classes inheriting from
-//   your class need to come first, too.
-// - If you added an onfoo attribute, use DEFINE_ATTRIBUTE_EVENT_LISTENER(foo)
-//   in your class declaration. Add "attribute EventHandler onfoo;" to the IDL
-//   file.
-// - Override EventTarget::interfaceName() and getExecutionContext(). The former
-//   will typically return EventTargetNames::YourClassName. The latter will
-//   return ExecutionContextLifecycleObserver::executionContext (if you are an
-//   ExecutionContextLifecycleObserver)
-//   or the document you're in.
-// - Your trace() method will need to call EventTargetWithInlineData::trace
-//   depending on the base class of your class.
 class EventTarget : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
-
  public:
+  using ImplType = EventTarget*;
+
   static EventTarget* Create(ExecutingContext* context);
 
   EventTarget() = delete;
   explicit EventTarget(ExecutingContext* context);
+
+  bool addEventListener(std::unique_ptr<NativeString> &event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state);
 
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
@@ -59,6 +44,63 @@ class EventTarget : public ScriptWrappable {
 
  private:
 };
+
+// Macros to define an attribute event listener.
+//  |lower_name| - Lower-cased event type name.  e.g. |focus|
+//  |symbol_name| - C++ symbol name in event_type_names namespace. e.g. |kFocus|
+#define DEFINE_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)        \
+  EventListener* on##lower_name() {                                     \
+    return GetAttributeEventListener(event_type_names::symbol_name);    \
+  }                                                                     \
+  void setOn##lower_name(EventListener* listener) {                     \
+    SetAttributeEventListener(event_type_names::symbol_name, listener); \
+  }
+
+#define DEFINE_STATIC_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name)  \
+  static EventListener* on##lower_name(EventTarget& eventTarget) {       \
+    return eventTarget.GetAttributeEventListener(                        \
+        event_type_names::symbol_name);                                  \
+  }                                                                      \
+  static void setOn##lower_name(EventTarget& eventTarget,                \
+                                EventListener* listener) {               \
+    eventTarget.SetAttributeEventListener(event_type_names::symbol_name, \
+                                          listener);                     \
+  }
+
+
+#define DEFINE_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name) \
+  EventListener* on##lower_name() {                                     \
+    return GetDocument().GetWindowAttributeEventListener(               \
+        event_type_names::symbol_name);                                 \
+  }                                                                     \
+  void setOn##lower_name(EventListener* listener) {                     \
+    GetDocument().SetWindowAttributeEventListener(                      \
+        event_type_names::symbol_name, listener);                       \
+  }
+
+#define DEFINE_STATIC_WINDOW_ATTRIBUTE_EVENT_LISTENER(lower_name, symbol_name) \
+  static EventListener* on##lower_name(EventTarget& eventTarget) {             \
+    if (Node* node = eventTarget.ToNode()) {                                   \
+      return node->GetDocument().GetWindowAttributeEventListener(              \
+          event_type_names::symbol_name);                                      \
+    }                                                                          \
+    DCHECK(eventTarget.ToLocalDOMWindow());                                    \
+    return eventTarget.GetAttributeEventListener(                              \
+        event_type_names::symbol_name);                                        \
+  }                                                                            \
+  static void setOn##lower_name(EventTarget& eventTarget,                      \
+                                EventListener* listener) {                     \
+    if (Node* node = eventTarget.ToNode()) {                                   \
+      node->GetDocument().SetWindowAttributeEventListener(                     \
+          event_type_names::symbol_name, listener);                            \
+    } else {                                                                   \
+      DCHECK(eventTarget.ToLocalDOMWindow());                                  \
+      eventTarget.SetAttributeEventListener(event_type_names::symbol_name,     \
+                                            listener);                         \
+    }                                                                          \
+  }
+
+
 //
 // using NativeDispatchEvent = int32_t (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
 // using InvokeBindingMethod = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);

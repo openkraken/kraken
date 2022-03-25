@@ -259,6 +259,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/frame/module_callback_coordinator.h
     core/dom/frame_request_callback_collection.cc
     core/dom/frame_request_callback_collection.h
+    core/dom/events/event.h
+    core/dom/events/event.cc
     core/dom/events/event_target.h
     core/dom/events/event_target.cc
 #    core/dom/character_data.cc
@@ -285,6 +287,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_module_manager.h
     out/qjs_blob.cc
     out/qjs_blob.h
+    out/qjs_event.cc
+    out/qjs_event.h
+    out/qjs_event_target.cc
+    out/qjs_event_target.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

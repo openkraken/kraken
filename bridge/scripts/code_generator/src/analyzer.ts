@@ -51,12 +51,9 @@ function getParameterName(name: ts.BindingName) : string {
 
 export type ParameterType =  FunctionArgumentType | string;
 
-function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
-  if (type.kind == ts.SyntaxKind.ArrayType) {
-    let arrayType = type as unknown as ts.ArrayTypeNode;
-    return [getParameterType(arrayType.elementType) as FunctionArgumentType];
-  } else if (type.kind === ts.SyntaxKind.StringKeyword) {
-    return FunctionArgumentType.string;
+function getParameterBaseType(type: ts.TypeNode): ParameterType {
+  if (type.kind === ts.SyntaxKind.StringKeyword) {
+    return FunctionArgumentType.dom_string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
     return FunctionArgumentType.double;
   } else if (type.kind === ts.SyntaxKind.BooleanKeyword) {
@@ -68,6 +65,10 @@ function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
     // @ts-ignore
   } else if (type.kind === ts.SyntaxKind.VoidKeyword) {
     return FunctionArgumentType.void;
+  } else if (type.kind === ts.SyntaxKind.NullKeyword) {
+    return FunctionArgumentType.null;
+  } else if (type.kind === ts.SyntaxKind.UndefinedKeyword) {
+    return FunctionArgumentType.undefined;
   } else if (type.kind === ts.SyntaxKind.TypeReference) {
     let typeReference: ts.TypeReference = type as unknown as ts.TypeReference;
     // @ts-ignore
@@ -83,9 +84,25 @@ function getParameterType(type: ts.TypeNode): ParameterType | ParameterType[] {
     }
 
     return identifier;
+  } else if (type.kind === ts.SyntaxKind.LiteralType) {
+    // @ts-ignore
+    return getParameterBaseType((type as ts.LiteralTypeNode).literal);
   }
 
   return FunctionArgumentType.any;
+}
+
+function getParameterType(type: ts.TypeNode): ParameterType[] {
+  if (type.kind == ts.SyntaxKind.ArrayType) {
+    let arrayType = type as unknown as ts.ArrayTypeNode;
+    return [FunctionArgumentType.array, getParameterBaseType(arrayType.elementType)];
+  } else if (type.kind === ts.SyntaxKind.UnionType) {
+    let node = type as unknown as ts.UnionType;
+    let types = node.types;
+    // @ts-ignore
+    return types.map(type => getParameterBaseType(type as unknown as ts.TypeNode));
+  }
+  return [getParameterBaseType(type)];
 }
 
 function paramsNodeToArguments(parameter: ts.ParameterDeclaration): FunctionArguments {
@@ -126,7 +143,7 @@ function walkProgram(statement: ts.Statement) {
             let propKind = m.type;
             if (propKind) {
               prop.type = getParameterType(propKind);
-              if (prop.type === FunctionArgumentType.function) {
+              if (prop.type[0] === FunctionArgumentType.function) {
                 let f = (m.type as ts.FunctionTypeNode);
                 let functionProps = prop as FunctionDeclaration;
                 functionProps.args = [];

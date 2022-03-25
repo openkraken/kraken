@@ -30,34 +30,49 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration) {
 `;
 }
 
-function generateTypeConverter(type: ParameterType | ParameterType[]): string {
-  if (Array.isArray(type)) {
-    return `IDLSequence<${generateTypeConverter(type[0])}>`;
+function generateTypeConverter(type: ParameterType[]): string {
+  let haveNull = type.some(t => t === FunctionArgumentType.null);
+  let returnValue = '';
+
+  if (type[0] === FunctionArgumentType.array) {
+    returnValue = `IDLSequence<${generateTypeConverter(type.slice(1))}>`;
+  } else if (typeof type[0] === 'string') {
+    returnValue = type[0];
+  } else {
+    switch(type[0]) {
+      case FunctionArgumentType.int32:
+        returnValue = `IDLInt32`;
+        break;
+      case FunctionArgumentType.int64:
+        returnValue = 'IDLInt64';
+        break;
+      case FunctionArgumentType.double:
+        returnValue = `IDLDouble`;
+        break;
+      case FunctionArgumentType.function:
+        returnValue =  `IDLCallback`;
+        break;
+      case FunctionArgumentType.boolean:
+        returnValue = `IDLBoolean`;
+        break;
+      case FunctionArgumentType.dom_string:
+        returnValue = `IDLDOMString`;
+        break;
+      case FunctionArgumentType.object:
+        returnValue = `IDLObject`;
+        break;
+      default:
+      case FunctionArgumentType.any:
+        returnValue = `IDLAny`;
+        break;
+    }
   }
 
-  if (typeof type === 'string') {
-    return type;
+  if (haveNull) {
+    returnValue = `IDLNullable<${returnValue}>`;
   }
 
-  switch(type) {
-    case FunctionArgumentType.int32:
-      return `IDLInt32`;
-    case FunctionArgumentType.int64:
-      return 'IDLInt64';
-    case FunctionArgumentType.double:
-      return `IDLDouble`;
-    case FunctionArgumentType.function:
-      return `IDLCallback`;
-    case FunctionArgumentType.boolean:
-      return `IDLBoolean`;
-    case FunctionArgumentType.string:
-      return `IDLDOMString`;
-    case FunctionArgumentType.object:
-      return `IDLObject`;
-    default:
-    case FunctionArgumentType.any:
-      return `IDLAny`;
-  }
+  return returnValue;
 }
 
 function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
@@ -73,7 +88,7 @@ function generateCallMethodName(name: string) {
 function generateOptionalInitBody(blob: Blob, declare: FunctionDeclaration, argument: FunctionArguments, argsIndex: number, previousArguments: string[], options: GenFunctionBodyOptions) {
   let call = '';
   let returnValueAssignment = '';
-  if (declare.returnType != FunctionArgumentType.void) {
+  if (declare.returnType[0] != FunctionArgumentType.void) {
     returnValueAssignment = 'return_value =';
   }
   if (options.isInstanceMethod) {
@@ -122,12 +137,12 @@ function generateFunctionCallBody(blob: Blob, declaration: FunctionDeclaration, 
 
   let call = '';
   let returnValueAssignment = '';
-  if (declaration.returnType != FunctionArgumentType.void) {
+  if (declaration.returnType[0] != FunctionArgumentType.void) {
     returnValueAssignment = 'return_value =';
   }
   if (options.isInstanceMethod) {
     call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
-${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : 'exception_state'});`;
+${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `${requiredArguments.join(',')}` : 'exception_state'});`;
   } else {
     call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
   }
@@ -149,30 +164,30 @@ ${body}
 }`;
 }
 
-function generateReturnValueInit(blob: Blob, type: ParameterType | ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
-  if (type == FunctionArgumentType.void) return '';
+function generateReturnValueInit(blob: Blob, type: ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
+  if (type[0] == FunctionArgumentType.void) return '';
 
   if (options.isConstructor) {
     return `${getClassName(blob)}* return_value = nullptr;`
   }
-  if (typeof type === 'string') {
-    if (type === 'Promise') {
+  if (typeof type[0] === 'string') {
+    if (type[0] === 'Promise') {
       return 'ScriptPromise return_value;';
     } else {
-      return `${type}* return_value = nullptr;`;
+      return `${type[0]}* return_value = nullptr;`;
     }
   }
   return `Converter<${generateTypeConverter(type)}>::ImplType return_value;`;
 }
 
-function generateReturnValueResult(blob: Blob, type: ParameterType | ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
-  if (type == FunctionArgumentType.void) return 'JS_NULL';
+function generateReturnValueResult(blob: Blob, type: ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
+  if (type[0] == FunctionArgumentType.void) return 'JS_NULL';
   if (options.isConstructor) {
     return `return_value->ToQuickJS()`;
   }
 
-  if (typeof type === 'string') {
-    if (type === 'Promise') {
+  if (typeof type[0] === 'string') {
+    if (type[0] === 'Promise') {
       return 'return_value.ToQuickJS()';
     } else {
       return `return_value->ToQuickJS()`;
@@ -208,7 +223,7 @@ ${addIndent(callBody, 4)}
 }
 
 function generateClassConstructorCallback(blob: Blob, declare: FunctionDeclaration) {
-  return `JSValue QJSBlob::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
+  return `JSValue QJS${getClassName(blob)}::ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags) {
 ${generateFunctionBody(blob, declare, {isConstructor: true})}
 }
 `;
@@ -230,7 +245,7 @@ function generatePropertySetterCallback(blob: Blob, prop: PropsDeclaration) {
   if (exception_state.HasException()) {
     return exception_state.ToQuickJS();
   }
-  qjs_blob->set${prop.name[0].toUpperCase() + prop.name.slice(1)}(v);
+  ${blob.filename}->set${prop.name[0].toUpperCase() + prop.name.slice(1)}(v);
 }`;
 }
 

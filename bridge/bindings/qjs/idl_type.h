@@ -29,6 +29,12 @@ struct IDLOptional final : public IDLTypeBase {
   using ImplType = typename Converter<T>::ImplType;
 };
 
+// Nullable
+template<typename T>
+struct IDLNullable final : public IDLTypeBase {
+  using ImplType = typename Converter<T>::ImplType;
+};
+
 // Bool
 struct IDLBoolean final : public IDLTypeBaseHelper<bool> {};
 
@@ -55,6 +61,10 @@ struct IDLObject : public IDLTypeBaseHelper<ScriptValue> {};
 class QJSFunction;
 // Function callback
 struct IDLCallback : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
+  using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
+};
+
+struct EventListener : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
   using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
 };
 

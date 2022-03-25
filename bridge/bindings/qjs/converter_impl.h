@@ -11,6 +11,7 @@
 #include "converter.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
+#include "core/dom/events/event_target.h"
 #include "idl_type.h"
 #include "native_string_utils.h"
 
@@ -34,6 +35,21 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) { return Converter<T>::ToValue(ctx, value); }
+};
+
+// Nullable value for pointer value
+template<typename T>
+struct Converter<IDLNullable<T>, std::enable_if<std::is_pointer<typename Converter<T>::ImplType>::value>> : public ConverterBase<IDLNullable<T>> {
+  using ImplType = typename Converter<T>::ImplType;
+
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return nullptr;
+    }
+    return Converter<T>::FromValue(ctx, value, exception_state);
+  }
+
+  static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value){ return Converter<T>::ToValue(ctx, value); }
 };
 
 template <typename T>
@@ -84,6 +100,14 @@ struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLAny>::ImplType value) { return Converter<IDLAny>::ToValue(ctx, std::move(value)); }
+};
+
+template<>
+struct Converter<IDLNullable<IDLAny>> : public ConverterBase<IDLNullable<IDLAny>> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return ScriptValue(ctx, value);
+  }
 };
 
 // Boolean
@@ -153,6 +177,7 @@ struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
     return jsValueToNativeString(ctx, value);
   }
 
+  static JSValue ToValue(JSContext* ctx, NativeString* str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
   static JSValue ToValue(JSContext* ctx, const std::string& str) { return JS_NewString(ctx, str.c_str()); }
@@ -169,6 +194,15 @@ struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString>
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return Converter<IDLDOMString>::ToValue(ctx, bytes, length); }
   static JSValue ToValue(JSContext* ctx, const std::string& str) { return Converter<IDLDOMString>::ToValue(ctx, str); }
   static JSValue ToValue(JSContext* ctx, typename Converter<IDLDOMString>::ImplType value) { return Converter<IDLDOMString>::ToValue(ctx, std::move(value)); }
+};
+
+template<>
+struct Converter<IDLNullable<IDLDOMString>> : public ConverterBase<IDLDOMString> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value))
+      return nullptr;
+    return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
+  }
 };
 
 template <>
@@ -222,6 +256,18 @@ struct Converter<IDLOptional<IDLSequence<T>>> : public ConverterBase<IDLSequence
   }
 };
 
+template <typename T>
+struct Converter<IDLNullable<IDLSequence<T>>> : public ConverterBase<IDLSequence<T>> {
+  using ImplType = typename IDLSequence<typename Converter<T>::ImplType>::ImplType;
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return {};
+    }
+
+    return Converter<IDLSequence<T>>::FromValue(ctx, value, exception_state);
+  }
+};
+
 template <>
 struct Converter<IDLCallback> : public ConverterBase<IDLCallback> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
@@ -251,6 +297,54 @@ struct Converter<BlobPropertyBag> : public ConverterBase<BlobPropertyBag> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return BlobPropertyBag::Create(ctx, value, exception_state);
+  }
+};
+
+// EventListener
+template<>
+struct Converter<EventListener> : public ConverterBase<EventListener> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    if (!JS_IsFunction(ctx, value)) {
+      return nullptr;
+    }
+
+    return QJSFunction::Create(ctx, value);
+  }
+};
+template<>
+struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListener> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    if (JS_IsNull(value)) {
+      return nullptr;
+    }
+
+    return Converter<EventListener>::FromValue(ctx, value, exception_state);
+  }
+};
+
+template<>
+struct Converter<EventTarget> : public ConverterBase<EventTarget> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return toScriptWrappable<EventTarget>(value);
+  }
+
+  static JSValue ToValue(JSContext* ctx, ImplType value) {
+    return value->ToQuickJS();
+  }
+};
+
+template<>
+struct Converter<IDLNullable<EventTarget>> : public ConverterBase<EventTarget> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return Converter<EventTarget>::FromValue(ctx, value, exception_state);
+  }
+
+  static JSValue ToValue(JSContext* ctx, ImplType value) {
+    return Converter<EventTarget>::ToValue(ctx, value);
   }
 };
 
