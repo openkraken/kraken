@@ -12,11 +12,7 @@
 
 namespace kraken {
 
-enum {
-  JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 1,
-  JS_CLASS_BLOB,
-  JS_CLASS_EVENTTARGET
-};
+enum { JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 1, JS_CLASS_BLOB, JS_CLASS_EVENTTARGET };
 
 // This struct provides a way to store a bunch of information that is helpful
 // when creating quickjs objects. Each quickjs bindings class has exactly one static

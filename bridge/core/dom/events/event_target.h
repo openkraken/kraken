@@ -45,6 +45,7 @@ namespace kraken {
 //   depending on the base class of your class.
 class EventTarget : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   static EventTarget* Create(ExecutingContext* context);
 
@@ -55,13 +56,14 @@ class EventTarget : public ScriptWrappable {
   void Dispose() const override;
 
   const char* GetHumanReadableName() const override;
+
  private:
 };
 //
-//using NativeDispatchEvent = int32_t (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
-//using InvokeBindingMethod = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
+// using NativeDispatchEvent = int32_t (*)(int32_t contextId, NativeEventTarget* nativeEventTarget, NativeString* eventType, void* nativeEvent, int32_t isCustomEvent);
+// using InvokeBindingMethod = void (*)(void* nativePtr, NativeValue* returnValue, NativeString* method, int32_t argc, NativeValue* argv);
 //
-//struct NativeEventTarget {
+// struct NativeEventTarget {
 //  NativeEventTarget() = delete;
 //  explicit NativeEventTarget(EventTargetInstance* _instance) : instance(_instance), dispatchEvent(reinterpret_cast<NativeDispatchEvent>(NativeEventTarget::dispatchEventImpl)){};
 //
@@ -76,17 +78,17 @@ class EventTarget : public ScriptWrappable {
 //#endif
 //};
 //
-//class EventTargetProperties : public HeapHashMap<JSAtom> {
+// class EventTargetProperties : public HeapHashMap<JSAtom> {
 // public:
 //  EventTargetProperties(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
 //};
 //
-//class EventHandlerMap : public HeapHashMap<JSAtom> {
+// class EventHandlerMap : public HeapHashMap<JSAtom> {
 // public:
 //  EventHandlerMap(JSContext* ctx) : HeapHashMap<JSAtom>(ctx){};
 //};
 //
-//class EventTargetInstance : public Instance {
+// class EventTargetInstance : public Instance {
 // public:
 //  EventTargetInstance() = delete;
 //  explicit EventTargetInstance(EventTarget* eventTarget, JSClassID classId, JSClassExoticMethods& exoticMethods, std::string name);
@@ -139,6 +141,6 @@ class EventTarget : public ScriptWrappable {
 //  friend StyleDeclarationInstance;
 //};
 
-}  // namespace kraken::binding::qjs
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_EVENT_TARGET_H

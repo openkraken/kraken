@@ -18,7 +18,7 @@ EventTarget* EventTarget::Create(ExecutingContext* context) {
   return makeGarbageCollected<EventTarget>(context);
 }
 
-EventTarget::EventTarget(ExecutingContext* context): ScriptWrappable(context->ctx()) {}
+EventTarget::EventTarget(ExecutingContext* context) : ScriptWrappable(context->ctx()) {}
 
 void EventTarget::Trace(GCVisitor* visitor) const {}
 
@@ -28,6 +28,6 @@ const char* EventTarget::GetHumanReadableName() const {
   return "EventTarget";
 }
 
-}
+}  // namespace kraken
 
 // namespace kraken::binding::qjs
