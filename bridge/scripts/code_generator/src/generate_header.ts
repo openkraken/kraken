@@ -1,5 +1,5 @@
 import {ClassObject, FunctionObject, PropsDeclaration} from "./declaration";
-import {uniqBy} from "lodash";
+import {uniqBy, snakeCase} from "lodash";
 import {Blob} from "./blob";
 import {addIndent, getClassName} from "./utils";
 

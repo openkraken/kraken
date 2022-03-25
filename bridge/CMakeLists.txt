@@ -259,6 +259,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/frame/module_callback_coordinator.h
     core/dom/frame_request_callback_collection.cc
     core/dom/frame_request_callback_collection.h
+    core/dom/events/event_target.h
+    core/dom/events/event_target.cc
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc

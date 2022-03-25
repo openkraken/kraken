@@ -24,6 +24,7 @@ abstract class EventTarget extends BindingObject {
   @protected
   bool hasEventListener(String type) => _eventHandlers.containsKey(type);
 
+  // TODO: Support addEventListener options: capture, once, passive, signal.
   @mustCallSuper
   void addEventListener(String eventType, EventHandler eventHandler) {
     if (_disposed) return;
