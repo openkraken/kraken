@@ -20,6 +20,20 @@ void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, 
 
 namespace kraken {
 
+class EventTargetData final {
+  KRAKEN_DISALLOW_NEW();
+ public:
+  EventTargetData();
+  EventTargetData(const EventTargetData&) = delete;
+  EventTargetData& operator=(const EventTargetData&) = delete;
+  ~EventTargetData();
+
+  void Trace(GCVisitor* visitor) const;
+
+ private:
+  EventListenerMap event_listener_map_;
+};
+
 // All DOM event targets extend EventTarget. The spec is defined here:
 // https://dom.spec.whatwg.org/#interface-eventtarget
 // EventTarget objects allow us to add and remove an event
@@ -41,10 +55,47 @@ class EventTarget : public ScriptWrappable {
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
 
+//  virtual bool AddEventListenerInternal(const AtomicString& event_type,
+//                                        EventListener*,
+//                                        const AddEventListenerOptionsResolved*);
+//  bool RemoveEventListenerInternal(const AtomicString& event_type,
+//                                   const EventListener*,
+//                                   const EventListenerOptions*);
+//
+//  // Called when an event listener has been successfully added.
+//  virtual void AddedEventListener(const AtomicString& event_type,
+//                                  RegisteredEventListener&);
+//
+//  // Called when an event listener is removed. The original registration
+//  // parameters of this event listener are available to be queried.
+//  virtual void RemovedEventListener(const AtomicString& event_type,
+//                                    const RegisteredEventListener&);
+//
+//  virtual DispatchEventResult DispatchEventInternal(Event&);
+
+  // Subclasses should likely not override these themselves; instead, they
+  // should subclass EventTargetWithInlineData.
+  virtual EventTargetData* GetEventTargetData() = 0;
+  virtual EventTargetData& EnsureEventTargetData() = 0;
+
   const char* GetHumanReadableName() const override;
 
  private:
 };
+
+// Provide EventTarget with inlined EventTargetData for improved performance.
+class EventTargetWithInlineData : public EventTarget {
+ public:
+  void Trace(GCVisitor* visitor) const override;
+
+ protected:
+  EventTargetData* GetEventTargetData() final { return &data_; }
+  EventTargetData& EnsureEventTargetData() final { return data_; }
+
+ private:
+  EventTargetData data_;
+};
+
 
 // Macros to define an attribute event listener.
 //  |lower_name| - Lower-cased event type name.  e.g. |focus|

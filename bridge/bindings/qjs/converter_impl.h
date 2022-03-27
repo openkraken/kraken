@@ -9,6 +9,7 @@
 #include <type_traits>
 #include "atom_string.h"
 #include "converter.h"
+#include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
@@ -174,9 +175,10 @@ template <>
 struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
-    return jsValueToNativeString(ctx, value);
+    return AtomString(ctx, value);
   }
 
+  static JSValue ToValue(JSContext* ctx, const AtomString& value) { return value.ToQuickJS(); }
   static JSValue ToValue(JSContext* ctx, NativeString* str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
@@ -187,7 +189,7 @@ template <>
 struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     if (JS_IsUndefined(value))
-      return nullptr;
+      return AtomString::Empty(ctx);
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
 
@@ -200,22 +202,9 @@ template <>
 struct Converter<IDLNullable<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     if (JS_IsNull(value))
-      return nullptr;
+      return AtomString::Empty(ctx);
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
-};
-
-template <>
-struct Converter<IDLAtomString> : public ConverterBase<IDLAtomString> {
-  static AtomString FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    JSAtom atom = JS_ValueToAtom(ctx, value);
-    AtomString result = AtomString(ctx, atom);
-    JS_FreeAtom(ctx, atom);
-    return result;
-  }
-
-  static JSValue ToValue(JSContext* ctx, const AtomString& atom_string) { return atom_string.ToQuickJS(); }
 };
 
 template <typename T>
@@ -342,6 +331,16 @@ struct Converter<IDLNullable<EventTarget>> : public ConverterBase<EventTarget> {
   }
 
   static JSValue ToValue(JSContext* ctx, ImplType value) { return Converter<EventTarget>::ToValue(ctx, value); }
+};
+
+template <>
+struct Converter<Event> : public ConverterBase<Event> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return toScriptWrappable<Event>(value);
+  }
+
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
 };
 
 }  // namespace kraken

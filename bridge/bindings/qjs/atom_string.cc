@@ -4,3 +4,9 @@
  */
 
 #include "atom_string.h"
+
+namespace kraken {
+
+AtomString::AtomString(const AtomString&) {}
+
+}

@@ -29,19 +29,23 @@ static bool removeListenerFromVector(EventListenerVector* listenerVector, JSValu
   return true;
 }
 
-bool EventListenerMap::contains(JSAtom eventType) const {
+bool EventListenerMap::Contains(const AtomString& event_type) const {
   for (const auto& entry : m_entries) {
-    if (entry.first == eventType)
+    if (entry.first == event_type)
       return true;
   }
   return false;
 }
 
-void EventListenerMap::clear() {
+bool EventListenerMap::ContainsCapturing(const AtomString& event_type) const {
+
+}
+
+void EventListenerMap::Clear() {
   m_entries.clear();
 }
 
-bool EventListenerMap::add(JSAtom eventType, JSValue callback) {
+bool EventListenerMap::Add(const AtomString& event_type, JSValue callback) {
   for (const auto& entry : m_entries) {
     if (entry.first == eventType) {
       return addListenerToVector(const_cast<EventListenerVector*>(&entry.second), callback);

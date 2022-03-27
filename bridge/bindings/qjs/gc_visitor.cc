@@ -4,11 +4,14 @@
  */
 
 #include "gc_visitor.h"
+#include "garbage_collected.h"
 
 namespace kraken {
 
-void GCVisitor::Trace(JSValue value) {
-  JS_MarkValue(runtime_, value, markFunc_);
+void GCVisitor::Trace(ScriptWrappable* target) {
+  if (target != nullptr) {
+    JS_MarkValue(runtime_, target->ToQuickJS(), markFunc_);
+  }
 }
 
 }  // namespace kraken

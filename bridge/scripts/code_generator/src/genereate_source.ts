@@ -348,7 +348,7 @@ export function generateCppSource(blob: Blob) {
       o.methods.forEach(method => {
         classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
       });
-      wrapperTypeInfoInit = `const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::m_wrapperTypeInfo;`;
+      wrapperTypeInfoInit = `const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::wrapper_type_info_;`;
       return generateClassSource(blob, o);
     }
   });

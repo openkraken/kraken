@@ -9,11 +9,11 @@ function generateInterfaceAdditionalHeader(blob: Blob, object: any): [string, st
   }
 
   let wrapperTypeInfo = `static WrapperTypeInfo* GetWrapperTypeInfo() {
-    return const_cast<WrapperTypeInfo*>(&m_wrapperTypeInfo);
+    return const_cast<WrapperTypeInfo*>(&wrapper_type_info_);
   }`;
 
   let wrapperTypeDefine = `static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
-  constexpr static const WrapperTypeInfo m_wrapperTypeInfo = {JS_CLASS_${getClassName(blob).toUpperCase()}, "Blob", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ConstructorCallback};
+  constexpr static const WrapperTypeInfo wrapper_type_info_ = {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ConstructorCallback};
 `;
 
   let installFunctions = `static void InstallPrototypeMethods(ExecutingContext* context);

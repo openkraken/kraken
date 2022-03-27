@@ -27,7 +27,7 @@ interface Event {
    */
   readonly type: string;
   /** @deprecated */
-  initEvent(type: string, bubbles?: boolean, cancelable?: boolean): void;
+  initEvent(type: string, bubbles: boolean, cancelable: boolean): void;
   /**
    * If invoked when the cancelable attribute value is true, and while executing a listener for the event with passive set to false, signals to the operation that caused event to be dispatched that it needs to be canceled.
    */

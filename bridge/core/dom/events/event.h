@@ -53,6 +53,25 @@ class Event : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  using ImplType = Event*;
+
+  enum class Bubbles {
+    kNo,
+    kYes,
+  };
+
+  enum class Cancelable {
+    kNo,
+    kYes,
+  };
+
+  enum PhaseType {
+    kNone = 0,
+    kCapturingPhase = 1,
+    kAtTarget = 2,
+    kBubblingPhase = 3
+  };
+
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
   static Event* From(ExecutingContext* context, NativeEvent* native_event) {}
 
@@ -60,13 +79,11 @@ class Event : public ScriptWrappable {
   explicit Event(ExecutingContext* context);
   explicit Event(ExecutingContext* context, NativeEvent* native_event);
 
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
   const char* GetHumanReadableName() const override;
   bool propagationStopped() const { return propagation_stopped_; }
   bool bubbles() { return bubbles_; };
   double timeStamp() { return time_stamp_; }
-  bool propagationImmediatelyStopped(ExceptionState& exception_state) { return propagation_immediately_stopped_; }
+  bool propagationImmediatelyStopped(ExceptionState& exception_state) { return immediate_propagation_stopped_; }
   bool cancelable() const { return cancelable_; }
   FORCE_INLINE NativeString* type() { return type_; };
   void SetType(NativeString* type);
@@ -75,6 +92,9 @@ class Event : public ScriptWrappable {
   EventTarget* currentTarget() const;
   void SetCurrentTarget(EventTarget* target);
 
+  uint8_t eventPhase() const { return event_phase_; }
+  void SetEventPhase(uint8_t event_phase) { event_phase_ = event_phase; }
+
   bool cancelBubble() const { return propagationStopped(); }
   void setCancelBubble(bool cancel) {
     if (cancel) {
@@ -82,27 +102,76 @@ class Event : public ScriptWrappable {
     }
   };
 
+  bool IsBeingDispatched() { return eventPhase(); }
+
   // IE legacy
   EventTarget* srcElement() const;
 
-  void stopPropagation() { propagation_stopped_ = true; }
+  void stopPropagation(ExceptionState& exception_state) { propagation_stopped_ = true; }
   void SetStopPropagation(bool stop_propagation) { propagation_stopped_ = stop_propagation; }
-  void stopImmediatePropagation(ExceptionState& exception_state) { propagation_immediately_stopped_ = true; }
-  void SetStopImmediatePropagation(bool stop_immediate_propagation) { propagation_immediately_stopped_ = stop_immediate_propagation; }
+  void stopImmediatePropagation(ExceptionState& exception_state) { immediate_propagation_stopped_ = true; }
+  void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
+  void initEvent(std::unique_ptr<NativeString> &event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);
 
+  void SetFireOnlyCaptureListenersAtTarget(
+      bool fire_only_capture_listeners_at_target) {
+    assert(event_phase_ == kAtTarget);
+    fire_only_capture_listeners_at_target_ =
+        fire_only_capture_listeners_at_target;
+  }
+
+  void SetFireOnlyNonCaptureListenersAtTarget(
+      bool fire_only_non_capture_listeners_at_target) {
+    assert(event_phase_ = kAtTarget);
+    fire_only_non_capture_listeners_at_target_ =
+        fire_only_non_capture_listeners_at_target;
+  }
+
+  bool FireOnlyCaptureListenersAtTarget() const {
+    return fire_only_capture_listeners_at_target_;
+  }
+  bool FireOnlyNonCaptureListenersAtTarget() const {
+    return fire_only_non_capture_listeners_at_target_;
+  }
+
+  void Trace(GCVisitor* visitor) const override;
+  void Dispose() const override;
+
  protected:
-  bool bubbles_{false};
-  bool cancelable_{false};
+  NativeString* type_{nullptr};
+
+  unsigned bubbles_ : 1;
+  unsigned cancelable_ : 1;
+  unsigned composed_ : 1;
+
+  unsigned propagation_stopped_ : 1;
+  unsigned immediate_propagation_stopped_ : 1;
+  unsigned default_prevented_ : 1;
+  unsigned default_handled_ : 1;
+  unsigned was_initialized_ : 1;
+  unsigned is_trusted_ : 1;
+
   double time_stamp_{0.0};
-  bool default_prevented_{false};
+
+  uint8_t event_phase_ = PhaseType::kNone;
+
+  // Whether preventDefault was called on uncancelable event.
+  unsigned prevent_default_called_on_uncancelable_event_ : 1;
+
+  // Whether any of listeners have thrown an exception or not.
+  // Corresponds to |legacyOutputDidListenersThrowFlag| in DOM standard.
+  // https://dom.spec.whatwg.org/#dispatching-events
+  // https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
+  unsigned legacy_did_listeners_throw_flag_ : 1;
+
+  unsigned fire_only_capture_listeners_at_target_ : 1;
+  unsigned fire_only_non_capture_listeners_at_target_ : 1;
+
   EventTarget* target_{nullptr};
   EventTarget* current_target_{nullptr};
-  bool propagation_stopped_{false};
-  bool propagation_immediately_stopped_{false};
-  NativeString* type_{nullptr};
 };
 
 }  // namespace kraken

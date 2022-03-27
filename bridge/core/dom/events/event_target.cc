@@ -14,6 +14,13 @@
 
 namespace kraken {
 
+// EventTargetData
+EventTargetData::EventTargetData() {}
+
+EventTargetData::~EventTargetData() {}
+
+void EventTargetData::Trace(GCVisitor* visitor) const {}
+
 EventTarget* EventTarget::Create(ExecutingContext* context) {
   return makeGarbageCollected<EventTarget>(context);
 }
@@ -28,6 +35,10 @@ void EventTarget::Dispose() const {}
 
 const char* EventTarget::GetHumanReadableName() const {
   return "EventTarget";
+}
+
+bool EventTarget::addEventListener(std::unique_ptr<NativeString>& event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state) {
+  return false;
 }
 
 }  // namespace kraken

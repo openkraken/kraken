@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-Event::Event(ExecutingContext* context) : ScriptWrappable(context->ctx()) {}
+Event::Event(ExecutingContext* context) : Event(context, nullptr) {}
 
 Event::Event(ExecutingContext* context, NativeEvent* native_event)
     : ScriptWrappable(context->ctx()),
@@ -24,11 +24,8 @@ Event::Event(ExecutingContext* context, NativeEvent* native_event)
       bubbles_(native_event->bubbles),
       cancelable_(native_event->cancelable),
       time_stamp_(static_cast<double>(native_event->timeStamp)),
-      default_prevented_(native_event->defaultPrevented) {
-}
-
-void Event::Trace(GCVisitor* visitor) const {}
-void Event::Dispose() const {}
+      default_prevented_(native_event->defaultPrevented)
+{}
 
 const char* Event::GetHumanReadableName() const {
   return "Event";
@@ -61,5 +58,26 @@ void Event::SetCurrentTarget(EventTarget* target) {
 void Event::preventDefault(ExceptionState& exception_state) {
   default_prevented_ = true;
 }
+
+void Event::initEvent(std::unique_ptr<NativeString>& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state) {
+  if (IsBeingDispatched()) {
+    return;
+  }
+
+  was_initialized_ = true;
+  propagation_stopped_ = false;
+  immediate_propagation_stopped_ = false;
+  default_prevented_ = false;
+
+  type_ = event_type->clone();
+  bubbles_ = bubbles;
+  cancelable_ = cancelable;
+}
+
+void Event::Trace(GCVisitor* visitor) const {
+  visitor->Trace(target_)
+
+}
+void Event::Dispose() const {}
 
 }  // namespace kraken
