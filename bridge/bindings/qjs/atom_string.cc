@@ -9,4 +9,4 @@ namespace kraken {
 
 AtomString::AtomString(const AtomString&) {}
 
-}
+}  // namespace kraken

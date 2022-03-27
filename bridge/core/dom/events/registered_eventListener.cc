@@ -7,16 +7,10 @@
 
 namespace kraken {
 
-RegisteredEventListener::RegisteredEventListener()
-    : use_capture_(false), passive_(false), once_(false), blocked_event_warning_emitted_(false){}
+RegisteredEventListener::RegisteredEventListener() : use_capture_(false), passive_(false), once_(false), blocked_event_warning_emitted_(false) {}
 
 RegisteredEventListener::RegisteredEventListener(const std::shared_ptr<EventListener>& listener, std::shared_ptr<AddEventListenerOptions> options)
-    : callback_(listener),
-      use_capture_(options->capture()),
-      passive_(options->passive()),
-      once_(options->once()),
-      blocked_event_warning_emitted_(false) {
-      };
+    : callback_(listener), use_capture_(options->capture()), passive_(options->passive()), once_(options->once()), blocked_event_warning_emitted_(false){};
 
 RegisteredEventListener::RegisteredEventListener(const RegisteredEventListener& that) = default;
 

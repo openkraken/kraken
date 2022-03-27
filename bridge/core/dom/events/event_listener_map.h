@@ -9,9 +9,9 @@
 #include <quickjs/quickjs.h>
 #include <vector>
 
-#include "foundation/macros.h"
 #include "bindings/qjs/atom_string.h"
 #include "event_listener.h"
+#include "foundation/macros.h"
 #include "registered_eventListener.h"
 
 namespace kraken {
@@ -20,6 +20,7 @@ using EventListenerVector = std::vector<JSValue>;
 
 class EventListenerMap final {
   KRAKEN_DISALLOW_NEW();
+
  public:
   EventListenerMap();
   ~EventListenerMap();

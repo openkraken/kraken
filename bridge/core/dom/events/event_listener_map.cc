@@ -37,9 +37,7 @@ bool EventListenerMap::Contains(const AtomString& event_type) const {
   return false;
 }
 
-bool EventListenerMap::ContainsCapturing(const AtomString& event_type) const {
-
-}
+bool EventListenerMap::ContainsCapturing(const AtomString& event_type) const {}
 
 void EventListenerMap::Clear() {
   m_entries.clear();

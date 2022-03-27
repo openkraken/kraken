@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2022 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
+ * Copyright (C) 2022 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
  */
 
 #include "dictionary_base.h"
@@ -15,4 +15,4 @@ JSValue DictionaryBase::toQuickJS(JSContext* ctx) const {
   return object;
 }
 
-}
+}  // namespace kraken

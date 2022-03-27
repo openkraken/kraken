@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_LISTENER_H_
 #define KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_LISTENER_H_
@@ -50,6 +50,6 @@ class EventListener {
   EventListener() = default;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_LISTENER_H_

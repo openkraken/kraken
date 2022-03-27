@@ -24,8 +24,8 @@ Event::Event(ExecutingContext* context, NativeEvent* native_event)
       bubbles_(native_event->bubbles),
       cancelable_(native_event->cancelable),
       time_stamp_(static_cast<double>(native_event->timeStamp)),
-      default_prevented_(native_event->defaultPrevented)
-{}
+      default_prevented_(native_event->defaultPrevented) {
+}
 
 const char* Event::GetHumanReadableName() const {
   return "Event";
@@ -76,7 +76,6 @@ void Event::initEvent(std::unique_ptr<NativeString>& event_type, bool bubbles, b
 
 void Event::Trace(GCVisitor* visitor) const {
   visitor->Trace(target_)
-
 }
 void Event::Dispose() const {}
 

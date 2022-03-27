@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_TARGET_IMPL_H_
 #define KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_TARGET_IMPL_H_
@@ -17,10 +17,8 @@ namespace kraken {
 // increase the size of EventTarget and all of its subclasses with code
 // that are mostly unnecessary for them, resulting in a performance
 // decrease.
-class EventTargetImpl : public EventTarget {
+class EventTargetImpl : public EventTarget {};
 
-};
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_EVENTS_EVENT_TARGET_IMPL_H_

@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "event_listener_options.h"
 
@@ -33,4 +33,4 @@ void EventListenerOptions::FillMembersFromQJSObject(JSContext* ctx, JSValue qjs_
   JS_FreeValue(ctx, capture);
 }
 
-}
+}  // namespace kraken

@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2022 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2022 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_DICTIONARY_BASE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_DICTIONARY_BASE_H_
@@ -31,12 +31,9 @@ class DictionaryBase {
 
   // Fills the given QuickJS object with the dictionary members.  Returns true on
   // success, otherwise returns false with throwing an exception.
-  virtual bool FillQJSObjectWithMembers(
-      JSContext* ctx,
-      JSValue qjs_dictionary) const = 0;
+  virtual bool FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dictionary) const = 0;
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_DICTIONARY_BASE_H_

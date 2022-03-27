@@ -22,6 +22,7 @@ namespace kraken {
 
 class EventTargetData final {
   KRAKEN_DISALLOW_NEW();
+
  public:
   EventTargetData();
   EventTargetData(const EventTargetData&) = delete;
@@ -55,23 +56,23 @@ class EventTarget : public ScriptWrappable {
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
 
-//  virtual bool AddEventListenerInternal(const AtomicString& event_type,
-//                                        EventListener*,
-//                                        const AddEventListenerOptionsResolved*);
-//  bool RemoveEventListenerInternal(const AtomicString& event_type,
-//                                   const EventListener*,
-//                                   const EventListenerOptions*);
-//
-//  // Called when an event listener has been successfully added.
-//  virtual void AddedEventListener(const AtomicString& event_type,
-//                                  RegisteredEventListener&);
-//
-//  // Called when an event listener is removed. The original registration
-//  // parameters of this event listener are available to be queried.
-//  virtual void RemovedEventListener(const AtomicString& event_type,
-//                                    const RegisteredEventListener&);
-//
-//  virtual DispatchEventResult DispatchEventInternal(Event&);
+  //  virtual bool AddEventListenerInternal(const AtomicString& event_type,
+  //                                        EventListener*,
+  //                                        const AddEventListenerOptionsResolved*);
+  //  bool RemoveEventListenerInternal(const AtomicString& event_type,
+  //                                   const EventListener*,
+  //                                   const EventListenerOptions*);
+  //
+  //  // Called when an event listener has been successfully added.
+  //  virtual void AddedEventListener(const AtomicString& event_type,
+  //                                  RegisteredEventListener&);
+  //
+  //  // Called when an event listener is removed. The original registration
+  //  // parameters of this event listener are available to be queried.
+  //  virtual void RemovedEventListener(const AtomicString& event_type,
+  //                                    const RegisteredEventListener&);
+  //
+  //  virtual DispatchEventResult DispatchEventInternal(Event&);
 
   // Subclasses should likely not override these themselves; instead, they
   // should subclass EventTargetWithInlineData.
@@ -95,7 +96,6 @@ class EventTargetWithInlineData : public EventTarget {
  private:
   EventTargetData data_;
 };
-
 
 // Macros to define an attribute event listener.
 //  |lower_name| - Lower-cased event type name.  e.g. |focus|

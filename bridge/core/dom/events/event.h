@@ -65,12 +65,7 @@ class Event : public ScriptWrappable {
     kYes,
   };
 
-  enum PhaseType {
-    kNone = 0,
-    kCapturingPhase = 1,
-    kAtTarget = 2,
-    kBubblingPhase = 3
-  };
+  enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
   static Event* From(ExecutingContext* context, NativeEvent* native_event) {}
@@ -111,31 +106,23 @@ class Event : public ScriptWrappable {
   void SetStopPropagation(bool stop_propagation) { propagation_stopped_ = stop_propagation; }
   void stopImmediatePropagation(ExceptionState& exception_state) { immediate_propagation_stopped_ = true; }
   void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
-  void initEvent(std::unique_ptr<NativeString> &event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
+  void initEvent(std::unique_ptr<NativeString>& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);
 
-  void SetFireOnlyCaptureListenersAtTarget(
-      bool fire_only_capture_listeners_at_target) {
+  void SetFireOnlyCaptureListenersAtTarget(bool fire_only_capture_listeners_at_target) {
     assert(event_phase_ == kAtTarget);
-    fire_only_capture_listeners_at_target_ =
-        fire_only_capture_listeners_at_target;
+    fire_only_capture_listeners_at_target_ = fire_only_capture_listeners_at_target;
   }
 
-  void SetFireOnlyNonCaptureListenersAtTarget(
-      bool fire_only_non_capture_listeners_at_target) {
+  void SetFireOnlyNonCaptureListenersAtTarget(bool fire_only_non_capture_listeners_at_target) {
     assert(event_phase_ = kAtTarget);
-    fire_only_non_capture_listeners_at_target_ =
-        fire_only_non_capture_listeners_at_target;
+    fire_only_non_capture_listeners_at_target_ = fire_only_non_capture_listeners_at_target;
   }
 
-  bool FireOnlyCaptureListenersAtTarget() const {
-    return fire_only_capture_listeners_at_target_;
-  }
-  bool FireOnlyNonCaptureListenersAtTarget() const {
-    return fire_only_non_capture_listeners_at_target_;
-  }
+  bool FireOnlyCaptureListenersAtTarget() const { return fire_only_capture_listeners_at_target_; }
+  bool FireOnlyNonCaptureListenersAtTarget() const { return fire_only_non_capture_listeners_at_target_; }
 
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;

@@ -1,15 +1,15 @@
 /*
-* Copyright (C) 2021 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_CORE_DOM_EVENTS_REGISTERED_EVENTLISTENER_H_
 #define KRAKENBRIDGE_CORE_DOM_EVENTS_REGISTERED_EVENTLISTENER_H_
 
-#include "foundation/macros.h"
-#include "event_listener.h"
 #include "bindings/qjs/add_event_listener_options.h"
 #include "bindings/qjs/event_listener_options.h"
+#include "event_listener.h"
+#include "foundation/macros.h"
 
 namespace kraken {
 
@@ -23,7 +23,7 @@ class RegisteredEventListener final {
   RegisteredEventListener(const RegisteredEventListener& that);
   RegisteredEventListener& operator=(const RegisteredEventListener& that);
 
-  const std::shared_ptr<EventListener>  Callback() const { return callback_; }
+  const std::shared_ptr<EventListener> Callback() const { return callback_; }
   std::shared_ptr<EventListener> Callback() { return callback_; }
 
   void SetCallback(EventListener* listener);
@@ -34,16 +34,11 @@ class RegisteredEventListener final {
 
   bool Capture() const { return use_capture_; }
 
-  bool BlockedEventWarningEmitted() const {
-    return blocked_event_warning_emitted_;
-  }
+  bool BlockedEventWarningEmitted() const { return blocked_event_warning_emitted_; }
 
-  void SetBlockedEventWarningEmitted() {
-    blocked_event_warning_emitted_ = true;
-  }
+  void SetBlockedEventWarningEmitted() { blocked_event_warning_emitted_ = true; }
 
-  bool Matches(const std::shared_ptr<EventListener>& listener,
-               const std::shared_ptr<EventListenerOptions> & options) const;
+  bool Matches(const std::shared_ptr<EventListener>& listener, const std::shared_ptr<EventListenerOptions>& options) const;
 
   bool ShouldFire(const Event&) const;
 
@@ -55,12 +50,10 @@ class RegisteredEventListener final {
   unsigned blocked_event_warning_emitted_ : 1;
 
  private:
-
 };
 
 bool operator==(const RegisteredEventListener&, const RegisteredEventListener&);
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_EVENTS_REGISTERED_EVENTLISTENER_H_

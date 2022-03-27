@@ -30,7 +30,7 @@ class AtomString final {
 
   explicit AtomString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())) {}
   explicit AtomString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(JS_DupAtom(ctx, atom)){};
-  explicit AtomString(JSContext* ctx, JSValue value): ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)) {};
+  explicit AtomString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
 
   ~AtomString() { JS_FreeAtom(ctx_, atom_); }
 
@@ -65,9 +65,8 @@ class AtomString final {
     return *this;
   }
 
-  bool operator==(const AtomString& other) const {
-    return other.atom_ == this->atom_;
-  }
+  bool operator==(const AtomString& other) const { return other.atom_ == this->atom_; }
+
  private:
   AtomString() = delete;
   JSContext* ctx_{nullptr};

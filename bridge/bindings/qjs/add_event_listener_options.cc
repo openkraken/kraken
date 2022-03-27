@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "add_event_listener_options.h"
 
@@ -9,9 +9,7 @@ namespace kraken {
 
 AddEventListenerOptions::AddEventListenerOptions() {}
 
-AddEventListenerOptions::AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExecutingContext& executing_context) {
-
-}
+AddEventListenerOptions::AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExecutingContext& executing_context) {}
 
 bool AddEventListenerOptions::FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dictionary) const {
   if (!JS_IsObject(qjs_dictionary)) {
@@ -40,4 +38,4 @@ void AddEventListenerOptions::FillMembersFromQJSObject(JSContext* ctx, JSValue q
   JS_FreeValue(ctx, once);
 }
 
-}
+}  // namespace kraken

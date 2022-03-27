@@ -23,9 +23,7 @@ class AddEventListenerOptions : public EventListenerOptions {
   void setOnce(bool value) { member_once_ = value; }
 
   bool hasPassive() const { return has_passive_; }
-  bool passive() const {
-    return member_passive_;
-  }
+  bool passive() const { return member_passive_; }
   bool getPassiveOr(bool fallback_value) const {
     if (!hasPassive()) {
       return fallback_value;
