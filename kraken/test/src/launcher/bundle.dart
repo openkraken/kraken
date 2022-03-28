@@ -46,5 +46,12 @@ void main() {
       expect(bundle.isResolved, true);
       expect(bundle.data, bytecode);
     });
+
+    test('KrakenBundle', () async {
+      Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
+      var bundle = KrakenBundle.fromBytecode(bytecode);
+      await bundle.resolve(1);
+      expect(bundle.contentType.mimeType, 'application/vnd.kraken.bc1');
+    });
   });
 }
