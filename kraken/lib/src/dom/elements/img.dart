@@ -394,10 +394,6 @@ class ImageElement extends Element {
   void _decode({ bool updateImageProvider = false }) {
     _ImageRequest? request = _currentRequest;
     if (request != null && request.available) {
-      // Try to make sure that this image can be encoded into a smaller size.
-      int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
-      int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
-
       ImageProvider? provider = _currentImageProvider;
       if (updateImageProvider || provider == null) {
         // Image should be resized based on different ratio according to object-fit value.
@@ -405,7 +401,10 @@ class ImageElement extends Element {
         provider = _currentImageProvider = BoxFitImage(descriptor: _currentImageDescriptor!, boxFit: objectFit);
       }
 
-      ImageConfiguration imageConfiguration = cachedWidth != null && cachedHeight != null
+      // Try to make sure that this image can be encoded into a smaller size.
+      int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+      int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
+      ImageConfiguration imageConfiguration = _shouldScaling && cachedWidth != null && cachedHeight != null
           ? ImageConfiguration(size: Size(cachedWidth.toDouble(), cachedHeight.toDouble()))
           : ImageConfiguration.empty;
       _updateSourceStream(provider.resolve(imageConfiguration));
