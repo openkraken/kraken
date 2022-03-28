@@ -135,7 +135,7 @@ abstract class KrakenBundle {
   }
 
   static KrakenBundle fromBytecode(Uint8List data, { String url = DEFAULT_URL }) {
-    return DataBundle(data, url, contentType: _javascriptContentType);
+    return DataBundle(data, url, contentType: _krakenBc1ContentType);
   }
 
   bool get isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');

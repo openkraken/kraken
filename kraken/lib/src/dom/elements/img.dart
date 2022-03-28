@@ -218,35 +218,49 @@ class ImageElement extends Element {
     _currentImageProvider = null;
   }
 
-  // Width and height set through style.
-  double? get _styleWidth => renderStyle.width.value;
-  double? get _styleHeight => renderStyle.height.value;
+  // Width and height set through style declaration.
+  double? get _styleWidth {
+    String width = style.getPropertyValue(WIDTH);
+    if (width.isNotEmpty) {
+      CSSLengthValue len = CSSLength.parseLength(width, renderStyle);
+      return len.computedValue;
+    }
+  }
 
-  double ? get _propertyWidth {
+  double? get _styleHeight {
+    String height = style.getPropertyValue(HEIGHT);
+    if (height.isNotEmpty) {
+      CSSLengthValue len = CSSLength.parseLength(height, renderStyle);
+      return len.computedValue;
+    }
+  }
+
+  // Width and height set through attributes.
+  double? get _attrWidth {
     if (hasAttribute(WIDTH)) {
       return CSSLength.toDouble(getAttribute(WIDTH));
     }
   }
 
-  double ? get _propertyHeight {
+  double? get _attrHeight {
     if (hasAttribute(HEIGHT)) {
       return CSSLength.toDouble(getAttribute(HEIGHT));
     }
   }
 
   int get width {
-    // Width calc priority: style > property > intrinsic.
+    // Width calc priority: style > attr > intrinsic.
     final double borderBoxWidth = _styleWidth
-      ?? _propertyWidth
+      ?? _attrWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
     return borderBoxWidth.round();
   }
 
   int get height {
-    // Height calc priority: style > property > intrinsic.
+    // Height calc priority: style > attr > intrinsic.
     final double borderBoxHeight = _styleHeight
-      ?? _propertyHeight
+      ?? _attrHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
     return borderBoxHeight.round();
@@ -295,13 +309,13 @@ class ImageElement extends Element {
     // Only need to resize image after image is fully loaded.
     if (!complete) return;
 
-    if (_styleWidth == null && _propertyWidth != null) {
+    if (_styleWidth == null && _attrWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
-      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
+      renderStyle.width = CSSLengthValue(_attrWidth, CSSLengthType.PX);
     }
-    if (_styleHeight == null && _propertyHeight != null) {
+    if (_styleHeight == null && _attrHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
-      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
+      renderStyle.height = CSSLengthValue(_attrHeight, CSSLengthType.PX);
     }
 
     renderStyle.intrinsicWidth = naturalWidth.toDouble();
