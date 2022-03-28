@@ -40,6 +40,35 @@ describe('Tags textarea', () => {
     });
   });
 
+  it('works with child text node inserted data when value property not exist', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('inserted text');
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.insertBefore(text, null);
+      await snapshot();
+      done();
+    });
+  });
+
+  it('works with child text node replaced when value property not exist', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    const text = document.createTextNode('Hello World');
+    const text2 = document.createTextNode('replaced text');
+
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.replaceChild(text2, text);
+      await snapshot();
+      done();
+    });
+  });
+
   it('works with child text node removed when value property not exist', async (done) => {
     const textarea = document.createElement('textarea');
     textarea.style.fontSize = '16px';
@@ -80,6 +109,37 @@ describe('Tags textarea', () => {
 
     requestAnimationFrame(async () => {
       text.data = 'Hello World Hello World Hello World';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('does not work with child text node inserted data when value property exists', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.value = 'setted value';
+    const text = document.createTextNode('inserted text');
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.insertBefore(text, null);
+      await snapshot();
+      done();
+    });
+  });
+
+  it('does not work with child text node replaced when value property exists', async (done) => {
+    const textarea = document.createElement('textarea');
+    textarea.style.fontSize = '16px';
+    textarea.value = 'setted value';
+    const text = document.createTextNode('Hello World');
+    const text2 = document.createTextNode('replaced text');
+
+    textarea.appendChild(text);
+    document.body.appendChild(textarea);
+
+    requestAnimationFrame(async () => {
+      textarea.replaceChild(text2, text);
       await snapshot();
       done();
     });
