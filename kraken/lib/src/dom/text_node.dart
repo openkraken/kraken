@@ -40,9 +40,7 @@ class TextNode extends Node {
       // To replace data of node node with offset offset, count count, and data data, run step 12 from the spec:
       // 12. If node’s parent is non-null, then run the children changed steps for node’s parent.
       // https://dom.spec.whatwg.org/#concept-cd-replace
-      if (parentNode != null) {
-        parentNode!.childrenChanged();
-      }
+      parentNode?.childrenChanged();
     }
   }
 
