@@ -4,9 +4,9 @@ import 'package:kraken/css.dart';
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
 class CSSOrigin {
-  Offset offset;
-  Alignment alignment;
-  CSSOrigin(this.offset, this.alignment);
+  final Offset offset;
+  final Alignment alignment;
+  const CSSOrigin(this.offset, this.alignment);
 
   static CSSOrigin? parseOrigin(String origin, RenderStyle renderStyle, String property) {
     if (origin.isNotEmpty) {

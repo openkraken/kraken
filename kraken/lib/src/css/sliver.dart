@@ -9,9 +9,9 @@ import 'package:kraken/css.dart';
 mixin CSSSliverMixin on RenderStyle {
 
   @override
-  Axis get sliverDirection => _sliverDirection;
-  Axis _sliverDirection = Axis.vertical;
-  set sliverDirection(Axis value) {
+  Axis get sliverDirection => _sliverDirection ?? Axis.vertical;
+  Axis? _sliverDirection;
+  set sliverDirection(Axis? value) {
     if (_sliverDirection == value) return;
     _sliverDirection = value;
     renderBoxModel?.markNeedsLayout();

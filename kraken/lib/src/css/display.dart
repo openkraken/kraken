@@ -25,7 +25,7 @@ mixin CSSDisplayMixin on RenderStyle {
 
   @override
   CSSDisplay get display => _display ?? CSSDisplay.inline;
-  set display(CSSDisplay value) {
+  set display(CSSDisplay? value) {
     if (_display != value) {
       _display = value;
       renderBoxModel?.markNeedsLayout();
@@ -90,7 +90,7 @@ mixin CSSDisplayMixin on RenderStyle {
         bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
         bool isStretchSelf = alignSelf != AlignSelf.auto
           ? alignSelf == AlignSelf.stretch
-          : parentRenderStyle.effectiveAlignItems == AlignItems.stretch;
+          : parentRenderStyle.alignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
         if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isStretchSelf) {

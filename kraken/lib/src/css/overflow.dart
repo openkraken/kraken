@@ -52,7 +52,7 @@ mixin CSSOverflowMixin on RenderStyle {
   @override
   CSSOverflowType get overflowX => _overflowX ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowX;
-  set overflowX(CSSOverflowType value) {
+  set overflowX(CSSOverflowType? value) {
     if (_overflowX == value) return;
     _overflowX = value;
   }
@@ -60,7 +60,7 @@ mixin CSSOverflowMixin on RenderStyle {
   @override
   CSSOverflowType get overflowY => _overflowY ?? CSSOverflowType.visible;
   CSSOverflowType? _overflowY;
-  set overflowY(CSSOverflowType value) {
+  set overflowY(CSSOverflowType? value) {
     if (_overflowY == value) return;
     _overflowY = value;
   }

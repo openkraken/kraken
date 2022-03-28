@@ -36,4 +36,38 @@ describe('Visibility', () => {
 
     await snapshot();
   });
+
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+    'div',
+      {
+        style: {
+          width: '200px',
+          height: '200px',
+          background: 'yellow',
+        },
+      },
+      [
+        (item = createElement('div', {
+          style: {
+            width: '100px',
+            height: '100px',
+            backgroundColor: 'green',
+            visibility: 'hidden',
+          }
+        }))
+      ]
+    );
+
+    document.body.appendChild(div);
+    await snapshot();
+    
+    requestAnimationFrame(async () => {
+      item.style.visibility = '';
+      await snapshot();
+      done();
+    });
+  });
 });
