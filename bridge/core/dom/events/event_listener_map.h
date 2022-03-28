@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
 
 #include <quickjs/quickjs.h>
+
 #include <vector>
 
 #include "bindings/qjs/atom_string.h"
@@ -16,26 +17,27 @@
 
 namespace kraken {
 
-using EventListenerVector = std::vector<JSValue>;
+using EventListenerVector = std::vector<RegisteredEventListener>;
 
 class EventListenerMap final {
   KRAKEN_DISALLOW_NEW();
 
  public:
   EventListenerMap();
-  ~EventListenerMap();
   EventListenerMap(const EventListenerMap&) = delete;
   EventListenerMap& operator=(const EventListenerMap&) = delete;
 
-  bool IsEmpty() const { return m_entries.empty(); }
+  bool IsEmpty() const { return entries_.empty(); }
   bool Contains(const AtomString& event_type) const;
   bool ContainsCapturing(const AtomString& event_type) const;
   void Clear();
-  bool Add(const AtomString& eventType, JSValue callback);
-  bool remove(JSAtom eventType, JSValue callback);
-  const EventListenerVector* find(JSAtom eventType);
-
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const;
+  bool Add(const AtomString& event_type, const std::shared_ptr<EventListener>& listener, const std::shared_ptr<AddEventListenerOptions>& options, RegisteredEventListener* registered_event_listener);
+  bool Remove(const AtomString& event_type,
+              const std::shared_ptr<EventListener>& listener,
+              const std::shared_ptr<AddEventListenerOptions>& options,
+              size_t* index_of_removed_listener,
+              RegisteredEventListener* registered_event_listener);
+  const EventListenerVector* Find(const AtomString& event_type);
 
  private:
   // EventListener handlers registered with addEventListener API.
@@ -43,9 +45,7 @@ class EventListenerMap final {
   //  - vector is much more space efficient than hashMap.
   //  - An EventTarget rarely has event listeners for many event types, and
   //    vector is faster in such cases.
-  std::vector<std::pair<AtomString, EventListenerVector>> m_entries;
-
-  JSRuntime* m_runtime;
+  std::vector<std::pair<AtomString, std::unique_ptr<EventListenerVector>>> entries_;
 };
 
 }  // namespace kraken

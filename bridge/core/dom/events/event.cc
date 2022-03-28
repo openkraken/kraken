@@ -5,6 +5,7 @@
 
 #include "event.h"
 #include "core/executing_context.h"
+#include "event_target.h"
 
 namespace kraken {
 
@@ -75,7 +76,8 @@ void Event::initEvent(std::unique_ptr<NativeString>& event_type, bool bubbles, b
 }
 
 void Event::Trace(GCVisitor* visitor) const {
-  visitor->Trace(target_)
+  visitor->Trace(target_);
+  visitor->Trace(current_target_);
 }
 void Event::Dispose() const {}
 

@@ -290,28 +290,29 @@ struct Converter<BlobPropertyBag> : public ConverterBase<BlobPropertyBag> {
 };
 
 // EventListener
-template <>
-struct Converter<EventListener> : public ConverterBase<EventListener> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    if (!JS_IsFunction(ctx, value)) {
-      return nullptr;
-    }
-
-    return QJSFunction::Create(ctx, value);
-  }
-};
-template <>
-struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListener> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    if (JS_IsNull(value)) {
-      return nullptr;
-    }
-
-    return Converter<EventListener>::FromValue(ctx, value, exception_state);
-  }
-};
+//template <>
+//struct Converter<EventListener> : public ConverterBase<EventListener> {
+//  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+//    assert(!JS_IsException(value));
+//    if (!JS_IsFunction(ctx, value)) {
+//      return nullptr;
+//    }
+//
+//    return EventListener::Create(ctx, value);
+//  }
+//};
+//
+//template <>
+//struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListener> {
+//  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+//    assert(!JS_IsException(value));
+//    if (JS_IsNull(value)) {
+//      return nullptr;
+//    }
+//
+//    return Converter<EventListener>::FromValue(ctx, value, exception_state);
+//  }
+//};
 
 template <>
 struct Converter<EventTarget> : public ConverterBase<EventTarget> {

@@ -96,6 +96,7 @@ list(APPEND BRIDGE_SOURCE
   foundation/task_queue.h
   foundation/native_value.cc
   foundation/native_value.h
+  foundation/casting.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
   polyfill/dist/polyfill.cc
@@ -190,6 +191,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/event_listener_options.h
     bindings/qjs/add_event_listener_options.cc
     bindings/qjs/add_event_listener_options.h
+    bindings/qjs/js_based_event_listener.cc
+    bindings/qjs/js_based_event_listener.h
+    bindings/qjs/js_event_handler.cc
+    bindings/qjs/js_event_handler.h
+    bindings/qjs/js_event_listener.cc
+    bindings/qjs/js_event_listener.h
     bindings/qjs/binding_initializer.cc
     bindings/qjs/binding_initializer.h
     bindings/qjs/member_installer.cc

@@ -7,30 +7,44 @@
 
 namespace kraken {
 
-static bool addListenerToVector(EventListenerVector* vector, JSValue callback) {
-  if (std::find_if(vector->begin(), vector->end(), [&callback](JSValue fn) { return JS_VALUE_GET_PTR(fn) == JS_VALUE_GET_PTR(callback); }) != vector->end()) {
+static bool AddListenerToVector(EventListenerVector* vector,
+                                const std::shared_ptr<EventListener>& listener,
+                                const std::shared_ptr<AddEventListenerOptions>& options,
+                                RegisteredEventListener* registered_event_listener) {
+  *registered_event_listener = RegisteredEventListener(listener, options);
+
+  if (std::find(vector->begin(), vector->end(), *registered_event_listener) != vector->end()) {
     return false;  // Duplicate listener.
   }
 
-  vector->push_back(callback);
+  vector->push_back(*registered_event_listener);
   return true;
 }
 
-static bool removeListenerFromVector(EventListenerVector* listenerVector, JSValue callback) {
+static bool RemoveListenerFromVector(EventListenerVector* listener_vector,
+                                     const std::shared_ptr<EventListener>& listener,
+                                     const std::shared_ptr<AddEventListenerOptions>& options,
+                                     size_t* index_of_removed_listener,
+                                     RegisteredEventListener* registered_event_listener) {
   // Do a manual search for the matching listener. It is not
   // possible to create a listener on the stack because of the
   // const on |listener|.
-  auto it = std::find_if(listenerVector->begin(), listenerVector->end(), [&callback](const JSValue& listener) -> bool { return JS_VALUE_GET_PTR(listener) == JS_VALUE_GET_PTR(callback); });
+  auto it = std::find_if(listener_vector->begin(), listener_vector->end(), [listener, options](const RegisteredEventListener& event_listener) -> bool { return event_listener.Matches(listener, options); });
 
-  if (it == listenerVector->end()) {
+  if (it == listener_vector->end()) {
+    *index_of_removed_listener = -1;
     return false;
   }
-  listenerVector->erase(it);
+
+  *registered_event_listener = *it;
+  *index_of_removed_listener = it - listener_vector->begin();
+  listener_vector->erase(it);
+
   return true;
 }
 
 bool EventListenerMap::Contains(const AtomString& event_type) const {
-  for (const auto& entry : m_entries) {
+  for (const auto& entry : entries_) {
     if (entry.first == event_type)
       return true;
   }
@@ -40,29 +54,32 @@ bool EventListenerMap::Contains(const AtomString& event_type) const {
 bool EventListenerMap::ContainsCapturing(const AtomString& event_type) const {}
 
 void EventListenerMap::Clear() {
-  m_entries.clear();
+  entries_.clear();
 }
 
-bool EventListenerMap::Add(const AtomString& event_type, JSValue callback) {
-  for (const auto& entry : m_entries) {
-    if (entry.first == eventType) {
-      return addListenerToVector(const_cast<EventListenerVector*>(&entry.second), callback);
-    }
+bool EventListenerMap::Add(const AtomString& event_type,
+                           const std::shared_ptr<EventListener>& listener,
+                           const std::shared_ptr<AddEventListenerOptions>& options,
+                           RegisteredEventListener* registered_event_listener) {
+  for (const auto& entry : entries_) {
+    if (entry.first == event_type)
+      return AddListenerToVector(entry.second.get(), listener, options, registered_event_listener);
   }
 
-  std::vector<JSValue> list;
-  list.reserve(8);
-  m_entries.emplace_back(std::make_pair(eventType, list));
-
-  return addListenerToVector(&m_entries.back().second, callback);
+  entries_.emplace_back(event_type, std::make_unique<EventListenerVector>());
+  return AddListenerToVector(entries_.back().second.get(), listener, options, registered_event_listener);
 }
 
-bool EventListenerMap::remove(JSAtom eventType, JSValue callback) {
-  for (unsigned i = 0; i < m_entries.size(); ++i) {
-    if (m_entries[i].first == eventType) {
-      bool was_removed = removeListenerFromVector(&m_entries[i].second, callback);
-      if (m_entries[i].second.empty()) {
-        m_entries.erase(m_entries.begin() + i);
+bool EventListenerMap::Remove(const AtomString& event_type,
+                              const std::shared_ptr<EventListener>& listener,
+                              const std::shared_ptr<AddEventListenerOptions>& options,
+                              size_t* index_of_removed_listener,
+                              RegisteredEventListener* registered_event_listener) {
+  for (unsigned i = 0; i < entries_.size(); ++i) {
+    if (entries_[i].first == event_type) {
+      bool was_removed = RemoveListenerFromVector(entries_[i].second.get(), listener, options, index_of_removed_listener, registered_event_listener);
+      if (entries_[i].second->empty()) {
+        entries_.erase(entries_.begin() + i);
       }
       return was_removed;
     }
@@ -71,30 +88,13 @@ bool EventListenerMap::remove(JSAtom eventType, JSValue callback) {
   return false;
 }
 
-const EventListenerVector* EventListenerMap::find(JSAtom eventType) {
-  for (const auto& entry : m_entries) {
-    if (entry.first == eventType)
-      return &entry.second;
+const EventListenerVector* EventListenerMap::Find(const AtomString& event_type) {
+  for (const auto& entry : entries_) {
+    if (entry.first == event_type)
+      return entry.second.get();
   }
 
   return nullptr;
-}
-
-void EventListenerMap::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-  for (const auto& entry : m_entries) {
-    for (const auto& vector : entry.second) {
-      JS_MarkValue(rt, vector, mark_func);
-    }
-  }
-}
-
-EventListenerMap::~EventListenerMap() {
-  for (const auto& entry : m_entries) {
-    for (const auto& vector : entry.second) {
-      JS_FreeAtomRT(m_runtime, entry.first);
-      JS_FreeValueRT(m_runtime, vector);
-    }
-  }
 }
 
 }  // namespace kraken

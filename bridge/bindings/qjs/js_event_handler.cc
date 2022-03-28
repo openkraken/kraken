@@ -3,8 +3,4 @@
  * Author: Kraken Team.
  */
 
-#include "atom_string.h"
-
-namespace kraken {
-
-}  // namespace kraken
+#include "js_event_handler.h"

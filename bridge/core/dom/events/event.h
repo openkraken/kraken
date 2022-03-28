@@ -68,7 +68,9 @@ class Event : public ScriptWrappable {
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
-  static Event* From(ExecutingContext* context, NativeEvent* native_event) {}
+  static Event* From(ExecutingContext* context, NativeEvent* native_event) {
+    return makeGarbageCollected<Event>(context, native_event);
+  }
 
   Event() = delete;
   explicit Event(ExecutingContext* context);

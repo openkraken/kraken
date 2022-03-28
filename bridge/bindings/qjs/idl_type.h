@@ -61,10 +61,6 @@ struct IDLCallback : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
   using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
 };
 
-struct EventListener : public IDLTypeBaseHelper<std::shared_ptr<QJSFunction>> {
-  using ImplType = typename Converter<std::shared_ptr<QJSFunction>>::ImplType;
-};
-
 // Sequence
 template <typename T>
 struct IDLSequence final : public IDLTypeBase {

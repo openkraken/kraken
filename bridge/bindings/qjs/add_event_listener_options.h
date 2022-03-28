@@ -6,17 +6,19 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_ADD_EVENT_LISTENER_OPTIONS_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_ADD_EVENT_LISTENER_OPTIONS_H_
 
-#include "dictionary_base.h"
+#include  "dictionary_base.h"
 #include "event_listener_options.h"
 
 namespace kraken {
 
 class AddEventListenerOptions : public EventListenerOptions {
  public:
-  static std::unique_ptr<AddEventListenerOptions> Create(JSContext* ctx, JSValue dictionary_value, ExecutingContext& executing_context) {}
+  static std::unique_ptr<AddEventListenerOptions> Create(JSContext* ctx, JSValue dictionary_value, ExceptionState& exception_state) {
+    return std::make_unique<AddEventListenerOptions>(ctx, dictionary_value, exception_state);
+  }
 
   explicit AddEventListenerOptions();
-  explicit AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExecutingContext& executing_context);
+  explicit AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExceptionState& exception_state);
 
   bool hasOnce() const { return true; }
   bool once() const { return member_once_; }

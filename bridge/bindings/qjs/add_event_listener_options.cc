@@ -9,7 +9,7 @@ namespace kraken {
 
 AddEventListenerOptions::AddEventListenerOptions() {}
 
-AddEventListenerOptions::AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExecutingContext& executing_context) {}
+AddEventListenerOptions::AddEventListenerOptions(JSContext* ctx, JSValue dictionary_value, ExceptionState& exception_state) {}
 
 bool AddEventListenerOptions::FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dictionary) const {
   if (!JS_IsObject(qjs_dictionary)) {
