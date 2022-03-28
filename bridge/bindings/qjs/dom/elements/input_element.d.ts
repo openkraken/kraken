@@ -24,6 +24,7 @@ interface InputElement extends Element {
   readonly: boolean;
   placeholder: string
   type: string;
+  inputMode: string;
   focus(): void;
   blur(): void;
 }

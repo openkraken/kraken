@@ -390,6 +390,13 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _setType(value);
   }
 
+  // Additional inputmode.
+  String get inputMode => getAttribute('inputmode') ?? '';
+  set inputMode(String value) {
+    internalSetAttribute('inputmode', value);
+    _setInputMode(value);
+  }
+
   @override
   void focus() {
     if (ownerDocument.focusedElement != this) {

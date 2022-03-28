@@ -38,6 +38,7 @@ class TextareaElement extends TextFormControlElement {
       case 'minLength': return minLength;
       case 'maxLength': return maxLength;
       case 'placeholder': return placeholder;
+      case 'inputMode': return inputMode;
       default: return super.getBindingProperty(key);
     }
   }
@@ -60,6 +61,7 @@ class TextareaElement extends TextFormControlElement {
       case 'minLength': minLength = castToType<num>(val).toInt(); break;
       case 'maxLength': maxLength = castToType<num>(val).toInt(); break;
       case 'placeholder': placeholder = castToType<String>(val); break;
+      case 'inputMode': inputMode = castToType<String>(val); break;
       default: super.setBindingProperty(key, value);
     }
   }
@@ -88,9 +90,10 @@ class TextareaElement extends TextFormControlElement {
       case 'readonly': readOnly = attributeToProperty<bool>(val); break;
       case 'name': name = attributeToProperty<String>(val); break;
       case 'disabled': disabled = attributeToProperty<bool>(val); break;
-      case 'minLength': minLength = attributeToProperty<int>(val); break;
-      case 'maxLength': maxLength = attributeToProperty<int>(val); break;
+      case 'minlength': minLength = attributeToProperty<int>(val); break;
+      case 'maxlength': maxLength = attributeToProperty<int>(val); break;
       case 'placeholder': placeholder = attributeToProperty<String>(val); break;
+      case 'inputmode': inputMode = attributeToProperty<String>(val); break;
     }
   }
 

@@ -17,6 +17,7 @@ interface TextareaElement extends Element {
   placeholder: string;
   readonly: boolean;
   required: boolean;
+  inputMode: string;
   focus(): void;
   blur(): void;
 }

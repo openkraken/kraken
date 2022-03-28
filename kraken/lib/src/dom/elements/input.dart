@@ -44,6 +44,7 @@ class InputElement extends TextFormControlElement {
       case 'maxLength': return maxLength;
       case 'placeholder': return placeholder;
       case 'type': return type;
+      case 'inputMode': return inputMode;
       default: return super.getBindingProperty(key);
     }
   }
@@ -73,6 +74,7 @@ class InputElement extends TextFormControlElement {
       case 'maxLength': maxLength = castToType<num>(val).toInt(); break;
       case 'placeholder': placeholder = castToType<String>(val); break;
       case 'type': type = castToType<String>(val); break;
+      case 'inputMode': inputMode = castToType<String>(val); break;
       default: super.setBindingProperty(key, value);
     }
   }
@@ -107,10 +109,11 @@ class InputElement extends TextFormControlElement {
       case 'disabled': disabled = attributeToProperty<bool>(val); break;
       case 'min': min = attributeToProperty<String>(val); break;
       case 'max': max = attributeToProperty<String>(val); break;
-      case 'minLength': minLength = attributeToProperty<int>(val); break;
-      case 'maxLength': maxLength = attributeToProperty<int>(val); break;
+      case 'minlength': minLength = attributeToProperty<int>(val); break;
+      case 'maxlength': maxLength = attributeToProperty<int>(val); break;
       case 'placeholder': placeholder = attributeToProperty<String>(val); break;
       case 'type': type = attributeToProperty<String>(val); break;
+      case 'inputmode': inputMode = attributeToProperty<String>(val); break;
     }
   }
 
