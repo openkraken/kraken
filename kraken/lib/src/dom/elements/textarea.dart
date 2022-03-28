@@ -181,14 +181,14 @@ class TextareaElement extends TextFormControlElement {
   }
 
   void _updateDefaultWidth() {
-    // cols is only valid when width in style is not set.
+    // Cols attribute is only valid when width in style is not set.
     if (_styleWidth == null) {
       renderStyle.width = CSSLengthValue(_defaultWidth, CSSLengthType.PX);
     }
   }
 
   void _updateDefaultHeight() {
-    // rows is only valid when height in style is not set.
+    // Rows attribute is only valid when height in style is not set.
     if (_styleHeight == null) {
       renderStyle.height = CSSLengthValue(_defaultHeight, CSSLengthType.PX);
     }
