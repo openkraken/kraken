@@ -222,7 +222,7 @@ class ImageElement extends Element {
   double? get _styleWidth {
     String width = style.getPropertyValue(WIDTH);
     if (width.isNotEmpty) {
-      CSSLengthValue len = CSSLength.parseLength(width, renderStyle);
+      CSSLengthValue len = CSSLength.parseLength(width, renderStyle, WIDTH);
       return len.computedValue;
     }
   }
@@ -230,7 +230,7 @@ class ImageElement extends Element {
   double? get _styleHeight {
     String height = style.getPropertyValue(HEIGHT);
     if (height.isNotEmpty) {
-      CSSLengthValue len = CSSLength.parseLength(height, renderStyle);
+      CSSLengthValue len = CSSLength.parseLength(height, renderStyle, HEIGHT);
       return len.computedValue;
     }
   }
