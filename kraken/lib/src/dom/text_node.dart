@@ -36,11 +36,12 @@ class TextNode extends Node {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
-      // When text node is the child of textarea element, the renderer of text node is not attached,
-      // so it needs to set defaultValue property of textarea element directly.
-      if (parentElement is TextareaElement) {
-        TextareaElement textareaElement = parentElement as TextareaElement;
-        textareaElement.defaultValue = textareaElement.textContent;
+
+      // To replace data of node node with offset offset, count count, and data data, run step 12 from the spec:
+      // 12. If node’s parent is non-null, then run the children changed steps for node’s parent.
+      // https://dom.spec.whatwg.org/#concept-cd-replace
+      if (parentNode != null) {
+        parentNode!.childrenChanged();
       }
     }
   }

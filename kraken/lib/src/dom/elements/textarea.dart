@@ -94,6 +94,14 @@ class TextareaElement extends TextFormControlElement {
     }
   }
 
+  // The children changed steps for textarea elements must, if the element's dirty value
+  // flag is false, set the element's raw value to its child text content.
+  // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element
+  @override
+  void childrenChanged() {
+    defaultValue = textContent;
+  }
+
   int get rows => int.tryParse(getAttribute('rows') ?? '') ?? 0;
   set rows(int value) {
     if (value < 0) value = 0;
@@ -181,26 +189,6 @@ class TextareaElement extends TextFormControlElement {
     if (_styleHeight == null) {
       renderStyle.height = CSSLengthValue(_defaultHeight, CSSLengthType.PX);
     }
-  }
-
-  @override
-  Node appendChild(Node child) {
-    super.appendChild(child);
-    // Need to update defaultValue when child text node is appended.
-    updateDefaultValue();
-    return child;
-  }
-
-  @override
-  Node removeChild(Node child) {
-    super.removeChild(child);
-    // Need to update defaultValue when child text node is removed.
-    updateDefaultValue();
-    return child;
-  }
-
-  void updateDefaultValue() {
-    defaultValue = textContent;
   }
 }
 

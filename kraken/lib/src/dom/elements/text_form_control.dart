@@ -417,7 +417,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void didAttachRenderer() {
     super.didAttachRenderer();
 
-    // Make element listen to click event to trigger focus.
     addEventListener(EVENT_TOUCH_START, _handleEditable);
     addEventListener(EVENT_TOUCH_MOVE, _handleEditable);
     addEventListener(EVENT_TOUCH_END, _handleEditable);
@@ -456,6 +455,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   @override
   void didDetachRenderer() {
     super.didDetachRenderer();
+
+    removeEventListener(EVENT_TOUCH_START, _handleEditable);
+    removeEventListener(EVENT_TOUCH_MOVE, _handleEditable);
+    removeEventListener(EVENT_TOUCH_END, _handleEditable);
+    removeEventListener(EVENT_CLICK, _handleEditable);
+    removeEventListener(EVENT_DOUBLE_CLICK, _handleEditable);
+    removeEventListener(EVENT_LONG_PRESS, _handleEditable);
+
     _cursorBlinkOpacityController!.removeListener(_onCursorColorTick);
     _cursorBlinkOpacityController = null;
     renderEditable = null;
