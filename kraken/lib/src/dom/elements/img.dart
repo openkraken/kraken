@@ -529,20 +529,6 @@ class ImageElement extends Element {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      if (property == WIDTH) {
-        double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
-          ? null : renderStyle.width.computedValue;
-        // To avoid resolved auto, which computed value is infinity, we can not calculate
-        // infinite double as valid number, mark null to let width/height resized by decode
-        // size.
-        resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
-        renderStyle.width = CSSLengthValue(resolveStyleWidth, CSSLengthType.PX);
-      } else if (property == HEIGHT) {
-        double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
-          ? null : renderStyle.height.computedValue;
-        resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
-        renderStyle.height = CSSLengthValue(resolveStyleHeight, CSSLengthType.PX);
-      }
       // Resize image
       if (_shouldScaling) {
         _decode(updateImageProvider: true);
