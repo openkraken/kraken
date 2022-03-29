@@ -16,6 +16,7 @@ export 'src/dom/document.dart';
 export 'src/dom/comment.dart';
 export 'src/dom/document_fragment.dart';
 export 'src/dom/sliver_manager.dart';
+export 'src/dom/screen.dart';
 export 'src/dom/element_registry.dart';
 
 // Elements

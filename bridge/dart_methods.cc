@@ -39,8 +39,6 @@ void registerDartMethods(uint64_t* methodBytes, int32_t length) {
   methodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
   methodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
   methodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
-  methodPointer->devicePixelRatio = reinterpret_cast<DevicePixelRatio>(methodBytes[i++]);
-  methodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
   methodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   methodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
   methodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
