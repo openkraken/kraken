@@ -159,6 +159,29 @@ JSValue Element::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue t
   return element->jsObject;
 }
 
+JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  if (argc < 2) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'insertAdjacentElement' on 'Element': 2 argument required.");
+  }
+  JSValue position = argv[0];
+  JSValue target = argv[1];
+
+  ElementInstance* targetElementInstance = nullptr;
+
+  if (JS_IsObject(target)) {
+    targetElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(target, Element::classId()));
+  } else if (!JS_IsNull(target)) {
+    return JS_ThrowTypeError(ctx, "TypeError: Failed to execute 'insertAdjacentElement' on 'Element': parameter 2 is not of type 'Element'");
+  }
+
+  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  
+  std::string eventTargetId = std::to_string(targetElementInstance->m_eventTargetId);
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(eventTargetId);
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, position);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+}
+
 JSValue Element::getBoundingClientRect(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
   getDartMethod()->flushUICommand();

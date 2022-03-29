@@ -10,6 +10,7 @@
  * - Element.prototype.toBlob
  * - Element.prototype.firstElementChild
  * - Element.prototype.lastElementChild
+ * - Element.prototype.insertAdjacentElement
  */
 describe('DOM Element API', () => {
   it('should work', () => {
@@ -100,5 +101,52 @@ describe('DOM Element API', () => {
 
     var target = el.lastElementChild;
     expect(target.tagName).toEqual('SPAN');
+  });
+
+  // <!-- beforebegin -->
+  // <p>
+  //   <!-- afterbegin -->
+  //   foo
+  //   <!-- beforeend -->
+  // </p>
+  // <!-- afterend -->
+  it('insertAdjacentElement should work with beforebegin', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+
+    const newElement = document.createElement('p');
+    root.insertAdjacentElement('beforebegin', newElement);
+
+    expect(newElement.parentNode).toEqual(root.parentNode);
+  });
+
+  it('insertAdjacentElement should work with afterbegin', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+
+    const newElement = document.createElement('p');
+    root.insertAdjacentElement('afterbegin', newElement);
+
+    expect(newElement.parentNode).toEqual(root);
+  });
+
+  it('insertAdjacentElement should work with afterend', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+
+    const newElement = document.createElement('p');
+    root.insertAdjacentElement('afterend', newElement);
+
+    expect(newElement.parentNode).toEqual(root.parentNode);
+  });
+
+  it('insertAdjacentElement should work with beforeend', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+
+    const newElement = document.createElement('p');
+    root.insertAdjacentElement('beforeend', newElement);
+
+    expect(newElement.parentNode).toEqual(root);
   });
 });

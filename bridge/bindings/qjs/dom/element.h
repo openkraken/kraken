@@ -82,6 +82,7 @@ class Element : public Node {
 
   JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
 
+  static JSValue insertAdjacentElement(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue hasAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   static JSValue setAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
@@ -118,6 +119,7 @@ class Element : public Node {
   DEFINE_PROTOTYPE_PROPERTY(scrollTop);
   DEFINE_PROTOTYPE_PROPERTY(scrollLeft);
 
+  DEFINE_PROTOTYPE_FUNCTION(insertAdjacentElement, 2);
   DEFINE_PROTOTYPE_FUNCTION(getBoundingClientRect, 0);
   DEFINE_PROTOTYPE_FUNCTION(hasAttribute, 1);
   DEFINE_PROTOTYPE_FUNCTION(setAttribute, 2);
