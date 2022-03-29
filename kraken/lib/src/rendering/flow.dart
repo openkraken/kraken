@@ -385,28 +385,18 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         Size childSize = _getChildSize(child)!;
-        double? lineHeight = _getLineHeight(child);
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (child is! RenderTextBox && lineHeight != null) {
-          childLeading = lineHeight - childSize.height;
-        }
-
         // When baseline of children not found, use boundary of margin bottom as baseline.
         double childAscent = _getChildAscent(child);
-
-        double extentAboveBaseline = childAscent + childLeading / 2;
+        double extentAboveBaseline = childAscent;
         double extentBelowBaseline = childMarginTop +
           childSize.height +
           childMarginBottom -
-          childAscent +
-          childLeading / 2;
+          childAscent;
 
         maxSizeAboveBaseline = math.max(
           extentAboveBaseline,
           maxSizeAboveBaseline,
         );
-
         maxSizeBelowBaseline = math.max(
           extentBelowBaseline,
           maxSizeBelowBaseline,
@@ -643,13 +633,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           : _getChildCrossAxisOffset(runCrossAxisExtent, childCrossAxisExtent);
 
         Size? childSize = _getChildSize(child);
-        // Line height of child.
-        double? childLineHeight = _getLineHeight(child);
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (childLineHeight != null) {
-          childLeading = childLineHeight - childSize!.height;
-        }
         // Child line extent calculated according to vertical align.
         double childLineExtent = childCrossAxisOffset;
 
@@ -664,7 +647,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Leading between height of line box's content area and line height of line box.
           double lineBoxLeading = 0;
           double? lineBoxHeight = _getLineHeight(this);
-          if (child is! RenderTextBox && lineBoxHeight != null) {
+          if (lineBoxHeight != null) {
             lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
           }
 
@@ -674,19 +657,19 @@ class RenderFlowLayout extends RenderLayoutBox {
                 lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case VerticalAlign.top:
-              childLineExtent = childLeading / 2;
+              childLineExtent = 0;
               break;
             case VerticalAlign.bottom:
               childLineExtent =
-                (lineBoxHeight ?? runCrossAxisExtent) -
-                  childSize!.height -
-                  childLeading / 2;
+                (lineBoxHeight ?? runCrossAxisExtent) - childSize!.height;
               break;
-          // @TODO: Vertical align middle needs to caculate the baseline of the parent box plus
+          // @TODO: Vertical align middle needs to calculate the baseline of the parent box plus
           //  half the x-height of the parent from W3C spec currently flutter lack the api to calculate x-height of glyph.
           //  case VerticalAlign.middle:
           //  break;
           }
+          // Child should not exceed over the top of parent.
+          childLineExtent = childLineExtent < 0 ? 0 : childLineExtent;
         }
 
         double? childMarginLeft = 0;

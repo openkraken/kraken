@@ -4,6 +4,8 @@
  */
 
 export 'src/foundation/binding.dart';
+export 'src/foundation/bundle.dart';
+export 'src/foundation/convert.dart';
 export 'src/foundation/environment.dart';
 export 'src/foundation/http_cache.dart';
 export 'src/foundation/http_cache_object.dart';

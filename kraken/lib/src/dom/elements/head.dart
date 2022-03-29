@@ -7,9 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/launcher.dart';
 import 'package:kraken/foundation.dart';
+import 'package:kraken/kraken.dart';
 
 // Children of the <head> element all have display:none
 const Map<String, dynamic> _defaultStyle = {
@@ -85,7 +84,7 @@ class LinkElement extends Element {
   set href(String value) {
     internalSetAttribute('href', value);
     _resolveHyperlink();
-    _fetchBundle();
+    _fetchAndApplyCSSStyle();
   }
 
   String get rel => getAttribute('rel') ?? '';
@@ -111,13 +110,15 @@ class LinkElement extends Element {
     }
   }
 
-  void _fetchBundle() async {
+  void _fetchAndApplyCSSStyle() async {
     if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected) {
       String url = _resolvedHyperlink.toString();
+      KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
-        KrakenBundle bundle = KrakenBundle.fromUrl(url);
         await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        assert(bundle.isResolved, 'Failed to obtain $url');
+        final String cssString = await resolveStringFromData(bundle.data!);
+        _addCSSStyleSheet(cssString);
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
@@ -128,16 +129,22 @@ class LinkElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
+      } finally {
+        bundle.dispose();
       }
       SchedulerBinding.instance!.scheduleFrame();
     }
+  }
+
+  void _addCSSStyleSheet(String css) {
+    ownerDocument.addStyleSheet(CSSStyleSheet(css));
   }
 
   @override
   void connectedCallback() async {
     super.connectedCallback();
     if (_resolvedHyperlink != null) {
-      _fetchBundle();
+      _fetchAndApplyCSSStyle();
     }
   }
 }
@@ -275,10 +282,24 @@ class ScriptElement extends Element {
           || _type == _MIME_X_APPLICATION_JAVASCRIPT
           || _type == _JAVASCRIPT_MODULE
     )) {
+      String url = src.toString();
+
+      // Obtain bundle.
+      KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
-        KrakenBundle bundle = KrakenBundle.fromUrl(src.toString());
         await bundle.resolve(contextId);
-        await bundle.eval(contextId);
+        assert(bundle.isResolved, 'Failed to obtain $url');
+
+        // Evaluate bundle.
+        if (bundle.isJavascript) {
+          final String contentInString = await resolveStringFromData(bundle.data!);
+          evaluateScripts(contextId, contentInString, url: url);
+        } else if (bundle.isBytecode) {
+          evaluateQuickjsByteCode(contextId, bundle.data!);
+        } else {
+          throw FlutterError('Unknown type for <script> to execute. $url');
+        }
+
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
@@ -289,6 +310,8 @@ class ScriptElement extends Element {
         SchedulerBinding.instance!.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
+      } finally {
+        bundle.dispose();
       }
       SchedulerBinding.instance!.scheduleFrame();
     }
@@ -305,12 +328,7 @@ class ScriptElement extends Element {
       // Eval script context: <script> console.log(1) </script>
       String? script = _collectElementChildText(this);
       if (script != null && script.isNotEmpty) {
-        KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-        if (controller != null) {
-          KrakenBundle bundle = KrakenBundle.fromContent(script, url: controller.url);
-          await bundle.resolve(contextId);
-          await bundle.eval(contextId);
-        }
+        evaluateScripts(contextId, script);
       }
     }
   }

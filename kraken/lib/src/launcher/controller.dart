@@ -26,8 +26,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
-import 'bundle.dart';
-
 const int WINDOW_ID = -1;
 const int DOCUMENT_ID = -2;
 
@@ -188,7 +186,8 @@ class KrakenViewController
     // Blur input element when new input focused.
     window.addEventListener(EVENT_CLICK, (event) {
       if (event.target is Element) {
-        if (document.focusedElement != null) {
+        Element? focusedElement = document.focusedElement;
+        if (focusedElement != null && focusedElement != event.target) {
           document.focusedElement!.blur();
         }
         (event.target as Element).focus();
@@ -216,9 +215,9 @@ class KrakenViewController
   late Document document;
   late Window window;
 
-  void evaluateJavaScripts(String code, [String source = 'vm://']) {
+  void evaluateJavaScripts(String code) {
     assert(!_disposed, 'Kraken have already disposed');
-    evaluateScripts(_contextId, code, source);
+    evaluateScripts(_contextId, code);
   }
 
   void _setupObserver() {
@@ -1167,7 +1166,33 @@ class KrakenController {
 
     assert(!_view._disposed, 'Kraken have already disposed');
     if (_entrypoint != null) {
-      await _entrypoint!.eval(_view.contextId);
+      KrakenBundle entrypoint = _entrypoint!;
+      int contextId = _view.contextId;
+      assert(entrypoint.isResolved, 'The kraken bundle $entrypoint is not resolved to evaluate.');
+
+      if (kProfileMode) {
+        PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
+      }
+
+      Uint8List data = entrypoint.data!;
+      if (entrypoint.isHTML) {
+        parseHTML(contextId, await resolveStringFromData(data));
+      } else if (entrypoint.isJavascript) {
+        evaluateScripts(contextId, await resolveStringFromData(data), url: url);
+      } else if (entrypoint.isBytecode) {
+        evaluateQuickjsByteCode(contextId, data);
+      } else {
+        // The resource type can not be evaluated.
+        throw FlutterError('Can\'t evaluate content of $url');
+      }
+
+      if (kProfileMode) {
+        PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
+      }
+
+      // To release entrypoint bundle memory.
+      entrypoint.dispose();
+
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:kraken/launcher.dart';
+import 'package:kraken/foundation.dart';
 import 'package:test/test.dart';
 
 import '../../local_http_server.dart';
@@ -45,6 +45,13 @@ void main() {
       await bundle.resolve(1);
       expect(bundle.isResolved, true);
       expect(bundle.data, bytecode);
+    });
+
+    test('KrakenBundle', () async {
+      Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
+      var bundle = KrakenBundle.fromBytecode(bytecode);
+      await bundle.resolve(1);
+      expect(bundle.contentType.mimeType, 'application/vnd.kraken.bc1');
     });
   });
 }
