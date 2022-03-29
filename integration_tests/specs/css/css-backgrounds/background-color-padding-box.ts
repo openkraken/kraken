@@ -10,6 +10,8 @@ describe('Background-color-padding-box', function() {
     'background-position': '30px 30px, 60px 60px, 90px 90px',
     'background-color': 'black',
   };
+
+  // @TODO: Need to support multiple background-image
   xit('basic', async () => {
     let parent = createElementWithStyle('div', {
       ...divStyle,

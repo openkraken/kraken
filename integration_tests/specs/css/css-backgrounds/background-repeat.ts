@@ -121,6 +121,7 @@ describe('background-repeat', () => {
     await snapshot(repeat);
   });
 
+  // @TODO: Need to support background-repeat: round.
   xit('round', async () => {
     let div = createElementWithStyle('div', {
       width: '220px',
@@ -135,6 +136,7 @@ describe('background-repeat', () => {
     await snapshot(div);
   });
 
+  // @TODO: Need to support background-repeat: round.
   xit('no-repeat will stop round to repeat', async () => {
     let div = createElementWithStyle('div', {
       width: '220px',

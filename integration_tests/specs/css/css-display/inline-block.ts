@@ -18,7 +18,7 @@ describe('Display inline-block', () => {
     await snapshot();
   });
 
-  xit('inline-block box constraint is tight', async () => {
+  it('inline-block box constraint is tight', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -36,7 +36,7 @@ describe('Display inline-block', () => {
     await snapshot();
   });
 
-  xit('inline-block nest inline-block should behavior like inline-block', async () => {
+  it('inline-block nest inline-block should behavior like inline-block', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -53,7 +53,7 @@ describe('Display inline-block', () => {
     await snapshot(magenta);
   });
 
-  xit('inline-block nest block should behavior like inline-block', async () => {
+  it('inline-block nest block should behavior like inline-block', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -70,7 +70,7 @@ describe('Display inline-block', () => {
     await snapshot(magenta);
   });
 
-  xit('textNode only if have one space', async () => {
+  it('textNode only if have one space', async () => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',

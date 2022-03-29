@@ -11,7 +11,7 @@ describe('Background-color', () => {
     await snapshot(div);
   });
 
-  xit('red with display none', async () => {
+  it('red with display none', async () => {
     const div = createElementWithStyle('div', {
       backgroundColor: 'red',
       display: 'none',
@@ -22,7 +22,7 @@ describe('Background-color', () => {
     await snapshot(div);
   });
 
-  xit('red with display when window.onload', done => {
+  it('red with display when window.onload', done => {
     window.onload = async () => {
       div.style.display = 'none';
       await snapshot();
