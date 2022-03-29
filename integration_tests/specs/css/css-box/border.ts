@@ -25,7 +25,7 @@ describe('Box border', () => {
     await snapshot(div);
   });
 
-  // @TODO: Need to support border-style: dashed.
+  // @TODO: Support border-style: dashed.
   xit('dashed border', async () => {
     const div = createElementWithStyle('div', {
       width: '100px',
@@ -36,7 +36,7 @@ describe('Box border', () => {
     await snapshot(div);
   });
 
-  // @TODO: Need to support border-style: dashed.
+  // @TODO: Support border-style: dashed.
   xit('dashed with backgroundColor', async () => {
     const div = createElementWithStyle('div', {
       width: '100px',
