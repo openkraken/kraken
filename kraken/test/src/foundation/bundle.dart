@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:kraken/launcher.dart';
+import 'package:kraken/foundation.dart';
 import 'package:test/test.dart';
 
 import '../../local_http_server.dart';

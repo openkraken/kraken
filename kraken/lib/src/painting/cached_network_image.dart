@@ -14,7 +14,7 @@ import 'package:flutter/painting.dart';
 import 'package:kraken/foundation.dart';
 
 class CachedNetworkImageKey {
-  CachedNetworkImageKey({
+  const CachedNetworkImageKey({
     required this.url,
     required this.scale
   });
@@ -62,7 +62,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     return client;
   }
 
-  Future<Uint8List> loadFile(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
+  Future<Uint8List> _getRawImageBytes(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
     HttpCacheController cacheController = HttpCacheController.instance(
         getOrigin(getEntrypointUri(contextId)));
 
@@ -79,22 +79,18 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     }
 
     // Fallback to network
-    bytes ??= await fetchFile(key, chunkEvents, cacheController);
+    bytes ??= await _fetchImageBytes(key, chunkEvents, cacheController);
 
     return bytes;
   }
 
-  Future<Codec?> _loadImage(
+  Future<Codec> _loadAsync(
       CachedNetworkImageKey key, DecoderCallback decode, StreamController<ImageChunkEvent> chunkEvents) async {
-    Uint8List bytes = await loadFile(key, chunkEvents);
-
-    if (bytes.isNotEmpty) {
-      return decode(bytes);
-    }
-    return null;
+    Uint8List bytes = await _getRawImageBytes(key, chunkEvents);
+    return decode(bytes);
   }
 
-  Future<Uint8List> fetchFile(CachedNetworkImageKey key,
+  Future<Uint8List> _fetchImageBytes(CachedNetworkImageKey key,
       StreamController<ImageChunkEvent> chunkEvents,
       HttpCacheController cacheController) async {
     try {
@@ -148,7 +144,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-        codec: _loadImage(key, decode, chunkEvents).then((value) => value!),
+        codec: _loadAsync(key, decode, chunkEvents),
         chunkEvents: chunkEvents.stream,
         scale: key.scale,
         informationCollector: () {

@@ -161,10 +161,17 @@ final DartParseHTML _parseHTML = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeParseHTML>>('parseHTML')
     .asFunction();
 
-void evaluateScripts(int contextId, String code, String url, [int line = 0]) {
+int _anonymousScriptEvaluationId = 0;
+void evaluateScripts(int contextId, String code, {String? url, int line = 0}) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
+  // Assign `vm://$id` for no url (anonymous scripts).
+  if (url == null) {
+    url = 'vm://$_anonymousScriptEvaluationId';
+    _anonymousScriptEvaluationId++;
+  }
+
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
