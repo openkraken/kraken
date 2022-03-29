@@ -54,18 +54,25 @@ class Document extends Node {
     _isParsing = isParsing;
   }
 
-
   int _requestCount = 0;
-  int requestCount() {
-    return _requestCount;
-  }
-
+  bool get hasRequestCount => _requestCount > 0;
   void incrementRequestCount() {
     _requestCount++;
   }
   void decrementRequestCount() {
     assert(_requestCount > 0);
     _requestCount--;
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L2091
+  // Counters that currently need to delay load event, such as parsing a script.
+  int _loadEventDelayCount = 0;
+  bool get isDelayingLoadEvent => _loadEventDelayCount > 0;
+  void incrementLoadEventDelayCount() {
+    _loadEventDelayCount++;
+  }
+  void decrementLoadEventDelayCount() {
+    _loadEventDelayCount--;
   }
 
   Element? _documentElement;
