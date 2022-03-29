@@ -176,6 +176,23 @@ const String _MIME_APPLICATION_JAVASCRIPT = 'application/javascript';
 const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
+class ScriptRunner {
+  final List<KrakenBundle> _scriptsToExecute = [];
+
+  static ScriptRunner? _instance;
+  static ScriptRunner get instance {
+    _instance ??= ScriptRunner._();
+    return _instance!;
+  }
+
+  ScriptRunner._();
+
+  queueScriptForExecution(KrakenBundle bundle) {
+    _scriptsToExecute.add(bundle);
+    // TODO: trigger script eval.
+  }
+}
+
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html
 class ScriptElement extends Element {
   ScriptElement([BindingContext? context])
@@ -303,7 +320,11 @@ class ScriptElement extends Element {
         // Decrement conut when response.
         ownerDocument.decrementRequestCount();
 
+        // Increment load event delay count before eval.
+        ownerDocument.incrementLoadEventDelayCount();
+
         // Evaluate bundle.
+        ScriptRunner.instance.queueScriptForExecution(bundle);
         if (bundle.isJavascript) {
           final String contentInString = await resolveStringFromData(bundle.data!);
           evaluateScripts(contextId, contentInString, url: url);
@@ -312,6 +333,9 @@ class ScriptElement extends Element {
         } else {
           throw FlutterError('Unknown type for <script> to execute. $url');
         }
+
+        // Decrement load event delay count after eval.
+        ownerDocument.decrementLoadEventDelayCount();
 
         // Successful load.
         SchedulerBinding.instance!.addPostFrameCallback((_) {
