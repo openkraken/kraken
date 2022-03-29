@@ -113,6 +113,37 @@ describe('line-height', () => {
     await snapshot();
   });
 
+  it('with line-height smaller than height of inline-block element', async () => {
+    const div = createElement(
+      'div',
+      {
+        style: {
+          'line-height': '20px',
+          'box-sizing': 'border-box',
+          'background-color': 'green',
+          fontSize: '16px',
+          width: '200px',
+          height: '100px',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              display: 'inline-block',
+              'background-color': 'yellow',
+              width: '200px',
+              height: '50px',
+            },
+          })
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
   it('with flex item', async () => {
     const div = createElement(
       'div',
