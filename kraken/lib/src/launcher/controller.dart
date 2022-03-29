@@ -1189,6 +1189,23 @@ class KrakenController {
       }
     }
   }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.h#L470
+  bool _isComplete = false;
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.cpp#L840
+  // Check whether the document has been loaded, such as html has parsed (main of JS has evaled) and images/scripts has loaded.
+  void checkCompleted() {
+    if (_isComplete) return;
+
+    // Are we still parsing?
+    if (_view.document.parsing) return;
+
+    // Still waiting for images/scripts?
+    if (_view.document.requestCount() > 0) return;
+
+    _isComplete = true;
+  }
 }
 
 mixin RenderObjectWithControllerMixin {
