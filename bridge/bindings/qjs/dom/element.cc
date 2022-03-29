@@ -175,7 +175,7 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   }
 
   auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
-  
+
   std::string eventTargetId = std::to_string(targetElementInstance->m_eventTargetId);
   std::unique_ptr<NativeString> args_01 = stringToNativeString(eventTargetId);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, position);
