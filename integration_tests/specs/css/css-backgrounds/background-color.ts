@@ -19,10 +19,10 @@ describe('Background-color', () => {
       height: '100px',
     });
     append(BODY, div);
-    await snapshot(div);
+    await snapshot();
   });
 
-  it('red with display when window.onload', done => {
+  it('red with display when window.onload', async(done) => {
     window.onload = async () => {
       div.style.display = 'none';
       await snapshot();
