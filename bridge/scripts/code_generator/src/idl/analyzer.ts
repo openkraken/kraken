@@ -1,5 +1,5 @@
 import ts, {HeritageClause, ScriptTarget, VariableStatement} from 'typescript';
-import {Blob} from './blob';
+import {IDLBlob} from './IDLBlob';
 import {
   ClassObject,
   FunctionArguments,
@@ -10,7 +10,7 @@ import {
 } from './declaration';
 import {generatorSource} from './generator';
 
-export function analyzer(blob: Blob) {
+export function analyzer(blob: IDLBlob) {
   let code = blob.raw;
   const sourceFile = ts.createSourceFile(blob.source, blob.raw, ScriptTarget.ES2020);
   blob.objects = sourceFile.statements.map(statement => walkProgram(statement)).filter(o => {

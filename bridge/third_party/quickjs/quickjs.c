@@ -67,12 +67,6 @@
 #define CONFIG_PRINTF_RNDN
 #endif
 
-/* define to include Atomics.* operations which depend on the OS
-   threads */
-#if !defined(EMSCRIPTEN)
-#define CONFIG_ATOMICS
-#endif
-
 #if !defined(EMSCRIPTEN)
 /* enable stack limitation */
 #define CONFIG_STACK_CHECK
@@ -949,21 +943,7 @@ struct JSObject {
     } u;
     /* byte sizes: 40/48/72 */
 };
-enum {
-    __JS_ATOM_NULL = JS_ATOM_NULL,
-#define DEF(name, str) JS_ATOM_ ## name,
-#include "quickjs-atom.h"
-#undef DEF
-    JS_ATOM_END,
-};
-#define JS_ATOM_LAST_KEYWORD JS_ATOM_super
-#define JS_ATOM_LAST_STRICT_KEYWORD JS_ATOM_yield
 
-static const char js_atom_init[] =
-#define DEF(name, str) str "\0"
-#include "quickjs-atom.h"
-#undef DEF
-;
 
 typedef enum OPCodeFormat {
 #define FMT(f) OP_FMT_ ## f,

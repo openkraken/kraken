@@ -1,4 +1,4 @@
-import {Blob} from './blob';
+import {IDLBlob} from './IDLBlob';
 import {camelCase} from 'lodash';
 
 export function addIndent(str: String, space: number) {
@@ -12,7 +12,7 @@ export function addIndent(str: String, space: number) {
   return lines.join('\n');
 }
 
-export function getClassName(blob: Blob) {
+export function getClassName(blob: IDLBlob) {
   let raw = camelCase(blob.filename[4].toUpperCase() + blob.filename.slice(5));
 
   return `${raw[0].toUpperCase() + raw.slice(1)}`;

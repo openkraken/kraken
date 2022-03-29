@@ -1,9 +1,9 @@
 import {ClassObject, FunctionObject, PropsDeclaration} from "./declaration";
 import {uniqBy, snakeCase} from "lodash";
-import {Blob} from "./blob";
+import {IDLBlob} from "./IDLBlob";
 import {addIndent, getClassName} from "./utils";
 
-function generateInterfaceAdditionalHeader(blob: Blob, object: any): [string, string, string] {
+function generateInterfaceAdditionalHeader(blob: IDLBlob, object: any): [string, string, string] {
   if (!(object instanceof ClassObject)) {
     return ['', '', ''];
   }
@@ -27,7 +27,7 @@ function generateInterfaceAdditionalHeader(blob: Blob, object: any): [string, st
   ];
 }
 
-export function generateCppHeader(blob: Blob) {
+export function generateCppHeader(blob: IDLBlob) {
   let classObject = blob.objects.find(object => object instanceof ClassObject);
   let interfaceDefines = generateInterfaceAdditionalHeader(blob, classObject);
   let haveInterfaceBase = !!classObject;

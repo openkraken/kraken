@@ -1,7 +1,7 @@
 import fs from 'fs';
 import {ClassObject, FunctionObject} from "./declaration";
 
-export class Blob {
+export class IDLBlob {
   raw: string;
   dist: string;
   source: string;
