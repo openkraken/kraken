@@ -13,10 +13,6 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 
-const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
-const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
-const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
 
 final ContentType _cssContentType = ContentType('text', 'css', charset: 'utf-8');
@@ -25,15 +21,6 @@ final ContentType _javascriptContentType = ContentType('text', 'javascript', cha
 final ContentType _javascriptApplicationContentType = ContentType('application', 'javascript', charset: 'utf-8');
 final ContentType _xJavascriptContentType = ContentType('application', 'x-javascript', charset: 'utf-8');
 final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.kraken.bc1');
-
-
-String? getBundleURLFromEnv() {
-  return Platform.environment[BUNDLE_URL];
-}
-
-String? getBundlePathFromEnv() {
-  return Platform.environment[BUNDLE_PATH];
-}
 
 List<String> _supportedByteCodeVersions = ['1'];
 
