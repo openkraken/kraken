@@ -94,6 +94,7 @@ void defineBuiltInElements() {
   defineElement(LABEL, (context) => LabelElement(context));
   defineElement(BUTTON, (context) => ButtonElement(context));
   defineElement(INPUT, (context) => InputElement(context));
+  defineElement(TEXTAREA, (context) => TextareaElement(context));
   // Edits
   defineElement(DEL, (context) => DelElement(context));
   defineElement(INS, (context) => InsElement(context));
