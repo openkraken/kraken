@@ -1175,7 +1175,6 @@ class KrakenController {
 
       Uint8List data = entrypoint.data!;
       if (entrypoint.isHTML) {
-        // parse html.
         parseHTML(contextId, await resolveStringFromData(data));
       } else if (entrypoint.isJavascript) {
         evaluateScripts(contextId, await resolveStringFromData(data), url: url);
