@@ -17,6 +17,7 @@ export 'src/rendering/replaced.dart';
 export 'src/rendering/sliver_list.dart';
 export 'src/rendering/preferred_size.dart';
 export 'src/rendering/text.dart';
+export 'src/rendering/text_control.dart';
 export 'src/rendering/content_visibility.dart';
 export 'src/rendering/event.dart';
 export 'src/rendering/opacity.dart';
