@@ -115,8 +115,15 @@ class LinkElement extends Element {
       String url = _resolvedHyperlink.toString();
       KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
+        // Increment conut when request.
+        ownerDocument.incrementRequestCount();
+
         await bundle.resolve(contextId);
         assert(bundle.isResolved, 'Failed to obtain $url');
+
+        // Decrement conut when response.
+        ownerDocument.decrementRequestCount();
+
         final String cssString = await resolveStringFromData(bundle.data!);
         _addCSSStyleSheet(cssString);
 
@@ -287,8 +294,14 @@ class ScriptElement extends Element {
       // Obtain bundle.
       KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
+        // Increment conut when request.
+        ownerDocument.incrementRequestCount();
+
         await bundle.resolve(contextId);
         assert(bundle.isResolved, 'Failed to obtain $url');
+
+        // Decrement conut when response.
+        ownerDocument.decrementRequestCount();
 
         // Evaluate bundle.
         if (bundle.isJavascript) {
@@ -313,6 +326,7 @@ class ScriptElement extends Element {
       } finally {
         bundle.dispose();
       }
+
       SchedulerBinding.instance!.scheduleFrame();
     }
   }

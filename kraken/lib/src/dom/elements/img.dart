@@ -481,7 +481,26 @@ class ImageElement extends Element {
   Future<_ImageRequest> _obtainImage() async {
     _ImageRequest request = _currentRequest = _ImageRequest(currentUri: _resolvedUri!);
     try {
-      _currentImageDescriptor = await request._obtainImage(contextId);
+      // Increment conut when request.
+      ownerDocument.incrementRequestCount();
+
+      Uint8List data = await request._obtainImage(contextId);
+
+      // Decrement conut when response.
+      ownerDocument.decrementRequestCount();
+
+      // Decode size of raw image.
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
+      _currentImageDescriptor = await ui.ImageDescriptor.encoded(buffer);
+
+      // State available at least the image dimensions are available.
+      if (_currentImageDescriptor?.width != 0 && _currentImageDescriptor?.height != 0) {
+        request.state = _ImageRequestState.partiallyAvailable;
+      } else {
+        request.state = _ImageRequestState.broken;
+      }
+
+      buffer.dispose();
     } catch (error) {
       _dispatchErrorEvent();
     } finally {
@@ -583,31 +602,22 @@ class _ImageRequest {
   bool get available => state == _ImageRequestState.completelyAvailable
       || state == _ImageRequestState.partiallyAvailable;
 
-  Future<ui.ImageDescriptor> _obtainImage(int? contextId) async {
+  late Uint8List _data;
+
+  Future<Uint8List> _obtainImage(int? contextId) async {
     final KrakenBundle bundle = KrakenBundle.fromUrl(currentUri.toString());
+
     await bundle.resolve(contextId);
 
     if (!bundle.isResolved) {
       throw FlutterError('Failed to load $currentUri');
     }
 
-    final Uint8List data = bundle.data!;
+    _data = bundle.data!;
 
     // Free the bundle memory.
     bundle.dispose();
 
-    // Decode size of raw image.
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
-    final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
-
-    // State available at least the image dimensions are available.
-    if (descriptor.width != 0 && descriptor.height != 0) {
-      state = _ImageRequestState.partiallyAvailable;
-    } else {
-      state = _ImageRequestState.broken;
-    }
-
-    buffer.dispose();
-    return descriptor;
+    return _data;
   }
 }
