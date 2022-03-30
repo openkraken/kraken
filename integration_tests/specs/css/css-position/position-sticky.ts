@@ -1509,8 +1509,8 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
-  // @TODO: nested children size does not count into scroll container size
-  xit('left', async () => {
+
+  it('left', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -2264,8 +2264,8 @@ describe('position-sticky', () => {
 
     await snapshot();
   });
-  // @TODO: nested children size does not count into scroll container size
-  xit('nested-left', async () => {
+
+  it('nested-left', async () => {
     let prepadding;
     let filter;
     let sticky;
@@ -2350,8 +2350,7 @@ describe('position-sticky', () => {
     await snapshot();
   });
 
-  // @TODO: nested children size does not count into scroll container size
-  xit('nested-right', async () => {
+  it('nested-right', async () => {
     let prepadding;
     let filter;
     let sticky;

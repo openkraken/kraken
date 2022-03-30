@@ -162,6 +162,8 @@ describe('top', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative margin-top fail to work on following case.
   xit('007', async () => {
     let p;
     let div2;
@@ -217,6 +219,8 @@ describe('top', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative margin-top fail to work on following case.
   xit('008', async () => {
     let p;
     let div2;
@@ -272,7 +276,7 @@ describe('top', () => {
 
     await snapshot();
   });
-  xit('019', async () => {
+  it('019', async () => {
     let p;
     let div2;
     let div3;
@@ -338,7 +342,7 @@ describe('top', () => {
 
     await snapshot();
   });
-  xit('020', async () => {
+  it('020', async () => {
     let p;
     let div2;
     let div3;
@@ -404,7 +408,7 @@ describe('top', () => {
 
     await snapshot();
   });
-  xit('043', async () => {
+  it('043', async () => {
     let p;
     let div2;
     let div3;
@@ -470,7 +474,7 @@ describe('top', () => {
 
     await snapshot();
   });
-  xit('044', async () => {
+  it('044', async () => {
     let p;
     let div2;
     let div3;

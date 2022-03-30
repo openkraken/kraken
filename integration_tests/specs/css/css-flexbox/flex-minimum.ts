@@ -431,7 +431,7 @@ describe('flex-minimum', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: Need to support outline.
+  // @TODO: Support outline.
   xit('height-flex-items-009', async () => {
     let p;
     let log;
@@ -654,7 +654,7 @@ describe('flex-minimum', () => {
     await snapshot();
   });
 
-  // @TODO: Need to impl word-break rule of W3C.
+  // @TODO: Impl word-break rule of W3C.
   xit("width-flex-items-001", async () => {
     let p;
     let referenceOverlappedRed;
@@ -798,7 +798,7 @@ describe('flex-minimum', () => {
     await snapshot();
   })
 
-  // @TODO: Need to impl word-break rule of W3C.
+  // @TODO: Impl word-break rule of W3C.
   xit("width-flex-items-003", async () => {
     let p;
     let referenceOverlappedRed;

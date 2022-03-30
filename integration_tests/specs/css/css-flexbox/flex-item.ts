@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex-item', () => {
-  // @TODO: Need to impl stacking-context.
+  // @TODO: Support stacking-context.
   xit('z-ordering-001', async () => {
     let flexItem;
     let flexItem_1;

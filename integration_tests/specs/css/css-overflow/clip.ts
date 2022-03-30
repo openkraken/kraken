@@ -1,5 +1,6 @@
 /*auto generated*/
 xdescribe('clip', () => {
+  // @TODO: Overflow clip set in only one direction will cause content clipped in the other direction.
   xit('002', async () => {
     let inner;
     let inner_1;
@@ -349,6 +350,8 @@ xdescribe('clip', () => {
 
     await snapshot();
   });
+
+  // @TODO: Overflow clip set in only one direction will cause content clipped in the other direction.
   xit('004', async () => {
     let inner;
     let inner_1;
@@ -455,6 +458,9 @@ xdescribe('clip', () => {
 
     await snapshot();
   });
+
+  // @TODO: Overflow clip set in only one direction will cause content clipped in the other direction.
+  // Outline is not supported.
   xit('005', async () => {
     let inner;
     let inner_1;

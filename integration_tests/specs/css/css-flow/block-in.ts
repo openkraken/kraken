@@ -649,6 +649,8 @@ describe('block-in', () => {
 
     await snapshot();
   });
+
+  // @TODO: Children of display inline element not displayed inside its parent.
   xit('inline-empty-004', async () => {
     let span;
     span = createElement(

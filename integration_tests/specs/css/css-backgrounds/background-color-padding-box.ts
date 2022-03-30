@@ -11,7 +11,7 @@ describe('Background-color-padding-box', function() {
     'background-color': 'black',
   };
 
-  // @TODO: Need to support multiple background-image
+  // @TODO: Support multiple background-image
   xit('basic', async () => {
     let parent = createElementWithStyle('div', {
       ...divStyle,

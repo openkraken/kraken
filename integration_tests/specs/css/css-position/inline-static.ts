@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('inline-static', () => {
+  // @TODO: Support ch unit.
   xit('position-001', async () => {
     let abs;
     let abs_1;
