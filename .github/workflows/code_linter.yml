@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate cmake project
-        run: cd bridge && npm i && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+        run: cd bridge/polyfill && npm i && npm run build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. && cd ../..
       - uses: tonybaloney/cppcheck-action@master
         with:
           path: ./bridge
