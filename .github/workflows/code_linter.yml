@@ -6,19 +6,19 @@ on:
 
 jobs:
   cppcheck:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     name: Cppcheck
     steps:
       - uses: actions/checkout@v2
-      - uses: tonybaloney/cppcheck-action@master
+      - name: Run cppcheck
         run: |
+          brew install cppcheck
           cd bridge/polyfill
           npm i
           npm run build
           cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-          cd ../..
-        with:
-          opts: --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem --quiet
+          cd ../
+          cppcheck --project=compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem --quiet
         continue-on-error: true
 
   check_merge_conflict:
