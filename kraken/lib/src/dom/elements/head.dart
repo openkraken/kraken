@@ -3,12 +3,15 @@
  * Author: Kraken Team.
  */
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/kraken.dart';
+import 'package:path/path.dart';
 
 // Children of the <head> element all have display:none
 const Map<String, dynamic> _defaultStyle = {
@@ -177,17 +180,69 @@ const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptRunner {
-  ScriptRunner(Document document) : _document = document;
+  ScriptRunner(Document document, int contextId) : _document = document, _contextId = contextId;
   final Document _document;
+  final int _contextId;
 
   final List<KrakenBundle> _scriptsToExecute = [];
 
-  queueScriptForExecution(KrakenBundle bundle) {
+  void _executeScripts() async {
+    while (_scriptsToExecute.isNotEmpty) {
+      KrakenBundle bundle = _scriptsToExecute.first;
 
+      // If bundle is not resolved, should wait for it resolve to prevent the next script running.
+      if (!bundle.isResolved) break;
+
+      // Evaluate bundle.
+      if (bundle.isJavascript) {
+        final String contentInString = await resolveStringFromData(bundle.data!);
+        evaluateScripts(_contextId, contentInString, url: bundle.url);
+      } else if (bundle.isBytecode) {
+        evaluateQuickjsByteCode(_contextId, bundle.data!);
+      } else {
+        throw FlutterError('Unknown type for <script> to execute. $url');
+      }
+
+      _scriptsToExecute.remove(bundle);
+    }
+  }
+
+  void queueScriptForExecution (KrakenBundle bundle) async {
+    // Increment load event delay count before eval.
     _document.incrementLoadEventDelayCount();
 
     _scriptsToExecute.add(bundle);
-    // TODO: trigger script eval.
+
+    try {
+      // Increment conut when request.
+      _document.incrementRequestCount();
+
+      await bundle.resolve(_contextId);
+      assert(bundle.isResolved, 'Failed to obtain ${bundle.url}');
+
+      // Decrement conut when response.
+      _document.decrementRequestCount();
+
+      _executeScripts();
+
+      // Decrement load event delay count after eval.
+      _document.decrementLoadEventDelayCount();
+
+      // Successful load.
+      // SchedulerBinding.instance!.addPostFrameCallback((_) {
+      //   dispatchEvent(Event(EVENT_LOAD));
+      // });
+    } catch (e, st) {
+      print('aaa');
+      // An error occurred.
+      // debugPrint('Failed to load script: $src, reason: $e\n$st');
+      // SchedulerBinding.instance!.addPostFrameCallback((_) {
+      //   dispatchEvent(Event(EVENT_ERROR));
+      // });
+    }
+    // finally {
+    //   bundle.dispose();
+    // }
   }
 }
 
@@ -308,46 +363,10 @@ class ScriptElement extends Element {
 
       // Obtain bundle.
       KrakenBundle bundle = KrakenBundle.fromUrl(url);
-      try {
-        // Increment conut when request.
-        ownerDocument.incrementRequestCount();
 
-        await bundle.resolve(contextId);
-        assert(bundle.isResolved, 'Failed to obtain $url');
+      // Add bundle to scripts queue.
+      ownerDocument.scriptRunner.queueScriptForExecution(bundle);
 
-        // Decrement conut when response.
-        ownerDocument.decrementRequestCount();
-
-        // Increment load event delay count before eval.
-        ownerDocument.incrementLoadEventDelayCount();
-
-        // Evaluate bundle.
-        ownerDocument.scriptRunner.queueScriptForExecution(bundle);
-        if (bundle.isJavascript) {
-          final String contentInString = await resolveStringFromData(bundle.data!);
-          evaluateScripts(contextId, contentInString, url: url);
-        } else if (bundle.isBytecode) {
-          evaluateQuickjsByteCode(contextId, bundle.data!);
-        } else {
-          throw FlutterError('Unknown type for <script> to execute. $url');
-        }
-
-        // Decrement load event delay count after eval.
-        ownerDocument.decrementLoadEventDelayCount();
-
-        // Successful load.
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_LOAD));
-        });
-      } catch (e, st) {
-        // An error occurred.
-        debugPrint('Failed to load script: $src, reason: $e\n$st');
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
-          dispatchEvent(Event(EVENT_ERROR));
-        });
-      } finally {
-        bundle.dispose();
-      }
 
       SchedulerBinding.instance!.scheduleFrame();
     }

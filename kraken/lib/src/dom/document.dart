@@ -19,14 +19,14 @@ class Document extends Node {
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
-  Document(context, {
+  Document(BindingContext context, {
     required this.controller,
     required RenderViewportBox viewport,
     this.gestureListener,
     this.widgetDelegate,
   }) : _viewport = viewport,
         super(NodeType.DOCUMENT_NODE, context) {
-    _scriptRunner = ScriptRunner(this);
+    _scriptRunner = ScriptRunner(this, context.contextId);
   }
 
   // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L1898
