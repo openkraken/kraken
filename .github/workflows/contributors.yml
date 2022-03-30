@@ -4,7 +4,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   create-contributors-svg:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate Contributors Images
         uses: jaywcjlove/github-action-contributors@main
@@ -14,7 +14,7 @@ jobs:
           avatarSize: 42
 
       - name: Deploy
-        uses: taixw2/deploy-aliyun-oss@1
+        uses: taixw2/deploy-aliyun-oss@main
         with:
           access-key-id: ${{ secrets.OSS_AK }}
           access-key-secret: ${{ secrets.OSS_SK }}
