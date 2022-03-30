@@ -3,6 +3,8 @@ name: Run Code Linter
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'bridge/**'
 
 jobs:
   cppcheck:
