@@ -14,7 +14,7 @@ jobs:
         uses: jaywcjlove/github-action-contributors@main
         with:
           filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
-          output: build/CONTRIBUTORS.svg
+          output: CONTRIBUTORS.svg
           avatarSize: 42
 
       - name: Deploy
@@ -24,5 +24,5 @@ jobs:
           access-key-secret: ${{ secrets.OSS_SK }}
           bucket: kraken
           region: oss-cn-hangzhou.aliyuncs.com
-          entry: build/**/*
+          entry: ./CONTRIBUTORS.svg
           remote-dir: /contributors
