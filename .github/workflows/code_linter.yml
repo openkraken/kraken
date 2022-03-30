@@ -5,6 +5,19 @@ on:
     paths:
       - 'bridge/**'
 jobs:
+  cppcheck:
+    runs-on: ubuntu-latest
+    name: Cppcheck
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate cmake project
+        run: cd bridge && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+      - uses: tonybaloney/cppcheck-action@master
+        with:
+          path: ./bridge
+          opts: --project=compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
+        continue-on-error: true
+
   check_merge_conflict:
     runs-on: ubuntu-latest
     name: Find merge conflicts
