@@ -26,10 +26,8 @@ function strEncodeUTF8(str) {
   return bufView;
 }
 
-
 const getPolyFillHeader = (outputName) => `/*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 #ifndef KRAKEN_${outputName.toUpperCase()}_H
 #define KRAKEN_${outputName.toUpperCase()}_H
@@ -59,8 +57,7 @@ const getPolyfillEvalCall = () => {
 }
 
 const getPolyFillSource = (source, outputName) => `/*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
 #include "${outputName.toLowerCase()}.h"

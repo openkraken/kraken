@@ -164,8 +164,7 @@ export function generateCppHeader(blob: Blob) {
   let headers = blob.objects.map(o => generateObjectHeader(o));
 
   return `/*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKENBRIDGE_${blob.filename.toUpperCase()}_H

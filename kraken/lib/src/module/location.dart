@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 import 'package:kraken/module.dart';
 
 class LocationModule extends BaseModule {

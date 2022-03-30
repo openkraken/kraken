@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 const path = require('path');
 const HTMLParser = require('node-html-parser');
 
@@ -34,7 +37,7 @@ const loader = function(source) {
 
   let root = HTMLParser.parse(source);
   traverseParseHTML(root);
-  
+
   // Set attr of HTML can let the case use fit. For example: <html fit> xxx </html>.
   let isFit = false;
   root.childNodes && root.childNodes.forEach(ele => {

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2022-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui';
