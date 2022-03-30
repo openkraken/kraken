@@ -1,6 +1,6 @@
 name: Create contributors
 
-on: [push, workflow_dispatch]
+on: [pull, workflow_dispatch]
 
 jobs:
   create-contributors-svg:
@@ -25,5 +25,5 @@ jobs:
           access-key-secret: ${{ secrets.OSS_SK }}
           bucket: kraken
           region: oss-cn-hangzhou
-          entry: CONTRIBUTORS.svg
+          entry: ./CONTRIBUTORS.svg
           remote-dir: /images

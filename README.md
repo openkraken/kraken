@@ -111,6 +111,6 @@ Read our [contributing guide](https://openkraken.com/guide/contribute/environmen
     $ npm test
     ```
 
-## Authors
+Thank you to all the people who already contributed to Kraken!
 
-![](https://github.com/Airing.png?size=40) ![](https://github.com/Airing.png?size=40) ![](https://github.com/airingdeng.png?size=40) ![](https://github.com/anjihang.png?size=40) ![](https://github.com/anjihang.png?size=40) ![](https://github.com/boiawang.png?size=40) ![](https://github.com/haonan.whn.png?size=40) ![](https://github.com/jiangzhou.png?size=40) ![](https://github.com/lzl.png?size=40) ![](https://github.com/openkraken-bot.png?size=40) ![](https://github.com/qinxuliang.png?size=40) ![](https://github.com/ranmo.cy.png?size=40) ![](https://github.com/ranmo.cy.png?size=40) ![](https://github.com/suyulin.png?size=40) ![](https://github.com/tylorvan.fzm.png?size=40) ![](https://github.com/xiaolun.zxl.png?size=40) ![](https://github.com/ZeroLing.png?size=40) ![](https://github.com/zhanwen.zw.png?size=40) ![](https://github.com/不求圣剑.png?size=40) ![](https://github.com/任跃兵.png?size=40) ![](https://github.com/任跃兵.png?size=40) ![](https://github.com/元彦.png?size=40) ![](https://github.com/元彦.png?size=40) ![](https://github.com/卓凌.png?size=40) ![](https://github.com/史胜龙.png?size=40) ![](https://github.com/晟怀.png?size=40) ![](https://github.com/清扬陌客.png?size=40) ![](https://github.com/苏昱霖.png?size=40) ![](https://github.com/董天成.png?size=40)
+<img width="750" src="">
