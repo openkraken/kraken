@@ -236,13 +236,13 @@ class ScriptRunner {
       _executeScripts();
 
       // Successful load.
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      Timer.run(() {
         element.dispatchEvent(Event(EVENT_LOAD));
       });
     } catch (e, st) {
       // An error occurred.
       debugPrint('Failed to load script: $url, reason: $e\n$st');
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      Timer.run(() {
         element.dispatchEvent(Event(EVENT_ERROR));
       });
     }
