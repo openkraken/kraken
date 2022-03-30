@@ -17,9 +17,9 @@ jobs:
           npm run build
           cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
           cd ../..
-      - name: Run cppcheck
-        uses: tonybaloney/cppcheck-action@master
-        run: cppcheck --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
+      - uses: tonybaloney/cppcheck-action@master
+        with:
+          opts: --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem --quiet
         continue-on-error: true
 
   check_merge_conflict:
