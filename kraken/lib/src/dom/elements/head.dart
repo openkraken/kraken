@@ -204,6 +204,9 @@ class ScriptRunner {
       }
 
       _scriptsToExecute.remove(bundle);
+
+      // Decrement load event delay count after eval.
+      _document.decrementLoadEventDelayCount();
     }
   }
 
@@ -225,8 +228,6 @@ class ScriptRunner {
 
       _executeScripts();
 
-      // Decrement load event delay count after eval.
-      _document.decrementLoadEventDelayCount();
 
       // Successful load.
       // SchedulerBinding.instance!.addPostFrameCallback((_) {
