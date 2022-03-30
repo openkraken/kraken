@@ -18,10 +18,8 @@ jobs:
           cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
           cd ../..
       - name: Run cppcheck
-        run: |
-          apt-get update
-          apt-get -qq -y install curl cmake jq clang cppcheck
-          cppcheck --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
+        uses: tonybaloney/cppcheck-action@master
+        run: cppcheck --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
         continue-on-error: true
 
   check_merge_conflict:
