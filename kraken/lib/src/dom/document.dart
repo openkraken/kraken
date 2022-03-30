@@ -25,7 +25,13 @@ class Document extends Node {
     this.gestureListener,
     this.widgetDelegate,
   }) : _viewport = viewport,
-        super(NodeType.DOCUMENT_NODE, context);
+        super(NodeType.DOCUMENT_NODE, context) {
+    _scriptRunner = ScriptRunner(this);
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L1898
+  late ScriptRunner _scriptRunner;
+  ScriptRunner get scriptRunner => _scriptRunner;
 
   @override
   EventTarget? get parentEventTarget => defaultView;

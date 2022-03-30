@@ -177,17 +177,15 @@ const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
 class ScriptRunner {
+  ScriptRunner(Document document) : _document = document;
+  final Document _document;
+
   final List<KrakenBundle> _scriptsToExecute = [];
 
-  static ScriptRunner? _instance;
-  static ScriptRunner get instance {
-    _instance ??= ScriptRunner._();
-    return _instance!;
-  }
-
-  ScriptRunner._();
-
   queueScriptForExecution(KrakenBundle bundle) {
+
+    _document.incrementLoadEventDelayCount();
+
     _scriptsToExecute.add(bundle);
     // TODO: trigger script eval.
   }
@@ -324,7 +322,7 @@ class ScriptElement extends Element {
         ownerDocument.incrementLoadEventDelayCount();
 
         // Evaluate bundle.
-        ScriptRunner.instance.queueScriptForExecution(bundle);
+        ownerDocument.scriptRunner.queueScriptForExecution(bundle);
         if (bundle.isJavascript) {
           final String contentInString = await resolveStringFromData(bundle.data!);
           evaluateScripts(contextId, contentInString, url: url);
