@@ -6,7 +6,7 @@ on:
 
 jobs:
   cppcheck:
-    runs-on: macos-latest
+    runs-on: macos-10.15
     name: Cppcheck
     steps:
       - uses: actions/checkout@v2
@@ -16,8 +16,8 @@ jobs:
           cd bridge/polyfill
           npm i
           npm run build
-          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
           cd ../
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
           cppcheck --project=compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem --quiet
         continue-on-error: true
 
