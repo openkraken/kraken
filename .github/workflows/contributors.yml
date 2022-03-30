@@ -1,6 +1,6 @@
 name: Create contributors
 
-on: [pull, workflow_dispatch]
+on: [push, workflow_dispatch]
 
 jobs:
   create-contributors-svg:
