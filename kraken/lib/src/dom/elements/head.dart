@@ -205,14 +205,21 @@ class ScriptRunner {
 
       _scriptsToExecute.remove(bundle);
 
+      bundle.dispose();
+
       // Decrement load event delay count after eval.
       _document.decrementLoadEventDelayCount();
     }
   }
 
-  void queueScriptForExecution (KrakenBundle bundle) async {
+  void queueScriptForExecution(ScriptElement element) async {
     // Increment load event delay count before eval.
     _document.incrementLoadEventDelayCount();
+
+    String url = element.src.toString();
+
+    // Obtain bundle.
+    KrakenBundle bundle = KrakenBundle.fromUrl(url);
 
     _scriptsToExecute.add(bundle);
 
@@ -228,22 +235,17 @@ class ScriptRunner {
 
       _executeScripts();
 
-
       // Successful load.
-      // SchedulerBinding.instance!.addPostFrameCallback((_) {
-      //   dispatchEvent(Event(EVENT_LOAD));
-      // });
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        element.dispatchEvent(Event(EVENT_LOAD));
+      });
     } catch (e, st) {
-      print('aaa');
       // An error occurred.
-      // debugPrint('Failed to load script: $src, reason: $e\n$st');
-      // SchedulerBinding.instance!.addPostFrameCallback((_) {
-      //   dispatchEvent(Event(EVENT_ERROR));
-      // });
+      debugPrint('Failed to load script: $url, reason: $e\n$st');
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        element.dispatchEvent(Event(EVENT_ERROR));
+      });
     }
-    // finally {
-    //   bundle.dispose();
-    // }
   }
 }
 
@@ -360,14 +362,8 @@ class ScriptElement extends Element {
           || _type == _MIME_X_APPLICATION_JAVASCRIPT
           || _type == _JAVASCRIPT_MODULE
     )) {
-      String url = src.toString();
-
-      // Obtain bundle.
-      KrakenBundle bundle = KrakenBundle.fromUrl(url);
-
       // Add bundle to scripts queue.
-      ownerDocument.scriptRunner.queueScriptForExecution(bundle);
-
+      ownerDocument.scriptRunner.queueScriptForExecution(this);
 
       SchedulerBinding.instance!.scheduleFrame();
     }
