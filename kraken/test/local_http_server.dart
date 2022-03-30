@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
