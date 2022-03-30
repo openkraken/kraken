@@ -39,6 +39,14 @@ void main() {
       expect(utf8.decode(bundle.data!), content);
     });
 
+    test('DataBundle with non-latin string', () async {
+      var content = '你好,世界😈';
+      var bundle = DataBundle.fromString(content, 'about:blank');
+      await bundle.resolve(1);
+      expect(bundle.isResolved, true);
+      expect(utf8.decode(bundle.data!), content);
+    });
+
     test('DataBundle data', () async {
       Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
       var bundle = DataBundle(bytecode, 'about:blank');
