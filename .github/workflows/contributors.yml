@@ -14,7 +14,7 @@ jobs:
           avatarSize: 42
 
       - name: Deploy
-        uses: taixw2/deploy-aliyun-oss@v1
+        uses: taixw2/deploy-aliyun-oss@1
         with:
           access-key-id: ${{ secrets.OSS_AK }}
           access-key-secret: ${{ secrets.OSS_SK }}
