@@ -8,6 +8,7 @@
 
 #include <cinttypes>
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/atom_string.h"
 #include "core/executing_context.h"
 #include "foundation/native_string.h"
 
@@ -68,12 +69,17 @@ class Event : public ScriptWrappable {
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
+  static Event* Create(ExecutingContext* context, const AtomicString& type) {
+      return makeGarbageCollected<Event>(context, type);
+  };
+
   static Event* From(ExecutingContext* context, NativeEvent* native_event) {
     return makeGarbageCollected<Event>(context, native_event);
   }
 
   Event() = delete;
   explicit Event(ExecutingContext* context);
+  explicit Event(ExecutingContext* context, const AtomicString& event_type);
   explicit Event(ExecutingContext* context, NativeEvent* native_event);
 
   const char* GetHumanReadableName() const override;
@@ -82,7 +88,7 @@ class Event : public ScriptWrappable {
   double timeStamp() { return time_stamp_; }
   bool propagationImmediatelyStopped(ExceptionState& exception_state) { return immediate_propagation_stopped_; }
   bool cancelable() const { return cancelable_; }
-  FORCE_INLINE NativeString* type() { return type_; };
+  const AtomicString& type() { return type_; };
   void SetType(NativeString* type);
   EventTarget* target() const;
   void SetTarget(EventTarget* target);
@@ -130,7 +136,7 @@ class Event : public ScriptWrappable {
   void Dispose() const override;
 
  protected:
-  NativeString* type_{nullptr};
+  AtomicString type_;
 
   unsigned bubbles_ : 1;
   unsigned cancelable_ : 1;

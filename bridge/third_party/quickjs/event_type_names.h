@@ -50,31 +50,13 @@ DEF(abort, "abort")
 
 DEF(abortpayment, "abortpayment")
 
-DEF(accessibleclick, "accessibleclick")
-
-DEF(accessiblecontextmenu, "accessiblecontextmenu")
-
-DEF(accessibledecrement, "accessibledecrement")
-
-DEF(accessiblefocus, "accessiblefocus")
-
-DEF(accessibleincrement, "accessibleincrement")
-
-DEF(accessiblescrollintoview, "accessiblescrollintoview")
-
 DEF(activate, "activate")
 
 DEF(active, "active")
 
 DEF(addsourcebuffer, "addsourcebuffer")
 
-DEF(addstream, "addstream")
-
 DEF(addtrack, "addtrack")
-
-DEF(advertisementreceived, "advertisementreceived")
-
-DEF(afterprint, "afterprint")
 
 DEF(animationcancel, "animationcancel")
 
@@ -84,18 +66,6 @@ DEF(animationiteration, "animationiteration")
 
 DEF(animationstart, "animationstart")
 
-DEF(appinstalled, "appinstalled")
-
-DEF(audioend, "audioend")
-
-DEF(audioprocess, "audioprocess")
-
-DEF(audiostart, "audiostart")
-
-DEF(auxclick, "auxclick")
-
-DEF(availablechange, "availablechange")
-
 DEF(backgroundfetchabort, "backgroundfetchabort")
 
 DEF(backgroundfetchclick, "backgroundfetchclick")
@@ -104,25 +74,7 @@ DEF(backgroundfetchfail, "backgroundfetchfail")
 
 DEF(backgroundfetchsuccess, "backgroundfetchsuccess")
 
-DEF(beforecopy, "beforecopy")
-
-DEF(beforecreatepolicy, "beforecreatepolicy")
-
-DEF(beforecut, "beforecut")
-
-DEF(beforeinput, "beforeinput")
-
-DEF(beforeinstallprompt, "beforeinstallprompt")
-
-DEF(beforematch, "beforematch")
-
-DEF(beforepaste, "beforepaste")
-
-DEF(beforeprint, "beforeprint")
-
 DEF(beforeunload, "beforeunload")
-
-DEF(beforexrselect, "beforexrselect")
 
 DEF(beginEvent, "beginEvent")
 
@@ -132,13 +84,9 @@ DEF(blur, "blur")
 
 DEF(boundary, "boundary")
 
-DEF(bufferedamountlow, "bufferedamountlow")
-
 DEF(cached, "cached")
 
 DEF(cancel, "cancel")
-
-DEF(canmakepayment, "canmakepayment")
 
 DEF(canplay, "canplay")
 
@@ -147,14 +95,6 @@ DEF(canplaythrough, "canplaythrough")
 DEF(capturehandlechange, "capturehandlechange")
 
 DEF(change, "change")
-
-DEF(characterboundsupdate, "characterboundsupdate")
-
-DEF(characteristicvaluechanged, "characteristicvaluechanged")
-
-DEF(chargingchange, "chargingchange")
-
-DEF(chargingtimechange, "chargingtimechange")
 
 DEF(checking, "checking")
 
@@ -173,12 +113,6 @@ DEF(compositionstart, "compositionstart")
 DEF(compositionupdate, "compositionupdate")
 
 DEF(connect, "connect")
-
-DEF(connecting, "connecting")
-
-DEF(connectionavailable, "connectionavailable")
-
-DEF(connectionstatechange, "connectionstatechange")
 
 DEF(contextlost, "contextlost")
 
@@ -210,43 +144,13 @@ DEF(dblclick, "dblclick")
 
 DEF(defaultsessionstart, "defaultsessionstart")
 
-DEF(devicechange, "devicechange")
-
-DEF(devicemotion, "devicemotion")
-
-DEF(deviceorientation, "deviceorientation")
-
-DEF(deviceorientationabsolute, "deviceorientationabsolute")
-
-DEF(dischargingtimechange, "dischargingtimechange")
-
 DEF(disconnect, "disconnect")
 
 DEF(display, "display")
 
-DEF(dispose, "dispose")
-
-DEF(downloading, "downloading")
-
-DEF(dataavailable, "dataavailable")
-
-DEF(drag, "drag")
-
-DEF(dragend, "dragend")
-
-DEF(dragenter, "dragenter")
-
-DEF(dragleave, "dragleave")
-
-DEF(dragover, "dragover")
-
-DEF(dragstart, "dragstart")
-
 DEF(drop, "drop")
 
 DEF(durationchange, "durationchange")
-
-DEF(elementtimingbufferfull, "elementtimingbufferfull")
 
 DEF(emptied, "emptied")
 
@@ -260,11 +164,7 @@ DEF(endEvent, "endEvent")
 
 DEF(enter, "enter")
 
-DEF(enterpictureinpicture, "enterpictureinpicture")
-
 DEF(error, "error")
-
-DEF(eventtimingbufferfull, "eventtimingbufferfull")
 
 DEF(exit, "exit")
 
@@ -278,61 +178,15 @@ DEF(focusin, "focusin")
 
 DEF(focusout, "focusout")
 
-DEF(foreignfetch, "foreignfetch")
-
-DEF(formdata, "formdata")
-
 DEF(freeze, "freeze")
 
 DEF(fullscreenchange, "fullscreenchange")
 
 DEF(fullscreenerror, "fullscreenerror")
 
-DEF(gamepadconnected, "gamepadconnected")
-
-DEF(gamepaddisconnected, "gamepaddisconnected")
-
-DEF(gatheringstatechange, "gatheringstatechange")
-
-DEF(gattserverdisconnected, "gattserverdisconnected")
-
-DEF(geofenceenter, "geofenceenter")
-
-DEF(geofenceleave, "geofenceleave")
-
-DEF(geometrychange, "geometrychange")
-
-DEF(gesturelongpress, "gesturelongpress")
-
-DEF(gesturescrollend, "gesturescrollend")
-
-DEF(gesturescrollstart, "gesturescrollstart")
-
-DEF(gesturescrollupdate, "gesturescrollupdate")
-
-DEF(gestureshowpress, "gestureshowpress")
-
-DEF(gesturetap, "gesturetap")
-
-DEF(gesturetapdown, "gesturetapdown")
-
-DEF(gesturetapunconfirmed, "gesturetapunconfirmed")
-
-DEF(gestureflingstart, "gestureflingstart")
-
-DEF(gotpointercapture, "gotpointercapture")
-
 DEF(hashchange, "hashchange")
 
 DEF(hide, "hide")
-
-DEF(icecandidate, "icecandidate")
-
-DEF(icecandidateerror, "icecandidateerror")
-
-DEF(iceconnectionstatechange, "iceconnectionstatechange")
-
-DEF(icegatheringstatechange, "icegatheringstatechange")
 
 DEF(inactive, "inactive")
 
@@ -372,23 +226,15 @@ DEF(loadend, "loadend")
 
 DEF(loading, "loading")
 
-DEF(loadingdone, "loadingdone")
-
-DEF(loadingerror, "loadingerror")
-
 DEF(loadstart, "loadstart")
 
 DEF(lostpointercapture, "lostpointercapture")
-
-DEF(managedconfigurationchange, "managedconfigurationchange")
 
 DEF(mark, "mark")
 
 DEF(message, "message")
 
 DEF(messageerror, "messageerror")
-
-DEF(midimessage, "midimessage")
 
 DEF(mousedown, "mousedown")
 
@@ -414,23 +260,7 @@ DEF(navigateerror, "navigateerror")
 
 DEF(navigatesuccess, "navigatesuccess")
 
-DEF(negotiationneeded, "negotiationneeded")
-
-DEF(nomatch, "nomatch")
-
-DEF(notificationclick, "notificationclick")
-
-DEF(notificationclose, "notificationclose")
-
-DEF(notificationerror, "notificationerror")
-
 DEF(noupdate, "noupdate")
-
-DEF(obsolete, "obsolete")
-
-DEF(offline, "offline")
-
-DEF(online, "online")
 
 DEF(open, "open")
 
@@ -445,14 +275,6 @@ DEF(pageshow, "pageshow")
 DEF(paste, "paste")
 
 DEF(pause, "pause")
-
-DEF(payerdetailchange, "payerdetailchange")
-
-DEF(paymentmethodchange, "paymentmethodchange")
-
-DEF(paymentrequest, "paymentrequest")
-
-DEF(periodicsync, "periodicsync")
 
 DEF(play, "play")
 
@@ -476,17 +298,9 @@ DEF(pointerout, "pointerout")
 
 DEF(pointerover, "pointerover")
 
-DEF(pointerrawupdate, "pointerrawupdate")
-
 DEF(pointerup, "pointerup")
 
 DEF(popstate, "popstate")
-
-DEF(portalactivate, "portalactivate")
-
-DEF(prerenderingchange, "prerenderingchange")
-
-DEF(prioritychange, "prioritychange")
 
 DEF(progress, "progress")
 
@@ -495,10 +309,6 @@ DEF(processorerror, "processorerror")
 DEF(push, "push")
 
 DEF(pushsubscriptionchange, "pushsubscriptionchange")
-
-DEF(quicstream, "quicstream")
-
-DEF(quotachange, "quotachange")
 
 DEF(ratechange, "ratechange")
 
@@ -516,8 +326,6 @@ DEF(release, "release")
 
 DEF(remove, "remove")
 
-DEF(removesourcebuffer, "removesourcebuffer")
-
 DEF(removestream, "removestream")
 
 DEF(removetrack, "removetrack")
@@ -526,17 +334,11 @@ DEF(repeatEvent, "repeatEvent")
 
 DEF(reset, "reset")
 
-DEF(resetpose, "resetpose")
-
 DEF(resize, "resize")
-
-DEF(resourcetimingbufferfull, "resourcetimingbufferfull")
 
 DEF(result, "result")
 
 DEF(resume, "resume")
-
-DEF(samplebufferfull, "samplebufferfull")
 
 DEF(screenschange, "screenschange")
 
@@ -546,45 +348,17 @@ DEF(scrollend, "scrollend")
 
 DEF(search, "search")
 
-DEF(securitypolicyviolation, "securitypolicyviolation")
-
 DEF(seeked, "seeked")
 
 DEF(seeking, "seeking")
 
 DEF(select, "select")
 
-DEF(selectedcandidatepairchange, "selectedcandidatepairchange")
-
-DEF(selectend, "selectend")
-
 DEF(selectionchange, "selectionchange")
 
 DEF(selectstart, "selectstart")
 
-DEF(shippingaddresschange, "shippingaddresschange")
-
-DEF(shippingoptionchange, "shippingoptionchange")
-
 DEF(show, "show")
-
-DEF(signalingstatechange, "signalingstatechange")
-
-DEF(slotchange, "slotchange")
-
-DEF(soundend, "soundend")
-
-DEF(soundstart, "soundstart")
-
-DEF(sourceclose, "sourceclose")
-
-DEF(sourceended, "sourceended")
-
-DEF(sourceopen, "sourceopen")
-
-DEF(speechend, "speechend")
-
-DEF(speechstart, "speechstart")
 
 DEF(squeeze, "squeeze")
 
@@ -618,12 +392,6 @@ DEF(textupdate, "textupdate")
 
 DEF(textformatupdate, "textformatupdate")
 
-DEF(timeout, "timeout")
-
-DEF(timeupdate, "timeupdate")
-
-DEF(timezonechange, "timezonechange")
-
 DEF(toggle, "toggle")
 
 DEF(tonechange, "tonechange")
@@ -635,8 +403,6 @@ DEF(touchend, "touchend")
 DEF(touchmove, "touchmove")
 
 DEF(touchstart, "touchstart")
-
-DEF(track, "track")
 
 DEF(transitioncancel, "transitioncancel")
 
@@ -658,37 +424,9 @@ DEF(unmute, "unmute")
 
 DEF(update, "update")
 
-DEF(updateend, "updateend")
-
-DEF(updatefound, "updatefound")
-
-DEF(updateready, "updateready")
-
-DEF(updatestart, "updatestart")
-
-DEF(upgradeneeded, "upgradeneeded")
-
 DEF(versionchange, "versionchange")
 
 DEF(visibilitychange, "visibilitychange")
-
-DEF(voiceschanged, "voiceschanged")
-
-DEF(volumechange, "volumechange")
-
-DEF(vrdisplayconnect, "vrdisplayconnect")
-
-DEF(vrdisplaydisconnect, "vrdisplaydisconnect")
-
-DEF(vrdisplayactivate, "vrdisplayactivate")
-
-DEF(vrdisplaydeactivate, "vrdisplaydeactivate")
-
-DEF(vrdisplayblur, "vrdisplayblur")
-
-DEF(vrdisplayfocus, "vrdisplayfocus")
-
-DEF(vrdisplaypresentchange, "vrdisplaypresentchange")
 
 DEF(waiting, "waiting")
 
@@ -700,33 +438,7 @@ DEF(webglcontextlost, "webglcontextlost")
 
 DEF(webglcontextrestored, "webglcontextrestored")
 
-DEF(webkitAnimationEnd, "webkitAnimationEnd")
-
-DEF(webkitAnimationIteration, "webkitAnimationIteration")
-
-DEF(webkitAnimationStart, "webkitAnimationStart")
-
-DEF(webkitBeforeTextInserted, "webkitBeforeTextInserted")
-
-DEF(webkitEditableContentChanged, "webkitEditableContentChanged")
-
-DEF(webkitTransitionEnd, "webkitTransitionEnd")
-
-DEF(webkitfullscreenchange, "webkitfullscreenchange")
-
-DEF(webkitfullscreenerror, "webkitfullscreenerror")
-
-DEF(webkitspeechchange, "webkitspeechchange")
-
-DEF(webkitvisibilitychange, "webkitvisibilitychange")
-
 DEF(wheel, "wheel")
-
-DEF(write, "write")
-
-DEF(writeend, "writeend")
-
-DEF(writestart, "writestart")
 
 DEF(zoom, "zoom")
 

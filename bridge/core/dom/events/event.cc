@@ -11,6 +11,8 @@ namespace kraken {
 
 Event::Event(ExecutingContext* context) : Event(context, nullptr) {}
 
+Event::Event(ExecutingContext* context, const AtomicString& event_type): type_(event_type), ScriptWrappable(context->ctx()) {}
+
 Event::Event(ExecutingContext* context, NativeEvent* native_event)
     : ScriptWrappable(context->ctx()),
 #if ANDROID_32_BIT
@@ -18,7 +20,7 @@ Event::Event(ExecutingContext* context, NativeEvent* native_event)
       target_(reinterpret_cast<EventTarget*>(native_event->target)),
       current_target_(reinterpret_cast<EventTarget*>(native_event->currentTarget)),
 #else
-      type_(native_event->type),
+      type_(),
       target_(static_cast<EventTarget*>(native_event->target)),
       current_target_(static_cast<EventTarget*>(native_event->currentTarget)),
 #endif

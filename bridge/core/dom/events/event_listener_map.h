@@ -28,16 +28,16 @@ class EventListenerMap final {
   EventListenerMap& operator=(const EventListenerMap&) = delete;
 
   bool IsEmpty() const { return entries_.empty(); }
-  bool Contains(const AtomString& event_type) const;
-  bool ContainsCapturing(const AtomString& event_type) const;
+  bool Contains(const AtomicString& event_type) const;
+  bool ContainsCapturing(const AtomicString& event_type) const;
   void Clear();
-  bool Add(const AtomString& event_type, const std::shared_ptr<EventListener>& listener, const std::shared_ptr<AddEventListenerOptions>& options, RegisteredEventListener* registered_event_listener);
-  bool Remove(const AtomString& event_type,
+  bool Add(const AtomicString& event_type, const std::shared_ptr<EventListener>& listener, const std::shared_ptr<AddEventListenerOptions>& options, RegisteredEventListener* registered_event_listener);
+  bool Remove(const AtomicString& event_type,
               const std::shared_ptr<EventListener>& listener,
               const std::shared_ptr<AddEventListenerOptions>& options,
               size_t* index_of_removed_listener,
               RegisteredEventListener* registered_event_listener);
-  const EventListenerVector* Find(const AtomString& event_type);
+  const EventListenerVector* Find(const AtomicString& event_type);
 
  private:
   // EventListener handlers registered with addEventListener API.
@@ -45,7 +45,7 @@ class EventListenerMap final {
   //  - vector is much more space efficient than hashMap.
   //  - An EventTarget rarely has event listeners for many event types, and
   //    vector is faster in such cases.
-  std::vector<std::pair<AtomString, std::unique_ptr<EventListenerVector>>> entries_;
+  std::vector<std::pair<AtomicString, std::unique_ptr<EventListenerVector>>> entries_;
 };
 
 }  // namespace kraken

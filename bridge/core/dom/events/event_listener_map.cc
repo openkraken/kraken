@@ -43,7 +43,7 @@ static bool RemoveListenerFromVector(EventListenerVector* listener_vector,
   return true;
 }
 
-bool EventListenerMap::Contains(const AtomString& event_type) const {
+bool EventListenerMap::Contains(const AtomicString& event_type) const {
   for (const auto& entry : entries_) {
     if (entry.first == event_type)
       return true;
@@ -51,13 +51,13 @@ bool EventListenerMap::Contains(const AtomString& event_type) const {
   return false;
 }
 
-bool EventListenerMap::ContainsCapturing(const AtomString& event_type) const {}
+bool EventListenerMap::ContainsCapturing(const AtomicString& event_type) const {}
 
 void EventListenerMap::Clear() {
   entries_.clear();
 }
 
-bool EventListenerMap::Add(const AtomString& event_type,
+bool EventListenerMap::Add(const AtomicString& event_type,
                            const std::shared_ptr<EventListener>& listener,
                            const std::shared_ptr<AddEventListenerOptions>& options,
                            RegisteredEventListener* registered_event_listener) {
@@ -70,7 +70,7 @@ bool EventListenerMap::Add(const AtomString& event_type,
   return AddListenerToVector(entries_.back().second.get(), listener, options, registered_event_listener);
 }
 
-bool EventListenerMap::Remove(const AtomString& event_type,
+bool EventListenerMap::Remove(const AtomicString& event_type,
                               const std::shared_ptr<EventListener>& listener,
                               const std::shared_ptr<AddEventListenerOptions>& options,
                               size_t* index_of_removed_listener,
@@ -88,7 +88,7 @@ bool EventListenerMap::Remove(const AtomString& event_type,
   return false;
 }
 
-const EventListenerVector* EventListenerMap::Find(const AtomString& event_type) {
+const EventListenerVector* EventListenerMap::Find(const AtomicString& event_type) {
   for (const auto& entry : entries_) {
     if (entry.first == event_type)
       return entry.second.get();

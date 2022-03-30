@@ -11,6 +11,8 @@
 
 namespace kraken {
 
+class JSBasedEventListener;
+
 // EventListener represents 'callback' in 'event listener' in DOM standard.
 // https://dom.spec.whatwg.org/#concept-event-listener
 //
@@ -48,6 +50,8 @@ class EventListener {
 
  private:
   EventListener() = default;
+
+  friend JSBasedEventListener;
 };
 
 }  // namespace kraken

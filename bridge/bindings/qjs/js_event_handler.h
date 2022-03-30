@@ -25,17 +25,45 @@ class JSEventHandler : public JSBasedEventListener {
     kOnBeforeUnloadEventHandler,
   };
 
-  static std::unique_ptr<JSEventHandler> CreateOrNull(JSContext* ctx, HandlerType handler_type);
+  static std::unique_ptr<JSEventHandler> CreateOrNull(JSContext* ctx, JSValue value, HandlerType handler_type);
   static JSValue ToQuickJS(JSContext* ctx, EventTarget* event_target, EventListener* listener) {
     if (auto* event_handler = DynamicTo<JSEventHandler>(listener)) {
-      return event_handler->GetListenerObject(*event_target);
+      return event_handler->GetEffectiveFunction(*event_target);
     }
     return JS_NULL;
   }
 
+  explicit JSEventHandler(const std::shared_ptr<QJSFunction>& event_handler, HandlerType type):  type_(type), event_handler_(event_handler) {};
+
+  JSValue GetEffectiveFunction(EventTarget&) {
+    return event_handler_->ToQuickJS();
+  }
+
+  // Helper functions for DowncastTraits.
+  bool IsJSEventHandler() const override { return true; }
+
+  // For checking special types of EventHandler.
+  bool IsOnErrorEventHandler() const {
+    return type_ == HandlerType::kOnErrorEventHandler;
+  }
+
+  bool IsOnBeforeUnloadEventHandler() const {
+    return type_ == HandlerType::kOnBeforeUnloadEventHandler;
+  }
+
+  // EventListener overrides:
+  bool Matches(const EventListener&) const override;
 
  private:
+  // JSBasedEventListener override:
+  // Performs "The event handler processing algorithm"
+  // https://html.spec.whatwg.org/C/#the-event-handler-processing-algorithm
+  void InvokeInternal(EventTarget&,
+                      Event&,
+                      ExceptionState& exception_state) override;
 
+  std::shared_ptr<QJSFunction> event_handler_;
+  const HandlerType type_;
 };
 
 }

@@ -21,6 +21,8 @@ class QJSFunction {
 
   bool IsFunction(JSContext* ctx);
 
+  JSValue ToQuickJS() { return JS_DupValue(ctx_, function_); };
+
   // Performs "invoke".
   // https://webidl.spec.whatwg.org/#invoke-a-callback-function
   ScriptValue Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);

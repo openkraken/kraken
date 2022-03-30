@@ -7,4 +7,9 @@
 
 namespace kraken {
 
+JSValue StaticAtomicString::ToQuickJS(JSContext* ctx) const {
+  return JS_AtomToValue(ctx, atom_);
+}
+
+
 }  // namespace kraken

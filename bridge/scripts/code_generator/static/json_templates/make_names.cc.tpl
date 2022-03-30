@@ -3,21 +3,35 @@
 // and input files:
 //   <%= template_path %>
 
-
-#ifndef <%= _.snakeCase(name).toUpperCase() %>_H_
-#define <%= _.snakeCase(name).toUpperCase() %>_H_
-
-#include "third_party/blink/renderer/platform/wtf/text/atomic_string.h"
-#include "third_party/blink/renderer/core/core_export.h"
+#include "<%= name %>.h"
 
 namespace kraken {
+namespace event_type_names {
 
-extern const WTF::AtomicString& kAbort;
+void* names_storage[kNamesCount * ((sizeof(AtomicString) + sizeof(void *) - 1) / sizeof(void *))];
 
-constexpr unsigned kNamesCount = 352;
+<% _.forEach(data, function(name, index) { %>const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+<% }) %>
 
-void Init();
+void Init() {
+  static bool is_loaded = false;
+  if (is_loaded) return;
+  is_loaded = true;
 
+  struct NameEntry {
+    JSAtom atom;
+  };
+
+  static const NameEntry kNames[] = {
+      <% _.forEach(data, function(name) { %>{ JS_ATOM_<%= name %> },
+      <% }); %>
+  };
+
+  for(size_t i = 0; i < std::size(kNames); i ++) {
+    void* address = reinterpret_cast<AtomicString*>(&names_storage) + i;
+    new (address) PersistentAtomicString(kNames[i].atom);
+  }
+};
+
+}
 } // kraken
-
-#endif  // #define <%= _.snakeCase(name).toUpperCase() %>

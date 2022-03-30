@@ -18,32 +18,55 @@ namespace kraken {
 // instances can share their string storage if the strings are
 // identical. Comparing two AtomicString instances is much faster than comparing
 // two String instances because we just check string storage identity.
-//
-// AtomicString instances are not thread-safe. An AtomicString instance created
-// in a thread must be used only in the creator thread.
-class AtomString final {
-  // ScriptAtom should only allocate at stack.
+class AtomicString {
+ public:
+  AtomicString() = default;
+  AtomicString(JSAtom atom) : atom_(atom) {}
+
+  // Return the undefined string value from atom key.
+  virtual JSValue ToQuickJS(JSContext* ctx) const = 0;
+
+  bool operator==(const AtomicString& other) const { return other.atom_ == this->atom_; }
+
+ protected:
+  JSAtom atom_{JS_ATOM_NULL};
+};
+
+// AtomicString which holding quickjs built-in atoms string.
+// These string are stored in JSRuntime instead of JSContext.
+// So it can be used by any JSContext and don't needs to be freed.
+class PersistentAtomicString : public AtomicString {
+ public:
+  PersistentAtomicString(JSAtom atom): AtomicString(atom) {};
+
+  JSValue ToQuickJS(JSContext* ctx) const override;
+};
+
+// PeriodicAtomicString holding string atom key created by JSContext.
+// Could be freed when string refer_count set to 0.
+class PeriodicAtomicString : public AtomicString {
+  // Should only allocate on stack.
   KRAKEN_DISALLOW_NEW();
 
  public:
-  static AtomString Empty(JSContext* ctx) { return AtomString(ctx, JS_ATOM_NULL); };
+  static PeriodicAtomicString Empty(JSContext* ctx) { return PeriodicAtomicString(ctx); };
 
-  explicit AtomString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())) {}
-  explicit AtomString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(JS_DupAtom(ctx, atom)){};
-  explicit AtomString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
+  explicit PeriodicAtomicString(JSContext* ctx) : ctx_(ctx), AtomicString(JS_ATOM_NULL) {}
+  explicit PeriodicAtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), AtomicString(JS_NewAtom(ctx, string.c_str())) {}
+  explicit PeriodicAtomicString(JSContext* ctx, JSAtom atom) : ctx_(ctx), AtomicString(JS_DupAtom(ctx, atom)) {};
+  explicit PeriodicAtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), AtomicString(JS_ValueToAtom(ctx, value)){};
+  ~PeriodicAtomicString() { JS_FreeAtom(ctx_, atom_); }
 
-  ~AtomString() { JS_FreeAtom(ctx_, atom_); }
-
-  JSValue ToQuickJS() const { return JS_AtomToValue(ctx_, atom_); }
+  JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); }
 
   // Copy assignment
-  AtomString(AtomString const& value) {
+  PeriodicAtomicString(PeriodicAtomicString const& value) {
     if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
-  AtomString& operator=(const AtomString& other) {
+  PeriodicAtomicString& operator=(const PeriodicAtomicString& other) {
     if (&other != this) {
       atom_ = JS_DupAtom(ctx_, other.atom_);
     }
@@ -51,13 +74,13 @@ class AtomString final {
   };
 
   // Move assignment
-  AtomString(AtomString&& value) noexcept {
+  PeriodicAtomicString(PeriodicAtomicString&& value) noexcept {
     if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
-  AtomString& operator=(AtomString&& value) noexcept {
+  PeriodicAtomicString& operator=(PeriodicAtomicString&& value) noexcept {
     if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
@@ -65,12 +88,9 @@ class AtomString final {
     return *this;
   }
 
-  bool operator==(const AtomString& other) const { return other.atom_ == this->atom_; }
-
  private:
-  AtomString() = delete;
+  PeriodicAtomicString() = delete;
   JSContext* ctx_{nullptr};
-  JSAtom atom_{JS_ATOM_NULL};
 };
 
 }  // namespace kraken

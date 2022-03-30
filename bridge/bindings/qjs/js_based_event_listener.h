@@ -21,12 +21,6 @@ class JSBasedEventListener : public EventListener {
   // Implements step 2. of "inner invoke".
   // See: https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
   void Invoke(ExecutingContext* context, Event* event) final;
-
-  // Implements "get the current value of the event handler".
-  // https://html.spec.whatwg.org/C/#getting-the-current-value-of-the-event-handler
-  // Returns null with firing error event instead of throwing an exception.
-  virtual JSValue GetListenerObject(EventTarget&) = 0;
-
   // Returns Functions that handles invoked event or undefined without
   // throwing any exception.
   virtual JSValue GetEffectiveFunction(EventTarget&) = 0;
@@ -35,11 +29,8 @@ class JSBasedEventListener : public EventListener {
   virtual bool IsJSEventHandler() const { return false; }
 
  protected:
-  JSBasedEventListener() = default;
+  JSBasedEventListener();
 
-  virtual JSContext* GetJSContext() const = 0;
-  // Returns the ScriptState of the relevant realm of the callback object.
-  virtual ScriptState* GetScriptState() const = 0;
  private:
   // Performs "call a user object's operation", required in "inner-invoke".
   // "The event handler processing algorithm" corresponds to this in the case of

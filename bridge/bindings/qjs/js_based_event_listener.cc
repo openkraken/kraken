@@ -21,4 +21,6 @@ void JSBasedEventListener::Invoke(ExecutingContext* context, Event* event) {
   InvokeInternal(*event->currentTarget(), *event, exception_state);
 }
 
+JSBasedEventListener::JSBasedEventListener() {}
+
 }

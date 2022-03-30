@@ -13,7 +13,12 @@ function generateHeader(blob: JSONBlob, template: Template): string {
 }
 
 function generateBody(blob: JSONBlob, template: Template): string {
-
+  let compiled = _.template(template.raw);
+  return compiled({
+    template_path: blob.source,
+    name: blob.filename,
+    data: blob.json.data
+  });
 }
 
 export function generateJSONTemplate(blob: JSONBlob, headerTemplate: Template, bodyTemplate?: Template) {

@@ -47,7 +47,7 @@ struct IDLDouble final : public IDLTypeBaseHelper<double> {};
 class NativeString;
 // DOMString is UTF-16 strings.
 // https://stackoverflow.com/questions/35123890/what-is-a-domstring-really
-struct IDLDOMString final : public IDLTypeBaseHelper<AtomString> {};
+struct IDLDOMString final : public IDLTypeBaseHelper<AtomicString> {};
 
 // https://developer.mozilla.org/en-US/docs/Web/API/USVString
 struct IDLUSVString final : public IDLTypeBaseHelper<std::string> {};

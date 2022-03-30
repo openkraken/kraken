@@ -175,10 +175,10 @@ template <>
 struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
-    return AtomString(ctx, value);
+    return AtomicString(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, const AtomString& value) { return value.ToQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, const AtomicString& value) { return value.ToQuickJS(); }
   static JSValue ToValue(JSContext* ctx, NativeString* str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
@@ -189,7 +189,7 @@ template <>
 struct Converter<IDLOptional<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     if (JS_IsUndefined(value))
-      return AtomString::Empty(ctx);
+      return AtomicString::Empty(ctx);
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
 
@@ -202,7 +202,7 @@ template <>
 struct Converter<IDLNullable<IDLDOMString>> : public ConverterBase<IDLDOMString> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     if (JS_IsNull(value))
-      return AtomString::Empty(ctx);
+      return AtomicString::Empty(ctx);
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
 };

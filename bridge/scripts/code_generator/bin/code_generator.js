@@ -78,7 +78,7 @@ function genCodeFromJSONData() {
     let blob = blobs[i];
     blob.json.metadata.templates.forEach((targetTemplate) => {
       let targetTemplateHeaderData = templates.find(t => t.filename === targetTemplate + '.h');
-      let targetTemplateBodyData = templates.find(t => t.filename === targetTemplate + '.h');
+      let targetTemplateBodyData = templates.find(t => t.filename === targetTemplate + '.cc');
       let result = generateJSONTemplate(blobs[i], targetTemplateHeaderData, targetTemplateBodyData);
       let dist = blob.dist;
 
