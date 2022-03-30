@@ -79,6 +79,11 @@ class Document extends Node {
   }
   void decrementLoadEventDelayCount() {
     _loadEventDelayCount--;
+
+    // Try to check when the request is complete.
+    if (_loadEventDelayCount == 0) {
+      controller.checkCompleted();
+    }
   }
 
   Element? _documentElement;
