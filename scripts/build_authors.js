@@ -1,6 +1,5 @@
 const { spawnSync } = require('child_process');
 
-
 function main() {
   const authors = spawnSync('sh', ['-c', 'git log --abbrev-commit | grep Author'])
     .stdout
@@ -28,6 +27,7 @@ function main() {
     content += `${username} <${email}>\n`;
   });
 
+  // Not to generate AUTHORS.txt directly, for some duplicated authors should be handled.
   console.log(content);
 }
 
