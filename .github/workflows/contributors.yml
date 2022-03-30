@@ -1,0 +1,24 @@
+name: Create contributors
+
+on: [push, workflow_dispatch]
+
+jobs:
+  create-contributors-svg:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Generate Contributors Images
+        uses: jaywcjlove/github-action-contributors@main
+        with:
+          filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
+          output: build/CONTRIBUTORS.svg
+          avatarSize: 42
+
+      - name: Deploy
+        uses: taixw2/deploy-aliyun-oss@v1
+        with:
+          access-key-id: ${{ secrets.OSS_AK }}
+          access-key-secret: ${{ secrets.OSS_SK }}
+          bucket: kraken
+          region: oss-cn-hangzhou.aliyuncs.com
+          entry: build/**/*
+          remote-dir: /contributors
