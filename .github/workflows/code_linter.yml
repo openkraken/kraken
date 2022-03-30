@@ -11,11 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Generate cmake project
-        run: cd bridge/polyfill && npm i && npm run build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. && cd ../..
-      - uses: tonybaloney/cppcheck-action@master
-        with:
-          path: ./bridge
-          opts: --project=compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
+        run: |
+          cd bridge/polyfill
+          npm i
+          npm run build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+          cd ../..
+      - name: Run cppcheck
+        run: |
+          apt-get update
+          apt-get -qq -y install curl cmake jq clang cppcheck
+          cppcheck --project=bridge/compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem  --quiet
         continue-on-error: true
 
   check_merge_conflict:
