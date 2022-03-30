@@ -23,6 +23,6 @@ jobs:
           access-key-id: ${{ secrets.OSS_AK }}
           access-key-secret: ${{ secrets.OSS_SK }}
           bucket: kraken
-          region: oss-cn-hangzhou.aliyuncs.com
+          region: oss-cn-hangzhou
           entry: ./CONTRIBUTORS.svg
           remote-dir: /contributors
