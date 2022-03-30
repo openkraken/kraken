@@ -13,7 +13,6 @@ jobs:
       - name: Generate Contributors Images
         uses: jaywcjlove/github-action-contributors@main
         with:
-          token: ${{ secrets.ACCESSTOKEN }}
           filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
           output: CONTRIBUTORS.svg
           avatarSize: 36
@@ -25,5 +24,5 @@ jobs:
           access-key-secret: ${{ secrets.OSS_SK }}
           bucket: kraken
           region: oss-cn-hangzhou
-          entry: ./CONTRIBUTORS.svg
+          entry: /CONTRIBUTORS.svg
           remote-dir: /images
