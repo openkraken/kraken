@@ -30,7 +30,7 @@ describe('bottom-applies', () => {
     );
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('to-009', async () => {
     let p;

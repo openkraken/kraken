@@ -1,5 +1,5 @@
 /*auto generated*/
-xdescribe('clip-003', () => {
+describe('clip-003', () => {
   // @TODO: Support outline.
   xit('ref', async () => {
     let inner;

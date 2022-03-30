@@ -239,7 +239,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(div);
     BODY.appendChild(flex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-row-001', async () => {
     let referenceOverlappedRed;
@@ -321,7 +321,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-row-003', async () => {
     let referenceOverlappedRed;

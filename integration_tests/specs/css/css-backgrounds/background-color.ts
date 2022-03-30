@@ -22,7 +22,9 @@ describe('Background-color', () => {
     await snapshot();
   });
 
-  it('red with display when window.onload', async(done) => {
+  // @TODO: window.onload will not be triggered in single test
+  // cause all tests are placed in the same page.
+  xit('red with display when window.onload', async(done) => {
     window.onload = async () => {
       div.style.display = 'none';
       await snapshot();
