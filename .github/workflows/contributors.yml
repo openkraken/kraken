@@ -24,5 +24,4 @@ jobs:
           access-key-secret: ${{ secrets.OSS_SK }}
           bucket: kraken
           region: oss-cn-hangzhou
-          entry: /CONTRIBUTORS.svg
-          remote-dir: /images
+          entry: CONTRIBUTORS.svg
