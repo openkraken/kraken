@@ -1174,6 +1174,9 @@ class KrakenController {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
       }
 
+      // entry point start parse.
+      _view.document.parsing = true;
+
       Uint8List data = entrypoint.data!;
       if (entrypoint.isHTML) {
         parseHTML(contextId, await resolveStringFromData(data));
@@ -1185,6 +1188,9 @@ class KrakenController {
         // The resource type can not be evaluated.
         throw FlutterError('Can\'t evaluate content of $url');
       }
+
+      // entry point end parse.
+      _view.document.parsing = true;
 
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -1237,7 +1243,7 @@ class KrakenController {
 
     _isComplete = true;
 
-
+    
   }
 }
 
