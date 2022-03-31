@@ -142,6 +142,8 @@ describe('block-replaced', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: Inline replaced element not stretch according to intrinsic ratio.
   xit('height-003', async () => {
     let p;
     let div;
@@ -292,7 +294,7 @@ describe('block-replaced', () => {
 
     await snapshot();
   });
-  xit('height-005', async () => {
+  it('height-005', async () => {
     let p;
     let div1;
     p = createElement(
@@ -527,6 +529,7 @@ describe('block-replaced', () => {
 
     await snapshot();
   });
+  // @TODO: Support svg element.
   xit('width-002', async () => {
     let p;
     let div1;
@@ -607,6 +610,8 @@ describe('block-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support svg element.
   xit('width-003', async () => {
     let p;
     let div1;
@@ -677,6 +682,8 @@ describe('block-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support svg element.
   xit('width-004', async () => {
     let p;
     let div2;
@@ -836,7 +843,7 @@ describe('block-replaced', () => {
 
     await snapshot();
   });
-  xit('width-006', async () => {
+  it('width-006', async () => {
     let p;
     let child;
     let div1;
@@ -888,9 +895,9 @@ describe('block-replaced', () => {
         createElement('img', {
           alt: 'blue 15x15',
           src: 'assets/blue15x15.png',
-          width: '50%',
           style: {
             display: 'block',
+            width: '50%',
             'margin-left': 'auto',
             'margin-right': 'auto',
             'box-sizing': 'border-box',

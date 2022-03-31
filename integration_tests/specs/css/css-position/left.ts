@@ -162,7 +162,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('007', async () => {
+  it('007', async () => {
     let p;
     let div1;
     p = createElement(
@@ -218,7 +218,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('008', async () => {
+  it('008', async () => {
     let p;
     let div1;
     p = createElement(
@@ -436,7 +436,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('019', async () => {
+  it('019', async () => {
     let p;
     let div1;
     p = createElement(
@@ -493,7 +493,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('020', async () => {
+  it('020', async () => {
     let p;
     let div1;
     p = createElement(
@@ -712,7 +712,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('031', async () => {
+  it('031', async () => {
     let p;
     let div1;
     p = createElement(
@@ -769,7 +769,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('032', async () => {
+  it('032', async () => {
     let p;
     let div1;
     p = createElement(
@@ -988,7 +988,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('043', async () => {
+  it('043', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1045,7 +1045,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('044', async () => {
+  it('044', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1264,7 +1264,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('055', async () => {
+  it('055', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1539,7 +1539,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('067', async () => {
+  it('067', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1596,7 +1596,7 @@ describe('left', () => {
 
     await snapshot();
   });
-  xit('068', async () => {
+  it('068', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1815,6 +1815,8 @@ describe('left', () => {
 
     await snapshot();
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('079', async () => {
     let p;
     let div1;
@@ -1874,6 +1876,8 @@ describe('left', () => {
 
     await snapshot();
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('080', async () => {
     let p;
     let div1;
@@ -2101,6 +2105,8 @@ describe('left', () => {
 
     await snapshot();
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('091', async () => {
     let p;
     let div1;

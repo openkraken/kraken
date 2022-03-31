@@ -76,6 +76,8 @@ describe('flexbox_flex-natural', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage of flex-basis not working.
   xit('mixed-basis-auto', async () => {
     let div;
     div = createElement(
@@ -216,7 +218,7 @@ describe('flexbox_flex-natural', () => {
 
     await snapshot();
   });
-  xit('mixed-basis', async () => {
+  it('mixed-basis', async () => {
     let div;
     div = createElement(
       'div',
@@ -284,7 +286,7 @@ describe('flexbox_flex-natural', () => {
 
     await snapshot();
   });
-  xit('ref', async () => {
+  it('ref', async () => {
     let div;
     let div_1;
     div = createElement(
@@ -506,6 +508,8 @@ describe('flexbox_flex-natural', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage of flex-basis not working.
   xit('variable-zero-basis', async () => {
     let div;
     div = createElement(

@@ -125,8 +125,7 @@ describe('Tags input', () => {
     BODY.appendChild(div);
   });
 
-  // @TODO: line-height should not take effect for input element itself.
-  xit('line-height set and is smaller than text size', async (done) => {
+  it('line-height set and is smaller than text size', async () => {
     let input;
     input = createElement(
       'input',

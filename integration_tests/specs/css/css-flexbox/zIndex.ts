@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flex-box', () => {
-  xit('wrap', async () => {
+  it('wrap', async () => {
     let p;
     let flexItem;
     let flexItem_1;

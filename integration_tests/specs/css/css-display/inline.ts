@@ -21,6 +21,7 @@ describe('Display inline', () => {
     await snapshot();
   });
 
+  // @TODO: White-space collapse rule between inline element is wrong.
   xit('textNode only if have one space', async () => {
     let containerStyle = {
       backgroundColor: 'fuchsia',

@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('tiled', () => {
+  // @TODO: linear-gradient with percentage impl differs from browser.
   xit('gradients', async () => {
     let gradient;
     gradient = createElement('div', {

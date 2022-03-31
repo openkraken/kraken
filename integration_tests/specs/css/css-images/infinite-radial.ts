@@ -29,6 +29,8 @@ describe('infinite-radial', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-radial-gradient parse error. 
   xit('gradient-refcrash', async () => {
     let p;
     let crash;

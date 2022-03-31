@@ -80,7 +80,7 @@ describe('dynamic-top', () => {
 
     await snapshot();
   });
-  xit('change-004', async () => {
+  it('change-004', async () => {
     let p;
     let red;
     let parent;
@@ -146,6 +146,8 @@ describe('dynamic-top', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support CSS inherit keyword.
   xit('change-005', async () => {
     let p;
     let red;
@@ -220,6 +222,8 @@ describe('dynamic-top', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support CSS inherit keyword.
   xit('change-005a', async () => {
     let p;
     let red;
@@ -296,6 +300,8 @@ describe('dynamic-top', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support CSS inherit keyword.
   xit('change-005b', async () => {
     let p;
     let red;

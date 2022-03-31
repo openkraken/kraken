@@ -180,6 +180,8 @@ describe('left-offset', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('003-ref', async () => {
     let p;
     let div;
@@ -281,6 +283,8 @@ describe('left-offset', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('percentage-001-ref', async () => {
     let p;
     let div;
@@ -409,7 +413,7 @@ describe('left-offset', () => {
 
     await snapshot();
   });
-  xit('percentage-002', async () => {
+  it('percentage-002', async () => {
     let p;
     let redAbsPosOverlapped;
     let greenChildAbsPosInheritOverlapping;
