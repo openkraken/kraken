@@ -1204,20 +1204,7 @@ class KrakenController {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.window;
         window.dispatchEvent(event);
-        // @HACK: window.load should trigger after all image had loaded.
-        // Someone needs to fix this in the future.
-        module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          window.dispatchEvent(event);
-        });
       });
-
-      if (onLoad != null) {
-        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-        module.requestAnimationFrame((_) {
-          onLoad!(this);
-        });
-      }
     }
   }
 
@@ -1243,7 +1230,20 @@ class KrakenController {
 
     _isComplete = true;
 
-    
+    _dispatchWindowLoadEvent();
+  }
+
+  void _dispatchWindowLoadEvent() {
+    module.requestAnimationFrame((_) {
+      Event event = Event(EVENT_LOAD);
+      _view.window.dispatchEvent(event);
+    });
+    if (onLoad != null) {
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      module.requestAnimationFrame((_) {
+        onLoad!(this);
+      });
+    }
   }
 }
 
