@@ -45,6 +45,11 @@ class IdleRequestOptions {
 
 // https://www.w3.org/TR/requestidlecallback
 mixin ScheduleBackgroundTasks {
+  // @TODO: Current only supported 60fps.
+  // Initial frame duration is 60fps, after negotiation it should be the time between each frame.
+  // ignore: prefer_final_fields
+  double _frameDuration = 1000 / 60;
+
   // The list must be initially empty and each entry in this list is identified by a number, which must
   // be unique within the list for the lifetime of the Window object.
   final Map<int, IdleRequestCallback> _idleRequestCallbacks = {};
@@ -121,8 +126,7 @@ mixin ScheduleBackgroundTasks {
   // pending internal timeouts such as deadlines to start rendering the next frame, process audio
   // or any other internal task the user agent deems important.
   double get _expectedNextDeadline {
-    // @TODO: Only supported 60fps.
-    return SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds + 1000 / 60;
+    return SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds + _frameDuration;
   }
 
   void _queueIdleTask(VoidCallback task) {
