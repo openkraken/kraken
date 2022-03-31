@@ -1235,15 +1235,14 @@ class KrakenController {
 
   void _dispatchWindowLoadEvent() {
     module.requestAnimationFrame((_) {
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
       Event event = Event(EVENT_LOAD);
       _view.window.dispatchEvent(event);
-    });
-    if (onLoad != null) {
-      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-      module.requestAnimationFrame((_) {
+
+      if (onLoad != null) {
         onLoad!(this);
-      });
-    }
+      }
+    });
   }
 }
 
