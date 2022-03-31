@@ -1192,6 +1192,9 @@ class KrakenController {
       // entry point end parse.
       _view.document.parsing = true;
 
+      // Should check completed when parse end.
+      checkCompleted();
+
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
       }
