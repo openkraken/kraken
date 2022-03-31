@@ -51,4 +51,8 @@ jobs:
       with:
         flutter-version: ${{ env.flutterVersion }}
     - name: Publish to dart.dev
-      run: cd kraken && flutter pub publish --force
+      uses: sakebook/actions-flutter-pub-publisher@v1.4.0
+      with:
+          credential: ${{ secrets.CREDENTIAL_JSON }}
+          package_directory: ./kraken
+          flutter_package: true
