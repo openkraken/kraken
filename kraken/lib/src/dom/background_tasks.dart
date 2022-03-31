@@ -126,7 +126,7 @@ mixin ScheduleBackgroundTasks {
   // pending internal timeouts such as deadlines to start rendering the next frame, process audio
   // or any other internal task the user agent deems important.
   double get _expectedNextDeadline {
-    return SchedulerBinding.instance!.currentFrameTimeStamp.inMicroseconds + _frameDuration;
+    return SchedulerBinding.instance!.currentSystemFrameTimeStamp.inMicroseconds + _frameDuration;
   }
 
   void _queueIdleTask(VoidCallback task) {
