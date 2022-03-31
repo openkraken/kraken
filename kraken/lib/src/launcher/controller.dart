@@ -1190,7 +1190,7 @@ class KrakenController {
       }
 
       // entry point end parse.
-      _view.document.parsing = true;
+      _view.document.parsing = false;
 
       // Should check completed when parse end.
       checkCompleted();
