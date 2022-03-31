@@ -77,6 +77,7 @@ class Document extends Node {
   void incrementLoadEventDelayCount() {
     _loadEventDelayCount++;
   }
+
   void decrementLoadEventDelayCount() {
     _loadEventDelayCount--;
 

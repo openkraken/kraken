@@ -489,6 +489,9 @@ class ImageElement extends Element {
       // Decrement conut when response.
       ownerDocument.decrementRequestCount();
 
+      // Increment load event delay count before decode.
+      ownerDocument.incrementLoadEventDelayCount();
+
       // Decode size of raw image.
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
       _currentImageDescriptor = await ui.ImageDescriptor.encoded(buffer);
@@ -499,6 +502,9 @@ class ImageElement extends Element {
       } else {
         request.state = _ImageRequestState.broken;
       }
+
+      // Decrement load event delay count after decode.
+      ownerDocument.decrementLoadEventDelayCount();
 
       buffer.dispose();
     } catch (error) {
