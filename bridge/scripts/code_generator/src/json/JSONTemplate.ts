@@ -5,7 +5,7 @@ enum TemplateType {
   body
 }
 
-export class Template {
+export class JSONTemplate {
   public raw: string;
   public filename: string;
   public type: TemplateType;

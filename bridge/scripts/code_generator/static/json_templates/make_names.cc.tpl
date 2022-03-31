@@ -29,7 +29,7 @@ void Init() {
 
   for(size_t i = 0; i < std::size(kNames); i ++) {
     void* address = reinterpret_cast<AtomicString*>(&names_storage) + i;
-    new (address) PersistentAtomicString(kNames[i].atom);
+    new (address) AtomicString(kNames[i].atom);
   }
 };
 

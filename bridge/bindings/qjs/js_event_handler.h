@@ -35,6 +35,10 @@ class JSEventHandler : public JSBasedEventListener {
 
   explicit JSEventHandler(const std::shared_ptr<QJSFunction>& event_handler, HandlerType type):  type_(type), event_handler_(event_handler) {};
 
+  JSValue GetListenerObject(EventTarget&) {
+    return event_handler_->ToQuickJS();
+  }
+
   JSValue GetEffectiveFunction(EventTarget&) {
     return event_handler_->ToQuickJS();
   }

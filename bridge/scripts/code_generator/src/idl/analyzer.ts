@@ -2,6 +2,7 @@ import ts, {HeritageClause, ScriptTarget, VariableStatement} from 'typescript';
 import {IDLBlob} from './IDLBlob';
 import {
   ClassObject,
+  ClassObjectKind,
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
@@ -131,6 +132,14 @@ function walkProgram(statement: ts.Statement) {
       }
 
       obj.name = s.name.escapedText.toString();
+
+      if (s.decorators) {
+        let decoratorExpression = s.decorators[0].expression as ts.CallExpression;
+        // @ts-ignore
+        if (decoratorExpression.expression.kind === ts.SyntaxKind.Identifier && decoratorExpression.expression.escapedText === 'Dictionary') {
+          obj.kind = ClassObjectKind.dictionary;
+        }
+      }
 
       s.members.forEach(member => {
         switch(member.kind) {

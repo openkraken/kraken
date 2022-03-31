@@ -51,7 +51,18 @@ bool EventListenerMap::Contains(const AtomicString& event_type) const {
   return false;
 }
 
-bool EventListenerMap::ContainsCapturing(const AtomicString& event_type) const {}
+bool EventListenerMap::ContainsCapturing(const AtomicString& event_type) const {
+  for (const auto& entry : entries_) {
+    if (entry.first == event_type) {
+      for (const auto& event_listener : *entry.second) {
+        if (event_listener.Capture())
+          return true;
+      }
+      return false;
+    }
+  }
+  return false;
+}
 
 void EventListenerMap::Clear() {
   entries_.clear();

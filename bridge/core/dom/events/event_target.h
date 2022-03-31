@@ -81,6 +81,8 @@ class EventTarget : public ScriptWrappable {
 
   const char* GetHumanReadableName() const override;
 
+  virtual bool IsWindowOrWorkerGlobalScope() const { return false; }
+
  private:
 };
 

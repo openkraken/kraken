@@ -7,7 +7,7 @@ const glob = require('glob');
 const fs = require('fs');
 const { IDLBlob } = require('../dist/idl/IDLBlob');
 const { JSONBlob } = require('../dist/json/JSONBlob');
-const { Template } = require('../dist/json/template');
+const { JSONTemplate } = require('../dist/json/JSONTemplate');
 const { analyzer } = require('../dist/idl/analyzer');
 const { generateJSONTemplate } = require('../dist/json/generator');
 
@@ -30,11 +30,11 @@ if (!path.isAbsolute(dist)) {
 
 function genCodeFromTypeDefine() {
   // Generate code from type defines.
-  let files = glob.sync("**/*.d.ts", {
+  let typeFiles = glob.sync("**/*.d.ts", {
     cwd: source,
   });
 
-  let blobs = files.map(file => {
+  let blobs = typeFiles.map(file => {
     let filename = 'qjs_' + file.split('/').slice(-1)[0].replace('.d.ts', '');
     let implement = file.replace(path.join(__dirname, '../../')).replace('.d.ts', '');
     return new IDLBlob(path.join(source, file), dist, filename, implement);
@@ -61,7 +61,7 @@ function genCodeFromJSONData() {
     cwd: source
   });
   let templateFiles = glob.sync('**/*.tpl', {
-    cwd: path.join(__dirname, '../static')
+    cwd: path.join(__dirname, '../static/json_templates')
   });
 
   let blobs = jsonFiles.map(file => {
@@ -71,7 +71,7 @@ function genCodeFromJSONData() {
 
   let templates = templateFiles.map(template => {
     let filename = template.split('/').slice(-1)[0].replace('.tpl', '');
-    return new Template(path.join(path.join(__dirname, '../static'), template), filename);
+    return new JSONTemplate(path.join(path.join(__dirname, '../static/json_templates'), template), filename);
   });
 
   for (let i = 0; i < blobs.length; i ++) {
@@ -93,5 +93,5 @@ function genCodeFromJSONData() {
   }
 }
 
-// genCodeFromTypeDefine();
+genCodeFromTypeDefine();
 genCodeFromJSONData();

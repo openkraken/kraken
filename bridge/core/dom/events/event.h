@@ -66,6 +66,11 @@ class Event : public ScriptWrappable {
     kYes,
   };
 
+  enum class ComposedMode {
+    kComposed,
+    kScoped,
+  };
+
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
@@ -73,14 +78,12 @@ class Event : public ScriptWrappable {
       return makeGarbageCollected<Event>(context, type);
   };
 
-  static Event* From(ExecutingContext* context, NativeEvent* native_event) {
-    return makeGarbageCollected<Event>(context, native_event);
-  }
+  static Event* From(ExecutingContext* context, NativeEvent* native_event);
 
   Event() = delete;
   explicit Event(ExecutingContext* context);
   explicit Event(ExecutingContext* context, const AtomicString& event_type);
-  explicit Event(ExecutingContext* context, NativeEvent* native_event);
+  explicit Event(ExecutingContext* context, const AtomicString& event_type, Bubbles bubbles, Cancelable cancelable, ComposedMode composed_mode, double timeStamp);
 
   const char* GetHumanReadableName() const override;
   bool propagationStopped() const { return propagation_stopped_; }
@@ -89,7 +92,7 @@ class Event : public ScriptWrappable {
   bool propagationImmediatelyStopped(ExceptionState& exception_state) { return immediate_propagation_stopped_; }
   bool cancelable() const { return cancelable_; }
   const AtomicString& type() { return type_; };
-  void SetType(NativeString* type);
+  void SetType(const AtomicString& type);
   EventTarget* target() const;
   void SetTarget(EventTarget* target);
   EventTarget* currentTarget() const;
@@ -114,7 +117,7 @@ class Event : public ScriptWrappable {
   void SetStopPropagation(bool stop_propagation) { propagation_stopped_ = stop_propagation; }
   void stopImmediatePropagation(ExceptionState& exception_state) { immediate_propagation_stopped_ = true; }
   void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
-  void initEvent(std::unique_ptr<NativeString>& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
+  void initEvent(const AtomicString& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);
@@ -141,6 +144,7 @@ class Event : public ScriptWrappable {
   unsigned bubbles_ : 1;
   unsigned cancelable_ : 1;
   unsigned composed_ : 1;
+  double time_stamp_{0.0};
 
   unsigned propagation_stopped_ : 1;
   unsigned immediate_propagation_stopped_ : 1;
@@ -148,8 +152,6 @@ class Event : public ScriptWrappable {
   unsigned default_handled_ : 1;
   unsigned was_initialized_ : 1;
   unsigned is_trusted_ : 1;
-
-  double time_stamp_{0.0};
 
   uint8_t event_phase_ = PhaseType::kNone;
 

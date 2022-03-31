@@ -33,12 +33,18 @@ export class FunctionDeclaration extends PropsDeclaration {
   returnType: ParameterType[] = [];
 }
 
+export enum ClassObjectKind {
+  interface,
+  dictionary
+}
+
 export class ClassObject {
   name: string;
   parent: string;
   props: PropsDeclaration[] = [];
   methods: FunctionDeclaration[] = [];
   construct?: FunctionDeclaration;
+  kind: ClassObjectKind = ClassObjectKind.interface
 }
 
 export class FunctionObject {

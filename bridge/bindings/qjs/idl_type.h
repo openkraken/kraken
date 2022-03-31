@@ -50,7 +50,7 @@ class NativeString;
 struct IDLDOMString final : public IDLTypeBaseHelper<AtomicString> {};
 
 // https://developer.mozilla.org/en-US/docs/Web/API/USVString
-struct IDLUSVString final : public IDLTypeBaseHelper<std::string> {};
+struct IDLUSVString final : public IDLTypeBaseHelper<AtomicString> {};
 
 // Object
 struct IDLObject : public IDLTypeBaseHelper<ScriptValue> {};

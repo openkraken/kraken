@@ -1,66 +1,68 @@
-import {ClassObject, FunctionObject, PropsDeclaration} from "./declaration";
-import {uniqBy, snakeCase} from "lodash";
+import {ClassObject, ClassObjectKind, FunctionObject} from "./declaration";
+import _ from "lodash";
 import {IDLBlob} from "./IDLBlob";
-import {addIndent, getClassName} from "./utils";
+import {getClassName} from "./utils";
+import fs from 'fs';
+import path from 'path';
+import {generateTypeConverter} from "./generateSource";
 
-function generateInterfaceAdditionalHeader(blob: IDLBlob, object: any): [string, string, string] {
-  if (!(object instanceof ClassObject)) {
-    return ['', '', ''];
+export enum TemplateKind {
+  globalFunction,
+  Dictionary,
+  Interface,
+  null
+}
+
+export function getTemplateKind(object: ClassObject | FunctionObject | null): TemplateKind {
+  if (object instanceof FunctionObject) {
+    return TemplateKind.globalFunction;
+  } else if (object instanceof ClassObject) {
+    if (object.kind === ClassObjectKind.dictionary) {
+      return TemplateKind.Dictionary;
+    }
+    return TemplateKind.Interface;
   }
+  return TemplateKind.null;
+}
 
-  let wrapperTypeInfo = `static WrapperTypeInfo* GetWrapperTypeInfo() {
-    return const_cast<WrapperTypeInfo*>(&wrapper_type_info_);
-  }`;
-
-  let wrapperTypeDefine = `static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
-  constexpr static const WrapperTypeInfo wrapper_type_info_ = {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ConstructorCallback};
-`;
-
-  let installFunctions = `static void InstallPrototypeMethods(ExecutingContext* context);
-  static void InstallPrototypeProperties(ExecutingContext* context);
-  static void InstallConstructor(ExecutingContext* context);`;
-
-  return [
-    wrapperTypeInfo,
-    wrapperTypeDefine,
-    installFunctions
-  ];
+function readTemplate(name: string) {
+  return fs.readFileSync(path.join(__dirname, '../../static/idl_templates/' + name + '.h.tpl'), {encoding: 'utf-8'});
 }
 
 export function generateCppHeader(blob: IDLBlob) {
-  let classObject = blob.objects.find(object => object instanceof ClassObject);
-  let interfaceDefines = generateInterfaceAdditionalHeader(blob, classObject);
-  let haveInterfaceBase = !!classObject;
-  return `/*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
- */
+  const baseTemplate = fs.readFileSync(path.join(__dirname, '../../static/idl_templates/base.h.tpl'), {encoding: 'utf-8'});
+  const contents = blob.objects.map(object => {
+    const templateKind = getTemplateKind(object);
+    if (templateKind === TemplateKind.null) return '';
 
-#ifndef KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
-#define KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
+    switch(templateKind) {
+      case TemplateKind.Interface: {
+        return _.template(readTemplate('interface'))({
+          className: getClassName(blob),
+          blob: blob
+        });
+      }
+      case TemplateKind.Dictionary: {
+        let props = (object as ClassObject).props;
+        return _.template(readTemplate('dictionary'))({
+          className: getClassName(blob),
+          blob: blob,
+          object: object,
+          props,
+          generateTypeConverter: generateTypeConverter
+        });
+      }
+      case TemplateKind.globalFunction: {
+        return _.template(readTemplate('global_function'))({
+          className: getClassName(blob),
+          blob: blob
+        });
+      }
+    }
+  });
 
-#include <quickjs/quickjs.h>
-#include "bindings/qjs/wrapper_type_info.h"
-#include "bindings/qjs/qjs_interface_bridge.h"
-#include "core/${blob.implement}.h"
-
-namespace kraken {
-
-class ExecutingContext;
-
-class QJS${getClassName(blob)} ${haveInterfaceBase ? `: public QJSInterfaceBridge<QJS${getClassName(blob)}, ${getClassName(blob)}>` : 'final'} {
- public:
-  static void Install(ExecutingContext* context);
-
-  ${interfaceDefines[0]}
-  ${interfaceDefines[1]}
- private:
-  static void InstallGlobalFunctions(ExecutingContext* context);
-  ${interfaceDefines[2]}
-};
-
-}
-
-#endif //KRAKENBRIDGE_${blob.filename.toUpperCase()}T_H
-`;
+  return _.template(baseTemplate)({
+    content: contents.join('\n'),
+    blob: blob
+  });
 }

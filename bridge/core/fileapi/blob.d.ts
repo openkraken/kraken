@@ -1,5 +1,3 @@
-type int64 = void;
-
 interface Blob {
   readonly size: number;
   readonly type: string;

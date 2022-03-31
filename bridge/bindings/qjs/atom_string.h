@@ -11,6 +11,7 @@
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "native_string_utils.h"
+#include "qjs_engine_patch.h"
 
 namespace kraken {
 
@@ -20,77 +21,60 @@ namespace kraken {
 // two String instances because we just check string storage identity.
 class AtomicString {
  public:
+  static AtomicString Empty(JSContext* ctx) { return AtomicString(ctx, JS_ATOM_NULL); };
+  static AtomicString From(JSContext* ctx, NativeString* native_string) {
+    JSValue str = JS_NewUnicodeString(ctx, native_string->string, native_string->length);
+    auto result = AtomicString(ctx, str);
+    JS_FreeValue(ctx, str);
+    return result;
+  };
+
   AtomicString() = default;
-  AtomicString(JSAtom atom) : atom_(atom) {}
+  AtomicString(JSContext *ctx, JSAtom atom) : ctx_(ctx), atom_(atom) {};
+  AtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())) {};
+  AtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)) {};
+  AtomicString(JSAtom atom): atom_(atom), is_static_atom_(true) {};
 
   // Return the undefined string value from atom key.
-  virtual JSValue ToQuickJS(JSContext* ctx) const = 0;
-
-  bool operator==(const AtomicString& other) const { return other.atom_ == this->atom_; }
-
- protected:
-  JSAtom atom_{JS_ATOM_NULL};
-};
-
-// AtomicString which holding quickjs built-in atoms string.
-// These string are stored in JSRuntime instead of JSContext.
-// So it can be used by any JSContext and don't needs to be freed.
-class PersistentAtomicString : public AtomicString {
- public:
-  PersistentAtomicString(JSAtom atom): AtomicString(atom) {};
-
-  JSValue ToQuickJS(JSContext* ctx) const override;
-};
-
-// PeriodicAtomicString holding string atom key created by JSContext.
-// Could be freed when string refer_count set to 0.
-class PeriodicAtomicString : public AtomicString {
-  // Should only allocate on stack.
-  KRAKEN_DISALLOW_NEW();
-
- public:
-  static PeriodicAtomicString Empty(JSContext* ctx) { return PeriodicAtomicString(ctx); };
-
-  explicit PeriodicAtomicString(JSContext* ctx) : ctx_(ctx), AtomicString(JS_ATOM_NULL) {}
-  explicit PeriodicAtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), AtomicString(JS_NewAtom(ctx, string.c_str())) {}
-  explicit PeriodicAtomicString(JSContext* ctx, JSAtom atom) : ctx_(ctx), AtomicString(JS_DupAtom(ctx, atom)) {};
-  explicit PeriodicAtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), AtomicString(JS_ValueToAtom(ctx, value)){};
-  ~PeriodicAtomicString() { JS_FreeAtom(ctx_, atom_); }
-
-  JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); }
+  JSValue ToQuickJS(JSContext* ctx) const {
+    return JS_AtomToValue(ctx, atom_);
+  };
 
   // Copy assignment
-  PeriodicAtomicString(PeriodicAtomicString const& value) {
-    if (&value != this) {
+  AtomicString(AtomicString const& value) {
+    if (!is_static_atom_ && &value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
-  PeriodicAtomicString& operator=(const PeriodicAtomicString& other) {
-    if (&other != this) {
+  AtomicString& operator=(const AtomicString& other) {
+    if (!is_static_atom_ && &other != this) {
       atom_ = JS_DupAtom(ctx_, other.atom_);
     }
     return *this;
   };
 
   // Move assignment
-  PeriodicAtomicString(PeriodicAtomicString&& value) noexcept {
-    if (&value != this) {
+  AtomicString(AtomicString&& value) noexcept {
+    if (!is_static_atom_ && &value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
-  PeriodicAtomicString& operator=(PeriodicAtomicString&& value) noexcept {
-    if (&value != this) {
+  AtomicString& operator=(AtomicString&& value) noexcept {
+    if (!is_static_atom_ && &value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
     return *this;
   }
 
- private:
-  PeriodicAtomicString() = delete;
+  bool operator==(const AtomicString& other) const { return other.atom_ == this->atom_; }
+
+ protected:
+  bool is_static_atom_ = false;
   JSContext* ctx_{nullptr};
+  JSAtom atom_{JS_ATOM_NULL};
 };
 
 }  // namespace kraken

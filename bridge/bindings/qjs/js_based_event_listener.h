@@ -21,6 +21,14 @@ class JSBasedEventListener : public EventListener {
   // Implements step 2. of "inner invoke".
   // See: https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
   void Invoke(ExecutingContext* context, Event* event) final;
+
+  // Implements "get the current value of the event handler".
+  // https://html.spec.whatwg.org/C/#getting-the-current-value-of-the-event-handler
+  // Returns v8::Null with firing error event instead of throwing an exception
+  // on failing to compile the uncompiled script body in eventHandler's value.
+  // Also, this can return empty because of crbug.com/881688 .
+  virtual JSValue GetListenerObject(EventTarget&) = 0;
+
   // Returns Functions that handles invoked event or undefined without
   // throwing any exception.
   virtual JSValue GetEffectiveFunction(EventTarget&) = 0;

@@ -1,6 +1,3 @@
-type double = number;
-type int64 = number;
-
 interface CanvasRenderingContext2D {
   fillStyle: string;
   direction: string;

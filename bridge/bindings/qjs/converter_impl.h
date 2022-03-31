@@ -178,7 +178,7 @@ struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
     return AtomicString(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, const AtomicString& value) { return value.ToQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, const AtomicString& value) { return value.ToQuickJS(ctx); }
   static JSValue ToValue(JSContext* ctx, NativeString* str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) { return JS_NewUnicodeString(ctx, str->string, str->length); }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) { return JS_NewUnicodeString(ctx, bytes, length); }
@@ -341,7 +341,7 @@ struct Converter<Event> : public ConverterBase<Event> {
     return toScriptWrappable<Event>(value);
   }
 
-  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return reinterpret_cast<ScriptWrappable*>(value)->ToQuickJS(); }
 };
 
 }  // namespace kraken
