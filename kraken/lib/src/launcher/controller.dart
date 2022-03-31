@@ -1193,7 +1193,11 @@ class KrakenController {
       _view.document.parsing = false;
 
       // Should check completed when parse end.
-      checkCompleted();
+      module.requestAnimationFrame((_) {
+        // UICommand list is read in the next frame, so we need to determine whether there are labels
+        // such as images and scripts after it to check is completed.
+        checkCompleted();
+      });
 
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
