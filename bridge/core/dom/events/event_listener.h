@@ -31,7 +31,7 @@ class EventListener {
   ~EventListener() = default;
 
   // Invokes this event listener.
-  virtual void Invoke(ExecutingContext* context, Event*) = 0;
+  virtual void Invoke(ExecutingContext* context, Event*, ExceptionState& exception_state) = 0;
 
   // Returns true if this implements IDL EventHandler family.
   virtual bool IsEventHandler() const { return false; }

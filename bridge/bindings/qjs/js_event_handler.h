@@ -15,6 +15,8 @@ namespace kraken {
 // https://html.spec.whatwg.org/C/#event-handler-attributes
 class JSEventHandler : public JSBasedEventListener {
  public:
+  using ImplType = std::shared_ptr<JSEventHandler>;
+
   enum class HandlerType {
     kEventHandler,
     // For kOnErrorEventHandler

@@ -20,7 +20,7 @@ class JSBasedEventListener : public EventListener {
  public:
   // Implements step 2. of "inner invoke".
   // See: https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-  void Invoke(ExecutingContext* context, Event* event) final;
+  void Invoke(ExecutingContext* context, Event* event, ExceptionState& exception_state);
 
   // Implements "get the current value of the event handler".
   // https://html.spec.whatwg.org/C/#getting-the-current-value-of-the-event-handler

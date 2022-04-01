@@ -119,6 +119,11 @@ class Event : public ScriptWrappable {
   void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
   void initEvent(const AtomicString& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
+  bool WasInitialized() { return was_initialized_; }
+
+  bool isTrusted() const { return is_trusted_; }
+  void SetTrusted(bool value) { is_trusted_ = value; }
+
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);
 

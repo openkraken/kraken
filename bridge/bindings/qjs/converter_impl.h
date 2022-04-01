@@ -15,6 +15,7 @@
 #include "core/fileapi/blob_property_bag.h"
 #include "idl_type.h"
 #include "native_string_utils.h"
+#include "js_event_listener.h"
 
 namespace kraken {
 
@@ -342,6 +343,22 @@ struct Converter<Event> : public ConverterBase<Event> {
   }
 
   static JSValue ToValue(JSContext* ctx, ImplType value) { return reinterpret_cast<ScriptWrappable*>(value)->ToQuickJS(); }
+};
+
+template<>
+struct Converter<JSEventListener> : public ConverterBase<JSEventListener> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return JSEventListener::CreateOrNull(QJSFunction::Create(ctx, value));
+  }
+};
+
+template<>
+struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventListener> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return Converter<JSEventListener>::FromValue(ctx, value, exception_state);
+  }
 };
 
 }  // namespace kraken

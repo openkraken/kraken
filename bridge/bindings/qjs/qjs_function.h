@@ -25,7 +25,11 @@ class QJSFunction {
 
   // Performs "invoke".
   // https://webidl.spec.whatwg.org/#invoke-a-callback-function
-  ScriptValue Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments);
+  ScriptValue Invoke(JSContext* ctx, const ScriptValue& this_val, int32_t argc, ScriptValue* arguments);
+
+  bool operator==(const QJSFunction& other) {
+    return JS_VALUE_GET_PTR(function_) == JS_VALUE_GET_PTR(other.function_);
+  };
 
  private:
   JSContext* ctx_{nullptr};

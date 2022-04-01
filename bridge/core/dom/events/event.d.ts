@@ -18,6 +18,7 @@ interface Event {
   readonly defaultPrevented: boolean;
   readonly srcElement: EventTarget | null;
   readonly target: EventTarget | null;
+  readonly isTrusted: boolean;
   /**
    * Returns the event's timestamp as the number of milliseconds measured relative to the time origin.
    */

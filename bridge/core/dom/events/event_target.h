@@ -8,6 +8,7 @@
 
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/js_event_listener.h"
 #include "event_listener_map.h"
 #include "foundation/native_string.h"
 
@@ -19,6 +20,25 @@ void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, 
 #define SetPropertyMagic "%s"
 
 namespace kraken {
+
+enum class DispatchEventResult {
+  // Event was not canceled by event handler or default event handler.
+  kNotCanceled,
+  // Event was canceled by event handler; i.e. a script handler calling
+  // preventDefault.
+  kCanceledByEventHandler,
+  // Event was canceled by the default event handler; i.e. executing the default
+  // action.  This result should be used sparingly as it deviates from the DOM
+  // Event Dispatch model. Default event handlers really shouldn't be invoked
+  // inside of dispatch.
+  kCanceledByDefaultEventHandler,
+  // Event was canceled but suppressed before dispatched to event handler.  This
+  // result should be used sparingly; and its usage likely indicates there is
+  // potential for a bug. Trusted events may return this code; but untrusted
+  // events likely should always execute the event handler the developer intends
+  // to execute.
+  kCanceledBeforeDispatch,
+};
 
 class EventTargetData final {
   KRAKEN_DISALLOW_NEW();
@@ -51,28 +71,20 @@ class EventTarget : public ScriptWrappable {
   EventTarget() = delete;
   explicit EventTarget(ExecutingContext* context);
 
-  bool addEventListener(std::unique_ptr<NativeString>& event_type, const std::shared_ptr<QJSFunction>& callback, ExceptionState& exception_state);
+  bool addEventListener(const AtomicString& event_type, const std::shared_ptr<JSEventListener>& event_listener, ExceptionState& exception_state);
+  bool removeEventListener(const AtomicString& event_type, const std::shared_ptr<JSEventListener> &event_listener, ExceptionState& exception_state);
+  bool dispatchEvent(Event* event, ExceptionState& exception_state);
 
   void Trace(GCVisitor* visitor) const override;
   void Dispose() const override;
 
-  //  virtual bool AddEventListenerInternal(const AtomicString& event_type,
-  //                                        EventListener*,
-  //                                        const AddEventListenerOptionsResolved*);
-  //  bool RemoveEventListenerInternal(const AtomicString& event_type,
-  //                                   const EventListener*,
-  //                                   const EventListenerOptions*);
-  //
-  //  // Called when an event listener has been successfully added.
-  //  virtual void AddedEventListener(const AtomicString& event_type,
-  //                                  RegisteredEventListener&);
-  //
-  //  // Called when an event listener is removed. The original registration
-  //  // parameters of this event listener are available to be queried.
-  //  virtual void RemovedEventListener(const AtomicString& event_type,
-  //                                    const RegisteredEventListener&);
-  //
-  //  virtual DispatchEventResult DispatchEventInternal(Event&);
+ protected:
+
+  virtual bool AddEventListenerInternal(const AtomicString& event_type, const EventListener* listener);
+
+  bool RemoveEventListenerInternal(const AtomicString& event_type, const EventListener* listener);
+
+  DispatchEventResult DispatchEventInternal(Event& event);
 
   // Subclasses should likely not override these themselves; instead, they
   // should subclass EventTargetWithInlineData.
@@ -89,6 +101,8 @@ class EventTarget : public ScriptWrappable {
 // Provide EventTarget with inlined EventTargetData for improved performance.
 class EventTargetWithInlineData : public EventTarget {
  public:
+  EventTargetWithInlineData(ExecutingContext* context): EventTarget(context) {};
+
   void Trace(GCVisitor* visitor) const override;
 
  protected:

@@ -12,7 +12,7 @@ bool QJSFunction::IsFunction(JSContext* ctx) {
   return JS_IsFunction(ctx, function_);
 }
 
-ScriptValue QJSFunction::Invoke(JSContext* ctx, int32_t argc, ScriptValue* arguments) {
+ScriptValue QJSFunction::Invoke(JSContext* ctx, const ScriptValue& this_val, int32_t argc, ScriptValue* arguments) {
   // 'm_function' might be destroyed when calling itself (if it frees the handler), so must take extra care.
   JS_DupValue(ctx, function_);
 
@@ -22,7 +22,7 @@ ScriptValue QJSFunction::Invoke(JSContext* ctx, int32_t argc, ScriptValue* argum
     argv[0 + i] = arguments[i].ToQuickJS();
   }
 
-  JSValue returnValue = JS_Call(ctx, function_, JS_UNDEFINED, argc, argv);
+  JSValue returnValue = JS_Call(ctx, function_, this_val.ToQuickJS(), argc, argv);
 
   // Free the previous duplicated function.
   JS_FreeValue(ctx, function_);

@@ -6,3 +6,4 @@ declare interface Dictionary {}
 declare interface BlobPart {}
 declare interface BlobPropertyBag {}
 declare function Dictionary() : any;
+declare type JSEventListener = void;
