@@ -52,6 +52,13 @@ class _MyHomePageState extends State<MyBrowser> {
     final MediaQueryData queryData = MediaQuery.of(context);
     final TextEditingController textEditingController = TextEditingController();
 
+    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+    javaScriptChannel.onMethodCall = (String method, arguments) async {
+      if (method == 'firstPaint') {
+        print('firstPaint=$arguments');
+      }
+    };
+
     Kraken? _kraken;
     AppBar appBar = AppBar(
       backgroundColor: Colors.black87,
@@ -91,6 +98,7 @@ class _MyHomePageState extends State<MyBrowser> {
             viewportWidth: viewportSize.width - queryData.padding.horizontal,
             viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
             bundle: KrakenBundle.fromUrl('assets://benchmark/build/kraken/home.kbc1'),
+            javaScriptChannel: javaScriptChannel,
             onLoad: (KrakenController controller) {
               Timer(Duration(seconds: 4), () {
                 exit(0);
