@@ -3,7 +3,10 @@
  */
 
 import 'dart:async';
+import 'dart:collection';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -43,12 +46,15 @@ class IdleRequestOptions {
   int? timeout;
 }
 
+const double _DEFAULT_FRAME_DURATION = 1000 / 60;
+
 // https://www.w3.org/TR/requestidlecallback
 mixin ScheduleBackgroundTasks {
   // @TODO: Current only supported 60fps.
   // Initial frame duration is 60fps, after negotiation it should be the time between each frame.
   // ignore: prefer_final_fields
-  double _frameDuration = 1000 / 60;
+  double _frameDuration = _DEFAULT_FRAME_DURATION;
+  int _frameCount = 0;
 
   // The list must be initially empty and each entry in this list is identified by a number, which must
   // be unique within the list for the lifetime of the Window object.
@@ -108,7 +114,10 @@ mixin ScheduleBackgroundTasks {
     double deadline = _expectedNextDeadline;
     if (deadline - now > 50) {
       deadline = now + 50;
+    } else if (deadline < now) {
+      deadline = now + 1;
     }
+    assert(deadline > now, 'deadline should greater than now.');
     Map<int, IdleRequestCallback> pendingList = _idleRequestCallbacks;
     Map<int, IdleRequestCallback> runList = _runnableIdleCallback;
     runList.addAll(pendingList);
@@ -126,8 +135,39 @@ mixin ScheduleBackgroundTasks {
   // pending internal timeouts such as deadlines to start rendering the next frame, process audio
   // or any other internal task the user agent deems important.
   double get _expectedNextDeadline {
-    return SchedulerBinding.instance!.currentSystemFrameTimeStamp.inMicroseconds + _frameDuration;
+    _ensureBeginFrameHooked();
+    if (_diffBetweenEpochTimeStamp == 0) {
+      return _currentTime() + _frameDuration;
+    } else {
+      return _currentFrameBegin + _diffBetweenEpochTimeStamp + _frameDuration;
+    }
   }
+
+  double _diffBetweenEpochTimeStamp = 0;
+  static double get _currentFrameBegin => SchedulerBinding.instance!.currentSystemFrameTimeStamp.inMicroseconds / Duration.microsecondsPerMillisecond;
+
+  bool _beginFrameHooked = false;
+  void _ensureBeginFrameHooked() {
+    if (!_beginFrameHooked) {
+      _beginFrameHooked = true;
+      FrameCallback? prevOnBeginFrame = window.onBeginFrame;
+      window.onBeginFrame = (Duration duration) {
+        var now = _currentTime();
+        _diffBetweenEpochTimeStamp = now - _currentFrameBegin;
+        var period = now - _lastBeginFrameTime;
+        if (period < _DEFAULT_FRAME_DURATION) {
+          _frameCount++;
+          _frameDuration = (_frameDuration * (_frameCount - 1) + period) / _frameCount;
+        }
+        _lastBeginFrameTime = now;
+        if (prevOnBeginFrame != null) {
+          prevOnBeginFrame(duration);
+        }
+      };
+    }
+  }
+
+  double _lastBeginFrameTime = 0;
 
   void _queueIdleTask(VoidCallback task) {
     SchedulerBinding.instance!.scheduleTask(task, Priority.idle);
@@ -190,5 +230,5 @@ FutureOr<void> _waitUntilNextMicrotask() {
 }
 
 double _currentTime() {
-  return DateTime.now().microsecond / 1000;
+  return DateTime.now().microsecondsSinceEpoch / 1000;
 }
