@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <div>
       <View className={styles.homeContainer}>
-        <div>firstPaint: <span id="firstPaint"></span></div>
+        <div>{window.kraken ? 'Kraken Page' : 'Webview Page'}</div>
         <View
           style={{ height: '100vh', display: 'block' }}
         >
