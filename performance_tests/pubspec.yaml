@@ -42,7 +42,6 @@ dev_dependencies:
 flutter:
   assets:
     - benchmark/build/kraken/
-    - benchmark/build/web/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
