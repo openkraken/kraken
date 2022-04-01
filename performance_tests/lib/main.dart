@@ -41,7 +41,7 @@ class MyBrowser extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-typedef PerformanceDataCallback = void Function(int time);
+typedef PerformanceDataCallback = void Function(String viewType, int time);
 
 class _WebviewPage extends StatelessWidget {
   _WebviewPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback;
@@ -52,7 +52,7 @@ class _WebviewPage extends StatelessWidget {
     return JavascriptChannel(
         name: 'Message',
         onMessageReceived: (JavascriptMessage message) {
-          _performanceDataCallback(int.parse(message.message));
+          _performanceDataCallback('Web', int.parse(message.message));
         }
     );
   }
@@ -81,8 +81,8 @@ class _KrakenPage extends StatelessWidget {
   Widget build(BuildContext context) {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
     javaScriptChannel.onMethodCall = (String method, arguments) async {
-      if (method == 'firstPaint') {
-        _performanceDataCallback((arguments as List)[0] as int);
+      if (method == 'performance') {
+        _performanceDataCallback('Kraken', (arguments as List)[0] as int);
       }
     };
 
@@ -105,8 +105,8 @@ class _MyHomePageState extends State<MyBrowser> {
   Widget? _currentView;
 
   List<int> _krakenOnloadTimes = [];
-  List _webonloadTimes = [];
-  int _collectCount = 30;
+  List _webOnloadTimes = [];
+  final int _collectCount = 30;
 
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
@@ -116,7 +116,6 @@ class _MyHomePageState extends State<MyBrowser> {
   );
 
   void _changeViewAndReloadPage() async {
-    print('change _currentView=$_currentView');
     if (_currentView is _KrakenPage) {
       setState(() {
         _currentView = _WebviewPage(_getPerformanceData);
@@ -128,9 +127,20 @@ class _MyHomePageState extends State<MyBrowser> {
     }
   }
 
-  void _getPerformanceData(int time) {
-    _krakenOnloadTimes.add(time);
-    Timer.run(_changeViewAndReloadPage);
+  void _getPerformanceData(String viewType, int time) {
+    print('_getPerformanceData viewType=$viewType, time=$time');
+    if (viewType == 'Kraken') {
+      _krakenOnloadTimes.add(time);
+    } else {
+      _webOnloadTimes.add(time);
+    }
+
+    if (_krakenOnloadTimes.length >= _collectCount && _webOnloadTimes.length >= _collectCount) {
+      print('_krakenOnloadTimes = $_krakenOnloadTimes');
+      print('_webonloadTimes = $_webOnloadTimes');
+    } else {
+      Timer(Duration(seconds: 3), _changeViewAndReloadPage);
+    }
   }
 
   @override
