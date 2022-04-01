@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:ui';
 import 'dart:io';
@@ -40,10 +41,68 @@ class MyBrowser extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyBrowser> {
+typedef PerformanceDataCallback = void Function(int time);
 
-  Kraken? _kraken;
-  WebView? _webView;
+class _WebviewPage extends StatelessWidget {
+  _WebviewPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback;
+
+  late PerformanceDataCallback _performanceDataCallback;
+
+  JavascriptChannel _javascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Message',
+        onMessageReceived: (JavascriptMessage message) {
+          _performanceDataCallback(int.parse(message.message));
+        }
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WebView(
+      initialUrl: 'http://192.168.1.196:3333/home.html',
+      javascriptMode: JavascriptMode.unrestricted,
+      onWebViewCreated: (WebViewController controller)  {
+        controller.clearCache();
+      },
+      javascriptChannels: <JavascriptChannel>{
+        _javascriptChannel(context),
+      },
+    );
+  }
+}
+
+class _KrakenPage extends StatelessWidget {
+  _KrakenPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback;
+
+  late PerformanceDataCallback _performanceDataCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+    javaScriptChannel.onMethodCall = (String method, arguments) async {
+      if (method == 'firstPaint') {
+        _performanceDataCallback((arguments as List)[0] as int);
+      }
+    };
+
+    return Kraken(
+      bundle: KrakenBundle.fromUrl('assets:///benchmark/build/kraken/home.kbc1'),
+      javaScriptChannel: javaScriptChannel,
+      onLoad: (KrakenController controller) {
+        // Timer(Duration(seconds: 4), () {
+        //   exit(0);
+        // });
+        // controller.view.evaluateJavaScripts("""setTimeout(() => {
+        //   console.log(performance.__kraken_navigation_summary__());
+        // }, 2000);""");
+      },
+    );
+  }
+}
+
+class _MyHomePageState extends State<MyBrowser> {
+  Widget? _currentView;
 
   List<int> _krakenOnloadTimes = [];
   List _webonloadTimes = [];
@@ -56,28 +115,29 @@ class _MyHomePageState extends State<MyBrowser> {
     ),
   );
 
-  void _runKrakenPage() async {
-    if (_krakenOnloadTimes.length < _collectCount) {
-      await _kraken?.reload();
+  void _changeViewAndReloadPage() async {
+    print('change _currentView=$_currentView');
+    if (_currentView is _KrakenPage) {
+      setState(() {
+        _currentView = _WebviewPage(_getPerformanceData);
+      });
     } else {
-      print('_krakenPaintTimes=$_krakenOnloadTimes');
-      // End of collect Kraken performance.
+      setState(() {
+        _currentView = _KrakenPage(_getPerformanceData);
+      });
     }
   }
 
-  JavascriptChannel _javascriptChannel(BuildContext context) {
-    return JavascriptChannel(
-        name: 'Message',
-        onMessageReceived: (JavascriptMessage message) {
-          print('firstPaint=${message.message}');
-        }
-    );
+  void _getPerformanceData(int time) {
+    _krakenOnloadTimes.add(time);
+    Timer.run(_changeViewAndReloadPage);
   }
 
   @override
   void initState() {
-    Timer.run(_runKrakenPage);
     super.initState();
+
+    Timer.run(_changeViewAndReloadPage);
   }
 
   @override
@@ -85,14 +145,6 @@ class _MyHomePageState extends State<MyBrowser> {
     final MediaQueryData queryData = MediaQuery.of(context);
     final Size viewportSize = queryData.size;
     final TextEditingController textEditingController = TextEditingController();
-
-    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
-    javaScriptChannel.onMethodCall = (String method, arguments) async {
-      if (method == 'firstPaint') {
-        _krakenOnloadTimes.add((arguments as List)[0] as int);
-        Timer.run(_runKrakenPage);
-      }
-    };
 
     AppBar appBar = AppBar(
       backgroundColor: Colors.black87,
@@ -103,7 +155,6 @@ class _MyHomePageState extends State<MyBrowser> {
           controller: textEditingController,
           onSubmitted: (value) {
             textEditingController.text = value;
-            _kraken?.load(KrakenBundle.fromUrl(value));
           },
           decoration: InputDecoration(
             hintText: 'Enter a app url',
@@ -123,44 +174,11 @@ class _MyHomePageState extends State<MyBrowser> {
     );
 
     return Scaffold(
-        appBar: appBar,
-        body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 1,
-                  child: _kraken = Kraken(
-                    viewportWidth: (viewportSize.width - queryData.padding.horizontal) / 2,
-                    viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-                    bundle: KrakenBundle.fromUrl('assets:///benchmark/build/kraken/home.kbc1'),
-                    javaScriptChannel: javaScriptChannel,
-                    onLoad: (KrakenController controller) {
-                      // Timer(Duration(seconds: 4), () {
-                      //   exit(0);
-                      // });
-                      controller.view.evaluateJavaScripts("""setTimeout(() => {
-                            console.log(performance.__kraken_navigation_summary__());
-                          }, 2000);""");
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: _webView = WebView(
-                    initialUrl: 'http://192.168.1.196:3333/home.html',
-                    javascriptMode: JavascriptMode.unrestricted,
-                    onWebViewCreated: (WebViewController controller)  {
-                      controller.clearCache();
-                    },
-                    javascriptChannels: <JavascriptChannel>{
-                      _javascriptChannel(context),
-                    },
-                  ),
-                  flex: 1,
-                ),
-              ],
-            )
-        ));
+      appBar: appBar,
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+          child: _currentView ?? Text('Performance test'),
+      ));
   }
 }
