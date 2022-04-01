@@ -40,6 +40,12 @@ class MyBrowser extends StatefulWidget {
 
 class _MyHomePageState extends State<MyBrowser> {
 
+  Kraken? _kraken;
+
+  List<int> _krakenPaintTimes = [];
+  List _webPaintTimes = [];
+  int _collectCount = 30;
+
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
     borderRadius: const BorderRadius.all(
@@ -47,19 +53,35 @@ class _MyHomePageState extends State<MyBrowser> {
     ),
   );
 
+  void _runKrakenPage() async {
+    if (_krakenPaintTimes.length < _collectCount) {
+      await _kraken?.reload();
+    } else {
+      print('_krakenPaintTimes=$_krakenPaintTimes');
+      // End of collect Kraken performance.
+    }
+  }
+
+  @override
+  void initState() {
+    Timer.run(_runKrakenPage);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final MediaQueryData queryData = MediaQuery.of(context);
+    final Size viewportSize = queryData.size;
     final TextEditingController textEditingController = TextEditingController();
 
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
     javaScriptChannel.onMethodCall = (String method, arguments) async {
       if (method == 'firstPaint') {
-        print('firstPaint=$arguments');
+        _krakenPaintTimes.add((arguments as List)[0] as int);
+        Timer.run(_runKrakenPage);
       }
     };
 
-    Kraken? _kraken;
     AppBar appBar = AppBar(
       backgroundColor: Colors.black87,
       titleSpacing: 10.0,
@@ -88,7 +110,7 @@ class _MyHomePageState extends State<MyBrowser> {
       // the App.build method, and use it to set our appbar title.
     );
 
-    final Size viewportSize = queryData.size;
+
     return Scaffold(
         appBar: appBar,
         body: Center(
@@ -96,18 +118,18 @@ class _MyHomePageState extends State<MyBrowser> {
           // in the middle of the parent.
           child: _kraken = Kraken(
             viewportWidth: viewportSize.width - queryData.padding.horizontal,
-            viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-            bundle: KrakenBundle.fromUrl('assets://benchmark/build/kraken/home.kbc1'),
-            javaScriptChannel: javaScriptChannel,
-            onLoad: (KrakenController controller) {
-              Timer(Duration(seconds: 4), () {
-                exit(0);
-              });
-              controller.view.evaluateJavaScripts("""setTimeout(() => {
-                console.log(performance.__kraken_navigation_summary__());
-              }, 2000);""");
-            },
-          ),
+              viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+              bundle: KrakenBundle.fromUrl('assets:///benchmark/build/kraken/test.js'),
+              javaScriptChannel: javaScriptChannel,
+              onLoad: (KrakenController controller) {
+                // Timer(Duration(seconds: 4), () {
+                //   exit(0);
+                // });
+                controller.view.evaluateJavaScripts("""setTimeout(() => {
+                    console.log(performance.__kraken_navigation_summary__());
+                  }, 2000);""");
+              },
+            )
         ));
   }
 }
