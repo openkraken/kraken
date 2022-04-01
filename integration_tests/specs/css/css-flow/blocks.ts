@@ -446,8 +446,7 @@ describe('blocks', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('021', async () => {
+  it('021', async () => {
     let p;
     let inner;
     let outer;
@@ -509,8 +508,7 @@ describe('blocks', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('022', async () => {
+  it('022', async () => {
     let p;
     let inner;
     let outer;

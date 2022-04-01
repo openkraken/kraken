@@ -355,8 +355,7 @@ describe('block-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('replaced-height-005', async () => {
+  it('replaced-height-005', async () => {
     let p;
     let div1;
     let div2;
@@ -441,8 +440,7 @@ describe('block-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('replaced-height-006', async () => {
+  it('replaced-height-006', async () => {
     let p;
     let div1;
     let div2;
@@ -523,10 +521,6 @@ describe('block-non', () => {
     );
     BODY.appendChild(p);
     BODY.appendChild(div);
-
-    await snapshot();
-
-    await snapshot();
 
     await snapshot();
   });
@@ -1708,8 +1702,7 @@ describe('block-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('replaced-width-007', async () => {
+  it('replaced-width-007', async () => {
     let p;
     let div2;
     let div3;
