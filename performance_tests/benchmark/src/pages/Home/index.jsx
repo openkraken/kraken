@@ -1,11 +1,30 @@
 import { createElement, useState, useEffect } from 'rax';
 import View from 'rax-view';
 import Text from 'rax-text';
-import originDatas from '../../mock.js'
+import originDatas from '../../mock.js';
 
 import styles from './index.module.css';
 import Price from '../../components/Price';
 import Card from '../../components/Card';
+
+if (!window.startTime) {
+  window.startTime = Date.now();
+}
+
+window.onload = () => {
+  const endTime = Date.now();
+  const firstPaint = endTime - startTime;
+  console.log('startTime=', startTime);
+  console.log('endTime=', endTime);
+  console.log('firstPaint=', firstPaint);
+  // document.getElementById('firstPaint').innerHTML = firstPaint;
+
+  if (window.kraken) {
+    kraken.methodChannel.invokeMethod('firstPaint', firstPaint);
+  } else {
+    Message.postMessage(firstPaint);  
+  }
+};
 
 export default function Home() {
   const calcRatio = (item) => {
@@ -38,6 +57,7 @@ export default function Home() {
   return (
     <div>
       <View className={styles.homeContainer}>
+        <div>firstPaint: <span id="firstPaint"></span></div>
         <View
           style={{ height: '100vh', display: 'block' }}
         >
