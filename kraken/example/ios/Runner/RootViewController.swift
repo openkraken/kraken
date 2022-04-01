@@ -15,15 +15,15 @@ class RootViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         view.addSubview(btn)
-//        view.addSubview(multiEnginBtn)
+        view.addSubview(multiEnginBtn)
     }
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         btn.frame = CGRect(x: 64, y: 134, width: 196, height: 52)
-//        multiEnginBtn.frame = CGRect(x: btn.frame.minX,
-//                                     y: btn.frame.maxY + 36,
-//                                     width: 196, height: 52)
+        multiEnginBtn.frame = CGRect(x: btn.frame.minX,
+                                     y: btn.frame.maxY + 36,
+                                     width: 196, height: 52)
     }
     
     /// Actions
