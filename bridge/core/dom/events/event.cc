@@ -37,7 +37,6 @@ Event::Event(ExecutingContext* context, const AtomicString& event_type, Bubbles 
       was_initialized_(true),
       is_trusted_(false),
       prevent_default_called_on_uncancelable_event_(false),
-      legacy_did_listeners_throw_flag_(false),
       fire_only_capture_listeners_at_target_(false),
       fire_only_non_capture_listeners_at_target_(false),
       event_phase_(0),

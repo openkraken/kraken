@@ -4,11 +4,12 @@
  */
 
 #include "js_event_handler.h"
-#include "core/dom/events/error_event.h"
+#include "core/events/error_event.h"
 #include "core/dom/events/event_target.h"
 #include "event_type_names.h"
 
 namespace kraken {
+
 
 std::unique_ptr<JSEventHandler> JSEventHandler::CreateOrNull(JSContext* ctx, JSValue value, JSEventHandler::HandlerType handler_type) {
   if (!JS_IsFunction(ctx, value)) {
@@ -55,7 +56,6 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
   //   If an exception gets thrown by the callback, end these steps and allow
   //   the exception to propagate. (It will propagate to the DOM event dispatch
   //   logic, which will then report the exception.)
-
   std::vector<ScriptValue> arguments;
   JSContext* ctx = event_target.ctx();
 
@@ -64,110 +64,42 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
     auto* error_event = To<ErrorEvent>(&event);
     // The error argument should be initialized to null for dedicated workers.
     // https://html.spec.whatwg.org/C/#runtime-script-errors-2
-//    ScriptValue error_attribute = error_event->error(script_state_of_listener);
-//    if (error_attribute.IsEmpty() ||
-//        error_event->target()->InterfaceName() == event_target_names::kWorker) {
-//      error_attribute = ScriptValue::CreateNull(isolate);
-//    }
-//    arguments = {
-//        ScriptValue(isolate,
-//                    ToV8Traits<IDLString>::ToV8(script_state_of_listener,
-//                                                error_event->message())
-//                        .ToLocalChecked()),
-//        ScriptValue(isolate,
-//                    ToV8Traits<IDLString>::ToV8(script_state_of_listener,
-//                                                error_event->filename())
-//                        .ToLocalChecked()),
-//        ScriptValue(isolate,
-//                    ToV8Traits<IDLUnsignedLong>::ToV8(script_state_of_listener,
-//                                                      error_event->lineno())
-//                        .ToLocalChecked()),
-//        ScriptValue(isolate, ToV8Traits<IDLUnsignedLong>::ToV8(
-//            script_state_of_listener, error_event->colno())
-//            .ToLocalChecked()),
-//        error_attribute};
+    ScriptValue error_attribute = error_event->error();
+    if (error_attribute.IsEmpty()) {
+      error_attribute = ScriptValue::Empty(event.ctx());
+    }
+    arguments = {
+      ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->message())),
+      ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->filename())),
+      ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->lineno())),
+      ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->colno())),
+      error_attribute
+    };
   } else {
     arguments.emplace_back(ctx, event.ToQuickJS());
   }
 
-//  if (!event_handler_->IsRunnableOrThrowException(
-//      event.ShouldDispatchEvenWhenExecutionContextIsPaused()
-//      ? V8EventHandlerNonNull::IgnorePause::kIgnore
-//      : V8EventHandlerNonNull::IgnorePause::kDontIgnore)) {
-//    return;
-//  }
-//  ScriptValue result;
-//  if (!event_handler_
-//      ->InvokeWithoutRunnabilityCheck(event.currentTarget(), arguments)
-//      .To(&result) ||
-//      isolate->IsExecutionTerminating())
-//    return;
-//  v8::Local<v8::Value> v8_return_value = result.V8Value();
-//
-//  // There is nothing to do if |v8_return_value| is null or undefined.
-//  // See Step 5. for more information.
-//  if (v8_return_value->IsNullOrUndefined())
-//    return;
-//
-//  // https://webidl.spec.whatwg.org/#invoke-a-callback-function
-//  // step 13: Set completion to the result of converting callResult.[[Value]] to
-//  //          an IDL value of the same type as the operation's return type.
-//  //
-//  // OnBeforeUnloadEventHandler returns DOMString? while OnErrorEventHandler and
-//  // EventHandler return any, so converting |v8_return_value| to return type is
-//  // necessary only for OnBeforeUnloadEventHandler.
-//  String result_for_beforeunload;
-//  if (IsOnBeforeUnloadEventHandler()) {
-//    event_handler_->EvaluateAsPartOfCallback(Bind(
-//        [](v8::Local<v8::Value>& v8_return_value,
-//           String& result_for_beforeunload) {
-//          // TODO(yukiy): use |NativeValueTraits|.
-//          V8StringResource<kTreatNullAsNullString> native_result(
-//              v8_return_value);
-//
-//          // |native_result.Prepare()| throws exception if it fails to convert
-//          // |native_result| to String.
-//          if (!native_result.Prepare())
-//            return;
-//          result_for_beforeunload = native_result;
-//        },
-//        std::ref(v8_return_value), std::ref(result_for_beforeunload)));
-//    if (!result_for_beforeunload)
-//      return;
-//  }
+  ScriptValue result = event_handler_
+      ->Invoke(event.ctx(), arguments.size(), arguments.data());
+  if (result.IsException()) {
+    exception_state.ThrowException(event.ctx(), result.ToQuickJS());
+    return;
+  }
 
-  // Step 5. Process return value as follows:
-  //   If event is a BeforeUnloadEvent object and event's type is beforeunload
-  //     If return value is not null, then:
-  //       1. Set event's canceled flag.
-  //       2. If event's returnValue attribute's value is the empty string, then
-  //          set event's returnValue attribute's value to return value.
-  //   If special error event handling is true
-  //     If return value is true, then set event's canceled flag.
-  //   Otherwise
-  //     If return value is false, then set event's canceled flag.
-  //       Note: If we've gotten to this "Otherwise" clause because event's type
-  //             is beforeunload but event is not a BeforeUnloadEvent object,
-  //             then return value will never be false, since in such cases
-  //             return value will have been coerced into either null or a
-  //             DOMString.
-//  auto* before_unload_event = DynamicTo<BeforeUnloadEvent>(&event);
-//  const bool is_beforeunload_event =
-//      before_unload_event && event.type() == event_type_names::kBeforeunload;
-//  if (is_beforeunload_event) {
-//    if (result_for_beforeunload) {
-//      event.preventDefault();
-//      if (before_unload_event->returnValue().IsEmpty())
-//        before_unload_event->setReturnValue(result_for_beforeunload);
-//    }
-//  } else if (!IsOnBeforeUnloadEventHandler()) {
-//    if (special_error_event_handling && v8_return_value->IsBoolean() &&
-//        v8_return_value.As<v8::Boolean>()->Value())
-//      event.preventDefault();
-//    else if (!special_error_event_handling && v8_return_value->IsBoolean() &&
-//        !v8_return_value.As<v8::Boolean>()->Value())
-//      event.preventDefault();
-//  }
+  //  // There is nothing to do if |v8_return_value| is null or undefined.
+  //  // See Step 5. for more information.
+  if (result.IsEmpty()) {
+    return;
+  }
+
+  // https://webidl.spec.whatwg.org/#invoke-a-callback-function
+  // step 13: Set completion to the result of converting callResult.[[Value]] to
+  //          an IDL value of the same type as the operation's return type.
+  //
+  // OnBeforeUnloadEventHandler returns DOMString? while OnErrorEventHandler and
+  // EventHandler return any, so converting |v8_return_value| to return type is
+  // necessary only for OnBeforeUnloadEventHandler.
+  // TODO: special handling for beforeunload event and onerror event.
 }
 
 }

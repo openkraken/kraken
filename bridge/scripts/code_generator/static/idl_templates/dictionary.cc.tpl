@@ -36,7 +36,12 @@ void <%= className %>::FillMembersWithQJSObject(JSContext* ctx, JSValue value, E
   }
 
   <% _.forEach(props, function(prop, index) { %>
-  <%= prop.name %>_ = Converter<<%= generateTypeConverter(prop.type) %>>::FromValue(ctx, value, exception_state);
+  {
+      JSValue v = JS_GetPropertyStr(ctx, value, "<%= prop.name %>");
+      <%= prop.name %>_ = Converter<<%= generateTypeConverter(prop.type) %>>::FromValue(ctx, v, exception_state);
+      JS_FreeValue(ctx, v);
+  }
+
   <% }); %>
 
 

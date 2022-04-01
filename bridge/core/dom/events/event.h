@@ -158,12 +158,6 @@ class Event : public ScriptWrappable {
   // Whether preventDefault was called on uncancelable event.
   unsigned prevent_default_called_on_uncancelable_event_ : 1;
 
-  // Whether any of listeners have thrown an exception or not.
-  // Corresponds to |legacyOutputDidListenersThrowFlag| in DOM standard.
-  // https://dom.spec.whatwg.org/#dispatching-events
-  // https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-  unsigned legacy_did_listeners_throw_flag_ : 1;
-
   unsigned fire_only_capture_listeners_at_target_ : 1;
   unsigned fire_only_non_capture_listeners_at_target_ : 1;
 

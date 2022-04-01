@@ -187,10 +187,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/converter_impl.h
     bindings/qjs/dictionary_base.cc
     bindings/qjs/dictionary_base.h
-    bindings/qjs/event_listener_options.cc
-    bindings/qjs/event_listener_options.h
-    bindings/qjs/add_event_listener_options.cc
-    bindings/qjs/add_event_listener_options.h
     bindings/qjs/js_based_event_listener.cc
     bindings/qjs/js_based_event_listener.h
     bindings/qjs/js_event_handler.cc
@@ -201,6 +197,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/binding_initializer.h
     bindings/qjs/member_installer.cc
     bindings/qjs/member_installer.h
+    bindings/qjs/source_location.cc
+    bindings/qjs/source_location.h
     bindings/qjs/garbage_collected.h
     bindings/qjs/script_wrappable.cc
     bindings/qjs/script_wrappable.h
@@ -283,8 +281,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/events/event_target.cc
     core/dom/events/event_target_impl.cc
     core/dom/events/event_target_impl.h
-    core/dom/events/error_event.cc
-    core/dom/events/error_event.h
+    core/events/error_event.cc
+    core/events/error_event.h
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc

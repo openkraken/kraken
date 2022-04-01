@@ -40,6 +40,13 @@ class AtomicString {
     return JS_AtomToValue(ctx, atom_);
   };
 
+  std::string ToStdString() const {
+    const char* buf = JS_AtomToCString(ctx_, atom_);
+    std::string result = std::string(buf);
+    JS_FreeCString(ctx_, buf);
+    return result;
+  }
+
   // Copy assignment
   AtomicString(AtomicString const& value) {
     if (!is_static_atom_ && &value != this) {
