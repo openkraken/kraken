@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'dart:io';
 import 'dart:async';
 
+import 'package:webview_flutter/webview_flutter.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -41,6 +43,7 @@ class MyBrowser extends StatefulWidget {
 class _MyHomePageState extends State<MyBrowser> {
 
   Kraken? _kraken;
+  WebView? _webView;
 
   List<int> _krakenOnloadTimes = [];
   List _webonloadTimes = [];
@@ -60,6 +63,15 @@ class _MyHomePageState extends State<MyBrowser> {
       print('_krakenPaintTimes=$_krakenOnloadTimes');
       // End of collect Kraken performance.
     }
+  }
+
+  JavascriptChannel _javascriptChannel(BuildContext context) {
+    return JavascriptChannel(
+        name: 'Message',
+        onMessageReceived: (JavascriptMessage message) {
+          print('firstPaint=${message.message}');
+        }
+    );
   }
 
   @override
@@ -135,9 +147,15 @@ class _MyHomePageState extends State<MyBrowser> {
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    color: Colors.blue,
-                    padding: EdgeInsets.all(5.0),
+                  child: _webView = WebView(
+                    initialUrl: 'http://192.168.1.196:3333/home.html',
+                    javascriptMode: JavascriptMode.unrestricted,
+                    onWebViewCreated: (WebViewController controller)  {
+                      controller.clearCache();
+                    },
+                    javascriptChannels: <JavascriptChannel>{
+                      _javascriptChannel(context),
+                    },
                   ),
                   flex: 1,
                 ),
