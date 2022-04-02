@@ -8,7 +8,9 @@ import 'dart:async';
 
 import 'package:webview_flutter/webview_flutter.dart';
 
-void main() {
+const benchMarkServerAddress = String.fromEnvironment("IP");
+
+void main(List<String> args) {
   runApp(MyApp());
 }
 
@@ -64,7 +66,7 @@ class _WebviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WebView(
-      initialUrl: 'http://192.168.1.196:8080/web/home.html',
+      initialUrl: 'http://$benchMarkServerAddress:7878/web/home.html',
       javascriptMode: JavascriptMode.unrestricted,
       onWebViewCreated: (WebViewController controller)  {
         // controller.clearCache();
@@ -94,7 +96,7 @@ class _KrakenPage extends StatelessWidget {
     };
 
     return Kraken(
-      bundle: KrakenBundle.fromUrl('http://192.168.1.196:8080/kraken/home.kbc1'),
+      bundle: KrakenBundle.fromUrl('http://$benchMarkServerAddress:7878/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
       onLoad: (KrakenController controller) {
         // controller.view.evaluateJavaScripts("""setTimeout(() => {

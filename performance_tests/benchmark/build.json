@@ -10,5 +10,6 @@
   "kraken": {
     "mpa": true
   },
-  "plugins": []
+  "plugins": [],
+  "publicPath": "/web/"
 }

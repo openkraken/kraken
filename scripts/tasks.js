@@ -815,27 +815,30 @@ task('build-benchmark-app', async (doen) => {
 })
 
 task('run-benchmark', async (done) => {
-  let androidDevices = getDevicesInfo();
+  const childProcess = spawn('http-server', ['./', '-p 7878'], {
+    stdio: 'pipe',
+    cwd: path.join(paths.performanceTests, '/benchmark/build')
+  });
+
+  let serverIpAddress;
+  let interfaces = os.networkInterfaces();
+  for (let devName in interfaces) {
+    interfaces[devName].forEach((item) => {
+      if (item.family === 'IPv4' && !item.internal && item.address !== '127.0.0.1') {
+        serverIpAddress = item.address;
+      }
+    })
+  }
   
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
+
+  if (!serverIpAddress) {
+    const err = new Error('The IP address was not found.');
+    done(err);
+  }
+
+  let androidDevices = getDevicesInfo();
+  execSync(`flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress}"`, {stdio: 'inherit', cwd: paths.performanceTests});
   execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
-  execSync(`flutter run -d ${androidDevices[0].id} --profile`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
+  
   done();
 });
