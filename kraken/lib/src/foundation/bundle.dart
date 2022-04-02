@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
@@ -164,7 +164,8 @@ class DataBundle extends KrakenBundle {
   }
 
   DataBundle.fromString(String content, String url, { ContentType? contentType }) : super(url) {
-    data = Uint8List.fromList(content.codeUnits);
+    // Encode string to data by utf8.
+    data = Uint8List.fromList(utf8.encode(content));
     this.contentType = contentType ?? ContentType.text;
   }
 

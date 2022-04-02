@@ -34,7 +34,7 @@ describe('border', () => {
 
     await snapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let reference;
     let test;
     let wrapper;
@@ -77,7 +77,7 @@ describe('border', () => {
 
     await snapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let reference;
     let test;
     let wrapper;

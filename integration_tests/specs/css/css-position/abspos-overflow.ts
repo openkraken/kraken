@@ -156,7 +156,7 @@ describe('abspos-overflow', () => {
 
     await snapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let control;
     let p;
     let positioned;
@@ -436,7 +436,7 @@ describe('abspos-overflow', () => {
 
     await snapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let control;
     let positioned;
     let overflow;
@@ -625,7 +625,7 @@ describe('abspos-overflow', () => {
 
     await snapshot();
   });
-  xit('008', async () => {
+  it('008', async () => {
     let control;
     let positioned;
     let overflow;

@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('align-self', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let test;
     let cover;
     test = createElement(
@@ -67,6 +67,8 @@ describe('align-self', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative margin offset calculation is wrong.
   xit('002', async () => {
     let test;
     let cover;
@@ -354,7 +356,7 @@ describe('align-self', () => {
 
     await snapshot();
   });
-  xit('007', async () => {
+  it('007', async () => {
     let test;
     let cover;
     test = createElement(
@@ -422,6 +424,8 @@ describe('align-self', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative margin offset calculation is wrong.
   xit('008', async () => {
     let p;
     let test;
@@ -504,6 +508,8 @@ describe('align-self', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative margin offset calculation is wrong.
   xit('009', async () => {
     let p;
     let test;
@@ -865,7 +871,7 @@ describe('align-self', () => {
 
     await snapshot();
   });
-  xit('013', async () => {
+  it('013', async () => {
     let test;
     let cover;
     test = createElement(
@@ -931,7 +937,7 @@ describe('align-self', () => {
     await snapshot();
   });
 
-  xit("015-ref", async () => {
+  it("015-ref", async () => {
     let p;
     let item1;
     let item2;

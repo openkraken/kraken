@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('blocks-018', () => {
-  xit('ref', async () => {
+  it('ref', async () => {
     let div;
     div = createElement(
       'div',

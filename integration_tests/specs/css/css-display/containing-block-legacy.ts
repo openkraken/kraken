@@ -38,7 +38,7 @@ describe('containing-block legacy', () => {
     await snapshot();
   });
 
-  xit('004', async () => {
+  it('004', async () => {
     let div1 = createElementWithStyle('div', {
       width: '100px',
       height: '100px',
@@ -149,7 +149,7 @@ describe('containing-block legacy', () => {
     append(BODY, div1);
     await snapshot();
   });
-  xit('011', async () => {
+  it('011', async () => {
     let div2 = createElementWithStyle('div', {
       border: '1px solid black',
       padding: '100px',
@@ -166,7 +166,7 @@ describe('containing-block legacy', () => {
     append(BODY, div2);
     await snapshot();
   });
-  xit('013', async () => {
+  it('013', async () => {
     let div2 = createElementWithStyle('div', {
       border: '1px solid black',
       padding: '100px',
@@ -183,7 +183,7 @@ describe('containing-block legacy', () => {
     append(BODY, div2);
     await snapshot();
   });
-  xit('015', async () => {
+  it('015', async () => {
     let div2 = createElementWithStyle('div', {
       border: '1px solid black',
       padding: '100px',
@@ -201,6 +201,7 @@ describe('containing-block legacy', () => {
     await snapshot();
   });
 
+  // @TODO: Height of display: inline element is wrong.
   xit('017', async () => {
     let divStyle = {
       border: '3px solid silver',
@@ -275,6 +276,7 @@ describe('containing-block legacy', () => {
     await snapshot();
   });
 
+  // @TODO: Height of display: inline element is wrong.
   xit('018', async () => {
     let divStyle = {
       border: '3px solid silver',
@@ -345,7 +347,7 @@ describe('containing-block legacy', () => {
     await snapshot();
   });
 
-  xit('019', async () => {
+  it('019', async () => {
     let divStyle = {
       border: '3px solid black',
       padding: '100px',

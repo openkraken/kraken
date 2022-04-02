@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('abspos-002', () => {
-  xit('ref', async () => {
+  it('ref', async () => {
     let p;
     let div;
     p = createElement(

@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('image-percentage', () => {
-  xit('max-height-in-anonymous-block', async () => {
+  it('max-height-in-anonymous-block', async () => {
     let p;
     let div;
     p = createElement(

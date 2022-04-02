@@ -102,8 +102,8 @@ describe('Position fixed', () => {
     await snapshot();
 
   });
-  // FIXME: Current scroll in horizontal axis is not work in viewport
-  xit('works with single frame image in window scroll', async () => {
+
+  it('works with single frame image in window scroll', async () => {
     let container = createElement('div',
       {
         style: {
@@ -136,7 +136,6 @@ describe('Position fixed', () => {
     );
 
     BODY.appendChild(container);
-    await snapshot(0.5);
 
     window.scroll(100, 200);
     await snapshot();

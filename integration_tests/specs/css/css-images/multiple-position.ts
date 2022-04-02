@@ -110,7 +110,7 @@ describe('multiple-position', () => {
 
     await snapshot();
   });
-  xit('color-stop-radial-2', async () => {
+  it('color-stop-radial-2', async () => {
     let div;
     div = createElement('div', {
       '<': '',
@@ -126,6 +126,7 @@ describe('multiple-position', () => {
 
     await snapshot();
   });
+  // @TODO: radial-gradient parse error. 
   xit('color-stop-radial', async () => {
     let target;
     target = createElement('div', {
