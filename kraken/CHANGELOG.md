@@ -1,3 +1,18 @@
+## 0.10.4
+
+** Feature** 
+
++ Add window.innerWidth/innerHeight, add screen.availWidth/availHeight https://github.com/openkraken/kraken/pull/1256
+
+**Bug Fixed**
+
++ Fix DataBundle string with non latin. https://github.com/openkraken/kraken/pull/1263
++ Fix KrakenBundle.fromBytecode's wrong content type. https://github.com/openkraken/kraken/pull/1245
+
+** Others **
+
++ Change copyright to `The Kraken authors`.
+
 ## 0.10.3
 
 **Bug Fixed**

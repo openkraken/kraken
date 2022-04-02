@@ -1,6 +1,6 @@
 name: kraken
 description: A high-performance, web standards-compliant rendering engine.
-version: 0.10.3+1
+version: 0.10.4
 homepage: https://openkraken.com
 
 environment:
