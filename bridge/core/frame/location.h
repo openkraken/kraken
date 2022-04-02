@@ -25,7 +25,9 @@ class Location : public GarbageCollected<Location> {
   void dispose() const override;
 };
 
-auto locationCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto locationCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   auto* type = static_cast<const WrapperTypeInfo*>(JS_GetOpaque(func_obj, JSValueGetClassId(func_obj)));
   auto* location = Location::create(ctx);
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));

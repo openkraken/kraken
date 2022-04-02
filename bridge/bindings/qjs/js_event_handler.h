@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_HANDLER_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_HANDLER_H_
 
-#include "js_based_event_listener.h"
 #include "foundation/casting.h"
+#include "js_based_event_listener.h"
 
 namespace kraken {
 
@@ -35,27 +35,20 @@ class JSEventHandler : public JSBasedEventListener {
     return JS_NULL;
   }
 
-  explicit JSEventHandler(const std::shared_ptr<QJSFunction>& event_handler, HandlerType type):  type_(type), event_handler_(event_handler) {};
+  explicit JSEventHandler(const std::shared_ptr<QJSFunction>& event_handler, HandlerType type)
+      : type_(type), event_handler_(event_handler){};
 
-  JSValue GetListenerObject(EventTarget&) {
-    return event_handler_->ToQuickJS();
-  }
+  JSValue GetListenerObject(EventTarget&) { return event_handler_->ToQuickJS(); }
 
-  JSValue GetEffectiveFunction(EventTarget&) {
-    return event_handler_->ToQuickJS();
-  }
+  JSValue GetEffectiveFunction(EventTarget&) { return event_handler_->ToQuickJS(); }
 
   // Helper functions for DowncastTraits.
   bool IsJSEventHandler() const override { return true; }
 
   // For checking special types of EventHandler.
-  bool IsOnErrorEventHandler() const {
-    return type_ == HandlerType::kOnErrorEventHandler;
-  }
+  bool IsOnErrorEventHandler() const { return type_ == HandlerType::kOnErrorEventHandler; }
 
-  bool IsOnBeforeUnloadEventHandler() const {
-    return type_ == HandlerType::kOnBeforeUnloadEventHandler;
-  }
+  bool IsOnBeforeUnloadEventHandler() const { return type_ == HandlerType::kOnBeforeUnloadEventHandler; }
 
   // EventListener overrides:
   bool Matches(const EventListener&) const override;
@@ -64,14 +57,12 @@ class JSEventHandler : public JSBasedEventListener {
   // JSBasedEventListener override:
   // Performs "The event handler processing algorithm"
   // https://html.spec.whatwg.org/C/#the-event-handler-processing-algorithm
-  void InvokeInternal(EventTarget&,
-                      Event&,
-                      ExceptionState& exception_state) override;
+  void InvokeInternal(EventTarget&, Event&, ExceptionState& exception_state) override;
 
   std::shared_ptr<QJSFunction> event_handler_;
   const HandlerType type_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_HANDLER_H_

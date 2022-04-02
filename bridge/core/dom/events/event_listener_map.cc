@@ -29,7 +29,10 @@ static bool RemoveListenerFromVector(EventListenerVector* listener_vector,
   // Do a manual search for the matching listener. It is not
   // possible to create a listener on the stack because of the
   // const on |listener|.
-  auto it = std::find_if(listener_vector->begin(), listener_vector->end(), [listener, options](const RegisteredEventListener& event_listener) -> bool { return event_listener.Matches(listener, options); });
+  auto it = std::find_if(listener_vector->begin(), listener_vector->end(),
+                         [listener, options](const RegisteredEventListener& event_listener) -> bool {
+                           return event_listener.Matches(listener, options);
+                         });
 
   if (it == listener_vector->end()) {
     *index_of_removed_listener = -1;
@@ -88,7 +91,8 @@ bool EventListenerMap::Remove(const AtomicString& event_type,
                               RegisteredEventListener* registered_event_listener) {
   for (unsigned i = 0; i < entries_.size(); ++i) {
     if (entries_[i].first == event_type) {
-      bool was_removed = RemoveListenerFromVector(entries_[i].second.get(), listener, options, index_of_removed_listener, registered_event_listener);
+      bool was_removed = RemoveListenerFromVector(entries_[i].second.get(), listener, options,
+                                                  index_of_removed_listener, registered_event_listener);
       if (entries_[i].second->empty()) {
         entries_.erase(entries_.begin() + i);
       }

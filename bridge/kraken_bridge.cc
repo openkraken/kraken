@@ -99,7 +99,9 @@ int32_t allocateNewPage(int32_t targetContextId) {
   }
 
   assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
-         (std::string("can not Allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
+         (std::string("can not Allocate page at index") + std::to_string(targetContextId) +
+          std::string(": page have already exist."))
+             .c_str());
   auto* page = new kraken::KrakenPage(targetContextId, nullptr);
   kraken::KrakenPage::pageContextPool[targetContextId] = page;
   return targetContextId;
@@ -149,7 +151,11 @@ void reloadJsContext(int32_t contextId) {
   kraken::KrakenPage::pageContextPool[contextId] = newContext;
 }
 
-void invokeModuleEvent(int32_t contextId, kraken::NativeString* moduleName, const char* eventType, void* event, kraken::NativeString* extra) {
+void invokeModuleEvent(int32_t contextId,
+                       kraken::NativeString* moduleName,
+                       const char* eventType,
+                       void* event,
+                       kraken::NativeString* extra) {
   assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
   context->invokeModuleEvent(moduleName, eventType, event, extra);

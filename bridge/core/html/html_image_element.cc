@@ -19,7 +19,8 @@
 //  context->defineGlobalProperty("Image", JS_DupValue(context->ctx(), constructor->jsObject));
 //}
 //
-// JSValue ImageElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+// JSValue ImageElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue*
+// argv) {
 //  auto instance = new ImageElementInstance(this);
 //  return instance->jsObject;
 //}
@@ -33,8 +34,8 @@
 //  std::string key = "width";
 //  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
 //  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
-//  return JS_NULL;
+//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01,
+//  *args_02, nullptr); return JS_NULL;
 //}
 // IMPL_PROPERTY_GETTER(ImageElement, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  getDartMethod()->flushUICommand();
@@ -46,8 +47,8 @@
 //  std::string key = "height";
 //  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
 //  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
-//  return JS_NULL;
+//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01,
+//  *args_02, nullptr); return JS_NULL;
 //}
 // IMPL_PROPERTY_GETTER(ImageElement, naturalWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  getDartMethod()->flushUICommand();
@@ -69,8 +70,8 @@
 //  std::string key = "src";
 //  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
 //  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
-//  return JS_NULL;
+//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01,
+//  *args_02, nullptr); return JS_NULL;
 //}
 // IMPL_PROPERTY_GETTER(ImageElement, loading)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  getDartMethod()->flushUICommand();
@@ -82,8 +83,8 @@
 //  std::string key = "loading";
 //  std::unique_ptr<NativeString> args_01 = stringToNativeString(key);
 //  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, argv[0]);
-//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01, *args_02, nullptr);
-//  return JS_NULL;
+//  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setProperty, *args_01,
+//  *args_02, nullptr); return JS_NULL;
 //}
 //
 // ImageElementInstance::ImageElementInstance(ImageElement* element) : ElementInstance(element, "img", true) {
@@ -92,9 +93,9 @@
 //}
 //
 // bool ImageElementInstance::dispatchEvent(EventInstance* event) {
-//  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string), event->nativeEvent->type->length);
-//  std::string eventType = toUTF8(u16EventType);
-//  bool result = EventTargetInstance::dispatchEvent(event);
+//  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(event->nativeEvent->type->string),
+//  event->nativeEvent->type->length); std::string eventType = toUTF8(u16EventType); bool result =
+//  EventTargetInstance::dispatchEvent(event);
 //
 //  // Free image instance after load or error event triggered.
 //  if ((eventType == "load" || eventType == "error") && !freed) {

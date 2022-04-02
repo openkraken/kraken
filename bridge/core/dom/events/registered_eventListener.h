@@ -20,7 +20,8 @@ class RegisteredEventListener final {
   KRAKEN_DISALLOW_NEW()
  public:
   RegisteredEventListener();
-  RegisteredEventListener(const std::shared_ptr<EventListener>& listener, std::shared_ptr<AddEventListenerOptions> options);
+  RegisteredEventListener(const std::shared_ptr<EventListener>& listener,
+                          std::shared_ptr<AddEventListenerOptions> options);
   RegisteredEventListener(const RegisteredEventListener& that);
   RegisteredEventListener& operator=(const RegisteredEventListener& that);
 
@@ -39,7 +40,8 @@ class RegisteredEventListener final {
 
   void SetBlockedEventWarningEmitted() { blocked_event_warning_emitted_ = true; }
 
-  bool Matches(const std::shared_ptr<EventListener>& listener, const std::shared_ptr<EventListenerOptions>& options) const;
+  bool Matches(const std::shared_ptr<EventListener>& listener,
+               const std::shared_ptr<EventListenerOptions>& options) const;
 
   bool ShouldFire(const Event&) const;
 

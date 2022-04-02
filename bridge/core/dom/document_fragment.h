@@ -24,7 +24,9 @@ class DocumentFragment : public Node {
   friend Node;
 };
 
-auto documentFragmentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto documentFragmentCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   auto* eventTarget = EventTarget::create(ctx);
   return eventTarget->toQuickJS();
 };

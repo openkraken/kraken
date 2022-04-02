@@ -14,7 +14,8 @@ class BlobReaderClient {
  public:
   enum ReadType { kReadAsText, kReadAsArrayBuffer };
 
-  BlobReaderClient(ExecutingContext* context, Blob* blob, ScriptPromiseResolver* resolver, ReadType read_type) : context_(context), blob_(blob), resolver_(resolver), read_type_(read_type) {
+  BlobReaderClient(ExecutingContext* context, Blob* blob, ScriptPromiseResolver* resolver, ReadType read_type)
+      : context_(context), blob_(blob), resolver_(resolver), read_type_(read_type) {
     Start();
   };
 
@@ -52,11 +53,16 @@ Blob* Blob::Create(ExecutingContext* context) {
   return makeGarbageCollected<Blob>(context->ctx());
 }
 
-Blob* Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>>& data, ExceptionState& exception_state) {
+Blob* Blob::Create(ExecutingContext* context,
+                   std::vector<std::shared_ptr<BlobPart>>& data,
+                   ExceptionState& exception_state) {
   return makeGarbageCollected<Blob>(context->ctx(), data);
 }
 
-Blob* Blob::Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>>& data, std::shared_ptr<BlobPropertyBag> property, ExceptionState& exception_state) {
+Blob* Blob::Create(ExecutingContext* context,
+                   std::vector<std::shared_ptr<BlobPart>>& data,
+                   std::shared_ptr<BlobPropertyBag> property,
+                   ExceptionState& exception_state) {
   return makeGarbageCollected<Blob>(context->ctx(), data, property);
 }
 
@@ -84,7 +90,10 @@ Blob* Blob::slice(int64_t start, int64_t end, ExceptionState& exception_state) {
   std::unique_ptr<NativeString> contentType = nullptr;
   return slice(start, end, contentType, exception_state);
 }
-Blob* Blob::slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& content_type, ExceptionState& exception_state) {
+Blob* Blob::slice(int64_t start,
+                  int64_t end,
+                  std::unique_ptr<NativeString>& content_type,
+                  ExceptionState& exception_state) {
   auto* newBlob = makeGarbageCollected<Blob>(ctx());
   std::vector<uint8_t> newData;
   newData.reserve(_data.size() - (end - start));

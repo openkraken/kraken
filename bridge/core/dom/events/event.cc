@@ -12,8 +12,10 @@ namespace kraken {
 Event* Event::From(ExecutingContext* context, NativeEvent* native_event) {
   AtomicString event_type = AtomicString::From(context->ctx(), native_event->type);
 
-  auto* event = makeGarbageCollected<Event>(context, event_type, native_event->bubbles == 0 ? Bubbles::kNo : Bubbles::kYes, native_event->cancelable == 0 ? Cancelable::kNo : Cancelable::kYes,
-                                             ComposedMode::kComposed, native_event->timeStamp);
+  auto* event =
+      makeGarbageCollected<Event>(context, event_type, native_event->bubbles == 0 ? Bubbles::kNo : Bubbles::kYes,
+                                  native_event->cancelable == 0 ? Cancelable::kNo : Cancelable::kYes,
+                                  ComposedMode::kComposed, native_event->timeStamp);
   event->SetTarget(static_cast<EventTarget*>(native_event->target));
   event->SetCurrentTarget(static_cast<EventTarget*>(native_event->currentTarget));
   event->default_prevented_ = native_event->defaultPrevented;
@@ -22,9 +24,15 @@ Event* Event::From(ExecutingContext* context, NativeEvent* native_event) {
 
 Event::Event(ExecutingContext* context) : type_(AtomicString::Empty(context->ctx())), ScriptWrappable(context->ctx()) {}
 
-Event::Event(ExecutingContext* context, const AtomicString& event_type) : type_(event_type), ScriptWrappable(context->ctx()) {}
+Event::Event(ExecutingContext* context, const AtomicString& event_type)
+    : type_(event_type), ScriptWrappable(context->ctx()) {}
 
-Event::Event(ExecutingContext* context, const AtomicString& event_type, Bubbles bubbles, Cancelable cancelable, ComposedMode composed_mode, double time_stamp)
+Event::Event(ExecutingContext* context,
+             const AtomicString& event_type,
+             Bubbles bubbles,
+             Cancelable cancelable,
+             ComposedMode composed_mode,
+             double time_stamp)
     : ScriptWrappable(context->ctx()),
       type_(event_type),
       bubbles_(bubbles == Bubbles::kYes),
@@ -73,8 +81,7 @@ void Event::SetCurrentTarget(EventTarget* target) {
 }
 
 void Event::preventDefault(ExceptionState& exception_state) {
-  if (handling_passive_ != PassiveMode::kNotPassive &&
-      handling_passive_ != PassiveMode::kNotPassiveDefault) {
+  if (handling_passive_ != PassiveMode::kNotPassive && handling_passive_ != PassiveMode::kNotPassiveDefault) {
     return;
   }
 

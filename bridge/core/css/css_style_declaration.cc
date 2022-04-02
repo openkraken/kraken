@@ -45,14 +45,19 @@ static std::string parseJavaScriptCSSPropertyName(std::string& propertyName) {
   return result;
 }
 
-JSValue CSSStyleDeclaration::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue CSSStyleDeclaration::instanceConstructor(JSContext* ctx,
+                                                 JSValue func_obj,
+                                                 JSValue this_val,
+                                                 int argc,
+                                                 JSValue* argv) {
   if (argc != 1) {
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
 
   JSValue eventTargetValue = argv[0];
 
-  auto eventTargetInstance = static_cast<EventTargetInstance*>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
+  auto eventTargetInstance =
+      static_cast<EventTargetInstance*>(JS_GetOpaque(eventTargetValue, EventTarget::classId(eventTargetValue)));
   auto style = new StyleDeclaration(this, eventTargetInstance);
   return style->jsObject;
 }
@@ -65,8 +70,11 @@ CSSStyleDeclaration::CSSStyleDeclaration(ExecutionContext* context) : HostClass(
 
 IMPL_FUNCTION(CSSStyleDeclaration, setProperty)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2)
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only %d present.", argc);
-  auto* instance = static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'setProperty' on 'CSSStyleDeclaration': 2 arguments required, but only %d present.",
+        argc);
+  auto* instance =
+      static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue propertyNameValue = argv[0];
   JSValue propertyValue = argv[1];
 
@@ -82,8 +90,10 @@ IMPL_FUNCTION(CSSStyleDeclaration, setProperty)(JSContext* ctx, JSValue this_val
 
 IMPL_FUNCTION(CSSStyleDeclaration, removeProperty)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1)
-    return JS_ThrowTypeError(ctx, "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto* instance = static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'removeProperty' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
+  auto* instance =
+      static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JSValue propertyNameValue = argv[0];
 
@@ -99,8 +109,11 @@ IMPL_FUNCTION(CSSStyleDeclaration, removeProperty)(JSContext* ctx, JSValue this_
 
 IMPL_FUNCTION(CSSStyleDeclaration, getPropertyValue)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1)
-    return JS_ThrowTypeError(ctx, "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
-  auto* instance = static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+    return JS_ThrowTypeError(
+        ctx,
+        "Failed to execute 'getPropertyValue' on 'CSSStyleDeclaration': 1 arguments required, but only 0 present.");
+  auto* instance =
+      static_cast<StyleDeclaration*>(JS_GetOpaque(this_val, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   JSValue propertyNameValue = argv[0];
   const char* cPropertyName = JS_ToCString(ctx, propertyNameValue);
   std::string propertyName = std::string(cPropertyName);
@@ -111,7 +124,12 @@ IMPL_FUNCTION(CSSStyleDeclaration, getPropertyValue)(JSContext* ctx, JSValue thi
 }
 
 StyleDeclaration::StyleDeclaration(CSSStyleDeclaration* cssStyleDeclaration, EventTargetInstance* ownerEventTarget)
-    : Instance(cssStyleDeclaration, "CSSStyleDeclaration", &m_exoticMethods, CSSStyleDeclaration::kCSSStyleDeclarationClassId, finalize), ownerEventTarget(ownerEventTarget) {
+    : Instance(cssStyleDeclaration,
+               "CSSStyleDeclaration",
+               &m_exoticMethods,
+               CSSStyleDeclaration::kCSSStyleDeclarationClassId,
+               finalize),
+      ownerEventTarget(ownerEventTarget) {
   JS_DupValue(m_ctx, ownerEventTarget->jsObject);
 }
 
@@ -125,7 +143,8 @@ bool StyleDeclaration::setProperty(std::string& name, JSValue value) {
   if (ownerEventTarget != nullptr) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
     std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, value);
-    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02,
+                                             nullptr);
   }
 
   return true;
@@ -143,7 +162,8 @@ void StyleDeclaration::removeProperty(std::string& name) {
   if (ownerEventTarget != nullptr) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
     std::unique_ptr<NativeString> args_02 = jsValueToNativeString(m_ctx, JS_NULL);
-    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02, nullptr);
+    m_context->uiCommandBuffer()->addCommand(ownerEventTarget->eventTargetId(), UICommand::setStyle, *args_01, *args_02,
+                                             nullptr);
   }
 }
 
@@ -233,8 +253,14 @@ bool StyleDeclaration::hasObjectProperty(JSContext* ctx, JSValue obj, JSAtom ato
 }
 
 // Property Accessors
-int StyleDeclaration::setObjectProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
-  auto* style = static_cast<StyleDeclaration*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+int StyleDeclaration::setObjectProperty(JSContext* ctx,
+                                        JSValue obj,
+                                        JSAtom atom,
+                                        JSValue value,
+                                        JSValue receiver,
+                                        int flags) {
+  auto* style =
+      static_cast<StyleDeclaration*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
   bool success = style->setProperty(name, value);
@@ -252,7 +278,8 @@ JSValue StyleDeclaration::getObjectProperty(JSContext* ctx, JSValue obj, JSAtom 
   }
   JS_FreeValue(ctx, prototype);
 
-  auto* style = static_cast<StyleDeclaration*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  auto* style =
+      static_cast<StyleDeclaration*>(JS_GetOpaque(receiver, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
   JSValue result = style->getPropertyValue(name);

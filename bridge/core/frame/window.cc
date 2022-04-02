@@ -100,7 +100,8 @@ IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, J
 
   JSValue messageType = JS_NewString(ctx, "message");
   JSValue arguments[] = {messageType, messageEventInitValue};
-  JSValue messageEventValue = JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 2, arguments);
+  JSValue messageEventValue =
+      JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 2, arguments);
   auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
   window->dispatchEvent(event);
 
@@ -113,7 +114,8 @@ IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, J
 
 IMPL_FUNCTION(Window, requestAnimationFrame)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc <= 0) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'requestAnimationFrame': 1 argument required, but only 0 present.");
   }
 
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
@@ -122,27 +124,32 @@ IMPL_FUNCTION(Window, requestAnimationFrame)(JSContext* ctx, JSValue this_val, i
   JSValue callbackValue = argv[0];
 
   if (!JS_IsObject(callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
 
   if (!JS_IsFunction(ctx, callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'requestAnimationFrame': parameter 1 (callback) must be a function.");
   }
 
   // Flutter backend implements check
 #if FLUTTER_BACKEND
   if (getDartMethod()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
   }
   // Flush all pending ui messages.
   getDartMethod()->flushUICommand();
 
   if (getDartMethod()->requestAnimationFrame == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
   }
 #endif
 
-  auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))->initialize<FrameCallback>(ctx, &FrameCallback::classId);
+  auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))
+                            ->initialize<FrameCallback>(ctx, &FrameCallback::classId);
 
   int32_t requestId = window->document()->requestAnimationFrame(frameCallback);
 
@@ -173,7 +180,8 @@ IMPL_FUNCTION(Window, cancelAnimationFrame)(JSContext* ctx, JSValue this_val, in
   JS_ToInt32(ctx, &id, requestIdValue);
 
   if (getDartMethod()->cancelAnimationFrame == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
   }
 
   window->document()->cancelAnimationFrame(id);

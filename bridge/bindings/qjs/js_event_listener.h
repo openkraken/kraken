@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_LISTENER_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_LISTENER_H_
 
-#include "js_based_event_listener.h"
 #include "foundation/casting.h"
+#include "js_based_event_listener.h"
 
 namespace kraken {
 
@@ -36,13 +36,11 @@ class JSEventListener final : public JSBasedEventListener {
   }
 
  private:
-  void InvokeInternal(EventTarget&,
-                      Event&,
-                      ExceptionState& exception_state) override;
+  void InvokeInternal(EventTarget&, Event&, ExceptionState& exception_state) override;
 
   const std::shared_ptr<QJSFunction> event_listener_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_LISTENER_H_

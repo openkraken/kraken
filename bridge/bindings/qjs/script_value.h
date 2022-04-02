@@ -19,7 +19,8 @@ namespace kraken {
 class ExecutingContext;
 class WrapperTypeInfo;
 
-// ScriptValue is a stack allocate only QuickJS JSValue wrapper ScriptValuewhich hold all information to hide out QuickJS running details.
+// ScriptValue is a stack allocate only QuickJS JSValue wrapper ScriptValuewhich hold all information to hide out
+// QuickJS running details.
 class ScriptValue final {
   // ScriptValue should only allocate at stack.
   KRAKEN_DISALLOW_NEW();

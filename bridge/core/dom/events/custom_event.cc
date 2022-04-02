@@ -80,7 +80,8 @@ CustomEvent::CustomEvent(JSValue eventType, JSValue eventInit) : Event(eventType
   }
 }
 
-CustomEvent::CustomEvent(NativeCustomEvent* nativeEvent) : m_nativeCustomEvent(nativeEvent), Event(reinterpret_cast<NativeEvent*>(nativeEvent)) {
+CustomEvent::CustomEvent(NativeCustomEvent* nativeEvent)
+    : m_nativeCustomEvent(nativeEvent), Event(reinterpret_cast<NativeEvent*>(nativeEvent)) {
   m_detail = JS_NewUnicodeString(m_runtime, m_ctx, nativeEvent->detail->string, nativeEvent->detail->length);
 }
 
@@ -97,7 +98,8 @@ void CustomEvent::dispose() const {
 
 IMPL_FUNCTION(CustomEvent, initCustomEvent)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'initCustomEvent' on 'CustomEvent': 1 argument required, but only 0 present");
   }
 
   auto* eventInstance = static_cast<CustomEvent*>(JS_GetOpaque(this_val, CustomEvent::classId));

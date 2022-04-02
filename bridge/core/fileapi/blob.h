@@ -22,13 +22,23 @@ class Blob : public ScriptWrappable {
 
  public:
   static Blob* Create(ExecutingContext* context);
-  static Blob* Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>>& data, ExceptionState& exception_state);
-  static Blob* Create(ExecutingContext* context, std::vector<std::shared_ptr<BlobPart>>& data, std::shared_ptr<BlobPropertyBag> property, ExceptionState& exception_state);
+  static Blob* Create(ExecutingContext* context,
+                      std::vector<std::shared_ptr<BlobPart>>& data,
+                      ExceptionState& exception_state);
+  static Blob* Create(ExecutingContext* context,
+                      std::vector<std::shared_ptr<BlobPart>>& data,
+                      std::shared_ptr<BlobPropertyBag> property,
+                      ExceptionState& exception_state);
 
   Blob() = delete;
   explicit Blob(JSContext* ctx) : ScriptWrappable(ctx){};
-  explicit Blob(JSContext* ctx, std::vector<std::shared_ptr<BlobPart>>& data) : ScriptWrappable(ctx) { PopulateBlobData(data); };
-  explicit Blob(JSContext* ctx, std::vector<std::shared_ptr<BlobPart>>& data, std::shared_ptr<BlobPropertyBag>& property) : mime_type_(property->type()), ScriptWrappable(ctx) {
+  explicit Blob(JSContext* ctx, std::vector<std::shared_ptr<BlobPart>>& data) : ScriptWrappable(ctx) {
+    PopulateBlobData(data);
+  };
+  explicit Blob(JSContext* ctx,
+                std::vector<std::shared_ptr<BlobPart>>& data,
+                std::shared_ptr<BlobPropertyBag>& property)
+      : mime_type_(property->type()), ScriptWrappable(ctx) {
     PopulateBlobData(data);
   };
 

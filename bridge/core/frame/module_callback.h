@@ -12,8 +12,9 @@
 
 namespace kraken {
 
-// ModuleCallback is an asynchronous callback function, usually from the 4th parameter of `kraken.invokeModule` function.
-// When the asynchronous operation on the Dart side ends, the callback is will called and to return to the JS executing environment.
+// ModuleCallback is an asynchronous callback function, usually from the 4th parameter of `kraken.invokeModule`
+// function. When the asynchronous operation on the Dart side ends, the callback is will called and to return to the JS
+// executing environment.
 class ModuleCallback {
  public:
   static std::shared_ptr<ModuleCallback> Create(std::shared_ptr<QJSFunction> function);

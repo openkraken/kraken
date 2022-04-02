@@ -33,8 +33,8 @@ void ScriptWrappable::InitializeQuickJSObject() {
     def.class_name = GetHumanReadableName();
 
     /// This callback will be called when QuickJS GC is running at marking stage.
-    /// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to tell GC
-    /// which member of their class should be collected by GC.
+    /// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to
+    /// tell GC which member of their class should be collected by GC.
     def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
       auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
       GCVisitor visitor{rt, mark_func};
@@ -47,7 +47,8 @@ void ScriptWrappable::InitializeQuickJSObject() {
     }
 
     /// This callback will be called when QuickJS GC will release the `jsObject` object memory of this class.
-    /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize completed.
+    /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize
+    /// completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
       auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
       object->Dispose();
@@ -57,9 +58,10 @@ void ScriptWrappable::InitializeQuickJSObject() {
     JS_NewClass(runtime, wrapperTypeInfo->classId, &def);
   }
 
-  /// The JavaScript object underline this class. This `jsObject` is the JavaScript object which can be directly access within JavaScript code.
-  /// When the reference count of `jsObject` decrease to 0, QuickJS will trigger `finalizer` callback and free `jsObject` memory.
-  /// When QuickJS GC found `jsObject` at marking stage, `gc_mark` callback will be triggered.
+  /// The JavaScript object underline this class. This `jsObject` is the JavaScript object which can be directly access
+  /// within JavaScript code. When the reference count of `jsObject` decrease to 0, QuickJS will trigger `finalizer`
+  /// callback and free `jsObject` memory. When QuickJS GC found `jsObject` at marking stage, `gc_mark` callback will be
+  /// triggered.
   jsObject_ = JS_NewObjectClass(ctx_, wrapperTypeInfo->classId);
   JS_SetOpaque(jsObject_, this);
 

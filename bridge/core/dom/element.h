@@ -141,7 +141,9 @@ class Element : public Node {
   friend class Node;
 };
 
-auto elementCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto elementCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   if (argc == 0) {
     return JS_ThrowTypeError(ctx, "Illegal constructor");
   }
@@ -171,7 +173,8 @@ const WrapperTypeInfo elementTypeInfo = {"Element", &nodeTypeInfo, elementCreato
 class BoundingClientRect : public GarbageCollected<BoundingClientRect> {
  public:
   BoundingClientRect() = delete;
-  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect) : GarbageCollected(), m_nativeBoundingClientRect(nativeBoundingClientRect){};
+  explicit BoundingClientRect(ExecutionContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
+      : GarbageCollected(), m_nativeBoundingClientRect(nativeBoundingClientRect){};
 
   const char* getHumanReadableName() const override { return "BoundingClientRect"; }
 

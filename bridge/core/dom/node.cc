@@ -104,7 +104,8 @@ IMPL_FUNCTION(Node, appendChild)(JSContext* ctx, JSValue this_val, int argc, JSV
   }
 
   if (node == self) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'appendChild' on 'Node': The new child element contains the parent.");
   }
 
   if (node->hasNodeFlag(Node::NodeFlag::IsDocumentFragment)) {
@@ -130,13 +131,15 @@ IMPL_FUNCTION(Node, remove)(JSContext* ctx, JSValue this_val, int argc, JSValue*
 }
 IMPL_FUNCTION(Node, removeChild)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required");
+    return JS_ThrowTypeError(ctx,
+                             "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1 arguments required");
   }
 
   JSValue nodeValue = argv[0];
 
   if (!JS_IsObject(nodeValue)) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object");
+    return JS_ThrowTypeError(
+        ctx, "Uncaught TypeError: Failed to execute 'removeChild' on 'Node': 1st arguments is not object");
   }
 
   auto self = static_cast<Node*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
@@ -167,7 +170,8 @@ IMPL_FUNCTION(Node, insertBefore)(JSContext* ctx, JSValue this_val, int argc, JS
   if (JS_IsObject(referenceNodeValue)) {
     reference = static_cast<Node*>(JS_GetOpaque(referenceNodeValue, JSValueGetClassId(referenceNodeValue)));
   } else if (!JS_IsNull(referenceNodeValue)) {
-    return JS_ThrowTypeError(ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'");
+    return JS_ThrowTypeError(
+        ctx, "TypeError: Failed to execute 'insertBefore' on 'Node': parameter 2 is not of type 'Node'");
   }
 
   auto self = static_cast<Node*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
@@ -197,26 +201,31 @@ IMPL_FUNCTION(Node, insertBefore)(JSContext* ctx, JSValue this_val, int argc, JS
 
 IMPL_FUNCTION(Node, replaceChild)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 2) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required");
+    return JS_ThrowTypeError(ctx,
+                             "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments required");
   }
 
   JSValue newChildValue = argv[0];
   JSValue oldChildValue = argv[1];
 
   if (!JS_IsObject(newChildValue)) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object");
+    return JS_ThrowTypeError(
+        ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 1 arguments is not object");
   }
 
   if (!JS_IsObject(oldChildValue)) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.");
+    return JS_ThrowTypeError(
+        ctx, "Uncaught TypeError: Failed to execute 'replaceChild' on 'Node': 2 arguments is not object.");
   }
 
   auto self = static_cast<Node*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
   auto newChild = static_cast<Node*>(JS_GetOpaque(newChildValue, JSValueGetClassId(newChildValue)));
   auto oldChild = static_cast<Node*>(JS_GetOpaque(oldChildValue, JSValueGetClassId(oldChildValue)));
 
-  if (oldChild == nullptr || JS_VALUE_GET_PTR(oldChild->parentNode) != JS_VALUE_GET_PTR(self->jsObject) || oldChild->ownerDocument() != self->ownerDocument()) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.");
+  if (oldChild == nullptr || JS_VALUE_GET_PTR(oldChild->parentNode) != JS_VALUE_GET_PTR(self->jsObject) ||
+      oldChild->ownerDocument() != self->ownerDocument()) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'replaceChild' on 'Node': The node to be replaced is not a child of this node.");
   }
 
   if (newChild == nullptr || newChild->ownerDocument() != self->ownerDocument()) {
@@ -267,7 +276,9 @@ JSValue Node::copyNodeValue(JSContext* ctx, Node* node) {
     std::string tagName = element->getRegisteredTagName();
     JSValue tagNameValue = JS_NewString(element->ctx(), tagName.c_str());
     JSValue arguments[] = {tagNameValue};
-    JSValue newElementValue = JS_CallConstructor(element->context()->ctx(), element->context()->contextData()->constructorForType(&elementTypeInfo), 1, arguments);
+    JSValue newElementValue =
+        JS_CallConstructor(element->context()->ctx(),
+                           element->context()->contextData()->constructorForType(&elementTypeInfo), 1, arguments);
     JS_FreeValue(ctx, tagNameValue);
 
     auto* newElement = static_cast<Element*>(JS_GetOpaque(newElementValue, JSValueGetClassId(newElementValue)));
@@ -283,7 +294,8 @@ JSValue Node::copyNodeValue(JSContext* ctx, Node* node) {
 
     std::string newNodeEventTargetId = std::to_string(newElement->eventTargetId());
     std::unique_ptr<NativeString> args_01 = stringToNativeString(newNodeEventTargetId);
-    element->context()->uiCommandBuffer()->addCommand(element->eventTargetId(), UICommand::cloneNode, *args_01, nullptr);
+    element->context()->uiCommandBuffer()->addCommand(element->eventTargetId(), UICommand::cloneNode, *args_01,
+                                                      nullptr);
 
     return newElement->jsObject;
   } else if (node->nodeType == TEXT_NODE) {
@@ -468,7 +480,9 @@ JSValue Node::internalInsertBefore(Node* node, Node* referenceNode) {
     internalAppendChild(node);
   } else {
     if (JS_VALUE_GET_PTR(referenceNode->parentNode) != JS_VALUE_GET_PTR(jsObject)) {
-      return JS_ThrowTypeError(m_ctx, "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
+      return JS_ThrowTypeError(m_ctx,
+                               "Uncaught TypeError: Failed to execute 'insertBefore' on 'Node': reference node is not "
+                               "a child of this node.");
     }
 
     auto parentNodeValue = referenceNode->parentNode;
@@ -478,7 +492,8 @@ JSValue Node::internalInsertBefore(Node* node, Node* referenceNode) {
       int32_t idx = arrayFindIdx(m_ctx, parentChildNodes, referenceNode->jsObject);
 
       if (idx == -1) {
-        return JS_ThrowTypeError(m_ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
+        return JS_ThrowTypeError(
+            m_ctx, "Failed to execute 'insertBefore' on 'Node': reference node is not a child of this node.");
       }
 
       arrayInsert(m_ctx, parentChildNodes, idx, node->jsObject);
@@ -491,7 +506,8 @@ JSValue Node::internalInsertBefore(Node* node, Node* referenceNode) {
       std::unique_ptr<NativeString> args_01 = stringToNativeString(nodeEventTargetId);
       std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-      context()->uiCommandBuffer()->addCommand(referenceNode->eventTargetId(), UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+      context()->uiCommandBuffer()->addCommand(referenceNode->eventTargetId(), UICommand::insertAdjacentNode, *args_01,
+                                               *args_02, nullptr);
     }
   }
 
@@ -507,7 +523,8 @@ JSValue Node::internalReplaceChild(Node* newChild, Node* oldChild) {
 
   int32_t childIndex = arrayFindIdx(m_ctx, childNodes, oldChild->jsObject);
   if (childIndex == -1) {
-    return JS_ThrowTypeError(m_ctx, "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.");
+    return JS_ThrowTypeError(m_ctx,
+                             "Failed to execute 'replaceChild' on 'Node': old child is not exist on childNodes.");
   }
 
   newChild->setParentNode(this);
@@ -523,7 +540,8 @@ JSValue Node::internalReplaceChild(Node* newChild, Node* oldChild) {
   std::unique_ptr<NativeString> args_01 = stringToNativeString(newChildEventTargetId);
   std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
 
-  context()->uiCommandBuffer()->addCommand(oldChild->eventTargetId(), UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  context()->uiCommandBuffer()->addCommand(oldChild->eventTargetId(), UICommand::insertAdjacentNode, *args_01, *args_02,
+                                           nullptr);
 
   context()->uiCommandBuffer()->addCommand(oldChild->eventTargetId(), UICommand::removeNode, nullptr);
 

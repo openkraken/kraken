@@ -5,7 +5,4 @@
 
 #include "atom_string.h"
 
-namespace kraken {
-
-
-}  // namespace kraken
+namespace kraken {}  // namespace kraken

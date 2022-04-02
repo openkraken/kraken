@@ -37,7 +37,8 @@ static JSValue setTimeout(JSContext* ctx, JSValueConst this_val, int argc, JSVal
   } else if (JS_IsNumber(timeoutValue)) {
     JS_ToInt32(ctx, &timeout, timeoutValue);
   } else {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
   auto handler = QJSFunction::Create(ctx, callbackValue);
@@ -81,7 +82,8 @@ static JSValue setInterval(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   } else if (JS_IsNumber(timeoutValue)) {
     JS_ToInt32(ctx, &timeout, timeoutValue);
   } else {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'setTimeout': parameter 2 (timeout) only can be a number or undefined.");
   }
 
   auto handler = QJSFunction::Create(ctx, callbackValue);

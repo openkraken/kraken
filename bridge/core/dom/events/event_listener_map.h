@@ -34,7 +34,10 @@ class EventListenerMap final {
   bool Contains(const AtomicString& event_type) const;
   bool ContainsCapturing(const AtomicString& event_type) const;
   void Clear();
-  bool Add(const AtomicString& event_type, const std::shared_ptr<EventListener>& listener, const std::shared_ptr<AddEventListenerOptions>& options, RegisteredEventListener* registered_event_listener);
+  bool Add(const AtomicString& event_type,
+           const std::shared_ptr<EventListener>& listener,
+           const std::shared_ptr<AddEventListenerOptions>& options,
+           RegisteredEventListener* registered_event_listener);
   bool Remove(const AtomicString& event_type,
               const std::shared_ptr<EventListener>& listener,
               const std::shared_ptr<EventListenerOptions>& options,

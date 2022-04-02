@@ -20,8 +20,14 @@ namespace kraken {
 using AsyncCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg);
 using AsyncRAFCallback = void (*)(void* callbackContext, int32_t contextId, double result, const char* errmsg);
 using AsyncModuleCallback = void (*)(void* callbackContext, int32_t contextId, const char* errmsg, NativeString* json);
-using AsyncBlobCallback = void (*)(void* callbackContext, int32_t contextId, const char* error, uint8_t* bytes, int32_t length);
-typedef NativeString* (*InvokeModule)(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback);
+using AsyncBlobCallback =
+    void (*)(void* callbackContext, int32_t contextId, const char* error, uint8_t* bytes, int32_t length);
+typedef NativeString* (*InvokeModule)(void* callbackContext,
+                                      int32_t contextId,
+                                      NativeString* moduleName,
+                                      NativeString* method,
+                                      NativeString* params,
+                                      AsyncModuleCallback callback);
 typedef void (*RequestBatchUpdate)(int32_t contextId);
 typedef void (*ReloadApp)(int32_t contextId);
 typedef int32_t (*SetTimeout)(void* callbackContext, int32_t contextId, AsyncCallback callback, int32_t timeout);
@@ -32,14 +38,23 @@ typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef NativeScreen* (*GetScreen)(int32_t contextId);
 typedef double (*DevicePixelRatio)(int32_t contextId);
 typedef NativeString* (*PlatformBrightness)(int32_t contextId);
-typedef void (*ToBlob)(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio);
+typedef void (*ToBlob)(void* callbackContext,
+                       int32_t contextId,
+                       AsyncBlobCallback blobCallback,
+                       int32_t elementId,
+                       double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char*);
 typedef void (*FlushUICommand)();
 typedef void (*InitWindow)(int32_t contextId, void* nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void* nativePtr);
 
 using MatchImageSnapshotCallback = void (*)(void* callbackContext, int32_t contextId, int8_t, const char* errmsg);
-using MatchImageSnapshot = void (*)(void* callbackContext, int32_t contextId, uint8_t* bytes, int32_t length, NativeString* name, MatchImageSnapshotCallback callback);
+using MatchImageSnapshot = void (*)(void* callbackContext,
+                                    int32_t contextId,
+                                    uint8_t* bytes,
+                                    int32_t length,
+                                    NativeString* name,
+                                    MatchImageSnapshotCallback callback);
 using Environment = const char* (*)();
 
 #if ENABLE_PROFILE

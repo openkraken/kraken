@@ -19,7 +19,11 @@ void bindTemplateElement(ExecutionContext* context) {
   context->defineGlobalProperty("HTMLTemplateElement", constructor->jsObject);
 }
 
-JSValue TemplateElement::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+JSValue TemplateElement::instanceConstructor(JSContext* ctx,
+                                             JSValue func_obj,
+                                             JSValue this_val,
+                                             int argc,
+                                             JSValue* argv) {
   auto instance = new TemplateElementInstance(this);
   return instance->jsObject;
 }
@@ -28,7 +32,8 @@ DocumentFragmentInstance* TemplateElementInstance::content() const {
   return static_cast<DocumentFragmentInstance*>(JS_GetOpaque(m_content.value(), DocumentFragment::classId()));
 }
 
-TemplateElementInstance::TemplateElementInstance(TemplateElement* element) : ElementInstance(element, "template", true) {
+TemplateElementInstance::TemplateElementInstance(TemplateElement* element)
+    : ElementInstance(element, "template", true) {
   setNodeFlag(NodeFlag::IsTemplateElement);
 }
 

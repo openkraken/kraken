@@ -46,12 +46,9 @@ class JSBasedEventListener : public EventListener {
   // This may throw an exception on invoking the listener.
   // See step 2-10:
   // https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-  virtual void InvokeInternal(EventTarget&,
-                              Event&,
-                              ExceptionState& exception_state) = 0;
+  virtual void InvokeInternal(EventTarget&, Event&, ExceptionState& exception_state) = 0;
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_JS_BASED_EVENT_LISTENER_H_

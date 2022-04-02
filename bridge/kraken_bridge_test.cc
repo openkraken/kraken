@@ -8,7 +8,8 @@
 #include "bindings/qjs/native_string_utils.h"
 #include "kraken_test_context.h"
 
-std::unordered_map<int, kraken::KrakenTestContext*> testContextPool = std::unordered_map<int, kraken::KrakenTestContext*>();
+std::unordered_map<int, kraken::KrakenTestContext*> testContextPool =
+    std::unordered_map<int, kraken::KrakenTestContext*>();
 
 void initTestFramework(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));

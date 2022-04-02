@@ -18,7 +18,8 @@ ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
 
 kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
 
-KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
+KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler)
+    : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
   m_context = new ExecutingContext(
       contextId,
       [](ExecutingContext* context, const char* message) {
@@ -40,7 +41,10 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   //    return true;
 }
 
-void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* eventType, void* ptr, NativeString* extra) {
+void KrakenPage::invokeModuleEvent(const NativeString* moduleName,
+                                   const char* eventType,
+                                   void* ptr,
+                                   NativeString* extra) {
   //  if (!m_context->isValid())
   //    return;
   //
@@ -52,9 +56,8 @@ void KrakenPage::invokeModuleEvent(const NativeString* moduleName, const char* e
   //    eventObject = event->toQuickJS();
   //  }
   //
-  //  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string, moduleName->length);
-  //  JSValue extraObject = JS_NULL;
-  //  if (extra != nullptr) {
+  //  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string,
+  //  moduleName->length); JSValue extraObject = JS_NULL; if (extra != nullptr) {
   //    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string), extra->length);
   //    std::string extraString = toUTF8(u16Extra);
   //    extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
@@ -90,7 +93,8 @@ void KrakenPage::evaluateScript(const NativeString* script, const char* url, int
 #if ENABLE_PROFILE
   auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_PARSE_TIME_START);
-  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") + std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
+  std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") +
+                               std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
   m_context->EvaluateJavaScript(script->string, script->length, url, startLine);

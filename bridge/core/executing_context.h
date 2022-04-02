@@ -103,7 +103,9 @@ class ExecutingContext {
   struct list_head module_callback_job_list;
   struct list_head native_function_job_list;
 
-  static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
+  static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
+                                                    JSValueConst promise,
+                                                    JSValueConst error);
   static void DispatchGlobalRejectionHandledEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error);
   static void DispatchGlobalErrorEvent(ExecutingContext* context, JSValueConst error);
 
@@ -111,7 +113,11 @@ class ExecutingContext {
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
  private:
-  static void promiseRejectTracker(JSContext* ctx, JSValueConst promise, JSValueConst reason, JS_BOOL is_handled, void* opaque);
+  static void promiseRejectTracker(JSContext* ctx,
+                                   JSValueConst promise,
+                                   JSValueConst reason,
+                                   JS_BOOL is_handled,
+                                   void* opaque);
 
   // From C++ standard, https://isocpp.org/wiki/faq/dtors#order-dtors-for-members
   // Members first initialized and destructed at the last.
@@ -141,7 +147,8 @@ class ObjectProperty {
   ObjectProperty() = delete;
 
   // Define an property on object with a JSValue.
-  explicit ObjectProperty(ExecutingContext* context, JSValueConst thisObject, const char* property, JSValue value) : m_value(value) {
+  explicit ObjectProperty(ExecutingContext* context, JSValueConst thisObject, const char* property, JSValue value)
+      : m_value(value) {
     JS_DefinePropertyValueStr(context->ctx(), thisObject, property, value, JS_PROP_ENUMERABLE);
   }
 

@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_EVENT_H
 
 #include <cinttypes>
-#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/atom_string.h"
+#include "bindings/qjs/script_wrappable.h"
 #include "core/executing_context.h"
 #include "foundation/native_string.h"
 
@@ -17,7 +17,8 @@ namespace kraken {
 class EventTarget;
 class ExceptionState;
 
-// Dart generated nativeEvent member are force align to 64-bit system. So all members in NativeEvent should have 64 bit width.
+// Dart generated nativeEvent member are force align to 64-bit system. So all members in NativeEvent should have 64 bit
+// width.
 #if ANDROID_32_BIT
 struct NativeEvent {
   int64_t type{0};
@@ -31,7 +32,8 @@ struct NativeEvent {
   int64_t currentTarget{0};
 };
 #else
-// Use pointer instead of int64_t on 64 bit system can help compiler to choose best register for better running performance.
+// Use pointer instead of int64_t on 64 bit system can help compiler to choose best register for better running
+// performance.
 struct NativeEvent {
   NativeString* type{nullptr};
   int64_t bubbles{0};
@@ -71,7 +73,6 @@ class Event : public ScriptWrappable {
     kScoped,
   };
 
-
   enum class PassiveMode {
     // Not passive, default initialized.
     kNotPassiveDefault,
@@ -90,7 +91,7 @@ class Event : public ScriptWrappable {
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
   static Event* Create(ExecutingContext* context, const AtomicString& type) {
-      return makeGarbageCollected<Event>(context, type);
+    return makeGarbageCollected<Event>(context, type);
   };
 
   static Event* From(ExecutingContext* context, NativeEvent* native_event);
@@ -98,7 +99,12 @@ class Event : public ScriptWrappable {
   Event() = delete;
   explicit Event(ExecutingContext* context);
   explicit Event(ExecutingContext* context, const AtomicString& event_type);
-  explicit Event(ExecutingContext* context, const AtomicString& event_type, Bubbles bubbles, Cancelable cancelable, ComposedMode composed_mode, double timeStamp);
+  explicit Event(ExecutingContext* context,
+                 const AtomicString& event_type,
+                 Bubbles bubbles,
+                 Cancelable cancelable,
+                 ComposedMode composed_mode,
+                 double timeStamp);
 
   const char* GetHumanReadableName() const override;
   bool propagationStopped() const { return propagation_stopped_; }
@@ -137,12 +143,12 @@ class Event : public ScriptWrappable {
   void stopPropagation(ExceptionState& exception_state) { propagation_stopped_ = true; }
   void SetStopPropagation(bool stop_propagation) { propagation_stopped_ = stop_propagation; }
   void stopImmediatePropagation(ExceptionState& exception_state) { immediate_propagation_stopped_ = true; }
-  void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
+  void SetStopImmediatePropagation(bool stop_immediate_propagation) {
+    immediate_propagation_stopped_ = stop_immediate_propagation;
+  }
   void initEvent(const AtomicString& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
-  bool ImmediatePropagationStopped() const {
-    return immediate_propagation_stopped_;
-  }
+  bool ImmediatePropagationStopped() const { return immediate_propagation_stopped_; }
   bool WasInitialized() { return was_initialized_; }
 
   void SetHandlingPassive(PassiveMode);
@@ -173,7 +179,6 @@ class Event : public ScriptWrappable {
   void Dispose() const override;
 
  protected:
-
   PassiveMode HandlingPassive() const { return handling_passive_; }
 
   AtomicString type_;

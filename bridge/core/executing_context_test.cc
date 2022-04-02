@@ -98,7 +98,8 @@ TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
   };
   auto bridge = TEST_init(errorHandler);
   static int logIndex = 0;
-  static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}} true"};
+  static std::string logs[] = {"error event cannot read property 'forceNullError' of null",
+                               "unhandled event {promise: Promise {...}, reason: Error {...}} true"};
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
@@ -167,7 +168,9 @@ TEST(Context, unhandledRejectionEventWillTriggerWhenNotHandled) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+  };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {
@@ -196,7 +199,9 @@ TEST(Context, handledRejectionEventWillTriggerWhenUnHandledRejectHandled) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+  };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {
@@ -314,7 +319,9 @@ TEST(Context, windowInheritEventTarget) {
     KRAKEN_LOG(VERBOSE) << errmsg;
   };
   auto bridge = TEST_init(errorHandler);
-  const char* code = "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === addEventListener)";
+  const char* code =
+      "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === "
+      "addEventListener)";
   bridge->evaluateScript(code, strlen(code), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);

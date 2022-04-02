@@ -30,7 +30,9 @@ TEST(Window, instanceofEventTarget) {
 TEST(Window, requestAnimationFrame) {
   auto bridge = TEST_init();
 
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { EXPECT_STREQ(message.c_str(), "456"); };
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "456");
+  };
 
   std::string code = R"(
 requestAnimationFrame(() => {

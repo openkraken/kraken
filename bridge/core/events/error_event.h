@@ -15,16 +15,23 @@ namespace kraken {
 
 class ErrorEvent : public Event {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = ErrorEvent*;
   static ErrorEvent* Create(ExecutingContext* context, const std::string& message);
   static ErrorEvent* Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state);
-  static ErrorEvent* Create(ExecutingContext* context, const AtomicString& type, const ErrorEventInit* initializer,  ExceptionState& exception_state);
+  static ErrorEvent* Create(ExecutingContext* context,
+                            const AtomicString& type,
+                            const ErrorEventInit* initializer,
+                            ExceptionState& exception_state);
 
   explicit ErrorEvent(ExecutingContext* context, const std::string& message);
   explicit ErrorEvent(ExecutingContext* context, const std::string& message, std::unique_ptr<SourceLocation> location);
   explicit ErrorEvent(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state);
-  explicit ErrorEvent(ExecutingContext* context, const AtomicString& type, const ErrorEventInit* initializer, ExceptionState& exception_state);
+  explicit ErrorEvent(ExecutingContext* context,
+                      const AtomicString& type,
+                      const ErrorEventInit* initializer,
+                      ExceptionState& exception_state);
 
   // As |message| is exposed to JavaScript, never return |unsanitized_message_|.
   const std::string& message() const { return message_; }
@@ -42,6 +49,6 @@ class ErrorEvent : public Event {
   ScriptValue error_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_EVENTS_ERROR_EVENT_H_

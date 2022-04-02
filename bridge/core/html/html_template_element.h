@@ -38,7 +38,8 @@ class TemplateElementInstance : public ElementInstance {
   void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) override;
 
  private:
-  ObjectProperty m_content{m_context, jsObject, "content", JS_CallConstructor(m_ctx, DocumentFragment::instance(m_context)->jsObject, 0, nullptr)};
+  ObjectProperty m_content{m_context, jsObject, "content",
+                           JS_CallConstructor(m_ctx, DocumentFragment::instance(m_context)->jsObject, 0, nullptr)};
   friend TemplateElement;
 };
 

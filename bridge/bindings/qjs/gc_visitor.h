@@ -17,6 +17,7 @@ class ScriptWrappable;
 class GCVisitor final {
   KRAKEN_DISALLOW_NEW();
   KRAKEN_DISALLOW_IMPLICIT_CONSTRUCTORS(GCVisitor);
+
  public:
   explicit GCVisitor(JSRuntime* rt, JS_MarkFunc* markFunc) : runtime_(rt), markFunc_(markFunc){};
 

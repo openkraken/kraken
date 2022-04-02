@@ -14,7 +14,12 @@ namespace kraken {
 class ExecutingContext;
 
 // Flags for object properties.
-enum JSPropFlag { normal = JS_PROP_NORMAL, writable = JS_PROP_WRITABLE, enumerable = JS_PROP_ENUMERABLE, configurable = JS_PROP_CONFIGURABLE };
+enum JSPropFlag {
+  normal = JS_PROP_NORMAL,
+  writable = JS_PROP_WRITABLE,
+  enumerable = JS_PROP_ENUMERABLE,
+  configurable = JS_PROP_CONFIGURABLE
+};
 
 // Combine multiple prop flags.
 int combinePropFlags(JSPropFlag a, JSPropFlag b);

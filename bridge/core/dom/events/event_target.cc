@@ -16,14 +16,12 @@
 
 namespace kraken {
 
-Event::PassiveMode EventPassiveMode(
-    const RegisteredEventListener& event_listener) {
+Event::PassiveMode EventPassiveMode(const RegisteredEventListener& event_listener) {
   if (!event_listener.Passive()) {
     return Event::PassiveMode::kNotPassiveDefault;
   }
   return Event::PassiveMode::kPassiveDefault;
 }
-
 
 // EventTargetData
 EventTargetData::EventTargetData() {}

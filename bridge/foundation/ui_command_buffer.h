@@ -41,8 +41,13 @@ struct UICommandItem {
         id(id),
         nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   UICommandItem(int32_t id, int32_t type, NativeString args_01, void* nativePtr)
-      : type(type), string_01(reinterpret_cast<int64_t>(args_01.string)), args_01_length(args_01.length), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
-  UICommandItem(int32_t id, int32_t type, void* nativePtr) : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+      : type(type),
+        string_01(reinterpret_cast<int64_t>(args_01.string)),
+        args_01_length(args_01.length),
+        id(id),
+        nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
+  UICommandItem(int32_t id, int32_t type, void* nativePtr)
+      : type(type), id(id), nativePtr(reinterpret_cast<int64_t>(nativePtr)){};
   int32_t type;
   int32_t id;
   int32_t args_01_length{0};

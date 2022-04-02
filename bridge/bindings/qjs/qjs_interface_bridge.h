@@ -13,7 +13,9 @@ namespace kraken {
 template <class QJST, class T>
 class QJSInterfaceBridge {
  public:
-  static T* ToWrappable(ExecutingContext* context, JSValue value) { return HasInstance(context, value) ? toScriptWrappable<T>(value) : nullptr; }
+  static T* ToWrappable(ExecutingContext* context, JSValue value) {
+    return HasInstance(context, value) ? toScriptWrappable<T>(value) : nullptr;
+  }
 
   static bool HasInstance(ExecutingContext* context, JSValue value);
 };

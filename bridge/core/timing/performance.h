@@ -128,7 +128,12 @@ namespace kraken {
 void bindPerformance(ExecutionContext* context);
 
 struct NativePerformanceEntry {
-  NativePerformanceEntry(const std::string& name, const std::string& entryType, int64_t startTime, int64_t duration, int64_t uniqueId) : startTime(startTime), duration(duration), uniqueId(uniqueId) {
+  NativePerformanceEntry(const std::string& name,
+                         const std::string& entryType,
+                         int64_t startTime,
+                         int64_t duration,
+                         int64_t uniqueId)
+      : startTime(startTime), duration(duration), uniqueId(uniqueId) {
     this->name = new char[name.size() + 1];
     this->entryType = new char[entryType.size() + 1];
     strcpy(this->name, name.data());
@@ -203,7 +208,10 @@ class Performance : public HostObject {
   DEFINE_READONLY_PROPERTY(timeOrigin);
 
  private:
-  void internalMeasure(const std::string& name, const std::string& startMark, const std::string& endMark, JSValue* exception);
+  void internalMeasure(const std::string& name,
+                       const std::string& startMark,
+                       const std::string& endMark,
+                       JSValue* exception);
   double internalNow();
   std::vector<NativePerformanceEntry*> getFullEntries();
 

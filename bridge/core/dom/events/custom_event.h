@@ -51,7 +51,9 @@ class CustomEvent : public Event {
 //  friend CustomEvent;
 //};
 
-auto customEventCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto customEventCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   if (argc < 1) {
     return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required, but only 0 present.");
   }

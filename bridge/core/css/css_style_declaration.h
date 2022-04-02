@@ -46,7 +46,12 @@ class CSSStyleDeclaration : public GarbageCollected<CSSStyleDeclaration> {
 
  private:
   static int hasObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom);
-  static int setObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+  static int setObjectProperty(JSContext* ctx,
+                               JSValueConst obj,
+                               JSAtom atom,
+                               JSValueConst value,
+                               JSValueConst receiver,
+                               int flags);
   static JSValue getObjectProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
   std::unordered_map<std::string, std::string> m_properties;
 };

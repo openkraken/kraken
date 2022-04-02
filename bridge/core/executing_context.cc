@@ -21,7 +21,9 @@ std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExc
 ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& handler, void* owner)
     : context_id_(contextId), handler_(handler), owner_(owner), ctx_invalid_(false), unique_id_(context_unique_id++) {
 #if ENABLE_PROFILE
-  auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  auto jsContextStartTime =
+      std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch())
+          .count();
   auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
@@ -43,9 +45,14 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   JSContext* ctx = script_state_.ctx();
   global_object_ = JS_GetGlobalObject(script_state_.ctx());
   JSValue windowGetter = JS_NewCFunction(
-      ctx, [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_GetGlobalObject(ctx); }, "get", 0);
+      ctx,
+      [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+        return JS_GetGlobalObject(ctx);
+      },
+      "get", 0);
   JSAtom windowKey = JS_NewAtom(ctx, "window");
-  JS_DefinePropertyGetSet(ctx, global_object_, windowKey, windowGetter, JS_UNDEFINED, JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
+  JS_DefinePropertyGetSet(ctx, global_object_, windowKey, windowGetter, JS_UNDEFINED,
+                          JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
   JS_FreeAtom(ctx, windowKey);
   JS_SetContextOpaque(ctx, this);
   JS_SetHostPromiseRejectionTracker(script_state_.runtime(), promiseRejectTracker, nullptr);
@@ -97,7 +104,10 @@ ExecutingContext* ExecutingContext::From(JSContext* ctx) {
   return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
 }
 
-bool ExecutingContext::EvaluateJavaScript(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool ExecutingContext::EvaluateJavaScript(const uint16_t* code,
+                                          size_t codeLength,
+                                          const char* sourceURL,
+                                          int startLine) {
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
   JSValue result = JS_Eval(script_state_.ctx(), utf8Code.c_str(), utf8Code.size(), sourceURL, JS_EVAL_TYPE_GLOBAL);
   DrainPendingPromiseJobs();
@@ -231,8 +241,12 @@ ExecutionContextData* ExecutingContext::contextData() {
   return &context_data_;
 }
 
-uint8_t* ExecutingContext::DumpByteCode(const char* code, uint32_t codeLength, const char* sourceURL, size_t* bytecodeLength) {
-  JSValue object = JS_Eval(script_state_.ctx(), code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
+uint8_t* ExecutingContext::DumpByteCode(const char* code,
+                                        uint32_t codeLength,
+                                        const char* sourceURL,
+                                        size_t* bytecodeLength) {
+  JSValue object =
+      JS_Eval(script_state_.ctx(), code, codeLength, sourceURL, JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
   bool success = HandleException(&object);
   if (!success)
     return nullptr;
@@ -273,7 +287,10 @@ void ExecutingContext::DispatchGlobalErrorEvent(ExecutingContext* context, JSVal
   //  }
 }
 
-static void dispatchPromiseRejectionEvent(const char* eventType, ExecutingContext* context, JSValueConst promise, JSValueConst error) {
+static void dispatchPromiseRejectionEvent(const char* eventType,
+                                          ExecutingContext* context,
+                                          JSValueConst promise,
+                                          JSValueConst error) {
   //  JSContext* ctx = context->ctx();
   //  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(context->global(), Window::classId()));
   //
@@ -303,7 +320,9 @@ static void dispatchPromiseRejectionEvent(const char* eventType, ExecutingContex
   //  }
 }
 
-void ExecutingContext::DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context, JSValueConst promise, JSValueConst error) {
+void ExecutingContext::DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
+                                                             JSValueConst promise,
+                                                             JSValueConst error) {
   // Trigger onerror event.
   DispatchGlobalErrorEvent(context, error);
 
@@ -318,11 +337,16 @@ void ExecutingContext::DispatchGlobalRejectionHandledEvent(ExecutingContext* con
 
 std::unordered_map<std::string, NativeByteCode> ExecutingContext::pluginByteCode{};
 
-void ExecutingContext::promiseRejectTracker(JSContext* ctx, JSValue promise, JSValue reason, int is_handled, void* opaque) {
+void ExecutingContext::promiseRejectTracker(JSContext* ctx,
+                                            JSValue promise,
+                                            JSValue reason,
+                                            int is_handled,
+                                            void* opaque) {
   auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
-  // The unhandledrejection event is the promise-equivalent of the global error event, which is fired for uncaught exceptions.
-  // Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or then(onFulfilled, onRejected) to it,
-  // the additional rejectionhandled event is needed to indicate that a promise which was previously rejected should no longer be considered unhandled.
+  // The unhandledrejection event is the promise-equivalent of the global error event, which is fired for uncaught
+  // exceptions. Because a rejected promise could be handled after the fact, by attaching catch(onRejected) or
+  // then(onFulfilled, onRejected) to it, the additional rejectionhandled event is needed to indicate that a promise
+  // which was previously rejected should no longer be considered unhandled.
   if (is_handled) {
     context->rejected_promises_.TrackHandledPromiseRejection(context, promise, reason);
   } else {

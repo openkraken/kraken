@@ -47,7 +47,8 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
 uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCallback) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
-  uint32_t requestId = getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
+  uint32_t requestId =
+      getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
 
   // Register frame callback to collection.
   m_frameRequestCallbackCollection.registerFrameCallback(requestId, frameCallback);

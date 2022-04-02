@@ -77,6 +77,6 @@ Derived* DynamicTo(Base& from) {
   return IsA<Derived>(from) ? &To<Derived>(from) : nullptr;
 }
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_FOUNDATION_CASTING_H_

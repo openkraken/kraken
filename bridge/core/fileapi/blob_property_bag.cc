@@ -7,7 +7,9 @@
 
 namespace kraken {
 
-std::shared_ptr<BlobPropertyBag> BlobPropertyBag::Create(JSContext* ctx, JSValue value, ExceptionState& exceptionState) {
+std::shared_ptr<BlobPropertyBag> BlobPropertyBag::Create(JSContext* ctx,
+                                                         JSValue value,
+                                                         ExceptionState& exceptionState) {
   auto bag = std::make_shared<BlobPropertyBag>();
   bag->FillMemberFromQuickjsObject(ctx, value, exceptionState);
   return nullptr;

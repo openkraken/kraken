@@ -30,10 +30,17 @@ class BlobPart {
   uint8_t* GetBytes(uint32_t* length) const;
   Blob* GetBlob() const;
 
-  explicit BlobPart(JSContext* ctx, uint8_t* arrayBuffer, uint32_t length) : content_type_(ContentType::kArrayBuffer), bytes_(arrayBuffer), byte_length_(length){};
-  explicit BlobPart(JSContext* ctx, uint8_t* buffer, uint32_t length, size_t byte_offset, size_t byte_length, size_t byte_per_element)
+  explicit BlobPart(JSContext* ctx, uint8_t* arrayBuffer, uint32_t length)
+      : content_type_(ContentType::kArrayBuffer), bytes_(arrayBuffer), byte_length_(length){};
+  explicit BlobPart(JSContext* ctx,
+                    uint8_t* buffer,
+                    uint32_t length,
+                    size_t byte_offset,
+                    size_t byte_length,
+                    size_t byte_per_element)
       : content_type_(ContentType::kArrayBufferView), bytes_(buffer), byte_length_(length){};
-  explicit BlobPart(JSContext* ctx, std::string value) : content_type_(ContentType::kString), member_string_(std::move(value)){};
+  explicit BlobPart(JSContext* ctx, std::string value)
+      : content_type_(ContentType::kString), member_string_(std::move(value)){};
   explicit BlobPart(JSContext* ctx, Blob* blob) : content_type_(ContentType::kBlob), blob_(blob){};
 
  private:

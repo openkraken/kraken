@@ -70,7 +70,8 @@ JSValue ElementAttributes::setAttribute(const std::string& name, JSValue value) 
   bool numberIndex = isNumberIndex(name);
 
   if (numberIndex) {
-    return JS_ThrowTypeError(m_ctx, "Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.", name.c_str());
+    return JS_ThrowTypeError(
+        m_ctx, "Failed to execute 'setAttribute' on 'Element': '%s' is not a valid attribute name.", name.c_str());
   }
 
   if (name == "class") {
@@ -167,7 +168,8 @@ JSValue Element::getBoundingClientRect(JSContext* ctx, JSValue this_val, int arg
 
 JSValue Element::hasAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'hasAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue nameValue = argv[0];
@@ -190,7 +192,8 @@ JSValue Element::hasAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
 
 JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 2) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only %d present", argc);
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'setAttribute' on 'Element': 2 arguments required, but only %d present", argc);
   }
 
   JSValue nameValue = argv[0];
@@ -223,7 +226,8 @@ JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, attributeValue);
 
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01, *args_02, nullptr);
+  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::setAttribute, *args_01,
+                                                    *args_02, nullptr);
 
   JS_FreeValue(ctx, attributeValue);
 
@@ -232,7 +236,8 @@ JSValue Element::setAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
 
 JSValue Element::getAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(ctx,
+                             "Failed to execute 'getAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue nameValue = argv[0];
@@ -255,7 +260,8 @@ JSValue Element::getAttribute(JSContext* ctx, JSValue this_val, int argc, JSValu
 
 JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'removeAttribute' on 'Element': 1 argument required, but only 0 present");
   }
 
   JSValue nameValue = argv[0];
@@ -275,7 +281,8 @@ JSValue Element::removeAttribute(JSContext* ctx, JSValue this_val, int argc, JSV
     JS_FreeValue(ctx, targetValue);
 
     std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
-    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::removeAttribute, *args_01, nullptr);
+    element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::removeAttribute, *args_01,
+                                                      nullptr);
   }
 
   return JS_NULL;
@@ -354,7 +361,8 @@ JSValue Element::toBlob(JSContext* ctx, JSValue this_val, int argc, JSValue* arg
       nullptr, element->m_context, resolving_funcs[0], resolving_funcs[1], promise,
   };
 
-  getDartMethod()->toBlob(static_cast<void*>(toBlobPromiseContext), element->m_context->getContextId(), blobCallback, element->m_eventTargetId, devicePixelRatio);
+  getDartMethod()->toBlob(static_cast<void*>(toBlobPromiseContext), element->m_context->getContextId(), blobCallback,
+                          element->m_eventTargetId, devicePixelRatio);
   list_add_tail(&toBlobPromiseContext->link, &element->m_context->promise_job_list);
 
   return promise;
@@ -842,59 +850,70 @@ ElementInstance::ElementInstance(Element* element, std::string tagName, bool sho
   m_attributes = makeGarbageCollected<ElementAttributes>()->initialize(m_ctx, &ElementAttributes::classId);
   JSValue arguments[] = {jsObject};
   JSValue style = JS_CallConstructor(m_ctx, CSSStyleDeclaration::instance(m_context)->jsObject, 1, arguments);
-  m_style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
+  m_style =
+      static_cast<StyleDeclarationInstance*>(JS_GetOpaque(style, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
 
   JS_DefinePropertyValueStr(m_ctx, jsObject, "style", m_style->jsObject, JS_PROP_C_W_E);
 
   if (shouldAddUICommand) {
     std::unique_ptr<NativeString> args_01 = stringToNativeString(tagName);
-    element->m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createElement, *args_01, nativeEventTarget);
+    element->m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createElement, *args_01,
+                                                      nativeEventTarget);
   }
 }
 
-JSClassExoticMethods ElementInstance::exoticMethods{nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty};
+JSClassExoticMethods ElementInstance::exoticMethods{nullptr,     nullptr,     nullptr,    nullptr,
+                                                    hasProperty, getProperty, setProperty};
 
 StyleDeclarationInstance* ElementInstance::style() {
   return m_style;
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, x)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->x);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, y)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->y);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, width)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->width);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, height)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->height);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, top)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->top);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, right)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->right);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, bottom)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->bottom);
 }
 
 IMPL_PROPERTY_GETTER(BoundingClientRect, left)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  auto* boundingClientRect = static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
+  auto* boundingClientRect =
+      static_cast<BoundingClientRect*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
 }
 

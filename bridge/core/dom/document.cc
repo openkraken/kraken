@@ -118,19 +118,23 @@ Document::Document() : Node() {
   if (!event_registered) {
     event_registered = true;
     //    Event::defineEvent(
-    //        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new InputEventInstance(InputEvent::instance(context),
-    //        reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    //        EVENT_INPUT, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new
+    //        InputEventInstance(InputEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     //    Event::defineEvent(EVENT_MEDIA_ERROR, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new MediaErrorEventInstance(MediaErrorEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new MediaErrorEventInstance(MediaErrorEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_MESSAGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new MessageEventInstance(MessageEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new MessageEventInstance(MessageEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(
-    //        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new CloseEventInstance(CloseEvent::instance(context),
-    //        reinterpret_cast<NativeEvent*>(nativeEvent)); });
-    //    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //        EVENT_CLOSE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new
+    //        CloseEventInstance(CloseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    //    Event::defineEvent(EVENT_INTERSECTION_CHANGE, [](ExecutionContext* context, void* nativeEvent) ->
+    //    EventInstance* {
+    //      return new IntersectionChangeEventInstance(IntersectionChangeEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_TOUCH_START, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
     //      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
@@ -145,25 +149,30 @@ Document::Document() : Node() {
     //      return new TouchEventInstance(TouchEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_SWIPE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new GestureEventInstance(GestureEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_PAN, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new GestureEventInstance(GestureEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_LONG_PRESS, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new GestureEventInstance(GestureEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_SCALE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new GestureEventInstance(GestureEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new GestureEventInstance(GestureEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(
-    //        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new MouseEventInstance(MouseEvent::instance(context),
-    //        reinterpret_cast<NativeEvent*>(nativeEvent)); });
+    //        EVENT_CLICK, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* { return new
+    //        MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent)); });
     //    Event::defineEvent(EVENT_CANCEL, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
     //      return new MouseEventInstance(MouseEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
     //    Event::defineEvent(EVENT_POPSTATE, [](ExecutionContext* context, void* nativeEvent) -> EventInstance* {
-    //      return new PopStateEventInstance(PopStateEvent::instance(context), reinterpret_cast<NativeEvent*>(nativeEvent));
+    //      return new PopStateEventInstance(PopStateEvent::instance(context),
+    //      reinterpret_cast<NativeEvent*>(nativeEvent));
     //    });
   }
 }
@@ -209,7 +218,8 @@ IMPL_FUNCTION(Document, createElement)(JSContext* ctx, JSValue this_val, int arg
   auto document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
   //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
   //  std::string tagName = jsValueToStdString(ctx, tagNameValue);
-  //  JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->context(), tagName);
+  //  JSValue constructor = static_cast<Document*>(document->prototype())->getElementConstructor(document->context(),
+  //  tagName);
   //
   //  JSValue element = JS_CallConstructor(ctx, constructor, argc, argv);
   //  return element;
@@ -217,7 +227,8 @@ IMPL_FUNCTION(Document, createElement)(JSContext* ctx, JSValue this_val, int arg
 
 IMPL_FUNCTION(Document, createTextNode)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc != 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.");
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute 'createTextNode' on 'Document': 1 argument required, but only 0 present.");
   }
 
   auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
@@ -238,7 +249,9 @@ IMPL_FUNCTION(Document, createComment)(JSContext* ctx, JSValue this_val, int arg
 
 IMPL_FUNCTION(Document, getElementById)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument required, but only 0 present.");
+    return JS_ThrowTypeError(ctx,
+                             "Uncaught TypeError: Failed to execute 'getElementById' on 'Document': 1 argument "
+                             "required, but only 0 present.");
   }
 
   auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
@@ -270,9 +283,10 @@ IMPL_FUNCTION(Document, getElementById)(JSContext* ctx, JSValue this_val, int ar
 
 JSValue Document::getElementsByTagName(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx,
-                             "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
-                             "but only 0 present.");
+    return JS_ThrowTypeError(
+        ctx,
+        "Uncaught TypeError: Failed to execute 'getElementsByTagName' on 'Document': 1 argument required, "
+        "but only 0 present.");
   }
 
   auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
@@ -306,7 +320,9 @@ JSValue Document::getElementsByTagName(JSContext* ctx, JSValue this_val, int arg
 
 JSValue Document::getElementsByClassName(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument required, but only 0 present.");
+    return JS_ThrowTypeError(ctx,
+                             "Uncaught TypeError: Failed to execute 'getElementsByClassName' on 'Document': 1 argument "
+                             "required, but only 0 present.");
   }
 
   auto* document = static_cast<Document*>(JS_GetOpaque(this_val, Document::classId));
@@ -441,7 +457,8 @@ IMPL_PROPERTY_SETTER(Document, body)(JSContext* ctx, JSValue this_val, int argc,
   }
   JSValue result = JS_NULL;
   JSValue newBody = argv[0];
-  // If the body element is not null, then replace the body element with the new value within the body element's parent and return.
+  // If the body element is not null, then replace the body element with the new value within the body element's parent
+  // and return.
   if (JS_IsInstanceOf(ctx, newBody, Element::instance(document->m_context)->jsObject)) {
     auto* newElementInstance = static_cast<Element*>(JS_GetOpaque(newBody, Element::classId()));
     // If the new value is not a body element, then throw a Exception.
@@ -562,7 +579,8 @@ Document::Document(Document* document) : Node(document, NodeType::DOCUMENT_NODE,
   m_cookie = std::make_unique<DocumentCookie>();
   m_eventTargetId = DOCUMENT_TARGET_ID;
 
-  m_scriptAnimationController = makeGarbageCollected<ScriptAnimationController>()->initialize(m_ctx, &ScriptAnimationController::classId);
+  m_scriptAnimationController =
+      makeGarbageCollected<ScriptAnimationController>()->initialize(m_ctx, &ScriptAnimationController::classId);
 
 #if FLUTTER_BACKEND
   getDartMethod()->initDocument(m_context->getContextId(), nativeEventTarget);

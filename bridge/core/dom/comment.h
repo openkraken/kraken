@@ -36,7 +36,9 @@ class Comment : public Node {
   friend CommentInstance;
 };
 
-auto commentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {};
+auto commentCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {};
 
 const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreator};
 

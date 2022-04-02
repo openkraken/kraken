@@ -26,7 +26,13 @@ enum NativeTag {
   TAG_ASYNC_FUNCTION = 8,
 };
 
-enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
+enum class JSPointerType {
+  AsyncContextContext = 0,
+  NativeFunctionContext = 1,
+  NativeBoundingClientRect = 2,
+  NativeCanvasRenderingContext2D = 3,
+  NativeEventTarget = 4
+};
 
 class ExecutingContext;
 
@@ -42,9 +48,15 @@ struct NativeValue {
 
 struct NativeFunctionContext;
 
-using CallNativeFunction = void (*)(NativeFunctionContext* functionContext, int32_t argc, NativeValue* argv, NativeValue* returnValue);
+using CallNativeFunction = void (*)(NativeFunctionContext* functionContext,
+                                    int32_t argc,
+                                    NativeValue* argv,
+                                    NativeValue* returnValue);
 
-static void call_native_function(NativeFunctionContext* functionContext, int32_t argc, NativeValue* argv, NativeValue* returnValue);
+static void call_native_function(NativeFunctionContext* functionContext,
+                                 int32_t argc,
+                                 NativeValue* argv,
+                                 NativeValue* returnValue);
 
 struct NativeFunctionContext {
   CallNativeFunction call;

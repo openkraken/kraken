@@ -41,7 +41,9 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   virtual const WrapperTypeInfo* GetWrapperTypeInfo() const = 0;
 
   JSValue ToQuickJS();
-  FORCE_INLINE ExecutingContext* GetExecutingContext() const { return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_)); };
+  FORCE_INLINE ExecutingContext* GetExecutingContext() const {
+    return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+  };
   FORCE_INLINE JSContext* ctx() const { return ctx_; }
 
  private:

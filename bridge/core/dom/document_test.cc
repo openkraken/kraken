@@ -44,7 +44,8 @@ TEST(Document, instanceofNode) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
-  const char* code = "console.log(document instanceof Node, document instanceof Document, document instanceof EventTarget)";
+  const char* code =
+      "console.log(document instanceof Node, document instanceof Document, document instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);

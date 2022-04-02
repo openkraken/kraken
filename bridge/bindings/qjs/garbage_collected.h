@@ -22,7 +22,8 @@ class ExecutingContext;
 
 /**
  * This class are mainly designed as base class for ScriptWrappable. If you wants to implement
- * a class which have corresponding object in JS environment and have the same memory life circle with JS object, use ScriptWrappable instead.
+ * a class which have corresponding object in JS environment and have the same memory life circle with JS object, use
+ * ScriptWrappable instead.
  *
  * Base class for GC managed objects. Only descendent types of `GarbageCollected`
  * can be constructed using `MakeGarbageCollected()`. Must be inherited from as

@@ -30,15 +30,13 @@ class AtomicString {
   };
 
   AtomicString() = default;
-  AtomicString(JSContext *ctx, JSAtom atom) : ctx_(ctx), atom_(atom) {};
-  AtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())) {};
-  AtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)) {};
-  AtomicString(JSAtom atom): atom_(atom), is_static_atom_(true) {};
+  AtomicString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(atom){};
+  AtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
+  AtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
+  AtomicString(JSAtom atom) : atom_(atom), is_static_atom_(true){};
 
   // Return the undefined string value from atom key.
-  JSValue ToQuickJS(JSContext* ctx) const {
-    return JS_AtomToValue(ctx, atom_);
-  };
+  JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
 
   std::string ToStdString() const {
     const char* buf = JS_AtomToCString(ctx_, atom_);

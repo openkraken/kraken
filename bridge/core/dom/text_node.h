@@ -37,7 +37,9 @@ class TextNode : public Node {
   std::string m_data;
 };
 
-auto textNodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto textNodeCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   JSValue textContent = JS_NULL;
   if (argc == 1) {
     textContent = argv[0];

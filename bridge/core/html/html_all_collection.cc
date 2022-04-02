@@ -29,7 +29,8 @@
 //  }
 //
 //  if (!JS_IsObject(argv[0])) {
-//    return JS_ThrowTypeError(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a object.");
+//    return JS_ThrowTypeError(ctx, "Failed to execute add() on HTMLAllCollection: first arguments should be a
+//    object.");
 //  }
 //
 //  JSValue before = JS_NULL;

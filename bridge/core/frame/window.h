@@ -51,7 +51,9 @@ class Window : public EventTarget {
   friend ExecutionContext;
 };
 
-auto windowCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue {
+auto windowCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue {
   auto* window = Window::create(ctx);
   return window->toQuickJS();
 };

@@ -4,14 +4,15 @@
  */
 
 #include "js_event_handler.h"
-#include "core/events/error_event.h"
 #include "core/dom/events/event_target.h"
+#include "core/events/error_event.h"
 #include "event_type_names.h"
 
 namespace kraken {
 
-
-std::unique_ptr<JSEventHandler> JSEventHandler::CreateOrNull(JSContext* ctx, JSValue value, JSEventHandler::HandlerType handler_type) {
+std::unique_ptr<JSEventHandler> JSEventHandler::CreateOrNull(JSContext* ctx,
+                                                             JSValue value,
+                                                             JSEventHandler::HandlerType handler_type) {
   if (!JS_IsFunction(ctx, value)) {
     return nullptr;
   }
@@ -36,9 +37,8 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
   // object, event's type is error, and event's currentTarget implements the
   // WindowOrWorkerGlobalScope mixin. Otherwise, let special error event
   // handling be false.
-  const bool special_error_event_handling =
-      IsA<ErrorEvent>(event) && event.type() == event_type_names::kError &&
-          event.currentTarget()->IsWindowOrWorkerGlobalScope();
+  const bool special_error_event_handling = IsA<ErrorEvent>(event) && event.type() == event_type_names::kError &&
+                                            event.currentTarget()->IsWindowOrWorkerGlobalScope();
 
   // Step 4. Process the Event object event as follows:
   //   If special error event handling is true
@@ -68,19 +68,16 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
     if (error_attribute.IsEmpty()) {
       error_attribute = ScriptValue::Empty(event.ctx());
     }
-    arguments = {
-      ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->message())),
-      ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->filename())),
-      ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->lineno())),
-      ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->colno())),
-      error_attribute
-    };
+    arguments = {ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->message())),
+                 ScriptValue(ctx, Converter<IDLDOMString>::ToValue(ctx, error_event->filename())),
+                 ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->lineno())),
+                 ScriptValue(ctx, Converter<IDLInt64>::ToValue(ctx, error_event->colno())), error_attribute};
   } else {
     arguments.emplace_back(ctx, event.ToQuickJS());
   }
 
-  ScriptValue result = event_handler_
-      ->Invoke(event.ctx(), ScriptValue(event_target.ctx(), event_target.ToQuickJS()), arguments.size(), arguments.data());
+  ScriptValue result = event_handler_->Invoke(event.ctx(), ScriptValue(event_target.ctx(), event_target.ToQuickJS()),
+                                              arguments.size(), arguments.data());
   if (result.IsException()) {
     exception_state.ThrowException(event.ctx(), result.ToQuickJS());
     return;
@@ -102,4 +99,4 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
   // TODO: special handling for beforeunload event and onerror event.
 }
 
-}
+}  // namespace kraken

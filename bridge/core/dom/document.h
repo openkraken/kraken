@@ -81,7 +81,9 @@ class Document : public Node {
   std::unordered_map<std::string, Element*> elementConstructorMap;
 };
 
-auto documentCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
+auto documentCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
 
 const WrapperTypeInfo documentTypeInfo = {"Document", &nodeTypeInfo, documentCreator};
 

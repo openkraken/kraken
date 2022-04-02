@@ -36,6 +36,8 @@ ErrorEvent::ErrorEvent(ExecutingContext* context,
     : Event(context),
       message_(type.ToStdString()),
       error_(initializer->error()),
-      source_location_(std::make_unique<SourceLocation>(initializer->filename().ToStdString(), initializer->lineno(), initializer->colno())) {}
+      source_location_(std::make_unique<SourceLocation>(initializer->filename().ToStdString(),
+                                                        initializer->lineno(),
+                                                        initializer->colno())) {}
 
 }  // namespace kraken

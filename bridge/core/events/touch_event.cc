@@ -14,7 +14,8 @@ void bindTouchEvent(ExecutionContext* context) {
   context->defineGlobalProperty("TouchEvent", constructor->jsObject);
 }
 
-TouchList::TouchList(ExecutionContext* context, NativeTouch** touches, int64_t length) : ExoticHostObject(context, "TouchList"), m_touches(touches), _length(length) {}
+TouchList::TouchList(ExecutionContext* context, NativeTouch** touches, int64_t length)
+    : ExoticHostObject(context, "TouchList"), m_touches(touches), _length(length) {}
 
 JSValue TouchList::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
   std::string key = jsAtomToStdString(ctx, atom);
@@ -38,7 +39,8 @@ IMPL_PROPERTY_SETTER(TouchList, length)(JSContext* ctx, JSValue this_val, int ar
   return JS_NULL;
 }
 
-Touch::Touch(ExecutionContext* context, NativeTouch* nativeTouch) : HostObject(context, "Touch"), m_nativeTouch(nativeTouch) {}
+Touch::Touch(ExecutionContext* context, NativeTouch* nativeTouch)
+    : HostObject(context, "Touch"), m_nativeTouch(nativeTouch) {}
 
 IMPL_PROPERTY_GETTER(Touch, identifier)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* object = static_cast<Touch*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
@@ -226,7 +228,8 @@ IMPL_PROPERTY_GETTER(TouchEvent, targetTouches)(JSContext* ctx, JSValue this_val
 IMPL_PROPERTY_GETTER(TouchEvent, changedTouches)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* event = static_cast<TouchEventInstance*>(JS_GetOpaque(this_val, Event::kEventClassID));
   auto* nativeEvent = reinterpret_cast<NativeTouchEvent*>(event->nativeEvent);
-  auto* changedTouchList = new TouchList(event->m_context, nativeEvent->changedTouches, nativeEvent->changedTouchesLength);
+  auto* changedTouchList =
+      new TouchList(event->m_context, nativeEvent->changedTouches, nativeEvent->changedTouchesLength);
   return changedTouchList->jsObject;
 }
 
@@ -254,6 +257,7 @@ IMPL_PROPERTY_GETTER(TouchEvent, shiftKey)(JSContext* ctx, JSValue this_val, int
   return JS_NewBool(ctx, nativeEvent->shiftKey ? 1 : 0);
 }
 
-TouchEventInstance::TouchEventInstance(TouchEvent* event, NativeEvent* nativeEvent) : EventInstance(event, nativeEvent) {}
+TouchEventInstance::TouchEventInstance(TouchEvent* event, NativeEvent* nativeEvent)
+    : EventInstance(event, nativeEvent) {}
 
 }  // namespace kraken

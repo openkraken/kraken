@@ -13,11 +13,13 @@
 
 #define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : ::kraken::LogMessageVoidify() & (stream)
 
-#define KRAKEN_EAT_STREAM_PARAMETERS(ignored) true || (ignored) ? (void)0 : ::LogMessageVoidify() & ::LogMessage(::LOG_FATAL, 0, 0, nullptr).stream()
+#define KRAKEN_EAT_STREAM_PARAMETERS(ignored) \
+  true || (ignored) ? (void)0 : ::LogMessageVoidify() & ::LogMessage(::LOG_FATAL, 0, 0, nullptr).stream()
 
 #define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
 
-#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::kraken::LogMessage(::kraken::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
+#define KRAKEN_CHECK(condition) \
+  KRAKEN_LAZY_STREAM(::kraken::LogMessage(::kraken::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
 
 namespace kraken {
 

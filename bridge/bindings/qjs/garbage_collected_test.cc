@@ -14,12 +14,14 @@
 // class ParentClass : public HostClass {
 // public:
 //  explicit ParentClass(ExecutionContext* context) : HostClass(context, "ParentClass") {}
-//  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv) override { return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
+//  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValueConst* argv)
+//  override { return HostClass::instanceConstructor(ctx, func_obj, this_val, argc, argv);
 //  }
 //
 //  OBJECT_INSTANCE(ParentClass);
 //
-//  static JSValue foo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) { return JS_NewFloat64(ctx, 20); }
+//  static JSValue foo(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) { return JS_NewFloat64(ctx,
+//  20); }
 //
 // private:
 //  ObjectFunction m_foo{m_context, m_prototypeObject, "foo", foo, 0};
@@ -30,7 +32,8 @@
 //
 // class SampleClassInstance : public Instance {
 // public:
-//  explicit SampleClassInstance(HostClass* sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId, finalizer){};
+//  explicit SampleClassInstance(HostClass* sampleClass) : Instance(sampleClass, "SampleClass", nullptr, kSampleClassId,
+//  finalizer){};
 //
 // private:
 //  static void finalizer(JSRuntime* rt, JSValue v) {
@@ -57,7 +60,8 @@
 //  ~SampleClass() {}
 //
 // private:
-//  static JSValue f(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) { return JS_NewFloat64(ctx, 10); }
+//  static JSValue f(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) { return JS_NewFloat64(ctx,
+//  10); }
 //
 //  ObjectFunction m_f{m_context, m_prototypeObject, "f", f, 0};
 //};
@@ -297,7 +301,8 @@
 //  ExoticClassInstance() = delete;
 //  static JSClassExoticMethods methods;
 //
-//  explicit ExoticClassInstance(ExoticClass* exoticClass) : Instance(exoticClass, "ExoticClass", &methods, ExoticClass::exoticClassID, finalizer){};
+//  explicit ExoticClassInstance(ExoticClass* exoticClass) : Instance(exoticClass, "ExoticClass", &methods,
+//  ExoticClass::exoticClassID, finalizer){};
 //
 //  static JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver) {
 //    auto* instance = static_cast<ExoticClassInstance*>(JS_GetOpaque(obj, ExoticClass::exoticClassID));
@@ -321,7 +326,8 @@
 //    delete instance;
 //  };
 //
-//  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags) {
+//  static int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int
+//  flags) {
 //    auto* instance = static_cast<ExoticClassInstance*>(JS_GetOpaque(obj, ExoticClass::exoticClassID));
 //    instance->m_properties[atom] = JS_DupValue(ctx, value);
 //    return 0;
@@ -343,16 +349,19 @@
 //      return JS_NULL;
 //    };
 //  };
-//  ObjectProperty m_getClassName{m_context, jsObject, "className", ClassNamePropertyDescriptor::getter, ClassNamePropertyDescriptor::setter};
+//  ObjectProperty m_getClassName{m_context, jsObject, "className", ClassNamePropertyDescriptor::getter,
+//  ClassNamePropertyDescriptor::setter};
 //
 // private:
 //  std::unordered_map<JSAtom, JSValue> m_properties;
 //  double classValue{100.0};
 //};
 //
-// JSClassExoticMethods ExoticClassInstance::methods{nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty};
+// JSClassExoticMethods ExoticClassInstance::methods{nullptr, nullptr, nullptr, nullptr, nullptr, getProperty,
+// setProperty};
 //
-// JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) {
+// JSValue ExoticClass::instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv)
+// {
 //  return (new ExoticClassInstance(this))->jsObject;
 //}
 //
@@ -538,7 +547,8 @@
 //  ~SampleExoticHostObject() { isSampleFree = true; }
 //
 //  JSValue getProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver);
-//  int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int flags);
+//  int setProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value, JSValueConst receiver, int
+//  flags);
 //
 // private:
 //};
@@ -546,7 +556,8 @@
 // JSValue SampleExoticHostObject::getProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue receiver) {
 //  return JS_NewFloat64(ctx, 100.0);
 //}
-// int SampleExoticHostObject::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver, int flags) {
+// int SampleExoticHostObject::setProperty(JSContext* ctx, JSValue obj, JSAtom atom, JSValue value, JSValue receiver,
+// int flags) {
 //  return 0;
 //}
 //

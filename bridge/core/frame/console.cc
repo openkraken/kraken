@@ -9,14 +9,19 @@
 
 namespace kraken {
 
-void Console::__kraken_print__(ExecutingContext* context, std::unique_ptr<NativeString>& log, std::unique_ptr<NativeString>& level, ExceptionState& exception) {
+void Console::__kraken_print__(ExecutingContext* context,
+                               std::unique_ptr<NativeString>& log,
+                               std::unique_ptr<NativeString>& level,
+                               ExceptionState& exception) {
   std::stringstream stream;
   std::string buffer = nativeStringToStdString(log.get());
   stream << buffer;
   printLog(context->contextId(), stream, level != nullptr ? nativeStringToStdString(level.get()) : "info", nullptr);
 }
 
-void Console::__kraken_print__(ExecutingContext* context, std::unique_ptr<NativeString>& log, ExceptionState& exception_state) {
+void Console::__kraken_print__(ExecutingContext* context,
+                               std::unique_ptr<NativeString>& log,
+                               ExceptionState& exception_state) {
   std::stringstream stream;
   std::string buffer = nativeStringToStdString(log.get());
   stream << buffer;

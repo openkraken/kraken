@@ -60,7 +60,12 @@ static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
   ts->os_frameCallbacks.erase(th->callbackId);
 }
 
-NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
+NativeString* TEST_invokeModule(void* callbackContext,
+                                int32_t contextId,
+                                NativeString* moduleName,
+                                NativeString* method,
+                                NativeString* params,
+                                AsyncModuleCallback callback) {
   std::string module = nativeStringToStdString(moduleName);
 
   if (module == "throwError") {
@@ -159,7 +164,11 @@ NativeString* TEST_platformBrightness(int32_t contextId) {
   return nullptr;
 }
 
-void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {}
+void TEST_toBlob(void* callbackContext,
+                 int32_t contextId,
+                 AsyncBlobCallback blobCallback,
+                 int32_t elementId,
+                 double devicePixelRatio) {}
 
 void TEST_flushUICommand() {}
 

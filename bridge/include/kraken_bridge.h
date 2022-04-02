@@ -49,7 +49,11 @@ void parseHTML(int32_t contextId, const char* code, int32_t length);
 KRAKEN_EXPORT_C
 void reloadJsContext(int32_t contextId);
 KRAKEN_EXPORT_C
-void invokeModuleEvent(int32_t contextId, NativeString* module, const char* eventType, void* event, NativeString* extra);
+void invokeModuleEvent(int32_t contextId,
+                       NativeString* module,
+                       const char* eventType,
+                       void* event,
+                       NativeString* extra);
 KRAKEN_EXPORT_C
 void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length);
 KRAKEN_EXPORT_C

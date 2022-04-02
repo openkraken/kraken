@@ -74,7 +74,10 @@ NativeValue Native_NewJSON(ExecutingContext* context, JSValue& value) {
   return result;
 }
 
-void call_native_function(NativeFunctionContext* functionContext, int32_t argc, NativeValue* argv, NativeValue* returnValue) {
+void call_native_function(NativeFunctionContext* functionContext,
+                          int32_t argc,
+                          NativeValue* argv,
+                          NativeValue* returnValue) {
   auto* context = functionContext->m_context;
   auto* arguments = new JSValue[argc];
   for (int i = 0; i < argc; i++) {
@@ -132,7 +135,8 @@ NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value) {
   return Native_NewNull();
 }
 
-NativeFunctionContext::NativeFunctionContext(ExecutingContext* context, JSValue callback) : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
+NativeFunctionContext::NativeFunctionContext(ExecutingContext* context, JSValue callback)
+    : m_context(context), m_ctx(context->ctx()), m_callback(callback), call(call_native_function) {
   JS_DupValue(context->ctx(), callback);
   list_add_tail(&link, &m_context->native_function_job_list);
 };
@@ -142,7 +146,12 @@ NativeFunctionContext::~NativeFunctionContext() {
   JS_FreeValue(m_ctx, m_callback);
 }
 
-static JSValue anonymousFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
+static JSValue anonymousFunction(JSContext* ctx,
+                                 JSValueConst this_val,
+                                 int argc,
+                                 JSValueConst* argv,
+                                 int magic,
+                                 JSValue* func_data) {
   //  auto id = magic;
   //  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
   //
@@ -177,9 +186,9 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
   //    JS_FreeValue(context->ctx(), returnValue);
   //  } else if (errmsg != nullptr) {
   //    JSValue error = JS_NewError(context->ctx());
-  //    JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg), JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE);
-  //    JSValue returnValue = JS_Call(context->ctx(), promiseContext->rejectFunc, context->Global(), 1, &error);
-  //    context->DrainPendingPromiseJobs();
+  //    JS_DefinePropertyValueStr(context->ctx(), error, "message", JS_NewString(context->ctx(), errmsg),
+  //    JS_PROP_WRITABLE | JS_PROP_CONFIGURABLE); JSValue returnValue = JS_Call(context->ctx(),
+  //    promiseContext->rejectFunc, context->Global(), 1, &error); context->DrainPendingPromiseJobs();
   //    context->HandleException(&returnValue);
   //    JS_FreeValue(context->ctx(), error);
   //    JS_FreeValue(context->ctx(), returnValue);
@@ -190,7 +199,12 @@ void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int
   //  list_del(&promiseContext->link);
 }
 
-static JSValue anonymousAsyncFunction(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data) {
+static JSValue anonymousAsyncFunction(JSContext* ctx,
+                                      JSValueConst this_val,
+                                      int argc,
+                                      JSValueConst* argv,
+                                      int magic,
+                                      JSValue* func_data) {
   //  JSValue resolving_funcs[2];
   //  JSValue promise = JS_NewPromiseCapability(ctx, resolving_funcs);
   //
@@ -225,9 +239,8 @@ JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
       //      auto* string = static_cast<NativeString*>(value.u.ptr);
       //      if (string == nullptr)
       //        return JS_NULL;
-      //      JSValue returnedValue = JS_NewUnicodeString(context->runtime(), context->ctx(), string->string, string->length);
-      //      string->free();
-      //      return returnedValue;
+      //      JSValue returnedValue = JS_NewUnicodeString(context->runtime(), context->ctx(), string->string,
+      //      string->length); string->free(); return returnedValue;
     }
     case NativeTag::TAG_INT: {
       return JS_NewUint32(context->ctx(), value.u.int64);
@@ -253,7 +266,8 @@ JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
       //      if (ptrType == static_cast<int64_t>(JSPointerType::NativeBoundingClientRect)) {
       //        return (new BoundingClientRect(context, static_cast<NativeBoundingClientRect*>(ptr)))->jsObject;
       //      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeCanvasRenderingContext2D)) {
-      //        return (new CanvasRenderingContext2D(context, static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
+      //        return (new CanvasRenderingContext2D(context,
+      //        static_cast<NativeCanvasRenderingContext2D*>(ptr)))->jsObject;
       //      } else if (ptrType == static_cast<int64_t>(JSPointerType::NativeEventTarget)) {
       //        auto* nativeEventTarget = static_cast<NativeEventTarget*>(ptr);
       //        return JS_DupValue(context->ctx(), nativeEventTarget->instance->jsObject);
@@ -272,7 +286,8 @@ JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
 }
 
 std::string nativeStringToStdString(NativeString* nativeString) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(nativeString->string), nativeString->length);
+  std::u16string u16EventType =
+      std::u16string(reinterpret_cast<const char16_t*>(nativeString->string), nativeString->length);
   return toUTF8(u16EventType);
 }
 

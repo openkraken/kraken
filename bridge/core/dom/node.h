@@ -19,7 +19,14 @@ class DocumentFragment;
 
 void bindNode(std::unique_ptr<ExecutionContext>& context);
 
-enum NodeType { ELEMENT_NODE = 1, TEXT_NODE = 3, COMMENT_NODE = 8, DOCUMENT_NODE = 9, DOCUMENT_TYPE_NODE = 10, DOCUMENT_FRAGMENT_NODE = 11 };
+enum NodeType {
+  ELEMENT_NODE = 1,
+  TEXT_NODE = 3,
+  COMMENT_NODE = 8,
+  DOCUMENT_NODE = 9,
+  DOCUMENT_TYPE_NODE = 10,
+  DOCUMENT_FRAGMENT_NODE = 11
+};
 
 class Node;
 class TextNode;
@@ -57,7 +64,9 @@ class Node : public EventTarget {
 
   enum class NodeFlag : uint32_t { IsDocumentFragment = 1 << 0, IsTemplateElement = 1 << 1 };
   mutable std::set<NodeFlag> m_nodeFlags;
-  bool hasNodeFlag(NodeFlag flag) const { return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end(); }
+  bool hasNodeFlag(NodeFlag flag) const {
+    return m_nodeFlags.size() != 0 && m_nodeFlags.find(flag) != m_nodeFlags.end();
+  }
   void setNodeFlag(NodeFlag flag) const { m_nodeFlags.insert(flag); }
   void removeNodeFlag(NodeFlag flag) const { m_nodeFlags.erase(flag); }
 
@@ -102,7 +111,9 @@ class Node : public EventTarget {
   static JSValue copyNodeValue(JSContext* ctx, Node* node);
 };
 
-auto nodeCreator = [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags) -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
+auto nodeCreator =
+    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
+    -> JSValue { return JS_ThrowTypeError(ctx, "Illegal constructor"); };
 
 const WrapperTypeInfo nodeTypeInfo = {"Node", &eventTargetTypeInfo, nodeCreator};
 

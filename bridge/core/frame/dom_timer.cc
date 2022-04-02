@@ -18,7 +18,8 @@ std::shared_ptr<DOMTimer> DOMTimer::create(ExecutingContext* context, std::share
   return std::make_shared<DOMTimer>(context, callback);
 }
 
-DOMTimer::DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback) : context_(context), callback_(callback) {}
+DOMTimer::DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback)
+    : context_(context), callback_(callback) {}
 
 void DOMTimer::Fire() {
   if (!callback_->IsFunction(context_->ctx()))
