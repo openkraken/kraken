@@ -160,6 +160,7 @@ class KrakenViewController
     window = Window(
         BindingContext(_contextId, windowNativePtrMap[_contextId]!),
         document);
+    _registerPlatformBrightnessChange();
     _setEventTarget(WINDOW_ID, window);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
@@ -252,6 +253,7 @@ class KrakenViewController
     debugDOMTreeChanged = null;
 
     _teardownObserver();
+    _unregisterPlatformBrightnessChange();
 
     // Should clear previous page cached ui commands
     clearUICommand(_contextId);
@@ -263,6 +265,25 @@ class KrakenViewController
     document.dispose();
     window.dispose();
     _disposed = true;
+  }
+
+  VoidCallback? _originalOnPlatformBrightnessChanged;
+
+  void _registerPlatformBrightnessChange() {
+    _originalOnPlatformBrightnessChanged = ui.window.onPlatformBrightnessChanged;
+    ui.window.onPlatformBrightnessChanged = _onPlatformBrightnessChanged;
+  }
+
+  void _unregisterPlatformBrightnessChange() {
+    ui.window.onPlatformBrightnessChanged = _originalOnPlatformBrightnessChanged;
+    _originalOnPlatformBrightnessChanged = null;
+  }
+
+  void _onPlatformBrightnessChanged() {
+    if (_originalOnPlatformBrightnessChanged != null) {
+      _originalOnPlatformBrightnessChanged!();
+    }
+    window.dispatchEvent(ColorSchemeChangeEvent(window.colorScheme));
   }
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
