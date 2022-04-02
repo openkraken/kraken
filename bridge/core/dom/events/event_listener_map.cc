@@ -23,7 +23,7 @@ static bool AddListenerToVector(EventListenerVector* vector,
 
 static bool RemoveListenerFromVector(EventListenerVector* listener_vector,
                                      const std::shared_ptr<EventListener>& listener,
-                                     const std::shared_ptr<AddEventListenerOptions>& options,
+                                     const std::shared_ptr<EventListenerOptions>& options,
                                      size_t* index_of_removed_listener,
                                      RegisteredEventListener* registered_event_listener) {
   // Do a manual search for the matching listener. It is not
@@ -83,7 +83,7 @@ bool EventListenerMap::Add(const AtomicString& event_type,
 
 bool EventListenerMap::Remove(const AtomicString& event_type,
                               const std::shared_ptr<EventListener>& listener,
-                              const std::shared_ptr<AddEventListenerOptions>& options,
+                              const std::shared_ptr<EventListenerOptions>& options,
                               size_t* index_of_removed_listener,
                               RegisteredEventListener* registered_event_listener) {
   for (unsigned i = 0; i < entries_.size(); ++i) {
@@ -99,7 +99,7 @@ bool EventListenerMap::Remove(const AtomicString& event_type,
   return false;
 }
 
-const EventListenerVector* EventListenerMap::Find(const AtomicString& event_type) {
+EventListenerVector* EventListenerMap::Find(const AtomicString& event_type) {
   for (const auto& entry : entries_) {
     if (entry.first == event_type)
       return entry.second.get();

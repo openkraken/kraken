@@ -140,7 +140,7 @@ bool ExecutingContext::IsValid() const {
 }
 
 void* ExecutingContext::owner() {
-  assert(!ctx_invalid_ && "context has been released");
+  assert(!ctx_invalid_ && "GetExecutingContext has been released");
   return owner_;
 }
 
@@ -166,7 +166,7 @@ JSValue ExecutingContext::Global() {
 }
 
 JSContext* ExecutingContext::ctx() {
-  assert(!ctx_invalid_ && "context has been released");
+  assert(!ctx_invalid_ && "GetExecutingContext has been released");
   return script_state_.ctx();
 }
 

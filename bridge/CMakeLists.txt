@@ -309,6 +309,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_blob.h
     out/qjs_event.cc
     out/qjs_event.h
+    out/qjs_add_event_listener_options.cc
+    out/qjs_add_event_listener_options.h
+    out/qjs_event_listener_options.cc
+    out/qjs_event_listener_options.h
     out/qjs_error_event.h
     out/qjs_error_event.cc
     out/qjs_event_init.h

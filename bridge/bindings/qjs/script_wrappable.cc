@@ -64,7 +64,7 @@ void ScriptWrappable::InitializeQuickJSObject() {
   JS_SetOpaque(jsObject_, this);
 
   // Let instance inherit EventTarget prototype methods.
-  JSValue prototype = context()->contextData()->prototypeForType(wrapperTypeInfo);
+  JSValue prototype = GetExecutingContext()->contextData()->prototypeForType(wrapperTypeInfo);
   JS_SetPrototype(ctx_, jsObject_, prototype);
 
   wrapped_ = true;

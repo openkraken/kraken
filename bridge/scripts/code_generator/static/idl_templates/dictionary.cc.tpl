@@ -1,8 +1,8 @@
-std::unique_ptr<<%= className %>> <%= className %>::Create() {
-  return std::make_unique<<%= className %>>();
+std::shared_ptr<<%= className %>> <%= className %>::Create() {
+  return std::make_shared<<%= className %>>();
 }
-std::unique_ptr<<%= className %>> <%= className %>::Create(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-  return std::make_unique<<%= className %>>(ctx, value, exception_state);
+std::shared_ptr<<%= className %>> <%= className %>::Create(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+  return std::make_shared<<%= className %>>(ctx, value, exception_state);
 }
 
 <%= className %>::<%= className %>() {}

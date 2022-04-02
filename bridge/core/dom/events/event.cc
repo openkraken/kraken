@@ -36,6 +36,7 @@ Event::Event(ExecutingContext* context, const AtomicString& event_type, Bubbles 
       default_handled_(false),
       was_initialized_(true),
       is_trusted_(false),
+      handling_passive_(PassiveMode::kNotPassiveDefault),
       prevent_default_called_on_uncancelable_event_(false),
       fire_only_capture_listeners_at_target_(false),
       fire_only_non_capture_listeners_at_target_(false),
@@ -72,6 +73,11 @@ void Event::SetCurrentTarget(EventTarget* target) {
 }
 
 void Event::preventDefault(ExceptionState& exception_state) {
+  if (handling_passive_ != PassiveMode::kNotPassive &&
+      handling_passive_ != PassiveMode::kNotPassiveDefault) {
+    return;
+  }
+
   default_prevented_ = true;
 }
 
@@ -88,6 +94,10 @@ void Event::initEvent(const AtomicString& event_type, bool bubbles, bool cancela
   type_ = event_type;
   bubbles_ = bubbles;
   cancelable_ = cancelable;
+}
+
+void Event::SetHandlingPassive(PassiveMode mode) {
+  handling_passive_ = mode;
 }
 
 void Event::Trace(GCVisitor* visitor) const {

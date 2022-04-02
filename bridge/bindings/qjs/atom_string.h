@@ -77,6 +77,7 @@ class AtomicString {
   }
 
   bool operator==(const AtomicString& other) const { return other.atom_ == this->atom_; }
+  bool operator!=(const AtomicString& other) const { return other.atom_ != this->atom_; };
 
  protected:
   bool is_static_atom_ = false;

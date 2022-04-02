@@ -10,8 +10,8 @@ class ExecutingContext;
 
 class <%= className %> : public <%= object.parent ? object.parent : 'DictionaryBase' %> {
  public:
-  static std::unique_ptr<<%= className %>> Create();
-  static std::unique_ptr<<%= className %>> Create(JSContext* ctx, JSValue value, ExceptionState& exception_state);
+  static std::shared_ptr<<%= className %>> Create();
+  static std::shared_ptr<<%= className %>> Create(JSContext* ctx, JSValue value, ExceptionState& exception_state);
   explicit <%= className %>();
   explicit <%= className %>(JSContext* ctx, JSValue value, ExceptionState& exception_state);
 

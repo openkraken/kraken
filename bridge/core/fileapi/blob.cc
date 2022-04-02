@@ -107,14 +107,14 @@ std::string Blob::type() {
 }
 
 ScriptPromise Blob::arrayBuffer(ExceptionState& exception_state) {
-  auto* resolver = ScriptPromiseResolver::Create(context());
-  new BlobReaderClient(context(), this, resolver, BlobReaderClient::ReadType::kReadAsArrayBuffer);
+  auto* resolver = ScriptPromiseResolver::Create(GetExecutingContext());
+  new BlobReaderClient(GetExecutingContext(), this, resolver, BlobReaderClient::ReadType::kReadAsArrayBuffer);
   return resolver->Promise();
 }
 
 ScriptPromise Blob::text(ExceptionState& exception_state) {
-  auto* resolver = ScriptPromiseResolver::Create(context());
-  new BlobReaderClient(context(), this, resolver, BlobReaderClient::ReadType::kReadAsText);
+  auto* resolver = ScriptPromiseResolver::Create(GetExecutingContext());
+  new BlobReaderClient(GetExecutingContext(), this, resolver, BlobReaderClient::ReadType::kReadAsText);
   return resolver->Promise();
 }
 

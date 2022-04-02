@@ -6,12 +6,13 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_EVENTS_REGISTERED_EVENTLISTENER_H_
 #define KRAKENBRIDGE_CORE_DOM_EVENTS_REGISTERED_EVENTLISTENER_H_
 
-#include "bindings/qjs/add_event_listener_options.h"
-#include "bindings/qjs/event_listener_options.h"
 #include "event_listener.h"
 #include "foundation/macros.h"
 
 namespace kraken {
+
+class AddEventListenerOptions;
+class EventListenerOptions;
 
 // RegisteredEventListener represents 'event listener' defined in the DOM
 // standard. https://dom.spec.whatwg.org/#concept-event-listener

@@ -71,6 +71,21 @@ class Event : public ScriptWrappable {
     kScoped,
   };
 
+
+  enum class PassiveMode {
+    // Not passive, default initialized.
+    kNotPassiveDefault,
+    // Not passive, explicitly specified.
+    kNotPassive,
+    // Passive, explicitly specified.
+    kPassive,
+    // Passive, not explicitly specified and forced due to document level
+    // listener.
+    kPassiveForcedDocumentLevel,
+    // Passive, default initialized.
+    kPassiveDefault,
+  };
+
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
@@ -101,6 +116,12 @@ class Event : public ScriptWrappable {
   uint8_t eventPhase() const { return event_phase_; }
   void SetEventPhase(uint8_t event_phase) { event_phase_ = event_phase; }
 
+  // This callback is invoked when an event listener has been dispatched
+  // at the current target. It should only be used to influence UMA metrics
+  // and not change functionality since observing the presence of listeners
+  // is dangerous.
+  virtual void DoneDispatchingEventAtCurrentTarget() {}
+
   bool cancelBubble() const { return propagationStopped(); }
   void setCancelBubble(bool cancel) {
     if (cancel) {
@@ -119,13 +140,21 @@ class Event : public ScriptWrappable {
   void SetStopImmediatePropagation(bool stop_immediate_propagation) { immediate_propagation_stopped_ = stop_immediate_propagation; }
   void initEvent(const AtomicString& event_type, bool bubbles, bool cancelable, ExceptionState& exception_state);
 
+  bool ImmediatePropagationStopped() const {
+    return immediate_propagation_stopped_;
+  }
   bool WasInitialized() { return was_initialized_; }
+
+  void SetHandlingPassive(PassiveMode);
 
   bool isTrusted() const { return is_trusted_; }
   void SetTrusted(bool value) { is_trusted_ = value; }
 
   bool defaultPrevented() const { return default_prevented_; }
   void preventDefault(ExceptionState& exception_state);
+
+  bool DefaultHandled() const { return default_handled_; }
+  void SetDefaultHandled() { default_handled_ = true; }
 
   void SetFireOnlyCaptureListenersAtTarget(bool fire_only_capture_listeners_at_target) {
     assert(event_phase_ == kAtTarget);
@@ -144,6 +173,9 @@ class Event : public ScriptWrappable {
   void Dispose() const override;
 
  protected:
+
+  PassiveMode HandlingPassive() const { return handling_passive_; }
+
   AtomicString type_;
 
   unsigned bubbles_ : 1;
@@ -158,6 +190,7 @@ class Event : public ScriptWrappable {
   unsigned was_initialized_ : 1;
   unsigned is_trusted_ : 1;
 
+  PassiveMode handling_passive_;
   uint8_t event_phase_ = PhaseType::kNone;
 
   // Whether preventDefault was called on uncancelable event.

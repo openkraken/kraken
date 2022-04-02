@@ -17,6 +17,9 @@
 
 namespace kraken {
 
+class AddEventListenerOptions;
+class EventListenerOptions;
+
 using EventListenerVector = std::vector<RegisteredEventListener>;
 
 class EventListenerMap final {
@@ -34,10 +37,10 @@ class EventListenerMap final {
   bool Add(const AtomicString& event_type, const std::shared_ptr<EventListener>& listener, const std::shared_ptr<AddEventListenerOptions>& options, RegisteredEventListener* registered_event_listener);
   bool Remove(const AtomicString& event_type,
               const std::shared_ptr<EventListener>& listener,
-              const std::shared_ptr<AddEventListenerOptions>& options,
+              const std::shared_ptr<EventListenerOptions>& options,
               size_t* index_of_removed_listener,
               RegisteredEventListener* registered_event_listener);
-  const EventListenerVector* Find(const AtomicString& event_type);
+  EventListenerVector* Find(const AtomicString& event_type);
 
  private:
   // EventListener handlers registered with addEventListener API.

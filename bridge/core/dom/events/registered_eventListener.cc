@@ -4,21 +4,31 @@
  */
 
 #include "registered_eventListener.h"
+#include "qjs_add_event_listener_options.h"
 
 namespace kraken {
 
-RegisteredEventListener::RegisteredEventListener() : use_capture_(false), passive_(false), once_(false), blocked_event_warning_emitted_(false) {}
+RegisteredEventListener::RegisteredEventListener() : RegisteredEventListener(nullptr, nullptr) {}
 
-RegisteredEventListener::RegisteredEventListener(const std::shared_ptr<EventListener>& listener, std::shared_ptr<AddEventListenerOptions> options)
-    : callback_(listener), use_capture_(options->capture()), passive_(options->passive()), once_(options->once()), blocked_event_warning_emitted_(false){};
+RegisteredEventListener::RegisteredEventListener(const std::shared_ptr<EventListener>& listener,
+                                                 std::shared_ptr<AddEventListenerOptions> options)
+    : callback_(listener),
+      use_capture_(options->capture()),
+      passive_(options->passive()),
+      passive_specified_(false),
+      once_(options->once()),
+      blocked_event_warning_emitted_(false){};
 
 RegisteredEventListener::RegisteredEventListener(const RegisteredEventListener& that) = default;
 
 RegisteredEventListener& RegisteredEventListener::operator=(const RegisteredEventListener& that) = default;
 
-void RegisteredEventListener::SetCallback(EventListener* listener) {}
+void RegisteredEventListener::SetCallback(const std::shared_ptr<JSEventListener>& listener) {
+  callback_ = listener;
+}
 
-bool RegisteredEventListener::Matches(const std::shared_ptr<EventListener>& listener, const std::shared_ptr<EventListenerOptions>& options) const {
+bool RegisteredEventListener::Matches(const std::shared_ptr<EventListener>& listener,
+                                      const std::shared_ptr<EventListenerOptions>& options) const {
   // Equality is soley based on the listener and useCapture flags.
   assert(callback_);
   assert(listener);
