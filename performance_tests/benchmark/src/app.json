@@ -7,8 +7,5 @@
   ],
   "window": {
     "title": "Rax App"
-  },
-  "scripts": [
-    "<script>window.startTime = Date.now();</script>"
-  ]
+  }
 }

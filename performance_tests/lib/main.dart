@@ -1,8 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
 import 'dart:ui';
-import 'dart:io';
 import 'dart:async';
 
 import 'package:webview_flutter/webview_flutter.dart';
@@ -44,7 +43,10 @@ class MyBrowser extends StatefulWidget {
 typedef PerformanceDataCallback = void Function(String viewType, int time);
 
 class _WebviewPage extends StatelessWidget {
-  _WebviewPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback;
+  late int _startTime;
+  _WebviewPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback {
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+  }
 
   late PerformanceDataCallback _performanceDataCallback;
 
@@ -52,7 +54,7 @@ class _WebviewPage extends StatelessWidget {
     return JavascriptChannel(
         name: 'Message',
         onMessageReceived: (JavascriptMessage message) {
-          _performanceDataCallback('Web', int.parse(message.message));
+          _performanceDataCallback('Web', int.parse(message.message) - _startTime);
         }
     );
   }
@@ -60,10 +62,10 @@ class _WebviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WebView(
-      initialUrl: 'http://192.168.1.196:3333/home.html',
+      initialUrl: 'http://192.168.1.196:8080/web/home.html',
       javascriptMode: JavascriptMode.unrestricted,
       onWebViewCreated: (WebViewController controller)  {
-        controller.clearCache();
+        // controller.clearCache();
       },
       javascriptChannels: <JavascriptChannel>{
         _javascriptChannel(context),
@@ -73,7 +75,10 @@ class _WebviewPage extends StatelessWidget {
 }
 
 class _KrakenPage extends StatelessWidget {
-  _KrakenPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback;
+  late int _startTime;
+  _KrakenPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback {
+    _startTime = DateTime.now().millisecondsSinceEpoch;
+  }
 
   late PerformanceDataCallback _performanceDataCallback;
 
@@ -82,12 +87,12 @@ class _KrakenPage extends StatelessWidget {
     KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
     javaScriptChannel.onMethodCall = (String method, arguments) async {
       if (method == 'performance') {
-        _performanceDataCallback('Kraken', (arguments as List)[0] as int);
+        _performanceDataCallback('Kraken', int.parse((arguments as List)[0]) - _startTime);
       }
     };
 
     return Kraken(
-      bundle: KrakenBundle.fromUrl('assets:///benchmark/build/kraken/home.kbc1'),
+      bundle: KrakenBundle.fromUrl('http://192.168.1.196:8080/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
       onLoad: (KrakenController controller) {
         // Timer(Duration(seconds: 4), () {
@@ -139,7 +144,7 @@ class _MyHomePageState extends State<MyBrowser> {
       print('_krakenOnloadTimes = $_krakenOnloadTimes');
       print('_webonloadTimes = $_webOnloadTimes');
     } else {
-      Timer(Duration(seconds: 3), _changeViewAndReloadPage);
+      Timer(Duration(seconds: 1), _changeViewAndReloadPage);
     }
   }
 

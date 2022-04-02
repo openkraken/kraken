@@ -7,22 +7,13 @@ import styles from './index.module.css';
 import Price from '../../components/Price';
 import Card from '../../components/Card';
 
-if (!window.startTime) {
-  window.startTime = Date.now();
-}
-
 window.onload = () => {
-  const endTime = Date.now();
-  const firstPaint = endTime - startTime;
-  console.log('startTime=', startTime);
-  console.log('endTime=', endTime);
-  console.log('firstPaint=', firstPaint);
-  // document.getElementById('firstPaint').innerHTML = firstPaint;
+  const time = Date.now();
 
   if (window.kraken) {
-    kraken.methodChannel.invokeMethod('firstPaint', firstPaint);
+    kraken.methodChannel.invokeMethod('performance', time.toString());
   } else {
-    Message.postMessage(firstPaint);  
+    Message.postMessage(time.toString());  
   }
 };
 
