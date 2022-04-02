@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyBrowser> {
   Widget? _currentView;
 
   List<int> _krakenOnloadTimes = [];
-  List _webOnloadTimes = [];
+  List<int> _webOnloadTimes = [];
   final int _collectCount = 30;
 
   OutlineInputBorder outlineBorder = OutlineInputBorder(
@@ -142,8 +142,27 @@ class _MyHomePageState extends State<MyBrowser> {
     }
 
     if (_krakenOnloadTimes.length >= _collectCount && _webOnloadTimes.length >= _collectCount) {
-      print('_krakenOnloadTimes = $_krakenOnloadTimes');
-      print('_webonloadTimes = $_webOnloadTimes');
+      print('The list of Average time in Kraken from loading to the onLoad is $_krakenOnloadTimes (ms)');
+      print('The list of Average time in webview from loading to the onLoad is $_webOnloadTimes (ms)');
+
+      // Remove the top five and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
+      _krakenOnloadTimes.sort();
+      _krakenOnloadTimes.removeRange(0, 5);
+      _krakenOnloadTimes.removeRange(_krakenOnloadTimes.length - 5, _krakenOnloadTimes.length);
+      int sumKrakenLoadTimes = 0;
+      _krakenOnloadTimes.forEach((t) => sumKrakenLoadTimes += t);
+      int averageKrakenLoadTime = sumKrakenLoadTimes ~/ _krakenOnloadTimes.length;
+
+      _webOnloadTimes.sort();
+      _webOnloadTimes.removeRange(0, 5);
+      _webOnloadTimes.removeRange(_webOnloadTimes.length - 5, _webOnloadTimes.length);
+      int sumWebLoadTimes = 0;
+      _webOnloadTimes.forEach((t) => sumWebLoadTimes += t);
+      int averageWebLoadTime = sumWebLoadTimes ~/ _webOnloadTimes.length;
+
+      print('The Average time in Kraken from loading to the onLoad is $averageKrakenLoadTime ms');
+      print('The Average time in webview from loading to the onLoad is $averageWebLoadTime ms');
+
       Timer(Duration(seconds: 2), () {
         exit(0);
       });
