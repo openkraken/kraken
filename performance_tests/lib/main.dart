@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
@@ -95,9 +97,6 @@ class _KrakenPage extends StatelessWidget {
       bundle: KrakenBundle.fromUrl('http://192.168.1.196:8080/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
       onLoad: (KrakenController controller) {
-        // Timer(Duration(seconds: 4), () {
-        //   exit(0);
-        // });
         // controller.view.evaluateJavaScripts("""setTimeout(() => {
         //   console.log(performance.__kraken_navigation_summary__());
         // }, 2000);""");
@@ -143,6 +142,9 @@ class _MyHomePageState extends State<MyBrowser> {
     if (_krakenOnloadTimes.length >= _collectCount && _webOnloadTimes.length >= _collectCount) {
       print('_krakenOnloadTimes = $_krakenOnloadTimes');
       print('_webonloadTimes = $_webOnloadTimes');
+      Timer(Duration(seconds: 2), () {
+        exit(0);
+      });
     } else {
       Timer(Duration(seconds: 1), _changeViewAndReloadPage);
     }
