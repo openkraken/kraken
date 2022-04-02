@@ -98,11 +98,6 @@ class _KrakenPage extends StatelessWidget {
     return Kraken(
       bundle: KrakenBundle.fromUrl('http://$benchMarkServerAddress:7878/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
-      onLoad: (KrakenController controller) {
-        // controller.view.evaluateJavaScripts("""setTimeout(() => {
-        //   console.log(performance.__kraken_navigation_summary__());
-        // }, 2000);""");
-      },
     );
   }
 }
@@ -134,7 +129,6 @@ class _MyHomePageState extends State<MyBrowser> {
   }
 
   void _getPerformanceData(String viewType, int time) {
-    print('_getPerformanceData viewType=$viewType, time=$time');
     if (viewType == 'Kraken') {
       _krakenOnloadTimes.add(time);
     } else {
