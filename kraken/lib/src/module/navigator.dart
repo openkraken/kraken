@@ -49,7 +49,7 @@ class NavigatorModule extends BaseModule {
   }
 
   static String getLanguages() {
-    // Strinfiy the list of languages to JSON format.
+    // Stringify the list of languages to JSON format.
     return '[' +  PlatformDispatcher.instance.locales.map(((locale) => '"${locale.toLanguageTag()}"')).join(',') + ']';
   }
 

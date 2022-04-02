@@ -16,11 +16,7 @@ class Window extends EventTarget {
   final Screen screen;
 
   Window(BindingContext? context, this.document)
-      : screen = Screen(context), super(context) {
-    window.onPlatformBrightnessChanged = () {
-      dispatchEvent(ColorSchemeChangeEvent(colorScheme));
-    };
-  }
+      : screen = Screen(context), super(context);
 
   @override
   EventTarget? get parentEventTarget => null;
