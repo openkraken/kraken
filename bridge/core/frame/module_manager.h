@@ -16,20 +16,20 @@ namespace kraken {
 class ModuleManager {
  public:
   static AtomicString __kraken_invoke_module__(ExecutingContext* context,
-                                                                const AtomicString& moduleName,
-                                                                const AtomicString& method,
-                                                                ExceptionState& exception);
+                                               const AtomicString& moduleName,
+                                               const AtomicString& method,
+                                               ExceptionState& exception);
   static AtomicString __kraken_invoke_module__(ExecutingContext* context,
-                                                                const AtomicString& moduleName,
-                                                                const AtomicString& method,
-                                                                ScriptValue& params,
-                                                                ExceptionState& exception);
+                                               const AtomicString& moduleName,
+                                               const AtomicString& method,
+                                               ScriptValue& params,
+                                               ExceptionState& exception);
   static AtomicString __kraken_invoke_module__(ExecutingContext* context,
-                                                                const AtomicString& moduleName,
-                                                                const AtomicString& method,
-                                                                ScriptValue& params,
-                                                                std::shared_ptr<QJSFunction> callback,
-                                                                ExceptionState& exception);
+                                               const AtomicString& moduleName,
+                                               const AtomicString& method,
+                                               ScriptValue& params,
+                                               std::shared_ptr<QJSFunction> callback,
+                                               ExceptionState& exception);
   static void __kraken_add_module_listener__(ExecutingContext* context,
                                              const std::shared_ptr<QJSFunction>& handler,
                                              ExceptionState& exception);

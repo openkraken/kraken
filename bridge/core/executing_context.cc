@@ -370,7 +370,6 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 //  return &pending_promises_;
 //}
 
-
 // An lock free context validator.
 bool isContextValid(int32_t contextId) {
   if (contextId > running_context_list)

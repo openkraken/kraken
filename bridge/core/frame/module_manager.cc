@@ -62,27 +62,27 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext,
 }
 
 AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      const AtomicString& moduleName,
-                                                                      const AtomicString& method,
-                                                                      ExceptionState& exception) {
+                                                     const AtomicString& moduleName,
+                                                     const AtomicString& method,
+                                                     ExceptionState& exception) {
   ScriptValue empty = ScriptValue::Empty(context->ctx());
   return __kraken_invoke_module__(context, moduleName, method, empty, nullptr, exception);
 }
 
 AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      const AtomicString& moduleName,
-                                                                      const AtomicString& method,
-                                                                      ScriptValue& paramsValue,
-                                                                      ExceptionState& exception) {
+                                                     const AtomicString& moduleName,
+                                                     const AtomicString& method,
+                                                     ScriptValue& paramsValue,
+                                                     ExceptionState& exception) {
   return __kraken_invoke_module__(context, moduleName, method, paramsValue, nullptr, exception);
 }
 
 AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      const AtomicString& moduleName,
-                                                                      const AtomicString& method,
-                                                                      ScriptValue& paramsValue,
-                                                                      std::shared_ptr<QJSFunction> callback,
-                                                                      ExceptionState& exception) {
+                                                     const AtomicString& moduleName,
+                                                     const AtomicString& method,
+                                                     ScriptValue& paramsValue,
+                                                     std::shared_ptr<QJSFunction> callback,
+                                                     ExceptionState& exception) {
   std::unique_ptr<NativeString> params;
   if (!paramsValue.IsEmpty()) {
     params = paramsValue.ToJSONStringify(&exception).toNativeString();
@@ -104,10 +104,12 @@ AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
 
   NativeString* result;
   if (callback != nullptr) {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.ToNativeString().get(), method.ToNativeString().get(),
+    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(),
+                                                    moduleName.ToNativeString().get(), method.ToNativeString().get(),
                                                     params.get(), handleInvokeModuleTransientCallback);
   } else {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.ToNativeString().get(), method.ToNativeString().get(),
+    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(),
+                                                    moduleName.ToNativeString().get(), method.ToNativeString().get(),
                                                     params.get(), handleInvokeModuleUnexpectedCallback);
   }
 

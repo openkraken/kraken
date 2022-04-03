@@ -388,11 +388,9 @@ struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventLis
   }
 };
 
-template<>
+template <>
 struct Converter<EventInit> : public ConverterBase<EventInit> {
-  static ImplType FromValue() {
-
-  }
+  static ImplType FromValue() {}
 };
 
 }  // namespace kraken
