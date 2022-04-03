@@ -20,9 +20,7 @@ std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue valu
 
   uint32_t length;
   uint16_t* buffer = JS_ToUnicode(ctx, value, &length);
-  std::unique_ptr<NativeString> ptr = std::make_unique<NativeString>();
-  ptr->string = buffer;
-  ptr->length = length;
+  std::unique_ptr<NativeString> ptr = std::make_unique<NativeString>(buffer, length);
 
   if (!isValueString) {
     JS_FreeValue(ctx, value);
@@ -33,9 +31,7 @@ std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue valu
 std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   std::u16string utf16;
   fromUTF8(string, utf16);
-  NativeString tmp{};
-  tmp.string = reinterpret_cast<const uint16_t*>(utf16.c_str());
-  tmp.length = utf16.size();
+  NativeString tmp{reinterpret_cast<const uint16_t*>(utf16.c_str()), static_cast<uint32_t>(utf16.size())};
   return std::unique_ptr<NativeString>(tmp.clone());
 }
 

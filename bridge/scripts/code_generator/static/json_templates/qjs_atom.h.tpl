@@ -26,7 +26,11 @@
 #ifdef DEF
 
 <% _.forEach(data, function(name) { %>
-DEF(<%= name %>, "<%= name %>")
+<% if (_.isArray(name)) { %>
+  DEF(<%= name[0] %>, "<%= name[1] %>")
+<% } else { %>
+  DEF(<%= name %>, "<%= name %>")
+<% } %>
 <% });  %>
 
 #endif /* DEF */

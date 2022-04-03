@@ -9,17 +9,17 @@
 namespace kraken {
 
 NativeString* NativeString::clone() {
-  auto* newNativeString = new NativeString();
-  auto* newString = new uint16_t[length];
+  auto* newNativeString = new NativeString(nullptr, 0);
+  auto* newString = new uint16_t[length_];
 
-  memcpy(newString, string, length * sizeof(uint16_t));
-  newNativeString->string = newString;
-  newNativeString->length = length;
+  memcpy(newString, string_, length_ * sizeof(uint16_t));
+  newNativeString->string_ = newString;
+  newNativeString->length_ = length_;
   return newNativeString;
 }
 
-void NativeString::free() {
-  delete[] string;
+NativeString::~NativeString() {
+  delete[] string_;
 }
 
 }  // namespace kraken

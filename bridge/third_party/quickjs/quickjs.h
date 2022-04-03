@@ -427,7 +427,7 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt);
 enum {
   __JS_ATOM_NULL = JS_ATOM_NULL,
 #define DEF(name, str) JS_ATOM_ ## name,
-#include "quickjs-atom.h"
+#include "built_in_string.h"
 #include "event_type_names.h"
 #undef DEF
   JS_ATOM_END,

@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_MODULE_MANAGER_H
 #define KRAKENBRIDGE_MODULE_MANAGER_H
 
+#include "bindings/qjs/atom_string.h"
 #include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/qjs_function.h"
 #include "module_callback.h"
@@ -14,18 +15,18 @@ namespace kraken {
 
 class ModuleManager {
  public:
-  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
-                                                                std::unique_ptr<NativeString>& moduleName,
-                                                                std::unique_ptr<NativeString>& method,
+  static AtomicString __kraken_invoke_module__(ExecutingContext* context,
+                                                                const AtomicString& moduleName,
+                                                                const AtomicString& method,
                                                                 ExceptionState& exception);
-  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
-                                                                std::unique_ptr<NativeString>& moduleName,
-                                                                std::unique_ptr<NativeString>& method,
+  static AtomicString __kraken_invoke_module__(ExecutingContext* context,
+                                                                const AtomicString& moduleName,
+                                                                const AtomicString& method,
                                                                 ScriptValue& params,
                                                                 ExceptionState& exception);
-  static std::unique_ptr<NativeString> __kraken_invoke_module__(ExecutingContext* context,
-                                                                std::unique_ptr<NativeString>& moduleName,
-                                                                std::unique_ptr<NativeString>& method,
+  static AtomicString __kraken_invoke_module__(ExecutingContext* context,
+                                                                const AtomicString& moduleName,
+                                                                const AtomicString& method,
                                                                 ScriptValue& params,
                                                                 std::shared_ptr<QJSFunction> callback,
                                                                 ExceptionState& exception);

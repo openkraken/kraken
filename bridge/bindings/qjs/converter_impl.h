@@ -16,6 +16,7 @@
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
+#include "qjs_event_init.h"
 
 namespace kraken {
 
@@ -195,10 +196,10 @@ struct Converter<IDLDOMString> : public ConverterBase<IDLDOMString> {
 
   static JSValue ToValue(JSContext* ctx, const AtomicString& value) { return value.ToQuickJS(ctx); }
   static JSValue ToValue(JSContext* ctx, NativeString* str) {
-    return JS_NewUnicodeString(ctx, str->string, str->length);
+    return JS_NewUnicodeString(ctx, str->string(), str->length());
   }
   static JSValue ToValue(JSContext* ctx, std::unique_ptr<NativeString> str) {
-    return JS_NewUnicodeString(ctx, str->string, str->length);
+    return JS_NewUnicodeString(ctx, str->string(), str->length());
   }
   static JSValue ToValue(JSContext* ctx, uint16_t* bytes, size_t length) {
     return JS_NewUnicodeString(ctx, bytes, length);
@@ -384,6 +385,13 @@ struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventLis
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return Converter<JSEventListener>::FromValue(ctx, value, exception_state);
+  }
+};
+
+template<>
+struct Converter<EventInit> : public ConverterBase<EventInit> {
+  static ImplType FromValue() {
+
   }
 };
 

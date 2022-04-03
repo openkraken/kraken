@@ -26,421 +26,837 @@
 #ifdef DEF
 
 
-DEF(DOMActivate, "DOMActivate")
 
-DEF(DOMCharacterDataModified, "DOMCharacterDataModified")
+  DEF(DOMActivate, "DOMActivate")
 
-DEF(DOMContentLoaded, "DOMContentLoaded")
 
-DEF(DOMFocusIn, "DOMFocusIn")
 
-DEF(DOMFocusOut, "DOMFocusOut")
+  DEF(DOMCharacterDataModified, "DOMCharacterDataModified")
 
-DEF(DOMNodeInserted, "DOMNodeInserted")
 
-DEF(DOMNodeInsertedIntoDocument, "DOMNodeInsertedIntoDocument")
 
-DEF(DOMNodeRemoved, "DOMNodeRemoved")
+  DEF(DOMContentLoaded, "DOMContentLoaded")
 
-DEF(DOMNodeRemovedFromDocument, "DOMNodeRemovedFromDocument")
 
-DEF(DOMSubtreeModified, "DOMSubtreeModified")
 
-DEF(abort, "abort")
+  DEF(DOMFocusIn, "DOMFocusIn")
 
-DEF(abortpayment, "abortpayment")
 
-DEF(activate, "activate")
 
-DEF(active, "active")
+  DEF(DOMFocusOut, "DOMFocusOut")
 
-DEF(addsourcebuffer, "addsourcebuffer")
 
-DEF(addtrack, "addtrack")
 
-DEF(animationcancel, "animationcancel")
+  DEF(DOMNodeInserted, "DOMNodeInserted")
 
-DEF(animationend, "animationend")
 
-DEF(animationiteration, "animationiteration")
 
-DEF(animationstart, "animationstart")
+  DEF(DOMNodeInsertedIntoDocument, "DOMNodeInsertedIntoDocument")
 
-DEF(backgroundfetchabort, "backgroundfetchabort")
 
-DEF(backgroundfetchclick, "backgroundfetchclick")
 
-DEF(backgroundfetchfail, "backgroundfetchfail")
+  DEF(DOMNodeRemoved, "DOMNodeRemoved")
 
-DEF(backgroundfetchsuccess, "backgroundfetchsuccess")
 
-DEF(beforeunload, "beforeunload")
 
-DEF(beginEvent, "beginEvent")
+  DEF(DOMNodeRemovedFromDocument, "DOMNodeRemovedFromDocument")
 
-DEF(blocked, "blocked")
 
-DEF(blur, "blur")
 
-DEF(boundary, "boundary")
+  DEF(DOMSubtreeModified, "DOMSubtreeModified")
 
-DEF(cached, "cached")
 
-DEF(cancel, "cancel")
 
-DEF(canplay, "canplay")
+  DEF(abort, "abort")
 
-DEF(canplaythrough, "canplaythrough")
 
-DEF(capturehandlechange, "capturehandlechange")
 
-DEF(change, "change")
+  DEF(abortpayment, "abortpayment")
 
-DEF(checking, "checking")
 
-DEF(click, "click")
 
-DEF(close, "close")
+  DEF(activate, "activate")
 
-DEF(closing, "closing")
 
-DEF(complete, "complete")
 
-DEF(compositionend, "compositionend")
+  DEF(active, "active")
 
-DEF(compositionstart, "compositionstart")
 
-DEF(compositionupdate, "compositionupdate")
 
-DEF(connect, "connect")
+  DEF(addsourcebuffer, "addsourcebuffer")
 
-DEF(contextlost, "contextlost")
 
-DEF(contextmenu, "contextmenu")
 
-DEF(contextrestored, "contextrestored")
+  DEF(addtrack, "addtrack")
 
-DEF(controllerchange, "controllerchange")
 
-DEF(cookiechange, "cookiechange")
 
-DEF(copy, "copy")
+  DEF(animationcancel, "animationcancel")
 
-DEF(contentdelete, "contentdelete")
 
-DEF(crossoriginmessage, "crossoriginmessage")
 
-DEF(currentscreenchange, "currentscreenchange")
+  DEF(animationend, "animationend")
 
-DEF(cuechange, "cuechange")
 
-DEF(currententrychange, "currententrychange")
 
-DEF(cut, "cut")
+  DEF(animationiteration, "animationiteration")
 
-DEF(datachannel, "datachannel")
 
-DEF(dblclick, "dblclick")
 
-DEF(defaultsessionstart, "defaultsessionstart")
+  DEF(animationstart, "animationstart")
 
-DEF(disconnect, "disconnect")
 
-DEF(display, "display")
 
-DEF(drop, "drop")
+  DEF(backgroundfetchabort, "backgroundfetchabort")
 
-DEF(durationchange, "durationchange")
 
-DEF(emptied, "emptied")
 
-DEF(encrypted, "encrypted")
+  DEF(backgroundfetchclick, "backgroundfetchclick")
 
-DEF(end, "end")
 
-DEF(ended, "ended")
 
-DEF(endEvent, "endEvent")
+  DEF(backgroundfetchfail, "backgroundfetchfail")
 
-DEF(enter, "enter")
 
-DEF(error, "error")
 
-DEF(exit, "exit")
+  DEF(backgroundfetchsuccess, "backgroundfetchsuccess")
 
-DEF(fetch, "fetch")
 
-DEF(finish, "finish")
 
-DEF(focus, "focus")
+  DEF(beforeunload, "beforeunload")
 
-DEF(focusin, "focusin")
 
-DEF(focusout, "focusout")
 
-DEF(freeze, "freeze")
+  DEF(beginEvent, "beginEvent")
 
-DEF(fullscreenchange, "fullscreenchange")
 
-DEF(fullscreenerror, "fullscreenerror")
 
-DEF(hashchange, "hashchange")
+  DEF(blocked, "blocked")
 
-DEF(hide, "hide")
 
-DEF(inactive, "inactive")
 
-DEF(input, "input")
+  DEF(blur, "blur")
 
-DEF(inputreport, "inputreport")
 
-DEF(inputsourceschange, "inputsourceschange")
 
-DEF(install, "install")
+  DEF(boundary, "boundary")
 
-DEF(interfacerequest, "interfacerequest")
 
-DEF(invalid, "invalid")
 
-DEF(keydown, "keydown")
+  DEF(cached, "cached")
 
-DEF(keypress, "keypress")
 
-DEF(keystatuseschange, "keystatuseschange")
 
-DEF(keyup, "keyup")
+  DEF(cancel, "cancel")
 
-DEF(languagechange, "languagechange")
 
-DEF(leavepictureinpicture, "leavepictureinpicture")
 
-DEF(levelchange, "levelchange")
+  DEF(canplay, "canplay")
 
-DEF(load, "load")
 
-DEF(loadeddata, "loadeddata")
 
-DEF(loadedmetadata, "loadedmetadata")
+  DEF(canplaythrough, "canplaythrough")
 
-DEF(loadend, "loadend")
 
-DEF(loading, "loading")
 
-DEF(loadstart, "loadstart")
+  DEF(capturehandlechange, "capturehandlechange")
 
-DEF(lostpointercapture, "lostpointercapture")
 
-DEF(mark, "mark")
 
-DEF(message, "message")
+  DEF(change, "change")
 
-DEF(messageerror, "messageerror")
 
-DEF(mousedown, "mousedown")
 
-DEF(mouseenter, "mouseenter")
+  DEF(checking, "checking")
 
-DEF(mouseleave, "mouseleave")
 
-DEF(mousemove, "mousemove")
 
-DEF(mouseout, "mouseout")
+  DEF(click, "click")
 
-DEF(mouseover, "mouseover")
 
-DEF(mouseup, "mouseup")
 
-DEF(mousewheel, "mousewheel")
+  DEF(close, "close")
 
-DEF(mute, "mute")
 
-DEF(navigate, "navigate")
 
-DEF(navigateerror, "navigateerror")
+  DEF(closing, "closing")
 
-DEF(navigatesuccess, "navigatesuccess")
 
-DEF(noupdate, "noupdate")
 
-DEF(open, "open")
+  DEF(complete, "complete")
 
-DEF(orientationchange, "orientationchange")
 
-DEF(overscroll, "overscroll")
 
-DEF(pagehide, "pagehide")
+  DEF(compositionend, "compositionend")
 
-DEF(pageshow, "pageshow")
 
-DEF(paste, "paste")
 
-DEF(pause, "pause")
+  DEF(compositionstart, "compositionstart")
 
-DEF(play, "play")
 
-DEF(playing, "playing")
 
-DEF(pointercancel, "pointercancel")
+  DEF(compositionupdate, "compositionupdate")
 
-DEF(pointerdown, "pointerdown")
 
-DEF(pointerenter, "pointerenter")
 
-DEF(pointerleave, "pointerleave")
+  DEF(connect, "connect")
 
-DEF(pointerlockchange, "pointerlockchange")
 
-DEF(pointerlockerror, "pointerlockerror")
 
-DEF(pointermove, "pointermove")
+  DEF(contextlost, "contextlost")
 
-DEF(pointerout, "pointerout")
 
-DEF(pointerover, "pointerover")
 
-DEF(pointerup, "pointerup")
+  DEF(contextmenu, "contextmenu")
 
-DEF(popstate, "popstate")
 
-DEF(progress, "progress")
 
-DEF(processorerror, "processorerror")
+  DEF(contextrestored, "contextrestored")
 
-DEF(push, "push")
 
-DEF(pushsubscriptionchange, "pushsubscriptionchange")
 
-DEF(ratechange, "ratechange")
+  DEF(controllerchange, "controllerchange")
 
-DEF(reading, "reading")
 
-DEF(readingerror, "readingerror")
 
-DEF(readystatechange, "readystatechange")
+  DEF(cookiechange, "cookiechange")
 
-DEF(reflectionchange, "reflectionchange")
 
-DEF(rejectionhandled, "rejectionhandled")
 
-DEF(release, "release")
+  DEF(copy, "copy")
 
-DEF(remove, "remove")
 
-DEF(removestream, "removestream")
 
-DEF(removetrack, "removetrack")
+  DEF(contentdelete, "contentdelete")
 
-DEF(repeatEvent, "repeatEvent")
 
-DEF(reset, "reset")
 
-DEF(resize, "resize")
+  DEF(crossoriginmessage, "crossoriginmessage")
 
-DEF(result, "result")
 
-DEF(resume, "resume")
 
-DEF(screenschange, "screenschange")
+  DEF(currentscreenchange, "currentscreenchange")
 
-DEF(scroll, "scroll")
 
-DEF(scrollend, "scrollend")
 
-DEF(search, "search")
+  DEF(cuechange, "cuechange")
 
-DEF(seeked, "seeked")
 
-DEF(seeking, "seeking")
 
-DEF(select, "select")
+  DEF(currententrychange, "currententrychange")
 
-DEF(selectionchange, "selectionchange")
 
-DEF(selectstart, "selectstart")
 
-DEF(show, "show")
+  DEF(cut, "cut")
 
-DEF(squeeze, "squeeze")
 
-DEF(squeezeend, "squeezeend")
 
-DEF(squeezestart, "squeezestart")
+  DEF(datachannel, "datachannel")
 
-DEF(stalled, "stalled")
 
-DEF(start, "start")
 
-DEF(stop, "stop")
+  DEF(dblclick, "dblclick")
 
-DEF(statechange, "statechange")
 
-DEF(storage, "storage")
 
-DEF(submit, "submit")
+  DEF(defaultsessionstart, "defaultsessionstart")
 
-DEF(success, "success")
 
-DEF(suspend, "suspend")
 
-DEF(sync, "sync")
+  DEF(disconnect, "disconnect")
 
-DEF(terminate, "terminate")
 
-DEF(textInput, "textInput")
 
-DEF(textupdate, "textupdate")
+  DEF(display, "display")
 
-DEF(textformatupdate, "textformatupdate")
 
-DEF(toggle, "toggle")
 
-DEF(tonechange, "tonechange")
+  DEF(drop, "drop")
 
-DEF(touchcancel, "touchcancel")
 
-DEF(touchend, "touchend")
 
-DEF(touchmove, "touchmove")
+  DEF(durationchange, "durationchange")
 
-DEF(touchstart, "touchstart")
 
-DEF(transitioncancel, "transitioncancel")
 
-DEF(transitionend, "transitionend")
+  DEF(emptied, "emptied")
 
-DEF(transitionrun, "transitionrun")
 
-DEF(transitionstart, "transitionstart")
 
-DEF(typechange, "typechange")
+  DEF(encrypted, "encrypted")
 
-DEF(uncapturederror, "uncapturederror")
 
-DEF(unhandledrejection, "unhandledrejection")
 
-DEF(unload, "unload")
+  DEF(end, "end")
 
-DEF(unmute, "unmute")
 
-DEF(update, "update")
 
-DEF(versionchange, "versionchange")
+  DEF(ended, "ended")
 
-DEF(visibilitychange, "visibilitychange")
 
-DEF(waiting, "waiting")
 
-DEF(waitingforkey, "waitingforkey")
+  DEF(endEvent, "endEvent")
 
-DEF(webglcontextcreationerror, "webglcontextcreationerror")
 
-DEF(webglcontextlost, "webglcontextlost")
 
-DEF(webglcontextrestored, "webglcontextrestored")
+  DEF(enter, "enter")
 
-DEF(wheel, "wheel")
 
-DEF(zoom, "zoom")
+
+  DEF(error, "error")
+
+
+
+  DEF(exit, "exit")
+
+
+
+  DEF(fetch, "fetch")
+
+
+
+  DEF(finish, "finish")
+
+
+
+  DEF(focus, "focus")
+
+
+
+  DEF(focusin, "focusin")
+
+
+
+  DEF(focusout, "focusout")
+
+
+
+  DEF(freeze, "freeze")
+
+
+
+  DEF(fullscreenchange, "fullscreenchange")
+
+
+
+  DEF(fullscreenerror, "fullscreenerror")
+
+
+
+  DEF(hashchange, "hashchange")
+
+
+
+  DEF(hide, "hide")
+
+
+
+  DEF(inactive, "inactive")
+
+
+
+  DEF(input, "input")
+
+
+
+  DEF(inputreport, "inputreport")
+
+
+
+  DEF(inputsourceschange, "inputsourceschange")
+
+
+
+  DEF(install, "install")
+
+
+
+  DEF(interfacerequest, "interfacerequest")
+
+
+
+  DEF(invalid, "invalid")
+
+
+
+  DEF(keydown, "keydown")
+
+
+
+  DEF(keypress, "keypress")
+
+
+
+  DEF(keystatuseschange, "keystatuseschange")
+
+
+
+  DEF(keyup, "keyup")
+
+
+
+  DEF(languagechange, "languagechange")
+
+
+
+  DEF(leavepictureinpicture, "leavepictureinpicture")
+
+
+
+  DEF(levelchange, "levelchange")
+
+
+
+  DEF(load, "load")
+
+
+
+  DEF(loadeddata, "loadeddata")
+
+
+
+  DEF(loadedmetadata, "loadedmetadata")
+
+
+
+  DEF(loadend, "loadend")
+
+
+
+  DEF(loading, "loading")
+
+
+
+  DEF(loadstart, "loadstart")
+
+
+
+  DEF(lostpointercapture, "lostpointercapture")
+
+
+
+  DEF(mark, "mark")
+
+
+
+  DEF(message, "message")
+
+
+
+  DEF(messageerror, "messageerror")
+
+
+
+  DEF(mousedown, "mousedown")
+
+
+
+  DEF(mouseenter, "mouseenter")
+
+
+
+  DEF(mouseleave, "mouseleave")
+
+
+
+  DEF(mousemove, "mousemove")
+
+
+
+  DEF(mouseout, "mouseout")
+
+
+
+  DEF(mouseover, "mouseover")
+
+
+
+  DEF(mouseup, "mouseup")
+
+
+
+  DEF(mousewheel, "mousewheel")
+
+
+
+  DEF(mute, "mute")
+
+
+
+  DEF(navigate, "navigate")
+
+
+
+  DEF(navigateerror, "navigateerror")
+
+
+
+  DEF(navigatesuccess, "navigatesuccess")
+
+
+
+  DEF(noupdate, "noupdate")
+
+
+
+  DEF(open, "open")
+
+
+
+  DEF(orientationchange, "orientationchange")
+
+
+
+  DEF(overscroll, "overscroll")
+
+
+
+  DEF(pagehide, "pagehide")
+
+
+
+  DEF(pageshow, "pageshow")
+
+
+
+  DEF(paste, "paste")
+
+
+
+  DEF(pause, "pause")
+
+
+
+  DEF(play, "play")
+
+
+
+  DEF(playing, "playing")
+
+
+
+  DEF(pointercancel, "pointercancel")
+
+
+
+  DEF(pointerdown, "pointerdown")
+
+
+
+  DEF(pointerenter, "pointerenter")
+
+
+
+  DEF(pointerleave, "pointerleave")
+
+
+
+  DEF(pointerlockchange, "pointerlockchange")
+
+
+
+  DEF(pointerlockerror, "pointerlockerror")
+
+
+
+  DEF(pointermove, "pointermove")
+
+
+
+  DEF(pointerout, "pointerout")
+
+
+
+  DEF(pointerover, "pointerover")
+
+
+
+  DEF(pointerup, "pointerup")
+
+
+
+  DEF(popstate, "popstate")
+
+
+
+  DEF(progress, "progress")
+
+
+
+  DEF(processorerror, "processorerror")
+
+
+
+  DEF(push, "push")
+
+
+
+  DEF(pushsubscriptionchange, "pushsubscriptionchange")
+
+
+
+  DEF(ratechange, "ratechange")
+
+
+
+  DEF(reading, "reading")
+
+
+
+  DEF(readingerror, "readingerror")
+
+
+
+  DEF(readystatechange, "readystatechange")
+
+
+
+  DEF(reflectionchange, "reflectionchange")
+
+
+
+  DEF(rejectionhandled, "rejectionhandled")
+
+
+
+  DEF(release, "release")
+
+
+
+  DEF(remove, "remove")
+
+
+
+  DEF(removestream, "removestream")
+
+
+
+  DEF(removetrack, "removetrack")
+
+
+
+  DEF(repeatEvent, "repeatEvent")
+
+
+
+  DEF(reset, "reset")
+
+
+
+  DEF(resize, "resize")
+
+
+
+  DEF(result, "result")
+
+
+
+  DEF(resume, "resume")
+
+
+
+  DEF(screenschange, "screenschange")
+
+
+
+  DEF(scroll, "scroll")
+
+
+
+  DEF(scrollend, "scrollend")
+
+
+
+  DEF(search, "search")
+
+
+
+  DEF(seeked, "seeked")
+
+
+
+  DEF(seeking, "seeking")
+
+
+
+  DEF(select, "select")
+
+
+
+  DEF(selectionchange, "selectionchange")
+
+
+
+  DEF(selectstart, "selectstart")
+
+
+
+  DEF(show, "show")
+
+
+
+  DEF(squeeze, "squeeze")
+
+
+
+  DEF(squeezeend, "squeezeend")
+
+
+
+  DEF(squeezestart, "squeezestart")
+
+
+
+  DEF(stalled, "stalled")
+
+
+
+  DEF(start, "start")
+
+
+
+  DEF(stop, "stop")
+
+
+
+  DEF(statechange, "statechange")
+
+
+
+  DEF(storage, "storage")
+
+
+
+  DEF(submit, "submit")
+
+
+
+  DEF(success, "success")
+
+
+
+  DEF(suspend, "suspend")
+
+
+
+  DEF(sync, "sync")
+
+
+
+  DEF(terminate, "terminate")
+
+
+
+  DEF(textInput, "textInput")
+
+
+
+  DEF(textupdate, "textupdate")
+
+
+
+  DEF(textformatupdate, "textformatupdate")
+
+
+
+  DEF(toggle, "toggle")
+
+
+
+  DEF(tonechange, "tonechange")
+
+
+
+  DEF(touchcancel, "touchcancel")
+
+
+
+  DEF(touchend, "touchend")
+
+
+
+  DEF(touchmove, "touchmove")
+
+
+
+  DEF(touchstart, "touchstart")
+
+
+
+  DEF(transitioncancel, "transitioncancel")
+
+
+
+  DEF(transitionend, "transitionend")
+
+
+
+  DEF(transitionrun, "transitionrun")
+
+
+
+  DEF(transitionstart, "transitionstart")
+
+
+
+  DEF(typechange, "typechange")
+
+
+
+  DEF(uncapturederror, "uncapturederror")
+
+
+
+  DEF(unhandledrejection, "unhandledrejection")
+
+
+
+  DEF(unload, "unload")
+
+
+
+  DEF(unmute, "unmute")
+
+
+
+  DEF(update, "update")
+
+
+
+  DEF(versionchange, "versionchange")
+
+
+
+  DEF(visibilitychange, "visibilitychange")
+
+
+
+  DEF(waiting, "waiting")
+
+
+
+  DEF(waitingforkey, "waitingforkey")
+
+
+
+  DEF(webglcontextcreationerror, "webglcontextcreationerror")
+
+
+
+  DEF(webglcontextlost, "webglcontextlost")
+
+
+
+  DEF(webglcontextrestored, "webglcontextrestored")
+
+
+
+  DEF(wheel, "wheel")
+
+
+
+  DEF(zoom, "zoom")
+
 
 
 #endif /* DEF */

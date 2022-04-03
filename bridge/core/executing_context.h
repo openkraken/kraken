@@ -160,8 +160,6 @@ class ObjectProperty {
 
 std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
 
-void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01);
-
 // JS array operation utilities.
 void arrayPushValue(JSContext* ctx, JSValue array, JSValue val);
 void arrayInsert(JSContext* ctx, JSValue array, uint32_t start, JSValue targetValue);

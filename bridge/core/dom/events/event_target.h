@@ -109,6 +109,8 @@ class EventTarget : public ScriptWrappable {
 
   static DispatchEventResult GetDispatchEventResult(const Event&);
 
+  virtual bool IsWindowOrWorkerGlobalScope() const { return false; }
+
  protected:
   virtual bool AddEventListenerInternal(const AtomicString& event_type,
                                         const std::shared_ptr<EventListener>& listener,
@@ -125,8 +127,6 @@ class EventTarget : public ScriptWrappable {
   virtual EventTargetData& EnsureEventTargetData() = 0;
 
   const char* GetHumanReadableName() const override;
-
-  virtual bool IsWindowOrWorkerGlobalScope() const { return false; }
 
  private:
   bool FireEventListeners(Event&, EventTargetData*, EventListenerVector&, ExceptionState&);

@@ -1,4 +1,3 @@
-#include "bindings/qjs/converter_impl.h"
 
 <% if (object.parent) { %>
 #include "qjs_<%= _.snakeCase(object.parent) %>.h"
@@ -10,6 +9,7 @@ class ExecutingContext;
 
 class <%= className %> : public <%= object.parent ? object.parent : 'DictionaryBase' %> {
  public:
+  using ImplType = std::shared_ptr<<%= className %>>;
   static std::shared_ptr<<%= className %>> Create();
   static std::shared_ptr<<%= className %>> Create(JSContext* ctx, JSValue value, ExceptionState& exception_state);
   explicit <%= className %>();

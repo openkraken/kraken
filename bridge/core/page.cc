@@ -97,7 +97,7 @@ void KrakenPage::evaluateScript(const NativeString* script, const char* url, int
                                std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
   m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
-  m_context->EvaluateJavaScript(script->string, script->length, url, startLine);
+  m_context->EvaluateJavaScript(script->string(), script->length(), url, startLine);
 #endif
 }
 

@@ -287,7 +287,7 @@ JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
 
 std::string nativeStringToStdString(NativeString* nativeString) {
   std::u16string u16EventType =
-      std::u16string(reinterpret_cast<const char16_t*>(nativeString->string), nativeString->length);
+      std::u16string(reinterpret_cast<const char16_t*>(nativeString->string()), nativeString->length());
   return toUTF8(u16EventType);
 }
 

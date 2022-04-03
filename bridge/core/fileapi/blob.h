@@ -57,7 +57,7 @@ class Blob : public ScriptWrappable {
   Blob* slice(ExceptionState& exception_state);
   Blob* slice(int64_t start, ExceptionState& exception_state);
   Blob* slice(int64_t start, int64_t end, ExceptionState& exception_state);
-  Blob* slice(int64_t start, int64_t end, std::unique_ptr<NativeString>& content_type, ExceptionState& exception_state);
+  Blob* slice(int64_t start, int64_t end, const AtomicString& content_type, ExceptionState& exception_state);
 
   std::string StringResult();
   ArrayBufferData ArrayBufferResult();

@@ -370,15 +370,6 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 //  return &pending_promises_;
 //}
 
-void buildUICommandArgs(JSContext* ctx, JSValue key, NativeString& args_01) {
-  if (!JS_IsString(key))
-    return;
-
-  uint32_t length;
-  uint16_t* buffer = JS_ToUnicode(ctx, key, &length);
-  args_01.string = buffer;
-  args_01.length = length;
-}
 
 // An lock free context validator.
 bool isContextValid(int32_t contextId) {

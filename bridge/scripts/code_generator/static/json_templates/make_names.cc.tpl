@@ -6,11 +6,16 @@
 #include "<%= name %>.h"
 
 namespace kraken {
-namespace event_type_names {
+namespace <%= name %> {
 
 void* names_storage[kNamesCount * ((sizeof(AtomicString) + sizeof(void *) - 1) / sizeof(void *))];
 
-<% _.forEach(data, function(name, index) { %>const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+<% _.forEach(data, function(name, index) { %>
+<% if (_.isArray(name)) { %>
+const AtomicString& k<%= name[0] %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+<% } else { %>
+const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+<% } %>
 <% }) %>
 
 void Init() {
@@ -23,7 +28,7 @@ void Init() {
   };
 
   static const NameEntry kNames[] = {
-      <% _.forEach(data, function(name) { %>{ JS_ATOM_<%= name %> },
+      <% _.forEach(data, function(name) { %>{ JS_ATOM_<%= name[0] %> },
       <% }); %>
   };
 

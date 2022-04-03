@@ -15,7 +15,6 @@ RegisteredEventListener::RegisteredEventListener(const std::shared_ptr<EventList
     : callback_(listener),
       use_capture_(options->capture()),
       passive_(options->passive()),
-      passive_specified_(false),
       once_(options->once()),
       blocked_event_warning_emitted_(false){};
 
@@ -23,7 +22,7 @@ RegisteredEventListener::RegisteredEventListener(const RegisteredEventListener& 
 
 RegisteredEventListener& RegisteredEventListener::operator=(const RegisteredEventListener& that) = default;
 
-void RegisteredEventListener::SetCallback(const std::shared_ptr<JSEventListener>& listener) {
+void RegisteredEventListener::SetCallback(const std::shared_ptr<EventListener>& listener) {
   callback_ = listener;
 }
 

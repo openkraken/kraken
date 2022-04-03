@@ -25,7 +25,7 @@ void DOMTimer::Fire() {
   if (!callback_->IsFunction(context_->ctx()))
     return;
 
-  ScriptValue returnValue = callback_->Invoke(context_->ctx(), 0, nullptr);
+  ScriptValue returnValue = callback_->Invoke(context_->ctx(), ScriptValue::Empty(context_->ctx()), 0, nullptr);
 
   if (returnValue.IsException()) {
     context_->HandleException(&returnValue);

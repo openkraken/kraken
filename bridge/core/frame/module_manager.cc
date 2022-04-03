@@ -33,16 +33,16 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
   if (errmsg != nullptr) {
     ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
     ScriptValue arguments[] = {errorObject};
-    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
+    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, ScriptValue::Empty(ctx), 1, arguments);
     if (returnValue.IsException()) {
       context->HandleException(&returnValue);
     }
   } else {
-    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string), json->length);
+    std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string()), json->length());
     std::string utf8Arguments = toUTF8(argumentString);
     ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
     ScriptValue arguments[] = {jsonObject};
-    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, 1, arguments);
+    ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, ScriptValue::Empty(ctx), 1, arguments);
     if (returnValue.IsException()) {
       context->HandleException(&returnValue);
     }
@@ -61,25 +61,25 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext,
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      std::unique_ptr<NativeString>& moduleName,
-                                                                      std::unique_ptr<NativeString>& method,
+AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
+                                                                      const AtomicString& moduleName,
+                                                                      const AtomicString& method,
                                                                       ExceptionState& exception) {
   ScriptValue empty = ScriptValue::Empty(context->ctx());
   return __kraken_invoke_module__(context, moduleName, method, empty, nullptr, exception);
 }
 
-std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      std::unique_ptr<NativeString>& moduleName,
-                                                                      std::unique_ptr<NativeString>& method,
+AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
+                                                                      const AtomicString& moduleName,
+                                                                      const AtomicString& method,
                                                                       ScriptValue& paramsValue,
                                                                       ExceptionState& exception) {
   return __kraken_invoke_module__(context, moduleName, method, paramsValue, nullptr, exception);
 }
 
-std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
-                                                                      std::unique_ptr<NativeString>& moduleName,
-                                                                      std::unique_ptr<NativeString>& method,
+AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
+                                                                      const AtomicString& moduleName,
+                                                                      const AtomicString& method,
                                                                       ScriptValue& paramsValue,
                                                                       std::shared_ptr<QJSFunction> callback,
                                                                       ExceptionState& exception) {
@@ -87,7 +87,7 @@ std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingC
   if (!paramsValue.IsEmpty()) {
     params = paramsValue.ToJSONStringify(&exception).toNativeString();
     if (exception.HasException()) {
-      return nullptr;
+      return AtomicString::Empty(context->ctx());
     }
   }
 
@@ -95,7 +95,7 @@ std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingC
     exception.ThrowException(
         context->ctx(), ErrorType::InternalError,
         "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
-    return nullptr;
+    return AtomicString::Empty(context->ctx());
   }
 
   auto moduleCallback = ModuleCallback::Create(callback);
@@ -104,24 +104,18 @@ std::unique_ptr<NativeString> ModuleManager::__kraken_invoke_module__(ExecutingC
 
   NativeString* result;
   if (callback != nullptr) {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.get(), method.get(),
+    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.ToNativeString().get(), method.ToNativeString().get(),
                                                     params.get(), handleInvokeModuleTransientCallback);
   } else {
-    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.get(), method.get(),
+    result = context->dartMethodPtr()->invokeModule(moduleContext, context->contextId(), moduleName.ToNativeString().get(), method.ToNativeString().get(),
                                                     params.get(), handleInvokeModuleUnexpectedCallback);
   }
 
-  moduleName->free();
-  method->free();
-  if (params != nullptr) {
-    params->free();
-  }
-
   if (result == nullptr) {
-    return nullptr;
+    return AtomicString::Empty(context->ctx());
   }
 
-  return std::unique_ptr<NativeString>(result);
+  return AtomicString::From(context->ctx(), result);
 }
 
 void ModuleManager::__kraken_add_module_listener__(ExecutingContext* context,

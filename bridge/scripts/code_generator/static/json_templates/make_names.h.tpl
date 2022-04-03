@@ -10,11 +10,11 @@
 #include "bindings/qjs/atom_string.h"
 
 namespace kraken {
-namespace event_type_names {
+namespace <%= name %> {
 
-<% _.forEach(data, function(name, index) { %>
-  extern const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %>;
-  <% }) %>
+<% _.forEach(data, function(name, index) { %><% if (_.isArray(name)) { %>extern const AtomicString& k<%= name[0] %>;
+<% } else { %>extern const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %>;
+<% } %><% }) %>
 
 constexpr unsigned kNamesCount = <%= data.length %>;
 

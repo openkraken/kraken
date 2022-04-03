@@ -11,11 +11,16 @@
 namespace kraken {
 
 struct NativeString {
-  const uint16_t* string;
-  uint32_t length;
-
+  NativeString(const uint16_t* string, uint32_t length): string_(string), length_(length) {};
+  ~NativeString();
   NativeString* clone();
-  void free();
+
+  inline const uint16_t* string() const{return string_;}
+  inline uint32_t length() const { return length_; }
+
+ private:
+  const uint16_t* string_;
+  uint32_t length_;
 };
 
 }  // namespace kraken

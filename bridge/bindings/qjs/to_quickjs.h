@@ -34,10 +34,10 @@ inline JSValue toQuickJS(JSContext* ctx, const char* str) {
   return JS_NewString(ctx, str);
 }
 inline JSValue toQuickJS(JSContext* ctx, std::unique_ptr<NativeString>& str) {
-  return JS_NewUnicodeString(ctx, str->string, str->length);
+  return JS_NewUnicodeString(ctx, str->string(), str->length());
 }
 inline JSValue toQuickJS(JSContext* ctx, NativeString* str) {
-  return JS_NewUnicodeString(ctx, str->string, str->length);
+  return JS_NewUnicodeString(ctx, str->string(), str->length());
 }
 
 // ScriptWrapper

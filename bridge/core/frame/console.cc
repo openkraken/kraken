@@ -6,24 +6,25 @@
 #include "console.h"
 #include <sstream>
 #include "foundation/logging.h"
+#include "built_in_string.h"
 
 namespace kraken {
 
 void Console::__kraken_print__(ExecutingContext* context,
-                               std::unique_ptr<NativeString>& log,
-                               std::unique_ptr<NativeString>& level,
+                               const AtomicString& log,
+                               const AtomicString& level,
                                ExceptionState& exception) {
   std::stringstream stream;
-  std::string buffer = nativeStringToStdString(log.get());
+  std::string buffer = log.ToStdString();
   stream << buffer;
-  printLog(context->contextId(), stream, level != nullptr ? nativeStringToStdString(level.get()) : "info", nullptr);
+  printLog(context->contextId(), stream, level != built_in_string::kempty_string  ? level.ToStdString() : "info", nullptr);
 }
 
 void Console::__kraken_print__(ExecutingContext* context,
-                               std::unique_ptr<NativeString>& log,
+                               const AtomicString& log,
                                ExceptionState& exception_state) {
   std::stringstream stream;
-  std::string buffer = nativeStringToStdString(log.get());
+  std::string buffer = log.ToStdString();
   stream << buffer;
   printLog(context->contextId(), stream, "info", nullptr);
 }

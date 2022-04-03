@@ -26,7 +26,7 @@ class RegisteredEventListener final {
   RegisteredEventListener& operator=(const RegisteredEventListener& that);
 
   const std::shared_ptr<EventListener> Callback() const { return callback_; }
-  std::shared_ptr<EventListener> Callback() { return callback_; }
+  void SetCallback(const std::shared_ptr<EventListener>& listener);
 
   void SetCallback(EventListener* listener);
 

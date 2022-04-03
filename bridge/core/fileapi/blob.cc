@@ -7,6 +7,7 @@
 #include <string>
 #include "bindings/qjs/script_promise_resolver.h"
 #include "core/executing_context.h"
+#include "built_in_string.h"
 
 namespace kraken {
 
@@ -87,19 +88,18 @@ Blob* Blob::slice(int64_t start, ExceptionState& exception_state) {
   return slice(start, _data.size(), exception_state);
 }
 Blob* Blob::slice(int64_t start, int64_t end, ExceptionState& exception_state) {
-  std::unique_ptr<NativeString> contentType = nullptr;
-  return slice(start, end, contentType, exception_state);
+  return slice(start, end, AtomicString::Empty(ctx()), exception_state);
 }
 Blob* Blob::slice(int64_t start,
                   int64_t end,
-                  std::unique_ptr<NativeString>& content_type,
+                  const AtomicString& content_type,
                   ExceptionState& exception_state) {
   auto* newBlob = makeGarbageCollected<Blob>(ctx());
   std::vector<uint8_t> newData;
   newData.reserve(_data.size() - (end - start));
   newData.insert(newData.begin(), _data.begin() + start, _data.end() - (_data.size() - end));
   newBlob->_data = newData;
-  newBlob->mime_type_ = content_type != nullptr ? nativeStringToStdString(content_type.get()) : mime_type_;
+  newBlob->mime_type_ = content_type != built_in_string::kempty_string ? content_type.ToStdString() : mime_type_;
   return newBlob;
 }
 

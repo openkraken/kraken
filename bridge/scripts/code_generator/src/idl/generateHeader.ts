@@ -31,32 +31,49 @@ function readTemplate(name: string) {
 
 export function generateCppHeader(blob: IDLBlob) {
   const baseTemplate = fs.readFileSync(path.join(__dirname, '../../static/idl_templates/base.h.tpl'), {encoding: 'utf-8'});
+  let headerOptions = {
+    interface: false,
+    dictionary: false,
+    global_function: false,
+  };
   const contents = blob.objects.map(object => {
     const templateKind = getTemplateKind(object);
     if (templateKind === TemplateKind.null) return '';
 
     switch(templateKind) {
       case TemplateKind.Interface: {
-        return _.template(readTemplate('interface'))({
-          className: getClassName(blob),
-          blob: blob
-        });
+        if (!headerOptions.interface) {
+          headerOptions.interface = true;
+          return _.template(readTemplate('interface'))({
+            className: getClassName(blob),
+            blob: blob
+          });
+        }
+        return '';
       }
       case TemplateKind.Dictionary: {
-        let props = (object as ClassObject).props;
-        return _.template(readTemplate('dictionary'))({
-          className: getClassName(blob),
-          blob: blob,
-          object: object,
-          props,
-          generateTypeConverter: generateTypeConverter
-        });
+        if (!headerOptions.dictionary) {
+          headerOptions.dictionary = true;
+          let props = (object as ClassObject).props;
+          return _.template(readTemplate('dictionary'))({
+            className: getClassName(blob),
+            blob: blob,
+            object: object,
+            props,
+            generateTypeConverter: generateTypeConverter
+          });
+        }
+        return '';
       }
       case TemplateKind.globalFunction: {
-        return _.template(readTemplate('global_function'))({
-          className: getClassName(blob),
-          blob: blob
-        });
+        if (!headerOptions.global_function) {
+          headerOptions.global_function = true;
+          return _.template(readTemplate('global_function'))({
+            className: getClassName(blob),
+            blob: blob
+          });
+        }
+        return '';
       }
     }
   });

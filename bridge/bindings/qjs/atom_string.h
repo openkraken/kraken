@@ -23,7 +23,7 @@ class AtomicString {
  public:
   static AtomicString Empty(JSContext* ctx) { return AtomicString(ctx, JS_ATOM_NULL); };
   static AtomicString From(JSContext* ctx, NativeString* native_string) {
-    JSValue str = JS_NewUnicodeString(ctx, native_string->string, native_string->length);
+    JSValue str = JS_NewUnicodeString(ctx, native_string->string(), native_string->length());
     auto result = AtomicString(ctx, str);
     JS_FreeValue(ctx, str);
     return result;
@@ -38,11 +38,19 @@ class AtomicString {
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
 
-  std::string ToStdString() const {
+  [[nodiscard]] std::string ToStdString() const {
     const char* buf = JS_AtomToCString(ctx_, atom_);
     std::string result = std::string(buf);
     JS_FreeCString(ctx_, buf);
     return result;
+  }
+
+  [[nodiscard]] std::unique_ptr<NativeString> ToNativeString() const {
+    JSValue stringValue = JS_AtomToValue(ctx_, atom_);
+    uint32_t length;
+    uint16_t* bytes = JS_ToUnicode(ctx_, stringValue, &length);
+    JS_FreeValue(ctx_, stringValue);
+    return std::make_unique<NativeString>(bytes, length);
   }
 
   // Copy assignment

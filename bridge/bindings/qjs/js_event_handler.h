@@ -38,9 +38,9 @@ class JSEventHandler : public JSBasedEventListener {
   explicit JSEventHandler(const std::shared_ptr<QJSFunction>& event_handler, HandlerType type)
       : type_(type), event_handler_(event_handler){};
 
-  JSValue GetListenerObject(EventTarget&) { return event_handler_->ToQuickJS(); }
+  JSValue GetListenerObject(EventTarget&) override { return event_handler_->ToQuickJS(); }
 
-  JSValue GetEffectiveFunction(EventTarget&) { return event_handler_->ToQuickJS(); }
+  JSValue GetEffectiveFunction(EventTarget&) override { return event_handler_->ToQuickJS(); }
 
   // Helper functions for DowncastTraits.
   bool IsJSEventHandler() const override { return true; }

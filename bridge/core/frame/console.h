@@ -7,6 +7,7 @@
 #define KRAKE_CONSOLE_H
 
 #include "bindings/qjs/script_value.h"
+#include "bindings/qjs/atom_string.h"
 #include "core/executing_context.h"
 
 namespace kraken {
@@ -14,11 +15,11 @@ namespace kraken {
 class Console final {
  public:
   static void __kraken_print__(ExecutingContext* context,
-                               std::unique_ptr<NativeString>& log,
-                               std::unique_ptr<NativeString>& level,
+                               const AtomicString& log,
+                               const AtomicString& level,
                                ExceptionState& exception);
   static void __kraken_print__(ExecutingContext* context,
-                               std::unique_ptr<NativeString>& log,
+                               const AtomicString& log,
                                ExceptionState& exception_state);
 };
 
