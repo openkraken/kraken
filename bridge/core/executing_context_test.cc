@@ -350,10 +350,10 @@ TEST(jsValueToNativeString, utf8String) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
   std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->getContext()->ctx(), str);
-  EXPECT_EQ(nativeString->length, 10);
+  EXPECT_EQ(nativeString->length(), 10);
   uint8_t expectedString[10] = {104, 101, 108, 108, 111, 119, 111, 114, 108, 100};
   for (int i = 0; i < 10; i++) {
-    EXPECT_EQ(expectedString[i], *(nativeString->string + i));
+    EXPECT_EQ(expectedString[i], *(nativeString->string() + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
 }
@@ -363,9 +363,9 @@ TEST(jsValueToNativeString, unicodeChinese) {
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
   std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
-  EXPECT_EQ(nativeString->length, expectedString.size());
-  for (int i = 0; i < nativeString->length; i++) {
-    EXPECT_EQ(expectedString[i], *(nativeString->string + i));
+  EXPECT_EQ(nativeString->length(), expectedString.size());
+  for (int i = 0; i < nativeString->length(); i++) {
+    EXPECT_EQ(expectedString[i], *(nativeString->string() + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
 }
@@ -375,9 +375,9 @@ TEST(jsValueToNativeString, emoji) {
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
   std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
-  EXPECT_EQ(nativeString->length, expectedString.length());
-  for (int i = 0; i < nativeString->length; i++) {
-    EXPECT_EQ(expectedString[i], *(nativeString->string + i));
+  EXPECT_EQ(nativeString->length(), expectedString.length());
+  for (int i = 0; i < nativeString->length(); i++) {
+    EXPECT_EQ(expectedString[i], *(nativeString->string() + i));
   }
   JS_FreeValue(bridge->getContext()->ctx(), str);
 }

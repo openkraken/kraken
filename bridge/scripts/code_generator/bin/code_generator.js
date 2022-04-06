@@ -82,10 +82,6 @@ function genCodeFromJSONData() {
       let result = generateJSONTemplate(blobs[i], targetTemplateHeaderData, targetTemplateBodyData);
       let dist = blob.dist;
 
-      if (targetTemplate === 'qjs_atom') {
-        dist = path.join(__dirname, '../../../third_party/quickjs')
-      }
-
       let genFilePath = path.join(dist, blob.filename);
       fs.writeFileSync(genFilePath + '.h', result.header);
       result.source && fs.writeFileSync(genFilePath + '.cc', result.source);

@@ -16,4 +16,6 @@ std::unique_ptr<SourceLocation> SourceLocation::Capture(const std::string& url,
 SourceLocation::SourceLocation(const std::string& url, unsigned int line_number, unsigned int column_number)
     : url_(url), line_number_(line_number), column_number_(column_number) {}
 
+SourceLocation::~SourceLocation() {}
+
 }  // namespace kraken

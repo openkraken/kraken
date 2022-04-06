@@ -18,7 +18,8 @@ namespace <%= name %> {
 
 constexpr unsigned kNamesCount = <%= data.length %>;
 
-void Init();
+void Init(JSContext* ctx);
+void Dispose();
 
 }
 

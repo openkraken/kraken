@@ -216,7 +216,6 @@ static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc
   std::unique_ptr<NativeString> nativeString = kraken::jsValueToNativeString(ctx, charStringValue);
   void* p = static_cast<void*>(nativeString.get());
   context->dartMethodPtr()->simulateInputText(static_cast<NativeString*>(p));
-  nativeString->free();
   return JS_NULL;
 };
 

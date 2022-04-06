@@ -33,7 +33,9 @@ class AtomicString {
   AtomicString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(atom){};
   AtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
   AtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
-  AtomicString(JSAtom atom) : atom_(atom), is_static_atom_(true){};
+  ~AtomicString() {
+    JS_FreeAtom(ctx_, atom_);
+  };
 
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
@@ -55,13 +57,13 @@ class AtomicString {
 
   // Copy assignment
   AtomicString(AtomicString const& value) {
-    if (!is_static_atom_ && &value != this) {
+    if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
   AtomicString& operator=(const AtomicString& other) {
-    if (!is_static_atom_ && &other != this) {
+    if (&other != this) {
       atom_ = JS_DupAtom(ctx_, other.atom_);
     }
     return *this;
@@ -69,13 +71,13 @@ class AtomicString {
 
   // Move assignment
   AtomicString(AtomicString&& value) noexcept {
-    if (!is_static_atom_ && &value != this) {
+    if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
   };
   AtomicString& operator=(AtomicString&& value) noexcept {
-    if (!is_static_atom_ && &value != this) {
+    if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
@@ -86,10 +88,10 @@ class AtomicString {
   bool operator!=(const AtomicString& other) const { return other.atom_ != this->atom_; };
 
  protected:
-  bool is_static_atom_ = false;
   JSContext* ctx_{nullptr};
   JSAtom atom_{JS_ATOM_NULL};
 };
+
 
 }  // namespace kraken
 

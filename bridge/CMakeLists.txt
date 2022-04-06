@@ -65,7 +65,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 if (ENABLE_ASAN)
-  add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1)
+  add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
   add_link_options(-fsanitize=address -fno-omit-frame-pointer)
 endif ()
 

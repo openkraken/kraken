@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "templates": ["make_names", "qjs_atom"]
+    "templates": ["make_names"]
   },
   "data": [
     ["null", "null"],
@@ -53,6 +53,7 @@
     ["length", "length"],
     ["fileName", "fileName"],
     ["lineNumber", "lineNumber"],
+    ["message", "message"],
     ["errors", "errors"],
     ["stack", "stack"],
     ["name", "name"],
@@ -89,6 +90,7 @@
     ["lastIndex", "lastIndex"],
     ["target", "target"],
     ["index", "index"],
+    ["input", "input"],
     ["defineProperties", "defineProperties"],
     ["apply", "apply"],
     ["join", "join"],
