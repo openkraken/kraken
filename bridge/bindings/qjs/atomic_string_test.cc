@@ -1,19 +1,19 @@
 /*
-* Copyright (C) 2021-present The Kraken authors. All rights reserved.
-*/
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 
+#include "atomic_string.h"
 #include <quickjs/quickjs.h>
 #include <codecvt>
-#include "gtest/gtest.h"
-#include "qjs_engine_patch.h"
-#include "atomic_string.h"
-#include "native_string_utils.h"
-#include "event_type_names.h"
 #include "built_in_string.h"
+#include "event_type_names.h"
+#include "gtest/gtest.h"
+#include "native_string_utils.h"
+#include "qjs_engine_patch.h"
 
 using namespace kraken;
 
-using TestCallback = void(*)(JSContext* ctx);
+using TestCallback = void (*)(JSContext* ctx);
 
 void TestAtomicString(TestCallback callback) {
   JSRuntime* runtime = JS_NewRuntime();
@@ -77,19 +77,8 @@ TEST(AtomicString, ToNativeString) {
     const uint16_t* p = native_string->string();
     EXPECT_EQ(native_string->length(), 10);
 
-    uint16_t result[10] = {
-        'h',
-        'e',
-        'l',
-        'l',
-        'o',
-        'w',
-        'o',
-        'r',
-        'l',
-        'd'
-    };
-    for(int i = 0; i < native_string->length(); i ++) {
+    uint16_t result[10] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'};
+    for (int i = 0; i < native_string->length(); i++) {
       EXPECT_EQ(result[i], p[i]);
     }
   });

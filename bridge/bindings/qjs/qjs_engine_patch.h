@@ -99,8 +99,7 @@ enum {
 extern "C" {
 #endif
 
-static inline bool __JS_AtomIsConst(JSAtom v)
-{
+static inline bool __JS_AtomIsConst(JSAtom v) {
 #if defined(DUMP_LEAKS) && DUMP_LEAKS > 1
   return (int32_t)v <= 0;
 #else

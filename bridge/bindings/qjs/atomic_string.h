@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2021-present The Kraken authors. All rights reserved.
-*/
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_ATOMIC_STRING_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_ATOMIC_STRING_H_
@@ -24,11 +24,11 @@ class AtomicString {
   static AtomicString From(JSContext* ctx, NativeString* native_string);
 
   AtomicString() = default;
-  AtomicString(JSContext* ctx, const std::string& string) : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
-  AtomicString(JSContext* ctx, JSValue value) : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
-  ~AtomicString() {
-    JS_FreeAtomRT(runtime_, atom_);
-  };
+  AtomicString(JSContext* ctx, const std::string& string)
+      : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
+  AtomicString(JSContext* ctx, JSValue value)
+      : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
+  ~AtomicString() { JS_FreeAtomRT(runtime_, atom_); };
 
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };

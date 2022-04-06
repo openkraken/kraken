@@ -1,12 +1,11 @@
 /*
-* Copyright (C) 2021-present The Kraken authors. All rights reserved.
-*/
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 
 #include "atomic_string.h"
 #include "built_in_string.h"
 
 namespace kraken {
-
 
 AtomicString AtomicString::Empty(JSContext* ctx) {
   AtomicString tmp = built_in_string::kempty_string;
@@ -26,7 +25,6 @@ std::string AtomicString::ToStdString() const {
   JS_FreeCString(ctx_, buf);
   return result;
 }
-
 
 std::unique_ptr<NativeString> AtomicString::ToNativeString() const {
   JSValue stringValue = JS_AtomToValue(ctx_, atom_);
