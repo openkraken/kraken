@@ -15,10 +15,6 @@ void* names_storage[kNamesCount * ((sizeof(AtomicString) + sizeof(void *) - 1) /
 <% }) %>
 
 void Init(JSContext* ctx) {
-  static bool is_loaded = false;
-  if (is_loaded) return;
-  is_loaded = true;
-
   struct NameEntry {
      const char* str;
    };

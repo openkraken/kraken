@@ -30,10 +30,12 @@ class AtomicString {
   };
 
   AtomicString() = default;
-  AtomicString(JSContext* ctx, JSAtom atom) : ctx_(ctx), atom_(atom){};
-  AtomicString(JSContext* ctx, const std::string& string) : ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
-  AtomicString(JSContext* ctx, JSValue value) : ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
-  ~AtomicString() { JS_FreeAtom(ctx_, atom_); };
+  AtomicString(JSContext* ctx, JSAtom atom) : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(atom){};
+  AtomicString(JSContext* ctx, const std::string& string) : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
+  AtomicString(JSContext* ctx, JSValue value) : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
+  ~AtomicString() {
+    JS_FreeAtomRT(runtime_, atom_);
+  };
 
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
@@ -59,11 +61,14 @@ class AtomicString {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
+    runtime_ = value.runtime_;
   };
   AtomicString& operator=(const AtomicString& other) {
     if (&other != this) {
       atom_ = JS_DupAtom(ctx_, other.atom_);
     }
+    runtime_ = other.runtime_;
+    ctx_ = other.ctx_;
     return *this;
   };
 
@@ -73,12 +78,14 @@ class AtomicString {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
+    runtime_ = value.runtime_;
   };
   AtomicString& operator=(AtomicString&& value) noexcept {
     if (&value != this) {
       atom_ = JS_DupAtom(ctx_, value.atom_);
     }
     ctx_ = value.ctx_;
+    runtime_ = value.runtime_;
     return *this;
   }
 
@@ -87,6 +94,7 @@ class AtomicString {
 
  protected:
   JSContext* ctx_{nullptr};
+  JSRuntime* runtime_{nullptr};
   JSAtom atom_{JS_ATOM_NULL};
 };
 

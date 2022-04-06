@@ -61,10 +61,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   JS_SetContextOpaque(ctx, this);
   JS_SetHostPromiseRejectionTracker(script_state_.runtime(), promiseRejectTracker, nullptr);
 
-  // PreInit Strings.
-  built_in_string::Init(ctx);
-  event_type_names::Init(ctx);
-
   // Register all built-in native bindings.
   InstallBindings(this);
 
@@ -87,10 +83,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 ExecutingContext::~ExecutingContext() {
   valid_contexts[context_id_] = false;
   ctx_invalid_ = true;
-
-  // Dispose pre-built-in strings.
-  built_in_string::Dispose();
-  event_type_names::Dispose();
 
   // Free unreleased native_functions.
   {

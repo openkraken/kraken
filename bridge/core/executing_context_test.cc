@@ -11,8 +11,15 @@
 using namespace kraken;
 
 TEST(Context, isValid) {
-  auto bridge = TEST_init();
-  EXPECT_EQ(bridge->getContext()->IsValid(), true);
+  {
+    auto bridge = TEST_init();
+    EXPECT_EQ(bridge->getContext()->IsValid(), true);
+  }
+  {
+    auto bridge = TEST_init();
+    EXPECT_EQ(bridge->getContext()->IsValid(), true);
+  }
+
 }
 
 TEST(Context, evalWithError) {

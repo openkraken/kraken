@@ -99,6 +99,15 @@ enum {
 extern "C" {
 #endif
 
+static inline bool __JS_AtomIsConst(JSAtom v)
+{
+#if defined(DUMP_LEAKS) && DUMP_LEAKS > 1
+  return (int32_t)v <= 0;
+#else
+  return (int32_t)v < JS_ATOM_END;
+#endif
+}
+
 uint16_t* JS_ToUnicode(JSContext* ctx, JSValueConst value, uint32_t* length);
 JSValue JS_NewUnicodeString(JSContext* ctx, const uint16_t* code, uint32_t length);
 JSClassID JSValueGetClassId(JSValue);
