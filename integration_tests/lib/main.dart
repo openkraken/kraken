@@ -5,14 +5,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/widget.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 

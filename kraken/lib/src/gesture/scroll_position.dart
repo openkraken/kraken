@@ -14,7 +14,6 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'gesture_detector.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_metrics.dart';

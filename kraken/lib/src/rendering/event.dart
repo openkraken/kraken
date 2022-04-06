@@ -2,7 +2,6 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/src/gesture/gesture_dispatcher.dart';

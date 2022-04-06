@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/gesture.dart';
 
 const String DIRECTION_UP = 'up';
 const String DIRECTION_DOWN = 'down';

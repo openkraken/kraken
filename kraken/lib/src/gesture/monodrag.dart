@@ -5,7 +5,6 @@
 // Modified from Flutter gesture/monodrag.dart.
 // Copyright 2014 The Flutter Authors. All rights reserved.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/rendering.dart';

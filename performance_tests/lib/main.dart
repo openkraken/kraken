@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:kraken/kraken.dart';
-import 'dart:ui';
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
+
 import 'dart:io';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:kraken/kraken.dart';
 
 void main() {
   runApp(MyApp());
