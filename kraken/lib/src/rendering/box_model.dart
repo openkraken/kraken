@@ -952,7 +952,12 @@ class RenderBoxModel extends RenderBox
 
   // The contentSize of layout box
   Size? _contentSize;
-  Size get contentSize => _contentSize ?? Size.zero;
+  Size get contentSize {
+    if (_contentSize == null) {
+      owner?.flushLayout();
+    }
+    return _contentSize ?? Size.zero;
+  }
 
   int get clientWidth {
     double width = contentSize.width;
