@@ -132,23 +132,52 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) {
-    // TODO: implement copySelection
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar(false);
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        // Collapse the selection and hide the toolbar and handles.
+          userUpdateTextEditingValue(
+            TextEditingValue(
+              text: textEditingValue.text,
+              selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
+            ),
+            SelectionChangedCause.toolbar,
+          );
+          break;
+      }
+    }
   }
 
   @override
   void cutSelection(SelectionChangedCause cause) {
-    // TODO: implement cutSelection
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
   }
 
   @override
-  Future<void> pasteText(SelectionChangedCause cause) {
-    // TODO: implement pasteText
-    throw UnimplementedError();
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
   }
 
   @override
-  void selectAll(SelectionChangedCause cause) {
-    // TODO: implement selectAll
+  void selectAll(SelectionChangedCause cause) async {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+    }
   }
 }
 
