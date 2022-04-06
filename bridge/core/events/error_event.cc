@@ -15,7 +15,7 @@ ErrorEvent* ErrorEvent::Create(ExecutingContext* context, const AtomicString& ty
 }
 ErrorEvent* ErrorEvent::Create(ExecutingContext* context,
                                const AtomicString& type,
-                               const ErrorEventInit* initializer,
+                               const std::shared_ptr<ErrorEventInit>& initializer,
                                ExceptionState& exception_state) {
   return makeGarbageCollected<ErrorEvent>(context, type, initializer, exception_state);
 }
@@ -31,7 +31,7 @@ ErrorEvent::ErrorEvent(ExecutingContext* context, const AtomicString& type, Exce
 
 ErrorEvent::ErrorEvent(ExecutingContext* context,
                        const AtomicString& type,
-                       const ErrorEventInit* initializer,
+                       const std::shared_ptr<ErrorEventInit>& initializer,
                        ExceptionState& exception_state)
     : Event(context),
       message_(type.ToStdString()),

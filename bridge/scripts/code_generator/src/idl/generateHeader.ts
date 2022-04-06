@@ -4,7 +4,8 @@ import {IDLBlob} from "./IDLBlob";
 import {getClassName} from "./utils";
 import fs from 'fs';
 import path from 'path';
-import {generateTypeConverter} from "./generateSource";
+import {generateTypeConverter, generateTypeValue} from "./generateSource";
+import {GenerateOptions} from "./generator";
 
 export enum TemplateKind {
   globalFunction,
@@ -29,7 +30,7 @@ function readTemplate(name: string) {
   return fs.readFileSync(path.join(__dirname, '../../static/idl_templates/' + name + '.h.tpl'), {encoding: 'utf-8'});
 }
 
-export function generateCppHeader(blob: IDLBlob) {
+export function generateCppHeader(blob: IDLBlob, options: GenerateOptions) {
   const baseTemplate = fs.readFileSync(path.join(__dirname, '../../static/idl_templates/base.h.tpl'), {encoding: 'utf-8'});
   let headerOptions = {
     interface: false,
@@ -46,7 +47,9 @@ export function generateCppHeader(blob: IDLBlob) {
           headerOptions.interface = true;
           return _.template(readTemplate('interface'))({
             className: getClassName(blob),
-            blob: blob
+            blob: blob,
+            object,
+            ...options
           });
         }
         return '';
@@ -60,7 +63,7 @@ export function generateCppHeader(blob: IDLBlob) {
             blob: blob,
             object: object,
             props,
-            generateTypeConverter: generateTypeConverter
+            generateTypeValue: generateTypeValue
           });
         }
         return '';

@@ -4,6 +4,7 @@
  */
 
 #include "event_target.h"
+#include "bindings/qjs/converter_impl.h"
 #include "event_type_names.h"
 #include "qjs_add_event_listener_options.h"
 
@@ -41,6 +42,18 @@ bool EventTarget::addEventListener(const AtomicString& event_type,
                                    const std::shared_ptr<AddEventListenerOptions>& options,
                                    ExceptionState& exception_state) {
   return AddEventListenerInternal(event_type, event_listener, options);
+}
+
+bool EventTarget::addEventListener(const AtomicString& event_type,
+                                   const std::shared_ptr<EventListener>& event_listener,
+                                   ExceptionState& exception_state) {
+  std::shared_ptr<AddEventListenerOptions> options = AddEventListenerOptions::Create();
+  return AddEventListenerInternal(event_type, event_listener, options);
+}
+
+bool EventTarget::removeEventListener(const AtomicString& event_type, const std::shared_ptr<EventListener>& event_listener, ExceptionState& exception_state) {
+  std::shared_ptr<EventListenerOptions> options = EventListenerOptions::Create();
+  return RemoveEventListenerInternal(event_type, event_listener, options);
 }
 
 bool EventTarget::removeEventListener(const AtomicString& event_type,
@@ -230,6 +243,10 @@ bool EventTarget::FireEventListeners(Event& event,
   }
   d->firing_event_iterators->pop_back();
   return fired_listener;
+}
+
+void EventTargetWithInlineData::Trace(GCVisitor* visitor) const {
+  EventTarget::Trace(visitor);
 }
 
 }  // namespace kraken

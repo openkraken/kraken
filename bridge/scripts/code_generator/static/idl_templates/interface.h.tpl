@@ -10,13 +10,13 @@ class QJS<%= className %> : public QJSInterfaceBridge<QJS<%= className %>, <%= c
   static WrapperTypeInfo* GetWrapperTypeInfo() {
     return const_cast<WrapperTypeInfo*>(&wrapper_type_info_);
   }
-  static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags);
+  <% if (object.construct) { %> static JSValue ConstructorCallback(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv, int flags); <% } %>
   static const WrapperTypeInfo wrapper_type_info_;
  private:
-  static void InstallGlobalFunctions(ExecutingContext* context);
-  static void InstallPrototypeMethods(ExecutingContext* context);
-  static void InstallPrototypeProperties(ExecutingContext* context);
-  static void InstallConstructor(ExecutingContext* context);
+ <% if (globalFunctionInstallList.length > 0) { %> static void InstallGlobalFunctions(ExecutingContext* context); <% } %>
+ <% if (classMethodsInstallList.length > 0) { %> static void InstallPrototypeMethods(ExecutingContext* context); <% } %>
+ <% if (classPropsInstallList.length > 0) { %> static void InstallPrototypeProperties(ExecutingContext* context); <% } %>
+ <% if (object.construct) { %> static void InstallConstructor(ExecutingContext* context); <% } %>
 };
 
 

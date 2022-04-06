@@ -5,7 +5,6 @@ import {
   FunctionArgumentType,
   FunctionDeclaration,
   FunctionObject,
-  PropsDeclaration,
 } from "./declaration";
 import {addIndent, getClassName} from "./utils";
 import {ParameterType} from "./analyzer";
@@ -13,6 +12,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import {getTemplateKind, TemplateKind} from "./generateHeader";
+import {GenerateOptions} from "./generator";
 
 enum PropType {
   hostObject,
@@ -32,6 +32,30 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration) {
     return JS_ThrowTypeError(ctx, "Failed to execute '${m.name}' : ${requiredArgsCount} argument required, but %d present.", argc);
   }
 `;
+}
+
+export function generateTypeValue(type: ParameterType[]): string {
+  switch(type[0]) {
+    case FunctionArgumentType.int64: {
+      return 'int64_t';
+    }
+    case FunctionArgumentType.int32: {
+      return 'int32_t';
+    }
+    case FunctionArgumentType.void: {
+      return 'void';
+    }
+    case FunctionArgumentType.boolean: {
+      return 'bool';
+    }
+    case FunctionArgumentType.dom_string: {
+      return 'AtomicString';
+    }
+    case FunctionArgumentType.any: {
+      return 'ScriptValue';
+    }
+  }
+  return '';
 }
 
 export function generateTypeConverter(type: ParameterType[]): string {
@@ -223,11 +247,7 @@ function readTemplate(name: string) {
   return fs.readFileSync(path.join(__dirname, '../../static/idl_templates/' + name + '.cc.tpl'), {encoding: 'utf-8'});
 }
 
-export function generateCppSource(blob: IDLBlob) {
-  let globalFunctionInstallList: string[] = [];
-  let classMethodsInstallList: string[] = [];
-  let classPropsInstallList: string[] = [];
-  let wrapperTypeInfoInit = '';
+export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
   const baseTemplate = fs.readFileSync(path.join(__dirname, '../../static/idl_templates/base.cc.tpl'), {encoding: 'utf-8'});
 
   const contents = blob.objects.map(object => {
@@ -238,12 +258,15 @@ export function generateCppSource(blob: IDLBlob) {
       case TemplateKind.Interface: {
         object = object as ClassObject;
         object.props.forEach(prop => {
-          classMethodsInstallList.push(`{"${prop.name}", ${prop.name}AttributeGetCallback, ${prop.readonly ? 'nullptr' : `${prop.name}AttributeSetCallback`}}`)
+          options.classMethodsInstallList.push(`{"${prop.name}", ${prop.name}AttributeGetCallback, ${prop.readonly ? 'nullptr' : `${prop.name}AttributeSetCallback`}}`)
         });
         object.methods.forEach(method => {
-          classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
+          options.classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
         });
-        wrapperTypeInfoInit = `
+        if (object.construct) {
+          options.constructorInstallList.push(`{"${getClassName(blob)}", nullptr, nullptr, constructor}`)
+        }
+        options.wrapperTypeInfoInit = `
 const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, QJS${getClassName(blob)}::ConstructorCallback};
 const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::wrapper_type_info_;`;
         return _.template(readTemplate('interface'))({
@@ -266,7 +289,7 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
       }
       case TemplateKind.globalFunction: {
         object = object as FunctionObject;
-        globalFunctionInstallList.push(` {"${object.declare.name}", ${object.declare.name}, ${object.declare.args.length}}`);
+        options.globalFunctionInstallList.push(` {"${object.declare.name}", ${object.declare.name}, ${object.declare.args.length}}`);
         return _.template(readTemplate('global_function'))({
           className: getClassName(blob),
           blob: blob,
@@ -282,9 +305,6 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
     content: contents.join('\n'),
     className: getClassName(blob),
     blob: blob,
-    globalFunctionInstallList,
-    classPropsInstallList,
-    classMethodsInstallList,
-    wrapperTypeInfoInit
+    ...options
   });
 }

@@ -14,7 +14,7 @@ void* names_storage[kNamesCount * ((sizeof(AtomicString) + sizeof(void *) - 1) /
 <% if (_.isArray(name)) { %>
 const AtomicString& k<%= name[0] %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
 <% } else { %>
-const AtomicString& k<%= name[0].toUpperCase() + name.slice(1) %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+const AtomicString& k<%= name %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
 <% } %>
 <% }) %>
 
@@ -28,7 +28,7 @@ void Init() {
   };
 
   static const NameEntry kNames[] = {
-      <% _.forEach(data, function(name) { %>{ JS_ATOM_<%= name[0] %> },
+      <% _.forEach(data, function(name) { %><% if (Array.isArray(name)) { %>{ JS_ATOM_<%= name[0] %> },<% } else { %>{ JS_ATOM_<%= name %> },<% } %>
       <% }); %>
   };
 

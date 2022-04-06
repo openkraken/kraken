@@ -22,7 +22,7 @@ class ErrorEvent : public Event {
   static ErrorEvent* Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state);
   static ErrorEvent* Create(ExecutingContext* context,
                             const AtomicString& type,
-                            const ErrorEventInit* initializer,
+                            const std::shared_ptr<ErrorEventInit>& initializer,
                             ExceptionState& exception_state);
 
   explicit ErrorEvent(ExecutingContext* context, const std::string& message);
@@ -30,7 +30,7 @@ class ErrorEvent : public Event {
   explicit ErrorEvent(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state);
   explicit ErrorEvent(ExecutingContext* context,
                       const AtomicString& type,
-                      const ErrorEventInit* initializer,
+                      const std::shared_ptr<ErrorEventInit>& initializer,
                       ExceptionState& exception_state);
 
   // As |message| is exposed to JavaScript, never return |unsanitized_message_|.

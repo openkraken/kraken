@@ -25,6 +25,7 @@ static JSValue <%= prop.name %>AttributeSetCallback(JSContext* ctx, JSValueConst
     return exception_state.ToQuickJS();
   }
   <%= blob.filename %>->set<%= prop.name[0].toUpperCase() + prop.name.slice(1) %>(v);
+  return JS_DupValue(ctx, argv[0]);
 }
 <% } %>
 <% }); %>

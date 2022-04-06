@@ -12,7 +12,7 @@ std::shared_ptr<<%= className %>> <%= className %>::Create(JSContext* ctx, JSVal
 
 bool <%= className %>::FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dictionary) const {
   <% if (object.parent) { %>
-  EventInit::FillQJSObjectWithMembers(ctx, qjs_dictionary);
+  <%= object.parent %>::FillQJSObjectWithMembers(ctx, qjs_dictionary);
   <% } %>
 
   if (!JS_IsObject(qjs_dictionary)) {
@@ -28,7 +28,7 @@ bool <%= className %>::FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dict
 
 void <%= className %>::FillMembersWithQJSObject(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
   <% if (object.parent) { %>
-  EventInit::FillMembersWithQJSObject(ctx, value, exception_state);
+  <%= object.parent %>::FillMembersWithQJSObject(ctx, value, exception_state);
   <% } %>
 
   if (!JS_IsObject(value)) {

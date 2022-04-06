@@ -7,8 +7,7 @@
 
 #include <quickjs/quickjs.h>
 #include "bindings/qjs/wrapper_type_info.h"
-#include "bindings/qjs/qjs_interface_bridge.h"
-#include "bindings/qjs/dictionary_base.h"
+#include "bindings/qjs/generated_code_helper.h"
 
 <%= content %>
 

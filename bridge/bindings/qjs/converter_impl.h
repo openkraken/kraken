@@ -17,6 +17,9 @@
 #include "js_event_listener.h"
 #include "native_string_utils.h"
 #include "qjs_event_init.h"
+#include "qjs_error_event_init.h"
+#include "qjs_event_listener_options.h"
+#include "qjs_add_event_listener_options.h"
 
 namespace kraken {
 
@@ -390,7 +393,34 @@ struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventLis
 
 template <>
 struct Converter<EventInit> : public ConverterBase<EventInit> {
-  static ImplType FromValue() {}
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return EventInit::Create(ctx, value, exception_state);
+  }
+};
+
+template<>
+struct Converter<ErrorEventInit>: public ConverterBase<ErrorEventInit> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return ErrorEventInit::Create(ctx, value, exception_state);
+  }
+};
+
+template<>
+struct Converter<AddEventListenerOptions> : public ConverterBase<AddEventListenerOptions> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return AddEventListenerOptions::Create(ctx, value, exception_state);
+  };
+};
+
+template<>
+struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptions> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return EventListenerOptions::Create(ctx, value, exception_state);
+  }
 };
 
 }  // namespace kraken

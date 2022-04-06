@@ -4,6 +4,7 @@
  */
 
 #include "js_event_handler.h"
+#include "bindings/qjs/converter_impl.h"
 #include "core/dom/events/event_target.h"
 #include "core/events/error_event.h"
 #include "event_type_names.h"
@@ -37,7 +38,7 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
   // object, event's type is error, and event's currentTarget implements the
   // WindowOrWorkerGlobalScope mixin. Otherwise, let special error event
   // handling be false.
-  const bool special_error_event_handling = IsA<ErrorEvent>(event) && event.type() == event_type_names::kError &&
+  const bool special_error_event_handling = IsA<ErrorEvent>(event) && event.type() == event_type_names::kerror &&
                                             event.currentTarget()->IsWindowOrWorkerGlobalScope();
 
   // Step 4. Process the Event object event as follows:

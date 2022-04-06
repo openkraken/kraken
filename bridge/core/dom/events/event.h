@@ -11,6 +11,7 @@
 #include "bindings/qjs/script_wrappable.h"
 #include "core/executing_context.h"
 #include "foundation/native_string.h"
+#include "qjs_event_init.h"
 
 namespace kraken {
 
@@ -90,8 +91,14 @@ class Event : public ScriptWrappable {
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
   static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
-  static Event* Create(ExecutingContext* context, const AtomicString& type) {
+  static Event* Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state) {
     return makeGarbageCollected<Event>(context, type);
+  };
+  static Event* Create(ExecutingContext* context,
+                       const AtomicString& type,
+                       const std::shared_ptr<EventInit>& init,
+                       ExceptionState& exception_state) {
+    return makeGarbageCollected<Event>(context, type, init);
   };
 
   static Event* From(ExecutingContext* context, NativeEvent* native_event);
@@ -99,6 +106,7 @@ class Event : public ScriptWrappable {
   Event() = delete;
   explicit Event(ExecutingContext* context);
   explicit Event(ExecutingContext* context, const AtomicString& event_type);
+  explicit Event(ExecutingContext* context, const AtomicString& type, const std::shared_ptr<EventInit>& init);
   explicit Event(ExecutingContext* context,
                  const AtomicString& event_type,
                  Bubbles bubbles,

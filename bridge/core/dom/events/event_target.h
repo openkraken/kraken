@@ -92,6 +92,12 @@ class EventTarget : public ScriptWrappable {
                         const std::shared_ptr<EventListener>& event_listener,
                         const std::shared_ptr<AddEventListenerOptions>& options,
                         ExceptionState& exception_state);
+  bool addEventListener(const AtomicString& event_type,
+                        const std::shared_ptr<EventListener>& event_listener,
+                        ExceptionState& exception_state);
+  bool removeEventListener(const AtomicString& event_type,
+                           const std::shared_ptr<EventListener>& event_listener,
+                           ExceptionState& exception_state);
   bool removeEventListener(const AtomicString& event_type,
                            const std::shared_ptr<EventListener>& event_listener,
                            const std::shared_ptr<EventListenerOptions>& options,
@@ -135,7 +141,8 @@ class EventTarget : public ScriptWrappable {
 // Provide EventTarget with inlined EventTargetData for improved performance.
 class EventTargetWithInlineData : public EventTarget {
  public:
-  EventTargetWithInlineData(ExecutingContext* context) : EventTarget(context){};
+  EventTargetWithInlineData() = delete;
+  explicit EventTargetWithInlineData(ExecutingContext* context) : EventTarget(context){};
 
   void Trace(GCVisitor* visitor) const override;
 

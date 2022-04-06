@@ -7,6 +7,8 @@
 
 namespace kraken {
 
+EventListenerMap::EventListenerMap() {}
+
 static bool AddListenerToVector(EventListenerVector* vector,
                                 const std::shared_ptr<EventListener>& listener,
                                 const std::shared_ptr<AddEventListenerOptions>& options,

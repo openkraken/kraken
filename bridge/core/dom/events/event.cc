@@ -27,6 +27,13 @@ Event::Event(ExecutingContext* context) : type_(AtomicString::Empty(context->ctx
 Event::Event(ExecutingContext* context, const AtomicString& event_type)
     : type_(event_type), ScriptWrappable(context->ctx()) {}
 
+Event::Event(ExecutingContext* context, const AtomicString& type, const std::shared_ptr<EventInit>& init)
+    : ScriptWrappable(context->ctx()),
+      type_(type),
+      bubbles_(init->bubbles()),
+      cancelable_(init->cancelable()),
+      composed_(init->composed()) {}
+
 Event::Event(ExecutingContext* context,
              const AtomicString& event_type,
              Bubbles bubbles,
