@@ -1,5 +1,6 @@
-import 'dart:ui';
-
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
