@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -130,6 +129,27 @@ class EditableTextDelegate implements TextSelectionDelegate {
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
     _textFormControlElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
+
+  @override
+  void copySelection(SelectionChangedCause cause) {
+    // TODO: implement copySelection
+  }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) {
+    // TODO: implement cutSelection
+  }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) {
+    // TODO: implement pasteText
+    throw UnimplementedError();
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) {
+    // TODO: implement selectAll
+  }
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
@@ -146,6 +166,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     );
     scrollOffset = _scrollable.position;
   }
+
+  // The [TextEditableActionTarget] used to apply actions.
+  // See also widgets/text_control.dart
+  Object? textEditingActionTarget;
 
   bool isMultiline;
   int? get _maxLines {
@@ -216,7 +240,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   static String obscuringCharacter = '•';
-
 
   int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
   set width(int value) {
@@ -1362,6 +1385,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
+
+  @override
+  void dispose() {
+    textEditingActionTarget = null;
+    super.dispose();
   }
 }
 
