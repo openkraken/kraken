@@ -4,9 +4,9 @@
  */
 
 #include "executing_context.h"
-#include "polyfill.h"
 #include "built_in_string.h"
 #include "event_type_names.h"
+#include "polyfill.h"
 
 #include "foundation/logging.h"
 
@@ -65,7 +65,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   built_in_string::Init(ctx);
   event_type_names::Init(ctx);
 
-
   // Register all built-in native bindings.
   InstallBindings(this);
 
@@ -92,7 +91,6 @@ ExecutingContext::~ExecutingContext() {
   // Dispose pre-built-in strings.
   built_in_string::Dispose();
   event_type_names::Dispose();
-
 
   // Free unreleased native_functions.
   {

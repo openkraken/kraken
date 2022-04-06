@@ -16,10 +16,10 @@
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
-#include "qjs_event_init.h"
-#include "qjs_error_event_init.h"
-#include "qjs_event_listener_options.h"
 #include "qjs_add_event_listener_options.h"
+#include "qjs_error_event_init.h"
+#include "qjs_event_init.h"
+#include "qjs_event_listener_options.h"
 
 namespace kraken {
 
@@ -399,15 +399,15 @@ struct Converter<EventInit> : public ConverterBase<EventInit> {
   }
 };
 
-template<>
-struct Converter<ErrorEventInit>: public ConverterBase<ErrorEventInit> {
+template <>
+struct Converter<ErrorEventInit> : public ConverterBase<ErrorEventInit> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return ErrorEventInit::Create(ctx, value, exception_state);
   }
 };
 
-template<>
+template <>
 struct Converter<AddEventListenerOptions> : public ConverterBase<AddEventListenerOptions> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -415,7 +415,7 @@ struct Converter<AddEventListenerOptions> : public ConverterBase<AddEventListene
   };
 };
 
-template<>
+template <>
 struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptions> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));

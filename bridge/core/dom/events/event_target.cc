@@ -51,7 +51,9 @@ bool EventTarget::addEventListener(const AtomicString& event_type,
   return AddEventListenerInternal(event_type, event_listener, options);
 }
 
-bool EventTarget::removeEventListener(const AtomicString& event_type, const std::shared_ptr<EventListener>& event_listener, ExceptionState& exception_state) {
+bool EventTarget::removeEventListener(const AtomicString& event_type,
+                                      const std::shared_ptr<EventListener>& event_listener,
+                                      ExceptionState& exception_state) {
   std::shared_ptr<EventListenerOptions> options = EventListenerOptions::Create();
   return RemoveEventListenerInternal(event_type, event_listener, options);
 }
