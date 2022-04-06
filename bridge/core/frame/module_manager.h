@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_MODULE_MANAGER_H
 #define KRAKENBRIDGE_MODULE_MANAGER_H
 
-#include "bindings/qjs/atom_string.h"
+#include "bindings/qjs/atomic_string.h"
 #include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/qjs_function.h"
 #include "module_callback.h"

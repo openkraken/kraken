@@ -219,8 +219,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/qjs_interface_bridge.h
     bindings/qjs/script_promise_resolver.cc
     bindings/qjs/script_promise_resolver.h
-    bindings/qjs/atom_string.cc
-    bindings/qjs/atom_string.h
+    bindings/qjs/atomic_string.cc
+    bindings/qjs/atomic_string.h
     bindings/qjs/generated_code_helper.h
     bindings/qjs/exception_state.cc
     bindings/qjs/exception_state.h

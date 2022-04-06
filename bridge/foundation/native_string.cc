@@ -8,14 +8,9 @@
 
 namespace kraken {
 
-NativeString* NativeString::clone() {
-  auto* newNativeString = new NativeString(nullptr, 0);
-  auto* newString = new uint16_t[length_];
-
-  memcpy(newString, string_, length_ * sizeof(uint16_t));
-  newNativeString->string_ = newString;
-  newNativeString->length_ = length_;
-  return newNativeString;
+NativeString::NativeString(const uint16_t* string, uint32_t length) : length_(length) {
+  string_ = static_cast<const uint16_t*>(malloc(length * sizeof(uint16_t)));
+  memcpy((void*)string_, string, length * sizeof(uint16_t));
 }
 
 NativeString::~NativeString() {

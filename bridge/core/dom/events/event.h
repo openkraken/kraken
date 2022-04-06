@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_EVENT_H
 
 #include <cinttypes>
-#include "bindings/qjs/atom_string.h"
+#include "bindings/qjs/atomic_string.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "core/executing_context.h"
 #include "foundation/native_string.h"

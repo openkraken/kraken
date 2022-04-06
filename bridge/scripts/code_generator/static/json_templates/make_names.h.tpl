@@ -7,7 +7,7 @@
 #ifndef <%= _.snakeCase(name).toUpperCase() %>_H_
 #define <%= _.snakeCase(name).toUpperCase() %>_H_
 
-#include "bindings/qjs/atom_string.h"
+#include "bindings/qjs/atomic_string.h"
 
 namespace kraken {
 namespace <%= name %> {

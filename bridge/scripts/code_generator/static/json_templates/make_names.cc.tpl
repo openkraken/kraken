@@ -20,7 +20,7 @@ void Init(JSContext* ctx) {
    };
 
   static const NameEntry kNames[] = {
-      <% _.forEach(data, function(name) { %><% if (Array.isArray(name)) { %>{ "<%= name[0] %>" },<% } else { %>{ "<%= name %>" },<% } %>
+      <% _.forEach(data, function(name) { %><% if (Array.isArray(name)) { %>{ "<%= name[1] %>" },<% } else { %>{ "<%= name %>" },<% } %>
       <% }); %>
   };
 

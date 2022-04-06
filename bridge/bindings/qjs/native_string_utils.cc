@@ -32,7 +32,7 @@ std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   std::u16string utf16;
   fromUTF8(string, utf16);
   NativeString tmp{reinterpret_cast<const uint16_t*>(utf16.c_str()), static_cast<uint32_t>(utf16.size())};
-  return std::unique_ptr<NativeString>(tmp.clone());
+  return std::make_unique<NativeString>(tmp.string(), tmp.length());
 }
 
 std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom) {

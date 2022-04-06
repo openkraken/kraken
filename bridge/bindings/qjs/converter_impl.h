@@ -7,7 +7,7 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_IMPL_H_
 
 #include <type_traits>
-#include "atom_string.h"
+#include "atomic_string.h"
 #include "converter.h"
 #include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
