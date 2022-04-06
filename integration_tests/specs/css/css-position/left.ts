@@ -1816,8 +1816,7 @@ describe('left', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('079', async () => {
+  it('079', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1877,8 +1876,7 @@ describe('left', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
-  xit('080', async () => {
+  it('080', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2106,7 +2104,7 @@ describe('left', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
+  // @TODO: Support ex unit.
   xit('091', async () => {
     let p;
     let div1;
