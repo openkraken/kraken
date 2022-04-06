@@ -26,10 +26,10 @@ class _RunMetrics {
         _remainingFreeSpace = remainingFreeSpace;
 
   // Main size extent of the run.
-  final double mainAxisExtent;
+  double mainAxisExtent;
 
   // Cross size extent of the run.
-  final double crossAxisExtent;
+  double crossAxisExtent;
 
   // Total flex grow factor in the run.
   double get totalFlexGrow => _totalFlexGrow;
@@ -602,17 +602,14 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Layout children to compute metrics of flex lines.
     List<_RunMetrics> _runMetrics = _computeRunMetrics(children);
 
-    // Compute spacing before and between each flex line.
-    Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
-
     // Set flex container size.
     _setContainerSize(_runMetrics);
 
     // Adjust children size based on flex properties which may affect children size.
-    _adjustChildrenSize(_runMetrics, _runSpacingMap);
+    _adjustChildrenSize(_runMetrics);
 
     // Set children offset based on flex alignment properties.
-    _setChildrenOffset(_runMetrics, _runSpacingMap);
+    _setChildrenOffset(_runMetrics);
 
     // Set the size of scrollable overflow area for flex layout.
     _setMaxScrollableSize(_runMetrics);
@@ -625,11 +622,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     // Layout children to compute metrics of flex lines.
     List<_RunMetrics> _runMetrics = _computeRunMetrics(_positionPlaceholderChildren);
 
-    // Compute spacing before and between each flex line.
-    Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
-
     // Set children offset based on flex alignment properties.
-    _setChildrenOffset(_runMetrics, _runSpacingMap);
+    _setChildrenOffset(_runMetrics);
   }
 
   // Layout children in normal flow order to calculate metrics of flex lines according to its constraints
@@ -951,11 +945,12 @@ class RenderFlexLayout extends RenderLayoutBox {
   // https://www.w3.org/TR/css-flexbox-1/#resolve-flexible-lengths
   bool _resolveFlexibleLengths(
     _RunMetrics runMetric,
+    Map<String, double> totalFlexFactor,
     double initialFreeSpace,
   ) {
     Map<int?, _RunChild> runChildren = runMetric.runChildren;
-    double totalFlexGrow = runMetric.totalFlexGrow;
-    double totalFlexShrink = runMetric.totalFlexShrink;
+    double totalFlexGrow = totalFlexFactor['flexGrow']!;
+    double totalFlexShrink = totalFlexFactor['flexShrink']!;
     bool isFlexGrow = initialFreeSpace > 0 && totalFlexGrow > 0;
     bool isFlexShrink = initialFreeSpace < 0 && totalFlexShrink > 0;
 
@@ -1067,11 +1062,11 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         // If total violation is positive, freeze all the items with min violations.
         if (flexGrow > 0) {
-          runMetric.totalFlexGrow -= flexGrow;
+          totalFlexFactor['flexGrow'] = totalFlexFactor['flexGrow']! - flexGrow;
 
           // If total violation is negative, freeze all the items with max violations.
         } else if (flexShrink > 0) {
-          runMetric.totalFlexShrink -= flexShrink;
+          totalFlexFactor['flexShrink'] = totalFlexFactor['flexShrink']! - flexShrink;
         }
       }
     }
@@ -1084,9 +1079,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   //  https://www.w3.org/TR/css-flexbox-1/#resolve-flexible-lengths
   void _adjustChildrenSize(
     List<_RunMetrics> _runMetrics,
-    Map<String, double> _runSpacingMap,
   ) {
     if (_runMetrics.isEmpty) return;
+
+    // Compute spacing before and between each flex line.
+    Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
 
     double runBetweenSpace = _runSpacingMap['between']!;
     double? contentBoxLogicalWidth = renderStyle.contentBoxLogicalWidth;
@@ -1154,15 +1151,28 @@ class RenderFlexLayout extends RenderLayoutBox {
         // but as we place and lay out flex items we subtract from it.
         metrics.remainingFreeSpace = initialFreeSpace;
 
+        Map<String, double> totalFlexFactor = {
+          'flexGrow': metrics.totalFlexGrow,
+          'flexShrink': metrics.totalFlexShrink,
+        };
         // Loop flex items to resolve flexible length of flex items with flex factor.
-        while (_resolveFlexibleLengths(metrics, initialFreeSpace)) {}
+        while (_resolveFlexibleLengths(metrics, totalFlexFactor, initialFreeSpace)) {}
       }
+
+      // Main and cross axis size of children after child layouted.
+      double mainAxisExtent = 0;
+      double crossAxisExtent = 0;
 
       for (_RunChild runChild in runChildrenList) {
         RenderBox child = runChild.child;
 
+        double childMainAxisExtent = _getMainAxisExtent(child);
+        double childCrossAxisExtent = _getCrossAxisExtent(child);
+
         // Non renderBoxModel and scrolling content box of renderBoxModel does not to adjust size.
         if (child is! RenderBoxModel || child.isScrollingContentBox) {
+          mainAxisExtent += childMainAxisExtent;
+          crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
           continue;
         }
 
@@ -1196,6 +1206,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         bool isChildNeedsLayout = childMainSizeChanged || childCrossSizeChanged;
 
         if (!isChildNeedsLayout) {
+          mainAxisExtent += childMainAxisExtent;
+          crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
           continue;
         }
 
@@ -1211,12 +1223,23 @@ class RenderFlexLayout extends RenderLayoutBox {
         );
         child.layout(childConstraints, parentUsesSize: true);
 
+        // Child size needs to recalculated after layouted.
+        childMainAxisExtent = _getMainAxisExtent(child);
+        childCrossAxisExtent = _getCrossAxisExtent(child);
+
+        mainAxisExtent += childMainAxisExtent;
+        crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
+
         if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
           childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch -
             childLayoutStart.microsecondsSinceEpoch);
         }
       }
+
+      // Update run metrics after child size has been adjusted.
+      metrics.mainAxisExtent = mainAxisExtent;
+      metrics.crossAxisExtent = crossAxisExtent;
     }
   }
 
@@ -1674,9 +1697,11 @@ class RenderFlexLayout extends RenderLayoutBox {
   // Set children offset based on alignment properties.
   void _setChildrenOffset(
     List<_RunMetrics> _runMetrics,
-    Map<String, double> _runSpacingMap,
   ) {
     if (_runMetrics.isEmpty) return;
+
+    // Compute spacing before and between each flex line.
+    Map<String, double> _runSpacingMap = _computeRunSpacing(_runMetrics);
 
     double runLeadingSpace = _runSpacingMap['leading']!;
     double runBetweenSpace = _runSpacingMap['between']!;
@@ -1700,18 +1725,10 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
       final double totalFlexGrow = metrics.totalFlexGrow;
-      final double totalFlexShrink = metrics.totalFlexShrink;
       final Map<int?, _RunChild> runChildren = metrics.runChildren;
       final List<_RunChild> runChildrenList = runChildren.values.toList();
+      final double remainingSpace = mainAxisContentSize - runMainAxisExtent;
 
-      final double mainContentSizeDelta =
-          mainAxisContentSize - runMainAxisExtent;
-      bool isFlexGrow = mainContentSizeDelta > 0 && totalFlexGrow > 0;
-      bool isFlexShrink = mainContentSizeDelta < 0 && totalFlexShrink > 0;
-
-      // If flex grow or flex shrink exists, remaining space should be zero.
-      final double remainingSpace =
-          (isFlexGrow || isFlexShrink) ? 0 : mainContentSizeDelta;
       late double leadingSpace;
       late double betweenSpace;
 
