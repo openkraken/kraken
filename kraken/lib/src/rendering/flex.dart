@@ -1159,14 +1159,13 @@ class RenderFlexLayout extends RenderLayoutBox {
         while (_resolveFlexibleLengths(metrics, totalFlexFactor, initialFreeSpace)) {}
       }
 
-      // Main  axis size of children after child layouted.
+      // Main axis size of children after child layouted.
       double mainAxisExtent = 0;
 
       for (_RunChild runChild in runChildrenList) {
         RenderBox child = runChild.child;
 
         double childMainAxisExtent = _getMainAxisExtent(child);
-        double childCrossAxisExtent = _getCrossAxisExtent(child);
 
         // Non renderBoxModel and scrolling content box of renderBoxModel does not to adjust size.
         if (child is! RenderBoxModel || child.isScrollingContentBox) {
@@ -1219,7 +1218,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           childStretchedCrossSize,
         );
 
-        // @HACK: Inflate constraints cause Flutter will skip child layout if
+        // Inflate constraints cause Flutter will skip child layout if
         // its constraints not changed between two layouts.
         if (child.constraints == childConstraints) {
           childConstraints = BoxConstraints(
@@ -1235,10 +1234,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         }
 
         child.layout(childConstraints, parentUsesSize: true);
-        // Child size needs to recalculated after layouted.
-        childMainAxisExtent = _getMainAxisExtent(child);
-        childCrossAxisExtent = _getCrossAxisExtent(child);
 
+        // Child main size needs to recalculated after layouted.
+        childMainAxisExtent = _getMainAxisExtent(child);
         mainAxisExtent += childMainAxisExtent;
 
         if (kProfileMode && PerformanceTiming.enabled()) {

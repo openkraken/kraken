@@ -73,4 +73,116 @@ describe('flexbox flex-basis', () => {
 
     await snapshot();
   });
+  
+  it('should work with px', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          background: 'blue',
+          height: '100px',
+          width: '200px',
+          display: 'flex',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              width: '50px',
+              'max-width': '60px',
+              display: 'inline-block',
+              flexBasis: '0',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              width: '50px',
+              flexBasis: '40px',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              width: '50px',
+              flexBasis: '60px',
+            },
+          },
+          [createText(`three`)]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+  
+  it('should work with percentage', async () => {
+    let div;
+    div = createElement(
+      'div',
+      {
+        style: {
+          background: 'blue',
+          height: '100px',
+          width: '200px',
+          display: 'flex',
+        },
+      },
+      [
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'yellow',
+              width: '50px',
+              'max-width': '60px',
+              display: 'inline-block',
+              flexBasis: '0%',
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`one`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'pink',
+              width: '50px',
+              flexBasis: '20%',
+            },
+          },
+          [createText(`two`)]
+        ),
+        createElement(
+          'span',
+          {
+            style: {
+              background: 'lightblue',
+              width: '50px',
+              flexBasis: '30%',
+            },
+          },
+          [createText(`three`)]
+        ),
+      ]
+    );
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
