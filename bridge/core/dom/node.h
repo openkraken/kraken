@@ -8,9 +8,8 @@
 #include <set>
 #include <utility>
 
-#include "foundation/macros.h"
 #include "events/event_target.h"
-#include "node_list.h"
+#include "foundation/macros.h"
 
 namespace kraken {
 
@@ -25,6 +24,8 @@ class DocumentFragment;
 class TextNode;
 class Document;
 class ContainerNode;
+class NodeData;
+class NodeList;
 
 enum class CustomElementState : uint32_t {
   // https://dom.spec.whatwg.org/#concept-element-custom-element-state
@@ -42,6 +43,7 @@ enum class CloneChildrenFlag { kSkip, kClone, kCloneWithShadows };
 // https://dom.spec.whatwg.org/#interface-node
 class Node : public EventTarget {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   enum NodeType {
     kElementNode = 1,
@@ -58,14 +60,12 @@ class Node : public EventTarget {
 
   // DOM methods & attributes for Node
   bool HasTagName(const AtomicString&) const;
-  virtual AtomicString nodeName() const = 0;
-  virtual AtomicString nodeValue() const;
-  virtual void setNodeValue(const AtomicString&, ExceptionState&);
+  virtual std::string nodeName() const = 0;
+  virtual std::string nodeValue() const;
+  virtual void setNodeValue(const std::string&, ExceptionState&);
   virtual NodeType getNodeType() const = 0;
   ContainerNode* parentNode() const;
   Element* parentElement() const;
-  ContainerNode* ParentElementOrShadowRoot() const;
-  ContainerNode* ParentElementOrDocumentFragment() const;
   Node* previousSibling() const { return previous_; }
   Node* nextSibling() const { return next_; }
   NodeList* childNodes();
@@ -76,24 +76,24 @@ class Node : public EventTarget {
   Node& ShadowIncludingRoot() const;
 
   // TODO: support following APIs.
-//  void Prepend(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
-//  void Append(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
-//  void Before(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
-//  void After(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
-//  void ReplaceWith(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
-//  void ReplaceChildren(
-//      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-//      ExceptionState& exception_state);
+  //  void Prepend(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
+  //  void Append(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
+  //  void Before(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
+  //  void After(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
+  //  void ReplaceWith(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
+  //  void ReplaceChildren(
+  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
+  //      ExceptionState& exception_state);
 
   void remove(ExceptionState&);
   void remove();
@@ -129,36 +129,19 @@ class Node : public EventTarget {
   virtual void setTextContent(const AtomicString&);
 
   // Other methods (not part of DOM)
-  FORCE_INLINE bool IsTextNode() const {
-    return GetDOMNodeType() == DOMNodeType::kText;
-  }
-  FORCE_INLINE bool IsContainerNode() const {
-    return GetFlag(kIsContainerFlag);
-  }
-  FORCE_INLINE bool IsElementNode() const {
-    return GetDOMNodeType() == DOMNodeType::kElement;
-  }
-  FORCE_INLINE bool IsDocumentFragment() const {
-    return GetDOMNodeType() == DOMNodeType::kDocumentFragment;
-  }
+  FORCE_INLINE bool IsTextNode() const { return GetDOMNodeType() == DOMNodeType::kText; }
+  FORCE_INLINE bool IsContainerNode() const { return GetFlag(kIsContainerFlag); }
+  FORCE_INLINE bool IsElementNode() const { return GetDOMNodeType() == DOMNodeType::kElement; }
+  FORCE_INLINE bool IsDocumentFragment() const { return GetDOMNodeType() == DOMNodeType::kDocumentFragment; }
 
-  FORCE_INLINE bool IsHTMLElement() const {
-    return GetElementNamespaceType() == ElementNamespaceType::kHTML;
-  }
-  FORCE_INLINE bool IsMathMLElement() const {
-    return GetElementNamespaceType() == ElementNamespaceType::kMathML;
-  }
-  FORCE_INLINE bool IsSVGElement() const {
-    return GetElementNamespaceType() == ElementNamespaceType::kSVG;
-  }
+  FORCE_INLINE bool IsHTMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kHTML; }
+  FORCE_INLINE bool IsMathMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kMathML; }
+  FORCE_INLINE bool IsSVGElement() const { return GetElementNamespaceType() == ElementNamespaceType::kSVG; }
 
   CustomElementState GetCustomElementState() const {
-    return static_cast<CustomElementState>(node_flags_ &
-        kCustomElementStateMask);
+    return static_cast<CustomElementState>(node_flags_ & kCustomElementStateMask);
   }
-  bool IsCustomElement() const {
-    return GetCustomElementState() != CustomElementState::kUncustomized;
-  }
+  bool IsCustomElement() const { return GetCustomElementState() != CustomElementState::kUncustomized; }
   void SetCustomElementState(CustomElementState);
 
   virtual bool IsMediaControlElement() const { return false; }
@@ -176,9 +159,7 @@ class Node : public EventTarget {
   // attributes (ex. color), class names (ex. class="foo bar") and other
   // non-basic styling features. They also control if this element can
   // participate in style sharing.
-  bool IsStyledElement() const {
-    return IsHTMLElement() || IsSVGElement() || IsMathMLElement();
-  }
+  bool IsStyledElement() const { return IsHTMLElement() || IsSVGElement() || IsMathMLElement(); }
 
   bool IsDocumentNode() const;
 
@@ -199,9 +180,7 @@ class Node : public EventTarget {
   void SetNextSibling(Node* next) { next_ = next; }
 
   bool HasEventTargetData() const { return GetFlag(kHasEventTargetDataFlag); }
-  void SetHasEventTargetData(bool flag) {
-    SetFlag(flag, kHasEventTargetDataFlag);
-  }
+  void SetHasEventTargetData(bool flag) { SetFlag(flag, kHasEventTargetDataFlag); }
 
   unsigned NodeIndex() const;
 
@@ -211,7 +190,7 @@ class Node : public EventTarget {
 
   // Returns the document associated with this node. A Document node returns
   // itself.
-  Document& GetDocument() const {  }
+  Document& GetDocument() const {}
 
   // Returns true if this node is connected to a document, false otherwise.
   // See https://dom.spec.whatwg.org/#connected for the definition.
@@ -231,99 +210,44 @@ class Node : public EventTarget {
   // https://dom.spec.whatwg.org/#concept-shadow-including-ancestor
   bool IsShadowIncludingAncestorOf(const Node&) const;
   bool ContainsIncludingHostElements(const Node&) const;
-  Node* CommonAncestor(const Node&,
-                       ContainerNode* (*parent)(const Node&)) const;
+  Node* CommonAncestor(const Node&, ContainerNode* (*parent)(const Node&)) const;
 
   // Whether or not a selection can be started in this object
   virtual bool CanStartSelection() const;
 
   void NotifyPriorityScrollAnchorStatusChanged();
 
-  // ---------------------------------------------------------------------------
-  // Notification of document structure changes (see container_node.h for more
-  // notification methods)
-  //
-  // At first, Blink notifies the node that it has been inserted into the
-  // document. This is called during document parsing, and also when a node is
-  // added through the DOM methods insertBefore(), appendChild() or
-  // replaceChild(). The call happens _after_ the node has been added to the
-  // tree.  This is similar to the DOMNodeInsertedIntoDocument DOM event, but
-  // does not require the overhead of event dispatching.
-  //
-  // Blink notifies this callback regardless if the subtree of the node is a
-  // document tree or a floating subtree.  Implementation can determine the type
-  // of subtree by seeing insertion_point->isConnected().  For performance
-  // reasons, notifications are delivered only to ContainerNode subclasses if
-  // the insertion_point is not in a document tree.
-  //
-  // There is another callback, DidNotifySubtreeInsertionsToDocument(),
-  // which is called after all the descendants are notified, if this node was
-  // inserted into the document tree. Only a few subclasses actually need
-  // this. To utilize this, the node should return
-  // kInsertionShouldCallDidNotifySubtreeInsertions from InsertedInto().
-  //
-  // InsertedInto() implementations must not modify the DOM tree, and must not
-  // dispatch synchronous events. On the other hand,
-  // DidNotifySubtreeInsertionsToDocument() may modify the DOM tree, and may
-  // dispatch synchronous events.
-  enum InsertionNotificationRequest {
-    kInsertionDone,
-    kInsertionShouldCallDidNotifySubtreeInsertions
-  };
+  //  NodeListsNodeData* NodeLists();
+  //  void ClearNodeLists();
 
-  virtual InsertionNotificationRequest InsertedInto(
-      ContainerNode& insertion_point);
-  virtual void DidNotifySubtreeInsertionsToDocument() {}
+  enum ShadowTreesTreatment { kTreatShadowTreesAsDisconnected, kTreatShadowTreesAsComposed };
 
-  // Notifies the node that it is no longer part of the tree.
-  //
-  // This is a dual of InsertedInto(), and is similar to the
-  // DOMNodeRemovedFromDocument DOM event, but does not require the overhead of
-  // event dispatching, and is called _after_ the node is removed from the tree.
-  //
-  // RemovedFrom() implementations must not modify the DOM tree, and must not
-  // dispatch synchronous events.
-  virtual void RemovedFrom(ContainerNode& insertion_point);
-
-
-//  NodeListsNodeData* NodeLists();
-//  void ClearNodeLists();
-
-  enum ShadowTreesTreatment {
-    kTreatShadowTreesAsDisconnected,
-    kTreatShadowTreesAsComposed
-  };
-
-  uint16_t compareDocumentPosition(
-      const Node*,
-      ShadowTreesTreatment = kTreatShadowTreesAsDisconnected) const;
+  uint16_t compareDocumentPosition(const Node*, ShadowTreesTreatment = kTreatShadowTreesAsDisconnected) const;
 
   EventTargetData* GetEventTargetData() override;
   EventTargetData& EnsureEventTargetData() override;
 
-  bool IsFinishedParsingChildren() const {
-    return GetFlag(kIsFinishedParsingChildrenFlag);
-  }
+  bool IsFinishedParsingChildren() const { return GetFlag(kIsFinishedParsingChildrenFlag); }
 
   void SetHasDuplicateAttributes() { SetFlag(kHasDuplicateAttributes); }
-  bool HasDuplicateAttribute() const {
-    return GetFlag(kHasDuplicateAttributes);
-  }
+  bool HasDuplicateAttribute() const { return GetFlag(kHasDuplicateAttributes); }
 
-  bool SelfOrAncestorHasDirAutoAttribute() const {
-    return GetFlag(kSelfOrAncestorHasDirAutoAttribute);
-  }
-  void SetSelfOrAncestorHasDirAutoAttribute() {
-    SetFlag(kSelfOrAncestorHasDirAutoAttribute);
-  }
-  void ClearSelfOrAncestorHasDirAutoAttribute() {
-    ClearFlag(kSelfOrAncestorHasDirAutoAttribute);
-  }
+  bool SelfOrAncestorHasDirAutoAttribute() const { return GetFlag(kSelfOrAncestorHasDirAutoAttribute); }
+  void SetSelfOrAncestorHasDirAutoAttribute() { SetFlag(kSelfOrAncestorHasDirAutoAttribute); }
+  void ClearSelfOrAncestorHasDirAutoAttribute() { ClearFlag(kSelfOrAncestorHasDirAutoAttribute); }
+
+  NodeData& CreateData();
+  bool HasData() const { return GetFlag(kHasDataFlag); }
+  // |RareData| cannot be replaced or removed once assigned.
+  NodeData* Data() const { return data_.get(); }
+  NodeData& EnsureData();
 
   void Trace(GCVisitor*) const override;
 
  private:
   enum NodeFlags : uint32_t {
+    kHasDataFlag = 1,
+
     // Node type flags. These never change once created.
     kIsContainerFlag = 1 << 1,
     kDOMNodeTypeMask = 0x3 << kDOMNodeTypeShift,
@@ -348,12 +272,8 @@ class Node : public EventTarget {
     // 2 bits remaining.
   };
 
-  FORCE_INLINE bool GetFlag(NodeFlags mask) const {
-    return node_flags_ & mask;
-  }
-  void SetFlag(bool f, NodeFlags mask) {
-    node_flags_ = (node_flags_ & ~mask) | (-(int32_t)f & mask);
-  }
+  FORCE_INLINE bool GetFlag(NodeFlags mask) const { return node_flags_ & mask; }
+  void SetFlag(bool f, NodeFlags mask) { node_flags_ = (node_flags_ & ~mask) | (-(int32_t)f & mask); }
   void SetFlag(NodeFlags mask) { node_flags_ |= mask; }
   void ClearFlag(NodeFlags mask) { node_flags_ &= ~mask; }
 
@@ -364,9 +284,7 @@ class Node : public EventTarget {
     kOther = 3 << kDOMNodeTypeShift,
   };
 
-  FORCE_INLINE DOMNodeType GetDOMNodeType() const {
-    return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask);
-  }
+  FORCE_INLINE DOMNodeType GetDOMNodeType() const { return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask); }
 
   enum class ElementNamespaceType : uint32_t {
     kHTML = 0,
@@ -375,52 +293,41 @@ class Node : public EventTarget {
     kOther = 3 << kElementNamespaceTypeShift,
   };
   FORCE_INLINE ElementNamespaceType GetElementNamespaceType() const {
-    return static_cast<ElementNamespaceType>(node_flags_ &
-        kElementNamespaceTypeMask);
+    return static_cast<ElementNamespaceType>(node_flags_ & kElementNamespaceTypeMask);
   }
 
  protected:
   enum ConstructionType {
-    kCreateOther = kDefaultNodeFlags |
-        static_cast<NodeFlags>(DOMNodeType::kOther) |
-        static_cast<NodeFlags>(ElementNamespaceType::kOther),
-    kCreateText = kDefaultNodeFlags |
-        static_cast<NodeFlags>(DOMNodeType::kText) |
-        static_cast<NodeFlags>(ElementNamespaceType::kOther),
-    kCreateContainer = kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kOther) |
-        static_cast<NodeFlags>(ElementNamespaceType::kOther),
-    kCreateElement = kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kElement) |
-        static_cast<NodeFlags>(ElementNamespaceType::kOther),
-    kCreateDocumentFragment =
-    kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kDocumentFragment) |
-        static_cast<NodeFlags>(ElementNamespaceType::kOther),
-    kCreateHTMLElement = kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kElement) |
-        static_cast<NodeFlags>(ElementNamespaceType::kHTML),
-    kCreateMathMLElement =
-    kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kElement) |
-        static_cast<NodeFlags>(ElementNamespaceType::kMathML),
-    kCreateSVGElement = kDefaultNodeFlags | kIsContainerFlag |
-        static_cast<NodeFlags>(DOMNodeType::kElement) |
-        static_cast<NodeFlags>(ElementNamespaceType::kSVG),
+    kCreateOther = kDefaultNodeFlags | static_cast<NodeFlags>(DOMNodeType::kOther) |
+                   static_cast<NodeFlags>(ElementNamespaceType::kOther),
+    kCreateText = kDefaultNodeFlags | static_cast<NodeFlags>(DOMNodeType::kText) |
+                  static_cast<NodeFlags>(ElementNamespaceType::kOther),
+    kCreateContainer = kDefaultNodeFlags | kIsContainerFlag | static_cast<NodeFlags>(DOMNodeType::kOther) |
+                       static_cast<NodeFlags>(ElementNamespaceType::kOther),
+    kCreateElement = kDefaultNodeFlags | kIsContainerFlag | static_cast<NodeFlags>(DOMNodeType::kElement) |
+                     static_cast<NodeFlags>(ElementNamespaceType::kOther),
+    kCreateDocumentFragment = kDefaultNodeFlags | kIsContainerFlag |
+                              static_cast<NodeFlags>(DOMNodeType::kDocumentFragment) |
+                              static_cast<NodeFlags>(ElementNamespaceType::kOther),
+    kCreateHTMLElement = kDefaultNodeFlags | kIsContainerFlag | static_cast<NodeFlags>(DOMNodeType::kElement) |
+                         static_cast<NodeFlags>(ElementNamespaceType::kHTML),
+    kCreateMathMLElement = kDefaultNodeFlags | kIsContainerFlag | static_cast<NodeFlags>(DOMNodeType::kElement) |
+                           static_cast<NodeFlags>(ElementNamespaceType::kMathML),
+    kCreateSVGElement = kDefaultNodeFlags | kIsContainerFlag | static_cast<NodeFlags>(DOMNodeType::kElement) |
+                        static_cast<NodeFlags>(ElementNamespaceType::kSVG),
     kCreateDocument = kCreateContainer | kIsConnectedFlag,
   };
 
   Node(ConstructionType);
 
-  void SetIsFinishedParsingChildren(bool value) {
-    SetFlag(value, kIsFinishedParsingChildrenFlag);
-  }
+  void SetIsFinishedParsingChildren(bool value) { SetFlag(value, kIsFinishedParsingChildrenFlag); }
 
  private:
   uint32_t node_flags_;
   Node* parent_or_shadow_host_node_;
   Node* previous_;
   Node* next_;
+  std::unique_ptr<NodeData> data_;
 };
 
 }  // namespace kraken

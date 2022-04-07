@@ -90,15 +90,15 @@ class Event : public ScriptWrappable {
 
   enum PhaseType { kNone = 0, kCapturingPhase = 1, kAtTarget = 2, kBubblingPhase = 3 };
 
-  static Event* Create(ExecutingContext* context) { return makeGarbageCollected<Event>(context); };
+  static Event* Create(ExecutingContext* context) { return MakeGarbageCollected<Event>(context); };
   static Event* Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state) {
-    return makeGarbageCollected<Event>(context, type);
+    return MakeGarbageCollected<Event>(context, type);
   };
   static Event* Create(ExecutingContext* context,
                        const AtomicString& type,
                        const std::shared_ptr<EventInit>& init,
                        ExceptionState& exception_state) {
-    return makeGarbageCollected<Event>(context, type, init);
+    return MakeGarbageCollected<Event>(context, type, init);
   };
 
   static Event* From(ExecutingContext* context, NativeEvent* native_event);

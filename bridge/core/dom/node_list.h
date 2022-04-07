@@ -13,8 +13,9 @@ class Node;
 
 class NodeList : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
-  NodeList(JSContext* ctx): ScriptWrappable(ctx) {};
+  NodeList(JSContext* ctx) : ScriptWrappable(ctx){};
   ~NodeList() override = default;
 
   // DOM methods & attributes for NodeList
@@ -24,6 +25,8 @@ class NodeList : public ScriptWrappable {
   // Other methods (not part of DOM)
   virtual bool IsEmptyNodeList() const { return false; }
   virtual bool IsChildNodeList() const { return false; }
+
+  const char* GetHumanReadableName() const override { return "NodeList"; };
 
   virtual Node* VirtualOwnerNode() const { return nullptr; }
 

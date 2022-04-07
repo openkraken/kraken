@@ -14,7 +14,7 @@ namespace kraken {
 
 class ChildNodeList : public NodeList {
  public:
-  explicit ChildNodeList(JSContext* ctx, ContainerNode* root_node);
+  explicit ChildNodeList(ContainerNode* root_node);
   ~ChildNodeList() override;
 
   // DOM API.

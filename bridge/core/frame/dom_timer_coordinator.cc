@@ -51,9 +51,6 @@ void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
     return nullptr;
   auto timer = m_activeTimers[timerId];
 
-  // Push this timer to abandoned list to mark this timer is deprecated.
-  m_abandonedTimers.emplace_back(timer);
-
   m_activeTimers.erase(timerId);
   return nullptr;
 }

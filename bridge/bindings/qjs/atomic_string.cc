@@ -19,6 +19,14 @@ AtomicString AtomicString::From(JSContext* ctx, NativeString* native_string) {
   return result;
 }
 
+bool AtomicString::IsNull() const {
+  return atom_ == JS_ATOM_NULL;
+}
+
+bool AtomicString::IsEmpty() const {
+  return *this == built_in_string::kempty_string;
+}
+
 std::string AtomicString::ToStdString() const {
   const char* buf = JS_AtomToCString(ctx_, atom_);
   std::string result = std::string(buf);

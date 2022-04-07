@@ -37,7 +37,7 @@ void EventTargetData::Trace(GCVisitor* visitor) const {
 }
 
 EventTarget* EventTarget::Create(ExecutingContext* context, ExceptionState& exception_state) {
-  return makeGarbageCollected<EventTargetWithInlineData>(context);
+  return MakeGarbageCollected<EventTargetWithInlineData>(context);
 }
 
 EventTarget::EventTarget(ExecutingContext* context) : ScriptWrappable(context->ctx()) {}

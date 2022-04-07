@@ -33,7 +33,6 @@ class DOMTimerCoordinator {
 
  private:
   std::unordered_map<int, std::shared_ptr<DOMTimer>> m_activeTimers;
-  std::vector<std::shared_ptr<DOMTimer>> m_abandonedTimers;
 };
 
 }  // namespace kraken

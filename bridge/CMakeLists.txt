@@ -285,16 +285,30 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/events/event_target_impl.h
     core/dom/node.cc
     core/dom/node.h
+    core/dom/element.cc
+    core/dom/element.h
+    core/dom/element_data.cc
+    core/dom/element_data.h
+    core/dom/space_split_string.cc
+    core/dom/space_split_string.h
+    core/dom/document.cc
+    core/dom/document.h
+    core/dom/node_data.cc
+    core/dom/node_data.h
+    core/dom/document_fragment.h
+    core/dom/document_fragment.cc
     core/dom/collection_index_cache.h
     core/dom/child_node_list.cc
     core/dom/child_node_list.h
-    core/dom/node_lists_node_data.cc
-    core/dom/node_lists_node_data.h
+    core/dom/empty_node_list.cc
+    core/dom/empty_node_list.h
     core/dom/node_list.h
     core/dom/container_node.cc
     core/dom/container_node.h
     core/events/error_event.cc
     core/events/error_event.h
+    core/html/html_collection.cc
+    core/html/html_collection.h
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc

@@ -6,7 +6,7 @@
 
 namespace kraken {
 
-ChildNodeList::ChildNodeList(JSContext* ctx, ContainerNode* parent) : parent_(parent), NodeList(ctx) {}
+ChildNodeList::ChildNodeList(ContainerNode* parent) : parent_(parent), NodeList(parent->ctx()) {}
 ChildNodeList::~ChildNodeList() = default;
 
 Node* ChildNodeList::VirtualOwnerNode() const {

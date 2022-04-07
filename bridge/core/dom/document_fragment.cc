@@ -4,33 +4,33 @@
  */
 
 #include "document_fragment.h"
-#include "document.h"
+#include "events/event_target.h"
 
 namespace kraken {
 
-void bindDocumentFragment(std::unique_ptr<ExecutionContext>& context) {
-  JSValue classObject = context->contextData()->constructorForType(&documentFragmentInfo);
-  context->defineGlobalProperty("DocumentFragment", classObject);
+DocumentFragment* DocumentFragment::Create(ExecutingContext* context, ExceptionState& exception_state) {
+  return nullptr;
 }
 
-JSValue DocumentFragment::constructor(ExecutionContext* context) {
-  return context->contextData()->constructorForType(&documentFragmentInfo);
+DocumentFragment::DocumentFragment(ExecutingContext* context): ContainerNode(context, ConstructionType::kCreateDocumentFragment) {}
+
+std::string DocumentFragment::nodeName() const {
+  return "#document-fragment";
 }
 
-DocumentFragment* DocumentFragment::create(JSContext* ctx) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  JSValue prototype = context->contextData()->prototypeForType(&documentFragmentInfo);
-  auto* documentFragment = makeGarbageCollected<DocumentFragment>()->initialize<DocumentFragment>(ctx, &classId);
-
-  // Let documentFragment instance inherit Document prototype methods.
-  JS_SetPrototype(ctx, documentFragment->toQuickJS(), prototype);
-
-  return documentFragment;
+Node::NodeType DocumentFragment::getNodeType() const {
+  return NodeType::kDocumentFragmentNode;
 }
 
-DocumentFragment::DocumentFragment() {
-  setNodeFlag(DocumentFragment::NodeFlag::IsDocumentFragment);
-  context()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::createDocumentFragment, nativeEventTarget);
+bool DocumentFragment::ChildTypeAllowed(NodeType type) const {
+  switch (type) {
+    case kElementNode:
+    case kCommentNode:
+    case kTextNode:
+      return true;
+    default:
+      return false;
+  }
 }
 
 }  // namespace kraken

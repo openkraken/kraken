@@ -51,20 +51,20 @@ void BlobReaderClient::DidFinishLoading() {
 }
 
 Blob* Blob::Create(ExecutingContext* context) {
-  return makeGarbageCollected<Blob>(context->ctx());
+  return MakeGarbageCollected<Blob>(context->ctx());
 }
 
 Blob* Blob::Create(ExecutingContext* context,
                    std::vector<std::shared_ptr<BlobPart>>& data,
                    ExceptionState& exception_state) {
-  return makeGarbageCollected<Blob>(context->ctx(), data);
+  return MakeGarbageCollected<Blob>(context->ctx(), data);
 }
 
 Blob* Blob::Create(ExecutingContext* context,
                    std::vector<std::shared_ptr<BlobPart>>& data,
                    std::shared_ptr<BlobPropertyBag> property,
                    ExceptionState& exception_state) {
-  return makeGarbageCollected<Blob>(context->ctx(), data, property);
+  return MakeGarbageCollected<Blob>(context->ctx(), data, property);
 }
 
 int32_t Blob::size() {
@@ -90,7 +90,7 @@ Blob* Blob::slice(int64_t start, int64_t end, ExceptionState& exception_state) {
   return slice(start, end, AtomicString::Empty(ctx()), exception_state);
 }
 Blob* Blob::slice(int64_t start, int64_t end, const AtomicString& content_type, ExceptionState& exception_state) {
-  auto* newBlob = makeGarbageCollected<Blob>(ctx());
+  auto* newBlob = MakeGarbageCollected<Blob>(ctx());
   std::vector<uint8_t> newData;
   newData.reserve(_data.size() - (end - start));
   newData.insert(newData.begin(), _data.begin() + start, _data.end() - (_data.size() - end));

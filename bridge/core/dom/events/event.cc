@@ -13,7 +13,7 @@ Event* Event::From(ExecutingContext* context, NativeEvent* native_event) {
   AtomicString event_type = AtomicString::From(context->ctx(), native_event->type);
 
   auto* event =
-      makeGarbageCollected<Event>(context, event_type, native_event->bubbles == 0 ? Bubbles::kNo : Bubbles::kYes,
+      MakeGarbageCollected<Event>(context, event_type, native_event->bubbles == 0 ? Bubbles::kNo : Bubbles::kYes,
                                   native_event->cancelable == 0 ? Cancelable::kNo : Cancelable::kYes,
                                   ComposedMode::kComposed, native_event->timeStamp);
   event->SetTarget(static_cast<EventTarget*>(native_event->target));

@@ -71,7 +71,7 @@ class MakeGarbageCollectedTrait {
 };
 
 template <typename T, typename... Args>
-T* makeGarbageCollected(Args&&... args) {
+T* MakeGarbageCollected(Args&&... args) {
   static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
                 "U of GarbageCollected<U> must be a base of T. Check "
                 "GarbageCollected<T> base class inheritance.");

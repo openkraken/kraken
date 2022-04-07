@@ -33,6 +33,11 @@ class AtomicString {
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
 
+  bool IsNull() const;
+  bool IsEmpty() const;
+
+  JSAtom Impl() const { return atom_; }
+
   [[nodiscard]] std::string ToStdString() const;
   [[nodiscard]] std::unique_ptr<NativeString> ToNativeString() const;
 

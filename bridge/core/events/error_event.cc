@@ -8,16 +8,16 @@
 namespace kraken {
 
 ErrorEvent* ErrorEvent::Create(ExecutingContext* context, const std::string& message) {
-  return makeGarbageCollected<ErrorEvent>(context, message);
+  return MakeGarbageCollected<ErrorEvent>(context, message);
 }
 ErrorEvent* ErrorEvent::Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state) {
-  return makeGarbageCollected<ErrorEvent>(context, type, exception_state);
+  return MakeGarbageCollected<ErrorEvent>(context, type, exception_state);
 }
 ErrorEvent* ErrorEvent::Create(ExecutingContext* context,
                                const AtomicString& type,
                                const std::shared_ptr<ErrorEventInit>& initializer,
                                ExceptionState& exception_state) {
-  return makeGarbageCollected<ErrorEvent>(context, type, initializer, exception_state);
+  return MakeGarbageCollected<ErrorEvent>(context, type, initializer, exception_state);
 }
 
 ErrorEvent::ErrorEvent(ExecutingContext* context, const std::string& message)

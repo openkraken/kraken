@@ -6,32 +6,31 @@
 #ifndef KRAKENBRIDGE_DOCUMENT_FRAGMENT_H
 #define KRAKENBRIDGE_DOCUMENT_FRAGMENT_H
 
-#include "node.h"
+#include "container_node.h"
 
 namespace kraken {
 
-void bindDocumentFragment(ExecutionContext* context);
-
-class DocumentFragment : public Node {
+class DocumentFragment : public ContainerNode {
+  DEFINE_WRAPPERTYPEINFO();
  public:
-  static JSClassID classId;
-  // Return the constructor class object of DocumentFragment.
-  static JSValue constructor(ExecutionContext* context);
-  DocumentFragment* create(JSContext* ctx);
-  DocumentFragment();
+  static DocumentFragment* Create(ExecutingContext* context, ExceptionState& exception_state);
+
+  DocumentFragment(ExecutingContext* context);
+
+  virtual bool IsTemplateContent() const { return false; }
+
+  // This will catch anyone doing an unnecessary check.
+  bool IsDocumentFragment() const = delete;
+
+ protected:
+  std::string nodeName() const final;
 
  private:
-  friend Node;
+  NodeType getNodeType() const final;
+  Node* Clone(Document&, CloneChildrenFlag) const override;
+  bool ChildTypeAllowed(NodeType) const override;
 };
 
-auto documentFragmentCreator =
-    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
-    -> JSValue {
-  auto* eventTarget = EventTarget::create(ctx);
-  return eventTarget->toQuickJS();
-};
-
-const WrapperTypeInfo documentFragmentInfo = {"DocumentFragment", &nodeTypeInfo, documentFragmentCreator};
 
 }  // namespace kraken
 
