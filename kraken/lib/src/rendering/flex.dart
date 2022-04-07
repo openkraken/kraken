@@ -1159,9 +1159,8 @@ class RenderFlexLayout extends RenderLayoutBox {
         while (_resolveFlexibleLengths(metrics, totalFlexFactor, initialFreeSpace)) {}
       }
 
-      // Main and cross axis size of children after child layouted.
+      // Main  axis size of children after child layouted.
       double mainAxisExtent = 0;
-      double crossAxisExtent = 0;
 
       for (_RunChild runChild in runChildrenList) {
         RenderBox child = runChild.child;
@@ -1172,7 +1171,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         // Non renderBoxModel and scrolling content box of renderBoxModel does not to adjust size.
         if (child is! RenderBoxModel || child.isScrollingContentBox) {
           mainAxisExtent += childMainAxisExtent;
-          crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
           continue;
         }
 
@@ -1207,7 +1205,6 @@ class RenderFlexLayout extends RenderLayoutBox {
 
         if (!isChildNeedsLayout) {
           mainAxisExtent += childMainAxisExtent;
-          crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
           continue;
         }
 
@@ -1221,14 +1218,28 @@ class RenderFlexLayout extends RenderLayoutBox {
           childFlexedMainSize,
           childStretchedCrossSize,
         );
-        child.layout(childConstraints, parentUsesSize: true);
 
+        // @HACK: Inflate constraints cause Flutter will skip child layout if
+        // its constraints not changed between two layouts.
+        if (child.constraints == childConstraints) {
+          childConstraints = BoxConstraints(
+            minWidth: childConstraints.maxWidth != double.infinity
+              ? childConstraints.maxWidth
+              : 0,
+            maxWidth: double.infinity,
+            minHeight: childConstraints.maxHeight != double.infinity
+              ? childConstraints.maxHeight
+              : 0,
+            maxHeight: double.infinity,
+          );
+        }
+
+        child.layout(childConstraints, parentUsesSize: true);
         // Child size needs to recalculated after layouted.
         childMainAxisExtent = _getMainAxisExtent(child);
         childCrossAxisExtent = _getCrossAxisExtent(child);
 
         mainAxisExtent += childMainAxisExtent;
-        crossAxisExtent = math.max(crossAxisExtent, childCrossAxisExtent);
 
         if (kProfileMode && PerformanceTiming.enabled()) {
           DateTime childLayoutEnd = DateTime.now();
@@ -1236,10 +1247,8 @@ class RenderFlexLayout extends RenderLayoutBox {
             childLayoutStart.microsecondsSinceEpoch);
         }
       }
-
       // Update run metrics after child size has been adjusted.
       metrics.mainAxisExtent = mainAxisExtent;
-      metrics.crossAxisExtent = crossAxisExtent;
     }
   }
 
