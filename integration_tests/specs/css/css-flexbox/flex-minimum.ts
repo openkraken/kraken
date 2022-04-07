@@ -975,7 +975,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/60x60-green.png',
+          src: 'assets/60x60-green.png',
           style: {
             width: '100px',
           },
@@ -1098,7 +1098,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/60x60-green.png',
+          src: 'assets/60x60-green.png',
           style: {
             height: '100px',
           },
@@ -1160,7 +1160,7 @@ describe('flex-minimum', () => {
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/100x100-green.png',
+          'assets/100x100-green.png',
           style: {
             height: '100px',
           },
