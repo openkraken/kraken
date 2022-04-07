@@ -853,23 +853,24 @@ task('run-benchmark', async (done) => {
       try {
         let performanceDatas = JSON.parse(match[0]);
         // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
-        performanceDatas = performanceDatas.sort().slice(1, performanceDatas.length - 1);
-        
+        performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
+
+        // Save performance list to file and upload to OSS.
+        const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
+        fs.writeFileSync(listFile, performanceDatas.toString());
+        uploader(`${KrakenPerformancePath}/${viewType}-load-time-list.txt`, listFile).then(() => {
+          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
+        }).catch(err => done(err));
+
         // Get average of list.
         let sumLoadTimes = 0;
         performanceDatas.forEach(item => sumLoadTimes += item);
         let averageLoadTime = (sumLoadTimes / performanceDatas.length).toFixed();
 
-        // Save to file and upload to OSS.
+        // Save average time to file and upload to OSS.
         const averageFile = path.join(__dirname, `../${viewType}-average-load-time.txt`);
         fs.writeFileSync(averageFile, averageLoadTime.toString());
         uploader(`${KrakenPerformancePath}/${viewType}-average-load-time.txt`, averageFile).then(() => {
-          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
-        }).catch(err => done(err));
-
-        const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
-        fs.writeFileSync(listFile, performanceDatas.toString());
-        uploader(`${KrakenPerformancePath}/${viewType}-load-time-list.txt`, listFile).then(() => {
           console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
         }).catch(err => done(err));
 
