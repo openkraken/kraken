@@ -25,7 +25,7 @@ typedef IntersectionChangeCallback = void Function(
 mixin RenderIntersectionObserverMixin on RenderBox {
   IntersectionChangeCallback? _onIntersectionChange;
 
-  final LayerHandle<IntersectionObserverLayer> _intersectionObserverLayer = LayerHandle<IntersectionObserverLayer>();
+  IntersectionObserverLayer? _intersectionObserverLayer;
 
   bool intersectionObserverAlwaysNeedsCompositing() => _listeners != null && _listeners!.isNotEmpty;
 
@@ -33,7 +33,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
   List<IntersectionChangeCallback>? _listeners;
 
   void disposeIntersectionObserverLayer() {
-    _intersectionObserverLayer.layer = null;
+    _intersectionObserverLayer = null;
   }
 
   void addIntersectionChangeListener(IntersectionChangeCallback callback) {
@@ -84,18 +84,18 @@ mixin RenderIntersectionObserverMixin on RenderBox {
       return;
     }
 
-    if (_intersectionObserverLayer.layer == null) {
-      _intersectionObserverLayer.layer = IntersectionObserverLayer(
+    if (_intersectionObserverLayer == null) {
+      _intersectionObserverLayer = IntersectionObserverLayer(
           elementSize: size,
           paintOffset: offset,
           onIntersectionChange: _onIntersectionChange!
       );
     } else {
-      _intersectionObserverLayer.layer!.elementSize = semanticBounds.size;
-      _intersectionObserverLayer.layer!.paintOffset = offset;
+      _intersectionObserverLayer!.elementSize = semanticBounds.size;
+      _intersectionObserverLayer!.paintOffset = offset;
     }
 
-    context.pushLayer(_intersectionObserverLayer.layer!, callback, offset);
+    context.pushLayer(_intersectionObserverLayer!, callback, offset);
   }
 }
 

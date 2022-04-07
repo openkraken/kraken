@@ -30,10 +30,10 @@ mixin RenderTransformMixin on RenderBoxModelBase {
     return result;
   }
 
-  final LayerHandle<TransformLayer> _transformLayer = LayerHandle<TransformLayer>();
+  TransformLayer? _transformLayer;
 
   void disposeTransformLayer() {
-    _transformLayer.layer = null;
+    _transformLayer = null;
   }
 
   void paintTransform(PaintingContext context, Offset offset,
@@ -42,16 +42,16 @@ mixin RenderTransformMixin on RenderBoxModelBase {
       final Matrix4 transform = getEffectiveTransform();
       final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
-        _transformLayer.layer = context.pushTransform(
+        _transformLayer = context.pushTransform(
           needsCompositing,
           offset,
           transform,
           callback,
-          oldLayer: _transformLayer.layer,
+          oldLayer: _transformLayer,
         );
       } else {
         callback(context, offset + childOffset);
-        _transformLayer.layer = null;
+        _transformLayer = null;
       }
     } else {
       callback(context, offset);

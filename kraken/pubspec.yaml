@@ -4,8 +4,8 @@ version: 0.11.0-dev.0
 homepage: https://openkraken.com
 
 environment:
-  sdk: ">=2.15.0 <3.0.0"
-  flutter: ">=2.5.0"
+  sdk: ">=2.12.0 <3.0.0"
+  flutter: ">=2.2.0"
 
 dependencies:
   flutter:
