@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 import 'dart:math' as math;
 
@@ -242,6 +241,9 @@ class RenderFlowLayout extends RenderLayoutBox {
     // Set container size.
     _setContainerSize(_runMetrics);
 
+    // Adjust children size which depends on the container size.
+    _adjustChildrenSize(_runMetrics);
+
     // Set children offset based on alignment properties.
     _setChildrenOffset(_runMetrics);
 
@@ -382,28 +384,18 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         Size childSize = _getChildSize(child)!;
-        double? lineHeight = _getLineHeight(child);
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (child is! RenderTextBox && lineHeight != null) {
-          childLeading = lineHeight - childSize.height;
-        }
-
         // When baseline of children not found, use boundary of margin bottom as baseline.
         double childAscent = _getChildAscent(child);
-
-        double extentAboveBaseline = childAscent + childLeading / 2;
+        double extentAboveBaseline = childAscent;
         double extentBelowBaseline = childMarginTop +
           childSize.height +
           childMarginBottom -
-          childAscent +
-          childLeading / 2;
+          childAscent;
 
         maxSizeAboveBaseline = math.max(
           extentAboveBaseline,
           maxSizeAboveBaseline,
         );
-
         maxSizeBelowBaseline = math.max(
           extentBelowBaseline,
           maxSizeBelowBaseline,
@@ -488,6 +480,57 @@ class RenderFlowLayout extends RenderLayoutBox {
     );
     setMaxScrollableSize(layoutContentSize);
     size = scrollableSize = getBoxSize(layoutContentSize);
+  }
+
+  // Children may need to relayout when its display is block which depends on
+  // the size of its container whose display is inline-block.
+  // Take following as example, div of id="2" need to relayout after its container is
+  // stretched by sibling div of id="1".
+  //
+  // <div style="display: inline-block;">
+  //   <div id="1" style="width: 100px;">
+  //   </div>
+  //   <div id="2">
+  //   </div>
+  // </div>
+  void _adjustChildrenSize(
+    List<_RunMetrics> _runMetrics,
+    ) {
+    if (_runMetrics.isEmpty) return;
+
+    // Element of inline-block will shrink to its maximum children size
+    // when its width is not specified.
+    bool isInlineBlock = renderStyle.effectiveDisplay == CSSDisplay.inlineBlock;
+    if (isInlineBlock && constraints.maxWidth.isInfinite) {
+      for (int i = 0; i < _runMetrics.length; ++i) {
+        final _RunMetrics metrics = _runMetrics[i];
+        final Map<int?, RenderBox> runChildren = metrics.runChildren;
+        final List<RenderBox> runChildrenList = runChildren.values.toList();
+
+        for (RenderBox child in runChildrenList) {
+          if (child is RenderBoxModel) {
+            bool isChildBlockLevel = child.renderStyle.effectiveDisplay == CSSDisplay.block
+              || child.renderStyle.effectiveDisplay == CSSDisplay.flex;
+            // Element of display block will stretch to the width of its container
+            // when its width is not specified.
+            if (isChildBlockLevel && child.constraints.maxWidth.isInfinite) {
+              double contentBoxWidth = renderStyle.contentBoxWidth!;
+              // No need to layout child when its width is identical to parent's width.
+              if (child.renderStyle.borderBoxWidth == contentBoxWidth) {
+                continue;
+              }
+              BoxConstraints childConstraints = BoxConstraints(
+                minWidth: contentBoxWidth,
+                maxWidth: contentBoxWidth,
+                minHeight: child.constraints.minHeight,
+                maxHeight: child.constraints.maxHeight,
+              );
+              child.layout(childConstraints, parentUsesSize: true);
+            }
+          }
+        }
+      }
+    }
   }
 
   // Set children offset based on alignment properties.
@@ -589,13 +632,6 @@ class RenderFlowLayout extends RenderLayoutBox {
           : _getChildCrossAxisOffset(runCrossAxisExtent, childCrossAxisExtent);
 
         Size? childSize = _getChildSize(child);
-        // Line height of child.
-        double? childLineHeight = _getLineHeight(child);
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (childLineHeight != null) {
-          childLeading = childLineHeight - childSize!.height;
-        }
         // Child line extent calculated according to vertical align.
         double childLineExtent = childCrossAxisOffset;
 
@@ -610,7 +646,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Leading between height of line box's content area and line height of line box.
           double lineBoxLeading = 0;
           double? lineBoxHeight = _getLineHeight(this);
-          if (child is! RenderTextBox && lineBoxHeight != null) {
+          if (lineBoxHeight != null) {
             lineBoxLeading = lineBoxHeight - runCrossAxisExtent;
           }
 
@@ -620,19 +656,19 @@ class RenderFlowLayout extends RenderLayoutBox {
                 lineBoxLeading / 2 + (runBaselineExtent - childAscent);
               break;
             case VerticalAlign.top:
-              childLineExtent = childLeading / 2;
+              childLineExtent = 0;
               break;
             case VerticalAlign.bottom:
               childLineExtent =
-                (lineBoxHeight ?? runCrossAxisExtent) -
-                  childSize!.height -
-                  childLeading / 2;
+                (lineBoxHeight ?? runCrossAxisExtent) - childSize!.height;
               break;
-          // @TODO: Vertical align middle needs to caculate the baseline of the parent box plus
+          // @TODO: Vertical align middle needs to calculate the baseline of the parent box plus
           //  half the x-height of the parent from W3C spec currently flutter lack the api to calculate x-height of glyph.
           //  case VerticalAlign.middle:
           //  break;
           }
+          // Child should not exceed over the top of parent.
+          childLineExtent = childLineExtent < 0 ? 0 : childLineExtent;
         }
 
         double? childMarginLeft = 0;

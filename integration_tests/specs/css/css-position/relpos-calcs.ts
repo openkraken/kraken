@@ -34,6 +34,8 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
+
+  // @TODO: Negative percentage bottom fail on following case.
   xit('001', async () => {
     let p;
     let inner;
@@ -121,6 +123,8 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage top fail on following case.
   xit('002', async () => {
     let p;
     let inner;
@@ -208,7 +212,7 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let control;
     let inner;
@@ -295,7 +299,7 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let control;
     let inner;
@@ -392,6 +396,8 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('005', async () => {
     let p;
     let control;
@@ -489,6 +495,8 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('006', async () => {
     let p;
     let control;
@@ -585,6 +593,8 @@ describe('relpos-calcs', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support CSS inherit keyword.
   xit('007', async () => {
     let p;
     let inner;

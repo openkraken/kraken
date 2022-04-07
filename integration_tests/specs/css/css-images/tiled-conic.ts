@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('tiled-conic', () => {
+  // @TODO: conic-gradient with percentage impl differs from browser.
   xit('gradients-ref', async () => {
     let box;
     let box_1;
@@ -379,6 +380,8 @@ describe('tiled-conic', () => {
 
     await snapshot();
   });
+
+  // @TODO: conic-gradient with percentage impl differs from browser.
   xit('gradients', async () => {
     let gradient;
     gradient = createElement('div', {

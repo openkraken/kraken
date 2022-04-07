@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'dart:async';
 import 'dart:io';
 
@@ -8,7 +11,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/widget.dart';
-import 'package:kraken/launcher.dart';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:path/path.dart' as path;
 import 'package:kraken_websocket/kraken_websocket.dart';

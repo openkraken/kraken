@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('fit-content', () => {
-  xit('item-001', async () => {
+  it('item-001', async () => {
     let widthSetter;
     let mainSizeDependsOnCrossSize;
     let flexItem;

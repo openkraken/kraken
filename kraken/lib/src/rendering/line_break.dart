@@ -1,13 +1,12 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 
-class RenderLineBreak extends RenderIntrinsic {
+class RenderLineBreak extends RenderReplaced {
   RenderLineBreak(
     CSSRenderStyle renderStyle,
   ) : super(

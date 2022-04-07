@@ -52,7 +52,7 @@ describe('Transform origin', () => {
               await snapshot();
             });
 
-    xit('works width margin' , async () => {
+    it('works width margin' , async () => {
       let n1, n2;
       n1 = createElementWithStyle(
          'div',
@@ -83,4 +83,31 @@ describe('Transform origin', () => {
 
       await snapshot();
     });
+
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    div = createElement(
+    'div',
+      {
+        style: {
+          width: '100px',
+          height: '100px',
+          background: 'yellow',
+          overflow: 'hidden',
+          transformOrigin: '100px 100px',
+          transform: 'rotate(45deg)'
+        },
+      },
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      div.style.transformOrigin = '';
+      await snapshot();
+      done();
+    });
+  });
 });

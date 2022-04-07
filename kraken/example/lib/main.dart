@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyBrowser> {
               _kraken?.load(KrakenBundle.fromUrl(value));
             },
             decoration: InputDecoration(
-              hintText: 'Enter a app url',
+              hintText: 'Enter URL',
               hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
               contentPadding: const EdgeInsets.all(10.0),
               filled: true,
@@ -212,15 +212,15 @@ class _MyHomePageState extends State<MyBrowser> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: _kraken = Kraken(
-          devToolsService: ChromeDevToolsService(),
+          // devToolsService: ChromeDevToolsService(),
           onLoad: onJsBundleLoad,
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
           // bundle: KrakenBundle.fromUrl('assets://assets/bundle.js'),
           // hub server 后 ip 更换成 本地
           // bundle: KrakenBundle.fromUrl('https://pre.t.youku.com/yep/page/kraken/m_pre/08a5sb2xno?isNeedBaseImage=1'),
-          bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
-          // bundle: KrakenBundle.fromUrl('https://t.youku.com/yep/page/kraken/m/j73sp0s55m'),
+          // bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
+          bundle: KrakenBundle.fromUrl('https://t.youku.com/yep/page/kraken/m/j73sp0s55m'),
           // bundle: KrakenBundle.fromUrl('http://30.77.124.31:3000/build/demo.init.js'),
         ),
     ));

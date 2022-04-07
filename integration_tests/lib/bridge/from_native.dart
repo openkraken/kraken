@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 // ignore_for_file: unused_import, undefined_function
 
@@ -146,7 +145,6 @@ typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBy
 
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
 KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
-
 
 void registerDartTestMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:math' as math;
 import 'dart:ui';
@@ -217,8 +216,12 @@ class RenderLayoutBox extends RenderBoxModel
           // this logic after Kraken has implemented stacking context tree.
           if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
-            // Child element always paint after parent element in the renderObject tree.
-            return right.renderStyle.isAncestorOf(left.renderStyle) ? 1 : -1;
+            // Child element always paint after parent element when their position are both fixed
+            // as W3C stacking context specified.
+            // Kraken will place these two renderObjects as siblings of the children of HTML renderObject
+            // due to lack stacking context support, so it needs to add this patch to handle this case.
+            if (right.renderStyle.isAncestorOf(left.renderStyle)) return 1;
+            if (left.renderStyle.isAncestorOf(right.renderStyle)) return -1;
           }
 
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
@@ -363,16 +366,21 @@ class RenderLayoutBox extends RenderBoxModel
     // Size which is specified by sizing styles
     double? specifiedContentWidth = renderStyle.contentBoxLogicalWidth;
     double? specifiedContentHeight = renderStyle.contentBoxLogicalHeight;
-    // Flex basis takes priority over main size in flex item.
+
+    // Flex basis takes priority over main size in flex item when flex-grow or flex-shrink not work.
     if (parent is RenderFlexLayout) {
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
       double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
       if (flexBasis != null) {
         if (CSSFlex.isHorizontalFlexDirection(
             parentRenderBoxModel!.renderStyle.flexDirection)) {
-          specifiedContentWidth = _getContentWidth(flexBasis);
+          if (!hasOverrideContentLogicalWidth) {
+            specifiedContentWidth = _getContentWidth(flexBasis);
+          }
         } else {
-          specifiedContentHeight = _getContentHeight(flexBasis);
+          if (!hasOverrideContentLogicalHeight) {
+            specifiedContentHeight = _getContentHeight(flexBasis);
+          }
         }
       }
     }
@@ -716,6 +724,15 @@ class RenderBoxModel extends RenderBox
     return currentBox.parent is RenderViewportBox;
   }
 
+  // Width/height is overrided by flex-grow or flex-shrink in flex layout.
+  bool hasOverrideContentLogicalWidth = false;
+  bool hasOverrideContentLogicalHeight = false;
+
+  void clearOverrideContentSize() {
+    hasOverrideContentLogicalWidth = false;
+    hasOverrideContentLogicalHeight = false;
+  }
+
   // Auto value for min-width which equals to the total width of children
   // which is in flow (excluding position absolute/fixed).
   double autoMinWidth = 0;
@@ -849,7 +866,8 @@ class RenderBoxModel extends RenderBox
     double maxConstraintHeight = renderStyle.borderBoxLogicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
-      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
+      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto
+        ? null : renderStyle.flexBasis?.computedValue;
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
       // In flex layout, flex basis takes priority over width/height if set.
       // Flex-basis cannot be smaller than its content size which happens can not be known
@@ -857,44 +875,40 @@ class RenderBoxModel extends RenderBox
       if (flexBasis != null) {
         if (CSSFlex.isHorizontalFlexDirection(
             parentRenderBoxModel!.renderStyle.flexDirection)) {
-          minConstraintWidth = flexBasis;
-          // Clamp flex-basis by minWidth and maxWidth
-          if (minWidth != null && flexBasis < minWidth) {
-            maxConstraintWidth = minWidth;
-          }
-          if (maxWidth != null && flexBasis > maxWidth) {
-            minConstraintWidth = maxWidth;
-          }
+          minWidth = minWidth != null
+            ? math.max(flexBasis, minWidth) : flexBasis;
         } else {
-          minConstraintHeight = flexBasis;
-          // Clamp flex-basis by minHeight and maxHeight
-          if (minHeight != null && flexBasis < minHeight) {
-            maxConstraintHeight = minHeight;
-          }
-          if (maxHeight != null && flexBasis > maxHeight) {
-            minConstraintHeight = maxHeight;
-          }
+          minHeight = minHeight != null
+            ? math.max(flexBasis, minHeight) : flexBasis;
         }
       }
     }
 
-    // min/max size does not apply for inline element
+    // Clamp constraints by min/max size when display is not inline.
     if (!isDisplayInline) {
       if (minWidth != null) {
-        minConstraintWidth =
-            minConstraintWidth < minWidth ? minWidth : minConstraintWidth;
+        minConstraintWidth = minConstraintWidth < minWidth
+          ? minWidth : minConstraintWidth;
+        maxConstraintWidth = maxConstraintWidth < minWidth
+          ? minWidth : maxConstraintWidth;
       }
       if (maxWidth != null) {
-        maxConstraintWidth =
-            maxConstraintWidth > maxWidth ? maxWidth : maxConstraintWidth;
+        minConstraintWidth = minConstraintWidth > maxWidth
+          ? maxWidth : minConstraintWidth;
+        maxConstraintWidth = maxConstraintWidth > maxWidth
+          ? maxWidth : maxConstraintWidth;
       }
       if (minHeight != null) {
-        minConstraintHeight =
-            minConstraintHeight < minHeight ? minHeight : minConstraintHeight;
+        minConstraintHeight = minConstraintHeight < minHeight
+          ? minHeight : minConstraintHeight;
+        maxConstraintHeight = maxConstraintHeight < minHeight
+          ? minHeight : maxConstraintHeight;
       }
       if (maxHeight != null) {
-        maxConstraintHeight =
-            maxConstraintHeight > maxHeight ? maxHeight : maxConstraintHeight;
+        minConstraintHeight = minConstraintHeight > maxHeight
+          ? maxHeight : minConstraintHeight;
+        maxConstraintHeight = maxConstraintHeight > maxHeight
+          ? maxHeight : maxConstraintHeight;
       }
     }
 
@@ -1048,7 +1062,7 @@ class RenderBoxModel extends RenderBox
 
   /// [RenderLayoutBox] real paint things after basiclly paint box model.
   /// Override which to paint layout or intrinsic things.
-  /// Used by [RenderIntrinsic], [RenderFlowLayout], [RenderFlexLayout].
+  /// Used by [RenderReplaced], [RenderFlowLayout], [RenderFlexLayout].
   void performPaint(PaintingContext context, Offset offset) {
     throw FlutterError('Please impl performPaint of $runtimeType.');
   }

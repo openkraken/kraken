@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('available-height', () => {
-  xit('for-replaced-content-001', async () => {
+  it('for-replaced-content-001', async () => {
     let log;
     let wrapper;
     log = createElement('div', {

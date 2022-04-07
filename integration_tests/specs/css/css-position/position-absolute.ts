@@ -472,7 +472,7 @@ describe('position-absolute', () => {
 
     await snapshot();
   });
-  xit('007-ref', async () => {
+  it('007-ref', async () => {
     let p;
     let blue;
     let blue_1;

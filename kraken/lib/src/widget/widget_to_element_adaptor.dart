@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -174,7 +173,7 @@ abstract class WidgetElement extends dom.Element {
 
   WidgetElement(BindingContext? context, {
     Map<String, dynamic>? defaultStyle,
-    bool isIntrinsicBox = false,
+    bool isReplacedElement = false,
     // WidgetElement Adds repaintBoundary by default to prevent the internal paint process from affecting the outside.
     // If a lot of WidgetElement is used in a scene, you need to modify the default repaintBoundary according to the scene analysis.
     // Otherwise it will cause performance problems by creating most layers.
@@ -182,7 +181,7 @@ abstract class WidgetElement extends dom.Element {
   }) : super(
     context,
     defaultStyle: defaultStyle,
-    isIntrinsicBox: isIntrinsicBox,
+    isReplacedElement: isReplacedElement,
     isDefaultRepaintBoundary: isDefaultRepaintBoundary,
   ) {
     WidgetsFlutterBinding.ensureInitialized();

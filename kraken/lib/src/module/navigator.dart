@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 import 'dart:io' show Platform;
 import 'dart:ui';
 
@@ -46,7 +49,7 @@ class NavigatorModule extends BaseModule {
   }
 
   static String getLanguages() {
-    // Strinfiy the list of languages to JSON format.
+    // Stringify the list of languages to JSON format.
     return '[' +  PlatformDispatcher.instance.locales.map(((locale) => '"${locale.toLanguageTag()}"')).join(',') + ']';
   }
 

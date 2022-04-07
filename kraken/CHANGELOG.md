@@ -1,3 +1,19 @@
+## 0.10.3
+
+**Bug Fixed**
+
++ Fix Http cache file io error https://github.com/openkraken/kraken/pull/1202.
++ Fix align-self not work for positioned flex item. https://github.com/openkraken/kraken/pull/1207
++ Fix text-align should only work for text node for flex item. https://github.com/openkraken/kraken/pull/1208
++ Fix crash with scrolling.  https://github.com/openkraken/kraken/pull/1209
++ Fix children of inline-block element not stretch. https://github.com/openkraken/kraken/pull/1214
++ Fix style set to empty string. https://github.com/openkraken/kraken/pull/1220
++ Fix flex item not stretch when child size changed. https://github.com/openkraken/kraken/pull/1229
++ Fix html parse error. https://github.com/openkraken/kraken/pull/1231
++ Fix asset protocol error. https://github.com/openkraken/kraken/pull/1232
++ Fix file protocol. https://github.com/openkraken/kraken/pull/1234
+
+
 ## 0.10.2+1
 
 **Bug Fixed**

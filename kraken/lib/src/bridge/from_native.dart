@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:convert';
@@ -285,29 +284,6 @@ void _cancelAnimationFrame(int contextId, int timerId) {
 final Pointer<NativeFunction<NativeCancelAnimationFrame>> _nativeCancelAnimationFrame =
     Pointer.fromFunction(_cancelAnimationFrame);
 
-// Register devicePixelRatio
-typedef NativeDevicePixelRatio = Double Function();
-
-double _devicePixelRatio() {
-  return window.devicePixelRatio;
-}
-
-final Pointer<NativeFunction<NativeDevicePixelRatio>> _nativeDevicePixelRatio =
-    Pointer.fromFunction(_devicePixelRatio, 0.0);
-
-// Register platformBrightness
-typedef NativePlatformBrightness = Pointer<NativeString> Function();
-
-final Pointer<NativeString> _dark = stringToNativeString('dark');
-final Pointer<NativeString> _light = stringToNativeString('light');
-
-Pointer<NativeString> _platformBrightness() {
-  return window.platformBrightness == Brightness.dark ? _dark : _light;
-}
-
-final Pointer<NativeFunction<NativePlatformBrightness>> _nativePlatformBrightness =
-    Pointer.fromFunction(_platformBrightness);
-
 typedef NativeGetScreen = Pointer<Void> Function();
 
 Pointer<Void> _getScreen() {
@@ -410,8 +386,6 @@ final List<int> _dartNativeMethods = [
   _nativeRequestAnimationFrame.address,
   _nativeCancelAnimationFrame.address,
   _nativeGetScreen.address,
-  _nativeDevicePixelRatio.address,
-  _nativePlatformBrightness.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
   _nativeInitWindow.address,

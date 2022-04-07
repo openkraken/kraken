@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
@@ -69,7 +68,7 @@ class BRElement extends Element {
   RenderLineBreak? _renderLineBreak;
 
   BRElement([BindingContext? context])
-      : super(context, isIntrinsicBox: true);
+      : super(context, isReplacedElement: true);
 
   @override
   RenderBoxModel? get renderBoxModel => _renderLineBreak;

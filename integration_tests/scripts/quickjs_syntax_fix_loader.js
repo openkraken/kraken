@@ -1,4 +1,6 @@
-
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 // Quickjs has parsing issue when await expression
 // add an semicolon before await to avoid this problems
 // https://github.com/bellard/quickjs/issues/77

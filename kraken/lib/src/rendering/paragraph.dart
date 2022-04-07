@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui' as ui
@@ -75,16 +74,16 @@ class KrakenRenderParagraph extends RenderBox
 
   final TextPainter _textPainter;
 
-  /// The text painter of each line
+  // The text painter of each line
   late List<TextPainter> _lineTextPainters;
 
-  /// The line mertics of paragraph
+  // The line mertics of paragraph
   late List<ui.LineMetrics> _lineMetrics;
 
-  /// The vertical offset of each line
+  // The vertical offset of each line
   late List<double> _lineOffset;
 
-  /// The line height of paragraph
+  // The line height of paragraph
   double? _lineHeight;
   double? get lineHeight => _lineHeight;
   set lineHeight(double? value) {
@@ -92,7 +91,7 @@ class KrakenRenderParagraph extends RenderBox
     _lineHeight = value;
   }
 
-  /// The text to display.
+  // The text to display.
   TextSpan get text => _textPainter.text as TextSpan;
 
   set text(TextSpan value) {

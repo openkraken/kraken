@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKENBRIDGE_WINDOW_H
@@ -43,6 +42,8 @@ class Window : public EventTarget {
   DEFINE_PROTOTYPE_READONLY_PROPERTY(parent);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(innerWidth);
+  DEFINE_PROTOTYPE_READONLY_PROPERTY(innerHeight);
   DEFINE_PROTOTYPE_READONLY_PROPERTY(self);
 
   DEFINE_PROTOTYPE_PROPERTY(onerror);

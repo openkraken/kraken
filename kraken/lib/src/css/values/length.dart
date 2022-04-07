@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui';
@@ -139,24 +138,20 @@ class CSSLengthValue {
             : parentRenderBoxModel.renderStyle;
         }
 
-        // Constraints is calculated before layout, the layouted size is identical to the tight constraints
-        // if constraints is tight, so it's safe to use the tight constraints as the parent size to resolve
-        // the child percentage length to save one extra layout to wait for parent layout complete.
-
-        // Percentage relative width priority: tight constraints width > renderer width > logical width
-        double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxConstraintsWidth
-          ?? parentRenderStyle?.paddingBoxWidth
-          ?? parentRenderStyle?.paddingBoxLogicalWidth;
-        double? parentContentBoxWidth = parentRenderStyle?.contentBoxConstraintsWidth
-          ?? parentRenderStyle?.contentBoxWidth
-          ?? parentRenderStyle?.contentBoxLogicalWidth;
-        // Percentage relative height priority: tight constraints height > renderer height > logical height
-        double? parentPaddingBoxHeight = parentRenderStyle?.paddingBoxConstraintsHeight
-          ?? parentRenderStyle?.paddingBoxHeight
-          ?? parentRenderStyle?.paddingBoxLogicalHeight;
-        double? parentContentBoxHeight = parentRenderStyle?.contentBoxConstraintsHeight
-          ?? parentRenderStyle?.contentBoxHeight
-          ?? parentRenderStyle?.contentBoxLogicalHeight;
+        // Percentage relative width priority: logical width > renderer width
+        double? parentPaddingBoxWidth =
+          parentRenderStyle?.paddingBoxLogicalWidth
+          ?? parentRenderStyle?.paddingBoxWidth;
+        double? parentContentBoxWidth =
+          parentRenderStyle?.contentBoxLogicalWidth
+          ?? parentRenderStyle?.contentBoxWidth;
+        // Percentage relative height priority: logical height > renderer height
+        double? parentPaddingBoxHeight =
+          parentRenderStyle?.paddingBoxLogicalHeight
+          ?? parentRenderStyle?.paddingBoxHeight;
+        double? parentContentBoxHeight =
+          parentRenderStyle?.contentBoxLogicalHeight
+          ?? parentRenderStyle?.contentBoxHeight;
 
         // Positioned element is positioned relative to the padding box of its containing block
         // while the others relative to the content box.

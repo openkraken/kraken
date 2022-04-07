@@ -26,7 +26,7 @@ describe('block-fit', () => {
 
     await snapshot(0.1);
   });
-  xit('content-as-initial', async () => {
+  it('content-as-initial', async () => {
     let child;
     let parent;
     parent = createElement(

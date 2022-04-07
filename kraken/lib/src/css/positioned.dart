@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -58,7 +57,7 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
   // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
   if (left.isNotAuto && right.isNotAuto &&
-    (child is! RenderIntrinsic || width.isNotAuto)) {
+    (child is! RenderReplaced || width.isNotAuto)) {
     if (marginLeft.isAuto) {
       double leftValue = left.computedValue;
       double rightValue = right.computedValue;
@@ -73,7 +72,7 @@ Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxMode
   }
 
   if (top.isNotAuto && bottom.isNotAuto &&
-    (child is! RenderIntrinsic || height.isNotAuto)) {
+    (child is! RenderReplaced || height.isNotAuto)) {
     if (marginTop.isAuto) {
       double topValue = top.computedValue;
       double bottomValue = bottom.computedValue;
@@ -392,6 +391,14 @@ class CSSPositionedLayout {
       double borderBottom = borderEdge.bottom;
       RenderStyle childRenderStyle = child.renderStyle;
       Offset? placeholderOffset;
+
+      // ScrollTop and scrollLeft will be added to offset of renderBox in the paint stage
+      // for positioned fixed element.
+      if (child.renderStyle.position == CSSPositionType.fixed) {
+        Element rootElement = parent.renderStyle.target;
+        child.scrollingOffsetX = rootElement.scrollLeft;
+        child.scrollingOffsetY = rootElement.scrollTop;
+      }
 
       double top;
       if (childRenderStyle.top.isNotAuto) {

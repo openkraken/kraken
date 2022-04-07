@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:async';
@@ -118,7 +117,7 @@ void emitUIEvent(
   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
   bool isCustomEvent = event is CustomEvent;
   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  // @TODO: Make Event inhert BindingObject to pass value from bridge to dart.
+  // @TODO: Make Event inherit BindingObject to pass value from bridge to dart.
   int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
   event.propagationStopped = propagationStopped == 1 ? true : false;
   freeNativeString(eventTypeString);
@@ -161,10 +160,17 @@ final DartParseHTML _parseHTML = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeParseHTML>>('parseHTML')
     .asFunction();
 
-void evaluateScripts(int contextId, String code, String url, [int line = 0]) {
+int _anonymousScriptEvaluationId = 0;
+void evaluateScripts(int contextId, String code, {String? url, int line = 0}) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
+  // Assign `vm://$id` for no url (anonymous scripts).
+  if (url == null) {
+    url = 'vm://$_anonymousScriptEvaluationId';
+    _anonymousScriptEvaluationId++;
+  }
+
   Pointer<NativeString> nativeString = stringToNativeString(code);
   Pointer<Utf8> _url = url.toNativeUtf8();
   try {
@@ -201,7 +207,7 @@ void parseHTML(int contextId, String code) {
   }
   Pointer<Utf8> nativeCode = code.toNativeUtf8();
   try {
-    _parseHTML(contextId, nativeCode, code.length);
+    _parseHTML(contextId, nativeCode, nativeCode.length);
   } catch (e, stack) {
     print('$e\n$stack');
   }

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -43,7 +42,7 @@ class CanvasElement extends Element {
   CanvasElement([BindingContext? context])
       : super(
           context,
-          isIntrinsicBox: true,
+          isReplacedElement: true,
           isDefaultRepaintBoundary: true,
           defaultStyle: _defaultStyle,
         ) {

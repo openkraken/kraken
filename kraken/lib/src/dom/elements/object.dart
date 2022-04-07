@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
@@ -37,7 +36,7 @@ class ObjectElement extends Element implements ObjectElementHost {
   late ObjectElementClient _objectElementClient;
 
   ObjectElement([BindingContext? context])
-      : super(context, defaultStyle: _objectStyle, isIntrinsicBox: true) {
+      : super(context, defaultStyle: _objectStyle, isReplacedElement: true) {
     initObjectClient();
     initElementClient();
   }

@@ -15,6 +15,8 @@ describe('normalization-conic', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-conic-gradient with percentage impl differs from browser.
   xit('degenerate', async () => {
     let gradient;
     gradient = createElement('div', {

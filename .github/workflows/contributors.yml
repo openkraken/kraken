@@ -1,0 +1,27 @@
+name: Create contributors
+
+on: [workflow_dispatch]
+
+jobs:
+  create-contributors-svg:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Generate Contributors Images
+        uses: jaywcjlove/github-action-contributors@main
+        with:
+          filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
+          output: CONTRIBUTORS.svg
+          avatarSize: 36
+
+      - name: Deploy
+        uses: taixw2/deploy-aliyun-oss@main
+        with:
+          access-key-id: ${{ secrets.OSS_AK }}
+          access-key-secret: ${{ secrets.OSS_SK }}
+          bucket: kraken
+          region: oss-cn-hangzhou
+          entry: CONTRIBUTORS.svg

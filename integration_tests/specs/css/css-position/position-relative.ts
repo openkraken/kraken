@@ -32,7 +32,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let span1;
     let span2;
@@ -206,7 +206,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let div;
     p = createElement(
@@ -1033,8 +1033,8 @@ describe('position-relative', () => {
 
     await snapshot(0.1);
   });
-  // Some position relation case not works right
-  // restrict to flutter's renderiing pipe
+
+  // @TODO: Support stacking context.
   xit('016', async () => {
     let p;
     let div0;
@@ -1241,7 +1241,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('020', async () => {
+  it('020', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1289,7 +1289,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('021', async () => {
+  it('021', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1337,7 +1337,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('022', async () => {
+  it('022', async () => {
     let p;
     let tallerAndWiderRelPos;
     let containingAncestor;
@@ -1891,7 +1891,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('033-ref', async () => {
+  it('033-ref', async () => {
     let p;
     let yellowStripe;
     let orangeStripe;
@@ -2022,7 +2022,7 @@ describe('position-relative', () => {
       done();
     });
   });
-  xit('034', async () => {
+  it('034', async () => {
     let p;
     let div;
     p = createElement(
@@ -2070,8 +2070,7 @@ describe('position-relative', () => {
     await snapshot();
   });
 
-  // @TODO Need to impl text anonymous box split
-  xit('035-ref', async () => {
+  it('035-ref', async () => {
     let p;
     let black;
     let orange;
@@ -2183,7 +2182,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('036', async () => {
+  it('036', async () => {
     let p;
     let div;
     p = createElement(
@@ -2361,6 +2360,8 @@ describe('position-relative', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('038', async () => {
     let p;
     let div1;
@@ -2443,7 +2444,7 @@ describe('position-relative', () => {
 
     await snapshot();
   });
-  xit('nested-001', async () => {
+  it('nested-001', async () => {
     let p;
     let innerMost;
     let inner;
@@ -2476,7 +2477,7 @@ describe('position-relative', () => {
         xmlns: 'http://www.w3.org/1999/xhtml',
         id: 'outer',
         style: {
-          background: "green repeat-x center url('support/red_box.png')",
+          background: "green repeat-x center url('assets/red.png')",
           height: '300px',
           width: '200px',
           'box-sizing': 'border-box',

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2022-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui';
@@ -113,14 +112,14 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
         // scale-down is parsed as none, otherwise parsed as contain.
       } else if (boxFit == BoxFit.scaleDown) {
         if (preferredWidth / preferredHeight > naturalWidth / naturalHeight) {
-          if (preferredHeight > naturalHeight * window.devicePixelRatio) {
+          if (preferredHeight > naturalHeight) {
             targetWidth = naturalWidth;
             targetHeight = naturalHeight;
           } else {
             targetHeight = preferredHeight;
           }
         } else {
-          if (preferredWidth > naturalWidth * window.devicePixelRatio) {
+          if (preferredWidth > naturalWidth) {
             targetWidth = naturalWidth;
             targetHeight = naturalHeight;
           } else {
@@ -134,10 +133,10 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
     }
 
     // Resize image size should not be larger than its natural size.
-    if (targetWidth != null && targetWidth > naturalWidth * window.devicePixelRatio) {
+    if (targetWidth != null && targetWidth > naturalWidth) {
       targetWidth = naturalWidth;
     }
-    if (targetHeight != null && targetHeight > naturalHeight * window.devicePixelRatio) {
+    if (targetHeight != null && targetHeight > naturalHeight) {
       targetHeight = naturalHeight;
     }
 

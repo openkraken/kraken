@@ -203,7 +203,7 @@ describe('block-formatting', () => {
 
     await snapshot();
   });
-  xit('contexts-004-ref', async () => {
+  it('contexts-004-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -402,7 +402,7 @@ describe('block-formatting', () => {
 
     await snapshot(0.2);
   });
-  xit('contexts-009', async () => {
+  it('contexts-009', async () => {
     let p;
     let div1;
     p = createElement(
@@ -448,7 +448,7 @@ describe('block-formatting', () => {
 
     await snapshot();
   });
-  xit('contexts-010', async () => {
+  it('contexts-010', async () => {
     let p;
     let blockDescendant;
     let blockDescendant_1;
@@ -508,7 +508,7 @@ describe('block-formatting', () => {
 
     await snapshot();
   });
-  xit('contexts-015-ref', async () => {
+  it('contexts-015-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -535,7 +535,7 @@ describe('block-formatting', () => {
       },
       [
         createElement('img', {
-          src: 'support/blue15x15.png',
+          src: 'assets/blue15x15.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -544,7 +544,7 @@ describe('block-formatting', () => {
           },
         }),
         createElement('img', {
-          src: 'support/swatch-orange.png',
+          src: 'assets/swatch-orange.png',
           width: '50',
           height: '50',
           alt: 'Image download support must be enabled',
@@ -557,6 +557,6 @@ describe('block-formatting', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
