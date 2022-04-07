@@ -9,6 +9,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const del = require('del');
 const os = require('os');
+const uploader = require('./utils/uploader');
 
 program
 .option('--static-quickjs', 'Build quickjs as static library and bundled into kraken library.', false)
@@ -859,8 +860,20 @@ task('run-benchmark', async (done) => {
         performanceDatas.forEach(item => sumLoadTimes += item);
         let averageLoadTime = sumLoadTimes / performanceDatas.length;
 
+        // Save to file.
+        let file = path.join(__dirname, './performance.txt');
+        fs.writeFile(file, content, averageLoadTime => {
+          if (err) {
+            const err = new Error('The performance data write exception.');
+            done(err);
+          }
+        });
+
+        // Upload to OSS.
+        uploader('kraken-performance', file);
+
       } catch {
-        const err = new Error('The performance info is error.');
+        const err = new Error('The performance info parse exception.');
         done(err);
       }
     }
