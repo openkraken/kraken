@@ -11,7 +11,7 @@
 
 namespace kraken {
 
-ScriptValue ScriptValue::createErrorObject(JSContext* ctx, const char* errmsg) {
+ScriptValue ScriptValue::CreateErrorObject(JSContext* ctx, const char* errmsg) {
   JS_ThrowInternalError(ctx, "%s", errmsg);
   JSValue errorObject = JS_GetException(ctx);
   ScriptValue result = ScriptValue(ctx, errorObject);
@@ -19,7 +19,7 @@ ScriptValue ScriptValue::createErrorObject(JSContext* ctx, const char* errmsg) {
   return result;
 }
 
-ScriptValue ScriptValue::createJSONObject(JSContext* ctx, const char* jsonString, size_t length) {
+ScriptValue ScriptValue::CreateJsonObject(JSContext* ctx, const char* jsonString, size_t length) {
   JSValue jsonValue = JS_ParseJSON(ctx, jsonString, length, "");
   ScriptValue result = ScriptValue(ctx, jsonValue);
   JS_FreeValue(ctx, jsonValue);
@@ -30,11 +30,40 @@ ScriptValue ScriptValue::Empty(JSContext* ctx) {
   return ScriptValue(ctx);
 }
 
-JSValue ScriptValue::ToQuickJS() const {
+ScriptValue::ScriptValue(const ScriptValue& value) {
+  if (&value != this) {
+    value_ = JS_DupValue(ctx_, value.value_);
+  }
+  ctx_ = value.ctx_;
+}
+ScriptValue& ScriptValue::operator=(const ScriptValue& value) {
+  if (&value != this) {
+    value_ = JS_DupValue(ctx_, value.value_);
+  }
+  ctx_ = value.ctx_;
+  return *this;
+}
+
+ScriptValue::ScriptValue(ScriptValue&& value) noexcept {
+  if (&value != this) {
+    value_ = JS_DupValue(ctx_, value.value_);
+  }
+  ctx_ = value.ctx_;
+}
+ScriptValue& ScriptValue::operator=(ScriptValue&& value) noexcept {
+  if (&value != this) {
+    value_ = JS_DupValue(ctx_, value.value_);
+  }
+  ctx_ = value.ctx_;
+  return *this;
+}
+
+
+JSValue ScriptValue::QJSValue() const {
   return value_;
 }
 
-ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) {
+ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) const {
   JSValue stringifyedValue = JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL);
   ScriptValue result = ScriptValue(ctx_);
   // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
@@ -47,12 +76,8 @@ ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) {
   return result;
 }
 
-std::unique_ptr<NativeString> ScriptValue::toNativeString() {
-  return jsValueToNativeString(ctx_, value_);
-}
-
-std::string ScriptValue::toCString() {
-  return jsValueToStdString(ctx_, value_);
+AtomicString ScriptValue::ToString() const {
+  return AtomicString(ctx_, value_);
 }
 
 bool ScriptValue::IsException() {
@@ -61,6 +86,15 @@ bool ScriptValue::IsException() {
 
 bool ScriptValue::IsEmpty() {
   return JS_IsNull(value_) || JS_IsUndefined(value_);
+}
+
+bool ScriptValue::IsObject() {
+  return JS_IsObject(value_);
+}
+
+
+bool ScriptValue::IsString() {
+  return JS_IsString(value_);
 }
 
 void ScriptValue::Trace(GCVisitor* visitor) {

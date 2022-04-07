@@ -13,6 +13,7 @@
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "gc_visitor.h"
+#include "atomic_string.h"
 
 namespace kraken {
 
@@ -27,11 +28,9 @@ class ScriptValue final {
 
  public:
   // Create an errorObject from string error message.
-  static ScriptValue createErrorObject(JSContext* ctx, const char* errmsg);
+  static ScriptValue CreateErrorObject(JSContext* ctx, const char* errmsg);
   // Create an object from JSON string.
-  static ScriptValue createJSONObject(JSContext* ctx, const char* jsonString, size_t length);
-  // Create from NativeString
-  static ScriptValue fromNativeString(JSContext* ctx, NativeString* nativeString);
+  static ScriptValue CreateJsonObject(JSContext* ctx, const char* jsonString, size_t length);
 
   // Create an empty ScriptValue;
   static ScriptValue Empty(JSContext* ctx);
@@ -41,45 +40,24 @@ class ScriptValue final {
   ScriptValue() = default;
 
   // Copy and assignment
-  ScriptValue(ScriptValue const& value) {
-    if (&value != this) {
-      value_ = JS_DupValue(ctx_, value.value_);
-    }
-    ctx_ = value.ctx_;
-  };
-  ScriptValue& operator=(const ScriptValue& value) {
-    if (&value != this) {
-      value_ = JS_DupValue(ctx_, value.value_);
-    }
-    ctx_ = value.ctx_;
-    return *this;
-  }
+  ScriptValue(ScriptValue const& value);
+  ScriptValue& operator=(const ScriptValue& value);
 
   // Move operations
-  ScriptValue(ScriptValue&& value) noexcept {
-    if (&value != this) {
-      value_ = JS_DupValue(ctx_, value.value_);
-    }
-    ctx_ = value.ctx_;
-  };
-  ScriptValue& operator=(ScriptValue&& value) noexcept {
-    if (&value != this) {
-      value_ = JS_DupValue(ctx_, value.value_);
-    }
-    ctx_ = value.ctx_;
-    return *this;
-  }
+  ScriptValue(ScriptValue&& value) noexcept;
+  ScriptValue& operator=(ScriptValue&& value) noexcept;
 
   ~ScriptValue() { JS_FreeValue(ctx_, value_); };
 
-  JSValue ToQuickJS() const;
+  JSValue QJSValue() const;
   // Create a new ScriptValue from call JSON.stringify to current value.
-  ScriptValue ToJSONStringify(ExceptionState* exception);
-  std::unique_ptr<NativeString> toNativeString();
-  std::string toCString();
+  ScriptValue ToJSONStringify(ExceptionState* exception) const;
+  AtomicString ToString() const;
 
   bool IsException();
   bool IsEmpty();
+  bool IsObject();
+  bool IsString();
 
   void Trace(GCVisitor* visitor);
 

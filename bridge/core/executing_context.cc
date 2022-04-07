@@ -171,7 +171,7 @@ bool ExecutingContext::HandleException(JSValue* exc) {
 }
 
 bool ExecutingContext::HandleException(ScriptValue* exc) {
-  JSValue value = exc->ToQuickJS();
+  JSValue value = exc->QJSValue();
   return HandleException(&value);
 }
 

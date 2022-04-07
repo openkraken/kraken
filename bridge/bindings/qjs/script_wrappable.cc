@@ -25,7 +25,7 @@ void ScriptWrappable::InitializeQuickJSObject() {
   auto* wrapperTypeInfo = GetWrapperTypeInfo();
   JSRuntime* runtime = runtime_;
 
-  /// ClassId should be a static ToQuickJS to make sure JSClassDef when this class are created at the first class.
+  /// ClassId should be a static QJSValue to make sure JSClassDef when this class are created at the first class.
   if (!JS_HasClassId(runtime, wrapperTypeInfo->classId)) {
     /// Basic template to describe the behavior about this class.
     JSClassDef def{};

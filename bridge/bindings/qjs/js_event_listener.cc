@@ -21,7 +21,7 @@ void JSEventListener::InvokeInternal(EventTarget& event_target, Event& event, Ex
   ScriptValue result =
       event_listener_->Invoke(event.ctx(), ScriptValue(event_target.ctx(), event_target.ToQuickJS()), 1, arguments);
   if (result.IsException()) {
-    exception_state.ThrowException(event.ctx(), result.ToQuickJS());
+    exception_state.ThrowException(event.ctx(), result.QJSValue());
     return;
   }
 }

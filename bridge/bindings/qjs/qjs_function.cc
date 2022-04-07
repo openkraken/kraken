@@ -19,10 +19,10 @@ ScriptValue QJSFunction::Invoke(JSContext* ctx, const ScriptValue& this_val, int
   JSValue argv[std::max(1, argc)];
 
   for (int i = 0; i < argc; i++) {
-    argv[0 + i] = arguments[i].ToQuickJS();
+    argv[0 + i] = arguments[i].QJSValue();
   }
 
-  JSValue returnValue = JS_Call(ctx, function_, this_val.ToQuickJS(), argc, argv);
+  JSValue returnValue = JS_Call(ctx, function_, this_val.QJSValue(), argc, argv);
 
   // Free the previous duplicated function.
   JS_FreeValue(ctx, function_);

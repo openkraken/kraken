@@ -31,7 +31,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
   JSContext* ctx = moduleContext->context->ctx();
 
   if (errmsg != nullptr) {
-    ScriptValue errorObject = ScriptValue::createErrorObject(ctx, errmsg);
+    ScriptValue errorObject = ScriptValue::CreateErrorObject(ctx, errmsg);
     ScriptValue arguments[] = {errorObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, ScriptValue::Empty(ctx), 1, arguments);
     if (returnValue.IsException()) {
@@ -40,7 +40,7 @@ void handleInvokeModuleTransientCallback(void* ptr, int32_t contextId, const cha
   } else {
     std::u16string argumentString = std::u16string(reinterpret_cast<const char16_t*>(json->string()), json->length());
     std::string utf8Arguments = toUTF8(argumentString);
-    ScriptValue jsonObject = ScriptValue::createJSONObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
+    ScriptValue jsonObject = ScriptValue::CreateJsonObject(ctx, utf8Arguments.c_str(), utf8Arguments.size());
     ScriptValue arguments[] = {jsonObject};
     ScriptValue returnValue = moduleContext->callback->value()->Invoke(ctx, ScriptValue::Empty(ctx), 1, arguments);
     if (returnValue.IsException()) {
@@ -85,7 +85,7 @@ AtomicString ModuleManager::__kraken_invoke_module__(ExecutingContext* context,
                                                      ExceptionState& exception) {
   std::unique_ptr<NativeString> params;
   if (!paramsValue.IsEmpty()) {
-    params = paramsValue.ToJSONStringify(&exception).toNativeString();
+    params = paramsValue.ToJSONStringify(&exception).ToString().ToNativeString();
     if (exception.HasException()) {
       return AtomicString::Empty(context->ctx());
     }
