@@ -10,6 +10,7 @@
 #include "node_data.h"
 #include "node_list.h"
 #include "attr.h"
+#include "character_data.h"
 
 namespace kraken {
 
@@ -143,17 +144,32 @@ bool Node::isEqualNode(Node* other) const {
   if (other_child)
     return false;
 
-  if (const auto* document_type_this = DynamicTo<DocumentType>(this)) {
-    const auto* document_type_other = To<DocumentType>(other);
-
-    if (document_type_this->publicId() != document_type_other->publicId())
-      return false;
-
-    if (document_type_this->systemId() != document_type_other->systemId())
-      return false;
-  }
-
   return true;
+}
+
+std::string Node::textContent(bool convert_brs_to_newlines) const {
+  // This covers ProcessingInstruction and Comment that should return their
+  // value when .textContent is accessed on them, but should be ignored when
+  // iterated over as a descendant of a ContainerNode.
+  if (auto* character_data = DynamicTo<CharacterData>(this))
+    return character_data->data();
+
+  // Attribute nodes have their attribute values as textContent.
+  if (auto* attr = DynamicTo<Attr>(this))
+    return attr->value();
+
+  // Documents and non-container nodes (that are not CharacterData)
+  // have null textContent.
+  if (IsDocumentNode() || !IsContainerNode())
+    return "";
+
+  std::string content;
+  for (const Node& node : NodeTraversal::InclusiveDescendantsOf(*this)) {
+    if (auto* text_node = DynamicTo<Text>(node)) {
+      content += (text_node->data());
+    }
+  }
+  return content.ReleaseString();
 }
 
 Node::Node(Document* document, ConstructionType type)

@@ -63,6 +63,7 @@ class Node : public EventTarget {
   virtual std::string nodeValue() const;
   virtual void setNodeValue(const std::string&, ExceptionState&);
   virtual NodeType getNodeType() const = 0;
+
   ContainerNode* parentNode() const;
   Element* parentElement() const;
   Node* previousSibling() const { return previous_; }
@@ -109,7 +110,7 @@ class Node : public EventTarget {
   bool isEqualNode(Node*) const;
   bool isSameNode(const Node* other) const { return this == other; }
 
-  AtomicString textContent(bool convert_brs_to_newlines = false) const;
+  std::string textContent(bool convert_brs_to_newlines = false) const;
   virtual void setTextContent(const AtomicString&);
 
   // Other methods (not part of DOM)
