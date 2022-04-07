@@ -6,8 +6,8 @@
 #define KRAKENBRIDGE_CORE_DOM_COLLECTION_INDEX_CACHE_H_
 
 #include <climits>
-#include "foundation/macros.h"
 #include "bindings/qjs/gc_visitor.h"
+#include "foundation/macros.h"
 
 namespace kraken {
 

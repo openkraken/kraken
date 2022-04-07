@@ -15,6 +15,7 @@ class Document;
 
 class Attr : public Node {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   Attr(Element& element, const AtomicString& name);
   Attr(Document& document, const AtomicString& name, const AtomicString& value);
@@ -41,7 +42,6 @@ class Attr : public Node {
 
   const AtomicString& localName() const { return name_; }
 
-
  private:
   bool IsElementNode() const = delete;  // This will catch anyone doing an unnecessary check.
 
@@ -50,8 +50,7 @@ class Attr : public Node {
 
   std::string nodeValue() const override { return value().ToStdString(); }
   void setNodeValue(const std::string& node_value, ExceptionState& exception_state) override;
-  void setTextContentForBinding(const V8UnionStringOrTrustedScript* value,
-                                ExceptionState& exception_state) override;
+  void setTextContentForBinding(const V8UnionStringOrTrustedScript* value, ExceptionState& exception_state) override;
   Node* Clone(Document&, CloneChildrenFlag) const override;
 
   bool IsAttributeNode() const override { return true; }
@@ -60,6 +59,6 @@ class Attr : public Node {
   AtomicString name_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_ATTR_H_

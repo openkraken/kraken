@@ -3,8 +3,8 @@
  */
 
 #include "container_node.h"
-#include "document_fragment.h"
 #include "bindings/qjs/garbage_collected.h"
+#include "document_fragment.h"
 
 namespace kraken {
 
@@ -23,12 +23,9 @@ inline void GetChildNodes(ContainerNode& node, NodeVector& nodes) {
     nodes.push_back(child);
 }
 
-
 class ContainerNode::AdoptAndInsertBefore {
  public:
-  inline void operator()(ContainerNode& container,
-                         Node& child,
-                         Node* next) const {
+  inline void operator()(ContainerNode& container, Node& child, Node* next) const {
     assert(next);
     assert(next->parentNode() == &container);
     container.InsertBeforeCommon(*next, child);
@@ -37,9 +34,7 @@ class ContainerNode::AdoptAndInsertBefore {
 
 class ContainerNode::AdoptAndAppendChild {
  public:
-  inline void operator()(ContainerNode& container, Node& child, Node*) const {
-    container.AppendChildCommon(child);
-  }
+  inline void operator()(ContainerNode& container, Node& child, Node*) const { container.AppendChildCommon(child); }
 };
 
 bool ContainerNode::IsChildTypeAllowed(const Node& child) const {
@@ -47,8 +42,7 @@ bool ContainerNode::IsChildTypeAllowed(const Node& child) const {
   if (!child_fragment)
     return ChildTypeAllowed(child.getNodeType());
 
-  for (Node* node = child_fragment->firstChild(); node;
-       node = node->nextSibling()) {
+  for (Node* node = child_fragment->firstChild(); node; node = node->nextSibling()) {
     if (!ChildTypeAllowed(node->getNodeType()))
       return false;
   }
@@ -58,10 +52,9 @@ bool ContainerNode::IsChildTypeAllowed(const Node& child) const {
 // This dispatches various events; DOM mutation events, blur events, IFRAME
 // unload events, etc.
 // Returns true if DOM mutation should be proceeded.
-static inline bool CollectChildrenAndRemoveFromOldParent(
-    Node& node,
-    NodeVector& nodes,
-    ExceptionState& exception_state) {
+static inline bool CollectChildrenAndRemoveFromOldParent(Node& node,
+                                                         NodeVector& nodes,
+                                                         ExceptionState& exception_state) {
   if (auto* fragment = DynamicTo<DocumentFragment>(node)) {
     GetChildNodes(*fragment, nodes);
     fragment->RemoveChildren();
@@ -82,8 +75,7 @@ Node* ContainerNode::InsertBefore(Node* new_child, Node* ref_child, ExceptionSta
     return AppendChild(new_child, exception_state);
 
   // 1. Ensure pre-insertion validity of node into parent before child.
-  if (!EnsurePreInsertionValidity(*new_child, ref_child, nullptr,
-                                  exception_state))
+  if (!EnsurePreInsertionValidity(*new_child, ref_child, nullptr, exception_state))
     return new_child;
 
   // 2. Let reference child be child.
@@ -97,8 +89,7 @@ Node* ContainerNode::InsertBefore(Node* new_child, Node* ref_child, ExceptionSta
   // 4. Adopt node into parent’s node document.
   NodeVector targets;
   targets.reserve(kInitialNodeVectorSize);
-  if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets,
-                                             exception_state))
+  if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets, exception_state))
     return new_child;
 
   // 5. Insert node into parent before reference child.
@@ -117,8 +108,7 @@ Node* ContainerNode::ReplaceChild(Node* new_child, Node* old_child, ExceptionSta
   }
 
   // Step 2 to 6.
-  if (!EnsurePreInsertionValidity(*new_child, nullptr, old_child,
-                                  exception_state))
+  if (!EnsurePreInsertionValidity(*new_child, nullptr, old_child, exception_state))
     return old_child;
 
   // 7. Let reference child be child’s next sibling.
@@ -159,18 +149,15 @@ Node* ContainerNode::ReplaceChild(Node* new_child, Node* old_child, ExceptionSta
 
     // 13. Let nodes be node’s children if node is a DocumentFragment node, and
     // a list containing solely node otherwise.
-    if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets,
-                                               exception_state))
+    if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets, exception_state))
       return old_child;
     // 10. Adopt node into parent’s node document.
     // 14. Insert node into parent before reference child with the suppress
     // observers flag set.
     if (next) {
-      InsertNodeVector(targets, next, AdoptAndInsertBefore(),
-                       &post_insertion_notification_targets);
+      InsertNodeVector(targets, next, AdoptAndInsertBefore(), &post_insertion_notification_targets);
     } else {
-      InsertNodeVector(targets, nullptr, AdoptAndAppendChild(),
-                       &post_insertion_notification_targets);
+      InsertNodeVector(targets, nullptr, AdoptAndAppendChild(), &post_insertion_notification_targets);
     }
   }
   DidInsertNodeVector(targets, next, post_insertion_notification_targets);
@@ -191,9 +178,10 @@ Node* ContainerNode::RemoveChild(Node* old_child, ExceptionState& exception_stat
   // Events fired when blurring currently focused node might have moved this
   // child into a different parent.
   if (child->parentNode() != this) {
-    exception_state.ThrowException(ctx(), ErrorType::TypeError, "The node to be removed is no longer a "
-                                                              "child of this node. Perhaps it was moved "
-                                                              "in a 'blur' event handler?");
+    exception_state.ThrowException(ctx(), ErrorType::TypeError,
+                                   "The node to be removed is no longer a "
+                                   "child of this node. Perhaps it was moved "
+                                   "in a 'blur' event handler?");
     return nullptr;
   }
 
@@ -206,8 +194,7 @@ Node* ContainerNode::RemoveChild(Node* old_child, ExceptionState& exception_stat
       RemoveBetween(prev, next, *child);
       NotifyNodeRemoved(*child);
     }
-    ChildrenChanged(ChildrenChange::ForRemoval(*child, prev, next,
-                                               ChildrenChangeSource::kAPI));
+    ChildrenChanged(ChildrenChange::ForRemoval(*child, prev, next, ChildrenChangeSource::kAPI));
   }
   return child;
 }
@@ -215,22 +202,17 @@ Node* ContainerNode::RemoveChild(Node* old_child, ExceptionState& exception_stat
 Node* ContainerNode::AppendChild(Node* new_child, ExceptionState& exception_state) {
   assert(new_child);
   // Make sure adding the new child is ok
-  if (!EnsurePreInsertionValidity(*new_child, nullptr, nullptr,
-                                  exception_state))
+  if (!EnsurePreInsertionValidity(*new_child, nullptr, nullptr, exception_state))
     return new_child;
 
   NodeVector targets;
   targets.reserve(kInitialNodeVectorSize);
-  if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets,
-                                             exception_state))
+  if (!CollectChildrenAndRemoveFromOldParent(*new_child, targets, exception_state))
     return new_child;
 
   NodeVector post_insertion_notification_targets;
   post_insertion_notification_targets.reserve(kInitialNodeVectorSize);
-  {
-    InsertNodeVector(targets, nullptr, AdoptAndAppendChild(),
-                     &post_insertion_notification_targets);
-  }
+  { InsertNodeVector(targets, nullptr, AdoptAndAppendChild(), &post_insertion_notification_targets); }
   DidInsertNodeVector(targets, nullptr, post_insertion_notification_targets);
   return new_child;
 }
@@ -242,8 +224,7 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
   assert(!(next && old_child));
 
   // Use common case fast path if possible.
-  if ((new_child.IsElementNode() || new_child.IsTextNode()) &&
-      IsElementNode()) {
+  if ((new_child.IsElementNode() || new_child.IsTextNode()) && IsElementNode()) {
     DCHECK(IsChildTypeAllowed(new_child));
     // 2. If node is a host-including inclusive ancestor of parent, throw a
     // HierarchyRequestError.
@@ -258,9 +239,8 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
   // corruption.
   DCHECK(!new_child.IsPseudoElement());
   if (new_child.IsPseudoElement()) {
-    exception_state.ThrowDOMException(
-        DOMExceptionCode::kHierarchyRequestError,
-        "The new child element is a pseudo-element.");
+    exception_state.ThrowDOMException(DOMExceptionCode::kHierarchyRequestError,
+                                      "The new child element is a pseudo-element.");
     return false;
   }
 
@@ -270,8 +250,7 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
     if (!CheckReferenceChildParent(*this, next, old_child, exception_state))
       return false;
     // Step 4-6.
-    return document->CanAcceptChild(new_child, next, old_child,
-                                    exception_state);
+    return document->CanAcceptChild(new_child, next, old_child, exception_state);
   }
 
   // 2. If node is a host-including inclusive ancestor of parent, throw a
@@ -291,8 +270,7 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
   if (!IsChildTypeAllowed(new_child)) {
     exception_state.ThrowDOMException(
         DOMExceptionCode::kHierarchyRequestError,
-        "Nodes of type '" + new_child.nodeName() +
-            "' may not be inserted inside nodes of type '" + nodeName() + "'.");
+        "Nodes of type '" + new_child.nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
     return false;
   }
 
@@ -308,10 +286,10 @@ void ContainerNode::RemoveChildren() {
   // and remove... e.g. stop loading frames, fire unload events.
   WillRemoveChildren();
 
-//  {
-//    // Removing a node from a selection can cause widget updates.
-//    GetDocument().NodeChildrenWillBeRemoved(*this);
-//  }
+  //  {
+  //    // Removing a node from a selection can cause widget updates.
+  //    GetDocument().NodeChildrenWillBeRemoved(*this);
+  //  }
 
   std::vector<Node*> removed_nodes;
   const bool children_changed = ChildrenChangedAllChildrenRemovedNeedsList();
@@ -337,6 +315,5 @@ void ContainerNode::RemoveChildren() {
 }
 
 ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document, type) {}
-
 
 }  // namespace kraken

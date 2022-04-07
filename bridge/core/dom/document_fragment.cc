@@ -8,11 +8,14 @@
 
 namespace kraken {
 
-DocumentFragment* DocumentFragment::Create(ExecutingContext* context, Document* document, ExceptionState& exception_state) {
+DocumentFragment* DocumentFragment::Create(ExecutingContext* context,
+                                           Document* document,
+                                           ExceptionState& exception_state) {
   return nullptr;
 }
 
-DocumentFragment::DocumentFragment(ExecutingContext* context, Document* document): ContainerNode(context, ConstructionType::kCreateDocumentFragment) {}
+DocumentFragment::DocumentFragment(ExecutingContext* context, Document* document)
+    : ContainerNode(context, ConstructionType::kCreateDocumentFragment) {}
 
 std::string DocumentFragment::nodeName() const {
   return "#document-fragment";

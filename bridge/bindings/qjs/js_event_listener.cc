@@ -16,12 +16,9 @@ JSValue JSEventListener::GetEffectiveFunction(EventTarget&) {
   return event_listener_->ToQuickJS();
 }
 void JSEventListener::InvokeInternal(EventTarget& event_target, Event& event, ExceptionState& exception_state) {
-  ScriptValue arguments[] = {
-    event.ToValue()
-  };
+  ScriptValue arguments[] = {event.ToValue()};
 
-  ScriptValue result =
-      event_listener_->Invoke(event.ctx(), event_target.ToValue(), 1, arguments);
+  ScriptValue result = event_listener_->Invoke(event.ctx(), event_target.ToValue(), 1, arguments);
   if (result.IsException()) {
     exception_state.ThrowException(event.ctx(), result.QJSValue());
     return;

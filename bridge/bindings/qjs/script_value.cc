@@ -58,7 +58,6 @@ ScriptValue& ScriptValue::operator=(ScriptValue&& value) noexcept {
   return *this;
 }
 
-
 JSValue ScriptValue::QJSValue() const {
   return value_;
 }
@@ -91,7 +90,6 @@ bool ScriptValue::IsEmpty() {
 bool ScriptValue::IsObject() {
   return JS_IsObject(value_);
 }
-
 
 bool ScriptValue::IsString() {
   return JS_IsString(value_);

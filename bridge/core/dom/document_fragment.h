@@ -12,6 +12,7 @@ namespace kraken {
 
 class DocumentFragment : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   static DocumentFragment* Create(ExecutingContext* context, Document* document, ExceptionState& exception_state);
 
@@ -30,7 +31,6 @@ class DocumentFragment : public ContainerNode {
   Node* Clone(Document&, CloneChildrenFlag) const override;
   bool ChildTypeAllowed(NodeType) const override;
 };
-
 
 }  // namespace kraken
 

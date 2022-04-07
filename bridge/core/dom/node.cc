@@ -3,14 +3,14 @@
  */
 
 #include "node.h"
+#include "attr.h"
+#include "character_data.h"
 #include "child_node_list.h"
 #include "document.h"
 #include "document_fragment.h"
 #include "empty_node_list.h"
 #include "node_data.h"
 #include "node_list.h"
-#include "attr.h"
-#include "character_data.h"
 
 namespace kraken {
 
@@ -177,8 +177,7 @@ Node::Node(Document* document, ConstructionType type)
       node_flags_(type),
       parent_or_shadow_host_node_(nullptr),
       previous_(nullptr),
-      next_(nullptr) {
-}
+      next_(nullptr) {}
 
 void Node::Trace(GCVisitor*) const {}
 

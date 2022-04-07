@@ -20,9 +20,7 @@ class QJSFunction {
   }
   explicit QJSFunction(JSContext* ctx, JSValue function) : ctx_(ctx), function_(JS_DupValue(ctx, function)){};
   // This safe to free function_ at GC stage.
-  ~QJSFunction() {
-    JS_FreeValue(ctx_, function_);
-  }
+  ~QJSFunction() { JS_FreeValue(ctx_, function_); }
 
   bool IsFunction(JSContext* ctx);
 

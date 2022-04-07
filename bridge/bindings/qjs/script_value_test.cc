@@ -2,10 +2,10 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-#include "atomic_string.h"
+#include "script_value.h"
 #include <quickjs/quickjs.h>
 #include <codecvt>
-#include "script_value.h"
+#include "atomic_string.h"
 #include "gtest/gtest.h"
 
 using namespace kraken;
@@ -21,7 +21,6 @@ void TestScriptValue(TestCallback callback) {
   JS_FreeContext(ctx);
   JS_FreeRuntime(runtime);
 }
-
 
 TEST(ScriptValue, createErrorObject) {
   TestScriptValue([](JSContext* ctx) {
@@ -63,7 +62,7 @@ TEST(ScriptValue, CopyAssignment) {
     };
     P p;
     p.value = json;
-    EXPECT_STREQ(p.value.ToJSONStringify(nullptr).ToString().ToStdString().c_str(),  code.c_str());
+    EXPECT_STREQ(p.value.ToJSONStringify(nullptr).ToString().ToStdString().c_str(), code.c_str());
   });
 }
 
@@ -75,6 +74,6 @@ TEST(ScriptValue, MoveAssignment) {
       other = ScriptValue::CreateJsonObject(ctx, code.c_str(), code.size());
     }
 
-    EXPECT_STREQ(other.ToJSONStringify(nullptr).ToString().ToStdString().c_str(),  "{\"name\":1}");
+    EXPECT_STREQ(other.ToJSONStringify(nullptr).ToString().ToStdString().c_str(), "{\"name\":1}");
   });
 }

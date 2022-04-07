@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #include "text.h"
@@ -22,4 +22,4 @@ Node* Text::Clone(Document& document, CloneChildrenFlag flag) const {
   return Create(document, data());
 }
 
-}
+}  // namespace kraken

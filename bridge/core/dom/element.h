@@ -22,20 +22,17 @@ struct NativeBoundingClientRect {
   double left;
 };
 
-//bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
+// bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue instance);
 
 class Element : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
-  Element(ExecutingContext* context, const AtomicString& tag_name,
-          Document*,
-          ConstructionType = kCreateElement);
+  Element(ExecutingContext* context, const AtomicString& tag_name, Document*, ConstructionType = kCreateElement);
 
   bool hasAttribute(const AtomicString&) const;
   const AtomicString& getAttribute(const AtomicString&) const;
-
 };
-
 
 }  // namespace kraken
 

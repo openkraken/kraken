@@ -11,6 +11,7 @@ namespace kraken {
 
 class Text : public CharacterData {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   static const unsigned kDefaultLengthLimit = 1 << 16;
 

@@ -100,8 +100,6 @@ void JSEventHandler::InvokeInternal(EventTarget& event_target, Event& event, Exc
   // TODO: special handling for beforeunload event and onerror event.
 }
 
-void JSEventHandler::Trace(GCVisitor* visitor) const {
-
-}
+void JSEventHandler::Trace(GCVisitor* visitor) const {}
 
 }  // namespace kraken

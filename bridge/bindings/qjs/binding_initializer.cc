@@ -7,10 +7,10 @@
 #include "core/executing_context.h"
 
 #include "qjs_console.h"
+#include "qjs_event.h"
+#include "qjs_event_target.h"
 #include "qjs_module_manager.h"
 #include "qjs_window.h"
-#include "qjs_event_target.h"
-#include "qjs_event.h"
 
 namespace kraken {
 

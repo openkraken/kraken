@@ -13,33 +13,26 @@ Node* ChildNodeList::VirtualOwnerNode() const {
   return &OwnerNode();
 }
 
-
 Node* ChildNodeList::item(unsigned index) const {
   return collection_index_cache_.NodeAt(*this, index);
 }
 
-Node* ChildNodeList::TraverseForwardToOffset(unsigned offset,
-                                             Node& current_node,
-                                             unsigned& current_offset) const {
+Node* ChildNodeList::TraverseForwardToOffset(unsigned offset, Node& current_node, unsigned& current_offset) const {
   assert(current_offset < offset);
   assert(OwnerNode().childNodes() == this);
   assert(&OwnerNode() == current_node.parentNode());
-  for (Node* next = current_node.nextSibling(); next;
-       next = next->nextSibling()) {
+  for (Node* next = current_node.nextSibling(); next; next = next->nextSibling()) {
     if (++current_offset == offset)
       return next;
   }
   return nullptr;
 }
 
-Node* ChildNodeList::TraverseBackwardToOffset(unsigned offset,
-                                              Node& current_node,
-                                              unsigned& current_offset) const {
+Node* ChildNodeList::TraverseBackwardToOffset(unsigned offset, Node& current_node, unsigned& current_offset) const {
   assert(current_offset > offset);
   assert(OwnerNode().childNodes() == this);
   assert(&OwnerNode() == current_node.parentNode());
-  for (Node* previous = current_node.previousSibling(); previous;
-       previous = previous->previousSibling()) {
+  for (Node* previous = current_node.previousSibling(); previous; previous = previous->previousSibling()) {
     if (--current_offset == offset)
       return previous;
   }
@@ -52,4 +45,4 @@ void ChildNodeList::Trace(GCVisitor* visitor) const {
   NodeList::Trace(visitor);
 }
 
-}
+}  // namespace kraken

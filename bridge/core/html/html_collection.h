@@ -11,11 +11,9 @@ namespace kraken {
 
 class HTMLCollection : public ScriptWrappable {
  public:
-
  private:
-
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_COLLECTION_H_

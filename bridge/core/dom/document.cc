@@ -5,8 +5,4 @@
 
 #include "document.h"
 
-namespace kraken {
-
-
-
-}  // namespace kraken
+namespace kraken {}  // namespace kraken

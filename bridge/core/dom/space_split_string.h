@@ -6,8 +6,8 @@
 #define KRAKENBRIDGE_CORE_DOM_SPACE_SPLIT_STRING_H_
 
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 #include "bindings/qjs/atomic_string.h"
 
 namespace kraken {
@@ -49,7 +49,9 @@ class SpaceSplitString {
 
     ~Data();
 
-    bool Contains(const AtomicString& string) const { return std::find(vector_.begin(), vector_.end(), string) != vector_.end(); }
+    bool Contains(const AtomicString& string) const {
+      return std::find(vector_.begin(), vector_.end(), string) != vector_.end();
+    }
 
     bool ContainsAll(Data&);
 
@@ -62,6 +64,7 @@ class SpaceSplitString {
     AtomicString& operator[](size_t i) { return vector_[i]; }
 
     explicit Data(const Data&);
+
    private:
     explicit Data(const AtomicString&);
 
@@ -75,8 +78,8 @@ class SpaceSplitString {
 
   // We can use a non-ref-counted StringImpl* as the key because the associated
   // Data object will keep it alive via the key_string_ member.
-   typedef std::unordered_map<JSAtom, Data*> DataMap;
-   static DataMap& SharedDataMap();
+  typedef std::unordered_map<JSAtom, Data*> DataMap;
+  static DataMap& SharedDataMap();
 
   void EnsureUnique() {
     if (data_ && !data_->IsUnique())

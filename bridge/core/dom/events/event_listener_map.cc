@@ -115,8 +115,8 @@ EventListenerVector* EventListenerMap::Find(const AtomicString& event_type) {
 }
 
 void EventListenerMap::Trace(GCVisitor* visitor) const {
-  for(const auto& entry: entries_) {
-    for(auto& listener : *entry.second) {
+  for (const auto& entry : entries_) {
+    for (auto& listener : *entry.second) {
       listener.Trace(visitor);
     }
   }

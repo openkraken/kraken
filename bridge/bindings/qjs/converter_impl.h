@@ -424,7 +424,7 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
   }
 };
 
-template<>
+template <>
 struct Converter<Node> : public ConverterBase<Node> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));

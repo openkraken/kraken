@@ -9,11 +9,11 @@
 #include <quickjs/quickjs.h>
 #include <memory>
 
+#include "atomic_string.h"
 #include "exception_state.h"
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "gc_visitor.h"
-#include "atomic_string.h"
 
 namespace kraken {
 

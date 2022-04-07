@@ -15,18 +15,18 @@ namespace kraken {
 // (typically, HTML) resource.
 class Document : public Node {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
  private:
-
 };
 
-//void bindDocument(ExecutionContext* context);
+// void bindDocument(ExecutionContext* context);
 //
-//using TraverseHandler = std::function<bool(Node*)>;
+// using TraverseHandler = std::function<bool(Node*)>;
 //
-//void traverseNode(Node* node, TraverseHandler handler);
+// void traverseNode(Node* node, TraverseHandler handler);
 //
-//class DocumentCookie {
+// class DocumentCookie {
 // public:
 //  DocumentCookie() = default;
 //
@@ -37,7 +37,7 @@ class Document : public Node {
 //  std::unordered_map<std::string, std::string> cookiePairs;
 //};
 
-//class Document : public Node {
+// class Document : public Node {
 // public:
 //  static JSClassID classId;
 //  static Document* create(JSContext* ctx);
@@ -87,7 +87,6 @@ class Document : public Node {
 //  bool document_registered{false};
 //  std::unordered_map<std::string, Element*> elementConstructorMap;
 //};
-
 
 }  // namespace kraken
 

@@ -25,7 +25,12 @@ Event* Event::From(ExecutingContext* context, NativeEvent* native_event) {
 Event::Event(ExecutingContext* context) : Event(context, AtomicString::Empty(context->ctx())) {}
 
 Event::Event(ExecutingContext* context, const AtomicString& event_type)
-    : Event(context, event_type, Bubbles::kNo, Cancelable::kNo, ComposedMode::kComposed, std::chrono::system_clock::now().time_since_epoch().count()) {}
+    : Event(context,
+            event_type,
+            Bubbles::kNo,
+            Cancelable::kNo,
+            ComposedMode::kComposed,
+            std::chrono::system_clock::now().time_since_epoch().count()) {}
 
 Event::Event(ExecutingContext* context, const AtomicString& type, const std::shared_ptr<EventInit>& init)
     : ScriptWrappable(context->ctx()),
@@ -114,7 +119,6 @@ void Event::SetHandlingPassive(PassiveMode mode) {
   handling_passive_ = mode;
 }
 
-void Event::Trace(GCVisitor* visitor) const {
-}
+void Event::Trace(GCVisitor* visitor) const {}
 
 }  // namespace kraken
