@@ -42,7 +42,8 @@ Only flutter stable released version are fully tested.
 | ------------- | ------------- |
 | >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
 | >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3 |
-| >= 0.10.0 < 0.12.0 | 2.5.0 ~ 2.5.3 |
+| >= 0.10.0 < 0.11.0 | 2.5.0 ~ 2.5.3 |
+| >= 0.11.0 | 2.8.0 ~ 2.8.1 |
 
 
 ## 👏 Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
