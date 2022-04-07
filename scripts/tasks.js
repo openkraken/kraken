@@ -818,7 +818,7 @@ task('run-benchmark', async (done) => {
   const childProcess = spawn('http-server', ['./', '-p 7878'], {
     stdio: 'pipe',
     cwd: path.join(paths.performanceTests, '/benchmark/build')
-  });
+  })
 
   let serverIpAddress;
   let interfaces = os.networkInterfaces();
@@ -866,13 +866,7 @@ task('run-benchmark', async (done) => {
     }
   }
   
-  
-  
-  
-  console.log('infos2=', infos)
-
-
-  //execSync('adb uninstall com.example.performance_tests');
+  execSync('adb uninstall com.example.performance_tests');
   
   done();
 });
