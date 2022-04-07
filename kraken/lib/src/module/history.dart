@@ -7,7 +7,6 @@ import 'dart:async';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 
 class HistoryItem {
   HistoryItem(this.bundle, this.state, this.needJump);

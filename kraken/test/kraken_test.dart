@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/kraken.dart';
 
 import 'local_http_server.dart';

@@ -324,8 +324,7 @@ class CSSPositionedLayout {
     if (child.hasSize &&
       !needsRelayout &&
       (childConstraints == child.constraints) &&
-      ((child is RenderBoxModel && !child.needsLayout) ||
-        (child is RenderTextBox && !child.needsLayout))
+      (!child.needsLayout)
     ) {
       isChildNeedsLayout = false;
     }

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
 import 'package:kraken/kraken.dart';
 
 // Children of the <head> element all have display:none

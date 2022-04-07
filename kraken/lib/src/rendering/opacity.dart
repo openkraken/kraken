@@ -3,7 +3,6 @@
  */
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 mixin RenderOpacityMixin on RenderBox {

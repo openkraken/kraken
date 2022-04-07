@@ -2,15 +2,11 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/dom.dart' as dom;
-import 'package:kraken/foundation.dart';
-
-import 'element_to_widget_adaptor.dart';
 
 class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.

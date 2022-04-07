@@ -4,7 +4,6 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/gesture.dart';
 
 const String DIRECTION_UP = 'up';
 const String DIRECTION_DOWN = 'down';
@@ -167,7 +166,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
 
     return ((_direction == DIRECTION_LEFT || _direction == DIRECTION_RIGHT) && (estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance)
     || (_direction == DIRECTION_UP || _direction == DIRECTION_DOWN) && (estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance));

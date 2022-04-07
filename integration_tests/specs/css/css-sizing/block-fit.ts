@@ -52,6 +52,6 @@ describe('block-fit', () => {
     );
     BODY.appendChild(parent);
 
-    await snapshot();
+    await snapshot(0.2);
   });
 });
