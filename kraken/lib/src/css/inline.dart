@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 
@@ -26,9 +25,9 @@ enum VerticalAlign {
 
 mixin CSSInlineMixin on RenderStyle {
   @override
-  VerticalAlign get verticalAlign => _verticalAlign;
-  VerticalAlign _verticalAlign = VerticalAlign.baseline;
-  set verticalAlign(VerticalAlign value) {
+  VerticalAlign get verticalAlign => _verticalAlign ?? VerticalAlign.baseline;
+  VerticalAlign? _verticalAlign;
+  set verticalAlign(VerticalAlign? value) {
     if (_verticalAlign != value) {
       _verticalAlign = value;
       renderBoxModel?.markNeedsLayout();

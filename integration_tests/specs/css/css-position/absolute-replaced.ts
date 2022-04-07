@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('absolute-replaced', () => {
-  xit('height-001-ref', async () => {
+  it('height-001-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -43,9 +43,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-001', async () => {
+  it('height-001', async () => {
     let p;
     let div;
     p = createElement(
@@ -98,7 +98,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-002-ref', async () => {
     let p;
@@ -155,7 +155,7 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('height-002', async () => {
+  it('height-002', async () => {
     let p;
     let div;
     p = createElement(
@@ -216,9 +216,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-003', async () => {
+  it('height-003', async () => {
     let p;
     let div;
     p = createElement(
@@ -279,7 +279,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-004-ref', async () => {
     let p;
@@ -315,6 +315,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-004', async () => {
     let p;
     let div;
@@ -410,6 +412,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-005', async () => {
     let p;
     let div1;
@@ -557,6 +561,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-007', async () => {
     let p;
     let div1;
@@ -656,7 +662,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
-  xit('height-008', async () => {
+  it('height-008', async () => {
     let p;
     let div1;
     p = createElement(
@@ -715,9 +721,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-009', async () => {
+  it('height-009', async () => {
     let p;
     let div1;
     p = createElement(
@@ -774,7 +780,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-010-ref', async () => {
     let p;
@@ -815,7 +821,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
-  xit('height-010', async () => {
+  it('height-010', async () => {
     let p;
     let div1;
     p = createElement(
@@ -872,7 +878,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('height-011-ref', async () => {
     let p;
@@ -909,6 +915,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-011', async () => {
     let p;
     let div;
@@ -1007,6 +1015,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-012', async () => {
     let p;
     let div1;
@@ -1072,6 +1082,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
   it('height-013-ref', async () => {
     let p;
     let div;
@@ -1164,6 +1175,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-014', async () => {
     let p;
     let containingBlock;
@@ -1227,7 +1240,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
-  xit('height-016', async () => {
+  it('height-016', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1284,9 +1297,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-017', async () => {
+  it('height-017', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1343,8 +1356,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-018', async () => {
     let p;
     let div;
@@ -1408,6 +1423,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-019', async () => {
     let p;
     let div1;
@@ -1473,6 +1490,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-021', async () => {
     let p;
     let containingBlock;
@@ -1595,7 +1614,7 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('height-023', async () => {
+  it('height-023', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1654,9 +1673,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-024', async () => {
+  it('height-024', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1715,8 +1734,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-025', async () => {
     let p;
     let div;
@@ -1782,6 +1803,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-026', async () => {
     let p;
     let div1;
@@ -1849,6 +1872,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-028', async () => {
     let p;
     let div1;
@@ -1973,7 +1998,7 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('height-030', async () => {
+  it('height-030', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2032,9 +2057,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-031', async () => {
+  it('height-031', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2093,8 +2118,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-032', async () => {
     let p;
     let div;
@@ -2160,6 +2187,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-033', async () => {
     let p;
     let div1;
@@ -2227,6 +2256,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: iframe element not config default width/height.
   xit('height-035', async () => {
     let p;
     let div1;
@@ -2292,6 +2323,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin auto fail on position absolute element.
   xit('height-036', async () => {
     let p;
     let abspos;
@@ -2408,7 +2441,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(container);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-001-ref', async () => {
     let p;
@@ -2717,7 +2750,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
-  xit('width-004-ref', async () => {
+  it('width-004-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -2768,7 +2801,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-006-ref', async () => {
     let p;
@@ -2821,7 +2854,7 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('width-006', async () => {
+  it('width-006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2877,9 +2910,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('width-008', async () => {
+  it('width-008', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2936,9 +2969,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('width-013', async () => {
+  it('width-013', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2997,9 +3030,9 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('width-015-ref', async () => {
+  it('width-015-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -3048,8 +3081,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-015', async () => {
     let p;
     let div1;
@@ -3165,6 +3200,8 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-020', async () => {
     let p;
     let div1;
@@ -3556,7 +3593,7 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('width-027', async () => {
+  it('width-027', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3616,8 +3653,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-029', async () => {
     let p;
     let div1;
@@ -3679,6 +3718,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('width-034', async () => {
     let p;
     let div1;
@@ -4058,7 +4099,8 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('width-041', async () => {
+
+  it('width-041', async () => {
     let p;
     let div1;
     p = createElement(
@@ -4129,7 +4171,7 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('width-043', async () => {
     let p;
@@ -4203,6 +4245,8 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-048', async () => {
     let p;
     let div1;
@@ -4348,7 +4392,8 @@ describe('absolute-replaced', () => {
 
     await snapshot(0.1);
   });
-  xit('width-055', async () => {
+
+  it('width-055', async () => {
     let p;
     let div1;
     p = createElement(
@@ -4419,8 +4464,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-057', async () => {
     let p;
     let div1;
@@ -4493,6 +4540,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('width-062', async () => {
     let p;
     let div1;
@@ -4566,7 +4615,7 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
-  xit('width-064', async () => {
+  it('width-064', async () => {
     let p;
     let div1;
     p = createElement(
@@ -4636,8 +4685,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('width-069', async () => {
     let p;
     let div1;
@@ -4709,8 +4760,10 @@ describe('absolute-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div1);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Offset of position absolute element with left,right, margin-left, margin-right wrong.
   xit('width-071', async () => {
     let p;
     let div1;
@@ -4783,6 +4836,8 @@ describe('absolute-replaced', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('width-076', async () => {
     let p;
     let div1;

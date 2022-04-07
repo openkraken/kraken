@@ -15,6 +15,8 @@ describe('normalization-linear', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-linear-gradient with percentage impl differs from browser.
   xit('degenerate', async () => {
     let gradient;
     gradient = createElement('div', {

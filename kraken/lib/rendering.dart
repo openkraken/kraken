@@ -1,8 +1,7 @@
 
 
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 export 'src/rendering/box_decoration.dart';
@@ -13,10 +12,11 @@ export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';
 export 'src/rendering/intersection_observer.dart';
 export 'src/rendering/box_model.dart';
-export 'src/rendering/intrinsic.dart';
+export 'src/rendering/replaced.dart';
 export 'src/rendering/sliver_list.dart';
 export 'src/rendering/preferred_size.dart';
 export 'src/rendering/text.dart';
+export 'src/rendering/text_control.dart';
 export 'src/rendering/content_visibility.dart';
 export 'src/rendering/event.dart';
 export 'src/rendering/opacity.dart';

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKEN_DEVTOOLS_KRAKEN_DEVTOOLS_H

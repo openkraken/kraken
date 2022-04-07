@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #include "kraken_test_env.h"
@@ -301,8 +300,6 @@ void TEST_mockDartMethods(OnJSError onJSError) {
       reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
       reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
       reinterpret_cast<uint64_t>(TEST_getScreen),
-      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
-      reinterpret_cast<uint64_t>(TEST_platformBrightness),
       reinterpret_cast<uint64_t>(TEST_toBlob),
       reinterpret_cast<uint64_t>(TEST_flushUICommand),
       reinterpret_cast<uint64_t>(TEST_initWindow),

@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyBrowser> {
               _kraken?.load(KrakenBundle.fromUrl(value));
             },
             decoration: InputDecoration(
-              hintText: 'Enter a app url',
+              hintText: 'Enter URL',
               hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
               contentPadding: const EdgeInsets.all(10.0),
               filled: true,

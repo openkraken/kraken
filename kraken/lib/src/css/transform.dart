@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
@@ -8,12 +7,11 @@ import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+const Offset _DEFAULT_TRANSFORM_OFFSET = Offset.zero;
+const Alignment _DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
+
 // CSS Transforms: https://drafts.csswg.org/css-transforms/
 mixin CSSTransformMixin on RenderStyle {
-
-  static Offset DEFAULT_TRANSFORM_OFFSET = Offset.zero;
-  static Alignment DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
-
   // https://drafts.csswg.org/css-transforms-1/#propdef-transform
   // Name: transform
   // Value: none | <transform-list>
@@ -71,7 +69,7 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   Offset get transformOffset => _transformOffset;
-  Offset _transformOffset = DEFAULT_TRANSFORM_OFFSET;
+  Offset _transformOffset = _DEFAULT_TRANSFORM_OFFSET;
   set transformOffset(Offset value) {
     if (_transformOffset == value) return;
     _transformOffset = value;
@@ -79,7 +77,7 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   Alignment get transformAlignment => _transformAlignment;
-  Alignment _transformAlignment = DEFAULT_TRANSFORM_ALIGNMENT;
+  Alignment _transformAlignment = _DEFAULT_TRANSFORM_ALIGNMENT;
   set transformAlignment(Alignment value) {
     if (_transformAlignment == value) return;
     _transformAlignment = value;
@@ -87,21 +85,19 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   CSSOrigin? _transformOrigin;
-  CSSOrigin? get transformOrigin => _transformOrigin;
+  CSSOrigin get transformOrigin => _transformOrigin ?? const CSSOrigin(_DEFAULT_TRANSFORM_OFFSET, _DEFAULT_TRANSFORM_ALIGNMENT);
   set transformOrigin(CSSOrigin? value) {
-
     if (_transformOrigin == value) return;
     _transformOrigin = value;
 
-    if (value == null) return;
     Offset oldOffset = transformOffset;
-    Offset offset = value.offset;
+    Offset offset = transformOrigin.offset;
     // Transform origin transition by offset
     if (offset.dx != oldOffset.dx || offset.dy != oldOffset.dy) {
       transformOffset = offset;
     }
 
-    Alignment alignment = value.alignment;
+    Alignment alignment = transformOrigin.alignment;
     Alignment oldAlignment = transformAlignment;
     // Transform origin transition by alignment
     if (alignment.x != oldAlignment.x || alignment.y != oldAlignment.y) {

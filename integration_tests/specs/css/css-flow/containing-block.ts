@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('containing-block', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let div1;
     p = createElement(
@@ -93,7 +93,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let div1;
     p = createElement(
@@ -149,7 +149,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -279,7 +279,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('008-ref', async () => {
+  it('008-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -783,6 +783,8 @@ describe('containing-block', () => {
 
     await snapshot();
   });
+
+  // @TODO: Height of display: inline element is wrong.
   xit('017', async () => {
     let p;
     let tlControl;
@@ -914,9 +916,6 @@ describe('containing-block', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
-  });
-  xit('018', async () => {
     await snapshot();
   });
   it('019-ref', async () => {
@@ -1543,7 +1542,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-margin-bottom', async () => {
+  it('percent-margin-bottom', async () => {
     let p;
     let container;
     p = createElement(
@@ -1583,7 +1582,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-margin-left', async () => {
+  it('percent-margin-left', async () => {
     let p;
     let container;
     p = createElement(
@@ -1622,7 +1621,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-margin-right', async () => {
+  it('percent-margin-right', async () => {
     let p;
     let container;
     p = createElement(
@@ -1661,7 +1660,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-margin-top', async () => {
+  it('percent-margin-top', async () => {
     let p;
     let container;
     p = createElement(
@@ -1701,7 +1700,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-padding-bottom', async () => {
+  it('percent-padding-bottom', async () => {
     let p;
     let container;
     p = createElement(
@@ -1741,7 +1740,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-padding-left', async () => {
+  it('percent-padding-left', async () => {
     let p;
     let container;
     p = createElement(
@@ -1781,7 +1780,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-padding-right', async () => {
+  it('percent-padding-right', async () => {
     let p;
     let container;
     p = createElement(
@@ -1821,7 +1820,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('percent-padding-top', async () => {
+  it('percent-padding-top', async () => {
     let p;
     let container;
     p = createElement(

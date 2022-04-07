@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 
@@ -11,7 +10,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:kraken/foundation.dart';
 
 class CachedNetworkImageKey {
@@ -136,51 +134,6 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
       scale: scale
     ));
   }
-
-  @override
-  void resolveStreamForKey(
-    ImageConfiguration configuration,
-    ImageStream stream,
-    CachedNetworkImageKey key,
-    ImageErrorListener handleError,
-  ) {
-    // Something managed to complete the stream, or it's already in the image
-    // cache. Notify the wrapped provider and expect it to behave by not
-    // reloading the image since it's already resolved.
-    // Do this even if the context has gone out of the tree, since it will
-    // update LRU information about the cache. Even though we never showed the
-    // image, it was still touched more recently.
-    // Do this before checking scrolling, so that if the bytes are available we
-    // render them even though we're scrolling fast - there's no additional
-    // allocations to do for texture memory, it's already there.
-    if (stream.completer != null || PaintingBinding.instance!.imageCache!.containsKey(key)) {
-      super.resolveStreamForKey(configuration, stream, key, handleError);
-      return;
-    }
-    // Something still wants this image, but check if the context is scrolling
-    // too fast before scheduling work that might never show on screen.
-    // Try to get to end of the frame callbacks of the next frame, and then
-    // check again.
-    if (_recommendDeferredLoading()) {
-      // @TODO!
-      count++;
-      print('delay $count');
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
-      });
-      return;
-    }
-    // We are in the tree, we're not scrolling too fast, the cache doesn't
-    // have our image, and no one has otherwise completed the stream.  Go.
-    super.resolveStreamForKey(configuration, stream, key, handleError);
-  }
-
-  // Return true if recommend deferred to load the file.
-  bool _recommendDeferredLoading() {
-    return false;
-  }
-
-  static int count = 0;
 
   @override
   ImageStreamCompleter load(CachedNetworkImageKey key, DecoderCallback decode) {

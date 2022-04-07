@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
@@ -24,8 +24,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-
-import 'bundle.dart';
 
 const int WINDOW_ID = -1;
 const int DOCUMENT_ID = -2;
@@ -162,6 +160,7 @@ class KrakenViewController
     window = Window(
         BindingContext(_contextId, windowNativePtrMap[_contextId]!),
         document);
+    _registerPlatformBrightnessChange();
     _setEventTarget(WINDOW_ID, window);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
@@ -187,7 +186,8 @@ class KrakenViewController
     // Blur input element when new input focused.
     window.addEventListener(EVENT_CLICK, (event) {
       if (event.target is Element) {
-        if (document.focusedElement != null) {
+        Element? focusedElement = document.focusedElement;
+        if (focusedElement != null && focusedElement != event.target) {
           document.focusedElement!.blur();
         }
         (event.target as Element).focus();
@@ -215,9 +215,9 @@ class KrakenViewController
   late Document document;
   late Window window;
 
-  void evaluateJavaScripts(String code, [String source = 'vm://']) {
+  void evaluateJavaScripts(String code) {
     assert(!_disposed, 'Kraken have already disposed');
-    evaluateScripts(_contextId, code, source);
+    evaluateScripts(_contextId, code);
   }
 
   void _setupObserver() {
@@ -253,6 +253,7 @@ class KrakenViewController
     debugDOMTreeChanged = null;
 
     _teardownObserver();
+    _unregisterPlatformBrightnessChange();
 
     // Should clear previous page cached ui commands
     clearUICommand(_contextId);
@@ -264,6 +265,25 @@ class KrakenViewController
     document.dispose();
     window.dispose();
     _disposed = true;
+  }
+
+  VoidCallback? _originalOnPlatformBrightnessChanged;
+
+  void _registerPlatformBrightnessChange() {
+    _originalOnPlatformBrightnessChanged = ui.window.onPlatformBrightnessChanged;
+    ui.window.onPlatformBrightnessChanged = _onPlatformBrightnessChanged;
+  }
+
+  void _unregisterPlatformBrightnessChange() {
+    ui.window.onPlatformBrightnessChanged = _originalOnPlatformBrightnessChanged;
+    _originalOnPlatformBrightnessChanged = null;
+  }
+
+  void _onPlatformBrightnessChanged() {
+    if (_originalOnPlatformBrightnessChanged != null) {
+      _originalOnPlatformBrightnessChanged!();
+    }
+    window.dispatchEvent(ColorSchemeChangeEvent(window.colorScheme));
   }
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
@@ -1054,8 +1074,9 @@ class KrakenController {
   }
 
   String? getResourceContent(String? url) {
-    if (url == this.url) {
-      return _entrypoint?.content;
+    KrakenBundle? entrypoint = _entrypoint;
+    if (url == this.url && entrypoint != null && entrypoint.isResolved) {
+      return utf8.decode(entrypoint.data!);
     }
   }
 
@@ -1129,8 +1150,8 @@ class KrakenController {
     }
 
     KrakenBundle? bundleToLoad = _entrypoint;
-    if (bundleToLoad == null || bundleToLoad.isEmpty) {
-      // Do nothing if bundle is empty.
+    if (bundleToLoad == null) {
+      // Do nothing if bundle is null.
       return;
     }
 
@@ -1141,6 +1162,8 @@ class KrakenController {
       if (onLoadError != null) {
         onLoadError!(FlutterError(e.toString()), stack);
       }
+      // Not to dismiss this error.
+      rethrow;
     }
 
     if (kProfileMode) {
@@ -1149,7 +1172,7 @@ class KrakenController {
   }
 
   // Execute the content from entrypoint bundle.
-  void _evaluateEntrypoint({ AnimationController? animationController }) {
+  void _evaluateEntrypoint({ AnimationController? animationController }) async {
     // @HACK: Execute JavaScript scripts will block the Flutter UI Threads.
     // Listen for animationController listener to make sure to execute Javascript after route transition had completed.
     if (animationController != null) {
@@ -1163,6 +1186,14 @@ class KrakenController {
 
     assert(!_view._disposed, 'Kraken have already disposed');
     if (_entrypoint != null) {
+      KrakenBundle entrypoint = _entrypoint!;
+      int contextId = _view.contextId;
+      assert(entrypoint.isResolved, 'The kraken bundle $entrypoint is not resolved to evaluate.');
+
+      if (kProfileMode) {
+        PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
+      }
+
       if (onLoad != null) {
         // DOM element are created at next frame, so we should trigger onload callback in the next frame.
         // module.requestAnimationFrame((_) {
@@ -1170,7 +1201,25 @@ class KrakenController {
         // });
       }
 
-      _entrypoint!.eval(_view.contextId);
+      Uint8List data = entrypoint.data!;
+      if (entrypoint.isHTML) {
+        parseHTML(contextId, await resolveStringFromData(data));
+      } else if (entrypoint.isJavascript) {
+        evaluateScripts(contextId, await resolveStringFromData(data), url: url);
+      } else if (entrypoint.isBytecode) {
+        evaluateQuickjsByteCode(contextId, data);
+      } else {
+        // The resource type can not be evaluated.
+        throw FlutterError('Can\'t evaluate content of $url');
+      }
+
+      if (kProfileMode) {
+        PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
+      }
+
+      // To release entrypoint bundle memory.
+      entrypoint.dispose();
+
       // trigger DOMContentLoaded event
       module.requestAnimationFrame((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
@@ -1183,13 +1232,6 @@ class KrakenController {
           window.dispatchEvent(event);
         });
       });
-
-      // if (onLoad != null) {
-      //   // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-      //   module.requestAnimationFrame((_) {
-      //     onLoad!(this);
-      //   });
-      // }
     }
   }
 }

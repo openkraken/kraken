@@ -11,7 +11,7 @@ describe('Background-color', () => {
     await snapshot(div);
   });
 
-  xit('red with display none', async () => {
+  it('red with display none', async () => {
     const div = createElementWithStyle('div', {
       backgroundColor: 'red',
       display: 'none',
@@ -19,10 +19,12 @@ describe('Background-color', () => {
       height: '100px',
     });
     append(BODY, div);
-    await snapshot(div);
+    await snapshot();
   });
 
-  xit('red with display when window.onload', done => {
+  // @TODO: window.onload will not be triggered in single test
+  // cause all tests are placed in the same page.
+  xit('red with display when window.onload', async(done) => {
     window.onload = async () => {
       div.style.display = 'none';
       await snapshot();

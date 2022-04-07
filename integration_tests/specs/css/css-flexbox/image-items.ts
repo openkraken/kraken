@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('image-items', () => {
-  xit('flake-001', async () => {
+  it('flake-001', async () => {
     let p;
     let referenceOverlappedRed;
     let div;
@@ -61,6 +61,6 @@ describe('image-items', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

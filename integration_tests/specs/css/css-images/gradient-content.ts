@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('gradient-content', () => {
+  // @TODO: repeating-linear-gradient with percentage impl differs from browser.
   xit('box-ref', async () => {
     let x;
     x = createElement('div', {
@@ -19,6 +20,7 @@ describe('gradient-content', () => {
 
     await snapshot();
   });
+  // @TODO: repeating-linear-gradient with percentage impl differs from browser.
   xit('box', async () => {
     let x;
     x = createElement('div', {

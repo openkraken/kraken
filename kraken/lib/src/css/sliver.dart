@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
@@ -9,9 +8,9 @@ import 'package:kraken/css.dart';
 mixin CSSSliverMixin on RenderStyle {
 
   @override
-  Axis get sliverDirection => _sliverDirection;
-  Axis _sliverDirection = Axis.vertical;
-  set sliverDirection(Axis value) {
+  Axis get sliverDirection => _sliverDirection ?? Axis.vertical;
+  Axis? _sliverDirection;
+  set sliverDirection(Axis? value) {
     if (_sliverDirection == value) return;
     _sliverDirection = value;
     renderBoxModel?.markNeedsLayout();

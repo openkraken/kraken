@@ -18,7 +18,7 @@ describe('Display inline-block', () => {
     await snapshot();
   });
 
-  xit('inline-block box constraint is tight', async () => {
+  it('inline-block box constraint is tight', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -36,7 +36,7 @@ describe('Display inline-block', () => {
     await snapshot();
   });
 
-  xit('inline-block nest inline-block should behavior like inline-block', async () => {
+  it('inline-block nest inline-block should behavior like inline-block', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -53,7 +53,7 @@ describe('Display inline-block', () => {
     await snapshot(magenta);
   });
 
-  xit('inline-block nest block should behavior like inline-block', async () => {
+  it('inline-block nest block should behavior like inline-block', async () => {
     let magenta = createElementWithStyle('div', {
       border: '5px solid magenta',
       display: 'inline-block',
@@ -70,7 +70,7 @@ describe('Display inline-block', () => {
     await snapshot(magenta);
   });
 
-  xit('textNode only if have one space', async () => {
+  it('textNode only if have one space', async () => {
     let containerStyle = {
       backgroundColor: 'fuchsia',
       color: 'black',
@@ -142,6 +142,145 @@ describe('Display inline-block', () => {
     ]);
   
     document.body.appendChild(container);
+    await snapshot();
+  });
+
+  it('should stretch to its container of inline-block when its width not specified', async (done) => {
+    let div;
+    let item;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'inline-block',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            height: '50px',
+            backgroundColor: 'lightblue',
+
+          }
+        }),
+        (item = createElement('div', {
+          style: {
+            display: 'inline-block',
+            width: '100px',
+            height: '50px',
+            backgroundColor: 'lightgreen'
+          }
+        })),
+        (createElement('div', {
+          style: {
+            display: 'inline-block',
+            width: '100px',
+            height: '50px',
+            backgroundColor: 'yellow'
+          }
+        }))
+      ]
+    );
+
+    BODY.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+      item.style.width = '200px';
+      await snapshot();
+      done();
+    });
+  });
+
+  it('should stretch to its flex item when its width not specified', async () => {
+    let div;
+    let item;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          height: '100px'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50px',
+            backgroundColor: 'yellow',
+            flexShrink: 0,
+          }
+        }),
+        createElement('div', {
+          style: {
+          }
+        }, [
+          (item = createElement('div', {
+            style: {
+              height: '50px',
+              backgroundColor: 'lightblue',
+            }
+          })),
+          createElement('div', {
+            style: {
+              width: '200px',
+              height: '50px',
+              backgroundColor: 'lightgreen',
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    
+    await snapshot();
+  });
+
+  it('should stretch to its flex item of flex-grow when its width not specified', async () => {
+    let div;
+    let item;
+    div = createElement(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          height: '100px'
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '50px',
+            backgroundColor: 'yellow',
+            flexShrink: 0,
+          }
+        }),
+        createElement('div', {
+          style: {
+            flexGrow: 1,
+          }
+        }, [
+          (item = createElement('div', {
+            style: {
+                height: '50px',
+                backgroundColor: 'lightblue',
+            }
+          })),
+          createElement('div', {
+            style: {
+              width: '325px',
+              height: '50px',
+              backgroundColor: 'lightgreen',
+            }
+          })
+        ])
+      ]
+    );
+
+    BODY.appendChild(div);
+    
     await snapshot();
   });
 });

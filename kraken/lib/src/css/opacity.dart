@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui' as ui;
@@ -21,15 +20,13 @@ mixin CSSOpacityMixin on RenderStyle {
   /// require painting the child into an intermediate buffer, which is
   /// expensive.
   @override
-  double get opacity => _opacity;
-  double _opacity = 1.0;
+  double get opacity => _opacity ?? 1.0;
+  double? _opacity;
   set opacity(double? value) {
-    if (value == null) return;
-    assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value) return;
 
     _opacity = value;
-    int alpha = ui.Color.getAlphaFromOpacity(_opacity);
+    int alpha = ui.Color.getAlphaFromOpacity(opacity);
     renderBoxModel!.alpha = alpha;
 
     // Mark the compositing state for this render object as dirty

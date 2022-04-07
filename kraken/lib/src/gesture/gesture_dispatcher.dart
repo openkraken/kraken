@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/gestures.dart';
@@ -94,7 +93,7 @@ class GestureDispatcher {
       ..onUpdate = instance._onPanUpdate
       ..onEnd = instance._onPanEnd;
     // LongPress Recognizer
-    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPressEnd = instance._onLongPressEnd;
+    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPress = instance._onLongPress;
     // Scale Recognizer
     gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
       ..onStart = instance._onScaleStart
@@ -206,20 +205,24 @@ class GestureDispatcher {
     // Stores the current TouchPoint to trigger the corresponding event.
     TouchPoint touchPoint = _toTouchPoint(event);
 
+    _addPoint(touchPoint);
+
     if (event is PointerDownEvent) {
       _gatherEventsInPath();
-      _addPointerDownEventToMatchedRecognizers(event);
 
       // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
       if (_target != null) {
         _bindEventTargetWithTouchPoint(touchPoint, _target!);
       }
-
-      _addPoint(touchPoint);
     }
 
     _handleTouchPoint(touchPoint);
+
+    // Make sure gesture event is dispatched after touchstart event.
+    if (event is PointerDownEvent) {
+      _addPointerDownEventToMatchedRecognizers(event);
+    }
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _removePoint(touchPoint);
@@ -247,8 +250,8 @@ class GestureDispatcher {
     _handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void _onLongPressEnd(LongPressEndDetails details) {
-    _handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
+  void _onLongPress() {
+    _handleMouseEvent(EVENT_LONG_PRESS);
   }
 
   void _onSwipe(SwipeDetails details) {

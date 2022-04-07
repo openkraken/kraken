@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
@@ -8,9 +7,9 @@ import 'package:kraken/css.dart';
 
 mixin CSSObjectPositionMixin on RenderStyle {
   @override
-  Alignment get objectPosition => _objectPosition;
-  Alignment _objectPosition = Alignment.center;
-  set objectPosition(Alignment value) {
+  Alignment get objectPosition => _objectPosition ?? Alignment.center;
+  Alignment? _objectPosition;
+  set objectPosition(Alignment? value) {
     if (_objectPosition == value) return;
     _objectPosition = value;
     renderBoxModel?.markNeedsLayout();

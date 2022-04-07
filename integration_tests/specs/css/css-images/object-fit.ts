@@ -536,4 +536,28 @@ describe('object-fit', () => {
     });
   });
 
+  it('should work with value change to empty string', async (done) => {
+    let image;
+    image = createElement(
+      'img',
+      {
+        src: 'assets/css3.png',
+        style: {
+          display: 'block',
+          'object-fit': 'cover',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'yellow'
+        },
+      },
+    );
+    BODY.appendChild(image);
+ 
+    requestAnimationFrame(async () => {
+      image.style.objectFit = '';
+      await snapshot(0.1);
+      done();
+    });
+  });
+
 });

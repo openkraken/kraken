@@ -74,4 +74,38 @@ describe('display', () => {
     append(BODY, element);
     await snapshot();
   });
+
+  it('should work with value change to empty string', async (done) => {
+    let div;
+    div = createElement(
+    'div',
+      {
+        style: {
+          display: 'flex',
+          width: '100px',
+          height: '100px',
+          background: 'yellow',
+        },
+      },
+      [
+        createElement('div', {
+          style: {
+            width: '200px',
+            height: '200px',
+            backgroundColor: 'green'
+          }
+        })
+      ]
+    );
+
+    document.body.appendChild(div);
+
+    await snapshot();
+
+    requestAnimationFrame(async () => {
+        div.style.display = '';
+        await snapshot();
+        done();
+    });
+  });
 });
