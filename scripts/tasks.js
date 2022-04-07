@@ -830,7 +830,6 @@ task('run-benchmark', async (done) => {
       }
     })
   }
-  
 
   if (!serverIpAddress) {
     const err = new Error('The IP address was not found.');
@@ -845,33 +844,36 @@ task('run-benchmark', async (done) => {
     }
   ).toString().split(/\n/);
 
-  for (let item of performanceInfos) {
+  const KrakenPerformancePath = 'kraken-performance';
+console.log('performanceInfos.l;ength', performanceInfos.length)
+  for (let item in performanceInfos) {
     let info = performanceInfos[item];
     const match = /\[(\s?\d,?)+\]/.exec(info);
     if (match) {
+      const viewType = item === 0 ? 'kraken' : 'web';
+      console.log('viewType');
       try {
         let performanceDatas = JSON.parse(match[0]);
         // Remove the top five and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
         performanceDatas = performanceDatas.sort().slice(1, performanceDatas.length - 1);
-
-
+        
         // Get average of list.
         let sumLoadTimes = 0;
         performanceDatas.forEach(item => sumLoadTimes += item);
         let averageLoadTime = sumLoadTimes / performanceDatas.length;
 
-        // Save to file.
-        let file = path.join(__dirname, './performance.txt');
-        fs.writeFile(file, content, averageLoadTime => {
-          if (err) {
-            const err = new Error('The performance data write exception.');
-            done(err);
-          }
-        });
+        // Save to file and upload to OSS.
+        const averageFile = path.join(__dirname, '../performance.txt');
+        fs.writeFileSync(averageFile, averageLoadTime.toString());
+        uploader(`${KrakenPerformancePath}/${viewType}-average-load-time.txt`, averageFile).then(() => {
+          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
+        }).catch(err => done(err));
 
-        // Upload to OSS.
-        uploader('kraken-performance', file);
-
+        const listFile = path.join(__dirname, '../performance.txt');
+        fs.writeFileSync(listFile, performanceDatas.toString());
+        uploader(`${KrakenPerformancePath}/${viewType}-load-time-list.txt`, listFile).then(() => {
+          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
+        }).catch(err => done(err));
       } catch {
         const err = new Error('The performance info parse exception.');
         done(err);
@@ -879,7 +881,7 @@ task('run-benchmark', async (done) => {
     }
   }
   
-  execSync('adb uninstall com.example.performance_tests');
+  //execSync('adb uninstall com.example.performance_tests');
   
   done();
 });
