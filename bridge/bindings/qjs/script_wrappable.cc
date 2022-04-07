@@ -21,6 +21,10 @@ JSValue ScriptWrappable::ToQuickJS() {
   return jsObject_;
 }
 
+ScriptValue ScriptWrappable::ToValue() {
+  return ScriptValue(ctx_, jsObject_);
+}
+
 void ScriptWrappable::InitializeQuickJSObject() {
   auto* wrapperTypeInfo = GetWrapperTypeInfo();
   JSRuntime* runtime = runtime_;
@@ -51,8 +55,7 @@ void ScriptWrappable::InitializeQuickJSObject() {
     /// completed.
     def.finalizer = [](JSRuntime* rt, JSValue val) {
       auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      object->Dispose();
-      free(object);
+      delete object;
     };
 
     JS_NewClass(runtime, wrapperTypeInfo->classId, &def);

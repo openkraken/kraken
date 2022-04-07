@@ -35,6 +35,8 @@ class JSEventListener final : public JSBasedEventListener {
     return other_listener && *event_listener_ == *other_listener->event_listener_;
   }
 
+  void Trace(GCVisitor* visitor) const override;
+
  private:
   void InvokeInternal(EventTarget&, Event&, ExceptionState& exception_state) override;
 

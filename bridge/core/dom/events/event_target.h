@@ -108,9 +108,6 @@ class EventTarget : public ScriptWrappable {
                            ExceptionState& exception_state);
   bool dispatchEvent(Event* event, ExceptionState& exception_state);
 
-  void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
-
   DispatchEventResult FireEventListeners(Event&, ExceptionState&);
 
   static DispatchEventResult GetDispatchEventResult(const Event&);
@@ -125,7 +122,7 @@ class EventTarget : public ScriptWrappable {
                                    const std::shared_ptr<EventListener>& listener,
                                    const std::shared_ptr<EventListenerOptions>& options);
 
-  DispatchEventResult DispatchEventInternal(Event& event);
+  DispatchEventResult DispatchEventInternal(Event& event, ExceptionState& exception_state);
 
   // Subclasses should likely not override these themselves; instead, they
   // should subclass EventTargetWithInlineData.

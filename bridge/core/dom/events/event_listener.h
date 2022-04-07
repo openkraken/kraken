@@ -48,6 +48,8 @@ class EventListener {
   // produce the same result as b.Matches(a).
   virtual bool Matches(const EventListener&) const = 0;
 
+  virtual void Trace(GCVisitor* visitor) const = 0;
+
  private:
   EventListener() = default;
 

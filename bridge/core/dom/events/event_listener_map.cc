@@ -114,4 +114,12 @@ EventListenerVector* EventListenerMap::Find(const AtomicString& event_type) {
   return nullptr;
 }
 
+void EventListenerMap::Trace(GCVisitor* visitor) const {
+  for(const auto& entry: entries_) {
+    for(auto& listener : *entry.second) {
+      listener.Trace(visitor);
+    }
+  }
+}
+
 }  // namespace kraken

@@ -45,6 +45,8 @@ class EventListenerMap final {
               RegisteredEventListener* registered_event_listener);
   EventListenerVector* Find(const AtomicString& event_type);
 
+  void Trace(GCVisitor* visitor) const;
+
  private:
   // EventListener handlers registered with addEventListener API.
   // We use vector instead of hashMap because

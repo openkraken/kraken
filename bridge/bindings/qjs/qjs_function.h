@@ -19,7 +19,10 @@ class QJSFunction {
     return std::make_shared<QJSFunction>(ctx, function);
   }
   explicit QJSFunction(JSContext* ctx, JSValue function) : ctx_(ctx), function_(JS_DupValue(ctx, function)){};
-  ~QJSFunction() { JS_FreeValue(ctx_, function_); }
+  // This safe to free function_ at GC stage.
+  ~QJSFunction() {
+    JS_FreeValue(ctx_, function_);
+  }
 
   bool IsFunction(JSContext* ctx);
 
@@ -32,6 +35,8 @@ class QJSFunction {
   bool operator==(const QJSFunction& other) {
     return JS_VALUE_GET_PTR(function_) == JS_VALUE_GET_PTR(other.function_);
   };
+
+  void Trace(GCVisitor* visitor) const;
 
  private:
   JSContext* ctx_{nullptr};

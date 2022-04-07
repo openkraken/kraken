@@ -64,7 +64,6 @@ class Blob : public ScriptWrappable {
 
   const char* GetHumanReadableName() const override;
   void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
 
  protected:
   void PopulateBlobData(std::vector<std::shared_ptr<BlobPart>>& data);

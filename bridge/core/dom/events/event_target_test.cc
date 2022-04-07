@@ -6,7 +6,8 @@
 #include "event_target.h"
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "page.h"
+
+using namespace kraken;
 
 TEST(EventTarget, addEventListener) {
   bool static errorCalled = false;

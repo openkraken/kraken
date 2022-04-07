@@ -79,7 +79,6 @@ const char* Blob::GetHumanReadableName() const {
   return "Blob";
 }
 void Blob::Trace(GCVisitor* visitor) const {}
-void Blob::Dispose() const {}
 
 Blob* Blob::slice(ExceptionState& exception_state) {
   return slice(0, _data.size(), exception_state);

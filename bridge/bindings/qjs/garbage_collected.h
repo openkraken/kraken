@@ -38,21 +38,11 @@ class GarbageCollected {
   void* operator new(size_t) = delete;
   void* operator new[](size_t) = delete;
 
-  // The garbage collector is taking care of reclaiming the object.
-  void operator delete(void*) = delete;
-  void operator delete[](void*) = delete;
-
   /**
    * This Trace method must be override by objects inheriting from
    * GarbageCollected.
    */
   virtual void Trace(GCVisitor* visitor) const = 0;
-
-  /**
-   * Called before underline JavaScript object been collected by GC.
-   * Note: JS_FreeValue and JS_FreeAtom is not available, use JS_FreeValueRT and JS_FreeAtomRT instead.
-   */
-  virtual void Dispose() const = 0;
 
   /**
    * Specifies a name for the garbage-collected object. Such names will never
@@ -64,6 +54,7 @@ class GarbageCollected {
 
  protected:
   GarbageCollected(){};
+  ~GarbageCollected() = default;
   friend class MakeGarbageCollectedTrait<T>;
 };
 

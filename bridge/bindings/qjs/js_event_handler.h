@@ -53,6 +53,9 @@ class JSEventHandler : public JSBasedEventListener {
   // EventListener overrides:
   bool Matches(const EventListener&) const override;
 
+  void Trace(GCVisitor* visitor) const override;
+
+
  private:
   // JSBasedEventListener override:
   // Performs "The event handler processing algorithm"

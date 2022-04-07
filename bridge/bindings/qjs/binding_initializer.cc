@@ -9,6 +9,8 @@
 #include "qjs_console.h"
 #include "qjs_module_manager.h"
 #include "qjs_window.h"
+#include "qjs_event_target.h"
+#include "qjs_event.h"
 
 namespace kraken {
 
@@ -16,6 +18,8 @@ void InstallBindings(ExecutingContext* context) {
   QJSWindow::installGlobalFunctions(context);
   QJSModuleManager::Install(context);
   QJSConsole::Install(context);
+  QJSEventTarget::Install(context);
+  QJSEvent::Install(context);
 }
 
 }  // namespace kraken

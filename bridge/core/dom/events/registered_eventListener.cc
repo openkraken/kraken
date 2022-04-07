@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-RegisteredEventListener::RegisteredEventListener() : RegisteredEventListener(nullptr, nullptr) {}
+RegisteredEventListener::RegisteredEventListener() = default;
 
 RegisteredEventListener::RegisteredEventListener(const std::shared_ptr<EventListener>& listener,
                                                  std::shared_ptr<AddEventListenerOptions> options)
@@ -48,6 +48,10 @@ bool RegisteredEventListener::ShouldFire(const Event& event) const {
   if (event.eventPhase() == Event::kBubblingPhase)
     return !Capture();
   return true;
+}
+
+void RegisteredEventListener::Trace(GCVisitor* visitor) const {
+  callback_->Trace(visitor);
 }
 
 bool operator==(const RegisteredEventListener& lhs, const RegisteredEventListener& rhs) {

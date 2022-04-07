@@ -184,7 +184,6 @@ class Event : public ScriptWrappable {
   bool FireOnlyNonCaptureListenersAtTarget() const { return fire_only_non_capture_listeners_at_target_; }
 
   void Trace(GCVisitor* visitor) const override;
-  void Dispose() const override;
 
  protected:
   PassiveMode HandlingPassive() const { return handling_passive_; }

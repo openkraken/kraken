@@ -12,6 +12,8 @@
 
 namespace kraken {
 
+class ScriptValue;
+
 // Defines |GetWrapperTypeInfo| virtual method which returns the WrapperTypeInfo
 // of the instance. Also declares a static member of type WrapperTypeInfo, of
 // which the definition is given by the IDL code generator.
@@ -36,11 +38,13 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   ScriptWrappable() = delete;
 
   explicit ScriptWrappable(JSContext* ctx);
+  virtual ~ScriptWrappable() = default;
 
   // Returns the WrapperTypeInfo of the instance.
   virtual const WrapperTypeInfo* GetWrapperTypeInfo() const = 0;
 
   JSValue ToQuickJS();
+  ScriptValue ToValue();
   FORCE_INLINE ExecutingContext* GetExecutingContext() const {
     return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
   };

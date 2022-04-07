@@ -45,6 +45,8 @@ class RegisteredEventListener final {
 
   bool ShouldFire(const Event&) const;
 
+  void Trace(GCVisitor* visitor) const;
+
  private:
   std::shared_ptr<EventListener> callback_;
   unsigned use_capture_ : 1;

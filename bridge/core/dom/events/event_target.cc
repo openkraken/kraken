@@ -27,9 +27,14 @@ Event::PassiveMode EventPassiveMode(const RegisteredEventListener& event_listene
 // EventTargetData
 EventTargetData::EventTargetData() {}
 
-EventTargetData::~EventTargetData() {}
+EventTargetData::~EventTargetData() {
+  KRAKEN_LOG(VERBOSE) << "DISPOSE";
+}
 
-void EventTargetData::Trace(GCVisitor* visitor) const {}
+void EventTargetData::Trace(GCVisitor* visitor) const {
+  KRAKEN_LOG(VERBOSE) << "TRACE";
+  event_listener_map.Trace(visitor);
+}
 
 EventTarget* EventTarget::Create(ExecutingContext* context) {
   return makeGarbageCollected<EventTargetWithInlineData>(context);
@@ -93,12 +98,8 @@ bool EventTarget::dispatchEvent(Event* event, ExceptionState& exception_state) {
   // Return whether the event was cancelled or not to JS not that it
   // might have actually been default handled; so check only against
   // CanceledByEventHandler.
-  return DispatchEventInternal(*event) != DispatchEventResult::kCanceledByEventHandler;
+  return DispatchEventInternal(*event, exception_state) != DispatchEventResult::kCanceledByEventHandler;
 }
-
-void EventTarget::Trace(GCVisitor* visitor) const {}
-
-void EventTarget::Dispose() const {}
 
 DispatchEventResult EventTarget::FireEventListeners(Event& event, ExceptionState& exception_state) {
   assert(event.WasInitialized());
@@ -180,8 +181,13 @@ bool EventTarget::RemoveEventListenerInternal(const AtomicString& event_type,
   return true;
 }
 
-DispatchEventResult EventTarget::DispatchEventInternal(Event& event) {
-  return DispatchEventResult::kCanceledByDefaultEventHandler;
+DispatchEventResult EventTarget::DispatchEventInternal(Event& event, ExceptionState& exception_state) {
+  event.SetTarget(this);
+  event.SetCurrentTarget(this);
+  event.SetEventPhase(Event::kAtTarget);
+  DispatchEventResult dispatch_result = FireEventListeners(event, exception_state);
+  event.SetEventPhase(0);
+  return dispatch_result;
 }
 
 const char* EventTarget::GetHumanReadableName() const {
@@ -241,14 +247,14 @@ bool EventTarget::FireEventListeners(Event& event,
 
     event.SetHandlingPassive(Event::PassiveMode::kNotPassive);
 
-    assert(i < size);
+    assert(i <= size);
   }
   d->firing_event_iterators->pop_back();
   return fired_listener;
 }
 
 void EventTargetWithInlineData::Trace(GCVisitor* visitor) const {
-  EventTarget::Trace(visitor);
+  data_.Trace(visitor);
 }
 
 }  // namespace kraken
