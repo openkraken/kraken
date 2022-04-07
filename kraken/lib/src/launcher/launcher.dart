@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:io';
@@ -9,10 +8,6 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/src/launcher/controller.dart';
-
-import 'bundle.dart';
 
 typedef ConnectedCallback = void Function();
 

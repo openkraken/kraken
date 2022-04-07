@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:convert';
@@ -9,12 +8,9 @@ import 'dart:isolate';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:kraken/module.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
 import 'package:ffi/ffi.dart';
-import '../bridge/dynamic_library.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';

@@ -1,10 +1,11 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
-
-import 'module_manager.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, Object? arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';

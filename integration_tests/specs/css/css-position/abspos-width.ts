@@ -160,7 +160,7 @@ describe('abspos-width', () => {
 
     await snapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let test;
     p = createElement(
@@ -219,6 +219,9 @@ describe('abspos-width', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('005-ref', async () => {
     let p;
     let child;
@@ -267,6 +270,9 @@ describe('abspos-width', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('005', async () => {
     let p;
     let absolute;

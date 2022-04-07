@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('blocks', () => {
-  xit('011', async () => {
+  it('011', async () => {
     let p;
     let test;
     let container;
@@ -128,7 +128,7 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('014', async () => {
+  it('014', async () => {
     let p;
     let test;
     let container;
@@ -189,7 +189,7 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('015', async () => {
+  it('015', async () => {
     let p;
     let test;
     let container;
@@ -256,6 +256,8 @@ describe('blocks', () => {
 
     await snapshot();
   });
+
+  // @TODO: Vertical padding not working for inline box.
   xit('018', async () => {
     let control;
     let test;
@@ -318,6 +320,8 @@ describe('blocks', () => {
 
     await snapshot();
   });
+
+  // @TODO: Vertical padding not working for inline box.
   xit('019', async () => {
     let control;
     let test;
@@ -380,7 +384,7 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('020', async () => {
+  it('020', async () => {
     let p;
     let inner;
     let outer;
@@ -441,7 +445,8 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('021', async () => {
+
+  it('021', async () => {
     let p;
     let inner;
     let outer;
@@ -502,7 +507,8 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('022', async () => {
+
+  it('022', async () => {
     let p;
     let inner;
     let outer;
@@ -563,6 +569,8 @@ describe('blocks', () => {
 
     await snapshot();
   });
+
+  // @TODO: Input's default size should not contain border width.
   xit('026', async () => {
     let p;
     let div;
@@ -654,7 +662,7 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('027', async () => {
+  it('027', async () => {
     let p;
     let test;
     let control;
@@ -699,7 +707,7 @@ describe('blocks', () => {
 
     await snapshot();
   });
-  xit('028', async () => {
+  it('028', async () => {
     let p;
     let test;
     let control;

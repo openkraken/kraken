@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -9,8 +8,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/foundation.dart';
-
-import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
 const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;

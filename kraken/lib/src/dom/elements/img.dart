@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/painting.dart';
 import 'package:kraken/rendering.dart';
+
 
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
@@ -31,21 +31,19 @@ class ImageElement extends Element {
   // The render box to draw image.
   KrakenRenderImage? _renderImage;
 
-  ImageProvider? _cachedImageProvider;
-  dynamic _imageProviderKey;
+  ui.ImageDescriptor? _currentImageDescriptor;
+  ImageProvider? _currentImageProvider;
 
   ImageStream? _cachedImageStream;
   ImageInfo? _cachedImageInfo;
+
+  _ImageRequest? _currentRequest;
+  _ImageRequest? _pendingRequest;
+
+  // Current image source.
   Uri? _resolvedUri;
 
-  // Width and height set through property.
-  double? _propertyWidth;
-  double? _propertyHeight;
-
-  // Width and height set through style.
-  double? _styleWidth;
-  double? _styleHeight;
-
+  // Current image data([ui.Image]).
   ui.Image? get image => _cachedImageInfo?.image;
 
   /// Number of image frame, used to identify multi frame image after loaded.
@@ -63,7 +61,19 @@ class ImageElement extends Element {
 
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
   // A boolean value which indicates whether or not the image has completely loaded.
-  bool _complete = false;
+  // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
+  // The IDL attribute complete must return true if any of the following conditions is true:
+  // 1. Both the src attribute and the srcset attribute are omitted.
+  // 2. The srcset attribute is omitted and the src attribute's value is the empty string.
+  // 3. The img element's current request's state is completely available and its pending request is null.
+  // 4. The img element's current request's state is broken and its pending request is null.
+  bool get complete {
+    // @TODO: Implement the srcset.
+    if (src.isEmpty) return true;
+    if (_currentRequest != null && _currentRequest!.available && _pendingRequest == null) return true;
+    if (_currentRequest != null && _currentRequest!.state == _ImageRequestState.broken && _pendingRequest == null) return true;
+    return true;
+  }
 
   // The attribute directs the user agent to fetch a resource immediately or to defer fetching
   // until some conditions associated with the element are met, according to the attribute's
@@ -101,7 +111,7 @@ class ImageElement extends Element {
       case 'scaling': return scaling;
       case 'naturalWidth': return naturalWidth;
       case 'naturalHeight': return naturalHeight;
-      case 'complete': return _complete;
+      case 'complete': return complete;
       default: return super.getBindingProperty(key);
     }
   }
@@ -159,7 +169,7 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _resolveImage(_resolvedUri);
+    _decode();
     _listenToStream();
   }
 
@@ -169,22 +179,26 @@ class ImageElement extends Element {
     style.removeStyleChangeListener(_stylePropertyChanged);
 
     _stopListeningStream(keepStreamAlive: true);
+
+    _currentImageProvider?.evict();
+    _currentImageProvider = null;
+
+    _cachedImageInfo?.dispose();
+    _cachedImageInfo = null;
+
+    _renderImage?.dispose();
+    _renderImage = null;
+
   }
 
   ImageStreamListener? _imageStreamListener;
-  ImageStreamListener _getListener() {
-    _imageStreamListener ??= ImageStreamListener(
-      _handleImageFrame,
-      onError: _onImageError
-    );
-    return _imageStreamListener!;
-  }
+  ImageStreamListener get _listener => _imageStreamListener ??= ImageStreamListener(_handleImageFrame, onError: _onImageError);
 
   void _listenToStream() {
     if (_isListeningStream)
       return;
 
-    _cachedImageStream?.addListener(_getListener());
+    _cachedImageStream?.addListener(_listener);
     _completerHandle?.dispose();
     _completerHandle = null;
 
@@ -196,55 +210,67 @@ class ImageElement extends Element {
     super.dispose();
     _stopListeningStream();
     _completerHandle?.dispose();
+    _completerHandle = null;
     _replaceImage(info: null);
-    _cachedImageProvider?.evict();
-    _cachedImageProvider = null;
-    _imageProviderKey = null;
+    _currentImageProvider?.evict();
+    _currentImageProvider = null;
+  }
+
+  // Width and height set through style declaration.
+  double? get _styleWidth {
+    String width = style.getPropertyValue(WIDTH);
+    if (width.isNotEmpty) {
+      CSSLengthValue len = CSSLength.parseLength(width, renderStyle, WIDTH);
+      return len.computedValue;
+    }
+  }
+
+  double? get _styleHeight {
+    String height = style.getPropertyValue(HEIGHT);
+    if (height.isNotEmpty) {
+      CSSLengthValue len = CSSLength.parseLength(height, renderStyle, HEIGHT);
+      return len.computedValue;
+    }
+  }
+
+  // Width and height set through attributes.
+  double? get _attrWidth {
+    if (hasAttribute(WIDTH)) {
+      return CSSLength.toDouble(getAttribute(WIDTH));
+    }
+  }
+
+  double? get _attrHeight {
+    if (hasAttribute(HEIGHT)) {
+      return CSSLength.toDouble(getAttribute(HEIGHT));
+    }
   }
 
   int get width {
-    // Width calc priority: style > property > intrinsic.
-    double borderBoxWidth = _styleWidth
-      ?? _propertyWidth
+    // Width calc priority: style > attr > intrinsic.
+    final double borderBoxWidth = _styleWidth
+      ?? _attrWidth
       ?? renderStyle.getWidthByIntrinsicRatio();
 
     return borderBoxWidth.round();
   }
 
   int get height {
-    // Height calc priority: style > property > intrinsic.
-    double borderBoxHeight = _styleHeight
-      ?? _propertyHeight
+    // Height calc priority: style > attr > intrinsic.
+    final double borderBoxHeight = _styleHeight
+      ?? _attrHeight
       ?? renderStyle.getHeightByIntrinsicRatio();
 
     return borderBoxHeight.round();
   }
 
   // Read the original image width of loaded image.
-  // The getter must be called after image had loaded, otherwise will return 0.0.
-  int get naturalWidth {
-    ImageProvider? imageProvider = _cachedImageProvider;
-    if (imageProvider is KrakenResizeImage) {
-      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
-      if (size != null) {
-        return size.width.toInt();
-      }
-    }
-    return image?.width ?? 0;
-  }
+  // The getter must be called after image had loaded, otherwise will return 0.
+  int get naturalWidth => _currentImageDescriptor?.width ?? 0;
 
   // Read the original image height of loaded image.
-  // The getter must be called after image had loaded, otherwise will return 0.0.
-  int get naturalHeight {
-    ImageProvider? imageProvider = _cachedImageProvider;
-    if (imageProvider is KrakenResizeImage) {
-      Size? size = KrakenResizeImage.getImageNaturalSize(_imageProviderKey);
-      if (size != null) {
-        return size.height.toInt();
-      }
-    }
-    return image?.height ?? 0;
-  }
+  // The getter must be called after image had loaded, otherwise will return 0.
+  int get naturalHeight => _currentImageDescriptor?.height ?? 0;
 
   void _handleIntersectionChange(IntersectionObserverEntry entry) {
     // When appear
@@ -268,18 +294,8 @@ class ImageElement extends Element {
     dispatchEvent(Event(EVENT_LOAD));
   }
 
-  void _handleEventAfterImageLoaded() {
-    // `load` event is a simple event.
-    if (isConnected) {
-      // If image in tree, make sure the image-box has been layout, using addPostFrameCallback.
-      SchedulerBinding.instance!.scheduleFrame();
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        _dispatchLoadEvent();
-      });
-    } else {
-      // If not in tree, dispatch the event directly.
-      _dispatchLoadEvent();
-    }
+  void _dispatchErrorEvent() {
+    dispatchEvent(Event(EVENT_ERROR));
   }
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
@@ -289,15 +305,15 @@ class ImageElement extends Element {
 
   void _resizeImage() {
     // Only need to resize image after image is fully loaded.
-    if (!_complete) return;
+    if (!complete) return;
 
-    if (_styleWidth == null && _propertyWidth != null) {
+    if (_styleWidth == null && _attrWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
-      renderStyle.width = CSSLengthValue(_propertyWidth, CSSLengthType.PX);
+      renderStyle.width = CSSLengthValue(_attrWidth, CSSLengthType.PX);
     }
-    if (_styleHeight == null && _propertyHeight != null) {
+    if (_styleHeight == null && _attrHeight != null) {
       // The intrinsic height of the image, in pixels. Must be an integer without a unit.
-      renderStyle.height = CSSLengthValue(_propertyHeight, CSSLengthType.PX);
+      renderStyle.height = CSSLengthValue(_attrHeight, CSSLengthType.PX);
     }
 
     renderStyle.intrinsicWidth = naturalWidth.toDouble();
@@ -316,14 +332,10 @@ class ImageElement extends Element {
   }
 
   KrakenRenderImage _createRenderImageBox() {
-    RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    BoxFit objectFit = renderStyle.objectFit;
-    Alignment objectPosition = renderStyle.objectPosition;
-
     return KrakenRenderImage(
       image: _cachedImageInfo?.image,
-      fit: objectFit,
-      alignment: objectPosition,
+      fit: renderStyle.objectFit,
+      alignment: renderStyle.objectPosition,
     );
   }
 
@@ -332,7 +344,7 @@ class ImageElement extends Element {
     super.removeAttribute(key);
     if (key == 'src') {
       _stopListeningStream(keepStreamAlive: true);
-    } else if (key == 'loading' && _isInLazyLoading && _cachedImageProvider == null) {
+    } else if (key == 'loading' && _isInLazyLoading && _currentImageProvider == null) {
       _removeIntersectionChangeListener();
       _stopListeningStream(keepStreamAlive: true);
     }
@@ -353,7 +365,8 @@ class ImageElement extends Element {
       _completerHandle = _cachedImageStream!.completer!.keepAlive();
     }
 
-    _cachedImageStream?.removeListener(_getListener());
+    _cachedImageStream?.removeListener(_listener);
+    _imageStreamListener = null;
     _isListeningStream = false;
   }
 
@@ -361,48 +374,49 @@ class ImageElement extends Element {
     if (_cachedImageStream?.key == newStream.key) return;
 
     if (_isListeningStream) {
-      _cachedImageStream?.removeListener(_getListener());
+      _cachedImageStream?.removeListener(_listener);
     }
 
     _frameCount = 0;
     _cachedImageStream = newStream;
 
     if (_isListeningStream) {
-      _cachedImageStream!.addListener(_getListener());
+      _cachedImageStream!.addListener(_listener);
     }
   }
 
-  // Obtain image resource from resolvedUri, and create an ImageStream that loads the image streams.
-  // If imageElement has propertySize or width/height property on renderStyle,
+  // https://html.spec.whatwg.org/multipage/images.html#decoding-images
+  // Create an ImageStream that decodes the obtained image.
+  // If imageElement has property size or width/height property on [renderStyle],
   // The image will be encoded into a small size for better rasterization performance.
-  void _resolveImage(Uri? resolvedUri, { bool updateImageProvider = false }) async {
-    if (resolvedUri == null) return;
+  void _decode({ bool updateImageProvider = false }) {
+    _ImageRequest? request = _currentRequest;
+    if (request != null && request.available) {
+      ImageProvider? provider = _currentImageProvider;
+      if (updateImageProvider || provider == null) {
+        // Image should be resized based on different ratio according to object-fit value.
+        BoxFit objectFit = renderStyle.objectFit;
+        provider = _currentImageProvider = BoxFitImage(descriptor: _currentImageDescriptor!, boxFit: objectFit);
+      }
 
-    // Try to make sure that this image can be encoded into a smaller size.
-    int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
-    int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
-
-    ImageProvider? provider = _cachedImageProvider;
-    if (updateImageProvider || provider == null) {
-      // Image should be resized based on different ratio according to object-fit value.
-      BoxFit objectFit = renderStyle.objectFit;
-      provider = _cachedImageProvider = getImageProvider(
-        resolvedUri,
-        objectFit: objectFit,
-        cachedWidth: cachedWidth,
-        cachedHeight: cachedHeight,
-      );
+      // Try to make sure that this image can be encoded into a smaller size.
+      int? cachedWidth = width > 0 && width.isFinite ? (width * ui.window.devicePixelRatio).toInt() : null;
+      int? cachedHeight = height > 0 && height.isFinite ? (height * ui.window.devicePixelRatio).toInt() : null;
+      ImageConfiguration imageConfiguration = _shouldScaling && cachedWidth != null && cachedHeight != null
+          ? ImageConfiguration(size: Size(cachedWidth.toDouble(), cachedHeight.toDouble()))
+          : ImageConfiguration.empty;
+      _updateSourceStream(provider.resolve(imageConfiguration));
     }
-    if (provider == null) return;
-
-    // Cached the key of imageProvider to read naturalSize of the image.
-    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
-    final ImageStream newStream = provider.resolve(ImageConfiguration.empty);
-    _updateSourceStream(newStream);
   }
 
   void _replaceImage({required ImageInfo? info}) {
+    _cachedImageInfo?.dispose();
     _cachedImageInfo = info;
+
+    if (_currentRequest?.state != _ImageRequestState.completelyAvailable) {
+      _currentRequest?.state = _ImageRequestState.completelyAvailable;
+      scheduleMicrotask(() => _dispatchLoadEvent());
+    }
   }
 
   // Attach image to renderImage box.
@@ -410,25 +424,14 @@ class ImageElement extends Element {
     assert(isRendererAttached);
     assert(_renderImage != null);
     if (_cachedImageInfo == null) return;
-    _renderImage!.image = image?.clone();
+    _renderImage!.image = _cachedImageInfo!.image.clone();
   }
-
 
   // Callback when image are loaded, encoded and available to use.
   // This callback may fire multiple times when image have multiple frames (such as an animated GIF).
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     _replaceImage(info: imageInfo);
     _frameCount++;
-
-    if (!_complete) {
-      _complete = true;
-      if (synchronousCall) {
-        // `synchronousCall` happens when caches image and calling `addListener`.
-        scheduleMicrotask(_handleEventAfterImageLoaded);
-      } else {
-        _handleEventAfterImageLoaded();
-      }
-    }
 
     // Multi frame image should wrap a repaint boundary for better composite performance.
     if (_frameCount > 2) {
@@ -447,40 +450,6 @@ class ImageElement extends Element {
     _resizeImage();
   }
 
-  // Prefetch an image into the image cache. When the imageElement is attached to the renderTree, the imageProvider can directly
-  // obtain the cached imageStream from imageCache instead of obtaining resources from I/O.
-  void _precacheImage() async {
-    final ImageConfiguration config = ImageConfiguration.empty;
-    _resolveResource(src);
-    final Uri? resolvedUri = _resolvedUri;
-    if (resolvedUri == null) return;
-    final ImageProvider? provider = _cachedImageProvider = getImageProvider(resolvedUri);
-    if (provider == null) return;
-    _imageProviderKey = await provider.obtainKey(ImageConfiguration.empty);
-    _frameCount = 0;
-    final ImageStream stream = provider.resolve(config);
-    ImageStreamListener? listener;
-    listener = ImageStreamListener(
-      (ImageInfo? imageInfo, bool sync) {
-        _replaceImage(info: imageInfo);
-        _frameCount++;
-
-        if (!_complete && !_shouldLazyLoading) {
-          _complete = true;
-          if (sync) {
-            // `synchronousCall` happens when caches image and calling `addListener`.
-            scheduleMicrotask(_handleEventAfterImageLoaded);
-          } else {
-            _handleEventAfterImageLoaded();
-          }
-        }
-        stream.removeListener(listener!);
-      },
-      onError: _onImageError
-    );
-    stream.addListener(listener);
-  }
-
   String get scaling => getAttribute(SCALING) ?? '';
   set scaling(String value) {
     internalSetAttribute(SCALING, value);
@@ -488,21 +457,36 @@ class ImageElement extends Element {
 
   String get src => _resolvedUri?.toString() ?? '';
   set src(String value) {
-    String prevSrc = src;
     internalSetAttribute('src', value);
-    _resolveResource(value);
-    if (prevSrc != src) {
-      _complete = false;
-    }
+    _resolveResourceUri(value);
+
+    _updateImageData();
+  }
+
+  // https://html.spec.whatwg.org/multipage/images.html#update-the-image-data
+  void _updateImageData() async {
+    await _obtainImage();
+
     // Update image source if image already attached except image is lazy loading.
-    if (isRendererAttached && !_isInLazyLoading) {
-      _resolveImage(_resolvedUri, updateImageProvider: true);
-    } else {
-      _precacheImage();
+    if (!_isInLazyLoading) {
+      _listenToStream();
+      _decode(updateImageProvider: true);
     }
   }
 
-  // ReadOnly additional property.
+  // To load the resource, and dispatch load event.
+  // https://html.spec.whatwg.org/multipage/images.html#when-to-obtain-images
+  Future<_ImageRequest> _obtainImage() async {
+    _ImageRequest request = _currentRequest = _ImageRequest(currentUri: _resolvedUri!);
+    try {
+      _currentImageDescriptor = await request._obtainImage(contextId);
+    } catch (error) {
+      _dispatchErrorEvent();
+    } finally {
+      return request;
+    }
+  }
+
   String get loading => getAttribute(LOADING) ?? '';
   set loading(String value) {
     internalSetAttribute(SCALING, value);
@@ -513,10 +497,9 @@ class ImageElement extends Element {
 
   set width(int value) {
     if (value.isNegative) value = 0;
-    internalSetAttribute('width', value.toString());
-    _propertyWidth = value.toDouble();
+    internalSetAttribute(WIDTH, value.toString());
     if (_shouldScaling) {
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      _decode(updateImageProvider: true);
     } else {
       _resizeImage();
     }
@@ -524,16 +507,15 @@ class ImageElement extends Element {
 
   set height(int value) {
     if (value.isNegative) value = 0;
-    internalSetAttribute('height', value.toString());
-    _propertyHeight = value.toDouble();
+    internalSetAttribute(HEIGHT, value.toString());
     if (_shouldScaling) {
-      _resolveImage(_resolvedUri, updateImageProvider: true);
+      _decode(updateImageProvider: true);
     } else {
       _resizeImage();
     }
   }
 
-  void _resolveResource(String src) {
+  void _resolveResourceUri(String src) {
     String base = ownerDocument.controller.url;
     try {
       _resolvedUri = ownerDocument.controller.uriParser!.resolve(Uri.parse(base), Uri.parse(src));
@@ -545,21 +527,9 @@ class ImageElement extends Element {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH || property == HEIGHT) {
-      if (property == WIDTH) {
-        double? resolveStyleWidth = renderStyle.width.value == null && renderStyle.width.isNotAuto
-          ? null : renderStyle.width.computedValue;
-        // To avoid resolved auto, which computed value is infinity, we can not calculate
-        // infinite double as valid number, mark null to let width/height resized by decode
-        // size.
-        _styleWidth = resolveStyleWidth == double.infinity ? null : resolveStyleWidth;
-      } else if (property == HEIGHT) {
-        double? resolveStyleHeight = renderStyle.height.value == null && renderStyle.height.isNotAuto
-          ? null : renderStyle.height.computedValue;
-        _styleHeight = resolveStyleHeight == double.infinity ? null : resolveStyleHeight;
-      }
       // Resize image
       if (_shouldScaling) {
-        _resolveImage(_resolvedUri, updateImageProvider: true);
+        _decode(updateImageProvider: true);
       } else {
         _resizeImage();
       }
@@ -571,3 +541,71 @@ class ImageElement extends Element {
   }
 }
 
+// https://html.spec.whatwg.org/multipage/images.html#images-processing-model
+enum _ImageRequestState {
+  // The user agent hasn't obtained any image data, or has obtained some or
+  // all of the image data but hasn't yet decoded enough of the image to get
+  // the image dimensions.
+  unavailable,
+
+  // The user agent has obtained some of the image data and at least the
+  // image dimensions are available.
+  partiallyAvailable,
+
+  // The user agent has obtained all of the image data and at least the image
+  // dimensions are available.
+  completelyAvailable,
+
+  // The user agent has obtained all of the image data that it can, but it
+  // cannot even decode the image enough to get the image dimensions (e.g.
+  // the image is corrupted, or the format is not supported, or no data
+  // could be obtained).
+  broken,
+}
+
+// https://html.spec.whatwg.org/multipage/images.html#image-request
+class _ImageRequest {
+  _ImageRequest({
+    required this.currentUri,
+    this.state = _ImageRequestState.unavailable,
+  });
+
+  /// The request uri.
+  Uri currentUri;
+
+  /// Current state of image request.
+  _ImageRequestState state;
+
+  /// When an image request's state is either partially available or completely available,
+  /// the image request is said to be available.
+  bool get available => state == _ImageRequestState.completelyAvailable
+      || state == _ImageRequestState.partiallyAvailable;
+
+  Future<ui.ImageDescriptor> _obtainImage(int? contextId) async {
+    final KrakenBundle bundle = KrakenBundle.fromUrl(currentUri.toString());
+    await bundle.resolve(contextId);
+
+    if (!bundle.isResolved) {
+      throw FlutterError('Failed to load $currentUri');
+    }
+
+    final Uint8List data = bundle.data!;
+
+    // Free the bundle memory.
+    bundle.dispose();
+
+    // Decode size of raw image.
+    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(data);
+    final ui.ImageDescriptor descriptor = await ui.ImageDescriptor.encoded(buffer);
+
+    // State available at least the image dimensions are available.
+    if (descriptor.width != 0 && descriptor.height != 0) {
+      state = _ImageRequestState.partiallyAvailable;
+    } else {
+      state = _ImageRequestState.broken;
+    }
+
+    buffer.dispose();
+    return descriptor;
+  }
+}

@@ -1,13 +1,11 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
 
 enum NodeType {

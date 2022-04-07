@@ -107,7 +107,7 @@ describe('flex-minimum', () => {
 
     await snapshot();
   });
-  xit('height-flex-items-003', async () => {
+  it('height-flex-items-003', async () => {
     let p;
     let referenceOverlappedRed;
     let content100X100;
@@ -184,7 +184,7 @@ describe('flex-minimum', () => {
 
     await snapshot();
   });
-  xit('height-flex-items-004', async () => {
+  it('height-flex-items-004', async () => {
     let referenceOverlappedRed;
     let constrainedFlex;
     referenceOverlappedRed = createElement('div', {
@@ -220,9 +220,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-flex-items-005', async () => {
+  it('height-flex-items-005', async () => {
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
     let constrainedFlex;
@@ -262,9 +262,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-flex-items-006', async () => {
+  it('height-flex-items-006', async () => {
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
     let constrainedFlex;
@@ -304,9 +304,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-flex-items-007', async () => {
+  it('height-flex-items-007', async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -366,9 +366,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('height-flex-items-008', async () => {
+  it('height-flex-items-008', async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -428,8 +428,10 @@ describe('flex-minimum', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: Support outline.
   xit('height-flex-items-009', async () => {
     let p;
     let log;
@@ -651,6 +653,8 @@ describe('flex-minimum', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl word-break rule of W3C.
   xit("width-flex-items-001", async () => {
     let p;
     let referenceOverlappedRed;
@@ -718,7 +722,8 @@ describe('flex-minimum', () => {
 
     await snapshot();
   })
-  xit("width-flex-items-002", async () => {
+
+  it("width-flex-items-002", async () => {
     let p;
     let referenceOverlappedRed;
     let content200X100;
@@ -792,6 +797,8 @@ describe('flex-minimum', () => {
 
     await snapshot();
   })
+
+  // @TODO: Impl word-break rule of W3C.
   xit("width-flex-items-003", async () => {
     let p;
     let referenceOverlappedRed;
@@ -861,7 +868,7 @@ describe('flex-minimum', () => {
     await snapshot();
   })
 
-  xit("width-flex-items-004", async () => {
+  it("width-flex-items-004", async () => {
     let p;
     let referenceOverlappedRed;
     let constrainedFlex;
@@ -907,7 +914,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/100x100-green.png',
+          'assets/100x100-green.png',
           style: {},
         }),
       ]
@@ -917,8 +924,10 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
+
+  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
   xit("width-flex-items-005", async () => {
     let p;
     let referenceOverlappedRed;
@@ -966,7 +975,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/60x60-green.png',
+          src: 'assets/60x60-green.png',
           style: {
             width: '100px',
           },
@@ -978,9 +987,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
-  xit("width-flex-items-006", async () => {
+  it("width-flex-items-006", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -1028,7 +1037,7 @@ describe('flex-minimum', () => {
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/100x100-green.png',
+          'assets/100x100-green.png',
           style: {
             width: '100px',
           },
@@ -1040,9 +1049,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
-  xit("width-flex-items-007", async () => {
+  it("width-flex-items-007", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -1089,7 +1098,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/60x60-green.png',
+          src: 'assets/60x60-green.png',
           style: {
             height: '100px',
           },
@@ -1101,9 +1110,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
-  xit("width-flex-items-008", async () => {
+  it("width-flex-items-008", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -1151,7 +1160,7 @@ describe('flex-minimum', () => {
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/100x100-green.png',
+          'assets/100x100-green.png',
           style: {
             height: '100px',
           },
@@ -1163,8 +1172,10 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
+
+  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
   xit("width-flex-items-009", async () => {
     let p;
     let referenceOverlappedRed;
@@ -1228,9 +1239,9 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
-  xit("width-flex-items-010", async () => {
+  it("width-flex-items-010", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -1294,7 +1305,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
   it("width-flex-items-011", async () => {
     let p;
@@ -1393,6 +1404,8 @@ describe('flex-minimum', () => {
 
     await snapshot(0.1);
   })
+
+  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
   xit("width-flex-items-013", async () => {
     let p;
     let referenceOverlappedRed;
@@ -1465,6 +1478,6 @@ describe('flex-minimum', () => {
     BODY.appendChild(div_1);
 
 
-    await snapshot();
+    await snapshot(0.1);
   })
 });

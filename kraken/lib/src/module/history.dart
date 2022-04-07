@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:collection';
 import 'dart:convert';
@@ -8,7 +7,6 @@ import 'dart:async';
 
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 
 class HistoryItem {
   HistoryItem(this.bundle, this.state, this.needJump);

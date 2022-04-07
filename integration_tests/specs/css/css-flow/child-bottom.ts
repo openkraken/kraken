@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('child-bottom', () => {
-  xit('margin-in-unresolvable-percentage-height', async () => {
+  it('margin-in-unresolvable-percentage-height', async () => {
     let p;
     let div;
     p = createElement(

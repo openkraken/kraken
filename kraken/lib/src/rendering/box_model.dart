@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:math' as math;
 import 'dart:ui';
@@ -12,9 +11,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/dom/sliver_manager.dart';
 
 import 'debug_overlay.dart';
 
@@ -955,7 +952,12 @@ class RenderBoxModel extends RenderBox
 
   // The contentSize of layout box
   Size? _contentSize;
-  Size get contentSize => _contentSize ?? Size.zero;
+  Size get contentSize {
+    if (_contentSize == null) {
+      owner?.flushLayout();
+    }
+    return _contentSize ?? Size.zero;
+  }
 
   int get clientWidth {
     double width = contentSize.width;

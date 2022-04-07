@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -325,8 +324,7 @@ class CSSPositionedLayout {
     if (child.hasSize &&
       !needsRelayout &&
       (childConstraints == child.constraints) &&
-      ((child is RenderBoxModel && !child.needsLayout) ||
-        (child is RenderTextBox && !child.needsLayout))
+      (!child.needsLayout)
     ) {
       isChildNeedsLayout = false;
     }

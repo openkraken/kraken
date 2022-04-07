@@ -1,10 +1,8 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 
 const String ANCHOR = 'A';
 const String _TARGET_SELF = 'self';

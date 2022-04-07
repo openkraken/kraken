@@ -104,7 +104,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-height-002', async () => {
+  it('replaced-height-002', async () => {
     let p;
     let div1;
     p = createElement(
@@ -178,7 +178,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-003-ref', async () => {
+  it('replaced-height-003-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -235,7 +235,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-003', async () => {
+  it('replaced-height-003', async () => {
     let p;
     let div1;
     p = createElement(
@@ -294,6 +294,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin-bottom of position absolute element offset wrong.
   xit('replaced-height-004', async () => {
     let p;
     let div1;
@@ -353,7 +355,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-005', async () => {
+  it('replaced-height-005', async () => {
     let p;
     let div1;
     p = createElement(
@@ -412,7 +414,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-006-ref', async () => {
+  it('replaced-height-006-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -463,7 +465,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-006', async () => {
+  it('replaced-height-006', async () => {
     let p;
     let div2;
     let div3;
@@ -584,7 +586,8 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-height-007', async () => {
+
+  it('replaced-height-007', async () => {
     let p;
     let div1;
     p = createElement(
@@ -696,7 +699,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-height-008', async () => {
+  it('replaced-height-008', async () => {
     let p;
     let div1;
     p = createElement(
@@ -796,7 +799,8 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-height-009', async () => {
+
+  it('replaced-height-009', async () => {
     let p;
     let div1;
     p = createElement(
@@ -858,7 +862,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-010', async () => {
+  it('replaced-height-010', async () => {
     let p;
     let div1;
     p = createElement(
@@ -917,7 +921,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-011', async () => {
+  it('replaced-height-011', async () => {
     let p;
     let div1;
     p = createElement(
@@ -976,7 +980,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-012', async () => {
+  it('replaced-height-012', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1140,7 +1144,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-002-ref', async () => {
+  it('replaced-max-height-002-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -1188,7 +1192,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-002', async () => {
+  it('replaced-max-height-002', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1249,7 +1253,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-003-ref', async () => {
+  it('replaced-max-height-003-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -1297,7 +1301,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-003', async () => {
+  it('replaced-max-height-003', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1357,6 +1361,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin-bottom of position absolute element offset wrong.
   xit('replaced-max-height-004', async () => {
     let p;
     let div1;
@@ -1417,7 +1423,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-005', async () => {
+  it('replaced-max-height-005', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1477,7 +1483,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-006', async () => {
+  it('replaced-max-height-006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1592,7 +1598,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-max-height-007', async () => {
+  it('replaced-max-height-007', async () => {
     let p;
     let div2;
     let div3;
@@ -1716,7 +1722,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-max-height-008', async () => {
+  it('replaced-max-height-008', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1823,7 +1829,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-max-height-009', async () => {
+  it('replaced-max-height-009', async () => {
     let p;
     let div2;
     let div3;
@@ -1896,7 +1902,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-010', async () => {
+  it('replaced-max-height-010', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1956,7 +1962,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-011', async () => {
+  it('replaced-max-height-011', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2016,7 +2022,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-max-height-012', async () => {
+  it('replaced-max-height-012', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2076,7 +2082,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-001', async () => {
+
+  it('replaced-width-001', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2204,6 +2211,8 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: Support direction.
   xit('replaced-width-002', async () => {
     let p;
     let div1;
@@ -2332,7 +2341,7 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
-  xit('replaced-width-003', async () => {
+  it('replaced-width-003', async () => {
     let p;
     let containingblock;
     p = createElement(
@@ -2406,6 +2415,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin auto alignment should not take effect on position absolute element.
   xit('replaced-width-004', async () => {
     let p;
     let div1;
@@ -2481,6 +2492,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin auto alignment should not take effect on position absolute element.
   xit('replaced-width-005', async () => {
     let p;
     let div1;
@@ -2556,7 +2569,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-006', async () => {
+
+  it('replaced-width-006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2631,6 +2645,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: margin auto alignment should not take effect on position absolute element.
   xit('replaced-width-007', async () => {
     let p;
     let div1;
@@ -2760,6 +2776,8 @@ describe('absolute-non', () => {
 
     await snapshot(0.1);
   });
+
+  // @TODO: margin auto alignment should not take effect on position absolute element. 
   xit('replaced-width-008', async () => {
     let p;
     let containingblock;
@@ -2835,6 +2853,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // Support direction.
   xit('replaced-width-009', async () => {
     let p;
     let containingblock;
@@ -2910,7 +2930,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-010', async () => {
+
+  it('replaced-width-010', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2984,7 +3005,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-011', async () => {
+
+  it('replaced-width-011', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3059,6 +3081,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('replaced-width-012', async () => {
     let p;
     let div1;
@@ -3134,7 +3158,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-013', async () => {
+
+  it('replaced-width-013', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3208,7 +3233,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-014', async () => {
+  it('replaced-width-014', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3406,7 +3431,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-016', async () => {
+  it('replaced-width-016', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3480,7 +3505,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-017-ref', async () => {
+  it('replaced-width-017-ref', async () => {
     let p;
     let green45X120;
     let green45X120_1;
@@ -3531,6 +3556,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-017', async () => {
     let p;
     let div;
@@ -3578,6 +3606,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-018', async () => {
     let p;
     let innerInlineBlock;
@@ -3628,6 +3659,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-019', async () => {
     let p;
     let innerFloated;
@@ -3678,6 +3712,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-020', async () => {
     let p;
     let div;
@@ -3725,7 +3762,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-021-ref', async () => {
+
+  it('replaced-width-021-ref', async () => {
     let p;
     let green45X120;
     let green45X120_1;
@@ -3779,6 +3817,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-021', async () => {
     let p;
     let div;
@@ -3828,6 +3869,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-022', async () => {
     let p;
     let innerInlineBlock;
@@ -3880,6 +3924,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-023', async () => {
     let p;
     let innerFloated;
@@ -3932,6 +3979,9 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-024', async () => {
     let p;
     let div;
@@ -3981,7 +4031,8 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-025-ref', async () => {
+
+  it('replaced-width-025-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -4024,7 +4075,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-025', async () => {
+  it('replaced-width-025', async () => {
     let p;
     let absPosOverlappingGreen;
     let overlappedRed;
@@ -4092,7 +4143,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-026-ref', async () => {
+  it('replaced-width-026-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -4136,7 +4187,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-026', async () => {
+  it('replaced-width-026', async () => {
     let p;
     let absPosOverlappingGreen;
     let overlappedRed;
@@ -4274,7 +4325,7 @@ describe('absolute-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-028', async () => {
+  it('replaced-width-028', async () => {
     let p;
     let p_1;
     let div;
@@ -4323,7 +4374,7 @@ describe('absolute-non', () => {
       },
       [
         createElement('img', {
-          src: 'assets/green-rectangle-50wideBy10tall.png',
+          src: 'assets/green-60-60.png',
           alt: 'Image download support must be enabled',
           style: {
             height: '100%',

@@ -1,3 +1,4 @@
+// @TODO: Support getComputedStyle.
 xdescribe('background-331', () => {
   const divStyle = {
     background: 'red',

@@ -1,10 +1,8 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:io';
 
-import 'package:kraken/foundation.dart';
 import 'package:kraken/kraken.dart';
 
 // TODO: Don't use header to mark context.

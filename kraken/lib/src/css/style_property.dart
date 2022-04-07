@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:kraken/css.dart';
@@ -546,20 +545,51 @@ class CSSStyleProperty {
 
     bool isSizeEndAndLineHeightStart = false;
 
+    // Font shorthand has following rules:
+    // * it must include values for:
+    //    <font-size>
+    //    <font-family>
+    // * it may optionally include values for:
+    //    <font-style>
+    //    <font-variant>
+    //    <font-weight>
+    //    <font-stretch>
+    //    <line-height>
+    // * font-style, font-variant and font-weight must precede font-size
+    // * line-height must immediately follow font-size, preceded by "/", like this: "16px/3"
+    // * font-family must be the last value specified.
+    //
+    // [ [ <'font-style'> || <font-variant-css2> || <'font-weight'> || <font-stretch-css3> ]? <'font-size'> [ / <'line-height'> ]? <'font-family'> ]
+    // https://drafts.csswg.org/css-fonts/#font-prop
     for (String value in values) {
       final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
-      if (style == null && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
+      if (style == null
+        && size == null
+        && family == null
+        && !isSizeEndAndLineHeightStart
+        && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
         style = value;
-      } else if (weight == null && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))) {
+      } else if (weight == null
+        && size == null
+        && family == null
+        && !isSizeEndAndLineHeightStart
+        && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))
+      ) {
         weight = value;
-      } else if (size == null && (isValueVariableFunction || CSSLength.isNonNegativeLength(value))) {
+      } else if (size == null
+        && (isValueVariableFunction || CSSLength.isNonNegativeLength(value))
+      ) {
         size = value;
       } else if (value == '/') {
         isSizeEndAndLineHeightStart = true;
         continue;
-      } else if (lineHeight == null && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))) {
+      } else if (lineHeight == null
+        && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))
+      ) {
         lineHeight = value;
-      } else if (family == null) {
+      } else if (size != null
+        && family == null
+      ) {
         // The font-family must be the last value specified.
         // Like `font: 12px` is invalid property value.
         family = value;

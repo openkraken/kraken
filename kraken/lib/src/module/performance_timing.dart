@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 import 'dart:ffi';
 import 'dart:typed_data';
 

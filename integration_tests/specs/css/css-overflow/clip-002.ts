@@ -1,5 +1,5 @@
 /*auto generated*/
-xdescribe('clip-002', () => {
+describe('clip-002', () => {
   it('ref', async () => {
     let inner;
     let inner_1;
@@ -94,6 +94,6 @@ xdescribe('clip-002', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });

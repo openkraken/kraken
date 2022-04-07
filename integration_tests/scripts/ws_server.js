@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 const WebSocket = require('ws');
 
 exports.startWsServer = function(port) {

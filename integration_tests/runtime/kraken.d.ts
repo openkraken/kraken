@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 type MethodHandler = (method: string, args: any[]) => void;
 interface MethodChannel {
     addMethodCallHandler(handler: MethodHandler): void;
