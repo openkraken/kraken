@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyBrowser> {
 
   List<int> _krakenOnloadTimes = [];
   List<int> _webOnloadTimes = [];
-  final int _collectCount = 30;
+  final int _collectCount = 60;
 
   OutlineInputBorder outlineBorder = OutlineInputBorder(
     borderSide: BorderSide(color: Colors.transparent, width: 0.0),
