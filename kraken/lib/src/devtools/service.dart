@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
-import '../bridge/dynamic_library.dart';
 
 typedef NativePostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartPostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);

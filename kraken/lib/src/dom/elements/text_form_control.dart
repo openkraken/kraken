@@ -8,7 +8,6 @@ import 'dart:ui';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -130,6 +129,56 @@ class EditableTextDelegate implements TextSelectionDelegate {
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
     _textFormControlElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
+
+  @override
+  void copySelection(SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar(false);
+
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+        // Collapse the selection and hide the toolbar and handles.
+          userUpdateTextEditingValue(
+            TextEditingValue(
+              text: textEditingValue.text,
+              selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
+            ),
+            SelectionChangedCause.toolbar,
+          );
+          break;
+      }
+    }
+  }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
+  }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) async {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) async {
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+    }
+  }
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
@@ -146,6 +195,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     );
     scrollOffset = _scrollable.position;
   }
+
+  // The [TextEditableActionTarget] used to apply actions.
+  // See also widgets/text_control.dart
+  Object? textEditingActionTarget;
 
   bool isMultiline;
   int? get _maxLines {
@@ -216,7 +269,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   static String obscuringCharacter = '•';
-
 
   int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
   set width(int value) {
@@ -1362,6 +1414,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void showAutocorrectionPromptRect(int start, int end) {
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
+  }
+
+  @override
+  void dispose() {
+    textEditingActionTarget = null;
+    super.dispose();
   }
 }
 

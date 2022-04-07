@@ -2,7 +2,6 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';

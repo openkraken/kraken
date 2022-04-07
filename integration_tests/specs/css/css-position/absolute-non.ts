@@ -587,8 +587,7 @@ describe('absolute-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-height-007', async () => {
+  it('replaced-height-007', async () => {
     let p;
     let div1;
     p = createElement(
@@ -801,8 +800,7 @@ describe('absolute-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-height-009', async () => {
+  it('replaced-height-009', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2085,8 +2083,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-width-001', async () => {
+  it('replaced-width-001', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2573,8 +2570,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-width-006', async () => {
+  it('replaced-width-006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2650,7 +2646,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: margin auto alignment should not take effect on position absolute element.
   xit('replaced-width-007', async () => {
     let p;
     let div1;
@@ -2781,7 +2777,7 @@ describe('absolute-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: margin auto alignment should not take effect on position absolute element. 
   xit('replaced-width-008', async () => {
     let p;
     let containingblock;
@@ -2858,7 +2854,6 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
   // Support direction.
   xit('replaced-width-009', async () => {
     let p;
@@ -2936,8 +2931,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-width-010', async () => {
+  it('replaced-width-010', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3012,8 +3006,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-width-011', async () => {
+  it('replaced-width-011', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3089,7 +3082,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Support direction.
   xit('replaced-width-012', async () => {
     let p;
     let div1;
@@ -3166,8 +3159,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
-  xit('replaced-width-013', async () => {
+  it('replaced-width-013', async () => {
     let p;
     let div1;
     p = createElement(
@@ -3565,7 +3557,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-017', async () => {
     let p;
     let div;
@@ -3614,7 +3607,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-018', async () => {
     let p;
     let innerInlineBlock;
@@ -3666,7 +3660,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-019', async () => {
     let p;
     let innerFloated;
@@ -3718,7 +3713,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-020', async () => {
     let p;
     let div;
@@ -3822,7 +3818,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-021', async () => {
     let p;
     let div;
@@ -3873,7 +3870,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-022', async () => {
     let p;
     let innerInlineBlock;
@@ -3927,7 +3925,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-023', async () => {
     let p;
     let innerFloated;
@@ -3981,7 +3980,8 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: `font: '100px/1 Ahem'` shorthand parse wrong.
+  // @TODO: Impl setting longest words width as the minimum size of text.
+  // https://github.com/openkraken/kraken/issues/401
   xit('replaced-width-024', async () => {
     let p;
     let div;

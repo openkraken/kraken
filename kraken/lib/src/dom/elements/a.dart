@@ -3,7 +3,6 @@
  */
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 
 const String ANCHOR = 'A';
 const String _TARGET_SELF = 'self';

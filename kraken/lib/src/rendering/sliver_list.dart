@@ -11,7 +11,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/sliver_manager.dart';
-import 'package:meta/meta.dart';
 
 class RenderSliverListLayout extends RenderLayoutBox {
   // Expose viewport for sliver mixin.

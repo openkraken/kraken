@@ -1,16 +1,17 @@
-import 'dart:io';
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:kraken/kraken.dart';
-import 'dart:ui';
+import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:kraken/kraken.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 const benchMarkServerAddress = String.fromEnvironment("IP");
 
-void main(List<String> args) {
+void main() {
   runApp(MyApp());
 }
 

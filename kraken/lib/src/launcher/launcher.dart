@@ -8,8 +8,6 @@ import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/src/launcher/controller.dart';
 
 typedef ConnectedCallback = void Function();
 

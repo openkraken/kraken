@@ -10,7 +10,7 @@ class Throttling {
   Duration _duration;
   Duration get duration => _duration;
   set duration(Duration value) {
-    assert(duration is Duration && !duration.isNegative);
+    assert(!duration.isNegative);
     _duration = value;
   }
 
@@ -21,7 +21,7 @@ class Throttling {
   final StreamController<bool> _stateSC = StreamController<bool>.broadcast();
 
   Throttling({Duration duration = const Duration(seconds: 1)})
-      : assert(duration is Duration && !duration.isNegative),
+      : assert(!duration.isNegative),
         _duration = duration {
     _stateSC.sink.add(true);
   }

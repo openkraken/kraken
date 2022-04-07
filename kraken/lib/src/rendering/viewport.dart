@@ -1,9 +1,6 @@
 /*
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
-import 'dart:ui';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/launcher.dart';
