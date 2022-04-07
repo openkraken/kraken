@@ -336,32 +336,7 @@ void ContainerNode::RemoveChildren() {
   }
 }
 
-void ContainerNode::ParserAppendChild(Node* new_child) {
-  assert(new_child);
-  assert(!new_child->IsDocumentFragment());
+ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document, type) {}
 
-  if (!CheckParserAcceptChild(*new_child))
-    return;
-
-  // FIXME: parserRemoveChild can run script which could then insert the
-  // newChild back into the page. Loop until the child is actually removed.
-  // See: fast/parser/execute-script-during-adoption-agency-removal.html
-  while (ContainerNode* parent = new_child->parentNode())
-    parent->ParserRemoveChild(*new_child);
-
-  if (GetDocument() != new_child->GetDocument())
-    GetDocument().adoptNode(new_child, ASSERT_NO_EXCEPTION);
-
-  {
-    EventDispatchForbiddenScope assert_no_event_dispatch;
-    ScriptForbiddenScope forbid_script;
-
-    AdoptAndAppendChild()(*this, *new_child, nullptr);
-    DCHECK_EQ(new_child->ConnectedSubframeCount(), 0u);
-    ChildListMutationScope(*this).ChildAdded(*new_child);
-  }
-
-  NotifyNodeInserted(*new_child, ChildrenChangeSource::kParser);
-}
 
 }  // namespace kraken

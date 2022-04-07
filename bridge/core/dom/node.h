@@ -22,7 +22,6 @@ class Element;
 class Document;
 class DocumentFragment;
 class TextNode;
-class Document;
 class ContainerNode;
 class NodeData;
 class NodeList;
@@ -73,7 +72,6 @@ class Node : public EventTarget {
   Node* lastChild() const;
 
   Node& TreeRoot() const;
-  Node& ShadowIncludingRoot() const;
 
   // TODO: support following APIs.
   //  void Prepend(
@@ -96,31 +94,17 @@ class Node : public EventTarget {
   //      ExceptionState& exception_state);
 
   void remove(ExceptionState&);
-  void remove();
-
-  Node* PseudoAwareNextSibling() const;
-  Node* PseudoAwarePreviousSibling() const;
-  Node* PseudoAwareFirstChild() const;
-  Node* PseudoAwareLastChild() const;
 
   Node* insertBefore(Node* new_child, Node* ref_child, ExceptionState&);
-  Node* insertBefore(Node* new_child, Node* ref_child);
   Node* replaceChild(Node* new_child, Node* old_child, ExceptionState&);
-  Node* replaceChild(Node* new_child, Node* old_child);
   Node* removeChild(Node* child, ExceptionState&);
-  Node* removeChild(Node* child);
   Node* appendChild(Node* new_child, ExceptionState&);
-  Node* appendChild(Node* new_child);
 
   bool hasChildren() const { return firstChild(); }
   Node* cloneNode(bool deep, ExceptionState&) const;
 
   // https://dom.spec.whatwg.org/#concept-node-clone
   virtual Node* Clone(Document&, CloneChildrenFlag) const = 0;
-
-  // This is not web-exposed. We should rename it or remove it.
-  Node* cloneNode(bool deep) const;
-  void normalize();
 
   bool isEqualNode(Node*) const;
   bool isSameNode(const Node* other) const { return this == other; }
@@ -144,16 +128,9 @@ class Node : public EventTarget {
   bool IsCustomElement() const { return GetCustomElementState() != CustomElementState::kUncustomized; }
   void SetCustomElementState(CustomElementState);
 
-  virtual bool IsMediaControlElement() const { return false; }
-  virtual bool IsMediaControls() const { return false; }
   virtual bool IsMediaElement() const { return false; }
-  virtual bool IsTextTrackContainer() const { return false; }
-  virtual bool IsVTTElement() const { return false; }
   virtual bool IsAttributeNode() const { return false; }
   virtual bool IsCharacterDataNode() const { return false; }
-  virtual bool IsFrameOwnerElement() const { return false; }
-  virtual bool IsMediaRemotingInterstitial() const { return false; }
-  virtual bool IsPictureInPictureInterstitial() const { return false; }
 
   // StyledElements allow inline style (style="border: 1px"), presentational
   // attributes (ex. color), class names (ex. class="foo bar") and other
@@ -318,7 +295,7 @@ class Node : public EventTarget {
     kCreateDocument = kCreateContainer | kIsConnectedFlag,
   };
 
-  Node(ConstructionType);
+  Node(Document*, ConstructionType);
 
   void SetIsFinishedParsingChildren(bool value) { SetFlag(value, kIsFinishedParsingChildrenFlag); }
 

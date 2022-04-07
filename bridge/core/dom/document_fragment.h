@@ -13,9 +13,9 @@ namespace kraken {
 class DocumentFragment : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
  public:
-  static DocumentFragment* Create(ExecutingContext* context, ExceptionState& exception_state);
+  static DocumentFragment* Create(ExecutingContext* context, Document* document, ExceptionState& exception_state);
 
-  DocumentFragment(ExecutingContext* context);
+  DocumentFragment(ExecutingContext* context, Document* document);
 
   virtual bool IsTemplateContent() const { return false; }
 

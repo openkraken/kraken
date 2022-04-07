@@ -285,6 +285,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/events/event_target_impl.h
     core/dom/node.cc
     core/dom/node.h
+    core/dom/attr.cc
+    core/dom/attr.h
     core/dom/element.cc
     core/dom/element.h
     core/dom/element_data.cc

@@ -154,7 +154,7 @@ class ContainerNode : public Node {
   void Trace(GCVisitor* visitor) const override;
 
  protected:
-  ContainerNode(ExecutingContext* context, ConstructionType = kCreateContainer);
+  ContainerNode(Document* document, ConstructionType = kCreateContainer);
 
   void SetFirstChild(Node* child) { first_child_ = child; }
   void SetLastChild(Node* child) { last_child_ = child; }
@@ -167,14 +167,8 @@ class ContainerNode : public Node {
   // |next| may be nullptr.
   // |post_insertion_notification_targets| must not be nullptr.
   template <typename Functor>
-  void InsertNodeVector(const NodeVector&,
-                        Node* next,
-                        const Functor&,
-                        NodeVector* post_insertion_notification_targets);
-  void DidInsertNodeVector(
-      const NodeVector&,
-      Node* next,
-      const NodeVector& post_insertion_notification_targets);
+  void InsertNodeVector(const NodeVector&, Node* next, const Functor&, NodeVector* post_insertion_notification_targets);
+  void DidInsertNodeVector(const NodeVector&, Node* next, const NodeVector& post_insertion_notification_targets);
 
   class AdoptAndInsertBefore;
   class AdoptAndAppendChild;
