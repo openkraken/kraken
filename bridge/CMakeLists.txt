@@ -283,6 +283,16 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/events/event_listener_map.cc
     core/dom/events/event_target_impl.cc
     core/dom/events/event_target_impl.h
+    core/dom/node.cc
+    core/dom/node.h
+    core/dom/collection_index_cache.h
+    core/dom/child_node_list.cc
+    core/dom/child_node_list.h
+    core/dom/node_lists_node_data.cc
+    core/dom/node_lists_node_data.h
+    core/dom/node_list.h
+    core/dom/container_node.cc
+    core/dom/container_node.h
     core/events/error_event.cc
     core/events/error_event.h
 #    core/dom/character_data.cc
@@ -323,6 +333,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_event_init.cc
     out/qjs_event_target.cc
     out/qjs_event_target.h
+    out/qjs_node.h
+    out/qjs_node.cc
     out/event_type_names.h
     out/event_type_names.cc
     out/built_in_string.cc

@@ -20,6 +20,7 @@
 #include "qjs_error_event_init.h"
 #include "qjs_event_init.h"
 #include "qjs_event_listener_options.h"
+#include "qjs_node.h"
 
 namespace kraken {
 
@@ -48,7 +49,7 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
 
 // Nullable value for pointer value
 template <typename T>
-struct Converter<IDLNullable<T>, std::enable_if<std::is_pointer<typename Converter<T>::ImplType>::value>>
+struct Converter<IDLNullable<T>, std::enable_if_t<std::is_pointer<typename Converter<T>::ImplType>::value>>
     : public ConverterBase<IDLNullable<T>> {
   using ImplType = typename Converter<T>::ImplType;
 
@@ -420,6 +421,14 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     return EventListenerOptions::Create(ctx, value, exception_state);
+  }
+};
+
+template<>
+struct Converter<Node> : public ConverterBase<Node> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return toScriptWrappable<Node>(value);
   }
 };
 

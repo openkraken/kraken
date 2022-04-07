@@ -83,7 +83,7 @@ class EventTarget : public ScriptWrappable {
  public:
   using ImplType = EventTarget*;
 
-  static EventTarget* Create(ExecutingContext* context);
+  static EventTarget* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   EventTarget() = delete;
   explicit EventTarget(ExecutingContext* context);

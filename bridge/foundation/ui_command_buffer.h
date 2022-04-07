@@ -15,7 +15,7 @@ namespace kraken {
 
 class ExecutingContext;
 
-enum UICommand {
+enum class UICommand {
   createElement,
   createTextNode,
   createComment,

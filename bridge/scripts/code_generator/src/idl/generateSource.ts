@@ -172,7 +172,7 @@ function generateFunctionCallBody(blob: IDLBlob, declaration: FunctionDeclaratio
     call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
 ${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `${requiredArguments.join(',')}` : 'exception_state'});`;
   } else {
-    call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context${minimalRequiredArgc > 0 ? `,${requiredArguments.join(',')}` : ''});`;
+    call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context, ${requiredArguments.join(',')});`;
   }
 
   return `${requiredArgumentsInit.join('\n')}

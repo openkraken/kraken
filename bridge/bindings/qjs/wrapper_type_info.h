@@ -17,7 +17,8 @@ enum {
   JS_CLASS_BLOB,
   JS_CLASS_EVENT,
   JS_CLASS_ERROREVENT,
-  JS_CLASS_EVENTTARGET
+  JS_CLASS_EVENTTARGET,
+  JS_CLASS_NODE
 };
 
 // This struct provides a way to store a bunch of information that is helpful
