@@ -2,7 +2,7 @@
 
 **Breaking Changes**
 
-+ Update flutter requirement to 2.8.x
++ Update flutter requirement to 2.8.x https://github.com/openkraken/kraken/pull/1298
 
 **Bug Fixed**
 
