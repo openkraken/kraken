@@ -1,6 +1,9 @@
 name: Sample Page Benchmark
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
 
 env:
   nodeVersion: "16"
