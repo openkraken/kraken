@@ -837,8 +837,42 @@ task('run-benchmark', async (done) => {
   }
 
   let androidDevices = getDevicesInfo();
-  execSync(`flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress}"`, {stdio: 'inherit', cwd: paths.performanceTests});
-  execSync('adb uninstall com.example.performance_tests');
+  let performanceInfos = execSync(
+    `flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress}" | grep Performance`,
+    {
+      cwd: paths.performanceTests
+    }
+  ).toString().split(/\n/);
+
+  for (let item of performanceInfos) {
+    let info = performanceInfos[item];
+    const match = /\[(\s?\d,?)+\]/.exec(info);
+    if (match) {
+      try {
+        let performanceDatas = JSON.parse(match[0]);
+        // Remove the top five and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
+        performanceDatas = performanceDatas.sort().slice(1, performanceDatas.length - 1);
+
+
+        // Get average of list.
+        let sumLoadTimes = 0;
+        performanceDatas.forEach(item => sumLoadTimes += item);
+        let averageLoadTime = sumLoadTimes / performanceDatas.length;
+
+      } catch {
+        const err = new Error('The performance info is error.');
+        done(err);
+      }
+    }
+  }
+  
+  
+  
+  
+  console.log('infos2=', infos)
+
+
+  //execSync('adb uninstall com.example.performance_tests');
   
   done();
 });
