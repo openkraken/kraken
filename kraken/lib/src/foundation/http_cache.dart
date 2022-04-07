@@ -115,12 +115,13 @@ class HttpCacheController {
   Future<HttpClientResponse> interceptResponse(
       HttpClientRequest request,
       HttpClientResponse response,
-      HttpCacheObject cacheObject) async {
+      HttpCacheObject cacheObject,
+      HttpClient httpClient) async {
     await cacheObject.updateIndex(response);
 
     // Negotiate cache with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
-      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse(httpClient);
       if (cachedResponse != null) {
         return cachedResponse;
       }
