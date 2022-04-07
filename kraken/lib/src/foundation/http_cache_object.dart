@@ -189,12 +189,6 @@ class HttpCacheObject {
         index += 4;
       }
 
-      // Invalid cache blob size, mark as invalid.
-      if (await _blob.length != contentLength) {
-        _valid = false;
-        return;
-      }
-
       int urlLength;
       if (index + 4 <= byteLength) {
         // Read url.
@@ -226,7 +220,6 @@ class HttpCacheObject {
         }
         index += eTagLength;
       }
-
 
       int headersLength;
       if (index + 4 <= byteLength) {
@@ -375,6 +368,14 @@ class HttpCacheObject {
       return null;
     }
     HttpHeaders responseHeaders = createHttpHeaders(initialHeaders: _getResponseHeaders());
+
+    // Invalid cache blob size, mark as invalid.
+    // Unless content-encoding specified, like gzip or delfate, the real size is decoded size.
+    if (responseHeaders.value(HttpHeaders.contentEncodingHeader) == null && await _blob.length != contentLength) {
+      _valid = false;
+      return null;
+    }
+
     return HttpClientStreamResponse(
       _blob.openRead(),
       statusCode: HttpStatus.ok,

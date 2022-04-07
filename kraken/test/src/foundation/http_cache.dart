@@ -206,5 +206,27 @@ void main() {
 
       expect(res.statusCode, 301);
     });
+
+    test('Handle gzipped content', () async {
+      // First request to save cache.
+      var req = await httpClient.openUrl('GET',
+          server.getUri('js_gzipped'));
+      KrakenHttpOverrides.setContextHeader(req.headers, contextId);
+      var res = await req.close();
+      expect(String.fromCharCodes(await consolidateHttpClientResponseBytes(res))[0], '!');
+
+      // Assert cache object.
+      HttpCacheController cacheController = HttpCacheController.instance('local');
+      var cacheObject = await cacheController.getCacheObject(req.uri);
+      assert(cacheObject.valid);
+
+      var response = await cacheObject.toHttpClientResponse(httpClient);
+      assert(response != null);
+
+      var bytes = await consolidateHttpClientResponseBytes(response!);
+      String content = await resolveStringFromData(bytes);
+      expect(response.headers.value('content-encoding'), 'gzip');
+      expect(content.length, 18538);
+    });
   });
 }
