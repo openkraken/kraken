@@ -370,16 +370,27 @@ class HttpCacheObject {
     return await _blob.exists();
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse() async {
+  Future<HttpClientResponse?> toHttpClientResponse([HttpClient? httpClient]) async {
     if (!await _exists) {
       return null;
     }
-
+    HttpHeaders responseHeaders = createHttpHeaders(initialHeaders: _getResponseHeaders());
     return HttpClientStreamResponse(
       _blob.openRead(),
       statusCode: HttpStatus.ok,
-      responseHeaders: _getResponseHeaders(),
-    );
+      initialHeaders: responseHeaders,
+    )..compressionState = _getCompressionState(httpClient, responseHeaders);
+  }
+
+
+  static HttpClientResponseCompressionState _getCompressionState(HttpClient? httpClient, HttpHeaders responseHeaders) {
+    if (httpClient != null && responseHeaders.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
+      return httpClient.autoUncompress
+          ? HttpClientResponseCompressionState.decompressed
+          : HttpClientResponseCompressionState.compressed;
+    } else {
+      return HttpClientResponseCompressionState.notCompressed;
+    }
   }
 
   Future<Uint8List?> toBinaryContent() async {

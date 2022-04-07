@@ -64,9 +64,10 @@ class TestHttpClientInterceptor implements HttpClientInterceptor {
   Future<HttpClientResponse?> afterResponse(
       HttpClientRequest request, HttpClientResponse response) async {
     if (request.headers.value('x-test-id') == 'afterResponse-001') {
-      return HttpClientStreamResponse(response, responseHeaders: {
-        'x-test-after-response': ['modified'],
-      });
+      return HttpClientStreamResponse(response, initialHeaders: createHttpHeaders(
+        initialHeaders: {
+          'x-test-after-response': ['modified'],
+        }));
     }
     return response;
   }
