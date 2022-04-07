@@ -1733,7 +1733,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       final double runMainAxisExtent = metrics.mainAxisExtent;
       final double runCrossAxisExtent = metrics.crossAxisExtent;
       final double runBaselineExtent = metrics.baselineExtent;
-      final double totalFlexGrow = metrics.totalFlexGrow;
       final Map<int?, _RunChild> runChildren = metrics.runChildren;
       final List<_RunChild> runChildrenList = runChildren.values.toList();
       final double remainingSpace = mainAxisContentSize - runMainAxisExtent;
@@ -1934,7 +1933,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           if (_isHorizontalFlexDirection) {
             horizontalRemainingSpace = mainAxisRemainingSpace;
             verticalRemainingSpace = crossAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginLeft.isAuto) {
+            if (marginLeft.isAuto) {
               if (marginRight.isAuto) {
                 childMainPosition +=
                   (horizontalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
@@ -1956,7 +1955,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           } else {
             horizontalRemainingSpace = crossAxisRemainingSpace;
             verticalRemainingSpace = mainAxisRemainingSpace;
-            if (totalFlexGrow == 0 && marginTop.isAuto) {
+            if (marginTop.isAuto) {
               if (marginBottom.isAuto) {
                 childMainPosition +=
                   (verticalRemainingSpace / mainAxisMarginAutoChildrenCount) / 2;
