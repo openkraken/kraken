@@ -3,7 +3,6 @@
  */
 import 'dart:io';
 
-import 'package:kraken/foundation.dart';
 import 'package:kraken/kraken.dart';
 
 // TODO: Don't use header to mark context.

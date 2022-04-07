@@ -9,8 +9,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/foundation.dart';
 
-import 'canvas_context_2d.dart';
-
 const String CANVAS = 'CANVAS';
 const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;
 const int _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL = 150;
