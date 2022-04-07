@@ -1,8 +1,3 @@
-## 0.10.4+1
-
-**Bug Fixed**
-+ Fix: If request a cached gzipped content, and the http client set autoUncompress to false, it will store a raw gzip content. But the default HttpClientStreamResponse's compressState is notCompressed, causing convert fail exception. https://github.com/openkraken/kraken/pull/1302
-
 ## 0.10.4
 
 **Features**
