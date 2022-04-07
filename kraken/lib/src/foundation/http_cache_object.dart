@@ -443,10 +443,13 @@ class HttpCacheObject {
     }
 
     // Update content length.
-    int contentLength = response.headers.contentLength;
-    if (!contentLength.isNegative && contentLength != this.contentLength) {
-      this.contentLength = contentLength;
-      indexChanged = true;
+    // Only update content length while status code equals 200.
+    if (response.statusCode == HttpStatus.ok) {
+      int contentLength = response.headers.contentLength;
+      if (!contentLength.isNegative && contentLength != this.contentLength) {
+        this.contentLength = contentLength;
+        indexChanged = true;
+      }
     }
 
     // Update index.
