@@ -284,7 +284,28 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   double? _getFlexBasis(RenderBox child) {
     if (child is RenderBoxModel && child.renderStyle.flexBasis != CSSLengthValue.auto) {
-      return child.renderStyle.flexBasis?.computedValue;
+      double? flexBasis = child.renderStyle.flexBasis?.computedValue;
+
+      // Clamp flex-basis by min and max size.
+      if (flexBasis != null) {
+        double? minWidth = child.renderStyle.minWidth.isAuto
+          ? null : child.renderStyle.minWidth.computedValue;
+        double? minHeight = child.renderStyle.minHeight.isAuto
+          ? null : child.renderStyle.minHeight.computedValue;
+        double? maxWidth = child.renderStyle.maxWidth.isNone
+          ? null : child.renderStyle.maxWidth.computedValue;
+        double? maxHeight = child.renderStyle.maxHeight.isNone
+          ? null : child.renderStyle.maxHeight.computedValue;
+        double? minMainSize = _isHorizontalFlexDirection
+          ? minWidth : minHeight;
+        double? maxMainSize = _isHorizontalFlexDirection
+          ? maxWidth : maxHeight;
+
+        if (minMainSize != null && flexBasis < minMainSize) flexBasis = minMainSize;
+        if (maxMainSize != null && flexBasis > maxMainSize) flexBasis = maxMainSize;
+      }
+
+      return flexBasis;
     }
     return null;
   }
@@ -1064,7 +1085,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         if (flexGrow > 0) {
           totalFlexFactor['flexGrow'] = totalFlexFactor['flexGrow']! - flexGrow;
 
-          // If total violation is negative, freeze all the items with max violations.
+        // If total violation is negative, freeze all the items with max violations.
         } else if (flexShrink > 0) {
           totalFlexFactor['flexShrink'] = totalFlexFactor['flexShrink']! - flexShrink;
         }
