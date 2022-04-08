@@ -822,19 +822,18 @@ task('run-benchmark', async (done) => {
   const KrakenPerformancePath = 'kraken-performance';
   for (let item in performanceInfos) {
     let info = performanceInfos[item];
-    console.log('info=', info);
     const match = /\[(\s?\d,?)+\]/.exec(info);
     if (match) {
       const viewType = item == 0 ? 'kraken' : 'web';
       try {
         let performanceDatas = JSON.parse(match[0]);
-        console.log('performanceDatas', performanceDatas);
         // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
         performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
         
         // Save performance list to file and upload to OSS.
         const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
         fs.writeFileSync(listFile, performanceDatas.toString());
+
         let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-load-time-list.txt`;
         await uploader(WebviewPerformanceOSSPath, listFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
@@ -845,6 +844,7 @@ task('run-benchmark', async (done) => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
 
+
         // Get average of list.
         let sumLoadTimes = 0;
         performanceDatas.forEach(item => sumLoadTimes += item);
@@ -853,6 +853,7 @@ task('run-benchmark', async (done) => {
         // Save average time to file and upload to OSS.
         const averageFile = path.join(__dirname, `../${viewType}-average-load-time.txt`);
         fs.writeFileSync(averageFile, averageLoadTime.toString());
+        
         let KrakenPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
         await uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceOSSPath}`);
