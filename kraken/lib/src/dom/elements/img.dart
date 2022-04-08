@@ -479,12 +479,12 @@ class ImageElement extends Element {
   Future<_ImageRequest> _obtainImage() async {
     _ImageRequest request = _currentRequest = _ImageRequest(currentUri: _resolvedUri!);
     try {
-      // Increment conut when request.
+      // Increment count when request.
       ownerDocument.incrementRequestCount();
 
       Uint8List data = await request._obtainImage(contextId);
 
-      // Decrement conut when response.
+      // Decrement count when response.
       ownerDocument.decrementRequestCount();
 
       // Increment load event delay count before decode.

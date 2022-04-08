@@ -116,13 +116,13 @@ class LinkElement extends Element {
       String url = _resolvedHyperlink.toString();
       KrakenBundle bundle = KrakenBundle.fromUrl(url);
       try {
-        // Increment conut when request.
+        // Increment count when request.
         ownerDocument.incrementRequestCount();
 
         await bundle.resolve(contextId);
         assert(bundle.isResolved, 'Failed to obtain $url');
 
-        // Decrement conut when response.
+        // Decrement count when response.
         ownerDocument.decrementRequestCount();
 
         final String cssString = await resolveStringFromData(bundle.data!);
@@ -222,13 +222,13 @@ class ScriptRunner {
     _scriptsToExecute.add(bundle);
 
     try {
-      // Increment conut when request.
+      // Increment count when request.
       _document.incrementRequestCount();
 
       await bundle.resolve(_contextId);
       assert(bundle.isResolved, 'Failed to obtain ${bundle.url}');
 
-      // Decrement conut when response.
+      // Decrement count when response.
       _document.decrementRequestCount();
 
       _executeScripts();
