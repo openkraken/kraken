@@ -369,11 +369,13 @@ class HttpCacheObject {
     }
     HttpHeaders responseHeaders = createHttpHeaders(initialHeaders: _getResponseHeaders());
 
-    // Invalid cache blob size, mark as invalid.
     // Unless content-encoding specified, like gzip or delfate, the real size is decoded size.
-    if (responseHeaders.value(HttpHeaders.contentEncodingHeader) == null && await _blob.length != contentLength) {
-      _valid = false;
-      return null;
+    // Trust the blob length.
+    if (responseHeaders.value(HttpHeaders.contentEncodingHeader) == null) {
+      int blobLength = await _blob.length;
+      if (contentLength != blobLength) {
+        contentLength = blobLength;
+      }
     }
 
     return HttpClientStreamResponse(
