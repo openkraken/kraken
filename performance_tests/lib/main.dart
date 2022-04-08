@@ -10,7 +10,7 @@ import 'package:kraken/kraken.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 const benchMarkServerAddress = String.fromEnvironment("IP");
-const benchMarkServerPort = String.fromEnvironment("PORT") || '7878';
+const benchMarkServerPort = String.fromEnvironment("PORT");
 
 void main() {
   runApp(MyApp());
