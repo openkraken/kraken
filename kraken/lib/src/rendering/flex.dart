@@ -797,15 +797,9 @@ class RenderFlexLayout extends RenderLayoutBox {
             childAscent,
           maxSizeBelowBaseline,
         );
-        childCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
-      }
-
-      if (runCrossAxisExtent > 0 && childCrossAxisExtent > 0) {
-        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
-      } else if (runCrossAxisExtent < 0 && childCrossAxisExtent < 0) {
-        runCrossAxisExtent = math.min(runCrossAxisExtent, childCrossAxisExtent);
+        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
       } else {
-        runCrossAxisExtent = runCrossAxisExtent + childCrossAxisExtent;
+        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       }
 
       runChildren[childNodeId] = _RunChild(
