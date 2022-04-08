@@ -46,7 +46,7 @@ class Attr : public Node {
   bool IsElementNode() const = delete;  // This will catch anyone doing an unnecessary check.
 
   std::string nodeName() const override { return name(); }
-  NodeType getNodeType() const override { return kAttributeNode; }
+  NodeType nodeType() const override { return kAttributeNode; }
 
   std::string nodeValue() const override { return value().ToStdString(); }
   void setNodeValue(const std::string& node_value, ExceptionState& exception_state) override;

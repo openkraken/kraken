@@ -40,11 +40,55 @@ class ContainerNode::AdoptAndAppendChild {
 bool ContainerNode::IsChildTypeAllowed(const Node& child) const {
   auto* child_fragment = DynamicTo<DocumentFragment>(child);
   if (!child_fragment)
-    return ChildTypeAllowed(child.getNodeType());
+    return ChildTypeAllowed(child.nodeType());
 
   for (Node* node = child_fragment->firstChild(); node; node = node->nextSibling()) {
-    if (!ChildTypeAllowed(node->getNodeType()))
+    if (!ChildTypeAllowed(node->nodeType()))
       return false;
+  }
+  return true;
+}
+
+// Returns true if |new_child| contains this node. In that case,
+// |exception_state| has an exception.
+// https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
+bool ContainerNode::IsHostIncludingInclusiveAncestorOfThis(const Node& new_child,
+                                                           ExceptionState& exception_state) const {
+  // Non-ContainerNode can contain nothing.
+  if (!new_child.IsContainerNode())
+    return false;
+
+  bool child_contains_parent = false;
+  if (GetDocument().IsTemplateDocument()) {
+    child_contains_parent = new_child.ContainsIncludingHostElements(*this);
+  } else {
+    const Node& root = TreeRoot();
+    auto* fragment = DynamicTo<DocumentFragment>(root);
+    if (fragment && fragment->IsTemplateContent()) {
+      child_contains_parent = new_child.ContainsIncludingHostElements(*this);
+    } else {
+      child_contains_parent = new_child.contains(this);
+    }
+  }
+  if (child_contains_parent) {
+    exception_state.ThrowException(ctx(), ErrorType::TypeError, "The new child element contains the parent.");
+  }
+  return child_contains_parent;
+}
+
+inline bool CheckReferenceChildParent(const Node& parent,
+                                      const Node* next,
+                                      const Node* old_child,
+                                      ExceptionState& exception_state) {
+  if (next && next->parentNode() != &parent) {
+    exception_state.ThrowException(next->ctx(), ErrorType::TypeError, "The node before which the new node is "
+                                                                      "to be inserted is not a child of this "
+                                                                      "node.");
+    return false;
+  }
+  if (old_child && old_child->parentNode() != &parent) {
+    exception_state.ThrowException(old_child->ctx(), ErrorType::TypeError, "The node to be replaced is not a child of this node.");
+    return false;
   }
   return true;
 }
@@ -160,7 +204,6 @@ Node* ContainerNode::ReplaceChild(Node* new_child, Node* old_child, ExceptionSta
       InsertNodeVector(targets, nullptr, AdoptAndAppendChild(), &post_insertion_notification_targets);
     }
   }
-  DidInsertNodeVector(targets, next, post_insertion_notification_targets);
 
   // 16. Return child.
   return old_child;
@@ -185,16 +228,12 @@ Node* ContainerNode::RemoveChild(Node* old_child, ExceptionState& exception_stat
     return nullptr;
   }
 
-  WillRemoveChild(*child);
-
   {
     Node* prev = child->previousSibling();
     Node* next = child->nextSibling();
     {
       RemoveBetween(prev, next, *child);
-      NotifyNodeRemoved(*child);
     }
-    ChildrenChanged(ChildrenChange::ForRemoval(*child, prev, next, ChildrenChangeSource::kAPI));
   }
   return child;
 }
@@ -213,7 +252,6 @@ Node* ContainerNode::AppendChild(Node* new_child, ExceptionState& exception_stat
   NodeVector post_insertion_notification_targets;
   post_insertion_notification_targets.reserve(kInitialNodeVectorSize);
   { InsertNodeVector(targets, nullptr, AdoptAndAppendChild(), &post_insertion_notification_targets); }
-  DidInsertNodeVector(targets, nullptr, post_insertion_notification_targets);
   return new_child;
 }
 
@@ -225,7 +263,7 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
 
   // Use common case fast path if possible.
   if ((new_child.IsElementNode() || new_child.IsTextNode()) && IsElementNode()) {
-    DCHECK(IsChildTypeAllowed(new_child));
+    assert(IsChildTypeAllowed(new_child));
     // 2. If node is a host-including inclusive ancestor of parent, throw a
     // HierarchyRequestError.
     if (IsHostIncludingInclusiveAncestorOfThis(new_child, exception_state))
@@ -233,15 +271,6 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
     // 3. If child is not null and its parent is not parent, then throw a
     // NotFoundError.
     return CheckReferenceChildParent(*this, next, old_child, exception_state);
-  }
-
-  // This should never happen, but also protect release builds from tree
-  // corruption.
-  DCHECK(!new_child.IsPseudoElement());
-  if (new_child.IsPseudoElement()) {
-    exception_state.ThrowDOMException(DOMExceptionCode::kHierarchyRequestError,
-                                      "The new child element is a pseudo-element.");
-    return false;
   }
 
   if (auto* document = DynamicTo<Document>(this)) {
@@ -268,9 +297,7 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
   // 5. If either node is a Text node and parent is a document, or node is a
   // doctype and parent is not a document, throw a HierarchyRequestError.
   if (!IsChildTypeAllowed(new_child)) {
-    exception_state.ThrowDOMException(
-        DOMExceptionCode::kHierarchyRequestError,
-        "Nodes of type '" + new_child.nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
+    exception_state.ThrowException(ctx(), ErrorType::TypeError, "Nodes of type '" + new_child.nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
     return false;
   }
 
@@ -282,38 +309,84 @@ void ContainerNode::RemoveChildren() {
   if (!first_child_)
     return;
 
-  // Do any prep work needed before actually starting to detach
-  // and remove... e.g. stop loading frames, fire unload events.
-  WillRemoveChildren();
-
-  //  {
-  //    // Removing a node from a selection can cause widget updates.
-  //    GetDocument().NodeChildrenWillBeRemoved(*this);
-  //  }
-
-  std::vector<Node*> removed_nodes;
-  const bool children_changed = ChildrenChangedAllChildrenRemovedNeedsList();
-  {
-    {
-      while (Node* child = first_child_) {
-        RemoveBetween(nullptr, child->nextSibling(), *child);
-        NotifyNodeRemoved(*child);
-        if (children_changed)
-          removed_nodes.push_back(child);
-      }
-    }
-
-    ChildrenChange change = {ChildrenChangeType::kAllChildrenRemoved,
-                             ChildrenChangeSource::kAPI,
-                             nullptr,
-                             nullptr,
-                             nullptr,
-                             std::move(removed_nodes),
-                             ""};
-    ChildrenChanged(change);
+  while (Node* child = first_child_) {
+    RemoveBetween(nullptr, child->nextSibling(), *child);
   }
 }
 
 ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document, type) {}
+
+void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& old_child) {
+  assert(old_child.parentNode() == this);
+
+  if (next_child)
+    next_child->SetPreviousSibling(previous_child);
+  if (previous_child)
+    previous_child->SetNextSibling(next_child);
+  if (first_child_ == &old_child)
+    SetFirstChild(next_child);
+  if (last_child_ == &old_child)
+    SetLastChild(previous_child);
+
+  old_child.SetPreviousSibling(nullptr);
+  old_child.SetNextSibling(nullptr);
+  old_child.SetParentOrShadowHostNode(nullptr);
+}
+
+
+template <typename Functor>
+void ContainerNode::InsertNodeVector(
+    const NodeVector& targets,
+    Node* next,
+    const Functor& mutator,
+    NodeVector* post_insertion_notification_targets) {
+  assert(post_insertion_notification_targets);
+  {
+    for (const auto& target_node : targets) {
+      assert(target_node);
+      assert(!target_node->parentNode());
+      Node& child = *target_node;
+      mutator(*this, child, next);
+    }
+  }
+}
+
+void ContainerNode::InsertBeforeCommon(Node& next_child, Node& new_child) {
+  // Use insertBefore if you need to handle reparenting (and want DOM mutation
+  // events).
+  assert(!new_child.parentNode());
+  assert(!new_child.nextSibling());
+  assert(!new_child.previousSibling());
+
+  Node* prev = next_child.previousSibling();
+  assert(last_child_ != prev);
+  next_child.SetPreviousSibling(&new_child);
+  if (prev) {
+    assert(firstChild() != &next_child);
+    assert(prev->nextSibling() == &next_child);
+    prev->SetNextSibling(&new_child);
+  } else {
+    assert(firstChild() == &next_child);
+    SetFirstChild(&new_child);
+  }
+  new_child.SetParentOrShadowHostNode(this);
+  new_child.SetPreviousSibling(prev);
+  new_child.SetNextSibling(&next_child);
+}
+
+void ContainerNode::AppendChildCommon(Node& child) {
+  child.SetParentOrShadowHostNode(this);
+  if (last_child_) {
+    child.SetPreviousSibling(last_child_);
+    last_child_->SetNextSibling(&child);
+  } else {
+    SetFirstChild(&child);
+  }
+  SetLastChild(&child);
+}
+
+void ContainerNode::Trace(GCVisitor* visitor) const {
+  Node::Trace(visitor);
+}
 
 }  // namespace kraken

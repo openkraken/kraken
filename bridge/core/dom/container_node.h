@@ -15,7 +15,6 @@ class HTMLCollection;
 
 // This constant controls how much buffer is initially allocated
 // for a Node Vector that is used to store child Nodes of a given Node.
-// FIXME: Optimize the value.
 const int kInitialNodeVectorSize = 11;
 using NodeVector = std::vector<Node*>;
 
@@ -45,109 +44,7 @@ class ContainerNode : public Node {
                                   const Node* old_child,
                                   ExceptionState&) const;
 
-  // These methods are only used during parsing.
-  // They don't send DOM mutation events or accept DocumentFragments.
-  void ParserAppendChild(Node*);
-  void ParserRemoveChild(Node&);
-  void ParserInsertBefore(Node* new_child, Node& ref_child);
-  void ParserTakeAllChildrenFrom(ContainerNode&);
-
   void RemoveChildren();
-
-  // FIXME: These methods should all be renamed to something better than
-  // "check", since it's not clear that they alter the style bits of siblings
-  // and children.
-  enum SiblingCheckType { kFinishedParsingChildren, kSiblingElementInserted, kSiblingElementRemoved };
-
-  // -----------------------------------------------------------------------------
-  // Notification of document structure changes (see core/dom/node.h for more
-  // notification methods)
-
-  enum class ChildrenChangeType : uint8_t {
-    kElementInserted,
-    kNonElementInserted,
-    kElementRemoved,
-    kNonElementRemoved,
-    kAllChildrenRemoved,
-    kTextChanged
-  };
-  enum class ChildrenChangeSource : uint8_t { kAPI, kParser };
-  struct ChildrenChange {
-   public:
-    static ChildrenChange ForInsertion(Node& node,
-                                       Node* unchanged_previous,
-                                       Node* unchanged_next,
-                                       ChildrenChangeSource by_parser) {
-      ChildrenChange change = {
-          node.IsElementNode() ? ChildrenChangeType::kElementInserted : ChildrenChangeType::kNonElementInserted,
-          by_parser,
-          &node,
-          unchanged_previous,
-          unchanged_next,
-          {},
-          ""};
-      return change;
-    }
-
-    static ChildrenChange ForRemoval(Node& node,
-                                     Node* previous_sibling,
-                                     Node* next_sibling,
-                                     ChildrenChangeSource by_parser) {
-      ChildrenChange change = {
-          node.IsElementNode() ? ChildrenChangeType::kElementRemoved : ChildrenChangeType::kNonElementRemoved,
-          by_parser,
-          &node,
-          previous_sibling,
-          next_sibling,
-          {},
-          ""};
-      return change;
-    }
-
-    bool IsChildInsertion() const {
-      return type == ChildrenChangeType::kElementInserted || type == ChildrenChangeType::kNonElementInserted;
-    }
-    bool IsChildRemoval() const {
-      return type == ChildrenChangeType::kElementRemoved || type == ChildrenChangeType::kNonElementRemoved;
-    }
-    bool IsChildElementChange() const {
-      return type == ChildrenChangeType::kElementInserted || type == ChildrenChangeType::kElementRemoved;
-    }
-
-    bool ByParser() const { return by_parser == ChildrenChangeSource::kParser; }
-
-    ChildrenChangeType type;
-    ChildrenChangeSource by_parser;
-    Node* sibling_changed = nullptr;
-    // |siblingBeforeChange| is
-    //  - siblingChanged.previousSibling before node removal
-    //  - siblingChanged.previousSibling after single node insertion
-    //  - previousSibling of the first inserted node after multiple node
-    //    insertion
-    Node* sibling_before_change = nullptr;
-    // |siblingAfterChange| is
-    //  - siblingChanged.nextSibling before node removal
-    //  - siblingChanged.nextSibling after single node insertion
-    //  - nextSibling of the last inserted node after multiple node insertion.
-    Node* sibling_after_change = nullptr;
-    // List of removed nodes for ChildrenChangeType::kAllChildrenRemoved.
-    // Only populated if ChildrenChangedAllChildrenRemovedNeedsList() returns
-    // true.
-    std::vector<Node*> removed_nodes;
-    // |old_text| is mostly empty, only used for text node changes.
-    const std::string& old_text;
-  };
-
-  // Notifies the node that it's list of children have changed (either by adding
-  // or removing child nodes), or a child node that is of the type
-  // kCdataSectionNode, kTextNode or kCommentNode has changed its value.
-  //
-  // ChildrenChanged() implementations may modify the DOM tree, and may dispatch
-  // synchronous events.
-  virtual void ChildrenChanged(const ChildrenChange&);
-
-  // Provides ChildrenChange::removed_nodes for kAllChildrenRemoved.
-  virtual bool ChildrenChangedAllChildrenRemovedNeedsList() const;
 
   virtual bool ChildrenCanHaveStyle() const { return true; }
 
@@ -168,7 +65,6 @@ class ContainerNode : public Node {
   // |post_insertion_notification_targets| must not be nullptr.
   template <typename Functor>
   void InsertNodeVector(const NodeVector&, Node* next, const Functor&, NodeVector* post_insertion_notification_targets);
-  void DidInsertNodeVector(const NodeVector&, Node* next, const NodeVector& post_insertion_notification_targets);
 
   class AdoptAndInsertBefore;
   class AdoptAndAppendChild;
@@ -177,14 +73,9 @@ class ContainerNode : public Node {
 
   void InsertBeforeCommon(Node& next_child, Node& new_child);
   void AppendChildCommon(Node& child);
-  void WillRemoveChildren();
-  void WillRemoveChild(Node& child);
-  void RemoveDetachedChildrenInContainer(ContainerNode&);
-  void AddChildNodesToDeletionQueue(Node*&, Node*&, ContainerNode&);
-
-  void NotifyNodeRemoved(Node&);
 
   inline bool IsChildTypeAllowed(const Node& child) const;
+  inline bool IsHostIncludingInclusiveAncestorOfThis(const Node&, ExceptionState&) const;
 
   Node* first_child_;
   Node* last_child_;

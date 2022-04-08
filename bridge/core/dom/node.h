@@ -61,8 +61,8 @@ class Node : public EventTarget {
   bool HasTagName(const AtomicString&) const;
   virtual std::string nodeName() const = 0;
   virtual std::string nodeValue() const;
-  virtual void setNodeValue(const std::string&, ExceptionState&);
-  virtual NodeType getNodeType() const = 0;
+  virtual void setNodeValue(const AtomicString&);
+  virtual NodeType nodeType() const = 0;
 
   ContainerNode* parentNode() const;
   Element* parentElement() const;
@@ -71,29 +71,7 @@ class Node : public EventTarget {
   NodeList* childNodes();
   Node* firstChild() const;
   Node* lastChild() const;
-
   Node& TreeRoot() const;
-
-  // TODO: support following APIs.
-  //  void Prepend(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-  //  void Append(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-  //  void Before(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-  //  void After(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-  //  void ReplaceWith(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-  //  void ReplaceChildren(
-  //      const HeapVector<Member<V8UnionNodeOrStringOrTrustedScript>>& nodes,
-  //      ExceptionState& exception_state);
-
   void remove(ExceptionState&);
 
   Node* insertBefore(Node* new_child, Node* ref_child, ExceptionState&);
@@ -103,14 +81,15 @@ class Node : public EventTarget {
 
   bool hasChildren() const { return firstChild(); }
   Node* cloneNode(bool deep, ExceptionState&) const;
+  Node* cloneNode(ExceptionState&) const;
 
   // https://dom.spec.whatwg.org/#concept-node-clone
   virtual Node* Clone(Document&, CloneChildrenFlag) const = 0;
 
-  bool isEqualNode(Node*) const;
-  bool isSameNode(const Node* other) const { return this == other; }
+  bool isEqualNode(Node*, ExceptionState& exception_state) const;
+  bool isSameNode(const Node* other, ExceptionState& exception_state) const { return this == other; }
 
-  std::string textContent(bool convert_brs_to_newlines = false) const;
+  AtomicString textContent(bool convert_brs_to_newlines = false) const;
   virtual void setTextContent(const AtomicString&);
 
   // Other methods (not part of DOM)
@@ -168,7 +147,7 @@ class Node : public EventTarget {
 
   // Returns the document associated with this node. A Document node returns
   // itself.
-  Document& GetDocument() const {}
+  Document& GetDocument() const { return *document_; }
 
   // Returns true if this node is connected to a document, false otherwise.
   // See https://dom.spec.whatwg.org/#connected for the definition.
@@ -176,31 +155,16 @@ class Node : public EventTarget {
 
   bool IsInDocumentTree() const { return isConnected(); }
 
-  bool IsDocumentTypeNode() const { return getNodeType() == kDocumentTypeNode; }
+  bool IsDocumentTypeNode() const { return nodeType() == kDocumentTypeNode; }
   virtual bool ChildTypeAllowed(NodeType) const { return false; }
   unsigned CountChildren() const;
 
   bool IsDescendantOf(const Node*) const;
-  bool IsDescendantOrShadowDescendantOf(const Node*) const;
-  bool contains(const Node*) const;
-  // https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-ancestor
-  bool IsShadowIncludingInclusiveAncestorOf(const Node&) const;
-  // https://dom.spec.whatwg.org/#concept-shadow-including-ancestor
-  bool IsShadowIncludingAncestorOf(const Node&) const;
+  bool contains(const Node*, ExceptionState&) const;
   bool ContainsIncludingHostElements(const Node&) const;
   Node* CommonAncestor(const Node&, ContainerNode* (*parent)(const Node&)) const;
 
-  // Whether or not a selection can be started in this object
-  virtual bool CanStartSelection() const;
-
-  void NotifyPriorityScrollAnchorStatusChanged();
-
-  //  NodeListsNodeData* NodeLists();
-  //  void ClearNodeLists();
-
   enum ShadowTreesTreatment { kTreatShadowTreesAsDisconnected, kTreatShadowTreesAsComposed };
-
-  uint16_t compareDocumentPosition(const Node*, ShadowTreesTreatment = kTreatShadowTreesAsDisconnected) const;
 
   EventTargetData* GetEventTargetData() override;
   EventTargetData& EnsureEventTargetData() override;
@@ -246,7 +210,6 @@ class Node : public EventTarget {
 
     kSelfOrAncestorHasDirAutoAttribute = 1 << 27,
     kDefaultNodeFlags = kIsFinishedParsingChildrenFlag,
-
     // 2 bits remaining.
   };
 
@@ -298,15 +261,22 @@ class Node : public EventTarget {
 
   Node(Document*, ConstructionType);
 
-  void SetIsFinishedParsingChildren(bool value) { SetFlag(value, kIsFinishedParsingChildrenFlag); }
-
  private:
   uint32_t node_flags_;
   Node* parent_or_shadow_host_node_;
   Node* previous_;
   Node* next_;
+  Document* document_;
   std::unique_ptr<NodeData> data_;
 };
+
+inline ContainerNode* Node::ParentOrShadowHostNode() const {
+  return reinterpret_cast<ContainerNode*>(parent_or_shadow_host_node_);
+}
+
+inline void Node::SetParentOrShadowHostNode(ContainerNode* parent) {
+  parent_or_shadow_host_node_ = reinterpret_cast<Node*>(parent);
+}
 
 }  // namespace kraken
 

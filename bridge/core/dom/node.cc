@@ -11,11 +11,18 @@
 #include "empty_node_list.h"
 #include "node_data.h"
 #include "node_list.h"
+#include "node_traversal.h"
+#include "template_content_document_fragment.h"
+#include "text.h"
 
 namespace kraken {
 
 Node* Node::Create(ExecutingContext* context, ExceptionState& exception_state) {
   exception_state.ThrowException(context->ctx(), ErrorType::TypeError, "Illegal constructor");
+}
+
+void Node::setNodeValue(const AtomicString& value) {
+  // By default, setting nodeValue has no effect.
 }
 
 ContainerNode* Node::parentNode() const {
@@ -88,6 +95,10 @@ Node* Node::appendChild(Node* new_child, ExceptionState& exception_state) {
   return nullptr;
 }
 
+Node* Node::cloneNode(ExceptionState& exception_state) const {
+  return cloneNode(false, exception_state);
+}
+
 Node* Node::cloneNode(bool deep, ExceptionState&) const {
   // https://dom.spec.whatwg.org/#dom-node-clonenode
 
@@ -101,12 +112,12 @@ Node* Node::cloneNode(bool deep, ExceptionState&) const {
                     : CloneChildrenFlag::kSkip);
 }
 
-bool Node::isEqualNode(Node* other) const {
+bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
   if (!other)
     return false;
 
-  NodeType node_type = getNodeType();
-  if (node_type != other->getNodeType())
+  NodeType node_type = nodeType();
+  if (node_type != other->nodeType())
     return false;
 
   if (nodeValue() != other->nodeValue())
@@ -147,7 +158,7 @@ bool Node::isEqualNode(Node* other) const {
   return true;
 }
 
-std::string Node::textContent(bool convert_brs_to_newlines) const {
+AtomicString Node::textContent(bool convert_brs_to_newlines) const {
   // This covers ProcessingInstruction and Comment that should return their
   // value when .textContent is accessed on them, but should be ignored when
   // iterated over as a descendant of a ContainerNode.
@@ -161,15 +172,188 @@ std::string Node::textContent(bool convert_brs_to_newlines) const {
   // Documents and non-container nodes (that are not CharacterData)
   // have null textContent.
   if (IsDocumentNode() || !IsContainerNode())
-    return "";
+    return AtomicString::Empty(ctx());
 
-  std::string content;
-  for (const Node& node : NodeTraversal::InclusiveDescendantsOf(*this)) {
-    if (auto* text_node = DynamicTo<Text>(node)) {
-      content += (text_node->data());
+  // TODO: Implement text content.
+  //  std::string content;
+  //  for (const Node& node : NodeTraversal::InclusiveDescendantsOf(*this)) {
+  //    if (auto* text_node = DynamicTo<Text>(node)) {
+  //      content += (text_node->data());
+  //    }
+  //  }
+  //  return content.ReleaseString();
+}
+
+void Node::setTextContent(const AtomicString& text) {
+  switch (nodeType()) {
+    case kAttributeNode:
+    case kTextNode:
+    case kCommentNode:
+      setNodeValue(text);
+      return;
+    case kElementNode:
+    case kDocumentFragmentNode: {
+      // FIXME: Merge this logic into replaceChildrenWithText.
+      auto* container = To<ContainerNode>(this);
+
+      // Note: This is an intentional optimization.
+      // See crbug.com/352836 also.
+      // No need to do anything if the text is identical.
+      if (container->HasOneTextChild() && To<Text>(container->firstChild())->data() == text && !text.IsEmpty())
+        return;
+
+      // Note: This API will not insert empty text nodes:
+      // https://dom.spec.whatwg.org/#dom-node-textcontent
+      if (text.IsEmpty()) {
+        container->RemoveChildren();
+      } else {
+        container->RemoveChildren();
+        container->AppendChild(GetDocument().createTextNode(text), ExceptionState());
+      }
+      return;
     }
+    case kDocumentNode:
+    case kDocumentTypeNode:
+      // Do nothing.
+      return;
   }
-  return content.ReleaseString();
+}
+
+void Node::SetCustomElementState(CustomElementState new_state) {
+  CustomElementState old_state = GetCustomElementState();
+
+  switch (new_state) {
+    case CustomElementState::kUncustomized:
+      return;
+
+    case CustomElementState::kUndefined:
+      assert(CustomElementState::kUncustomized == old_state);
+      break;
+
+    case CustomElementState::kCustom:
+      assert(old_state == CustomElementState::kUndefined || old_state == CustomElementState::kFailed ||
+             old_state == CustomElementState::kPreCustomized);
+      break;
+
+    case CustomElementState::kFailed:
+      assert(CustomElementState::kFailed != old_state);
+      break;
+
+    case CustomElementState::kPreCustomized:
+      assert(CustomElementState::kFailed == old_state);
+      break;
+  }
+
+  assert(IsHTMLElement());
+
+  auto* element = To<Element>(this);
+  node_flags_ = (node_flags_ & ~kCustomElementStateMask) | static_cast<NodeFlags>(new_state);
+  assert(new_state == GetCustomElementState());
+}
+
+bool Node::IsDocumentNode() const {
+  return this == &GetDocument();
+}
+
+Element* Node::ParentOrShadowHostElement() const {
+  ContainerNode* parent = ParentOrShadowHostNode();
+  if (!parent)
+    return nullptr;
+
+  return DynamicTo<Element>(parent);
+}
+
+ContainerNode* Node::ParentOrShadowHostOrTemplateHostNode() const {
+  auto* this_fragment = DynamicTo<DocumentFragment>(this);
+  if (this_fragment && this_fragment->IsTemplateContent())
+    return static_cast<const TemplateContentDocumentFragment*>(this)->Host();
+  return ParentOrShadowHostNode();
+}
+
+ContainerNode* Node::NonShadowBoundaryParentNode() const {
+  return parentNode();
+}
+
+unsigned int Node::NodeIndex() const {
+  const Node* temp_node = previousSibling();
+  unsigned count = 0;
+  for (count = 0; temp_node; count++)
+    temp_node = temp_node->previousSibling();
+  return count;
+}
+
+Document* Node::ownerDocument() const {
+  Document* doc = &GetDocument();
+  return doc == this ? nullptr : doc;
+}
+
+bool Node::IsDescendantOf(const Node* other) const {
+  // Return true if other is an ancestor of this, otherwise false
+  if (!other || isConnected() != other->isConnected())
+    return false;
+  if (&other->GetDocument() != &GetDocument())
+    return false;
+  for (const ContainerNode* n = parentNode(); n; n = n->parentNode()) {
+    if (n == other)
+      return true;
+  }
+  return false;
+}
+
+bool Node::contains(const Node* node, ExceptionState& exception_state) const {
+  if (!node)
+    return false;
+  return this == node || node->IsDescendantOf(this);
+}
+
+bool Node::ContainsIncludingHostElements(const Node& node) const {
+  const Node* current = &node;
+  do {
+    if (current == this)
+      return true;
+    auto* curr_fragment = DynamicTo<DocumentFragment>(current);
+    if (curr_fragment && curr_fragment->IsTemplateContent())
+      current = static_cast<const TemplateContentDocumentFragment*>(current)->Host();
+    else
+      current = current->ParentOrShadowHostNode();
+  } while (current);
+  return false;
+}
+
+Node* Node::CommonAncestor(const Node& other, ContainerNode* (*parent)(const Node&)) const {
+  if (this == &other)
+    return const_cast<Node*>(this);
+  if (&GetDocument() != &other.GetDocument())
+    return nullptr;
+  int this_depth = 0;
+  for (const Node* node = this; node; node = parent(*node)) {
+    if (node == &other)
+      return const_cast<Node*>(node);
+    this_depth++;
+  }
+  int other_depth = 0;
+  for (const Node* node = &other; node; node = parent(*node)) {
+    if (node == this)
+      return const_cast<Node*>(this);
+    other_depth++;
+  }
+  const Node* this_iterator = this;
+  const Node* other_iterator = &other;
+  if (this_depth > other_depth) {
+    for (int i = this_depth; i > other_depth; --i)
+      this_iterator = parent(*this_iterator);
+  } else if (other_depth > this_depth) {
+    for (int i = other_depth; i > this_depth; --i)
+      other_iterator = parent(*other_iterator);
+  }
+  while (this_iterator) {
+    if (this_iterator == other_iterator)
+      return const_cast<Node*>(this_iterator);
+    this_iterator = parent(*this_iterator);
+    other_iterator = parent(*other_iterator);
+  }
+  assert(!other_iterator);
+  return nullptr;
 }
 
 Node::Node(Document* document, ConstructionType type)
@@ -177,8 +361,11 @@ Node::Node(Document* document, ConstructionType type)
       node_flags_(type),
       parent_or_shadow_host_node_(nullptr),
       previous_(nullptr),
+      document_(document),
       next_(nullptr) {}
 
-void Node::Trace(GCVisitor*) const {}
+void Node::Trace(GCVisitor*) const {
+
+}
 
 }  // namespace kraken

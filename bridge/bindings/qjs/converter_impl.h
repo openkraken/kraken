@@ -9,10 +9,13 @@
 #include <type_traits>
 #include "atomic_string.h"
 #include "converter.h"
+#include "core/dom/document.h"
 #include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
+#include "core/dom/node_list.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
+#include "core/html/html_element.h"
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
@@ -43,6 +46,10 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    if (value == nullptr) {
+      return JS_UNDEFINED;
+    }
+
     return Converter<T>::ToValue(ctx, value);
   }
 };
@@ -61,6 +68,10 @@ struct Converter<IDLNullable<T>, std::enable_if_t<std::is_pointer<typename Conve
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    if (value == nullptr) {
+      return JS_NULL;
+    }
+
     return Converter<T>::ToValue(ctx, value);
   }
 };
@@ -78,6 +89,10 @@ struct Converter<IDLOptional<T>, std::enable_if_t<is_shared_ptr<typename Convert
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
+    if (value == nullptr) {
+      return JS_UNDEFINED;
+    }
+
     return Converter<T>::ToValue(ctx, value);
   }
 };
@@ -126,6 +141,10 @@ struct Converter<IDLOptional<IDLAny>> : public ConverterBase<IDLOptional<IDLAny>
 template <>
 struct Converter<IDLNullable<IDLAny>> : public ConverterBase<IDLNullable<IDLAny>> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return ScriptValue::Empty(ctx);
+    }
+
     assert(!JS_IsException(value));
     return ScriptValue(ctx, value);
   }
@@ -235,6 +254,9 @@ struct Converter<IDLNullable<IDLDOMString>> : public ConverterBase<IDLDOMString>
       return AtomicString::Empty(ctx);
     return Converter<IDLDOMString>::FromValue(ctx, value, exception_state);
   }
+
+  static JSValue ToValue(JSContext* ctx, const std::string& value) { return AtomicString(ctx, value).ToQuickJS(ctx); }
+  static JSValue ToValue(JSContext* ctx, const AtomicString& value) { return value.ToQuickJS(ctx); }
 };
 
 template <typename T>
@@ -357,11 +379,19 @@ struct Converter<EventTarget> : public ConverterBase<EventTarget> {
 template <>
 struct Converter<IDLNullable<EventTarget>> : public ConverterBase<EventTarget> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return nullptr;
+    }
+
     assert(!JS_IsException(value));
     return Converter<EventTarget>::FromValue(ctx, value, exception_state);
   }
 
-  static JSValue ToValue(JSContext* ctx, ImplType value) { return Converter<EventTarget>::ToValue(ctx, value); }
+  static JSValue ToValue(JSContext* ctx, ImplType value) {
+    if (value == nullptr)
+      return JS_NULL;
+    return Converter<EventTarget>::ToValue(ctx, value);
+  }
 };
 
 template <>
@@ -387,6 +417,10 @@ struct Converter<JSEventListener> : public ConverterBase<JSEventListener> {
 template <>
 struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventListener> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return nullptr;
+    }
+
     assert(!JS_IsException(value));
     return Converter<JSEventListener>::FromValue(ctx, value, exception_state);
   }
@@ -424,12 +458,23 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
   }
 };
 
+#define DEFINE_SCRIPT_WRAPPABLE_CONVERTER(class_name)                                           \
+  template <>                                                                                   \
+  struct Converter<class_name> : public ConverterBase<class_name> {                                         \
+    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) { \
+      assert(!JS_IsException(value));                                                           \
+      return toScriptWrappable<class_name>(value);                                                    \
+    }                                                                                           \
+    static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }       \
+  };
+
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Node);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Document);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLElement);
+
 template <>
-struct Converter<Node> : public ConverterBase<Node> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    return toScriptWrappable<Node>(value);
-  }
+struct Converter<NodeList> : public ConverterBase<NodeList> {
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
 };
 
 }  // namespace kraken

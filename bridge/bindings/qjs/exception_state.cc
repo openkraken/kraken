@@ -7,22 +7,22 @@
 
 namespace kraken {
 
-void ExceptionState::ThrowException(JSContext* ctx, ErrorType type, const char* message) {
+void ExceptionState::ThrowException(JSContext* ctx, ErrorType type, const std::string& message) {
   switch (type) {
     case ErrorType::TypeError:
-      exception_ = JS_ThrowTypeError(ctx, "%s", message);
+      exception_ = JS_ThrowTypeError(ctx, "%s", message.c_str());
       break;
     case InternalError:
-      exception_ = JS_ThrowInternalError(ctx, "%s", message);
+      exception_ = JS_ThrowInternalError(ctx, "%s", message.c_str());
       break;
     case RangeError:
-      exception_ = JS_ThrowRangeError(ctx, "%s", message);
+      exception_ = JS_ThrowRangeError(ctx, "%s", message.c_str());
       break;
     case ReferenceError:
-      exception_ = JS_ThrowReferenceError(ctx, "%s", message);
+      exception_ = JS_ThrowReferenceError(ctx, "%s", message.c_str());
       break;
     case SyntaxError:
-      exception_ = JS_ThrowSyntaxError(ctx, "%s", message);
+      exception_ = JS_ThrowSyntaxError(ctx, "%s", message.c_str());
       break;
   }
 }

@@ -10,7 +10,7 @@ Text* Text::Create(Document& document, const AtomicString& value) {
   return MakeGarbageCollected<Text>(document, value, ConstructionType::kCreateText);
 }
 
-Node::NodeType Text::getNodeType() const {
+Node::NodeType Text::nodeType() const {
   return Node::kTextNode;
 }
 

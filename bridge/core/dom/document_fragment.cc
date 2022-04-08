@@ -11,17 +11,17 @@ namespace kraken {
 DocumentFragment* DocumentFragment::Create(ExecutingContext* context,
                                            Document* document,
                                            ExceptionState& exception_state) {
-  return nullptr;
+  return MakeGarbageCollected<DocumentFragment>(document, ConstructionType::kCreateDocumentFragment);
 }
 
-DocumentFragment::DocumentFragment(ExecutingContext* context, Document* document)
-    : ContainerNode(context, ConstructionType::kCreateDocumentFragment) {}
+DocumentFragment::DocumentFragment(Document* document, ConstructionType type)
+    : ContainerNode(document, type) {}
 
 std::string DocumentFragment::nodeName() const {
   return "#document-fragment";
 }
 
-Node::NodeType DocumentFragment::getNodeType() const {
+Node::NodeType DocumentFragment::nodeType() const {
   return NodeType::kDocumentFragmentNode;
 }
 

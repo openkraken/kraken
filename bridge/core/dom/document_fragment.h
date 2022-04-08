@@ -16,7 +16,7 @@ class DocumentFragment : public ContainerNode {
  public:
   static DocumentFragment* Create(ExecutingContext* context, Document* document, ExceptionState& exception_state);
 
-  DocumentFragment(ExecutingContext* context, Document* document);
+  DocumentFragment(Document* document, ConstructionType type);
 
   virtual bool IsTemplateContent() const { return false; }
 
@@ -27,7 +27,7 @@ class DocumentFragment : public ContainerNode {
   std::string nodeName() const final;
 
  private:
-  NodeType getNodeType() const final;
+  NodeType nodeType() const final;
   Node* Clone(Document&, CloneChildrenFlag) const override;
   bool ChildTypeAllowed(NodeType) const override;
 };

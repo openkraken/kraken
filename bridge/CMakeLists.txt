@@ -287,6 +287,9 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/node.h
     core/dom/attr.cc
     core/dom/attr.h
+    core/dom/node_traversal.cc
+    core/dom/node_traversal.h
+    core/dom/template_content_document_fragment.h
     core/dom/character_data.cc
     core/dom/character_data.h
     core/dom/text.cc
@@ -315,6 +318,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/events/error_event.h
     core/html/html_collection.cc
     core/html/html_collection.h
+    core/html/html_element.cc
+    core/html/html_element.h
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc

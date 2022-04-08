@@ -19,7 +19,7 @@ class Text : public CharacterData {
 
   Text(Document& document, const AtomicString& data, ConstructionType type) : CharacterData(document, data, type) {}
 
-  NodeType getNodeType() const override;
+  NodeType nodeType() const override;
 
  private:
   std::string nodeName() const override;

@@ -5,7 +5,7 @@ interface Node extends EventTarget {
   /**
    * Returns the children.
    */
-  readonly childNodes: Node[];
+  readonly childNodes: NodeList;
   /**
    * Returns the first child.
    */
@@ -34,15 +34,15 @@ interface Node extends EventTarget {
   /**
    * Returns the node document. Returns null for documents.
   //  */
-  // readonly ownerDocument: Document | null;
-  // /**
-  //  * Returns the parent element.
-  //  */
-  // readonly parentElement: HTMLElement | null;
-  // /**
-  //  * Returns the parent.
-  //  */
-  // readonly parentNode: Node & ParentNode | null;
+  readonly ownerDocument: Document | null;
+  /**
+   * Returns the parent element.
+   */
+  readonly parentElement: HTMLElement | null;
+  /**
+   * Returns the parent.
+   */
+  readonly parentNode: Node | null;
   /**
    * Returns the previous sibling.
    */
@@ -65,63 +65,6 @@ interface Node extends EventTarget {
   isSameNode(otherNode: Node | null): boolean;
   removeChild(oldChild: Node): Node;
   replaceChild(newChild: Node, oldChild: Node): Node;
-  readonly ATTRIBUTE_NODE: number;
-  /**
-   * node is a CDATASection node.
-   */
-  readonly CDATA_SECTION_NODE: number;
-  /**
-   * node is a Comment node.
-   */
-  readonly COMMENT_NODE: number;
-  /**
-   * node is a DocumentFragment node.
-   */
-  readonly DOCUMENT_FRAGMENT_NODE: number;
-  /**
-   * node is a document.
-   */
-  readonly DOCUMENT_NODE: number;
-  /**
-   * Set when other is a descendant of node.
-   */
-  readonly DOCUMENT_POSITION_CONTAINED_BY: number;
-  /**
-   * Set when other is an ancestor of node.
-   */
-  readonly DOCUMENT_POSITION_CONTAINS: number;
-  /**
-   * Set when node and other are not in the same tree.
-   */
-  readonly DOCUMENT_POSITION_DISCONNECTED: number;
-  /**
-   * Set when other is following node.
-   */
-  readonly DOCUMENT_POSITION_FOLLOWING: number;
-  readonly DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC: number;
-  /**
-   * Set when other is preceding node.
-   */
-  readonly DOCUMENT_POSITION_PRECEDING: number;
-  /**
-   * node is a doctype.
-   */
-  readonly DOCUMENT_TYPE_NODE: number;
-  /**
-   * node is an element.
-   */
-  readonly ELEMENT_NODE: number;
-  readonly ENTITY_NODE: number;
-  readonly ENTITY_REFERENCE_NODE: number;
-  readonly NOTATION_NODE: number;
-  /**
-   * node is a ProcessingInstruction node.
-   */
-  readonly PROCESSING_INSTRUCTION_NODE: number;
-  /**
-   * node is a Text node.
-   */
-  readonly TEXT_NODE: number;
 
   new(): Node;
 }

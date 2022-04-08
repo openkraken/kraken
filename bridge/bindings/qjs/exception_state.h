@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_EXCEPTION_STATE_H
 
 #include <quickjs/quickjs.h>
+#include <string>
 #include "foundation/macros.h"
 
 namespace kraken {
@@ -19,7 +20,7 @@ class ExceptionState {
   KRAKEN_DISALLOW_NEW();
 
  public:
-  void ThrowException(JSContext* ctx, ErrorType type, const char* message);
+  void ThrowException(JSContext* ctx, ErrorType type, const std::string& message);
   void ThrowException(JSContext* ctx, JSValue exception);
   bool HasException();
   JSValue ToQuickJS();
