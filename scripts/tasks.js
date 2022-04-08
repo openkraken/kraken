@@ -809,15 +809,11 @@ task('run-benchmark', async (done) => {
     const err = new Error('The IP address was not found.');
     done(err);
   }
-
+  
   let androidDevices = getDevicesInfo();
-  if (!androidDevices[0]) {
-    const err = new Error('The devices not found.');
-    done(err);
-  }
 
   let performanceInfos = execSync(
-    `flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress} PORT=${port}" | grep Performance`,
+    `flutter run -d ${androidDevices[0].id} --profile --dart-define="SERVER=${serverIpAddress}:${serverPort}" | grep Performance`,
     {
       cwd: paths.performanceTests
     }
@@ -831,20 +827,21 @@ task('run-benchmark', async (done) => {
       const viewType = item == 0 ? 'kraken' : 'web';
       try {
         let performanceDatas = JSON.parse(match[0]);
+        
         // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
         performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
-
+        
         // Save performance list to file and upload to OSS.
         const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
         fs.writeFileSync(listFile, performanceDatas.toString());
         let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-load-time-list.txt`;
-        uploader(WebviewPerformanceOSSPath, listFile).then(() => {
-          console.log(`Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
+        await uploader(WebviewPerformanceOSSPath, listFile).then(() => {
+          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
         }).catch(err => done(err));
         // Save performance data of Webview with kraken version.
         let WebviewPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-load-time-list.txt`;
-        uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
-          console.log(`Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
+        await uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
+          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
 
         // Get average of list.
@@ -856,12 +853,13 @@ task('run-benchmark', async (done) => {
         const averageFile = path.join(__dirname, `../${viewType}-average-load-time.txt`);
         fs.writeFileSync(averageFile, averageLoadTime.toString());
         let KrakenPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
-        uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
+        await uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceOSSPath}`);
         }).catch(err => done(err));
+        
         // Save performance data of Kraken with kraken version.
-        let KrakenPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
-        uploader(KrakenPerformanceWithVersionOSSPath, averageFile).then(() => {
+        let KrakenPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-average-load-time.txt`;
+        await uploader(KrakenPerformanceWithVersionOSSPath, averageFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
 

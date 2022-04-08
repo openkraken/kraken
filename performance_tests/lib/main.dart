@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:kraken/kraken.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-const benchMarkServerAddress = String.fromEnvironment("IP");
-const benchMarkServerPort = String.fromEnvironment("PORT");
+const benchMarkServer = String.fromEnvironment("SERVER");
 
 void main() {
+  print('benchMarkServer=$benchMarkServer');
   runApp(MyApp());
 }
 
@@ -68,7 +68,7 @@ class _WebviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WebView(
-      initialUrl: 'http://$benchMarkServerAddress:${benchMarkServerPort}/web/home.html',
+      initialUrl: 'http://$benchMarkServer/web/home.html',
       javascriptMode: JavascriptMode.unrestricted,
       onWebViewCreated: (WebViewController controller)  {
         // controller.clearCache();
@@ -98,7 +98,7 @@ class _KrakenPage extends StatelessWidget {
     };
 
     return Kraken(
-      bundle: KrakenBundle.fromUrl('http://$benchMarkServerAddress:${benchMarkServerPort}/kraken/home.kbc1'),
+      bundle: KrakenBundle.fromUrl('http://$benchMarkServer/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
     );
   }
