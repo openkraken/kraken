@@ -869,6 +869,11 @@ task('run-benchmark', async (done) => {
         uploader(WebviewPerformanceOSSPath, listFile).then(() => {
           console.log(`Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
         }).catch(err => done(err));
+        // Save performance data of Webview with kraken version.
+        let WebviewPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-load-time-list.txt`;
+        uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
+          console.log(`Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
+        }).catch(err => done(err));
 
         // Get average of list.
         let sumLoadTimes = 0;
@@ -881,6 +886,11 @@ task('run-benchmark', async (done) => {
         let KrakenPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
         uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceOSSPath}`);
+        }).catch(err => done(err));
+        // Save performance data of Kraken with kraken version.
+        let KrakenPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
+        uploader(KrakenPerformanceWithVersionOSSPath, averageFile).then(() => {
+          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
 
       } catch {
