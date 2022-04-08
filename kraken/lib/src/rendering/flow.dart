@@ -1112,8 +1112,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (!parent.isDocumentRootBox &&
       parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingTop.compute == 0 &&
-      parentRenderStyle.effectiveBorderTopWidth.compute == 0 &&
+      parentRenderStyle.paddingTop.compute(parentRenderStyle) == 0 &&
+      parentRenderStyle.effectiveBorderTopWidth.compute(parentRenderStyle) == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1233,8 +1233,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (!parent.isDocumentRootBox &&
       parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingBottom.compute == 0 &&
-      parentRenderStyle.effectiveBorderBottomWidth.compute == 0 &&
+      parentRenderStyle.paddingBottom.compute(parentRenderStyle) == 0 &&
+      parentRenderStyle.effectiveBorderBottomWidth.compute(parentRenderStyle) == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;

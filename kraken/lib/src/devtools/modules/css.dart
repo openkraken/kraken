@@ -205,7 +205,7 @@ class InspectCSSModule extends UIInspectorModule {
           propertyName,
         );
 
-        propertyValue = len == null ? '0' : '${len.compute}${_resolveCSSLengthType(len.type)}';
+        propertyValue = len == null ? '0' : '${len.compute(element.renderStyle)}${_resolveCSSLengthType(len.type)}';
       }
 
       if (propertyName == DISPLAY) {
