@@ -35,9 +35,7 @@ class Element : public ContainerNode {
   // Passing null as the second parameter removes the attribute when
   // calling either of these set methods.
   void setAttribute(const AtomicString&, const AtomicString& value);
-  void setAttribute(const AtomicString&,
-                    const AtomicString& value,
-                    ExceptionState&);
+  void setAttribute(const AtomicString&, const AtomicString& value, ExceptionState&);
 
   AtomicString TagName() const { return tag_name_; }
 

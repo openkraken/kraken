@@ -15,6 +15,7 @@ class Document;
 
 class Attr : public Node {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   Attr(Element& element, const AtomicString& name);
   Attr(Document& document, const AtomicString& name, const AtomicString& value);

@@ -14,8 +14,7 @@ DocumentFragment* DocumentFragment::Create(ExecutingContext* context,
   return MakeGarbageCollected<DocumentFragment>(document, ConstructionType::kCreateDocumentFragment);
 }
 
-DocumentFragment::DocumentFragment(Document* document, ConstructionType type)
-    : ContainerNode(document, type) {}
+DocumentFragment::DocumentFragment(Document* document, ConstructionType type) : ContainerNode(document, type) {}
 
 std::string DocumentFragment::nodeName() const {
   return "#document-fragment";

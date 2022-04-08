@@ -13,6 +13,7 @@ class Node;
 
 class NodeList : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = NodeList*;
   NodeList(JSContext* ctx) : ScriptWrappable(ctx){};

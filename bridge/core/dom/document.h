@@ -15,6 +15,7 @@ namespace kraken {
 // (typically, HTML) resource.
 class Document : public Node {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = Document*;
 

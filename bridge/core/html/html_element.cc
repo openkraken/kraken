@@ -4,8 +4,4 @@
 
 #include "html_element.h"
 
-namespace kraken {
-
-
-
-}
+namespace kraken {}

@@ -15,8 +15,7 @@ Node* NodeTraversal::NextAncestorSibling(const Node& current) {
   return nullptr;
 }
 
-Node* NodeTraversal::NextAncestorSibling(const Node& current,
-                                         const Node* stay_within) {
+Node* NodeTraversal::NextAncestorSibling(const Node& current, const Node* stay_within) {
   assert(!current.nextSibling());
   assert(&current != stay_within);
   for (Node& parent : AncestorsOf(current)) {
@@ -37,8 +36,7 @@ Node* NodeTraversal::LastWithin(const ContainerNode& current) {
 
 Node& NodeTraversal::LastWithinOrSelf(Node& current) {
   auto* curr_node = DynamicTo<ContainerNode>(current);
-  Node* last_descendant =
-      curr_node ? NodeTraversal::LastWithin(*curr_node) : nullptr;
+  Node* last_descendant = curr_node ? NodeTraversal::LastWithin(*curr_node) : nullptr;
   return last_descendant ? *last_descendant : current;
 }
 
@@ -54,8 +52,7 @@ Node* NodeTraversal::Previous(const Node& current, const Node* stay_within) {
   return current.parentNode();
 }
 
-Node* NodeTraversal::PreviousAbsoluteSibling(const Node& current,
-                                             const Node* stay_within) {
+Node* NodeTraversal::PreviousAbsoluteSibling(const Node& current, const Node* stay_within) {
   for (Node& node : InclusiveAncestorsOf(current)) {
     if (&node == stay_within)
       return nullptr;
@@ -65,8 +62,7 @@ Node* NodeTraversal::PreviousAbsoluteSibling(const Node& current,
   return nullptr;
 }
 
-Node* NodeTraversal::NextPostOrder(const Node& current,
-                                   const Node* stay_within) {
+Node* NodeTraversal::NextPostOrder(const Node& current, const Node* stay_within) {
   if (&current == stay_within)
     return nullptr;
   if (!current.nextSibling())
@@ -77,8 +73,7 @@ Node* NodeTraversal::NextPostOrder(const Node& current,
   return next;
 }
 
-Node* NodeTraversal::PreviousAncestorSiblingPostOrder(const Node& current,
-                                                      const Node* stay_within) {
+Node* NodeTraversal::PreviousAncestorSiblingPostOrder(const Node& current, const Node* stay_within) {
   assert(!current.previousSibling());
   for (Node& parent : NodeTraversal::AncestorsOf(current)) {
     if (&parent == stay_within)
@@ -89,8 +84,7 @@ Node* NodeTraversal::PreviousAncestorSiblingPostOrder(const Node& current,
   return nullptr;
 }
 
-Node* NodeTraversal::PreviousPostOrder(const Node& current,
-                                       const Node* stay_within) {
+Node* NodeTraversal::PreviousPostOrder(const Node& current, const Node* stay_within) {
   if (Node* last_child = current.lastChild())
     return last_child;
   if (&current == stay_within)
@@ -100,5 +94,4 @@ Node* NodeTraversal::PreviousPostOrder(const Node& current,
   return PreviousAncestorSiblingPostOrder(current, stay_within);
 }
 
-
-}
+}  // namespace kraken

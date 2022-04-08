@@ -27,9 +27,7 @@ bool AtomicString::IsEmpty() const {
   return *this == built_in_string::kempty_string;
 }
 
-AtomicString AtomicString::LowercaseIfNecessary() const {
-
-}
+AtomicString AtomicString::LowercaseIfNecessary() const {}
 
 std::string AtomicString::ToStdString() const {
   const char* buf = JS_AtomToCString(ctx_, atom_);

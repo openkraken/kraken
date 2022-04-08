@@ -5,8 +5,8 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_TEMPLATE_CONTENT_DOCUMENT_FRAGMENT_H_
 #define KRAKENBRIDGE_CORE_DOM_TEMPLATE_CONTENT_DOCUMENT_FRAGMENT_H_
 
-#include "document_fragment.h"
 #include "bindings/qjs/gc_visitor.h"
+#include "document_fragment.h"
 #include "element.h"
 
 namespace kraken {
@@ -28,7 +28,6 @@ class TemplateContentDocumentFragment final : public DocumentFragment {
   Element* host_;
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_TEMPLATE_CONTENT_DOCUMENT_FRAGMENT_H_

@@ -5,9 +5,9 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_NODE_TRAVERSAL_H_
 #define KRAKENBRIDGE_CORE_DOM_NODE_TRAVERSAL_H_
 
+#include "container_node.h"
 #include "foundation/macros.h"
 #include "node.h"
-#include "container_node.h"
 #include "traversal_range.h"
 
 namespace kraken {

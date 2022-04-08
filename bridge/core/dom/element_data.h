@@ -12,9 +12,9 @@ namespace kraken {
 class ElementData {
  public:
  private:
-//  mutable Member<CSSPropertyValueSet> inline_style_;
-//  mutable SpaceSplitString class_names_;
-//  mutable AtomicString id_for_style_resolution_;
+  //  mutable Member<CSSPropertyValueSet> inline_style_;
+  //  mutable SpaceSplitString class_names_;
+  //  mutable AtomicString id_for_style_resolution_;
 };
 
 }  // namespace kraken

@@ -363,8 +363,6 @@ Node::Node(Document* document, ConstructionType type)
       document_(document),
       next_(nullptr) {}
 
-void Node::Trace(GCVisitor*) const {
-
-}
+void Node::Trace(GCVisitor*) const {}
 
 }  // namespace kraken

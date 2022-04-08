@@ -81,13 +81,15 @@ inline bool CheckReferenceChildParent(const Node& parent,
                                       const Node* old_child,
                                       ExceptionState& exception_state) {
   if (next && next->parentNode() != &parent) {
-    exception_state.ThrowException(next->ctx(), ErrorType::TypeError, "The node before which the new node is "
-                                                                      "to be inserted is not a child of this "
-                                                                      "node.");
+    exception_state.ThrowException(next->ctx(), ErrorType::TypeError,
+                                   "The node before which the new node is "
+                                   "to be inserted is not a child of this "
+                                   "node.");
     return false;
   }
   if (old_child && old_child->parentNode() != &parent) {
-    exception_state.ThrowException(old_child->ctx(), ErrorType::TypeError, "The node to be replaced is not a child of this node.");
+    exception_state.ThrowException(old_child->ctx(), ErrorType::TypeError,
+                                   "The node to be replaced is not a child of this node.");
     return false;
   }
   return true;
@@ -231,9 +233,7 @@ Node* ContainerNode::RemoveChild(Node* old_child, ExceptionState& exception_stat
   {
     Node* prev = child->previousSibling();
     Node* next = child->nextSibling();
-    {
-      RemoveBetween(prev, next, *child);
-    }
+    { RemoveBetween(prev, next, *child); }
   }
   return child;
 }
@@ -297,7 +297,9 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
   // 5. If either node is a Text node and parent is a document, or node is a
   // doctype and parent is not a document, throw a HierarchyRequestError.
   if (!IsChildTypeAllowed(new_child)) {
-    exception_state.ThrowException(ctx(), ErrorType::TypeError, "Nodes of type '" + new_child.nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
+    exception_state.ThrowException(
+        ctx(), ErrorType::TypeError,
+        "Nodes of type '" + new_child.nodeName() + "' may not be inserted inside nodes of type '" + nodeName() + "'.");
     return false;
   }
 
@@ -333,13 +335,11 @@ void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& 
   old_child.SetParentOrShadowHostNode(nullptr);
 }
 
-
 template <typename Functor>
-void ContainerNode::InsertNodeVector(
-    const NodeVector& targets,
-    Node* next,
-    const Functor& mutator,
-    NodeVector* post_insertion_notification_targets) {
+void ContainerNode::InsertNodeVector(const NodeVector& targets,
+                                     Node* next,
+                                     const Functor& mutator,
+                                     NodeVector* post_insertion_notification_targets) {
   assert(post_insertion_notification_targets);
   {
     for (const auto& target_node : targets) {

@@ -460,10 +460,10 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
 
 #define DEFINE_SCRIPT_WRAPPABLE_CONVERTER(class_name)                                           \
   template <>                                                                                   \
-  struct Converter<class_name> : public ConverterBase<class_name> {                                         \
+  struct Converter<class_name> : public ConverterBase<class_name> {                             \
     static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) { \
       assert(!JS_IsException(value));                                                           \
-      return toScriptWrappable<class_name>(value);                                                    \
+      return toScriptWrappable<class_name>(value);                                              \
     }                                                                                           \
     static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }       \
   };
