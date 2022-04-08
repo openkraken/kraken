@@ -132,7 +132,7 @@ bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
       return false;
   } else if (auto* this_element = DynamicTo<Element>(this)) {
     auto* other_element = DynamicTo<Element>(other);
-    if (this_element->TagQName() != other_element->TagQName())
+    if (this_element->TagName() != other_element->TagName())
       return false;
 
     if (!this_element->HasEquivalentAttributes(*other_element))
@@ -174,14 +174,13 @@ AtomicString Node::textContent(bool convert_brs_to_newlines) const {
   if (IsDocumentNode() || !IsContainerNode())
     return AtomicString::Empty(ctx());
 
-  // TODO: Implement text content.
-  //  std::string content;
-  //  for (const Node& node : NodeTraversal::InclusiveDescendantsOf(*this)) {
-  //    if (auto* text_node = DynamicTo<Text>(node)) {
-  //      content += (text_node->data());
-  //    }
-  //  }
-  //  return content.ReleaseString();
+  std::string content;
+  for (const Node& node : NodeTraversal::InclusiveDescendantsOf(*this)) {
+    if (auto* text_node = DynamicTo<Text>(node)) {
+      content.append(text_node->data().ToStdString());
+    }
+  }
+  return AtomicString(ctx(), content);
 }
 
 void Node::setTextContent(const AtomicString& text) {

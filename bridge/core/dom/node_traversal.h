@@ -7,6 +7,7 @@
 
 #include "foundation/macros.h"
 #include "node.h"
+#include "container_node.h"
 #include "traversal_range.h"
 
 namespace kraken {
@@ -70,7 +71,6 @@ class NodeTraversal {
   static Node* NextSibling(const Node& node) { return node.nextSibling(); }
   static Node* PreviousSibling(const Node& node) { return node.previousSibling(); }
   static ContainerNode* Parent(const Node& node) { return node.parentNode(); }
-  static Node* CommonAncestor(const Node& node_a, const Node& node_b);
   static unsigned Index(const Node& node) { return node.NodeIndex(); }
   static unsigned CountChildren(const Node& parent) { return parent.CountChildren(); }
   static ContainerNode* ParentOrShadowHostNode(const Node& node) { return node.ParentOrShadowHostNode(); }
@@ -134,7 +134,7 @@ template <class NodeType>
 inline Node* NodeTraversal::TraverseNextTemplate(NodeType& current, const Node* stay_within) {
   if (current.hasChildren())
     return current.firstChild();
-  if (current == stay_within)
+  if (&current == stay_within)
     return nullptr;
   if (current.nextSibling())
     return current.nextSibling();
@@ -148,7 +148,7 @@ inline Node* NodeTraversal::NextSkippingChildren(const Node& current) {
 }
 
 inline Node* NodeTraversal::NextSkippingChildren(const Node& current, const Node* stay_within) {
-  if (current == stay_within)
+  if (&current == stay_within)
     return nullptr;
   if (current.nextSibling())
     return current.nextSibling();

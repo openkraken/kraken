@@ -1,4 +1,5 @@
 import { EventTarget } from './events/event_target';
+import { Document } from './document';
 
 /** Node is an interface from which a number of DOM API object types inherit. It allows those types to be treated similarly; for example, inheriting the same set of methods, or being tested in the same way. */
 interface Node extends EventTarget {
@@ -33,11 +34,12 @@ interface Node extends EventTarget {
   nodeValue: string | null;
   /**
    * Returns the node document. Returns null for documents.
-  //  */
+   */
   readonly ownerDocument: Document | null;
   /**
    * Returns the parent element.
    */
+  // @ts-ignore
   readonly parentElement: HTMLElement | null;
   /**
    * Returns the parent.

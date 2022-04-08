@@ -36,6 +36,9 @@ class AtomicString {
   bool IsNull() const;
   bool IsEmpty() const;
 
+  // Lower performance, should optimize in the future.
+  AtomicString LowercaseIfNecessary() const;
+
   JSAtom Impl() const { return atom_; }
 
   [[nodiscard]] std::string ToStdString() const;

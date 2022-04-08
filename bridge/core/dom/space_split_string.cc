@@ -177,4 +177,9 @@ SpaceSplitString::Data::Data(const SpaceSplitString::Data& other) : RefCounted<D
   // there's nothing to be removed from the SharedDataMap().
 }
 
+SpaceSplitString::DataMap& SpaceSplitString::SharedDataMap() {
+  thread_local static DataMap map;
+  return map;
+}
+
 }  // namespace kraken

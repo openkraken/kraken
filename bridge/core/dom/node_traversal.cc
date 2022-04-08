@@ -17,10 +17,10 @@ Node* NodeTraversal::NextAncestorSibling(const Node& current) {
 
 Node* NodeTraversal::NextAncestorSibling(const Node& current,
                                          const Node* stay_within) {
-  DCHECK(!current.nextSibling());
-  DCHECK_NE(current, stay_within);
+  assert(!current.nextSibling());
+  assert(&current != stay_within);
   for (Node& parent : AncestorsOf(current)) {
-    if (parent == stay_within)
+    if (&parent == stay_within)
       return nullptr;
     if (parent.nextSibling())
       return parent.nextSibling();
@@ -43,7 +43,7 @@ Node& NodeTraversal::LastWithinOrSelf(Node& current) {
 }
 
 Node* NodeTraversal::Previous(const Node& current, const Node* stay_within) {
-  if (current == stay_within)
+  if (&current == stay_within)
     return nullptr;
   if (current.previousSibling()) {
     Node* previous = current.previousSibling();
@@ -54,22 +54,10 @@ Node* NodeTraversal::Previous(const Node& current, const Node* stay_within) {
   return current.parentNode();
 }
 
-Node* NodeTraversal::PreviousAbsoluteSiblingIncludingPseudo(
-    const Node& current,
-    const Node* stay_within) {
-  for (Node& iter : InclusiveAncestorsOf(current)) {
-    if (iter == stay_within)
-      return nullptr;
-    if (Node* result = iter.PseudoAwarePreviousSibling())
-      return result;
-  }
-  return nullptr;
-}
-
 Node* NodeTraversal::PreviousAbsoluteSibling(const Node& current,
                                              const Node* stay_within) {
   for (Node& node : InclusiveAncestorsOf(current)) {
-    if (node == stay_within)
+    if (&node == stay_within)
       return nullptr;
     if (Node* prev = node.previousSibling())
       return prev;
@@ -79,7 +67,7 @@ Node* NodeTraversal::PreviousAbsoluteSibling(const Node& current,
 
 Node* NodeTraversal::NextPostOrder(const Node& current,
                                    const Node* stay_within) {
-  if (current == stay_within)
+  if (&current == stay_within)
     return nullptr;
   if (!current.nextSibling())
     return current.parentNode();
@@ -91,9 +79,9 @@ Node* NodeTraversal::NextPostOrder(const Node& current,
 
 Node* NodeTraversal::PreviousAncestorSiblingPostOrder(const Node& current,
                                                       const Node* stay_within) {
-  DCHECK(!current.previousSibling());
+  assert(!current.previousSibling());
   for (Node& parent : NodeTraversal::AncestorsOf(current)) {
-    if (parent == stay_within)
+    if (&parent == stay_within)
       return nullptr;
     if (parent.previousSibling())
       return parent.previousSibling();
@@ -105,15 +93,11 @@ Node* NodeTraversal::PreviousPostOrder(const Node& current,
                                        const Node* stay_within) {
   if (Node* last_child = current.lastChild())
     return last_child;
-  if (current == stay_within)
+  if (&current == stay_within)
     return nullptr;
   if (current.previousSibling())
     return current.previousSibling();
   return PreviousAncestorSiblingPostOrder(current, stay_within);
-}
-
-Node* NodeTraversal::CommonAncestor(const Node& node_a, const Node& node_b) {
-  return Range::commonAncestorContainer(&node_a, &node_b);
 }
 
 
