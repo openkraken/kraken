@@ -860,8 +860,9 @@ task('run-benchmark', async (done) => {
         // Save performance list to file and upload to OSS.
         const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
         fs.writeFileSync(listFile, performanceDatas.toString());
-        uploader(`${KrakenPerformancePath}/${viewType}-load-time-list.txt`, listFile).then(() => {
-          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
+        let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-load-time-list.txt`;
+        uploader(WebviewPerformanceOSSPath, listFile).then(() => {
+          console.log(`Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
         }).catch(err => done(err));
 
         // Get average of list.
@@ -872,8 +873,9 @@ task('run-benchmark', async (done) => {
         // Save average time to file and upload to OSS.
         const averageFile = path.join(__dirname, `../${viewType}-average-load-time.txt`);
         fs.writeFileSync(averageFile, averageLoadTime.toString());
-        uploader(`${KrakenPerformancePath}/${viewType}-average-load-time.txt`, averageFile).then(() => {
-          console.log('Snapshot Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/kraken-performance.txt');
+        let KrakenPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
+        uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
+          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceOSSPath}`);
         }).catch(err => done(err));
 
       } catch {
