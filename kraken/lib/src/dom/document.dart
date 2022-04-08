@@ -53,11 +53,7 @@ class Document extends Node {
   RenderBox? get renderer => _viewport;
 
   // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L770
-  bool _isParsing = false;
-  bool get parsing => _isParsing;
-  set parsing(bool isParsing) {
-    _isParsing = isParsing;
-  }
+  bool parsing = false;
 
   int _requestCount = 0;
   bool get hasPendingRequest => _requestCount > 0;
