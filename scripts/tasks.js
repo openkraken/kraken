@@ -839,6 +839,11 @@ task('run-benchmark', async (done) => {
   }
 
   let androidDevices = getDevicesInfo();
+  if (!androidDevices[0]) {
+    const err = new Error('The devices not found.');
+    done(err);
+  }
+
   let performanceInfos = execSync(
     `flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress} PORT=${port}" | grep Performance`,
     {
