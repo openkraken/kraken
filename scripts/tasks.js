@@ -822,12 +822,13 @@ task('run-benchmark', async (done) => {
   const KrakenPerformancePath = 'kraken-performance';
   for (let item in performanceInfos) {
     let info = performanceInfos[item];
+    console.log('info=', info);
     const match = /\[(\s?\d,?)+\]/.exec(info);
     if (match) {
       const viewType = item == 0 ? 'kraken' : 'web';
       try {
         let performanceDatas = JSON.parse(match[0]);
-        
+        console.log('performanceDatas', performanceDatas);
         // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
         performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
         
