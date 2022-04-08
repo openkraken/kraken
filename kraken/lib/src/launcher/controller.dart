@@ -1247,7 +1247,7 @@ class KrakenController {
     if (_view.document.parsing) return;
 
     // Still waiting for images/scripts?
-    if (_view.document.hasRequestCount) return;
+    if (_view.document.hasPendingRequest) return;
 
     // Still waiting for elements that don't go through a FrameLoader?
     if (_view.document.isDelayingLoadEvent) return;

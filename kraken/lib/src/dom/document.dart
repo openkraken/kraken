@@ -60,7 +60,7 @@ class Document extends Node {
   }
 
   int _requestCount = 0;
-  bool get hasRequestCount => _requestCount > 0;
+  bool get hasPendingRequest => _requestCount > 0;
   void incrementRequestCount() {
     _requestCount++;
   }
