@@ -816,7 +816,9 @@ task('build-benchmark-app', async (doen) => {
 })
 
 task('run-benchmark', async (done) => {
-  const childProcess = spawn('http-server', ['./', '-p 7878'], {
+  const port = '7878';
+
+  const childProcess = spawn('http-server', ['./', `-p ${port}`], {
     stdio: 'pipe',
     cwd: path.join(paths.performanceTests, '/benchmark/build')
   })
@@ -838,7 +840,7 @@ task('run-benchmark', async (done) => {
 
   let androidDevices = getDevicesInfo();
   let performanceInfos = execSync(
-    `flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress}" | grep Performance`,
+    `flutter run -d ${androidDevices[0].id} --profile --dart-define="IP=${serverIpAddress} PORT=${port}" | grep Performance`,
     {
       cwd: paths.performanceTests
     }
