@@ -35,5 +35,6 @@ export 'src/dom/elements/text_form_control.dart';
 export 'src/dom/elements/textarea.dart';
 export 'src/dom/elements/object.dart';
 export 'src/dom/elements/head.dart';
+export 'src/dom/elements/script.dart';
 export 'src/dom/elements/html.dart';
 export 'src/dom/elements/template.dart';
