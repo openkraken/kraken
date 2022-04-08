@@ -14,7 +14,7 @@ class RenderLineBreak extends RenderReplaced {
   );
 
   TextPainter get textPainter {
-    double fontSize = renderStyle.fontSize.computedValue;
+    double fontSize = renderStyle.fontSize.compute(renderStyle);
 
     TextStyle textStyle = TextStyle(
       fontFamilyFallback: renderStyle.fontFamily,
@@ -39,7 +39,7 @@ class RenderLineBreak extends RenderReplaced {
   double get lineHeight {
     CSSLengthValue lineHeight = renderStyle.parent!.lineHeight;
     if (lineHeight.type != CSSLengthType.NORMAL) {
-      return lineHeight.computedValue;
+      return lineHeight.compute(renderStyle);
     } else {
       return textPainter.size.height;
     }

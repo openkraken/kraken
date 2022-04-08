@@ -464,14 +464,14 @@ class CSSBackground {
       default:
         List<String> values = value.split(_splitRegExp);
         if (values.length == 1 && values[0].isNotEmpty) {
-          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
+          CSSLengthValue width = CSSLength.parseLength(values[0], propertyName, Axis.horizontal);
           return CSSBackgroundSize(
             fit: BoxFit.none,
             width: width,
           );
         } else if (values.length == 2) {
-          CSSLengthValue width = CSSLength.parseLength(values[0], renderStyle, propertyName, Axis.horizontal);
-          CSSLengthValue height = CSSLength.parseLength(values[1], renderStyle, propertyName, Axis.vertical);
+          CSSLengthValue width = CSSLength.parseLength(values[0], propertyName, Axis.horizontal);
+          CSSLengthValue height = CSSLength.parseLength(values[1], propertyName, Axis.vertical);
           // Value which is neither length/percentage/auto is considered to be invalid.
           return CSSBackgroundSize(
             fit: BoxFit.none,
@@ -574,7 +574,7 @@ List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, Strin
             stop = CSSAngle.parseAngle(strings[i])! / (math.pi * 2);
           } else if (CSSLength.isLength(strings[i])) {
             if (gradientLength != null) {
-              stop = CSSLength.parseLength(strings[i], renderStyle, propertyName).computedValue / gradientLength;
+              stop = CSSLength.parseLength(strings[i], propertyName).compute(renderStyle) / gradientLength;
             }
           }
           Color? color = CSSColor.resolveColor(strings[0], renderStyle, propertyName);

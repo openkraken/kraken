@@ -162,8 +162,8 @@ class RenderSliverListLayout extends RenderLayoutBox {
     RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
-    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    double? width = renderStyle.width.isAuto ? null : renderStyle.width.compute(renderStyle);
+    double? height = renderStyle.height.isAuto ? null : renderStyle.height.compute(renderStyle);
     Axis sliverAxis = renderStyle.sliverDirection;
 
     switch (sliverAxis) {
@@ -209,9 +209,9 @@ class RenderSliverListLayout extends RenderLayoutBox {
   @override
   void performPaint(PaintingContext context, Offset offset) {
 
-    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
+    offset += Offset(renderStyle.paddingLeft.compute(renderStyle), renderStyle.paddingTop.compute(renderStyle));
 
-    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
+    offset += Offset(renderStyle.effectiveBorderLeftWidth.compute(renderStyle), renderStyle.effectiveBorderTopWidth.compute(renderStyle));
 
     if (firstChild != null) {
       late DateTime childPaintStart;

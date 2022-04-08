@@ -156,10 +156,10 @@ class BoxDecorationPainter extends BoxPainter {
     // the inset box-shadow is drawn inside the padding box edge.
     // https://drafts.csswg.org/css-backgrounds-3/#shadow-shape
     Rect paddingBoxRect = Rect.fromLTRB(
-      rect.left + renderStyle.effectiveBorderLeftWidth.computedValue,
-      rect.top + renderStyle.effectiveBorderTopWidth.computedValue,
-      rect.right - renderStyle.effectiveBorderRightWidth.computedValue,
-      rect.bottom - renderStyle.effectiveBorderBottomWidth.computedValue
+      rect.left + renderStyle.effectiveBorderLeftWidth.compute(renderStyle),
+      rect.top + renderStyle.effectiveBorderTopWidth.compute(renderStyle),
+      rect.right - renderStyle.effectiveBorderRightWidth.compute(renderStyle),
+      rect.bottom - renderStyle.effectiveBorderBottomWidth.compute(renderStyle)
     );
 
     Path paddingBoxPath;
@@ -169,7 +169,7 @@ class BoxDecorationPainter extends BoxPainter {
       RRect borderBoxRRect = _decoration.borderRadius!.toRRect(rect);
       // A borderRadius can only be given for a uniform Border in Flutter.
       // https://github.com/flutter/flutter/issues/12583
-      double uniformBorderWidth = renderStyle.effectiveBorderTopWidth.computedValue;
+      double uniformBorderWidth = renderStyle.effectiveBorderTopWidth.compute(renderStyle);
       RRect paddingBoxRRect = borderBoxRRect.deflate(uniformBorderWidth);
       paddingBoxPath = Path()..addRRect(paddingBoxRRect);
     }
@@ -546,6 +546,7 @@ class BoxDecorationImagePainter {
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
       filterQuality: FilterQuality.low,
+      renderStyle: _renderStyle,
     );
 
     if (clipPath != null)
@@ -602,6 +603,7 @@ void _paintImage({
   required Canvas canvas,
   required Rect rect,
   required ui.Image image,
+  required RenderStyle renderStyle,
   String? debugImageLabel,
   double scale = 1.0,
   ColorFilter? colorFilter,
@@ -643,27 +645,27 @@ void _paintImage({
   CSSLengthValue? backgroundHeight = backgroundSize.height;
 
   // Only background width is set, eg `100px`, `100px auto`.
-  if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.computedValue > 0 &&
+  if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.compute(renderStyle) > 0 &&
     (backgroundHeight == null || backgroundHeight.isAuto)
   ) {
-    double width = backgroundWidth.computedValue;
+    double width = backgroundWidth.compute(renderStyle);
     double height = width / aspectRatio;
     destinationSize = Size(width, height);
 
   // Only background height is set, eg `auto 100px`.
   } else if (backgroundWidth != null && backgroundWidth.isAuto &&
-    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.computedValue > 0
+    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.compute(renderStyle) > 0
   ) {
-    double height = backgroundHeight.computedValue;
+    double height = backgroundHeight.compute(renderStyle);
     double width = height * aspectRatio;
     destinationSize = Size(width, height);
 
   // Both background width and height are set, eg `100px 100px`.
-  } else if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.computedValue > 0 &&
-    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.computedValue > 0
+  } else if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.compute(renderStyle) > 0 &&
+    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.compute(renderStyle) > 0
   ) {
-    double width = backgroundWidth.computedValue;
-    double height = backgroundHeight.computedValue;
+    double width = backgroundWidth.compute(renderStyle);
+    double height = backgroundHeight.compute(renderStyle);
     destinationSize = Size(width, height);
 
   // Keyword values are set(contain|cover|auto), eg `contain`, `auto auto`.
@@ -695,9 +697,9 @@ void _paintImage({
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
 
   // Use position as length type if specified in positionX/ positionY, otherwise use as percentage type.
-  final double dx = positionX.length != null ? positionX.length!.computedValue :
+  final double dx = positionX.length != null ? positionX.length!.compute(renderStyle) :
   halfWidthDelta + (flipHorizontally ? -positionX.percentage! : positionX.percentage!) * halfWidthDelta;
-  final double dy = positionY.length != null ? positionY.length!.computedValue :
+  final double dy = positionY.length != null ? positionY.length!.compute(renderStyle) :
   halfHeightDelta + positionY.percentage! * halfHeightDelta;
 
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);

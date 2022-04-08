@@ -15,10 +15,10 @@ mixin CSSMarginMixin on RenderStyle {
   @override
   EdgeInsets get margin {
     EdgeInsets insets = EdgeInsets.only(
-      left: marginLeft.computedValue,
-      right: marginRight.computedValue,
-      bottom: marginBottom.computedValue,
-      top: marginTop.computedValue
+      left: marginLeft.compute(this),
+      right: marginRight.compute(this),
+      bottom: marginBottom.compute(this),
+      top: marginTop.compute(this)
     ).resolve(TextDirection.ltr);
     return insets;
   }

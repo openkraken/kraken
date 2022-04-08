@@ -146,7 +146,7 @@ class InputElement extends TextFormControlElement {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH) {
-      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.computedValue : null;
+      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.compute(renderStyle) : null;
       _updateDefaultWidth();
     } else if (property == LINE_HEIGHT) {
       // Need to mark RenderTextControlLeaderLayer as needsLayout manually cause

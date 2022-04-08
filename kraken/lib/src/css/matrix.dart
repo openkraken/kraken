@@ -630,13 +630,12 @@ class CSSMatrix {
         if (method.args.isNotEmpty && method.args.length <= 2) {
           CSSLengthValue y;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
+            y = CSSLength.parseLength(method.args[1].trim(), TRANSLATE, Axis.vertical);
           } else {
             y = CSSLengthValue.zero;
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
-          x.renderStyle = y.renderStyle = renderStyle;
-          return Matrix4.identity()..translate(x.computedValue, y.computedValue);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), TRANSLATE, Axis.horizontal);
+          return Matrix4.identity()..translate(x.compute(renderStyle), y.compute(renderStyle));
         }
         break;
       case TRANSLATE_3D:
@@ -647,22 +646,20 @@ class CSSMatrix {
         if (method.args.isNotEmpty && method.args.length <= 3) {
           CSSLengthValue y = CSSLengthValue.zero, z = CSSLengthValue.zero;
           if (method.args.length == 2) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
+            y = CSSLength.parseLength(method.args[1].trim(), TRANSLATE, Axis.vertical);
           }
           if (method.args.length == 3) {
-            y = CSSLength.parseLength(method.args[1].trim(), renderStyle, TRANSLATE, Axis.vertical);
-            z = CSSLength.parseLength(method.args[2].trim(), renderStyle, TRANSLATE);
+            y = CSSLength.parseLength(method.args[1].trim(), TRANSLATE, Axis.vertical);
+            z = CSSLength.parseLength(method.args[2].trim(), TRANSLATE);
           }
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
-          x.renderStyle = y.renderStyle = z.renderStyle = renderStyle;
-          return Matrix4.identity()..translate(x.computedValue, y.computedValue, z.computedValue);
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), TRANSLATE, Axis.horizontal);
+          return Matrix4.identity()..translate(x.compute(renderStyle), y.compute(renderStyle), z.compute(renderStyle));
         }
         break;
       case TRANSLATE_X:
         if (method.args.length == 1) {
-          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.horizontal);
-          x.renderStyle = renderStyle;
-          double computedValue = x.computedValue;
+          CSSLengthValue x = CSSLength.parseLength(method.args[0].trim(), TRANSLATE, Axis.horizontal);
+          double computedValue = x.compute(renderStyle);
           // Double.infinity indicates translate not resolved due to renderBox not layout yet
           // in percentage case.
           if (computedValue == double.infinity) return null;
@@ -671,9 +668,8 @@ class CSSMatrix {
         break;
       case TRANSLATE_Y:
         if (method.args.length == 1) {
-          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE, Axis.vertical);
-          y.renderStyle = renderStyle;
-          double computedValue = y.computedValue;
+          CSSLengthValue y = CSSLength.parseLength(method.args[0].trim(), TRANSLATE, Axis.vertical);
+          double computedValue = y.compute(renderStyle);
           // Double.infinity indicates translate not resolved due to renderBox not layout yet
           // in percentage case.
           if (computedValue == double.infinity) return null;
@@ -682,8 +678,8 @@ class CSSMatrix {
         break;
       case TRANSLATE_Z:
         if (method.args.length == 1) {
-          CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSLATE);
-          double computedValue = z.computedValue;
+          CSSLengthValue z = CSSLength.parseLength(method.args[0].trim(), TRANSLATE);
+          double computedValue = z.compute(renderStyle);
           // Double.infinity indicates translate not resolved due to renderBox not layout yet
           // in percentage case.
           if (computedValue == double.infinity) return null;
@@ -815,9 +811,8 @@ class CSSMatrix {
         //   0, 0, 1, perspective,
         //   0, 0, 0, 1]
         if (method.args.length == 1) {
-          CSSLengthValue length = CSSLength.parseLength(method.args[0].trim(), renderStyle, TRANSFORM);
-          length.renderStyle = renderStyle;
-          double p = length.computedValue;
+          CSSLengthValue length = CSSLength.parseLength(method.args[0].trim(), TRANSFORM);
+          double p = length.compute(renderStyle);
           p = (-1 / p);
           return Matrix4.identity()..storage[11] = p;
         }

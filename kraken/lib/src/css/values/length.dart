@@ -45,87 +45,88 @@ enum CSSLengthType {
 }
 
 class CSSLengthValue {
+  // Indicate the raw value in double of CSS length value.
   final double? value;
+  // Indicate the unit of length.
   final CSSLengthType type;
 
-  CSSLengthValue(this.value, this.type, [this.renderStyle, this.propertyName, this.axisType]) {
-    if (propertyName != null) {
-      if (type == CSSLengthType.EM) {
-        renderStyle!.addFontRelativeProperty(propertyName!);
-      } else if (type == CSSLengthType.REM) {
-        renderStyle!.addRootFontRelativeProperty(propertyName!);
-      }
-    }
-  }
+  const CSSLengthValue(this.value, this.type, [this.propertyName, this.axisType]);
 
-  static final CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
-  static final CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
-  static final CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
-  static final CSSLengthValue unknown = CSSLengthValue(null, CSSLengthType.UNKNOWN);
+  static const CSSLengthValue zero = CSSLengthValue(0, CSSLengthType.PX);
+  static const CSSLengthValue auto = CSSLengthValue(null, CSSLengthType.AUTO);
+  static const CSSLengthValue initial = CSSLengthValue(null, CSSLengthType.INITIAL);
+  static const CSSLengthValue unknown = CSSLengthValue(null, CSSLengthType.UNKNOWN);
   // Used in https://www.w3.org/TR/css-inline-3/#valdef-line-height-normal
-  static final CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
-  static final CSSLengthValue none = CSSLengthValue(null, CSSLengthType.NONE);
+  static const CSSLengthValue normal = CSSLengthValue(null, CSSLengthType.NORMAL);
+  static const CSSLengthValue none = CSSLengthValue(null, CSSLengthType.NONE);
 
   // Length is applied in horizontal or vertical direction.
-  Axis? axisType;
+  final Axis? axisType;
 
-  RenderStyle? renderStyle;
-  String? propertyName;
-  double? _computedValue;
+  final String? propertyName;
 
   // Note return value of double.infinity means the value is resolved as the initial value
   // which can not be computed to a specific value, eg. percentage height is sometimes parsed
   // to be auto due to parent height not defined.
-  double get computedValue {
+  double compute(RenderStyle renderStyle) {
+    // Apply relative font property.
+    if (propertyName != null) {
+      if (type == CSSLengthType.EM) {
+        renderStyle.addFontRelativeProperty(propertyName!);
+      } else if (type == CSSLengthType.REM) {
+        renderStyle.addRootFontRelativeProperty(propertyName!);
+      }
+    }
 
+    double computedValue = 0.0;
     switch (type) {
       case CSSLengthType.PX:
-        _computedValue = value;
+        computedValue = value ?? computedValue;
         break;
       case CSSLengthType.EM:
         // Font size of the parent, in the case of typographical properties like font-size,
         // and font size of the element itself, in the case of other properties like width.
         if (propertyName == FONT_SIZE) {
           // If root element set fontSize as em unit.
-          if (renderStyle!.parent == null) {
-            _computedValue = value! * 16;
+          if (renderStyle.parent == null) {
+            computedValue = value! * 16;
           } else {
-            _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+            computedValue = value! * renderStyle.parent!.fontSize.compute(renderStyle.parent!);
           }
         } else {
-          _computedValue = value! * renderStyle!.fontSize.computedValue;
+          computedValue = value! * renderStyle.fontSize.compute(renderStyle);
         }
         break;
       case CSSLengthType.REM:
         // If root element set fontSize as rem unit.
-        if (renderStyle!.parent == null) {
-          _computedValue = value! * 16;
+        if (renderStyle.parent == null) {
+          computedValue = value! * 16;
         } else {
           // Font rem is calculated against the root element's font size.
-          _computedValue = value! * renderStyle!.rootFontSize;
+          computedValue = value! * renderStyle.rootFontSize;
         }
         break;
       case CSSLengthType.VH:
-        _computedValue = value! * renderStyle!.viewportSize.height;
+        computedValue = value! * renderStyle.viewportSize.height;
         break;
       case CSSLengthType.VW:
-        _computedValue = value! * renderStyle!.viewportSize.width;
+        computedValue = value! * renderStyle.viewportSize.width;
         break;
       // 1% of viewport's smaller (vw or vh) dimension.
       // If the height of the viewport is less than its width, 1vmin will be equivalent to 1vh.
       // If the width of the viewport is less than it’s height, 1vmin is equvialent to 1vw.
       case CSSLengthType.VMIN:
-        _computedValue = value! * renderStyle!.viewportSize.shortestSide;
+        computedValue = value! * renderStyle.viewportSize.shortestSide;
         break;
       case CSSLengthType.VMAX:
-        _computedValue = value! * renderStyle!.viewportSize.longestSide;
+        computedValue = value! * renderStyle.viewportSize.longestSide;
         break;
       case CSSLengthType.PERCENTAGE:
-        CSSPositionType positionType = renderStyle!.position;
+        CSSPositionType positionType = renderStyle.position;
         bool isPositioned = positionType == CSSPositionType.absolute ||
           positionType == CSSPositionType.fixed;
 
-        RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+        RenderBoxModel? renderBoxModel = renderStyle.renderBoxModel;
         // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
         // cause the element of renderStyle parent may not equal to containing block.
         RenderStyle? parentRenderStyle;
@@ -165,27 +166,27 @@ class CSSLengthValue {
         switch (propertyName) {
           case FONT_SIZE:
             // Relative to the parent font size.
-            if (renderStyle!.parent == null) {
-              _computedValue = value! * 16;
+            if (renderStyle.parent == null) {
+              computedValue = value! * 16;
             } else {
-              _computedValue = value! * renderStyle!.parent!.fontSize.computedValue;
+              computedValue = value! * renderStyle.parent!.fontSize.compute(renderStyle.parent!);
             }
             break;
           case LINE_HEIGHT:
             // Relative to the font size of the element itself.
-            _computedValue = value! * renderStyle!.fontSize.computedValue;
+            computedValue = value! * renderStyle.fontSize.compute(renderStyle);
             break;
           case WIDTH:
           case MIN_WIDTH:
           case MAX_WIDTH:
             if (relativeParentWidth != null) {
-              _computedValue = value! * relativeParentWidth;
+              computedValue = value! * relativeParentWidth;
             } else {
               // Mark parent to relayout to get renderer width of parent.
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              _computedValue = double.infinity;
+              computedValue = double.infinity;
             }
             break;
           case HEIGHT:
@@ -206,21 +207,21 @@ class CSSLengthValue {
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
               if (relativeParentHeight  != null) {
-                _computedValue = value! * relativeParentHeight;
+                computedValue = value! * relativeParentHeight;
               } else {
                 // Mark parent to relayout to get renderer height of parent.
                 if (renderBoxModel != null) {
                   renderBoxModel.markParentNeedsRelayout();
                 }
-                _computedValue = double.infinity;
+                computedValue = double.infinity;
               }
             } else {
               double? relativeParentHeight = parentRenderStyle?.contentBoxLogicalHeight;
               if (relativeParentHeight != null) {
-                _computedValue = value! * relativeParentHeight;
+                computedValue = value! * relativeParentHeight;
               } else {
                 // Resolves height as auto if parent has no height specified.
-                _computedValue = double.infinity;
+                computedValue = double.infinity;
               }
             }
             break;
@@ -235,27 +236,27 @@ class CSSLengthValue {
             // https://www.w3.org/TR/css-box-3/#padding-physical
             // Percentage refer to logical width of containing block
             if (relativeParentWidth != null) {
-              _computedValue = value! * relativeParentWidth;
+              computedValue = value! * relativeParentWidth;
             } else {
               // Mark parent to relayout to get renderer height of parent.
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              _computedValue = 0;
+              computedValue = 0;
             }
             break;
           case FLEX_BASIS:
             // Flex-basis computation is called in RenderFlexLayout which
             // will ensure parent exists.
-            RenderStyle parentRenderStyle = renderStyle!.parent!;
+            RenderStyle parentRenderStyle = renderStyle.parent!;
             double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
               parentRenderStyle.contentBoxLogicalWidth :
               parentRenderStyle.contentBoxLogicalHeight;
             if (mainContentSize != null) {
-              _computedValue = mainContentSize * value!;
+              computedValue = mainContentSize * value!;
             } else {
               // @TODO: Not supported when parent has no logical main size.
-              _computedValue = 0;
+              computedValue = 0;
             }
             // Refer to the flex container's inner main size.
             break;
@@ -268,27 +269,27 @@ class CSSLengthValue {
           case BOTTOM:
             // Offset of positioned element starts from the edge of padding box of containing block.
             if (parentPaddingBoxHeight != null) {
-              _computedValue = value! * parentPaddingBoxHeight;
+              computedValue = value! * parentPaddingBoxHeight;
             } else {
               // Mark parent to relayout to get renderer height of parent.
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
               // Set as initial value, use infinity as auto value.
-              _computedValue = double.infinity;
+              computedValue = double.infinity;
             }
             break;
           case LEFT:
           case RIGHT:
             // Offset of positioned element starts from the edge of padding box of containing block.
             if (parentPaddingBoxWidth != null) {
-              _computedValue = value! * parentPaddingBoxWidth;
+              computedValue = value! * parentPaddingBoxWidth;
             } else {
               // Mark parent to relayout to get renderer height of parent.
               if (renderBoxModel != null) {
                 renderBoxModel.markParentNeedsRelayout();
               }
-              _computedValue = double.infinity;
+              computedValue = double.infinity;
             }
             break;
 
@@ -300,14 +301,14 @@ class CSSLengthValue {
           case BORDER_BOTTOM_RIGHT_RADIUS:
             // Percentages for the horizontal axis refer to the width of the box.
             // Percentages for the vertical axis refer to the height of the box.
-            double? borderBoxWidth = renderStyle!.borderBoxWidth ?? renderStyle!.borderBoxLogicalWidth;
-            double? borderBoxHeight = renderStyle!.borderBoxHeight ?? renderStyle!.borderBoxLogicalHeight;
+            double? borderBoxWidth = renderStyle.borderBoxWidth ?? renderStyle.borderBoxLogicalWidth;
+            double? borderBoxHeight = renderStyle.borderBoxHeight ?? renderStyle.borderBoxLogicalHeight;
             double? borderBoxDimension = axisType == Axis.horizontal ? borderBoxWidth : borderBoxHeight;
 
             if (borderBoxDimension != null) {
-              _computedValue = value! * borderBoxDimension;
+              computedValue = value! * borderBoxDimension;
             } else {
-              _computedValue = propertyName == TRANSLATE
+              computedValue = propertyName == TRANSLATE
               // Transform will be cached once resolved, so avoid resolve if width not defined.
               // Use double.infinity to indicate percentage not resolved.
                 ? double.infinity
@@ -320,7 +321,7 @@ class CSSLengthValue {
         // @FIXME: Type AUTO not always resolves to 0, in cases such as `margin: auto`, `width: auto`.
         return 0;
     }
-    return _computedValue!;
+    return computedValue;
   }
 
   bool get isAuto {
@@ -341,7 +342,7 @@ class CSSLengthValue {
       case BOTTOM:
       case LEFT:
       case RIGHT:
-        if (computedValue == double.infinity) {
+        if (compute == double.infinity) {
           return true;
         }
         break;
@@ -382,10 +383,11 @@ class CSSLengthValue {
   int get hashCode => hashValues(value, type);
 
   @override
-  String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
+  String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $compute)';
 }
 
-final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
+// @TODO: Make a performance test to ensure cache is usable.
+final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 100);
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
@@ -433,16 +435,16 @@ class CSSLength {
     );
   }
 
-  static CSSLengthValue? resolveLength(String text, RenderStyle? renderStyle, String propertyName) {
+  static CSSLengthValue? resolveLength(String text, String propertyName) {
     if (text.isEmpty) {
       // Empty string means delete value.
       return null;
     } else {
-      return parseLength(text, renderStyle, propertyName);
+      return parseLength(text, propertyName);
     }
   }
 
-  static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
+  static CSSLengthValue parseLength(String text, [String? propertyName, Axis? axisType]) {
     if (_cachedParsedLength.containsKey(text)) {
       return _cachedParsedLength[text]!;
     }
@@ -527,7 +529,7 @@ class CSSLength {
             break;
           default:
             // Using fallback value if not match user agent-defined environment variable: env(xxx, 50px).
-            return parseLength(notations[0].args[1], renderStyle, propertyName, axisType);
+            return parseLength(notations[0].args[1], propertyName, axisType);
         }
       }
     }
@@ -539,7 +541,7 @@ class CSSLength {
     } else if (unit == CSSLengthType.PX){
       return _cachedParsedLength[text] = CSSLengthValue(value, unit);
     } else {
-      return CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
+      return CSSLengthValue(value, unit, propertyName, axisType);
     }
   }
 }

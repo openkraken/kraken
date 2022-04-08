@@ -50,10 +50,10 @@ mixin CSSBorderRadiusMixin on RenderStyle {
         borderBottomLeftRadius != CSSBorderRadius.zero;
 
     return hasBorderRadius ? [
-      borderTopLeftRadius.computedRadius,
-      borderTopRightRadius.computedRadius,
-      borderBottomRightRadius.computedRadius,
-      borderBottomLeftRadius.computedRadius
+      borderTopLeftRadius.computeRadius(this),
+      borderTopRightRadius.computeRadius(this),
+      borderBottomRightRadius.computeRadius(this),
+      borderBottomLeftRadius.computeRadius(this)
     ] : null;
   }
 }

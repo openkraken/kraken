@@ -13,10 +13,10 @@ mixin CSSPaddingMixin on RenderStyle {
   @override
   EdgeInsets get padding {
     EdgeInsets insets = EdgeInsets.only(
-      left: paddingLeft.computedValue,
-      right: paddingRight.computedValue,
-      bottom: paddingBottom.computedValue,
-      top: paddingTop.computedValue
+      left: paddingLeft.compute(this),
+      right: paddingRight.compute(this),
+      bottom: paddingBottom.compute(this),
+      top: paddingTop.compute(this)
     );
     assert(insets.isNonNegative);
     return insets;
@@ -78,8 +78,8 @@ mixin CSSPaddingMixin on RenderStyle {
 
   Size wrapPaddingSize(Size innerSize) {
     return Size(
-      paddingLeft.computedValue + innerSize.width + paddingRight.computedValue,
-      paddingTop.computedValue + innerSize.height + paddingBottom.computedValue
+      paddingLeft.compute(this) + innerSize.width + paddingRight.compute(this),
+      paddingTop.compute(this) + innerSize.height + paddingBottom.compute(this)
     );
   }
 

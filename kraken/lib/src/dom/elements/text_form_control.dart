@@ -569,7 +569,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       // For multiline editing, lineHeight works for inner text in the element,
       // so it needs to set line-height of textSpan for RenderEditable to use.
       height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
+      ? renderStyle.lineHeight.compute(renderStyle) / renderStyle.fontSize.compute(renderStyle)
       : null
     );
   }
@@ -607,7 +607,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   Size get avgCharSize {
     TextStyle textStyle = TextStyle(
       fontFamilyFallback: renderStyle.fontFamily,
-      fontSize: renderStyle.fontSize.computedValue,
+      fontSize: renderStyle.fontSize.compute(renderStyle),
       textBaseline: CSSText.getTextBaseLine(),
       package: CSSText.getFontPackage(),
       locale: CSSText.getLocale(),

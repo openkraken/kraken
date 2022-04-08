@@ -128,7 +128,7 @@ class TextareaElement extends TextFormControlElement {
     // rows defaults to 2.
     // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-rows
     double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue
+      ? renderStyle.lineHeight.compute(renderStyle)
       : avgCharHeight;
 
     return computedLineHeight * double.parse(attributes[ROWS] ?? '2');
@@ -166,10 +166,10 @@ class TextareaElement extends TextFormControlElement {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH) {
-      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.computedValue : null;
+      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.compute(renderStyle) : null;
       _updateDefaultWidth();
     } else if (property == HEIGHT) {
-      _styleHeight = renderStyle.height.isNotAuto ? renderStyle.height.computedValue : null;
+      _styleHeight = renderStyle.height.isNotAuto ? renderStyle.height.compute(renderStyle) : null;
       _updateDefaultHeight();
     } else if (property == LINE_HEIGHT) {
       _updateDefaultHeight();

@@ -112,8 +112,8 @@ class RenderReplaced extends RenderBoxModel
   /// Compute distance to baseline of replaced element
   @override
   double computeDistanceToBaseline() {
-    double marginTop = renderStyle.marginTop.computedValue;
-    double marginBottom = renderStyle.marginBottom.computedValue;
+    double marginTop = renderStyle.marginTop.compute(renderStyle);
+    double marginBottom = renderStyle.marginBottom.compute(renderStyle);
 
     // Use margin-bottom as baseline if layout has no children
     return marginTop + boxSize!.height + marginBottom;
@@ -138,9 +138,9 @@ class RenderReplaced extends RenderBoxModel
   @override
   void performPaint(PaintingContext context, Offset offset) {
 
-    offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
+    offset += Offset(renderStyle.paddingLeft.compute(renderStyle), renderStyle.paddingTop.compute(renderStyle));
 
-    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
+    offset += Offset(renderStyle.effectiveBorderLeftWidth.compute(renderStyle), renderStyle.effectiveBorderTopWidth.compute(renderStyle));
 
     if (child != null) {
       late DateTime childPaintStart;

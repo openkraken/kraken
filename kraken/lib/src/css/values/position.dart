@@ -54,7 +54,7 @@ class CSSPosition {
     if (CSSPercentage.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {
-      return CSSBackgroundPosition(length: CSSLength.parseLength(input, renderStyle, propertyName));
+      return CSSBackgroundPosition(length: CSSLength.parseLength(input, propertyName));
     } else {
       if (isHorizontal) {
         switch (input) {
