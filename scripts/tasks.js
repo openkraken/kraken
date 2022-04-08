@@ -774,51 +774,23 @@ function getDevicesInfo() {
   return androidDevices;
 }
 
-task('build-benchmark-app', async (doen) => {
-  const childProcess = spawn('npm', ['run', 'build'], {
-    stdio: 'pipe',
+task('build-benchmark-app', async (done) => {
+  execSync('npm install', { cwd: path.join(paths.performanceTests, '/benchmark') });
+  const result = spawnSync('npm', ['run', 'build'], {
     cwd: path.join(paths.performanceTests, '/benchmark')
   });
 
-  let stdout = '';
+  if (result.status !== 0) {
+    return done(result.status);
+  }
 
-  childProcess.stderr.pipe(process.stderr);
-  childProcess.stdout.pipe(process.stdout);
-
-  childProcess.stderr.on('data', (data) => {
-    stdout += data + '';
-  });
-
-  childProcess.stdout.on('data', (data) => {
-    stdout += data + '';
-  });
-
-  childProcess.on('error', (error) => {
-    done(error);
-  });
-
-  childProcess.on('close', (code) => {
-    let dartErrorMatch = matchError(stdout);
-    if (dartErrorMatch) {
-      let error = new Error('UnExpected Flutter Assert Failed.');
-      done(error);
-      return;
-    }
-
-    if (code === 0) {
-      done();
-    } else {
-      // TODO: collect error message from stdout.
-      const err = new Error('Some error occurred, please check log.');
-      done(err);
-    }
-  });
+  done();
 })
 
 task('run-benchmark', async (done) => {
-  const port = '7878';
+  const serverPort = '8892';
 
-  const childProcess = spawn('http-server', ['./', `-p ${port}`], {
+  const childProcess = spawn('http-server', ['./', `-p ${serverPort}`], {
     stdio: 'pipe',
     cwd: path.join(paths.performanceTests, '/benchmark/build')
   })
