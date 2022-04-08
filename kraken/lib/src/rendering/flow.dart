@@ -400,10 +400,17 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
-      } else {
-        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+        childCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
       }
+
+      if (runCrossAxisExtent > 0 && childCrossAxisExtent > 0) {
+        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+      } else if (runCrossAxisExtent < 0 && childCrossAxisExtent < 0) {
+        runCrossAxisExtent = math.min(runCrossAxisExtent, childCrossAxisExtent);
+      } else {
+        runCrossAxisExtent = runCrossAxisExtent + childCrossAxisExtent;
+      }
+
       runChildren[childNodeId] = child;
 
       childParentData.runIndex = _runMetrics.length;
@@ -1153,10 +1160,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.computedValue;
         if (marginTop < 0 && childMarginTop < 0) {
           return math.min(marginTop, childMarginTop);
-        } else if ((marginTop < 0 && childMarginTop > 0) || (marginTop > 0 && childMarginTop < 0)) {
-          return marginTop + childMarginTop;
-        } else {
+        } else if (marginTop > 0 && childMarginTop > 0) {
           return math.max(marginTop, childMarginTop);
+        } else {
+          return marginTop + childMarginTop;
         }
       }
     }
@@ -1274,10 +1281,10 @@ class RenderFlowLayout extends RenderLayoutBox {
         _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.computedValue;
         if (marginBottom < 0 && childMarginBottom < 0) {
           return math.min(marginBottom, childMarginBottom);
-        } else if ((marginBottom < 0 && childMarginBottom > 0) || (marginBottom > 0 && childMarginBottom < 0)) {
-          return marginBottom + childMarginBottom;
-        } else {
+        } else if (marginBottom > 0 && childMarginBottom > 0) {
           return math.max(marginBottom, childMarginBottom);
+        } else {
+          return marginBottom + childMarginBottom;
         }
       }
     }
