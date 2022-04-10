@@ -22,7 +22,8 @@ AtomicString AtomicString::From(JSContext* ctx, NativeString* native_string) {
 namespace {
 
 AtomicString::StringKind GetStringKind(const std::string& string) {
-  AtomicString::StringKind predictKind = std::islower(string[0]) ? AtomicString::StringKind::kIsLowerCase : AtomicString::StringKind::kIsUpperCase;
+  AtomicString::StringKind predictKind =
+      std::islower(string[0]) ? AtomicString::StringKind::kIsLowerCase : AtomicString::StringKind::kIsUpperCase;
   for (char i : string) {
     if (predictKind == AtomicString::StringKind::kIsUpperCase && !std::isupper(i)) {
       return AtomicString::StringKind::kIsMixed;

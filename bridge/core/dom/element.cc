@@ -25,7 +25,7 @@ bool Element::hasAttribute(const AtomicString& name) const {
 }
 
 const AtomicString& Element::getAttribute(const AtomicString&) const {
-//  GetElementData()->
+  //  GetElementData()->
 }
 
 void Element::setAttribute(const AtomicString& name, const AtomicString& value) {

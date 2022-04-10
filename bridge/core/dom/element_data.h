@@ -5,8 +5,8 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_ELEMENT_DATA_H_
 #define KRAKENBRIDGE_CORE_DOM_ELEMENT_DATA_H_
 
-#include "bindings/qjs/atomic_string.h"
 #include "attribute_collection.h"
+#include "bindings/qjs/atomic_string.h"
 #include "foundation/casting.h"
 
 namespace kraken {
@@ -82,8 +82,7 @@ inline AttributeCollection ShareableElementData::Attributes() const {
 }
 
 inline AttributeCollection UniqueElementData::Attributes() const {
-  return AttributeCollection(attribute_vector_.data(),
-                             attribute_vector_.size());
+  return AttributeCollection(attribute_vector_.data(), attribute_vector_.size());
 }
 
 inline MutableAttributeCollection UniqueElementData::Attributes() {

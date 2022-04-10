@@ -16,12 +16,11 @@ namespace kraken {
 // (typically, HTML) resource.
 class Document : public Node, TreeScope {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = Document*;
 
-  void IncrementNodeCount() {
-    node_count_++;
-  }
+  void IncrementNodeCount() { node_count_++; }
   void DecrementNodeCount() {
     assert(node_count_ > 0);
     node_count_--;

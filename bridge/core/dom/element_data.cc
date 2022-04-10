@@ -16,8 +16,7 @@ ElementData::~ElementData() {
 std::shared_ptr<UniqueElementData> ElementData::MakeUniqueCopy() const {
   if (auto* unique_element_data = DynamicTo<UniqueElementData>(this))
     return std::make_shared<UniqueElementData>(*unique_element_data);
-  return std::make_shared<UniqueElementData>(
-      To<ShareableElementData>(*this));
+  return std::make_shared<UniqueElementData>(To<ShareableElementData>(*this));
 }
 
 bool ElementData::IsEquivalent(const ElementData* other) const {
@@ -37,5 +36,4 @@ bool ElementData::IsEquivalent(const ElementData* other) const {
   return true;
 }
 
-
-}
+}  // namespace kraken

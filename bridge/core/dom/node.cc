@@ -158,7 +158,7 @@ bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
   return true;
 }
 
-bool Node::isEqualNode(Node* other) const{
+bool Node::isEqualNode(Node* other) const {
   ExceptionState exception_state;
   return isEqualNode(other, exception_state);
 }

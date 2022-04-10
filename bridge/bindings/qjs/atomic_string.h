@@ -20,11 +20,7 @@ namespace kraken {
 // two String instances because we just check string storage identity.
 class AtomicString {
  public:
-  enum class StringKind {
-    kIsLowerCase,
-    kIsUpperCase,
-    kIsMixed
-  };
+  enum class StringKind { kIsLowerCase, kIsUpperCase, kIsMixed };
 
   static AtomicString Empty(JSContext* ctx);
   static AtomicString From(JSContext* ctx, NativeString* native_string);

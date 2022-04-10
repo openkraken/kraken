@@ -35,9 +35,9 @@
   void* operator new(size_t) = delete;   \
   void* operator new(size_t, void*) = delete
 
-#define KRAKEN_STACK_ALLOCATED()                                  \
- private:                                                  \
-  void* operator new(size_t) = delete;                     \
+#define KRAKEN_STACK_ALLOCATED()       \
+ private:                              \
+  void* operator new(size_t) = delete; \
   void* operator new(size_t, void*) = delete
 
 // KRAKEN_DISALLOW_NEW(): Cannot be allocated with new operators but can be a
