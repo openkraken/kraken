@@ -5,6 +5,7 @@
 #include "container_node.h"
 #include "bindings/qjs/garbage_collected.h"
 #include "document_fragment.h"
+#include "node_traversal.h"
 
 namespace kraken {
 
@@ -383,6 +384,30 @@ void ContainerNode::AppendChildCommon(Node& child) {
     SetFirstChild(&child);
   }
   SetLastChild(&child);
+}
+
+void ContainerNode::NotifyNodeInserted(Node& root) {
+  NotifyNodeInsertedInternal(root);
+}
+
+void ContainerNode::NotifyNodeInsertedInternal(Node& root) {
+  for (Node& node : NodeTraversal::InclusiveDescendantsOf(root)) {
+    // As an optimization we don't notify leaf nodes when when inserting
+    // into detached subtrees that are not in a shadow tree.
+    if (!isConnected() && !node.IsContainerNode())
+      continue;
+  }
+}
+
+void ContainerNode::NotifyNodeRemoved(Node& root) {
+  for (Node& node : NodeTraversal::InclusiveDescendantsOf(root)) {
+    // As an optimization we skip notifying Text nodes and other leaf nodes
+    // of removal when they're not in the Document tree and not in a shadow root
+    // since the virtual call to removedFrom is not needed.
+    if (!node.IsContainerNode() && !node.IsInTreeScope())
+      continue;
+    node.RemovedFrom(*this);
+  }
 }
 
 void ContainerNode::Trace(GCVisitor* visitor) const {

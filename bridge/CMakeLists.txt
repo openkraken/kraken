@@ -294,6 +294,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/character_data.h
     core/dom/text.cc
     core/dom/text.h
+    core/dom/attribute.h
+    core/dom/attribute_collection.h
+    core/dom/tree_scope.cc
+    core/dom/tree_scope.h
     core/dom/element.cc
     core/dom/element.h
     core/dom/element_data.cc

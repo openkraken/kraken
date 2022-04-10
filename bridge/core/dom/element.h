@@ -40,7 +40,7 @@ class Element : public ContainerNode {
   AtomicString TagName() const { return tag_name_; }
 
  protected:
-  const ElementData* GetElementData() const { return element_data_.Get(); }
+  const ElementData* GetElementData() const { return &element_data_; }
 
  private:
   AtomicString tag_name_;

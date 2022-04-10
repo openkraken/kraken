@@ -158,6 +158,11 @@ bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
   return true;
 }
 
+bool Node::isEqualNode(Node* other) const{
+  ExceptionState exception_state;
+  return isEqualNode(other, exception_state);
+}
+
 AtomicString Node::textContent(bool convert_brs_to_newlines) const {
   // This covers ProcessingInstruction and Comment that should return their
   // value when .textContent is accessed on them, but should be ignored when
@@ -260,6 +265,22 @@ Element* Node::ParentOrShadowHostElement() const {
     return nullptr;
 
   return DynamicTo<Element>(parent);
+}
+
+void Node::InsertedInto(ContainerNode& insertion_point) {
+  assert(insertion_point.isConnected() || IsContainerNode());
+  if (insertion_point.isConnected()) {
+    SetFlag(kIsConnectedFlag);
+    insertion_point.GetDocument().IncrementNodeCount();
+  }
+}
+
+void Node::RemovedFrom(ContainerNode& insertion_point) {
+  assert(insertion_point.isConnected() || IsContainerNode());
+  if (insertion_point.isConnected()) {
+    ClearFlag(kIsConnectedFlag);
+    insertion_point.GetDocument().DecrementNodeCount();
+  }
 }
 
 ContainerNode* Node::ParentOrShadowHostOrTemplateHostNode() const {

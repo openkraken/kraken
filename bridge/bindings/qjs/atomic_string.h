@@ -20,14 +20,18 @@ namespace kraken {
 // two String instances because we just check string storage identity.
 class AtomicString {
  public:
+  enum class StringKind {
+    kIsLowerCase,
+    kIsUpperCase,
+    kIsMixed
+  };
+
   static AtomicString Empty(JSContext* ctx);
   static AtomicString From(JSContext* ctx, NativeString* native_string);
 
   AtomicString() = default;
-  AtomicString(JSContext* ctx, const std::string& string)
-      : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())){};
-  AtomicString(JSContext* ctx, JSValue value)
-      : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)){};
+  AtomicString(JSContext* ctx, const std::string& string);
+  AtomicString(JSContext* ctx, JSValue value);
   ~AtomicString() { JS_FreeAtomRT(runtime_, atom_); };
 
   // Return the undefined string value from atom key.
@@ -36,13 +40,16 @@ class AtomicString {
   bool IsNull() const;
   bool IsEmpty() const;
 
-  // Lower performance, should optimize in the future.
-  AtomicString LowercaseIfNecessary() const;
-
   JSAtom Impl() const { return atom_; }
 
   [[nodiscard]] std::string ToStdString() const;
   [[nodiscard]] std::unique_ptr<NativeString> ToNativeString() const;
+
+  AtomicString ToUpperIfNecessary() const;
+  const AtomicString ToUpperSlow() const;
+
+  const AtomicString ToLowerIfNecessary() const;
+  const AtomicString ToLowerSlow() const;
 
   // Copy assignment
   AtomicString(AtomicString const& value);
@@ -59,6 +66,9 @@ class AtomicString {
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
   JSAtom atom_{JS_ATOM_NULL};
+  mutable JSAtom atom_upper_{JS_ATOM_NULL};
+  mutable JSAtom atom_lower_{JS_ATOM_NULL};
+  StringKind kind_;
 };
 
 }  // namespace kraken

@@ -10,6 +10,7 @@
 
 #include "events/event_target.h"
 #include "foundation/macros.h"
+#include "tree_scope.h"
 
 namespace kraken {
 
@@ -21,7 +22,6 @@ const int kNodeCustomElementShift = 17;
 class Element;
 class Document;
 class DocumentFragment;
-class TextNode;
 class ContainerNode;
 class NodeData;
 class NodeList;
@@ -42,6 +42,7 @@ enum class CloneChildrenFlag { kSkip, kClone, kCloneWithShadows };
 // https://dom.spec.whatwg.org/#interface-node
 class Node : public EventTarget {
   DEFINE_WRAPPERTYPEINFO();
+  friend class TreeScope;
 
  public:
   enum NodeType {
@@ -87,6 +88,7 @@ class Node : public EventTarget {
   virtual Node* Clone(Document&, CloneChildrenFlag) const = 0;
 
   bool isEqualNode(Node*, ExceptionState& exception_state) const;
+  bool isEqualNode(Node*) const;
   bool isSameNode(const Node* other, ExceptionState& exception_state) const { return this == other; }
 
   AtomicString textContent(bool convert_brs_to_newlines = false) const;
@@ -125,6 +127,23 @@ class Node : public EventTarget {
   Element* ParentOrShadowHostElement() const;
   void SetParentOrShadowHostNode(ContainerNode*);
 
+  // ---------------------------------------------------------------------------
+  // Notification of document structure changes (see container_node.h for more
+  // notification methods)
+  //
+  // InsertedInto() implementations must not modify the DOM tree, and must not
+  // dispatch synchronous events.
+  virtual void InsertedInto(ContainerNode& insertion_point);
+
+  // Notifies the node that it is no longer part of the tree.
+  //
+  // This is a dual of InsertedInto(), but does not require the overhead of
+  // event dispatching, and is called _after_ the node is removed from the tree.
+  //
+  // RemovedFrom() implementations must not modify the DOM tree, and must not
+  // dispatch synchronous events.
+  virtual void RemovedFrom(ContainerNode& insertion_point);
+
   // Knows about all kinds of hosts.
   ContainerNode* ParentOrShadowHostOrTemplateHostNode() const;
 
@@ -147,13 +166,19 @@ class Node : public EventTarget {
 
   // Returns the document associated with this node. A Document node returns
   // itself.
-  Document& GetDocument() const { return *document_; }
+  Document& GetDocument() const { return GetTreeScope().GetDocument(); }
+
+  TreeScope& GetTreeScope() const {
+    assert(tree_scope_);
+    return *tree_scope_;
+  };
 
   // Returns true if this node is connected to a document, false otherwise.
   // See https://dom.spec.whatwg.org/#connected for the definition.
   bool isConnected() const { return GetFlag(kIsConnectedFlag); }
 
   bool IsInDocumentTree() const { return isConnected(); }
+  bool IsInTreeScope() const { return GetFlag(static_cast<NodeFlags>(kIsConnectedFlag)); }
 
   bool IsDocumentTypeNode() const { return nodeType() == kDocumentTypeNode; }
   virtual bool ChildTypeAllowed(NodeType) const { return false; }
@@ -259,6 +284,8 @@ class Node : public EventTarget {
     kCreateDocument = kCreateContainer | kIsConnectedFlag,
   };
 
+  void SetTreeScope(TreeScope* scope) { tree_scope_ = scope; }
+
   Node(Document*, ConstructionType);
 
  private:
@@ -266,7 +293,7 @@ class Node : public EventTarget {
   Node* parent_or_shadow_host_node_;
   Node* previous_;
   Node* next_;
-  Document* document_;
+  TreeScope* tree_scope_;
   std::unique_ptr<NodeData> data_;
 };
 

@@ -74,6 +74,10 @@ class ContainerNode : public Node {
   void InsertBeforeCommon(Node& next_child, Node& new_child);
   void AppendChildCommon(Node& child);
 
+  void NotifyNodeInserted(Node&);
+  void NotifyNodeInsertedInternal(Node&);
+  void NotifyNodeRemoved(Node&);
+
   inline bool IsChildTypeAllowed(const Node& child) const;
   inline bool IsHostIncludingInclusiveAncestorOfThis(const Node&, ExceptionState&) const;
 

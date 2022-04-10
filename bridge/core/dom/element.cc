@@ -4,6 +4,7 @@
  */
 
 #include "element.h"
+#include "attribute.h"
 
 namespace kraken {
 
@@ -13,21 +14,19 @@ Element::Element(Document* document, const AtomicString& tag_name, Node::Constru
 bool Element::hasAttribute(const AtomicString& name) const {
   if (!GetElementData())
     return false;
-  AtomicString result = name.LowercaseIfNecessary();
-  //  SynchronizeAttributeHinted(local_name, hint);
-  //  if (hint.IsNull()) {
-  //    return false;
-  //  }
-  //  for (const Attribute& attribute : GetElementData()->Attributes()) {
-  //    if (hint == attribute.LocalName())
-  //      return true;
-  //  }
+  AtomicString result = name.ToLowerIfNecessary();
+  for (const Attribute& attribute : GetElementData()->Attributes()) {
+    if (hint == attribute.LocalName())
+      return true;
+  }
   return false;
 
   return false;
 }
 
-const AtomicString& Element::getAttribute(const AtomicString&) const {}
+const AtomicString& Element::getAttribute(const AtomicString&) const {
+//  GetElementData()->
+}
 
 void Element::setAttribute(const AtomicString& name, const AtomicString& value) {
   ExceptionState exception_state;

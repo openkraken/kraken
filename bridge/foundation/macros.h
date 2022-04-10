@@ -35,6 +35,11 @@
   void* operator new(size_t) = delete;   \
   void* operator new(size_t, void*) = delete
 
+#define KRAKEN_STACK_ALLOCATED()                                  \
+ private:                                                  \
+  void* operator new(size_t) = delete;                     \
+  void* operator new(size_t, void*) = delete
+
 // KRAKEN_DISALLOW_NEW(): Cannot be allocated with new operators but can be a
 // part of object, a value object in collections or stack allocated. If it has
 // Members you need a trace method and the containing object needs to call that
