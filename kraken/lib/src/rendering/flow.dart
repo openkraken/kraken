@@ -81,8 +81,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginHorizontal = 0;
 
     if (child is RenderBoxModel) {
-      marginHorizontal = child.renderStyle.marginLeft.computedValue +
-          child.renderStyle.marginRight.computedValue;
+      marginHorizontal = child.renderStyle.marginLeft.compute(child.renderStyle) +
+          child.renderStyle.marginRight.compute(child.renderStyle);
     }
 
     Size childSize = _getChildSize(child) ?? Size.zero;
@@ -127,7 +127,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     }
 
     if (lineHeight != null && lineHeight.type != CSSLengthType.NORMAL) {
-      return lineHeight.computedValue;
+      return lineHeight.compute(renderStyle);
     }
     return null;
   }
@@ -614,9 +614,9 @@ class RenderFlowLayout extends RenderLayoutBox {
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childEffectiveDisplay == CSSDisplay.block ||
             childEffectiveDisplay == CSSDisplay.flex) {
-            if (marginLeft.isAuto) {
+            if (marginLeft.isAuto(childRenderStyle)) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
-              if (marginRight.isAuto) {
+              if (marginRight.isAuto(childRenderStyle)) {
                 childMainPosition = remainingSpace / 2;
               } else {
                 childMainPosition = remainingSpace;
@@ -682,20 +682,20 @@ class RenderFlowLayout extends RenderLayoutBox {
         }
 
         if (childRenderBoxModel is RenderBoxModel) {
-          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
+          childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.compute(childRenderBoxModel.renderStyle);
           childMarginTop = _getChildMarginTop(childRenderBoxModel);
         }
 
         // No need to add padding and border for scrolling content box.
         Offset relativeOffset = _getOffset(
           childMainPosition +
-            renderStyle.paddingLeft.computedValue +
-            renderStyle.effectiveBorderLeftWidth.computedValue +
+            renderStyle.paddingLeft.compute(renderStyle) +
+            renderStyle.effectiveBorderLeftWidth.compute(renderStyle) +
             childMarginLeft,
           crossAxisOffset +
             childLineExtent +
-            renderStyle.paddingTop.computedValue +
-            renderStyle.effectiveBorderTopWidth.computedValue +
+            renderStyle.paddingTop.compute(renderStyle) +
+            renderStyle.effectiveBorderTopWidth.compute(renderStyle) +
             childMarginTop);
         // Apply position relative offset change.
         CSSPositionedLayout.applyRelativeOffset(relativeOffset, child);
@@ -714,8 +714,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isInline = effectiveDisplay == CSSDisplay.inline;
     // Margin does not work for inline element.
-    double marginTop = !isInline ? renderStyle.marginTop.computedValue : 0;
-    double marginBottom = !isInline ? renderStyle.marginBottom.computedValue : 0;
+    double marginTop = !isInline ? renderStyle.marginTop.compute(renderStyle) : 0;
+    double marginBottom = !isInline ? renderStyle.marginBottom.compute(renderStyle) : 0;
     bool isParentFlowLayout = parent is RenderFlowLayout;
     bool isDisplayInline = effectiveDisplay == CSSDisplay.inline ||
         effectiveDisplay == CSSDisplay.inlineBlock ||
@@ -794,8 +794,8 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
       // Should add horizontal margin of child to the main axis auto size of parent.
       if (runChild is RenderBoxModel) {
-        double childMarginLeft = runChild.renderStyle.marginLeft.computedValue;
-        double childMarginRight = runChild.renderStyle.marginRight.computedValue;
+        double childMarginLeft = runChild.renderStyle.marginLeft.compute(runChild.renderStyle);
+        double childMarginRight = runChild.renderStyle.marginRight.compute(runChild.renderStyle);
         runChildMainSize += childMarginLeft + childMarginRight;
       }
       runMainExtent += runChildMainSize;
@@ -918,8 +918,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           // https://www.w3.org/TR/css-overflow-3/#scrollable-overflow-region
 
           // Add offset of margin.
-          childOffsetX += childRenderStyle.marginLeft.computedValue
-            + childRenderStyle.marginRight.computedValue;
+          childOffsetX += childRenderStyle.marginLeft.compute(childRenderStyle)
+            + childRenderStyle.marginRight.compute(childRenderStyle);
           childOffsetY += _getChildMarginTop(child)
             + _getChildMarginBottom(child);
 
@@ -980,8 +980,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableMainSizeOfChildren =
-      maxScrollableMainSizeOfLines + renderStyle.paddingLeft.computedValue
-      + (isScrollContainer ? renderStyle.paddingRight.computedValue : 0);
+      maxScrollableMainSizeOfLines + renderStyle.paddingLeft.compute(renderStyle)
+      + (isScrollContainer ? renderStyle.paddingRight.compute(renderStyle) : 0);
 
     // Max scrollable cross size of all lines.
     double maxScrollableCrossSizeOfLines =
@@ -991,18 +991,18 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     // Padding in the end direction of axis should be included in scroll container.
     double maxScrollableCrossSizeOfChildren =
-      maxScrollableCrossSizeOfLines + renderStyle.paddingTop.computedValue
-      + (isScrollContainer ? renderStyle.paddingBottom.computedValue : 0);
+      maxScrollableCrossSizeOfLines + renderStyle.paddingTop.compute(renderStyle)
+      + (isScrollContainer ? renderStyle.paddingBottom.compute(renderStyle) : 0);
 
     double maxScrollableMainSize = math.max(
         size.width -
-            container.renderStyle.effectiveBorderLeftWidth.computedValue -
-            container.renderStyle.effectiveBorderRightWidth.computedValue,
+            container.renderStyle.effectiveBorderLeftWidth.compute(container.renderStyle) -
+            container.renderStyle.effectiveBorderRightWidth.compute(container.renderStyle),
         maxScrollableMainSizeOfChildren);
     double maxScrollableCrossSize = math.max(
         size.height -
-            container.renderStyle.effectiveBorderTopWidth.computedValue -
-            container.renderStyle.effectiveBorderBottomWidth.computedValue,
+            container.renderStyle.effectiveBorderTopWidth.compute(container.renderStyle) -
+            container.renderStyle.effectiveBorderBottomWidth.compute(container.renderStyle),
         maxScrollableCrossSizeOfChildren);
 
     scrollableSize = Size(maxScrollableMainSize, maxScrollableCrossSize);
@@ -1112,8 +1112,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (!parent.isDocumentRootBox &&
       parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingTop.computedValue == 0 &&
-      parentRenderStyle.effectiveBorderTopWidth.computedValue == 0 &&
+      parentRenderStyle.paddingTop.compute(parentRenderStyle) == 0 &&
+      parentRenderStyle.effectiveBorderTopWidth.compute(parentRenderStyle) == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1127,12 +1127,12 @@ class RenderFlowLayout extends RenderLayoutBox {
     // the same with its parent.
     RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
       (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
-    double paddingTop = renderStyle.paddingTop.computedValue;
-    double borderTop = renderStyle.effectiveBorderTopWidth.computedValue;
+    double paddingTop = renderStyle.paddingTop.compute(renderStyle);
+    double borderTop = renderStyle.effectiveBorderTopWidth.compute(renderStyle);
 
     // Use own renderStyle of margin-top cause scrollingContentBox has margin-top of 0
     // which is correct.
-    double marginTop = renderBoxModel.renderStyle.marginTop.computedValue;
+    double marginTop = renderBoxModel.renderStyle.marginTop.compute(renderBoxModel.renderStyle);
 
     bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
     bool isOverflowClip = renderStyle.effectiveOverflowY == CSSOverflowType.clip;
@@ -1150,7 +1150,7 @@ class RenderFlowLayout extends RenderLayoutBox {
         firstChild.renderStyle.effectiveDisplay == CSSDisplay.flex)
       ) {
         double childMarginTop = firstChild is RenderFlowLayout ?
-        _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.computedValue;
+        _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.compute(firstChild.renderStyle);
         if (marginTop < 0 && childMarginTop < 0) {
           return math.min(marginTop, childMarginTop);
         } else if ((marginTop < 0 && childMarginTop > 0) || (marginTop > 0 && childMarginTop < 0)) {
@@ -1171,7 +1171,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (childEffectiveDisplay == CSSDisplay.inline) {
       return 0;
     }
-    double originalMarginTop = child.renderStyle.marginTop.computedValue;
+    double originalMarginTop = child.renderStyle.marginTop.compute(child.renderStyle);
     // Margin collapse does not work on following case:
     // 1. Document root element(HTML)
     // 2. Inline level elements
@@ -1202,7 +1202,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       childEffectiveDisplay != CSSDisplay.flex &&
       (isChildOverflowVisible || isChildOverflowClip)
     ) {
-      double marginBottom = child.renderStyle.marginBottom.computedValue;
+      double marginBottom = child.renderStyle.marginBottom.compute(child.renderStyle);
       marginTop = math.max(marginTop, marginBottom);
     }
     if (preSibling == null) {
@@ -1233,8 +1233,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (!parent.isDocumentRootBox &&
       parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
       (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingBottom.computedValue == 0 &&
-      parentRenderStyle.effectiveBorderBottomWidth.computedValue == 0 &&
+      parentRenderStyle.paddingBottom.compute(parentRenderStyle) == 0 &&
+      parentRenderStyle.effectiveBorderBottomWidth.compute(parentRenderStyle) == 0 &&
       parent.parent is RenderFlowLayout
     ) {
       return 0;
@@ -1248,18 +1248,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     // the same with its parent.
     RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
       (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
-    double paddingBottom = renderStyle.paddingBottom.computedValue;
-    double borderBottom = renderStyle.effectiveBorderBottomWidth.computedValue;
+    double paddingBottom = renderStyle.paddingBottom.compute(renderStyle);
+    double borderBottom = renderStyle.effectiveBorderBottomWidth.compute(renderStyle);
     bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
     bool isOverflowClip = renderStyle.effectiveOverflowY == CSSOverflowType.clip;
 
     // Use own renderStyle of margin-top cause scrollingContentBox has margin-bottom of 0
     // which is correct.
-    double marginBottom = renderBoxModel.renderStyle.marginBottom.computedValue;
+    double marginBottom = renderBoxModel.renderStyle.marginBottom.compute(renderBoxModel.renderStyle);
 
     if (renderBoxModel is RenderLayoutBox &&
-      renderStyle.height.isAuto &&
-      renderStyle.minHeight.isAuto &&
+      renderStyle.height.isAuto(renderStyle) &&
+      renderStyle.minHeight.isAuto(renderStyle) &&
       renderStyle.maxHeight.isNone &&
       renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isOverflowVisible || isOverflowClip) &&
@@ -1271,7 +1271,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       if (lastChild is RenderBoxModel &&
         lastChild.renderStyle.effectiveDisplay == CSSDisplay.block) {
         double childMarginBottom = lastChild is RenderLayoutBox ?
-        _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.computedValue;
+        _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.compute(lastChild.renderStyle);
         if (marginBottom < 0 && childMarginBottom < 0) {
           return math.min(marginBottom, childMarginBottom);
         } else if ((marginBottom < 0 && childMarginBottom > 0) || (marginBottom > 0 && childMarginBottom < 0)) {
@@ -1293,7 +1293,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     if (childEffectiveDisplay == CSSDisplay.inline) {
       return 0;
     }
-    double originalMarginBottom = child.renderStyle.marginBottom.computedValue;
+    double originalMarginBottom = child.renderStyle.marginBottom.compute(child.renderStyle);
     // Margin collapse does not work on following case:
     // 1. Document root element(HTML)
     // 2. Inline level elements

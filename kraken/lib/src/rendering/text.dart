@@ -144,7 +144,7 @@ class RenderTextBox extends RenderBox
 
   double? get _lineHeight {
     if (renderStyle.lineHeight.type != CSSLengthType.NORMAL) {
-      return renderStyle.lineHeight.computedValue;
+      return renderStyle.lineHeight.compute(renderStyle);
     }
     return null;
   }
@@ -226,7 +226,7 @@ class RenderTextBox extends RenderBox
   Size get minCharSize {
     TextStyle textStyle = TextStyle(
       fontFamilyFallback: renderStyle.fontFamily,
-      fontSize: renderStyle.fontSize.computedValue,
+      fontSize: renderStyle.fontSize.compute(renderStyle),
       textBaseline: CSSText.getTextBaseLine(),
       package: CSSText.getFontPackage(),
       locale: CSSText.getLocale(),

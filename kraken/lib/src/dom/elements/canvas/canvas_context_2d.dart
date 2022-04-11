@@ -407,10 +407,10 @@ class CanvasRenderingContext2D extends BindingObject {
       if (CSSPercentage.isPercentage(fontSize)) {
         double? percentage = CSSPercentage.parsePercentage(fontSize);
         if (percentage != null) {
-          _fontSize = percentage * canvas.renderStyle.fontSize.computedValue;
+          _fontSize = percentage * canvas.renderStyle.fontSize.compute(canvas.renderStyle);
         }
       } else {
-        _fontSize = CSSLength.parseLength(properties[FONT_SIZE]!, canvas.renderStyle).computedValue;
+        _fontSize = CSSLength.parseLength(properties[FONT_SIZE]!).compute(canvas.renderStyle);
       }
     }
     return true;

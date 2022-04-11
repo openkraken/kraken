@@ -39,7 +39,7 @@ class CSSOrigin {
 
       // Handle x.
       if (CSSLength.isLength(x)) {
-        offsetX = CSSLength.parseLength(x!, renderStyle, property).computedValue;
+        offsetX = CSSLength.parseLength(x!, property).compute(renderStyle);
       } else if (CSSPercentage.isPercentage(x)) {
         alignX = CSSPercentage.parsePercentage(x!)! * 2 - 1;
       } else if (x == LEFT) {
@@ -52,7 +52,7 @@ class CSSOrigin {
 
       // Handle y.
       if (CSSLength.isLength(y)) {
-        offsetY = CSSLength.parseLength(y!, renderStyle, property).computedValue;
+        offsetY = CSSLength.parseLength(y!, property).compute(renderStyle);
       } else if (CSSPercentage.isPercentage(y)) {
         alignY = CSSPercentage.parsePercentage(y!)! * 2 - 1;
       } else if (y == TOP) {

@@ -396,9 +396,9 @@ mixin ElementOverflowMixin on ElementBase {
     return scrollContainerSize.width.toInt();
   }
 
-  int get clientTop => renderBoxModel?.renderStyle.effectiveBorderTopWidth.computedValue.toInt() ?? 0;
+  int get clientTop => renderBoxModel?.renderStyle.effectiveBorderTopWidth.compute(renderStyle).toInt() ?? 0;
 
-  int get clientLeft => renderBoxModel?.renderStyle.effectiveBorderLeftWidth.computedValue.toInt() ?? 0;
+  int get clientLeft => renderBoxModel?.renderStyle.effectiveBorderLeftWidth.compute(renderStyle).toInt() ?? 0;
 
   int get clientWidth => renderBoxModel?.clientWidth ?? 0;
 

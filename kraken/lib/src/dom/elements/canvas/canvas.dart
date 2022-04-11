@@ -122,8 +122,8 @@ class CanvasElement extends Element {
     double? height;
 
     RenderStyle renderStyle = renderBoxModel!.renderStyle;
-    double? styleWidth = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
-    double? styleHeight = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+    double? styleWidth = renderStyle.width.isAuto(renderStyle) ? null : renderStyle.width.compute(renderStyle);
+    double? styleHeight = renderStyle.height.isAuto(renderStyle) ? null : renderStyle.height.compute(renderStyle);
 
     if (styleWidth != null) {
       width = styleWidth;
@@ -159,8 +159,8 @@ class CanvasElement extends Element {
       // @TODO: CSS object-fit for canvas.
       // To fill (default value of object-fit) the bitmap content, use scale to get the same performed.
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      double? styleWidth = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
-      double? styleHeight = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
+      double? styleWidth = renderStyle.width.isAuto(renderStyle) ? null : renderStyle.width.compute(renderStyle);
+      double? styleHeight = renderStyle.height.isAuto(renderStyle) ? null : renderStyle.height.compute(renderStyle);
 
       double? scaleX;
       double? scaleY;

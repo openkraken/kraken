@@ -218,7 +218,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
         RRect borderRRect = radius.toRRect(rect);
         // A borderRadius can only be given for a uniform Border in Flutter.
         // https://github.com/flutter/flutter/issues/12583
-        double? borderTop = renderStyle.borderTopWidth?.computedValue;
+        double? borderTop = renderStyle.borderTopWidth?.compute(renderStyle);
         // The content of overflow is trimmed to the padding edge curve.
         // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
         RRect clipRRect = borderTop != null
@@ -228,7 +228,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
         // The content of replaced elements is trimmed to the content edge curve.
         if (this is RenderReplaced) {
           // @TODO: Currently only support clip uniform padding for replaced element.
-          double paddingTop = renderStyle.paddingTop.computedValue;
+          double paddingTop = renderStyle.paddingTop.compute(renderStyle);
           clipRRect = clipRRect.deflate(paddingTop);
         }
         _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);

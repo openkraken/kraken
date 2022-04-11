@@ -34,10 +34,10 @@ mixin CSSBorderMixin on RenderStyle {
   EdgeInsets get border {
     // If has border, render padding should subtracting the edge of the border
     return EdgeInsets.fromLTRB(
-      effectiveBorderLeftWidth.computedValue,
-      effectiveBorderTopWidth.computedValue,
-      effectiveBorderRightWidth.computedValue,
-      effectiveBorderBottomWidth.computedValue,
+      effectiveBorderLeftWidth.compute(this),
+      effectiveBorderTopWidth.compute(this),
+      effectiveBorderRightWidth.compute(this),
+      effectiveBorderBottomWidth.compute(this),
     );
   }
 
@@ -252,7 +252,7 @@ class CSSBorderSide {
         borderWidth = _thickWidth;
         break;
       default:
-        borderWidth = CSSLength.parseLength(input, renderStyle, propertyName);
+        borderWidth = CSSLength.parseLength(input, propertyName);
     }
     return borderWidth;
   }
@@ -298,7 +298,7 @@ class CSSBorderSide {
       return null;
     } else {
       return BorderSide(
-        width: borderWidth.computedValue,
+        width: borderWidth.compute(renderStyle),
         style: borderStyle!,
         color: borderColor!
       );
@@ -312,7 +312,7 @@ class CSSBorderRadius {
 
   const CSSBorderRadius(this.x, this.y);
 
-  Radius get computedRadius => Radius.elliptical(x.computedValue, y.computedValue);
+  Radius computeRadius(RenderStyle renderStyle) => Radius.elliptical(x.compute(renderStyle), y.compute(renderStyle));
 
   @override
   int get hashCode => hashValues(x, y);
@@ -332,7 +332,7 @@ class CSSBorderRadius {
   }
 
   static CSSBorderRadius zero = CSSBorderRadius(CSSLengthValue.zero, CSSLengthValue.zero);
-  static CSSBorderRadius? parseBorderRadius(String radius, RenderStyle renderStyle, String propertyName) {
+  static CSSBorderRadius? parseBorderRadius(String radius, String propertyName) {
     if (radius.isNotEmpty) {
       // border-top-left-radius: horizontal vertical
       List<String> values = radius.split(_splitRegExp);
@@ -342,8 +342,8 @@ class CSSBorderRadius {
         // If the second value is omitted it is copied from the first.
         // https://www.w3.org/TR/css-backgrounds-3/#border-radius
         String verticalRadius = values.length == 1 ? values[0] : values[1];
-        CSSLengthValue x = CSSLength.parseLength(horizontalRadius, renderStyle, propertyName, Axis.horizontal);
-        CSSLengthValue y = CSSLength.parseLength(verticalRadius, renderStyle, propertyName, Axis.vertical);
+        CSSLengthValue x = CSSLength.parseLength(horizontalRadius, propertyName, Axis.horizontal);
+        CSSLengthValue y = CSSLength.parseLength(verticalRadius, propertyName, Axis.vertical);
         return CSSBorderRadius(x, y);
       }
     }
@@ -367,36 +367,35 @@ class KrakenBoxShadow extends BoxShadow {
   final bool inset;
 }
 
-// ignore: must_be_immutable
 class CSSBoxShadow {
-  CSSBoxShadow({
-    this.color,
-    this.offsetX,
-    this.offsetY,
-    this.blurRadius,
-    this.spreadRadius,
-    this.inset = false,
-  });
+  const CSSBoxShadow({
+    Color? color,
+    CSSLengthValue? offsetX,
+    CSSLengthValue? offsetY,
+    CSSLengthValue? blurRadius,
+    CSSLengthValue? spreadRadius,
+    bool? inset,
+  }) : _color = color ?? const Color(0xFF000000),
+        _offsetX = offsetX ?? CSSLengthValue.zero,
+        _offsetY = offsetY ?? CSSLengthValue.zero,
+        _blurRadius = blurRadius ?? CSSLengthValue.zero,
+        _spreadRadius = spreadRadius ?? CSSLengthValue.zero,
+        _inset = inset ?? false;
 
-  bool inset = false;
-  Color? color;
-  CSSLengthValue? offsetX;
-  CSSLengthValue? offsetY;
-  CSSLengthValue? blurRadius;
-  CSSLengthValue? spreadRadius;
+  final bool _inset;
+  final Color _color;
+  final CSSLengthValue _offsetX;
+  final CSSLengthValue _offsetY;
+  final CSSLengthValue _blurRadius;
+  final CSSLengthValue _spreadRadius;
 
-  KrakenBoxShadow get computedBoxShadow {
-    color ??= const Color(0xFF000000);
-    offsetX ??= CSSLengthValue.zero;
-    offsetY ??= CSSLengthValue.zero;
-    blurRadius ??= CSSLengthValue.zero;
-    spreadRadius ??= CSSLengthValue.zero;
+  KrakenBoxShadow computeBoxShadow(RenderStyle renderStyle) {
     return KrakenBoxShadow(
-      color: color!,
-      offset: Offset(offsetX!.computedValue, offsetY!.computedValue),
-      blurRadius: blurRadius!.computedValue,
-      spreadRadius: spreadRadius!.computedValue,
-      inset: inset,
+      color: _color,
+      offset: Offset(_offsetX.compute(renderStyle), _offsetY.compute(renderStyle)),
+      blurRadius: _blurRadius.compute(renderStyle),
+      spreadRadius: _spreadRadius.compute(renderStyle),
+      inset: _inset,
     );
   }
 
@@ -411,22 +410,22 @@ class CSSBoxShadow {
         Color? color = CSSColor.resolveColor(colorDefinition, renderStyle, propertyName);
         CSSLengthValue? offsetX;
         if (shadowDefinitions[1] != null) {
-          offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, propertyName);
+          offsetX = CSSLength.parseLength(shadowDefinitions[1]!, propertyName);
         }
 
         CSSLengthValue? offsetY;
         if (shadowDefinitions[2] != null) {
-          offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, propertyName);
+          offsetY = CSSLength.parseLength(shadowDefinitions[2]!, propertyName);
         }
 
         CSSLengthValue? blurRadius;
         if (shadowDefinitions[3] != null) {
-          blurRadius = CSSLength.parseLength(shadowDefinitions[3]!, renderStyle, propertyName);
+          blurRadius = CSSLength.parseLength(shadowDefinitions[3]!, propertyName);
         }
 
         CSSLengthValue? spreadRadius;
         if (shadowDefinitions[4] != null) {
-          spreadRadius = CSSLength.parseLength(shadowDefinitions[4]!, renderStyle, propertyName);
+          spreadRadius = CSSLength.parseLength(shadowDefinitions[4]!, propertyName);
         }
 
         bool inset = shadowDefinitions[5] == INSET;

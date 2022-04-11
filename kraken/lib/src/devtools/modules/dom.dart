@@ -3,10 +3,12 @@
  */
 import 'dart:ui' as ui;
 
+import 'package:kraken/css.dart';
 import 'package:kraken/devtools.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:flutter/rendering.dart';
+
 
 const int DOCUMENT_NODE_ID = 0;
 const String DEFAULT_FRAME_ID = 'main_frame';
@@ -95,23 +97,24 @@ class InspectDOMModule extends UIInspectorModule {
         contentBoxOffset.dx + widthWithinBorder, contentBoxOffset.dy + heightWithinBorder,
         contentBoxOffset.dx, contentBoxOffset.dy + heightWithinBorder,
       ];
+      RenderStyle renderStyle = element.renderBoxModel!.renderStyle;
       List<double> padding = [
-        border[0] + (element.renderBoxModel!.renderStyle.borderLeftWidth?.computedValue ?? 0), border[1] + (element.renderBoxModel!.renderStyle.borderTopWidth?.computedValue ?? 0),
-        border[2] - (element.renderBoxModel!.renderStyle.borderRightWidth?.computedValue ?? 0), border[3] + (element.renderBoxModel!.renderStyle.borderTopWidth?.computedValue ?? 0),
-        border[4] - (element.renderBoxModel!.renderStyle.borderRightWidth?.computedValue ?? 0), border[5] - (element.renderBoxModel!.renderStyle.borderBottomWidth?.computedValue ?? 0),
-        border[6] + (element.renderBoxModel!.renderStyle.borderLeftWidth?.computedValue ?? 0), border[7] - (element.renderBoxModel!.renderStyle.borderBottomWidth?.computedValue ?? 0),
+        border[0] + (renderStyle.borderLeftWidth?.compute(renderStyle) ?? 0), border[1] + (renderStyle.borderTopWidth?.compute(renderStyle) ?? 0),
+        border[2] - (renderStyle.borderRightWidth?.compute(renderStyle) ?? 0), border[3] + (renderStyle.borderTopWidth?.compute(renderStyle) ?? 0),
+        border[4] - (renderStyle.borderRightWidth?.compute(renderStyle) ?? 0), border[5] - (renderStyle.borderBottomWidth?.compute(renderStyle) ?? 0),
+        border[6] + (renderStyle.borderLeftWidth?.compute(renderStyle) ?? 0), border[7] - (renderStyle.borderBottomWidth?.compute(renderStyle) ?? 0),
       ];
       List<double> content = [
-        padding[0] + element.renderBoxModel!.renderStyle.paddingLeft.computedValue, padding[1] + element.renderBoxModel!.renderStyle.paddingTop.computedValue,
-        padding[2] - element.renderBoxModel!.renderStyle.paddingRight.computedValue, padding[3] + element.renderBoxModel!.renderStyle.paddingTop.computedValue,
-        padding[4] - element.renderBoxModel!.renderStyle.paddingRight.computedValue, padding[5] - element.renderBoxModel!.renderStyle.paddingBottom.computedValue,
-        padding[6] + element.renderBoxModel!.renderStyle.paddingLeft.computedValue, padding[7] - element.renderBoxModel!.renderStyle.paddingBottom.computedValue,
+        padding[0] + renderStyle.paddingLeft.compute(renderStyle), padding[1] + renderStyle.paddingTop.compute(renderStyle),
+        padding[2] - renderStyle.paddingRight.compute(renderStyle), padding[3] + renderStyle.paddingTop.compute(renderStyle),
+        padding[4] - renderStyle.paddingRight.compute(renderStyle), padding[5] - renderStyle.paddingBottom.compute(renderStyle),
+        padding[6] + renderStyle.paddingLeft.compute(renderStyle), padding[7] - renderStyle.paddingBottom.compute(renderStyle),
       ];
       List<double> margin = [
-        border[0] - element.renderBoxModel!.renderStyle.marginLeft.computedValue, border[1] - element.renderBoxModel!.renderStyle.marginTop.computedValue,
-        border[2] + element.renderBoxModel!.renderStyle.marginRight.computedValue, border[3] - element.renderBoxModel!.renderStyle.marginTop.computedValue,
-        border[4] + element.renderBoxModel!.renderStyle.marginRight.computedValue, border[5] + element.renderBoxModel!.renderStyle.marginBottom.computedValue,
-        border[6] - element.renderBoxModel!.renderStyle.marginLeft.computedValue, border[7] + element.renderBoxModel!.renderStyle.marginBottom.computedValue,
+        border[0] - renderStyle.marginLeft.compute(renderStyle), border[1] - renderStyle.marginTop.compute(renderStyle),
+        border[2] + renderStyle.marginRight.compute(renderStyle), border[3] - renderStyle.marginTop.compute(renderStyle),
+        border[4] + renderStyle.marginRight.compute(renderStyle), border[5] + renderStyle.marginBottom.compute(renderStyle),
+        border[6] - renderStyle.marginLeft.compute(renderStyle), border[7] + renderStyle.marginBottom.compute(renderStyle),
       ];
 
       BoxModel boxModel = BoxModel(

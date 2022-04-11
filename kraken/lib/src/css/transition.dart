@@ -54,7 +54,7 @@ void _updateColor(Color oldColor, Color newColor, double progress, String proper
 }
 
 double? _parseLength(String length, RenderStyle renderStyle, String property) {
-  return CSSLength.parseLength(length, renderStyle, property).computedValue;
+  return CSSLength.parseLength(length, property).compute(renderStyle);
 }
 
 void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, CSSRenderStyle renderStyle) {
@@ -90,9 +90,9 @@ void _updateNumber(double oldValue, double newValue, double progress, String pro
 
 double _parseLineHeight(String lineHeight, RenderStyle renderStyle, String property) {
   if (CSSNumber.isNumber(lineHeight)) {
-    return CSSLengthValue(CSSNumber.parseNumber(lineHeight), CSSLengthType.EM, renderStyle, LINE_HEIGHT).computedValue;
+    return CSSLengthValue(CSSNumber.parseNumber(lineHeight), CSSLengthType.EM, LINE_HEIGHT).compute(renderStyle);
   }
-  return CSSLength.parseLength(lineHeight, renderStyle, LINE_HEIGHT).computedValue;
+  return CSSLength.parseLength(lineHeight, LINE_HEIGHT).compute(renderStyle);
 }
 
 void _updateLineHeight(double oldValue, double newValue, double progress, String property, CSSRenderStyle renderStyle) {
@@ -342,7 +342,7 @@ mixin CSSTransitionMixin on RenderStyle {
       Keyframe(propertyName, end, 1, LINEAR),
     ];
     KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options);
-    Animation animation = Animation(effect);
+    Animation animation = Animation(effect, target.ownerDocument.animationTimeline);
     _propertyRunningTransition[propertyName] = animation;
 
     animation.onstart = () {
