@@ -24,6 +24,7 @@ struct NativeBoundingClientRect {
 
 class BoundingClientRect : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   BoundingClientRect() = delete;
   static BoundingClientRect* Create(ExecutingContext* context, NativeBoundingClientRect* native_bounding_client_rect);
@@ -43,6 +44,6 @@ class BoundingClientRect : public ScriptWrappable {
   double left_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_LEGACY_BOUNDING_CLIENT_RECT_H_

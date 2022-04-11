@@ -120,7 +120,6 @@ NativeFunctionContext::~NativeFunctionContext() {
   JS_FreeValue(m_ctx, m_callback);
 }
 
-
 JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value) {
   switch (value.tag) {
     case NativeTag::TAG_STRING: {

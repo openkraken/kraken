@@ -9,9 +9,9 @@
 #include "bindings/qjs/js_event_listener.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "core/dom/binding_object.h"
 #include "event_listener_map.h"
 #include "foundation/native_string.h"
-#include "core/dom/binding_object.h"
 
 #if UNIT_TEST
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
@@ -132,7 +132,7 @@ class EventTarget : public ScriptWrappable, BindingObject {
   virtual EventTargetData* GetEventTargetData() = 0;
   virtual EventTargetData& EnsureEventTargetData() = 0;
 
-  NativeValue HandleCallFromDartSide(const NativeString* method, int32_t argc, const NativeValue *argv) override;
+  NativeValue HandleCallFromDartSide(const NativeString* method, int32_t argc, const NativeValue* argv) override;
 
   const char* GetHumanReadableName() const override;
 

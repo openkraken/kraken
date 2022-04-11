@@ -63,7 +63,11 @@ class UICommandBuffer {
   explicit UICommandBuffer(ExecutingContext* context);
   void addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate);
   void addCommand(int32_t id, int32_t type, void* nativePtr);
-  void addCommand(int32_t id, int32_t type, const std::unique_ptr<NativeString>& args_01, const std::unique_ptr<NativeString>& args_02, void* nativePtr);
+  void addCommand(int32_t id,
+                  int32_t type,
+                  const std::unique_ptr<NativeString>& args_01,
+                  const std::unique_ptr<NativeString>& args_02,
+                  void* nativePtr);
   void addCommand(int32_t id, int32_t type, const std::unique_ptr<NativeString>& args_01, void* nativePtr);
   UICommandItem* data();
   int64_t size();

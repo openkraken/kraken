@@ -5,11 +5,11 @@
 
 #include "script_value.h"
 #include <vector>
-#include "foundation/native_value_converter.h"
 #include "core/executing_context.h"
+#include "foundation/native_value_converter.h"
 #include "native_string_utils.h"
-#include "qjs_engine_patch.h"
 #include "qjs_bounding_client_rect.h"
+#include "qjs_engine_patch.h"
 
 namespace kraken {
 
@@ -106,8 +106,7 @@ NativeValue ScriptValue::ToNative() const {
     auto* functionContext = new NativeFunctionContext{context, value_};
     return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
   } else if (JS_IsObject(value_)) {
-
-//    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+    //    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
     //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
     //    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
     //      auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));

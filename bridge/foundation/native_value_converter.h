@@ -71,61 +71,52 @@ class NativeBoundingClientRect;
 class NativeEventTarget;
 class NativeCanvasRenderingContext2D;
 
-template<>
-struct NativeValueConverter<NativeTypePointer<NativeBoundingClientRect>> : public NativeValueConverterBase<NativeTypePointer<NativeBoundingClientRect>> {
+template <>
+struct NativeValueConverter<NativeTypePointer<NativeBoundingClientRect>>
+    : public NativeValueConverterBase<NativeTypePointer<NativeBoundingClientRect>> {
   static NativeValue ToNativeValue(ImplType value) {
     return Native_NewPtr(JSPointerType::NativeBoundingClientRect, value);
   }
-  static ImplType FromNativeValue(NativeValue value) {
-    return static_cast<ImplType>(value.u.ptr);
-  }
+  static ImplType FromNativeValue(NativeValue value) { return static_cast<ImplType>(value.u.ptr); }
 };
 
-template<>
-struct NativeValueConverter<NativeTypePointer<NativeEventTarget>> : public NativeValueConverterBase<NativeTypePointer<NativeEventTarget>> {
-  static NativeValue ToNativeValue(ImplType value) {
-    return Native_NewPtr(JSPointerType::NativeEventTarget, value);
-  }
-  static ImplType FromNativeValue(NativeValue value) {
-    return static_cast<ImplType>(value.u.ptr);
-  }
+template <>
+struct NativeValueConverter<NativeTypePointer<NativeEventTarget>>
+    : public NativeValueConverterBase<NativeTypePointer<NativeEventTarget>> {
+  static NativeValue ToNativeValue(ImplType value) { return Native_NewPtr(JSPointerType::NativeEventTarget, value); }
+  static ImplType FromNativeValue(NativeValue value) { return static_cast<ImplType>(value.u.ptr); }
 };
 
-template<>
-struct NativeValueConverter<NativeTypePointer<NativeCanvasRenderingContext2D>> : public NativeValueConverterBase<NativeTypePointer<NativeCanvasRenderingContext2D>> {
+template <>
+struct NativeValueConverter<NativeTypePointer<NativeCanvasRenderingContext2D>>
+    : public NativeValueConverterBase<NativeTypePointer<NativeCanvasRenderingContext2D>> {
   static NativeValue ToNativeValue(ImplType value) {
     return Native_NewPtr(JSPointerType::NativeCanvasRenderingContext2D, value);
   }
-  static ImplType FromNativeValue(NativeValue value) {
-    return static_cast<ImplType>(value.u.ptr);
-  }
+  static ImplType FromNativeValue(NativeValue value) { return static_cast<ImplType>(value.u.ptr); }
 };
 
 std::shared_ptr<QJSFunction> CreateSyncCallback(JSContext* ctx, int function_id);
 std::shared_ptr<QJSFunction> CreateAsyncCallback(JSContext* ctx, int function_id);
 
-template<>
+template <>
 struct NativeValueConverter<NativeTypeFunction> : public NativeValueConverterBase<NativeTypeFunction> {
   static NativeValue ToNativeValue(ImplType value) {
     // Not supported.
     assert(false);
   }
 
-  static ImplType FromNativeValue(JSContext* ctx, NativeValue value) {
-    return CreateSyncCallback(ctx, value.u.int64);
-  };
+  static ImplType FromNativeValue(JSContext* ctx, NativeValue value) { return CreateSyncCallback(ctx, value.u.int64); };
 };
 
-template<>
+template <>
 struct NativeValueConverter<NativeTypeAsyncFunction> : public NativeValueConverterBase<NativeTypeAsyncFunction> {
   static NativeValue ToNativeValue(ImplType value) {
     // Not supported.
     assert(false);
   }
 
-  static ImplType FromNativeValue(JSContext* ctx, NativeValue value) {
-    return CreateAsyncCallback(ctx, value.u.int64);
-  }
+  static ImplType FromNativeValue(JSContext* ctx, NativeValue value) { return CreateAsyncCallback(ctx, value.u.int64); }
 };
 
 }  // namespace kraken

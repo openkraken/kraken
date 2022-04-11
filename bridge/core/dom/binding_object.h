@@ -14,18 +14,28 @@ namespace kraken {
 class BindingObject;
 class NativeBindingObject;
 
-using InvokeBindingsMethodsFromNative =
-    void (*)(NativeBindingObject* binding_object, NativeValue* return_value, NativeString* method, int32_t argc, NativeValue* argv);
+using InvokeBindingsMethodsFromNative = void (*)(NativeBindingObject* binding_object,
+                                                 NativeValue* return_value,
+                                                 NativeString* method,
+                                                 int32_t argc,
+                                                 NativeValue* argv);
 
-using InvokeBindingMethodsFromDart =
-    void (*)(NativeBindingObject* binding_object, NativeValue* return_value, NativeString* method, int32_t argc, NativeValue* argv);
+using InvokeBindingMethodsFromDart = void (*)(NativeBindingObject* binding_object,
+                                              NativeValue* return_value,
+                                              NativeString* method,
+                                              int32_t argc,
+                                              NativeValue* argv);
 
 struct NativeBindingObject {
   NativeBindingObject() = delete;
   explicit NativeBindingObject(BindingObject* target)
-      : binding_target_(target), invoke_binding_methods_from_dart(HandleCallFromDartSide) {};
+      : binding_target_(target), invoke_binding_methods_from_dart(HandleCallFromDartSide){};
 
-  static void HandleCallFromDartSide(NativeBindingObject* binding_object, NativeValue* return_value, NativeString* method, int32_t argc, NativeValue* argv);
+  static void HandleCallFromDartSide(NativeBindingObject* binding_object,
+                                     NativeValue* return_value,
+                                     NativeString* method,
+                                     int32_t argc,
+                                     NativeValue* argv);
 
   BindingObject* binding_target_{nullptr};
 #if UNIT_TEST
@@ -50,7 +60,6 @@ class BindingObject {
  private:
   NativeBindingObject binding_object_{this};
 };
-
 
 }  // namespace kraken
 

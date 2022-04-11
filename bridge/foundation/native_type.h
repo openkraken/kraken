@@ -7,9 +7,9 @@
 #define KRAKENBRIDGE_FOUNDATION_NATIVE_TYPE_H_
 
 #include <type_traits>
-#include "foundation/native_string.h"
-#include "bindings/qjs/script_value.h"
 #include "bindings/qjs/qjs_function.h"
+#include "bindings/qjs/script_value.h"
+#include "foundation/native_string.h"
 
 namespace kraken {
 
@@ -41,7 +41,7 @@ struct NativeTypeDouble final : public NativeTypeBaseHelper<double> {};
 struct NativeTypeJSON final : public NativeTypeBaseHelper<ScriptValue> {};
 
 // Pointer
-template<typename T>
+template <typename T>
 struct NativeTypePointer final : public NativeTypeBaseHelper<T*> {};
 
 // Sync function
@@ -50,6 +50,6 @@ struct NativeTypeFunction final : public NativeTypeBaseHelper<std::shared_ptr<QJ
 // Async function
 struct NativeTypeAsyncFunction final : public NativeTypeBaseHelper<std::shared_ptr<QJSFunction>> {};
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_FOUNDATION_NATIVE_TYPE_H_

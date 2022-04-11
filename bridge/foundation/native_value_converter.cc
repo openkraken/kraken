@@ -9,29 +9,28 @@ namespace kraken {
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
 
-
 void call_native_function(NativeFunctionContext* functionContext,
                           int32_t argc,
                           NativeValue* argv,
                           NativeValue* returnValue) {
-//  auto* context = functionContext->m_context;
-//  auto* arguments = new JSValue[argc];
-//  for (int i = 0; i < argc; i++) {
-//    arguments[i] = nativeValueToJSValue(context, argv[i]);
-//  }
-//  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->Global(), argc, arguments);
-//  context->DrainPendingPromiseJobs();
-//  if (context->HandleException(&result)) {
-//    *returnValue = jsValueToNativeValue(context->ctx(), result);
-//  }
-//
-//  JS_FreeValue(context->ctx(), result);
-//
-//  for (int i = 0; i < argc; i++) {
-//    JS_FreeValue(context->ctx(), arguments[i]);
-//  }
-//  delete[] arguments;
-//  delete functionContext;
+  //  auto* context = functionContext->m_context;
+  //  auto* arguments = new JSValue[argc];
+  //  for (int i = 0; i < argc; i++) {
+  //    arguments[i] = nativeValueToJSValue(context, argv[i]);
+  //  }
+  //  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->Global(), argc, arguments);
+  //  context->DrainPendingPromiseJobs();
+  //  if (context->HandleException(&result)) {
+  //    *returnValue = jsValueToNativeValue(context->ctx(), result);
+  //  }
+  //
+  //  JS_FreeValue(context->ctx(), result);
+  //
+  //  for (int i = 0; i < argc; i++) {
+  //    JS_FreeValue(context->ctx(), arguments[i]);
+  //  }
+  //  delete[] arguments;
+  //  delete functionContext;
 }
 
 static JSValue anonymousFunction(JSContext* ctx,
@@ -41,20 +40,19 @@ static JSValue anonymousFunction(JSContext* ctx,
                                  int magic,
                                  JSValue* func_data) {
   auto id = magic;
-//  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
-//
-//  std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
-//
-//  auto* arguments = new NativeValue[argc];
-//  for (int i = 0; i < argc; i++) {
-//    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
-//  }
-//
-//  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
-//  delete[] arguments;
-//  return returnValue;
+  //  auto* eventTarget = static_cast<EventTarget*>(JS_GetOpaque(this_val, JSValueGetClassId(this_val)));
+  //
+  //  std::string call_params = AnonymousFunctionCallPreFix + std::to_string(id);
+  //
+  //  auto* arguments = new NativeValue[argc];
+  //  for (int i = 0; i < argc; i++) {
+  //    arguments[i] = jsValueToNativeValue(ctx, argv[i]);
+  //  }
+  //
+  //  JSValue returnValue = eventTarget->callNativeMethods(call_params.c_str(), argc, arguments);
+  //  delete[] arguments;
+  //  return returnValue;
 }
-
 
 void anonymousAsyncCallback(void* callbackContext, NativeValue* nativeValue, int32_t contextId, const char* errmsg) {
   //  auto* promiseContext = static_cast<PromiseContext*>(callbackContext);

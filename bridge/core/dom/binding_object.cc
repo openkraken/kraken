@@ -6,16 +6,21 @@
 
 namespace kraken {
 
-void NativeBindingObject::HandleCallFromDartSide(NativeBindingObject* binding_object, NativeValue* return_value, NativeString* method, int32_t argc, NativeValue* argv) {
+void NativeBindingObject::HandleCallFromDartSide(NativeBindingObject* binding_object,
+                                                 NativeValue* return_value,
+                                                 NativeString* method,
+                                                 int32_t argc,
+                                                 NativeValue* argv) {
   NativeValue result = binding_object->binding_target_->HandleCallFromDartSide(method, argc, argv);
-  if (return_value != nullptr) *return_value = result;
+  if (return_value != nullptr)
+    *return_value = result;
 }
 
-BindingObject::BindingObject(ExecutingContext* context) {
+BindingObject::BindingObject(ExecutingContext* context) {}
 
-}
-
-NativeValue BindingObject::InvokeBindingMethod(const AtomicString& method, int32_t argc, const NativeValue* args) const {}
+NativeValue BindingObject::InvokeBindingMethod(const AtomicString& method,
+                                               int32_t argc,
+                                               const NativeValue* args) const {}
 
 NativeValue BindingObject::GetBindingProperty(const AtomicString& prop) const {
   return NativeValue();

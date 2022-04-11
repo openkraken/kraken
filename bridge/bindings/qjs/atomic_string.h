@@ -6,8 +6,8 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_ATOMIC_STRING_H_
 
 #include <quickjs/quickjs.h>
-#include <memory>
 #include <functional>
+#include <memory>
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "native_string_utils.h"
@@ -23,12 +23,8 @@ class AtomicString {
  public:
   enum class StringKind { kIsLowerCase, kIsUpperCase, kIsMixed };
 
-  struct KeyHasher
-  {
-    std::size_t operator()(const AtomicString& k) const
-    {
-      return k.atom_;
-    }
+  struct KeyHasher {
+    std::size_t operator()(const AtomicString& k) const { return k.atom_; }
   };
 
   static AtomicString Empty(JSContext* ctx);

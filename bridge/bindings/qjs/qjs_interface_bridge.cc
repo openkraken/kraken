@@ -13,4 +13,4 @@ bool QJSInterfaceBridge<QJST, T>::HasInstance(ExecutingContext* context, JSValue
   return JS_IsInstanceOf(context->ctx(), value, context->contextData()->prototypeForType(QJST::GetWrapperTypeInfo()));
 }
 
-}
+}  // namespace kraken

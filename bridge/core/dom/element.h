@@ -8,8 +8,8 @@
 
 #include "bindings/qjs/garbage_collected.h"
 #include "container_node.h"
-#include "legacy/element_attributes.h"
 #include "legacy/bounding_client_rect.h"
+#include "legacy/element_attributes.h"
 
 namespace kraken {
 
@@ -40,13 +40,12 @@ class Element : public ContainerNode {
   void removeAttribute(const AtomicString&, ExceptionState& exception_state);
   BoundingClientRect* getBoundingClientRect();
 
-//  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-//  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-//  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-//  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-//  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-//  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-
+  //  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  //  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  //  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  //  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  //  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  //  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   AtomicString TagName() const { return tag_name_; }
 

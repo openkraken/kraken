@@ -24,7 +24,6 @@ class SpaceSplitString {
   std::vector<std::string> sz_data_;
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_LEGACY_SPACE_SPLIT_STRING_H_

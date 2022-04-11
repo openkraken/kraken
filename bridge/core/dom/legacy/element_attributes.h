@@ -6,9 +6,9 @@
 #define KRAKENBRIDGE_CORE_DOM_LEGACY_ELEMENT_ATTRIBUTES_H_
 
 #include <unordered_map>
-#include "space_split_string.h"
 #include "bindings/qjs/atomic_string.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "space_split_string.h"
 
 namespace kraken {
 
@@ -18,8 +18,8 @@ class Element;
 // TODO: refactor for better W3C standard support and higher performance.
 class ElementAttributes : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
- public:
 
+ public:
   ElementAttributes(Element) = delete;
   ElementAttributes(Element* element);
   FORCE_INLINE const char* GetHumanReadableName() const override { return "ElementAttributes"; }
@@ -38,7 +38,6 @@ class ElementAttributes : public ScriptWrappable {
   std::shared_ptr<SpaceSplitString> class_name_{std::make_shared<SpaceSplitString>("")};
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_LEGACY_ELEMENT_ATTRIBUTES_H_

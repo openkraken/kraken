@@ -6,7 +6,6 @@
 
 namespace kraken {
 
-
 void SpaceSplitString::set(std::string& string) {
   size_t pos = 0;
   std::string token;
@@ -55,5 +54,4 @@ bool SpaceSplitString::containsAll(std::string s) {
   return flag;
 }
 
-
-}
+}  // namespace kraken

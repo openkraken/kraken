@@ -2,8 +2,8 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-#include "bindings/qjs/exception_state.h"
 #include "element_attributes.h"
+#include "bindings/qjs/exception_state.h"
 #include "built_in_string.h"
 #include "core/dom/element.h"
 
@@ -16,7 +16,7 @@ static inline bool IsNumberIndex(const std::string& name) {
   return f >= '0' && f <= '9';
 }
 
-ElementAttributes::ElementAttributes(Element* element): ScriptWrappable(element->ctx()) {}
+ElementAttributes::ElementAttributes(Element* element) : ScriptWrappable(element->ctx()) {}
 
 AtomicString ElementAttributes::GetAttribute(const AtomicString& name) {
   bool numberIndex = IsNumberIndex(name.ToStdString());
@@ -28,11 +28,15 @@ AtomicString ElementAttributes::GetAttribute(const AtomicString& name) {
   return attributes_[name];
 }
 
-bool ElementAttributes::SetAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state) {
+bool ElementAttributes::SetAttribute(const AtomicString& name,
+                                     const AtomicString& value,
+                                     ExceptionState& exception_state) {
   bool numberIndex = IsNumberIndex(name.ToStdString());
 
   if (numberIndex) {
-    exception_state.ThrowException(ctx(), ErrorType::TypeError, "Failed to execute 'setAttribute' on 'Element': '" + name.ToStdString() + "' is not a valid attribute name.");
+    exception_state.ThrowException(
+        ctx(), ErrorType::TypeError,
+        "Failed to execute 'setAttribute' on 'Element': '" + name.ToStdString() + "' is not a valid attribute name.");
     return false;
   }
 
@@ -81,7 +85,6 @@ std::string ElementAttributes::ToString() {
   return s;
 }
 
-void ElementAttributes::Trace(GCVisitor* visitor) const {
-}
+void ElementAttributes::Trace(GCVisitor* visitor) const {}
 
-}
+}  // namespace kraken
