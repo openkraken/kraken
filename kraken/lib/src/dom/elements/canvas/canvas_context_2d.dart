@@ -307,10 +307,13 @@ class CanvasRenderingContext2D extends BindingObject {
     for (int i = 0; i < _actions.length; i++) {
       _actions[i](canvas, size);
     }
+  }
+
+  // Clear the saved actions.
+  void clearActions() {
     if (_lastMatrix != _matrix) {
       _lastMatrix = _matrix.clone();
     }
-    // Clear actions
     _actions.clear();
   }
 
@@ -904,6 +907,8 @@ class CanvasRenderingContext2D extends BindingObject {
   // Reset the rendering context to its default state.
   // Called while canvas element's dimensions were changed.
   void reset() {
+    clearActions();
+    _states.clear();
     _matrix = Matrix4.identity();
     _lastMatrix = Matrix4.identity();
     _textAlign = TextAlign.start;
@@ -912,7 +917,6 @@ class CanvasRenderingContext2D extends BindingObject {
     _fontProperties.clear();
     _fontSize = null;
     _font = _DEFAULT_FONT;
-    _states.clear();
     _strokeStyle = CSSColor.initial;
     _fillStyle = CSSColor.initial;
     _lineCap = StrokeCap.butt;
@@ -922,6 +926,5 @@ class CanvasRenderingContext2D extends BindingObject {
     _lineDashOffset = 0.0;
     _miterLimit = 10.0;
     path2d = Path2D();
-    _actions.clear();
   }
 }
