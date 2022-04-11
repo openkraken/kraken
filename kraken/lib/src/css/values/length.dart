@@ -324,7 +324,7 @@ class CSSLengthValue {
     return computedValue;
   }
 
-  bool get isAuto {
+  bool isAuto(RenderStyle renderStyle) {
     switch (propertyName) {
       // Length is considered as auto of following properties
       // if it computes to double.infinity in cases of percentage.
@@ -342,7 +342,7 @@ class CSSLengthValue {
       case BOTTOM:
       case LEFT:
       case RIGHT:
-        if (compute == double.infinity) {
+        if (compute(renderStyle) == double.infinity) {
           return true;
         }
         break;
@@ -350,9 +350,7 @@ class CSSLengthValue {
     return type == CSSLengthType.AUTO;
   }
 
-  bool get isNotAuto {
-    return !isAuto;
-  }
+  bool isNotAuto(RenderStyle renderStyle) => !isAuto(renderStyle);
 
   bool get isNone {
     return type == CSSLengthType.NONE;
@@ -383,7 +381,7 @@ class CSSLengthValue {
   int get hashCode => hashValues(value, type);
 
   @override
-  String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $compute)';
+  String toString() => 'CSSLengthValue(value: $value, unit: $type)';
 }
 
 // @TODO: Make a performance test to ensure cache is usable.

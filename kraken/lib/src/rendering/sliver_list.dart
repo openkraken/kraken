@@ -162,8 +162,8 @@ class RenderSliverListLayout extends RenderLayoutBox {
     RenderBox? child = _renderViewport;
     late BoxConstraints childConstraints;
 
-    double? width = renderStyle.width.isAuto ? null : renderStyle.width.compute(renderStyle);
-    double? height = renderStyle.height.isAuto ? null : renderStyle.height.compute(renderStyle);
+    double? width = renderStyle.width.isAuto(renderStyle) ? null : renderStyle.width.compute(renderStyle);
+    double? height = renderStyle.height.isAuto(renderStyle) ? null : renderStyle.height.compute(renderStyle);
     Axis sliverAxis = renderStyle.sliverDirection;
 
     switch (sliverAxis) {

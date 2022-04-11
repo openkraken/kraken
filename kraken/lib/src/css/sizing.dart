@@ -197,8 +197,8 @@ mixin CSSSizingMixin on RenderStyle {
       if (renderPositionPlaceholder != null
         && renderPositionPlaceholder.parent is RenderFlexLayout
         && childParentData.isPositioned
-        && ((renderStyle.left.isAuto && renderStyle.right.isAuto)
-          || (renderStyle.top.isAuto && renderStyle.bottom.isAuto))
+        && ((renderStyle.left.isAuto(renderStyle) && renderStyle.right.isAuto(renderStyle))
+          || (renderStyle.top.isAuto(renderStyle) && renderStyle.bottom.isAuto(renderStyle)))
       ) {
         RenderLayoutBox? placeholderParent = renderPositionPlaceholder.parent as RenderLayoutBox;
         // Mark parent as _needsLayout directly as RenderPositionHolder has tight constraints which will

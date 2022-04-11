@@ -52,7 +52,7 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
     // Editable area should align to the center vertically for text control element which
     // does not support multiline editing.
     double dy;
-    if (renderStyle.height.isNotAuto) {
+    if (renderStyle.height.isNotAuto(renderStyle)) {
       dy = (renderStyle.height.compute(renderStyle) - intrinsicHeight) / 2;
     } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
       renderStyle.lineHeight.compute(renderStyle) > intrinsicHeight) {

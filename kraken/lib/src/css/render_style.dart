@@ -622,7 +622,7 @@ class CSSRenderStyle
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
         //  Use width directly if defined.
-        if (renderStyle.width.isNotAuto) {
+        if (renderStyle.width.isNotAuto(renderStyle)) {
           logicalWidth = renderStyle.width.compute(renderStyle);
         } else if (renderStyle.parent != null) {
           RenderStyle parentRenderStyle = renderStyle.parent!;
@@ -645,7 +645,7 @@ class CSSRenderStyle
         break;
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
-        if (renderStyle.width.isNotAuto) {
+        if (renderStyle.width.isNotAuto(renderStyle)) {
           logicalWidth = renderStyle.width.compute(renderStyle);
 
         // The width of positioned, non-replaced element is determined as following algorithm.
@@ -653,9 +653,9 @@ class CSSRenderStyle
         } else if ((renderStyle.position == CSSPositionType.absolute ||
           renderStyle.position == CSSPositionType.fixed)
           && current is! RenderReplaced
-          && renderStyle.width.isAuto
-          && renderStyle.left.isNotAuto
-          && renderStyle.right.isNotAuto
+          && renderStyle.width.isAuto(renderStyle)
+          && renderStyle.left.isNotAuto(renderStyle)
+          && renderStyle.right.isNotAuto(renderStyle)
         ) {
           if (current.parent is! RenderBoxModel) {
             logicalWidth = null;
@@ -689,7 +689,7 @@ class CSSRenderStyle
     }
 
     // Constrain width by min-width and max-width.
-    if (renderStyle.minWidth.isNotAuto) {
+    if (renderStyle.minWidth.isNotAuto(renderStyle)) {
       double minWidth = renderStyle.minWidth.compute(renderStyle);
       if (logicalWidth != null && logicalWidth < minWidth) {
         logicalWidth = minWidth;
@@ -726,7 +726,7 @@ class CSSRenderStyle
 
     // Inline element has no height.
     if (effectiveDisplay != CSSDisplay.inline) {
-      if (renderStyle.height.isNotAuto) {
+      if (renderStyle.height.isNotAuto(renderStyle)) {
         logicalHeight = renderStyle.height.compute(renderStyle);
 
       // The height of positioned, non-replaced element is determined as following algorithm.
@@ -734,9 +734,9 @@ class CSSRenderStyle
       } else if ((renderStyle.position == CSSPositionType.absolute ||
         renderStyle.position == CSSPositionType.fixed)
         && current is! RenderReplaced
-        && renderStyle.height.isAuto
-        && renderStyle.top.isNotAuto
-        && renderStyle.bottom.isNotAuto
+        && renderStyle.height.isAuto(renderStyle)
+        && renderStyle.top.isNotAuto(renderStyle)
+        && renderStyle.bottom.isNotAuto(renderStyle)
       ) {
         if (current.parent is! RenderBoxModel) {
           logicalHeight = null;
@@ -775,7 +775,7 @@ class CSSRenderStyle
     }
 
     // Constrain height by min-height and max-height.
-    if (renderStyle.minHeight.isNotAuto) {
+    if (renderStyle.minHeight.isNotAuto(renderStyle)) {
       double minHeight = renderStyle.minHeight.compute(renderStyle);
       if (logicalHeight != null && logicalHeight < minHeight) {
         logicalHeight = minHeight;
@@ -839,7 +839,7 @@ class CSSRenderStyle
     CSSLengthValue marginBottom = renderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (marginTop.isNotAuto && marginBottom.isNotAuto &&
+    if (marginTop.isNotAuto(renderStyle) && marginBottom.isNotAuto(renderStyle) &&
       isParentFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }
@@ -1043,9 +1043,9 @@ class CSSRenderStyle
   @override
   double getHeightByIntrinsicRatio() {
     double contentBoxHeight;
-    double borderBoxWidth = width.isAuto
+    double borderBoxWidth = width.isAuto(this)
       ? wrapPaddingBorderWidth(intrinsicWidth) : width.compute(this);
-    if (minWidth.isNotAuto && borderBoxWidth < minWidth.compute(this)) {
+    if (minWidth.isNotAuto(this) && borderBoxWidth < minWidth.compute(this)) {
       borderBoxWidth = minWidth.compute(this);
     }
     if (maxWidth.isNotNone && borderBoxWidth > maxWidth.compute(this)) {
@@ -1057,7 +1057,7 @@ class CSSRenderStyle
       contentBoxHeight = contentBoxWidth * intrinsicHeight / intrinsicWidth;
     } else {
       contentBoxHeight = intrinsicHeight;
-      if (!minHeight.isAuto && contentBoxHeight < minHeight.compute(this)) {
+      if (!minHeight.isAuto(this) && contentBoxHeight < minHeight.compute(this)) {
         contentBoxHeight = minHeight.compute(this);
       }
       if (!maxHeight.isNone && contentBoxHeight > maxHeight.compute(this)) {
@@ -1075,9 +1075,9 @@ class CSSRenderStyle
   double getWidthByIntrinsicRatio() {
     double contentBoxWidth;
 
-    double borderBoxHeight = height.isAuto
+    double borderBoxHeight = height.isAuto(this)
       ? wrapPaddingBorderHeight(intrinsicHeight) : height.compute(this);
-    if (!minHeight.isAuto && borderBoxHeight < minHeight.compute(this)) {
+    if (!minHeight.isAuto(this) && borderBoxHeight < minHeight.compute(this)) {
       borderBoxHeight = minHeight.compute(this);
     }
     if (!maxHeight.isNone && borderBoxHeight > maxHeight.compute(this)) {
@@ -1089,7 +1089,7 @@ class CSSRenderStyle
       contentBoxWidth = contentBoxHeight * intrinsicWidth / intrinsicHeight;
     } else {
       contentBoxWidth = intrinsicWidth;
-      if (minWidth.isNotAuto && contentBoxWidth < minWidth.compute(this)) {
+      if (minWidth.isNotAuto(this) && contentBoxWidth < minWidth.compute(this)) {
         contentBoxWidth = minWidth.compute(this);
       }
       if (maxWidth.isNotNone && contentBoxWidth > maxWidth.compute(this)) {

@@ -18,13 +18,13 @@ class RenderReplaced extends RenderBoxModel
 
   @override
   BoxSizeType get widthSizeType {
-    bool widthDefined = renderStyle.width.isNotAuto || renderStyle.minWidth.isNotAuto;
+    bool widthDefined = renderStyle.width.isNotAuto(renderStyle) || renderStyle.minWidth.isNotAuto(renderStyle);
     return widthDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 
   @override
   BoxSizeType get heightSizeType {
-    bool heightDefined = renderStyle.height.isNotAuto || renderStyle.minHeight.isNotAuto;
+    bool heightDefined = renderStyle.height.isNotAuto(renderStyle) || renderStyle.minHeight.isNotAuto(renderStyle);
     return heightDefined ? BoxSizeType.specified : BoxSizeType.intrinsic;
   }
 

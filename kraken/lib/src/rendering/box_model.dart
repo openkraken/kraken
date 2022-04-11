@@ -393,11 +393,11 @@ class RenderLayoutBox extends RenderBoxModel
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isInlineBlock = effectiveDisplay == CSSDisplay.inlineBlock;
     bool isNotInline = effectiveDisplay != CSSDisplay.inline;
-    double? width = renderStyle.width.isAuto ? null : renderStyle.width.compute(renderStyle);
-    double? height = renderStyle.height.isAuto ? null : renderStyle.height.compute(renderStyle);
-    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.compute(renderStyle);
+    double? width = renderStyle.width.isAuto(renderStyle) ? null : renderStyle.width.compute(renderStyle);
+    double? height = renderStyle.height.isAuto(renderStyle) ? null : renderStyle.height.compute(renderStyle);
+    double? minWidth = renderStyle.minWidth.isAuto(renderStyle) ? null : renderStyle.minWidth.compute(renderStyle);
     double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.compute(renderStyle);
-    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.compute(renderStyle);
+    double? minHeight = renderStyle.minHeight.isAuto(renderStyle) ? null : renderStyle.minHeight.compute(renderStyle);
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.compute(renderStyle);
 
     // Constrain to min-width or max-width if width not exists.
@@ -438,7 +438,7 @@ class RenderLayoutBox extends RenderBoxModel
     }
     double maxScrollableX = childRenderStyle.left.compute(childRenderStyle) + childScrollableSize!.width;
 
-    if (childRenderStyle.right.isNotAuto) {
+    if (childRenderStyle.right.isNotAuto(childRenderStyle)) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).widthSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
@@ -455,7 +455,7 @@ class RenderLayoutBox extends RenderBoxModel
     }
 
     double maxScrollableY = childRenderStyle.top.compute(childRenderStyle) + childScrollableSize.height;
-    if (childRenderStyle.bottom.isNotAuto) {
+    if (childRenderStyle.bottom.isNotAuto(childRenderStyle)) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
@@ -623,11 +623,11 @@ class RenderBoxModel extends RenderBox
   }
 
   BoxSizeType get widthSizeType {
-    return renderStyle.width.isAuto ? BoxSizeType.automatic : BoxSizeType.specified;
+    return renderStyle.width.isAuto(renderStyle) ? BoxSizeType.automatic : BoxSizeType.specified;
   }
 
   BoxSizeType get heightSizeType {
-    return renderStyle.height.isAuto ? BoxSizeType.automatic: BoxSizeType.specified;
+    return renderStyle.height.isAuto(renderStyle) ? BoxSizeType.automatic: BoxSizeType.specified;
   }
 
   // Cache scroll offset of scrolling box in horizontal direction
@@ -839,9 +839,9 @@ class RenderBoxModel extends RenderBox
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isDisplayInline = effectiveDisplay == CSSDisplay.inline;
 
-    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.compute(renderStyle);
+    double? minWidth = renderStyle.minWidth.isAuto(renderStyle) ? null : renderStyle.minWidth.compute(renderStyle);
     double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.compute(renderStyle);
-    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.compute(renderStyle);
+    double? minHeight = renderStyle.minHeight.isAuto(renderStyle) ? null : renderStyle.minHeight.compute(renderStyle);
     double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.compute(renderStyle);
 
     // Need to calculated logic content size on every layout.

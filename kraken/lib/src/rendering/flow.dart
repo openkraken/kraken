@@ -614,9 +614,9 @@ class RenderFlowLayout extends RenderLayoutBox {
           // 'border-right-width' + 'margin-right' = width of containing block
           if (childEffectiveDisplay == CSSDisplay.block ||
             childEffectiveDisplay == CSSDisplay.flex) {
-            if (marginLeft.isAuto) {
+            if (marginLeft.isAuto(childRenderStyle)) {
               double remainingSpace = mainAxisContentSize - childMainAxisExtent;
-              if (marginRight.isAuto) {
+              if (marginRight.isAuto(childRenderStyle)) {
                 childMainPosition = remainingSpace / 2;
               } else {
                 childMainPosition = remainingSpace;
@@ -1258,8 +1258,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginBottom = renderBoxModel.renderStyle.marginBottom.compute(renderBoxModel.renderStyle);
 
     if (renderBoxModel is RenderLayoutBox &&
-      renderStyle.height.isAuto &&
-      renderStyle.minHeight.isAuto &&
+      renderStyle.height.isAuto(renderStyle) &&
+      renderStyle.minHeight.isAuto(renderStyle) &&
       renderStyle.maxHeight.isNone &&
       renderStyle.effectiveDisplay == CSSDisplay.block &&
       (isOverflowVisible || isOverflowClip) &&

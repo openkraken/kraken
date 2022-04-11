@@ -166,10 +166,10 @@ class TextareaElement extends TextFormControlElement {
 
   void _stylePropertyChanged(String property, String? original, String present) {
     if (property == WIDTH) {
-      _styleWidth = renderStyle.width.isNotAuto ? renderStyle.width.compute(renderStyle) : null;
+      _styleWidth = renderStyle.width.isNotAuto(renderStyle) ? renderStyle.width.compute(renderStyle) : null;
       _updateDefaultWidth();
     } else if (property == HEIGHT) {
-      _styleHeight = renderStyle.height.isNotAuto ? renderStyle.height.compute(renderStyle) : null;
+      _styleHeight = renderStyle.height.isNotAuto(renderStyle) ? renderStyle.height.compute(renderStyle) : null;
       _updateDefaultHeight();
     } else if (property == LINE_HEIGHT) {
       _updateDefaultHeight();

@@ -645,24 +645,24 @@ void _paintImage({
   CSSLengthValue? backgroundHeight = backgroundSize.height;
 
   // Only background width is set, eg `100px`, `100px auto`.
-  if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.compute(renderStyle) > 0 &&
-    (backgroundHeight == null || backgroundHeight.isAuto)
+  if (backgroundWidth != null && !backgroundWidth.isAuto(renderStyle) && backgroundWidth.compute(renderStyle) > 0 &&
+    (backgroundHeight == null || backgroundHeight.isAuto(renderStyle))
   ) {
     double width = backgroundWidth.compute(renderStyle);
     double height = width / aspectRatio;
     destinationSize = Size(width, height);
 
   // Only background height is set, eg `auto 100px`.
-  } else if (backgroundWidth != null && backgroundWidth.isAuto &&
-    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.compute(renderStyle) > 0
+  } else if (backgroundWidth != null && backgroundWidth.isAuto(renderStyle) &&
+    backgroundHeight != null && !backgroundHeight.isAuto(renderStyle) && backgroundHeight.compute(renderStyle) > 0
   ) {
     double height = backgroundHeight.compute(renderStyle);
     double width = height * aspectRatio;
     destinationSize = Size(width, height);
 
   // Both background width and height are set, eg `100px 100px`.
-  } else if (backgroundWidth != null && !backgroundWidth.isAuto && backgroundWidth.compute(renderStyle) > 0 &&
-    backgroundHeight != null && !backgroundHeight.isAuto && backgroundHeight.compute(renderStyle) > 0
+  } else if (backgroundWidth != null && !backgroundWidth.isAuto(renderStyle) && backgroundWidth.compute(renderStyle) > 0 &&
+    backgroundHeight != null && !backgroundHeight.isAuto(renderStyle) && backgroundHeight.compute(renderStyle) > 0
   ) {
     double width = backgroundWidth.compute(renderStyle);
     double height = backgroundHeight.compute(renderStyle);
