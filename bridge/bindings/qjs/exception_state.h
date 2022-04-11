@@ -27,7 +27,6 @@ class ExceptionState {
 
  private:
   JSValue exception_{JS_NULL};
-  JSContext* ctx_;
 };
 
 }  // namespace kraken

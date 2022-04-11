@@ -13,17 +13,6 @@
 
 namespace kraken {
 
-struct NativeBoundingClientRect {
-  double x;
-  double y;
-  double width;
-  double height;
-  double top;
-  double right;
-  double bottom;
-  double left;
-};
-
 class Element : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
 
@@ -38,10 +27,9 @@ class Element : public ContainerNode {
   void setAttribute(const AtomicString&, const AtomicString& value);
   void setAttribute(const AtomicString&, const AtomicString& value, ExceptionState&);
   void removeAttribute(const AtomicString&, ExceptionState& exception_state);
-  BoundingClientRect* getBoundingClientRect();
+  BoundingClientRect* getBoundingClientRect(ExceptionState& exception_state);
+  void click(ExceptionState& exception_state);
 
-  //  static JSValue getBoundingClientRect(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  //  static JSValue removeAttribute(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   //  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   //  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   //  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);

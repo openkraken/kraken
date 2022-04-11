@@ -27,7 +27,7 @@ interface Element extends Node {
    * Returns element's first attribute whose qualified name is qualifiedName, and null if there is no such attribute otherwise.
    */
   getAttribute(qualifiedName: string): string | null;
-  getBoundingClientRect(): DOMRect;
+  getBoundingClientRect(): BoundingClientRect;
   /**
    * Returns a HTMLCollection of the elements in the object on which the method was invoked (a document or an element) that have all the classes given by classNames. The classNames argument is interpreted as a space-separated list of classes.
    */

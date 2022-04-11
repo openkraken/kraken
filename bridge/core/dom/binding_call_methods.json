@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "templates": ["make_names"]
+  },
+  "data": [
+    "click",
+    "getBoundingClientRect",
+    ["getPropertyMagic", "%g"],
+    ["setPropertyMagic", "%s"]
+  ]
+}

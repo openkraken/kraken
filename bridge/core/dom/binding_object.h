@@ -13,12 +13,13 @@ namespace kraken {
 
 class BindingObject;
 class NativeBindingObject;
+class ExceptionState;
 
-using InvokeBindingsMethodsFromNative = void (*)(NativeBindingObject* binding_object,
+using InvokeBindingsMethodsFromNative = void (*)(const NativeBindingObject* binding_object,
                                                  NativeValue* return_value,
                                                  NativeString* method,
                                                  int32_t argc,
-                                                 NativeValue* argv);
+                                                 const NativeValue* argv);
 
 using InvokeBindingMethodsFromDart = void (*)(NativeBindingObject* binding_object,
                                               NativeValue* return_value,
@@ -38,9 +39,6 @@ struct NativeBindingObject {
                                      NativeValue* argv);
 
   BindingObject* binding_target_{nullptr};
-#if UNIT_TEST
-  InvokeBindingMethod invokeBindingMethod{reinterpret_cast<InvokeBindingMethod>(TEST_invokeBindingMethod)};
-#else
   InvokeBindingMethodsFromDart invoke_binding_methods_from_dart{nullptr};
   InvokeBindingsMethodsFromNative invoke_bindings_methods_from_native{nullptr};
 };
@@ -53,11 +51,12 @@ class BindingObject {
   // Handle call from dart side.
   virtual NativeValue HandleCallFromDartSide(NativeString* method, int32_t argc, const NativeValue* argv) const = 0;
   // Invoke methods which implemented at dart side.
-  NativeValue InvokeBindingMethod(const AtomicString& method, int32_t argc, const NativeValue* args) const;
-  NativeValue GetBindingProperty(const AtomicString& prop) const;
-  NativeValue SetBindingProperty(const AtomicString& prop, NativeValue value) const;
+  NativeValue InvokeBindingMethod(const AtomicString& method, int32_t argc, const NativeValue* args, ExceptionState& exception_state) const;
+  NativeValue GetBindingProperty(const AtomicString& prop, ExceptionState& exception_state) const;
+  NativeValue SetBindingProperty(const AtomicString& prop, NativeValue value, ExceptionState& exception_state) const;
 
  private:
+  ExecutingContext* context_{nullptr};
   NativeBindingObject binding_object_{this};
 };
 

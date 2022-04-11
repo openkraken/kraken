@@ -4,6 +4,9 @@
  */
 
 #include "element.h"
+#include "binding_call_methods.h"
+#include "bindings/qjs/exception_state.h"
+#include "foundation/native_value_converter.h"
 
 namespace kraken {
 
@@ -48,8 +51,17 @@ void Element::removeAttribute(const AtomicString& name, ExceptionState& exceptio
   attributes_->RemoveAttribute(name);
 }
 
-BoundingClientRect* Element::getBoundingClientRect() {
-  return nullptr;
+BoundingClientRect* Element::getBoundingClientRect(ExceptionState& exception_state) {
+  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  NativeValue result = InvokeBindingMethod(binding_call_methods::kgetBoundingClientRect, 0, nullptr, exception_state);
+  return BoundingClientRect::Create(
+      GetExecutingContext(),
+      NativeValueConverter<NativeTypePointer<NativeBoundingClientRect>>::FromNativeValue(result));
+}
+
+void Element::click(ExceptionState& exception_state) {
+  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  InvokeBindingMethod(binding_call_methods::kclick, 0, nullptr, exception_state);
 }
 
 }  // namespace kraken

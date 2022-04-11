@@ -78,7 +78,7 @@ class EventTargetData final {
 // EventTarget objects allow us to add and remove an event
 // listeners of a specific event type. Each EventTarget object also represents
 // the target to which an event is dispatched when something has occurred.
-class EventTarget : public ScriptWrappable, BindingObject {
+class EventTarget : public ScriptWrappable, public BindingObject {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
@@ -127,12 +127,12 @@ class EventTarget : public ScriptWrappable, BindingObject {
 
   DispatchEventResult DispatchEventInternal(Event& event, ExceptionState& exception_state);
 
+  NativeValue HandleCallFromDartSide(NativeString *method, int32_t argc, const NativeValue *argv) const override;
+
   // Subclasses should likely not override these themselves; instead, they
   // should subclass EventTargetWithInlineData.
   virtual EventTargetData* GetEventTargetData() = 0;
   virtual EventTargetData& EnsureEventTargetData() = 0;
-
-  NativeValue HandleCallFromDartSide(const NativeString* method, int32_t argc, const NativeValue* argv) override;
 
   const char* GetHumanReadableName() const override;
 
