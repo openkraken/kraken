@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:quiver/collection.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
 const _1in = 96; // 1in = 2.54cm = 96px
@@ -384,9 +383,6 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type)';
 }
 
-// @TODO: Make a performance test to ensure cache is usable.
-final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 100);
-
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
 
@@ -443,10 +439,6 @@ class CSSLength {
   }
 
   static CSSLengthValue parseLength(String text, [String? propertyName, Axis? axisType]) {
-    if (_cachedParsedLength.containsKey(text)) {
-      return _cachedParsedLength[text]!;
-    }
-
     double? value;
     CSSLengthType unit = CSSLengthType.PX;
     if (text == ZERO) {
@@ -533,11 +525,11 @@ class CSSLength {
     }
 
     if (value == 0) {
-      return _cachedParsedLength[text] = CSSLengthValue.zero;
+      return CSSLengthValue.zero;
     } else if (value == null) {
-      return _cachedParsedLength[text] = CSSLengthValue.unknown;
+      return CSSLengthValue.unknown;
     } else if (unit == CSSLengthType.PX){
-      return _cachedParsedLength[text] = CSSLengthValue(value, unit);
+      return CSSLengthValue(value, unit);
     } else {
       return CSSLengthValue(value, unit, propertyName, axisType);
     }
