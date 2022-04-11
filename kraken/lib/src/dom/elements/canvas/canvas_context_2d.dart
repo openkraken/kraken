@@ -230,6 +230,7 @@ class CanvasRenderingContext2D extends BindingObject {
       case 'translate': return translate(
         castToType<num>(args[0]).toDouble(),
         castToType<num>(args[1]).toDouble());
+      case 'reset': return reset();
       default: return super.invokeBindingMethod(method, args);
     }
   }
@@ -306,10 +307,13 @@ class CanvasRenderingContext2D extends BindingObject {
     for (int i = 0; i < _actions.length; i++) {
       _actions[i](canvas, size);
     }
+  }
+
+  // Clear the saved actions.
+  void clearActions() {
     if (_lastMatrix != _matrix) {
       _lastMatrix = _matrix.clone();
     }
-    // Clear actions
     _actions.clear();
   }
 
@@ -878,7 +882,6 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-
   void strokeText(String text, double x, double y, {double? maxWidth}) {
     addAction((Canvas canvas, Size size) {
       TextPainter textPainter = _getTextPainter(text, strokeStyle, shouldStrokeText: true);
@@ -899,5 +902,29 @@ class CanvasRenderingContext2D extends BindingObject {
     // TextPainter textPainter = _getTextPainter(text, fillStyle);
     // TODO: transform textPainter layout info into TextMetrics.
     return null;
+  }
+
+  // Reset the rendering context to its default state.
+  // Called while canvas element's dimensions were changed.
+  void reset() {
+    clearActions();
+    _states.clear();
+    _matrix = Matrix4.identity();
+    _lastMatrix = Matrix4.identity();
+    _textAlign = TextAlign.start;
+    _textBaseline = CanvasTextBaseline.alphabetic;
+    _direction = TextDirection.ltr;
+    _fontProperties.clear();
+    _fontSize = null;
+    _font = _DEFAULT_FONT;
+    _strokeStyle = CSSColor.initial;
+    _fillStyle = CSSColor.initial;
+    _lineCap = StrokeCap.butt;
+    _lineJoin = StrokeJoin.miter;
+    _lineWidth = 1.0;
+    _lineDash = 'empty';
+    _lineDashOffset = 0.0;
+    _miterLimit = 10.0;
+    path2d = Path2D();
   }
 }
