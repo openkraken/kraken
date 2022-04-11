@@ -42,16 +42,6 @@ auto commentCreator =
 
 const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreator};
 
-//
-// class CommentInstance : public NodeInstance {
-// public:
-//  CommentInstance() = delete;
-//  explicit CommentInstance(Comment* comment);
-//
-// private:
-//  friend Comment;
-//};
-
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_COMMENT_H

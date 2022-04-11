@@ -10,10 +10,13 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "foundation/macros.h"
+
 namespace kraken {
 
 struct NativeString {
   NativeString(const uint16_t* string, uint32_t length);
+  NativeString(const NativeString* source);
   ~NativeString();
 
   inline const uint16_t* string() const { return string_; }

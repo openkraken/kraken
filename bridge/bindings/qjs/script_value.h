@@ -19,6 +19,7 @@ namespace kraken {
 
 class ExecutingContext;
 class WrapperTypeInfo;
+class NativeValue;
 
 // ScriptValue is a stack allocate only QuickJS JSValue wrapper ScriptValuewhich hold all information to hide out
 // QuickJS running details.
@@ -53,6 +54,7 @@ class ScriptValue final {
   // Create a new ScriptValue from call JSON.stringify to current value.
   ScriptValue ToJSONStringify(ExceptionState* exception) const;
   AtomicString ToString() const;
+  NativeValue ToNative() const;
 
   bool IsException();
   bool IsEmpty();

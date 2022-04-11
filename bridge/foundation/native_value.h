@@ -35,6 +35,7 @@ enum class JSPointerType {
 };
 
 class ExecutingContext;
+class ScriptValue;
 
 // Exchange data struct between dart and C++
 struct NativeValue {
@@ -73,13 +74,9 @@ NativeValue Native_NewString(NativeString* string);
 NativeValue Native_NewCString(std::string string);
 NativeValue Native_NewFloat64(double value);
 NativeValue Native_NewBool(bool value);
-NativeValue Native_NewInt32(int32_t value);
+NativeValue Native_NewInt64(int64_t value);
 NativeValue Native_NewPtr(JSPointerType pointerType, void* ptr);
-NativeValue Native_NewJSON(ExecutingContext* context, JSValue& value);
-NativeValue jsValueToNativeValue(JSContext* ctx, JSValue& value);
-JSValue nativeValueToJSValue(ExecutingContext* context, NativeValue& value);
-
-std::string nativeStringToStdString(NativeString* nativeString);
+NativeValue Native_NewJSON(const ScriptValue& value);
 
 }  // namespace kraken
 

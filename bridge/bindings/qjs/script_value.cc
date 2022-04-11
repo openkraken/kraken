@@ -5,9 +5,11 @@
 
 #include "script_value.h"
 #include <vector>
+#include "foundation/native_value_converter.h"
 #include "core/executing_context.h"
 #include "native_string_utils.h"
 #include "qjs_engine_patch.h"
+#include "qjs_bounding_client_rect.h"
 
 namespace kraken {
 
@@ -77,6 +79,45 @@ ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) const {
 
 AtomicString ScriptValue::ToString() const {
   return AtomicString(ctx_, value_);
+}
+
+NativeValue ScriptValue::ToNative() const {
+  if (JS_IsNull(value_) || JS_IsUndefined(value_)) {
+    return Native_NewNull();
+  } else if (JS_IsBool(value_)) {
+    return Native_NewBool(JS_ToBool(ctx_, value_));
+  } else if (JS_IsNumber(value_)) {
+    uint32_t tag = JS_VALUE_GET_TAG(value_);
+    if (JS_TAG_IS_FLOAT64(tag)) {
+      double v;
+      JS_ToFloat64(ctx_, &v, value_);
+      return Native_NewFloat64(v);
+    } else {
+      int32_t v;
+      JS_ToInt32(ctx_, &v, value_);
+      return Native_NewInt64(v);
+    }
+  } else if (JS_IsString(value_)) {
+    // NativeString owned by NativeValue will be freed by users.
+    NativeString* string = this->ToString().ToNativeString().release();
+    return NativeValueConverter<NativeTypeString>::ToNativeValue(string);
+  } else if (JS_IsFunction(ctx_, value_)) {
+    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+    auto* functionContext = new NativeFunctionContext{context, value_};
+    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
+  } else if (JS_IsObject(value_)) {
+
+//    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+    //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+    //    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {
+    //      auto* imageElementInstance = static_cast<ImageElementInstance*>(JS_GetOpaque(value, Element::classId()));
+    //      return Native_NewPtr(JSPointerType::NativeEventTarget, imageElementInstance->nativeEventTarget);
+    //    }
+
+    //    return Native_NewJSON(context, value);
+  }
+
+  return Native_NewNull();
 }
 
 bool ScriptValue::IsException() {

@@ -11,6 +11,7 @@
 #include "bindings/qjs/script_wrappable.h"
 #include "event_listener_map.h"
 #include "foundation/native_string.h"
+#include "core/dom/binding_object.h"
 
 #if UNIT_TEST
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
@@ -77,7 +78,7 @@ class EventTargetData final {
 // EventTarget objects allow us to add and remove an event
 // listeners of a specific event type. Each EventTarget object also represents
 // the target to which an event is dispatched when something has occurred.
-class EventTarget : public ScriptWrappable {
+class EventTarget : public ScriptWrappable, BindingObject {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
@@ -112,6 +113,8 @@ class EventTarget : public ScriptWrappable {
 
   static DispatchEventResult GetDispatchEventResult(const Event&);
 
+  int32_t eventTargetId() const { return event_target_id_; }
+
   virtual bool IsWindowOrWorkerGlobalScope() const { return false; }
 
  protected:
@@ -129,9 +132,12 @@ class EventTarget : public ScriptWrappable {
   virtual EventTargetData* GetEventTargetData() = 0;
   virtual EventTargetData& EnsureEventTargetData() = 0;
 
+  NativeValue HandleCallFromDartSide(const NativeString* method, int32_t argc, const NativeValue *argv) override;
+
   const char* GetHumanReadableName() const override;
 
  private:
+  int32_t event_target_id_;
   bool FireEventListeners(Event&, EventTargetData*, EventListenerVector&, ExceptionState&);
 };
 

@@ -49,6 +49,7 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
     return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
   };
   FORCE_INLINE JSContext* ctx() const { return ctx_; }
+  FORCE_INLINE JSRuntime* runtime() const { return runtime_; }
 
  private:
   bool wrapped_{false};

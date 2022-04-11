@@ -33,7 +33,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
   queue.emplace_back(item);
 }
 
-void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01, void* nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, int32_t type, const std::unique_ptr<NativeString>& args_01, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
     m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
@@ -41,14 +41,14 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString& args_01
 #endif
   }
 
-  UICommandItem item{id, type, args_01, nativePtr};
+  UICommandItem item{id, type, args_01.get(), nativePtr};
   queue.emplace_back(item);
 }
 
 void UICommandBuffer::addCommand(int32_t id,
                                  int32_t type,
-                                 NativeString& args_01,
-                                 NativeString& args_02,
+                                 const std::unique_ptr<NativeString>& args_01,
+                                 const std::unique_ptr<NativeString>& args_02,
                                  void* nativePtr) {
 #if FLUTTER_BACKEND
   if (!update_batched) {
@@ -56,7 +56,7 @@ void UICommandBuffer::addCommand(int32_t id,
     update_batched = true;
   }
 #endif
-  UICommandItem item{id, type, args_01, args_02, nativePtr};
+  UICommandItem item{id, type, args_01.get(), args_02.get(), nativePtr};
   queue.emplace_back(item);
 }
 

@@ -7,6 +7,7 @@
 
 #include <quickjs/quickjs.h>
 #include <memory>
+#include <functional>
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
 #include "native_string_utils.h"
@@ -21,6 +22,14 @@ namespace kraken {
 class AtomicString {
  public:
   enum class StringKind { kIsLowerCase, kIsUpperCase, kIsMixed };
+
+  struct KeyHasher
+  {
+    std::size_t operator()(const AtomicString& k) const
+    {
+      return k.atom_;
+    }
+  };
 
   static AtomicString Empty(JSContext* ctx);
   static AtomicString From(JSContext* ctx, NativeString* native_string);

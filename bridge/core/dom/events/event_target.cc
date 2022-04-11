@@ -17,6 +17,8 @@
 
 namespace kraken {
 
+static std::atomic<int32_t> global_event_target_id{0};
+
 Event::PassiveMode EventPassiveMode(const RegisteredEventListener& event_listener) {
   if (!event_listener.Passive()) {
     return Event::PassiveMode::kNotPassiveDefault;
@@ -27,12 +29,9 @@ Event::PassiveMode EventPassiveMode(const RegisteredEventListener& event_listene
 // EventTargetData
 EventTargetData::EventTargetData() {}
 
-EventTargetData::~EventTargetData() {
-  KRAKEN_LOG(VERBOSE) << "DISPOSE";
-}
+EventTargetData::~EventTargetData() {}
 
 void EventTargetData::Trace(GCVisitor* visitor) const {
-  KRAKEN_LOG(VERBOSE) << "TRACE";
   event_listener_map.Trace(visitor);
 }
 
@@ -40,7 +39,10 @@ EventTarget* EventTarget::Create(ExecutingContext* context, ExceptionState& exce
   return MakeGarbageCollected<EventTargetWithInlineData>(context);
 }
 
-EventTarget::EventTarget(ExecutingContext* context) : ScriptWrappable(context->ctx()) {}
+EventTarget::EventTarget(ExecutingContext* context)
+    : BindingObject(context),
+      ScriptWrappable(context->ctx()),
+      event_target_id_(global_event_target_id.fetch_add(std::memory_order_relaxed)) {}
 
 bool EventTarget::addEventListener(const AtomicString& event_type,
                                    const std::shared_ptr<EventListener>& event_listener,
@@ -188,6 +190,10 @@ DispatchEventResult EventTarget::DispatchEventInternal(Event& event, ExceptionSt
   DispatchEventResult dispatch_result = FireEventListeners(event, exception_state);
   event.SetEventPhase(0);
   return dispatch_result;
+}
+
+NativeValue EventTarget::HandleCallFromDartSide(const NativeString* method, int32_t argc, const NativeValue* argv) {
+
 }
 
 const char* EventTarget::GetHumanReadableName() const {

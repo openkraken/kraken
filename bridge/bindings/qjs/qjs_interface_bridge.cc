@@ -4,3 +4,13 @@
  */
 
 #include "qjs_interface_bridge.h"
+#include "core/executing_context.h"
+
+namespace kraken {
+
+template <class QJST, class T>
+bool QJSInterfaceBridge<QJST, T>::HasInstance(ExecutingContext* context, JSValue value) {
+  return JS_IsInstanceOf(context->ctx(), value, context->contextData()->prototypeForType(QJST::GetWrapperTypeInfo()));
+}
+
+}

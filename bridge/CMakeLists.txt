@@ -96,6 +96,8 @@ list(APPEND BRIDGE_SOURCE
   foundation/task_queue.h
   foundation/native_value.cc
   foundation/native_value.h
+  foundation/native_type.h
+  foundation/native_value_converter.h
   foundation/casting.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
@@ -283,6 +285,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/events/event_listener_map.cc
     core/dom/events/event_target_impl.cc
     core/dom/events/event_target_impl.h
+    core/dom/binding_object.h
+    core/dom/binding_object.cc
     core/dom/node.cc
     core/dom/node.h
     core/dom/attr.cc
@@ -294,16 +298,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/character_data.h
     core/dom/text.cc
     core/dom/text.h
-    core/dom/attribute.h
-    core/dom/attribute_collection.h
     core/dom/tree_scope.cc
     core/dom/tree_scope.h
     core/dom/element.cc
     core/dom/element.h
-    core/dom/element_data.cc
-    core/dom/element_data.h
-    core/dom/space_split_string.cc
-    core/dom/space_split_string.h
     core/dom/document.cc
     core/dom/document.h
     core/dom/node_data.cc
@@ -324,6 +322,14 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_collection.h
     core/html/html_element.cc
     core/html/html_element.h
+    # Legacy implements, should remove them in the future.
+    core/dom/legacy/space_split_string.cc
+    core/dom/legacy/space_split_string.h
+    core/dom/legacy/element_attributes.cc
+    core/dom/legacy/element_attributes.h
+    core/dom/legacy/bounding_client_rect.cc
+    core/dom/legacy/bounding_client_rect.h
+
 #    core/dom/character_data.cc
 #    core/dom/character_data.h
 #    core/dom/comment.cc
