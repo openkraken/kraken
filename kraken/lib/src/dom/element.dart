@@ -175,6 +175,20 @@ abstract class Element
     return renderBoxModel!;
   }
 
+  String? collectElementChildText() {
+    StringBuffer buffer = StringBuffer();
+    childNodes.forEach((node) {
+      if (node is TextNode) {
+        buffer.write(node.data);
+      }
+    });
+    if (buffer.isNotEmpty) {
+      return buffer.toString();
+    } else {
+      return null;
+    }
+  }
+
   // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface
   // https://www.w3.org/TR/cssom-view-1/#extension-to-the-element-interface
   @override
