@@ -109,20 +109,20 @@ typedef DartDispatchEvent = int Function(
   int isCustomEvent
 );
 
-void emitUIEvent(
-    int contextId, Pointer<NativeBindingObject> nativeBindingObject, Event event) {
-  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
-    return;
-  }
-  DartDispatchEvent dispatchEvent = nativeBindingObject.ref.dispatchEvent.asFunction();
-  Pointer<Void> rawEvent = event.toRaw().cast<Void>();
-  bool isCustomEvent = event is CustomEvent;
-  Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  // @TODO: Make Event inhert BindingObject to pass value from bridge to dart.
-  int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
-  event.propagationStopped = propagationStopped == 1 ? true : false;
-  freeNativeString(eventTypeString);
-}
+// void emitUIEvent(
+//     int contextId, Pointer<NativeBindingObject> nativeBindingObject, Event event) {
+//   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
+//     return;
+//   }
+//   DartDispatchEvent dispatchEvent = nativeBindingObject.ref.dispatchEvent.asFunction();
+//   Pointer<Void> rawEvent = event.toRaw().cast<Void>();
+//   bool isCustomEvent = event is CustomEvent;
+//   Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
+//   // @TODO: Make Event inhert BindingObject to pass value from bridge to dart.
+//   int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
+//   event.propagationStopped = propagationStopped == 1 ? true : false;
+//   freeNativeString(eventTypeString);
+// }
 
 void emitModuleEvent(
     int contextId, String moduleName, Event? event, String extra) {

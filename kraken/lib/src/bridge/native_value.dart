@@ -146,3 +146,14 @@ void toNativeValue(Pointer<NativeValue> target, value) {
     target.ref.u = str.toNativeUtf8().address;
   }
 }
+
+Pointer<NativeValue> makeNativeValueArguments(List<dynamic> args) {
+  Pointer<Pointer<NativeValue>> buffer = malloc.allocate(sizeOf<NativeValue>() * args.length).cast<Pointer<NativeValue>>();
+
+  for(int i = 0; i < args.length; i ++) {
+    buffer[i] = malloc.allocate(sizeOf<NativeValue>());
+    toNativeValue(buffer[i], args[i]);
+  }
+
+  return buffer.cast<NativeValue>();
+}

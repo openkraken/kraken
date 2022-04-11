@@ -25,7 +25,7 @@ typedef NativeAsyncAnonymousFunctionCallback = Void Function(
 typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
 // This function receive calling from binding side.
-void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue> returnValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+void _invokeBindingMethodFromNativeImpl(Pointer<NativeBindingObject> nativeBindingObject, Pointer<NativeValue> returnValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
@@ -64,7 +64,7 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
     toNativeValue(returnValue, null);
   } else {
     // @TODO: Should not share the same binding method, and separate by magic.
-    BindingObject bindingObject = BindingBridge.getBindingObject(nativeBindingObject.cast<NativeBindingObject>());
+    BindingObject bindingObject = BindingBridge.getBindingObject(nativeBindingObject);
     var result;
     try {
       if (method == GetPropertyMagic && argc == 1) {
@@ -83,18 +83,37 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
   }
 }
 
+List prepareDispatchEventArguments(Event event) {
+  Pointer<Void> rawEvent = event.toRaw().cast<Void>();
+  bool isCustomEvent = event is CustomEvent;
+  return [event.type, rawEvent, isCustomEvent ? 1 : 0];
+}
+
 // Dispatch the event to the binding side.
-void _dispatchBindingEvent(Event event) {
+void _dispatchEventToNative(Event event) {
   Pointer<NativeBindingObject>? pointer = event.currentTarget?.pointer;
   int? contextId = event.target?.contextId;
   if (contextId != null && pointer != null) {
-    emitUIEvent(contextId, pointer, event);
+    // Call methods implements at C++ side.
+    DartInvokeBindingMethodsFromDart f = pointer.ref.invokeBindingMethodFromDart.asFunction();
+
+    List dispatchEventArguments = prepareDispatchEventArguments(event);
+    Pointer<NativeString> method = stringToNativeString('dispatchEvent');
+    Pointer<NativeValue> allocatedNativeArguments = makeNativeValueArguments(dispatchEventArguments);
+
+    f(pointer, nullptr, method, dispatchEventArguments.length, allocatedNativeArguments);
+
+    // Free the allocated arguments.
+    malloc.free(method);
+    malloc.free(allocatedNativeArguments);
+
+
   }
 }
 
 abstract class BindingBridge {
-  static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod = Pointer.fromFunction(_invokeBindingMethod);
-  static  Pointer<NativeFunction<NativeInvokeBindingMethod>> get nativeInvokeBindingMethod => _nativeInvokeBindingMethod;
+  static final Pointer<NativeFunction<InvokeBindingsMethodsFromNative>> _invokeBindingMethodFromNative = Pointer.fromFunction(_invokeBindingMethodFromNativeImpl);
+  static Pointer<NativeFunction<InvokeBindingsMethodsFromNative>> get nativeInvokeBindingMethod => _invokeBindingMethodFromNative;
 
   static final SplayTreeMap<int, BindingObject> _nativeObjects = SplayTreeMap();
 
@@ -107,28 +126,18 @@ abstract class BindingBridge {
   }
 
   static void _bindObject(BindingObject object) {
-    Pointer? nativeBindingObject = castToType<Pointer?>(object.pointer);
+    Pointer<NativeBindingObject>? nativeBindingObject = object.pointer;
     if (nativeBindingObject != null) {
       _nativeObjects[nativeBindingObject.address] = object;
-      if (nativeBindingObject is Pointer<NativeBindingObject>) {
-        nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
-      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>) {
-        // @TODO: Remove it.
-        nativeBindingObject.ref.invokeBindingMethod = _nativeInvokeBindingMethod;
-      }
+      nativeBindingObject.ref.invokeBindingMethodFromNative = _invokeBindingMethodFromNative;
     }
   }
 
   static void _unbindObject(BindingObject object) {
-    Pointer? nativeBindingObject = castToType<Pointer?>(object.pointer);
+    Pointer<NativeBindingObject>? nativeBindingObject = object.pointer;
     if (nativeBindingObject != null) {
       _nativeObjects.remove(nativeBindingObject.address);
-      if (nativeBindingObject is Pointer<NativeBindingObject>) {
-        nativeBindingObject.ref.invokeBindingMethod = nullptr;
-      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>)  {
-        // @TODO: Remove it.
-        nativeBindingObject.ref.invokeBindingMethod = nullptr;
-      }
+      nativeBindingObject.ref.invokeBindingMethodFromNative = nullptr;
     }
   }
 
@@ -143,10 +152,10 @@ abstract class BindingBridge {
   }
 
   static void listenEvent(EventTarget target, String type) {
-    target.addEventListener(type, _dispatchBindingEvent);
+    target.addEventListener(type, _dispatchEventToNative);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
-    target.removeEventListener(type, _dispatchBindingEvent);
+    target.removeEventListener(type, _dispatchEventToNative);
   }
 }

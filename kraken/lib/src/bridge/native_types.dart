@@ -86,6 +86,7 @@ class RawNativeMessageEvent extends Struct {
   @Int64()
   external int length;
 }
+
 //
 class RawNativeCustomEvent extends Struct {
 // Raw bytes represent the following fields.
@@ -271,25 +272,21 @@ class NativeBoundingClientRect extends Struct {
   external double left;
 }
 
+// using InvokeNativeBindingMethod =
+// void (*)(NativeBindingObject* binding_object, NativeValue* return_value, NativeString* method, int32_t argc, NativeValue* argv);
 
-typedef NativeDispatchEvent = Int32 Function(
-    Int32 contextId,
-    Pointer<NativeBindingObject> nativeBindingObject,
-    Pointer<NativeString> eventType,
-    Pointer<Void> nativeEvent,
-    Int32 isCustomEvent);
-typedef NativeInvokeBindingMethod = Void Function(
-    Pointer<Void> nativePtr,
-    Pointer<NativeValue> returnValue,
-    Pointer<NativeString> method,
-    Int32 argc,
-    Pointer<NativeValue> argv);
+typedef InvokeBindingsMethodsFromNative = Void Function(Pointer<NativeBindingObject> binding_object,
+    Pointer<NativeValue> return_value, Pointer<NativeString> method, Int32 argc, Pointer<NativeValue> argv);
+typedef InvokeBindingMethodsFromDart = Void Function(Pointer<NativeBindingObject> binding_object,
+    Pointer<NativeValue> return_value, Pointer<NativeString> method, Int32 argc, Pointer<NativeValue> argv);
+typedef DartInvokeBindingMethodsFromDart = void Function(Pointer<NativeBindingObject> binding_object,
+    Pointer<NativeValue> return_value, Pointer<NativeString> method, int argc, Pointer<NativeValue> argv);
 
 class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
-  external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
+  external Pointer<NativeFunction<InvokeBindingMethodsFromDart>> invokeBindingMethodFromDart;
   // Shared method called by JS side.
-  external Pointer<NativeFunction> invokeBindingMethod;
+  external Pointer<NativeFunction<InvokeBindingsMethodsFromNative>> invokeBindingMethodFromNative;
 }
 
 class NativeCanvasRenderingContext2D extends Struct {
