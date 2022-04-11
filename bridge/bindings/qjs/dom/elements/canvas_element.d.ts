@@ -47,6 +47,7 @@ interface CanvasRenderingContext2D extends HostObject {
   setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
   transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
   translate(x: number, y: number): void;
+  reset(): void;
 }
 
 interface CanvasElement extends Element {
