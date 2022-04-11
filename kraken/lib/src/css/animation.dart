@@ -122,8 +122,6 @@ class AnimationTimeline {
   }
 }
 
-AnimationTimeline _documentTimeline = AnimationTimeline();
-
 class Animation {
   double? _startTime;
   double _currentTime = 0;
@@ -154,12 +152,8 @@ class Animation {
   // For transitionstart event
   Function? onstart;
 
-  Animation(KeyframeEffect effect, [AnimationTimeline? timeline]) {
-    if (timeline == null) {
-      _timeline = _documentTimeline;
-    }
-    _effect = effect;
-  }
+  Animation(KeyframeEffect effect, AnimationTimeline timeline)
+      : _effect = effect, _timeline = timeline;
 
   void _setInEffect(bool flag) {
     if (_inEffect == false && flag == true && onstart != null) {

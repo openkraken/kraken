@@ -11,12 +11,12 @@ import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/element_registry.dart' as element_registry;
 import 'package:kraken/widget.dart';
 
-
 class Document extends Node {
   final KrakenController controller;
   RenderViewportBox? _viewport;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
+  final AnimationTimeline animationTimeline = AnimationTimeline();
 
   Document(context, {
     required this.controller,

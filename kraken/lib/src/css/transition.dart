@@ -342,7 +342,7 @@ mixin CSSTransitionMixin on RenderStyle {
       Keyframe(propertyName, end, 1, LINEAR),
     ];
     KeyframeEffect effect = KeyframeEffect(this, target, keyframes, options);
-    Animation animation = Animation(effect);
+    Animation animation = Animation(effect, target.ownerDocument.animationTimeline);
     _propertyRunningTransition[propertyName] = animation;
 
     animation.onstart = () {
