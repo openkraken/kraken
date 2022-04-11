@@ -3,7 +3,6 @@
  */
 
 require('./tasks');
-
 const { series } = require('gulp');
 const chalk = require('chalk');
 
@@ -13,6 +12,7 @@ series(
   'android-so-clean',
   'compile-polyfill',
   'build-android-kraken-lib',
+  'build-benchmark-app',
   'run-benchmark'
 )(() => {
   console.log(chalk.green('Test Success.'));

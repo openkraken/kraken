@@ -86,6 +86,10 @@ class CanvasPainter extends CustomPainter {
     _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
     // Dispose the used picture.
     picture.dispose();
+    // Clear actions after snapshot was created, or next frame call may empty.
+    if (_shouldPainting) {
+      context!.clearActions();
+    }
   }
 
   @override
