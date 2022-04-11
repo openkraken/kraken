@@ -193,7 +193,6 @@ class InspectCSSModule extends UIInspectorModule {
   static List<CSSComputedStyleProperty> buildComputedStyle(Element element) {
     List<CSSComputedStyleProperty> computedStyle = [];
     CSSStyleDeclaration style = element.style;
-    RenderStyle? renderStyle = element.renderStyle;
 
     for (int i = 0; i < style.length; i++) {
       String propertyName = style.item(i);
@@ -203,11 +202,10 @@ class InspectCSSModule extends UIInspectorModule {
       if (CSSLength.isLength(propertyValue)) {
         CSSLengthValue? len = CSSLength.resolveLength(
           propertyValue,
-          renderStyle,
           propertyName,
         );
 
-        propertyValue = len == null ? '0' : '${len.computedValue}${_resolveCSSLengthType(len.type)}';
+        propertyValue = len == null ? '0' : '${len.compute(element.renderStyle)}${_resolveCSSLengthType(len.type)}';
       }
 
       if (propertyName == DISPLAY) {

@@ -483,9 +483,9 @@ mixin CSSTextMixin on RenderStyle {
       fontWeight: renderStyle.fontWeight,
       fontStyle: renderStyle.fontStyle,
       fontFamilyFallback: renderStyle.fontFamily,
-      fontSize: renderStyle.fontSize.computedValue,
-      letterSpacing: renderStyle.letterSpacing?.computedValue,
-      wordSpacing: renderStyle.wordSpacing?.computedValue,
+      fontSize: renderStyle.fontSize.compute(renderStyle),
+      letterSpacing: renderStyle.letterSpacing?.compute(renderStyle),
+      wordSpacing: renderStyle.wordSpacing?.compute(renderStyle),
       shadows: renderStyle.textShadow,
       textBaseline: CSSText.getTextBaseLine(),
       package: CSSText.getFontPackage(),
@@ -533,9 +533,9 @@ class CSSText {
   static CSSLengthValue? resolveLineHeight(String value, RenderStyle renderStyle, String propertyName) {
     if (value.isNotEmpty) {
       if (CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value)) {
-        CSSLengthValue lineHeight = CSSLength.parseLength(value, renderStyle, propertyName);
+        CSSLengthValue lineHeight = CSSLength.parseLength(value, propertyName);
         // Line-height 0 and negative value is considered invalid.
-        if (lineHeight.computedValue != double.infinity && lineHeight.computedValue > 0) {
+        if (lineHeight.compute(renderStyle) != double.infinity && lineHeight.compute(renderStyle) > 0) {
           return lineHeight;
         }
       } else if (value == NORMAL) {
@@ -543,7 +543,7 @@ class CSSText {
       } else if (CSSNumber.isNumber(value)){
         double? multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null) {
-          return CSSLengthValue(multipliedNumber, CSSLengthType.EM, renderStyle, propertyName);
+          return CSSLengthValue(multipliedNumber, CSSLengthType.EM, propertyName);
         }
       }
     }
@@ -742,7 +742,7 @@ class CSSText {
   static CSSLengthValue resolveSpacing(String spacing, RenderStyle renderStyle, String property) {
     if (spacing == NORMAL) return CSSLengthValue.zero;
 
-    return CSSLength.parseLength(spacing, renderStyle, property);
+    return CSSLength.parseLength(spacing, property);
   }
 
   static Locale? getLocale() {
@@ -769,12 +769,12 @@ class CSSText {
         String shadowColor = shadowDefinitions[0] ?? CURRENT_COLOR;
         // Specifies the color of the shadow. If the color is absent, it defaults to currentColor.
         Color? color = CSSColor.resolveColor(shadowColor, renderStyle, propertyName);
-        double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, renderStyle, propertyName).computedValue;
-        double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, propertyName).computedValue;
+        double offsetX = CSSLength.parseLength(shadowDefinitions[1]!, propertyName).compute(renderStyle);
+        double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, propertyName).compute(renderStyle);
         String? blurRadiusStr = shadowDefinitions[3];
         // Blur-radius defaults to 0 if not specified.
         double blurRadius = blurRadiusStr != null ?
-          CSSLength.parseLength(blurRadiusStr, renderStyle, propertyName).computedValue : 0;
+          CSSLength.parseLength(blurRadiusStr, propertyName).compute(renderStyle) : 0;
         if (color != null) {
           textShadows.add(Shadow(
             offset: Offset(offsetX, offsetY),

@@ -46,17 +46,17 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
     RenderStyle renderStyle = renderReplaced.renderStyle;
 
     double intrinsicHeight = (child as RenderEditable).preferredLineHeight
-      + renderStyle.paddingTop.computedValue + renderStyle.paddingBottom.computedValue
-      + renderStyle.effectiveBorderTopWidth.computedValue + renderStyle.effectiveBorderBottomWidth.computedValue;
+      + renderStyle.paddingTop.compute(renderStyle) + renderStyle.paddingBottom.compute(renderStyle)
+      + renderStyle.effectiveBorderTopWidth.compute(renderStyle) + renderStyle.effectiveBorderBottomWidth.compute(renderStyle);
 
     // Editable area should align to the center vertically for text control element which
     // does not support multiline editing.
     double dy;
-    if (renderStyle.height.isNotAuto) {
-      dy = (renderStyle.height.computedValue - intrinsicHeight) / 2;
+    if (renderStyle.height.isNotAuto(renderStyle)) {
+      dy = (renderStyle.height.compute(renderStyle) - intrinsicHeight) / 2;
     } else if (renderStyle.lineHeight.type != CSSLengthType.NORMAL &&
-      renderStyle.lineHeight.computedValue > intrinsicHeight) {
-      dy = (renderStyle.lineHeight.computedValue - intrinsicHeight) /2;
+      renderStyle.lineHeight.compute(renderStyle) > intrinsicHeight) {
+      dy = (renderStyle.lineHeight.compute(renderStyle) - intrinsicHeight) /2;
     } else {
       dy = 0;
     }
@@ -86,7 +86,7 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
       if (constraints.maxHeight != double.infinity) {
         height = constraints.maxHeight;
       } else  {
-        height = math.max(renderStyle.lineHeight.computedValue, childSize.height);
+        height = math.max(renderStyle.lineHeight.compute(renderStyle), childSize.height);
       }
 
       size = Size(width, height);

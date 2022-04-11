@@ -172,7 +172,10 @@ abstract class RenderStyle {
 
   Size get viewportSize => target.ownerDocument.viewport!.viewportSize;
 
-  double get rootFontSize => target.ownerDocument.documentElement!.renderStyle.fontSize.computedValue;
+  double get rootFontSize {
+    RenderStyle rootRenderStyle = target.ownerDocument.documentElement!.renderStyle;
+    return rootRenderStyle.fontSize.compute(rootRenderStyle);
+  }
 
   void visitChildren<T extends RenderStyle>(RenderStyleVisitor<T> visitor);
 }
@@ -438,7 +441,7 @@ class CSSRenderStyle
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
       case FONT_SIZE:
-        value = CSSLength.resolveLength(propertyValue, renderStyle, propertyName);
+        value = CSSLength.resolveLength(propertyValue, propertyName);
         break;
       case FLEX_DIRECTION:
         value = CSSFlexboxMixin.resolveFlexDirection(propertyValue);
@@ -522,7 +525,7 @@ class CSSRenderStyle
       case BORDER_TOP_RIGHT_RADIUS:
       case BORDER_BOTTOM_LEFT_RADIUS:
       case BORDER_BOTTOM_RIGHT_RADIUS:
-        value = CSSBorderRadius.parseBorderRadius(propertyValue, renderStyle, propertyName);
+        value = CSSBorderRadius.parseBorderRadius(propertyValue, propertyName);
         break;
       case OPACITY:
         value = CSSOpacityMixin.resolveOpacity(propertyValue);
@@ -619,8 +622,8 @@ class CSSRenderStyle
       case CSSDisplay.flex:
       case CSSDisplay.sliver:
         //  Use width directly if defined.
-        if (renderStyle.width.isNotAuto) {
-          logicalWidth = renderStyle.width.computedValue;
+        if (renderStyle.width.isNotAuto(renderStyle)) {
+          logicalWidth = renderStyle.width.compute(renderStyle);
         } else if (renderStyle.parent != null) {
           RenderStyle parentRenderStyle = renderStyle.parent!;
           RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
@@ -642,17 +645,17 @@ class CSSRenderStyle
         break;
       case CSSDisplay.inlineBlock:
       case CSSDisplay.inlineFlex:
-        if (renderStyle.width.isNotAuto) {
-          logicalWidth = renderStyle.width.computedValue;
+        if (renderStyle.width.isNotAuto(renderStyle)) {
+          logicalWidth = renderStyle.width.compute(renderStyle);
 
         // The width of positioned, non-replaced element is determined as following algorithm.
         // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
         } else if ((renderStyle.position == CSSPositionType.absolute ||
           renderStyle.position == CSSPositionType.fixed)
           && current is! RenderReplaced
-          && renderStyle.width.isAuto
-          && renderStyle.left.isNotAuto
-          && renderStyle.right.isNotAuto
+          && renderStyle.width.isAuto(renderStyle)
+          && renderStyle.left.isNotAuto(renderStyle)
+          && renderStyle.right.isNotAuto(renderStyle)
         ) {
           if (current.parent is! RenderBoxModel) {
             logicalWidth = null;
@@ -667,8 +670,8 @@ class CSSRenderStyle
             : parent.renderStyle;
           // Width of positioned element should subtract its horizontal margin.
           logicalWidth = (parentRenderStyle.paddingBoxLogicalWidth ?? 0)
-            - renderStyle.left.computedValue - renderStyle.right.computedValue
-            - renderStyle.marginLeft.computedValue - renderStyle.marginRight.computedValue;
+            - renderStyle.left.compute(renderStyle) - renderStyle.right.compute(renderStyle)
+            - renderStyle.marginLeft.compute(renderStyle) - renderStyle.marginRight.compute(renderStyle);
 
         } else if (current.hasSize && current.constraints.hasTightWidth) {
           logicalWidth = current.constraints.maxWidth;
@@ -686,14 +689,14 @@ class CSSRenderStyle
     }
 
     // Constrain width by min-width and max-width.
-    if (renderStyle.minWidth.isNotAuto) {
-      double minWidth = renderStyle.minWidth.computedValue;
+    if (renderStyle.minWidth.isNotAuto(renderStyle)) {
+      double minWidth = renderStyle.minWidth.compute(renderStyle);
       if (logicalWidth != null && logicalWidth < minWidth) {
         logicalWidth = minWidth;
       }
     }
     if (renderStyle.maxWidth.isNotNone) {
-      double maxWidth = renderStyle.maxWidth.computedValue;
+      double maxWidth = renderStyle.maxWidth.compute(renderStyle);
       if (logicalWidth != null && logicalWidth > maxWidth) {
         logicalWidth = maxWidth;
       }
@@ -723,17 +726,17 @@ class CSSRenderStyle
 
     // Inline element has no height.
     if (effectiveDisplay != CSSDisplay.inline) {
-      if (renderStyle.height.isNotAuto) {
-        logicalHeight = renderStyle.height.computedValue;
+      if (renderStyle.height.isNotAuto(renderStyle)) {
+        logicalHeight = renderStyle.height.compute(renderStyle);
 
       // The height of positioned, non-replaced element is determined as following algorithm.
       // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
       } else if ((renderStyle.position == CSSPositionType.absolute ||
         renderStyle.position == CSSPositionType.fixed)
         && current is! RenderReplaced
-        && renderStyle.height.isAuto
-        && renderStyle.top.isNotAuto
-        && renderStyle.bottom.isNotAuto
+        && renderStyle.height.isAuto(renderStyle)
+        && renderStyle.top.isNotAuto(renderStyle)
+        && renderStyle.bottom.isNotAuto(renderStyle)
       ) {
         if (current.parent is! RenderBoxModel) {
           logicalHeight = null;
@@ -748,8 +751,8 @@ class CSSRenderStyle
           : parent.renderStyle;
         // Height of positioned element should subtract its vertical margin.
         logicalHeight = (parentRenderStyle.paddingBoxLogicalHeight ?? 0)
-          - renderStyle.top.computedValue - renderStyle.bottom.computedValue
-          - renderStyle.marginTop.computedValue - renderStyle.marginBottom.computedValue;
+          - renderStyle.top.compute(renderStyle) - renderStyle.bottom.compute(renderStyle)
+          - renderStyle.marginTop.compute(renderStyle) - renderStyle.marginBottom.compute(renderStyle);
 
       } else {
         if (renderStyle.parent != null) {
@@ -772,14 +775,14 @@ class CSSRenderStyle
     }
 
     // Constrain height by min-height and max-height.
-    if (renderStyle.minHeight.isNotAuto) {
-      double minHeight = renderStyle.minHeight.computedValue;
+    if (renderStyle.minHeight.isNotAuto(renderStyle)) {
+      double minHeight = renderStyle.minHeight.compute(renderStyle);
       if (logicalHeight != null && logicalHeight < minHeight) {
         logicalHeight = minHeight;
       }
     }
     if (renderStyle.maxHeight.isNotNone) {
-      double maxHeight = renderStyle.maxHeight.computedValue;
+      double maxHeight = renderStyle.maxHeight.compute(renderStyle);
       if (logicalHeight != null && logicalHeight > maxHeight) {
         logicalHeight = maxHeight;
       }
@@ -836,7 +839,7 @@ class CSSRenderStyle
     CSSLengthValue marginBottom = renderStyle.marginBottom;
 
     // Display as block if flex vertical layout children and stretch children
-    if (marginTop.isNotAuto && marginBottom.isNotAuto &&
+    if (marginTop.isNotAuto(renderStyle) && marginBottom.isNotAuto(renderStyle) &&
       isParentFlex && isHorizontalDirection && isFlexNoWrap && isChildStretchSelf) {
       isStretch = true;
     }
@@ -928,8 +931,8 @@ class CSSRenderStyle
       return null;
     }
     return contentBoxLogicalWidth!
-      + paddingLeft.computedValue
-      + paddingRight.computedValue;
+      + paddingLeft.compute(this)
+      + paddingRight.compute(this);
   }
 
   // Padding box height calculated from renderStyle tree.
@@ -940,8 +943,8 @@ class CSSRenderStyle
       return null;
     }
     return contentBoxLogicalHeight!
-      + paddingTop.computedValue
-      + paddingBottom.computedValue;
+      + paddingTop.compute(this)
+      + paddingBottom.compute(this);
   }
 
   // Border box width calculated from renderStyle tree.
@@ -952,8 +955,8 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxLogicalWidth!
-      + effectiveBorderLeftWidth.computedValue
-      + effectiveBorderRightWidth.computedValue;
+      + effectiveBorderLeftWidth.compute(this)
+      + effectiveBorderRightWidth.compute(this);
   }
 
   // Border box height calculated from renderStyle tree.
@@ -964,8 +967,8 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxLogicalHeight!
-      + effectiveBorderTopWidth.computedValue
-      + effectiveBorderBottomWidth.computedValue;
+      + effectiveBorderTopWidth.compute(this)
+      + effectiveBorderBottomWidth.compute(this);
   }
 
   // Border box width of renderBoxModel after it was rendered.
@@ -996,8 +999,8 @@ class CSSRenderStyle
       return null;
     }
     return borderBoxWidth!
-      - effectiveBorderLeftWidth.computedValue
-      - effectiveBorderRightWidth.computedValue;
+      - effectiveBorderLeftWidth.compute(this)
+      - effectiveBorderRightWidth.compute(this);
   }
 
   // Padding box height of renderBoxModel after it was rendered.
@@ -1008,8 +1011,8 @@ class CSSRenderStyle
       return null;
     }
     return borderBoxHeight!
-      - effectiveBorderTopWidth.computedValue
-      - effectiveBorderBottomWidth.computedValue;
+      - effectiveBorderTopWidth.compute(this)
+      - effectiveBorderBottomWidth.compute(this);
   }
 
   // Content box width of renderBoxModel after it was rendered.
@@ -1020,8 +1023,8 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxWidth!
-      - paddingLeft.computedValue
-      - paddingRight.computedValue;
+      - paddingLeft.compute(this)
+      - paddingRight.compute(this);
   }
 
   // Content box height of renderBoxModel after it was rendered.
@@ -1032,21 +1035,21 @@ class CSSRenderStyle
       return null;
     }
     return paddingBoxHeight!
-      - paddingTop.computedValue
-      - paddingBottom.computedValue;
+      - paddingTop.compute(this)
+      - paddingBottom.compute(this);
   }
 
   // Get height of replaced element by intrinsic ratio if height is not defined.
   @override
   double getHeightByIntrinsicRatio() {
     double contentBoxHeight;
-    double borderBoxWidth = width.isAuto
-      ? wrapPaddingBorderWidth(intrinsicWidth) : width.computedValue;
-    if (minWidth.isNotAuto && borderBoxWidth < minWidth.computedValue) {
-      borderBoxWidth = minWidth.computedValue;
+    double borderBoxWidth = width.isAuto(this)
+      ? wrapPaddingBorderWidth(intrinsicWidth) : width.compute(this);
+    if (minWidth.isNotAuto(this) && borderBoxWidth < minWidth.compute(this)) {
+      borderBoxWidth = minWidth.compute(this);
     }
-    if (maxWidth.isNotNone && borderBoxWidth > maxWidth.computedValue) {
-      borderBoxWidth = maxWidth.computedValue;
+    if (maxWidth.isNotNone && borderBoxWidth > maxWidth.compute(this)) {
+      borderBoxWidth = maxWidth.compute(this);
     }
 
     if (borderBoxWidth != 0 && intrinsicWidth != 0) {
@@ -1054,11 +1057,11 @@ class CSSRenderStyle
       contentBoxHeight = contentBoxWidth * intrinsicHeight / intrinsicWidth;
     } else {
       contentBoxHeight = intrinsicHeight;
-      if (!minHeight.isAuto && contentBoxHeight < minHeight.computedValue) {
-        contentBoxHeight = minHeight.computedValue;
+      if (!minHeight.isAuto(this) && contentBoxHeight < minHeight.compute(this)) {
+        contentBoxHeight = minHeight.compute(this);
       }
-      if (!maxHeight.isNone && contentBoxHeight > maxHeight.computedValue) {
-        contentBoxHeight = maxHeight.computedValue;
+      if (!maxHeight.isNone && contentBoxHeight > maxHeight.compute(this)) {
+        contentBoxHeight = maxHeight.compute(this);
       }
     }
 
@@ -1072,13 +1075,13 @@ class CSSRenderStyle
   double getWidthByIntrinsicRatio() {
     double contentBoxWidth;
 
-    double borderBoxHeight = height.isAuto
-      ? wrapPaddingBorderHeight(intrinsicHeight) : height.computedValue;
-    if (!minHeight.isAuto && borderBoxHeight < minHeight.computedValue) {
-      borderBoxHeight = minHeight.computedValue;
+    double borderBoxHeight = height.isAuto(this)
+      ? wrapPaddingBorderHeight(intrinsicHeight) : height.compute(this);
+    if (!minHeight.isAuto(this) && borderBoxHeight < minHeight.compute(this)) {
+      borderBoxHeight = minHeight.compute(this);
     }
-    if (!maxHeight.isNone && borderBoxHeight > maxHeight.computedValue) {
-      borderBoxHeight = maxHeight.computedValue;
+    if (!maxHeight.isNone && borderBoxHeight > maxHeight.compute(this)) {
+      borderBoxHeight = maxHeight.compute(this);
     }
 
     if (borderBoxHeight != 0 && intrinsicHeight != 0) {
@@ -1086,11 +1089,11 @@ class CSSRenderStyle
       contentBoxWidth = contentBoxHeight * intrinsicWidth / intrinsicHeight;
     } else {
       contentBoxWidth = intrinsicWidth;
-      if (minWidth.isNotAuto && contentBoxWidth < minWidth.computedValue) {
-        contentBoxWidth = minWidth.computedValue;
+      if (minWidth.isNotAuto(this) && contentBoxWidth < minWidth.compute(this)) {
+        contentBoxWidth = minWidth.compute(this);
       }
-      if (maxWidth.isNotNone && contentBoxWidth > maxWidth.computedValue) {
-        contentBoxWidth = maxWidth.computedValue;
+      if (maxWidth.isNotNone && contentBoxWidth > maxWidth.compute(this)) {
+        contentBoxWidth = maxWidth.compute(this);
       }
     }
 
@@ -1166,8 +1169,8 @@ class CSSRenderStyle
   // Add padding and border to content-box height to get border-box height.
   double wrapPaddingBorderHeight(double contentBoxHeight) {
     return contentBoxHeight
-      + paddingTop.computedValue
-      + paddingBottom.computedValue
+      + paddingTop.compute(this)
+      + paddingBottom.compute(this)
       + border.top
       + border.bottom;
   }
@@ -1175,8 +1178,8 @@ class CSSRenderStyle
   // Add padding and border to content-box width to get border-box width.
   double wrapPaddingBorderWidth(double contentBoxWidth) {
     return contentBoxWidth
-      + paddingLeft.computedValue
-      + paddingRight.computedValue
+      + paddingLeft.compute(this)
+      + paddingRight.compute(this)
       + border.left
       + border.right;
   }
@@ -1184,8 +1187,8 @@ class CSSRenderStyle
   // Subtract padding and border to border-box height to get content-box height.
   double deflatePaddingBorderHeight(double borderBoxHeight) {
     return borderBoxHeight
-      - paddingTop.computedValue
-      - paddingBottom.computedValue
+      - paddingTop.compute(this)
+      - paddingBottom.compute(this)
       - border.top
       - border.bottom;
   }
@@ -1193,8 +1196,8 @@ class CSSRenderStyle
   // Subtract padding and border to border-box width to get content-box width.
   double deflatePaddingBorderWidth(double borderBoxWidth) {
     return borderBoxWidth
-      - paddingLeft.computedValue
-      - paddingRight.computedValue
+      - paddingLeft.compute(this)
+      - paddingRight.compute(this)
       - border.left
       - border.right;
   }

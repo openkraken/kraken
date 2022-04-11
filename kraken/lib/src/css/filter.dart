@@ -142,8 +142,8 @@ mixin CSSFilterEffectsMixin on RenderStyle {
         CSSFunctionalNotation f = functions[i];
         switch (f.name.toLowerCase()) {
           case BLUR:
-            CSSLengthValue length = CSSLength.parseLength(f.args.first, this, FILTER);
-            double amount = length.computedValue;
+            CSSLengthValue length = CSSLength.parseLength(f.args.first, FILTER);
+            double amount = length.compute(this);
             ImageFilter imageFilter =  ImageFilter.blur(sigmaX: amount, sigmaY: amount);
             // Only length is not relative value will cached the image filter.
             if (length.type == CSSLengthType.PX) {

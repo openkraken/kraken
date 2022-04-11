@@ -370,7 +370,7 @@ class RenderLayoutBox extends RenderBoxModel
     // Flex basis takes priority over main size in flex item when flex-grow or flex-shrink not work.
     if (parent is RenderFlexLayout) {
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
-      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.computedValue;
+      double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto ? null : renderStyle.flexBasis?.compute(renderStyle);
       if (flexBasis != null) {
         if (CSSFlex.isHorizontalFlexDirection(
             parentRenderBoxModel!.renderStyle.flexDirection)) {
@@ -395,12 +395,12 @@ class RenderLayoutBox extends RenderBoxModel
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isInlineBlock = effectiveDisplay == CSSDisplay.inlineBlock;
     bool isNotInline = effectiveDisplay != CSSDisplay.inline;
-    double? width = renderStyle.width.isAuto ? null : renderStyle.width.computedValue;
-    double? height = renderStyle.height.isAuto ? null : renderStyle.height.computedValue;
-    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
-    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
-    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
-    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
+    double? width = renderStyle.width.isAuto(renderStyle) ? null : renderStyle.width.compute(renderStyle);
+    double? height = renderStyle.height.isAuto(renderStyle) ? null : renderStyle.height.compute(renderStyle);
+    double? minWidth = renderStyle.minWidth.isAuto(renderStyle) ? null : renderStyle.minWidth.compute(renderStyle);
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.compute(renderStyle);
+    double? minHeight = renderStyle.minHeight.isAuto(renderStyle) ? null : renderStyle.minHeight.compute(renderStyle);
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.compute(renderStyle);
 
     // Constrain to min-width or max-width if width not exists.
     if (isInlineBlock && maxWidth != null && width == null) {
@@ -438,48 +438,48 @@ class RenderLayoutBox extends RenderBoxModel
     } else {
       childScrollableSize = child.boxSize;
     }
-    double maxScrollableX = childRenderStyle.left.computedValue + childScrollableSize!.width;
+    double maxScrollableX = childRenderStyle.left.compute(childRenderStyle) + childScrollableSize!.width;
 
-    if (childRenderStyle.right.isNotAuto) {
+    if (childRenderStyle.right.isNotAuto(childRenderStyle)) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).widthSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
         maxScrollableX = math.max(
             maxScrollableX,
-            -childRenderStyle.right.computedValue +
-                overflowContainerBox.renderStyle.width.computedValue -
-                overflowContainerBox.renderStyle.effectiveBorderLeftWidth.computedValue -
-                overflowContainerBox.renderStyle.effectiveBorderRightWidth.computedValue);
+            - childRenderStyle.right.compute(childRenderStyle) +
+                overflowContainerBox.renderStyle.width.compute(overflowContainerBox.renderStyle) -
+                overflowContainerBox.renderStyle.effectiveBorderLeftWidth.compute(overflowContainerBox.renderStyle) -
+                overflowContainerBox.renderStyle.effectiveBorderRightWidth.compute(overflowContainerBox.renderStyle));
       } else {
         maxScrollableX = math.max(maxScrollableX,
-            -childRenderStyle.right.computedValue + _contentSize!.width);
+            - childRenderStyle.right.compute(childRenderStyle) + _contentSize!.width);
       }
     }
 
-    double maxScrollableY = childRenderStyle.top.computedValue + childScrollableSize.height;
-    if (childRenderStyle.bottom.isNotAuto) {
+    double maxScrollableY = childRenderStyle.top.compute(childRenderStyle) + childScrollableSize.height;
+    if (childRenderStyle.bottom.isNotAuto(childRenderStyle)) {
       if (isScrollingContentBox &&
           (parent as RenderBoxModel).heightSizeType == BoxSizeType.specified) {
         RenderBoxModel overflowContainerBox = parent as RenderBoxModel;
         maxScrollableY = math.max(
             maxScrollableY,
-            -childRenderStyle.bottom.computedValue +
-                overflowContainerBox.renderStyle.height.computedValue -
-                overflowContainerBox.renderStyle.effectiveBorderTopWidth.computedValue -
-                overflowContainerBox.renderStyle.effectiveBorderBottomWidth.computedValue);
+            - childRenderStyle.bottom.compute(childRenderStyle) +
+                overflowContainerBox.renderStyle.height.compute(overflowContainerBox.renderStyle) -
+                overflowContainerBox.renderStyle.effectiveBorderTopWidth.compute(overflowContainerBox.renderStyle) -
+                overflowContainerBox.renderStyle.effectiveBorderBottomWidth.compute(overflowContainerBox.renderStyle));
       } else {
         maxScrollableY = math.max(maxScrollableY,
-            -childRenderStyle.bottom.computedValue + _contentSize!.height);
+            - childRenderStyle.bottom.compute(childRenderStyle) + _contentSize!.height);
       }
     }
 
     RenderBoxModel scrollContainer = isScrollingContentBox
       ? parent as RenderBoxModel : this;
     // Scrollable area of positioned element will ignore padding area of scroll container.
-    maxScrollableX -= scrollContainer.renderStyle.paddingLeft.computedValue
-      + scrollContainer.renderStyle.paddingRight.computedValue;
-    maxScrollableY -= scrollContainer.renderStyle.paddingTop.computedValue
-      + scrollContainer.renderStyle.paddingBottom.computedValue;
+    maxScrollableX -= scrollContainer.renderStyle.paddingLeft.compute(scrollContainer.renderStyle)
+      + scrollContainer.renderStyle.paddingRight.compute(scrollContainer.renderStyle);
+    maxScrollableY -= scrollContainer.renderStyle.paddingTop.compute(scrollContainer.renderStyle)
+      + scrollContainer.renderStyle.paddingBottom.compute(scrollContainer.renderStyle);
 
     maxScrollableX = math.max(maxScrollableX, scrollableSize.width);
     maxScrollableY = math.max(maxScrollableY, scrollableSize.height);
@@ -488,17 +488,17 @@ class RenderLayoutBox extends RenderBoxModel
   }
 
   double _getContentWidth(double width) {
-    return width - (renderStyle.borderLeftWidth?.computedValue ?? 0) -
-      (renderStyle.borderRightWidth?.computedValue ?? 0) -
-      renderStyle.paddingLeft.computedValue -
-      renderStyle.paddingRight.computedValue;
+    return width - (renderStyle.borderLeftWidth?.compute(renderStyle) ?? 0) -
+      (renderStyle.borderRightWidth?.compute(renderStyle) ?? 0) -
+      renderStyle.paddingLeft.compute(renderStyle) -
+      renderStyle.paddingRight.compute(renderStyle);
   }
 
   double _getContentHeight(double height) {
-    return height - (renderStyle.borderTopWidth?.computedValue ?? 0) -
-      (renderStyle.borderBottomWidth?.computedValue ?? 0) -
-      renderStyle.paddingTop.computedValue -
-      renderStyle.paddingBottom.computedValue;
+    return height - (renderStyle.borderTopWidth?.compute(renderStyle) ?? 0) -
+      (renderStyle.borderBottomWidth?.compute(renderStyle) ?? 0) -
+      renderStyle.paddingTop.compute(renderStyle) -
+      renderStyle.paddingBottom.compute(renderStyle);
   }
 
   /// Convert to [RenderFlexLayout]
@@ -625,11 +625,11 @@ class RenderBoxModel extends RenderBox
   }
 
   BoxSizeType get widthSizeType {
-    return renderStyle.width.isAuto ? BoxSizeType.automatic : BoxSizeType.specified;
+    return renderStyle.width.isAuto(renderStyle) ? BoxSizeType.automatic : BoxSizeType.specified;
   }
 
   BoxSizeType get heightSizeType {
-    return renderStyle.height.isAuto ? BoxSizeType.automatic: BoxSizeType.specified;
+    return renderStyle.height.isAuto(renderStyle) ? BoxSizeType.automatic: BoxSizeType.specified;
   }
 
   // Cache scroll offset of scrolling box in horizontal direction
@@ -841,10 +841,10 @@ class RenderBoxModel extends RenderBox
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
     bool isDisplayInline = effectiveDisplay == CSSDisplay.inline;
 
-    double? minWidth = renderStyle.minWidth.isAuto ? null : renderStyle.minWidth.computedValue;
-    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.computedValue;
-    double? minHeight = renderStyle.minHeight.isAuto ? null : renderStyle.minHeight.computedValue;
-    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.computedValue;
+    double? minWidth = renderStyle.minWidth.isAuto(renderStyle) ? null : renderStyle.minWidth.compute(renderStyle);
+    double? maxWidth = renderStyle.maxWidth.isNone ? null : renderStyle.maxWidth.compute(renderStyle);
+    double? minHeight = renderStyle.minHeight.isAuto(renderStyle) ? null : renderStyle.minHeight.compute(renderStyle);
+    double? maxHeight = renderStyle.maxHeight.isNone ? null : renderStyle.maxHeight.compute(renderStyle);
 
     // Need to calculated logic content size on every layout.
     renderStyle.computeContentBoxLogicalWidth();
@@ -852,22 +852,22 @@ class RenderBoxModel extends RenderBox
 
     // Width should be not smaller than border and padding in horizontal direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintWidth = renderStyle.effectiveBorderLeftWidth.computedValue
-      + renderStyle.effectiveBorderRightWidth.computedValue
-      + renderStyle.paddingLeft.computedValue
-      + renderStyle.paddingRight.computedValue;
+    double minConstraintWidth = renderStyle.effectiveBorderLeftWidth.compute(renderStyle)
+      + renderStyle.effectiveBorderRightWidth.compute(renderStyle)
+      + renderStyle.paddingLeft.compute(renderStyle)
+      + renderStyle.paddingRight.compute(renderStyle);
     double maxConstraintWidth = renderStyle.borderBoxLogicalWidth ?? double.infinity;
     // Height should be not smaller than border and padding in vertical direction
     // when box-sizing is border-box which is only supported.
-    double minConstraintHeight = renderStyle.effectiveBorderTopWidth.computedValue
-      + renderStyle.effectiveBorderBottomWidth.computedValue
-      + renderStyle.paddingTop.computedValue
-      + renderStyle.paddingBottom.computedValue;
+    double minConstraintHeight = renderStyle.effectiveBorderTopWidth.compute(renderStyle)
+      + renderStyle.effectiveBorderBottomWidth.compute(renderStyle)
+      + renderStyle.paddingTop.compute(renderStyle)
+      + renderStyle.paddingBottom.compute(renderStyle);
     double maxConstraintHeight = renderStyle.borderBoxLogicalHeight ?? double.infinity;
 
     if (parent is RenderFlexLayout) {
       double? flexBasis = renderStyle.flexBasis == CSSLengthValue.auto
-        ? null : renderStyle.flexBasis?.computedValue;
+        ? null : renderStyle.flexBasis?.compute(renderStyle);
       RenderBoxModel? parentRenderBoxModel = parent as RenderBoxModel?;
       // In flex layout, flex basis takes priority over width/height if set.
       // Flex-basis cannot be smaller than its content size which happens can not be known
@@ -925,8 +925,8 @@ class RenderBoxModel extends RenderBox
   void setMaxScrollableSize(Size contentSize) {
     // Scrollable area includes right and bottom padding
     scrollableSize = Size(
-      contentSize.width + renderStyle.paddingLeft.computedValue,
-      contentSize.height + renderStyle.paddingTop.computedValue
+      contentSize.width + renderStyle.paddingLeft.compute(renderStyle),
+      contentSize.height + renderStyle.paddingTop.compute(renderStyle)
     );
   }
 
@@ -1033,11 +1033,11 @@ class RenderBoxModel extends RenderBox
   void didLayout() {
     scrollableViewportSize = Size(
       _contentSize!.width +
-        renderStyle.paddingLeft.computedValue +
-        renderStyle.paddingRight.computedValue,
+        renderStyle.paddingLeft.compute(renderStyle) +
+        renderStyle.paddingRight.compute(renderStyle),
       _contentSize!.height +
-        renderStyle.paddingTop.computedValue +
-        renderStyle.paddingBottom.computedValue);
+        renderStyle.paddingTop.compute(renderStyle) +
+        renderStyle.paddingBottom.compute(renderStyle));
 
     setUpOverflowScroller(scrollableSize, scrollableViewportSize);
 
@@ -1166,10 +1166,10 @@ class RenderBoxModel extends RenderBox
 
   void _chainPaintOverflow(PaintingContext context, Offset offset) {
     EdgeInsets borderEdge = EdgeInsets.fromLTRB(
-        renderStyle.effectiveBorderLeftWidth.computedValue,
-        renderStyle.effectiveBorderTopWidth.computedValue,
-        renderStyle.effectiveBorderRightWidth.computedValue,
-        renderStyle.effectiveBorderLeftWidth.computedValue);
+        renderStyle.effectiveBorderLeftWidth.compute(renderStyle),
+        renderStyle.effectiveBorderTopWidth.compute(renderStyle),
+        renderStyle.effectiveBorderRightWidth.compute(renderStyle),
+        renderStyle.effectiveBorderLeftWidth.compute(renderStyle));
     CSSBoxDecoration? decoration = renderStyle.decoration;
 
     bool hasLocalAttachment = _hasLocalBackgroundImage(renderStyle);

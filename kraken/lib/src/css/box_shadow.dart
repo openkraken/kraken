@@ -19,7 +19,7 @@ mixin CSSBoxShadowMixin on RenderStyle {
     }
     List<KrakenBoxShadow> result = [];
     for (CSSBoxShadow shadow in boxShadow!) {
-      result.add(shadow.computedBoxShadow);
+      result.add(shadow.computeBoxShadow(this));
     }
     return result;
   }

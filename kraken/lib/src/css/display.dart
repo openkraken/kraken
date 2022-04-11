@@ -92,7 +92,7 @@ mixin CSSDisplayMixin on RenderStyle {
           : parentRenderStyle.alignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
-        if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isStretchSelf) {
+        if (!marginLeft.isAuto(this) && !marginRight.isAuto(this) && isVerticalDirection && isFlexNoWrap && isStretchSelf) {
           transformedDisplay = CSSDisplay.block;
         }
       }
