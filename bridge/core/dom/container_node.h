@@ -20,8 +20,6 @@ using NodeVector = std::vector<Node*>;
 
 class ContainerNode : public Node {
  public:
-  ~ContainerNode() override;
-
   Node* firstChild() const { return first_child_; }
   Node* lastChild() const { return last_child_; }
   bool hasChildren() const { return first_child_; }
@@ -45,6 +43,8 @@ class ContainerNode : public Node {
                                   ExceptionState&) const;
 
   void RemoveChildren();
+
+  std::string nodeValue() const override;
 
   virtual bool ChildrenCanHaveStyle() const { return true; }
 

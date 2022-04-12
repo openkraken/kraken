@@ -13,7 +13,7 @@ Node* ChildNodeList::VirtualOwnerNode() const {
   return &OwnerNode();
 }
 
-Node* ChildNodeList::item(unsigned index) const {
+Node* ChildNodeList::item(unsigned index, ExceptionState& exception_state) const {
   return collection_index_cache_.NodeAt(*this, index);
 }
 

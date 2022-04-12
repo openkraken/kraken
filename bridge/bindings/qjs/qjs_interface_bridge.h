@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_QJS_INTERFACE_BRIDGE_H_
 
 #include "script_wrappable.h"
+#include "core/executing_context.h"
 
 namespace kraken {
 
@@ -17,7 +18,9 @@ class QJSInterfaceBridge {
     return HasInstance(context, value) ? toScriptWrappable<T>(value) : nullptr;
   }
 
-  static bool HasInstance(ExecutingContext* context, JSValue value);
+  static bool HasInstance(ExecutingContext* context, JSValue value) {
+    return JS_IsInstanceOf(context->ctx(), value, context->contextData()->prototypeForType(QJST::GetWrapperTypeInfo()));
+  };
 };
 
 }  // namespace kraken

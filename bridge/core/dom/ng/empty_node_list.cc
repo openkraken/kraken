@@ -3,7 +3,7 @@
  */
 
 #include "empty_node_list.h"
-#include "node.h"
+#include "core/dom/node.h"
 
 namespace kraken {
 

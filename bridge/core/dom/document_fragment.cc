@@ -13,6 +13,10 @@ DocumentFragment* DocumentFragment::Create(Document* document,
   return MakeGarbageCollected<DocumentFragment>(document, ConstructionType::kCreateDocumentFragment);
 }
 
+DocumentFragment * DocumentFragment::Create(ExecutingContext* context, ExceptionState& exception_state) {
+  return MakeGarbageCollected<DocumentFragment>(context->document(), ConstructionType::kCreateDocumentFragment);
+}
+
 DocumentFragment::DocumentFragment(Document* document, ConstructionType type) : ContainerNode(document, type) {}
 
 std::string DocumentFragment::nodeName() const {
@@ -21,6 +25,10 @@ std::string DocumentFragment::nodeName() const {
 
 Node::NodeType DocumentFragment::nodeType() const {
   return NodeType::kDocumentFragmentNode;
+}
+
+std::string DocumentFragment::nodeValue() const {
+  return "";
 }
 
 Node* DocumentFragment::Clone(Document& factory, CloneChildrenFlag flag) const {

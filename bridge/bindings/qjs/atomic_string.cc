@@ -47,9 +47,10 @@ AtomicString::StringKind GetStringKind(JSValue stringValue) {
 }  // namespace
 
 AtomicString::AtomicString(JSContext* ctx, const std::string& string)
-    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())), kind_(GetStringKind(string)) {}
+    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())), kind_(GetStringKind(string)), length_(string.size()) {}
 AtomicString::AtomicString(JSContext* ctx, JSValue value)
-    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)), kind_(GetStringKind(value)) {}
+    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)), kind_(GetStringKind(value)), length_(JS_VALUE_GET_STRING(value)->len) {
+}
 
 bool AtomicString::IsNull() const {
   return atom_ == JS_ATOM_NULL;

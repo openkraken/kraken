@@ -14,7 +14,10 @@ class CharacterData : public Node {
 
  public:
   const AtomicString& data() const { return data_; }
+  int64_t length() const { return data_.length(); };
   void setData(const AtomicString& data);
+
+  std::string nodeValue() const override;
 
  protected:
   CharacterData(Document& tree_scope, const AtomicString& text, ConstructionType type)

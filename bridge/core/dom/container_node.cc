@@ -316,6 +316,10 @@ void ContainerNode::RemoveChildren() {
   }
 }
 
+std::string ContainerNode::nodeValue() const {
+  return "";
+}
+
 ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document, type) {}
 
 void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& old_child) {

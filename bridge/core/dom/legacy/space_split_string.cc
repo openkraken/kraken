@@ -6,6 +6,8 @@
 
 namespace kraken {
 
+std::string SpaceSplitString::delimiter_{""};
+
 void SpaceSplitString::set(std::string& string) {
   size_t pos = 0;
   std::string token;

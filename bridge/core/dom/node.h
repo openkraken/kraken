@@ -61,7 +61,7 @@ class Node : public EventTarget {
   // DOM methods & attributes for Node
   bool HasTagName(const AtomicString&) const;
   virtual std::string nodeName() const = 0;
-  virtual std::string nodeValue() const;
+  virtual std::string nodeValue() const = 0;
   virtual void setNodeValue(const AtomicString&, ExceptionState&);
   virtual NodeType nodeType() const = 0;
 
@@ -287,6 +287,7 @@ class Node : public EventTarget {
   void SetTreeScope(TreeScope* scope) { tree_scope_ = scope; }
 
   Node(Document*, ConstructionType);
+  Node() = delete;
 
  private:
   uint32_t node_flags_;

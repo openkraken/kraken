@@ -46,6 +46,7 @@ struct NativeBindingObject {
 class BindingObject {
  public:
   BindingObject() = delete;
+  ~BindingObject() = default;
   explicit BindingObject(ExecutingContext* context);
 
   // Handle call from dart side.

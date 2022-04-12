@@ -15,13 +15,17 @@ class DocumentFragment : public ContainerNode {
 
  public:
   static DocumentFragment* Create(Document* document, ExceptionState& exception_state);
+  static DocumentFragment* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   DocumentFragment(Document* document, ConstructionType type);
+  ~DocumentFragment() override {};
 
   virtual bool IsTemplateContent() const { return false; }
 
   // This will catch anyone doing an unnecessary check.
   bool IsDocumentFragment() const = delete;
+
+  std::string nodeValue() const override;
 
  protected:
   std::string nodeName() const final;

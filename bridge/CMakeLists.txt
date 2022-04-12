@@ -308,11 +308,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/document_fragment.h
     core/dom/document_fragment.cc
     core/dom/collection_index_cache.h
-    core/dom/child_node_list.cc
-    core/dom/child_node_list.h
-    core/dom/empty_node_list.cc
-    core/dom/empty_node_list.h
-    core/dom/node_list.h
+    core/dom/ng/child_node_list.cc
+    core/dom/ng/child_node_list.h
+    core/dom/ng/empty_node_list.cc
+    core/dom/ng/empty_node_list.h
+    core/dom/ng/node_list.h
     core/dom/container_node.cc
     core/dom/container_node.h
     core/events/error_event.cc
@@ -375,6 +375,16 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_element.h
     out/qjs_element_attributes.cc
     out/qjs_element_attributes.h
+    out/qjs_character_data.cc
+    out/qjs_character_data.h
+    out/qjs_document_fragment.cc
+    out/qjs_document_fragment.h
+    out/qjs_bounding_client_rect.cc
+    out/qjs_bounding_client_rect.h
+    out/qjs_text.cc
+    out/qjs_text.h
+    out/qjs_node_list.cc
+    out/qjs_node_list.h
     out/event_type_names.h
     out/event_type_names.cc
     out/built_in_string.cc

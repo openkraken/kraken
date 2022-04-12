@@ -60,6 +60,7 @@ class Element : public ContainerNode {
   std::string innerHTML() const;
   void setInnerHTML(const AtomicString& value, ExceptionState& exception_state);
 
+  std::string nodeValue() const override;
   AtomicString tagName() const { return tag_name_; }
 
   bool HasEquivalentAttributes(const Element& other) const;

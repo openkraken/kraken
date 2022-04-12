@@ -101,11 +101,15 @@ NativeValue ScriptValue::ToNative() const {
     // NativeString owned by NativeValue will be freed by users.
     NativeString* string = this->ToString().ToNativeString().release();
     return NativeValueConverter<NativeTypeString>::ToNativeValue(string);
-  } else if (JS_IsFunction(ctx_, value_)) {
-    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
-    auto* functionContext = new NativeFunctionContext{context, value_};
-    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
-  } else if (JS_IsObject(value_)) {
+  }
+
+//  else if (JS_IsFunction(ctx_, value_)) {
+//    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+//    auto* functionContext = new NativeFunctionContext{context, value_};
+//    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
+//  }
+//  
+  else if (JS_IsObject(value_)) {
     //    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
     //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
     //    if (JS_IsInstanceOf(ctx, value, ImageElement::instance(context)->jsObject)) {

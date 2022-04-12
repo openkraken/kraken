@@ -9,6 +9,8 @@
 
 namespace kraken {
 
+class ExceptionState;
+
 class EmptyNodeList : public NodeList {
  public:
   explicit EmptyNodeList(Node* root_node);
@@ -18,7 +20,7 @@ class EmptyNodeList : public NodeList {
 
  private:
   unsigned length() const override { return 0; }
-  Node* item(unsigned) const override { return nullptr; }
+  Node* item(unsigned, ExceptionState& exception_state) const override { return nullptr; }
 
   bool IsEmptyNodeList() const override { return true; }
   Node* VirtualOwnerNode() const override;

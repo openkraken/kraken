@@ -6,11 +6,13 @@
 #define KRAKENBRIDGE_CORE_DOM_CHILD_NODE_LIST_H_
 
 #include "bindings/qjs/gc_visitor.h"
-#include "collection_index_cache.h"
-#include "container_node.h"
+#include "core/dom/collection_index_cache.h"
+#include "core/dom/container_node.h"
 #include "node_list.h"
 
 namespace kraken {
+
+class ExceptionState;
 
 class ChildNodeList : public NodeList {
  public:
@@ -20,7 +22,7 @@ class ChildNodeList : public NodeList {
   // DOM API.
   unsigned length() const override { return collection_index_cache_.NodeCount(*this); }
 
-  Node* item(unsigned index) const override;
+  Node* item(unsigned index, ExceptionState& exception_state) const override;
 
   // Non-DOM API.
   void InvalidateCache() { collection_index_cache_.Invalidate(); }

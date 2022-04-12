@@ -10,6 +10,7 @@
 namespace kraken {
 
 class Node;
+class ExceptionState;
 
 class NodeList : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
@@ -21,7 +22,7 @@ class NodeList : public ScriptWrappable {
 
   // DOM methods & attributes for NodeList
   virtual unsigned length() const = 0;
-  virtual Node* item(unsigned index) const = 0;
+  virtual Node* item(unsigned index, ExceptionState& exception_state) const = 0;
 
   // Other methods (not part of DOM)
   virtual bool IsEmptyNodeList() const { return false; }

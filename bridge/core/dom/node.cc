@@ -4,12 +4,11 @@
 
 #include "node.h"
 #include "character_data.h"
-#include "child_node_list.h"
 #include "document.h"
 #include "document_fragment.h"
-#include "empty_node_list.h"
+#include "ng/child_node_list.h"
+#include "ng/empty_node_list.h"
 #include "node_data.h"
-#include "node_list.h"
 #include "node_traversal.h"
 #include "template_content_document_fragment.h"
 #include "text.h"
@@ -28,12 +27,21 @@ ContainerNode* Node::parentNode() const {
   return ParentOrShadowHostNode();
 }
 
+Element* Node::parentElement() const {
+  return nullptr;
+}
+
 NodeList* Node::childNodes() {
   auto* this_node = DynamicTo<ContainerNode>(this);
   if (this_node)
     return EnsureData().EnsureChildNodeList(*this_node);
   return EnsureData().EnsureEmptyChildNodeList(*this);
 }
+
+EventTargetData* Node::GetEventTargetData() {
+  return nullptr;
+}
+EventTargetData& Node::EnsureEventTargetData() {}
 
 NodeData& Node::CreateData() {
   data_ = std::make_unique<NodeData>();
@@ -122,15 +130,14 @@ bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
   if (nodeValue() != other->nodeValue())
     return false;
 
-//  if (auto* this_attr = DynamicTo<Attr>(this)) {
-//    auto* other_attr = To<Attr>(other);
-//    if (this_attr->localName() != other_attr->localName())
-//      return false;
-//
-//    if (this_attr->namespaceURI() != other_attr->namespaceURI())
-//      return false;
-//  } else
-
+  //  if (auto* this_attr = DynamicTo<Attr>(this)) {
+  //    auto* other_attr = To<Attr>(other);
+  //    if (this_attr->localName() != other_attr->localName())
+  //      return false;
+  //
+  //    if (this_attr->namespaceURI() != other_attr->namespaceURI())
+  //      return false;
+  //  } else
 
   if (auto* this_element = DynamicTo<Element>(this)) {
     auto* other_element = DynamicTo<Element>(other);
@@ -173,8 +180,8 @@ AtomicString Node::textContent(bool convert_brs_to_newlines) const {
     return character_data->data();
 
   // Attribute nodes have their attribute values as textContent.
-//  if (auto* attr = DynamicTo<Attr>(this))
-//    return attr->value();
+  //  if (auto* attr = DynamicTo<Attr>(this))
+  //    return attr->value();
 
   // Documents and non-container nodes (that are not CharacterData)
   // have null textContent.

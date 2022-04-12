@@ -87,6 +87,7 @@ class EventTarget : public ScriptWrappable, public BindingObject {
   static EventTarget* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   EventTarget() = delete;
+  ~EventTarget() = default;
   explicit EventTarget(ExecutingContext* context);
 
   bool addEventListener(const AtomicString& event_type,

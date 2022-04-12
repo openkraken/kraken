@@ -117,6 +117,10 @@ void Element::scrollTo(const std::shared_ptr<ScrollToOptions>& options, Exceptio
   return scroll(options, exception_state);
 }
 
+std::string Element::nodeValue() const {
+  return "";
+}
+
 bool Element::HasEquivalentAttributes(const Element& other) const {
   return other.attributes_->IsEquivalent(*attributes_);
 }

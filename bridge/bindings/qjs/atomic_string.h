@@ -43,6 +43,8 @@ class AtomicString {
 
   JSAtom Impl() const { return atom_; }
 
+  int64_t length() const { return length_; }
+
   [[nodiscard]] std::string ToStdString() const;
   [[nodiscard]] std::unique_ptr<NativeString> ToNativeString() const;
 
@@ -66,6 +68,7 @@ class AtomicString {
  protected:
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
+  int64_t length_{0};
   JSAtom atom_{JS_ATOM_NULL};
   mutable JSAtom atom_upper_{JS_ATOM_NULL};
   mutable JSAtom atom_lower_{JS_ATOM_NULL};
