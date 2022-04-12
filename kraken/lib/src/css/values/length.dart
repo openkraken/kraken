@@ -77,6 +77,18 @@ class CSSLengthValue {
   // which can not be computed to a specific value, eg. percentage height is sometimes parsed
   // to be auto due to parent height not defined.
   double get computedValue {
+    // Use cached value if type is not percentage which may needs 2 layout passes to resolve the
+    // final computed value.
+    if (renderStyle?.renderBoxModel != null
+      && propertyName != null
+      && type != CSSLengthType.PERCENTAGE
+    ) {
+      RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+      double? cachedValue = getCachedComputedValue(renderBoxModel.hashCode, propertyName!);
+      if (cachedValue != null) {
+        return cachedValue;
+      }
+    }
 
     switch (type) {
       case CSSLengthType.PX:
@@ -318,8 +330,18 @@ class CSSLengthValue {
         break;
       default:
         // @FIXME: Type AUTO not always resolves to 0, in cases such as `margin: auto`, `width: auto`.
-        return 0;
+        _computedValue = 0;
     }
+
+    // Cache computed value.
+    if (renderStyle?.renderBoxModel != null
+      && propertyName != null
+      && type != CSSLengthType.PERCENTAGE
+    ) {
+      RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+      cacheComputedValue(renderBoxModel.hashCode, propertyName!, _computedValue!);
+    }
+
     return _computedValue!;
   }
 
@@ -386,6 +408,30 @@ class CSSLengthValue {
 }
 
 final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
+
+// Cache resolved length value during perform layout.
+// format: { hashCode: { renderStyleKey: renderStyleValue } }
+final LinkedLruHashMap<int, Map<String, double>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
+
+// Get computed length value from cache only in perform layout stage.
+double? getCachedComputedValue(int hashCode, String propertyName) {
+  if (renderBoxInLayoutHashCodes.isNotEmpty) {
+    return _cachedComputedValue[hashCode]?[propertyName];
+  }
+}
+
+// Cache computed length value only in perform layout stage.
+void cacheComputedValue(int hashCode, String propertyName, double value) {
+  if (renderBoxInLayoutHashCodes.isNotEmpty) {
+    _cachedComputedValue[hashCode] = _cachedComputedValue[hashCode] ?? {};
+    _cachedComputedValue[hashCode]![propertyName] = value;
+  }
+}
+
+// Clear all the computed length value cache.
+void clearComputedValueCache() {
+  _cachedComputedValue.clear();
+}
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {

@@ -77,11 +77,24 @@ mixin CSSMarginMixin on RenderStyle {
   // Margin top of in-flow block-level box which has collapsed margin.
   // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double get collapsedMarginTop {
-    if (effectiveDisplay == CSSDisplay.inline) {
-      return 0;
+    RenderBoxModel boxModel = renderBoxModel!;
+    int hashCode = boxModel.hashCode;
+    String propertyName = 'collapsedMarginBottom';
+
+    // Use cached value if exits.
+    double? cachedValue = getCachedComputedValue(hashCode, propertyName);
+    if (cachedValue != null) {
+      return cachedValue;
     }
 
-    RenderBoxModel boxModel = renderBoxModel!;
+    double _marginTop;
+
+    if (effectiveDisplay == CSSDisplay.inline) {
+      _marginTop = 0;
+      // Cache computed value.
+      cacheComputedValue(hashCode, propertyName, _marginTop);
+      return _marginTop;
+    }
 
     // Margin collapse does not work on following case:
     // 1. Document root element(HTML)
@@ -90,9 +103,11 @@ mixin CSSMarginMixin on RenderStyle {
     if (boxModel.isDocumentRootBox
       || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)
     ) {
-      return marginTop.computedValue;
+      _marginTop = marginTop.computedValue;
+      // Cache computed value.
+      cacheComputedValue(hashCode, propertyName, _marginTop);
+      return _marginTop;
     }
-
     RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
     RenderObject? preSibling = childParentData.previousSibling != null
       ? childParentData.previousSibling as RenderObject
@@ -100,13 +115,17 @@ mixin CSSMarginMixin on RenderStyle {
 
     if (preSibling == null) {
       // Margin top collapse with its parent if it is the first child of its parent and its value is 0.
-      return _collapsedMarginTopWithParent;
+      _marginTop = _collapsedMarginTopWithParent;
     } else {
       // Margin top collapse with margin-bottom of its previous sibling, get the difference between
       // the margin top of itself and the margin bottom of ite previous sibling. Set it to 0 if the
       // difference is negative.
-      return _collapsedMarginTopWithPreSibling;
+      _marginTop = _collapsedMarginTopWithPreSibling;
     }
+
+    // Cache computed value.
+    cacheComputedValue(hashCode, propertyName, _marginTop);
+    return _marginTop;
   }
 
   // The top margin of an in-flow block element collapses with its first in-flow block-level child's
@@ -241,12 +260,25 @@ mixin CSSMarginMixin on RenderStyle {
   // Margin bottom of in-flow block-level box which has collapsed margin.
   // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double get collapsedMarginBottom {
-    // Margin is invalid for inline element.
-    if (effectiveDisplay == CSSDisplay.inline) {
-      return 0;
+    RenderBoxModel boxModel = renderBoxModel!;
+    int hashCode = boxModel.hashCode;
+    String propertyName = 'collapsedMarginBottom';
+
+    // Use cached value if exits.
+    double? cachedValue = getCachedComputedValue(hashCode, propertyName);
+    if (cachedValue != null) {
+      return cachedValue;
     }
 
-    RenderBoxModel boxModel = renderBoxModel!;
+    double _marginBottom;
+
+    // Margin is invalid for inline element.
+    if (effectiveDisplay == CSSDisplay.inline) {
+      _marginBottom = 0;
+      // Cache computed value.
+      cacheComputedValue(hashCode, propertyName, _marginBottom);
+      return _marginBottom;
+    }
 
     // Margin collapse does not work on following case:
     // 1. Document root element(HTML)
@@ -255,7 +287,10 @@ mixin CSSMarginMixin on RenderStyle {
     if (boxModel.isDocumentRootBox
       || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)
     ) {
-      return marginBottom.computedValue;
+      _marginBottom = marginBottom.computedValue;
+      // Cache computed value.
+      cacheComputedValue(hashCode, propertyName, _marginBottom);
+      return _marginBottom;
     }
 
     RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
@@ -265,14 +300,18 @@ mixin CSSMarginMixin on RenderStyle {
 
     if (nextSibling == null) {
       // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
-      return _collapsedMarginBottomWithParent;
+      _marginBottom = _collapsedMarginBottomWithParent;
+    } else {
+      // Margin bottom collapse with its nested last child when meeting following cases at the same time:
+      // 1. No padding, border is set.
+      // 2. No height, min-height, max-height is set.
+      // 3. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
+      _marginBottom = _collapsedMarginBottomWithLastChild;
     }
 
-    // Margin bottom collapse with its nested last child when meeting following cases at the same time:
-    // 1. No padding, border is set.
-    // 2. No height, min-height, max-height is set.
-    // 3. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
-    return _collapsedMarginBottomWithLastChild;
+    // Cache computed value.
+    cacheComputedValue(hashCode, propertyName, _marginBottom);
+    return _marginBottom;
   }
 
   // The bottom margin of an in-flow block box with a 'height' of 'auto' and a 'min-height' of zero collapses
