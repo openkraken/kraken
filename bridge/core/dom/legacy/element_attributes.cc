@@ -86,8 +86,9 @@ std::string ElementAttributes::ToString() {
 }
 
 bool ElementAttributes::IsEquivalent(const ElementAttributes& other) const {
-  if (attributes_.size() != other.attributes_.size()) return false;
-  for(auto& entry: attributes_) {
+  if (attributes_.size() != other.attributes_.size())
+    return false;
+  for (auto& entry : attributes_) {
     auto it = other.attributes_.find(entry.first);
     if (it == other.attributes_.end()) {
       return false;

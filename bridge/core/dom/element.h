@@ -31,7 +31,7 @@ class Element : public ContainerNode {
   BoundingClientRect* getBoundingClientRect(ExceptionState& exception_state);
   void click(ExceptionState& exception_state);
   void scroll(ExceptionState& exception_state);
-  void scroll(const std::shared_ptr<ScrollToOptions> &options, ExceptionState& exception_state);
+  void scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
   void scroll(double x, double y, ExceptionState& exception_state);
 
   //  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);

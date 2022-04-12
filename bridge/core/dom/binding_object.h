@@ -51,7 +51,10 @@ class BindingObject {
   // Handle call from dart side.
   virtual NativeValue HandleCallFromDartSide(NativeString* method, int32_t argc, const NativeValue* argv) const = 0;
   // Invoke methods which implemented at dart side.
-  NativeValue InvokeBindingMethod(const AtomicString& method, int32_t argc, const NativeValue* args, ExceptionState& exception_state) const;
+  NativeValue InvokeBindingMethod(const AtomicString& method,
+                                  int32_t argc,
+                                  const NativeValue* args,
+                                  ExceptionState& exception_state) const;
   NativeValue GetBindingProperty(const AtomicString& prop, ExceptionState& exception_state) const;
   NativeValue SetBindingProperty(const AtomicString& prop, NativeValue value, ExceptionState& exception_state) const;
 

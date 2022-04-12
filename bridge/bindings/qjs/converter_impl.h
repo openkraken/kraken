@@ -478,7 +478,7 @@ struct Converter<NodeList> : public ConverterBase<NodeList> {
   static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
 };
 
-template<>
+template <>
 struct Converter<ScrollToOptions> : ConverterBase<ScrollToOptions> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));

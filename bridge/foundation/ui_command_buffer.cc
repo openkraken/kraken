@@ -33,10 +33,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
   queue.emplace_back(item);
 }
 
-void UICommandBuffer::addCommand(int32_t id,
-                                 int32_t type,
-                                 NativeString* args_01,
-                                 void* nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString* args_01, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
     m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
