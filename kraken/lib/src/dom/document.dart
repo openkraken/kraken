@@ -18,13 +18,19 @@ class Document extends Node {
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
-  Document(context, {
+  Document(BindingContext context, {
     required this.controller,
     required RenderViewportBox viewport,
     this.gestureListener,
     this.widgetDelegate,
   }) : _viewport = viewport,
-        super(NodeType.DOCUMENT_NODE, context);
+        super(NodeType.DOCUMENT_NODE, context) {
+    _scriptRunner = ScriptRunner(this, context.contextId);
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L1898
+  late ScriptRunner _scriptRunner;
+  ScriptRunner get scriptRunner => _scriptRunner;
 
   @override
   EventTarget? get parentEventTarget => defaultView;
@@ -45,6 +51,36 @@ class Document extends Node {
 
   @override
   RenderBox? get renderer => _viewport;
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L770
+  bool parsing = false;
+
+  int _requestCount = 0;
+  bool get hasPendingRequest => _requestCount > 0;
+  void incrementRequestCount() {
+    _requestCount++;
+  }
+  void decrementRequestCount() {
+    assert(_requestCount > 0);
+    _requestCount--;
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L2091
+  // Counters that currently need to delay load event, such as parsing a script.
+  int _loadEventDelayCount = 0;
+  bool get isDelayingLoadEvent => _loadEventDelayCount > 0;
+  void incrementLoadEventDelayCount() {
+    _loadEventDelayCount++;
+  }
+
+  void decrementLoadEventDelayCount() {
+    _loadEventDelayCount--;
+
+    // Try to check when the request is complete.
+    if (_loadEventDelayCount == 0) {
+      controller.checkCompleted();
+    }
+  }
 
   Element? _documentElement;
   Element? get documentElement => _documentElement;

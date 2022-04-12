@@ -349,17 +349,13 @@ class RenderFlexLayout extends RenderLayoutBox {
 
     RenderStyle? childRenderStyle = child.renderStyle;
 
-    if (child is RenderBoxModel) {
-      minWidth = childRenderStyle.minWidth.isAuto
-          ? child.autoMinWidth
-          : childRenderStyle.minWidth.computedValue;
-      minHeight = childRenderStyle.minHeight.isAuto
-          ? child.autoMinHeight
-          : childRenderStyle.minHeight.computedValue;
-    } else if (child is RenderTextBox) {
-      minWidth = child.autoMinWidth;
-      minHeight = child.autoMinHeight;
-    }
+    minWidth = childRenderStyle.minWidth.isAuto
+        ? child.autoMinWidth
+        : childRenderStyle.minWidth.computedValue;
+    minHeight = childRenderStyle.minHeight.isAuto
+        ? child.autoMinHeight
+        : childRenderStyle.minHeight.computedValue;
+
 
     contentSize = _isHorizontalFlexDirection
         ? minWidth
@@ -381,15 +377,13 @@ class RenderFlexLayout extends RenderLayoutBox {
           ? childRenderStyle.width.computedValue / childRenderStyle.intrinsicRatio!
           : childRenderStyle.intrinsicHeight;
       minMainSize = math.min(contentSize, transferredSize);
-    } else if (child is RenderBoxModel) {
+    } else {
       double? specifiedMainSize = _isHorizontalFlexDirection
           ? child.renderStyle.contentBoxLogicalWidth
           : child.renderStyle.contentBoxLogicalHeight;
       minMainSize = specifiedMainSize != null
           ? math.min(contentSize, specifiedMainSize)
           : contentSize;
-    } else if (child is RenderTextBox) {
-      minMainSize = contentSize;
     }
 
     return minMainSize;
@@ -2041,7 +2035,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     if (child is! RenderBoxModel
       || child is RenderPositionPlaceholder
       || child is RenderLineBreak
-      || (child is RenderBoxModel && childParentData.isPositioned)
+      || (childParentData.isPositioned)
     ) {
       return null;
     }

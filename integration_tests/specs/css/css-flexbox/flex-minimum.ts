@@ -1305,7 +1305,7 @@ describe('flex-minimum', () => {
     BODY.appendChild(constrainedFlex);
 
 
-    await snapshot(0.1);
+    await snapshot(0.2);
   })
   it("width-flex-items-011", async () => {
     let p;

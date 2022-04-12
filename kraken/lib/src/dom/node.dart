@@ -6,7 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
-import 'package:meta/meta.dart';
 import 'package:kraken/widget.dart';
 
 enum NodeType {

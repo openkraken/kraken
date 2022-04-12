@@ -106,7 +106,6 @@ class IntersectionObserverLayer extends ContainerLayer {
       required this.onIntersectionChange})
       : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
-        _layerOffset = Offset.zero,
         _elementSize = elementSize,
         _paintOffset = paintOffset;
 
@@ -137,9 +136,6 @@ class IntersectionObserverLayer extends ContainerLayer {
     if (value == _paintOffset) return;
     _paintOffset = value;
   }
-
-  /// Last known layer offset supplied to [addToScene].  Never null.
-  Offset _layerOffset;
 
   final IntersectionChangeCallback onIntersectionChange;
 
@@ -191,10 +187,9 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// See [Layer.addToScene].
   @override
-  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
-    _layerOffset = layerOffset;
+  void addToScene(ui.SceneBuilder builder) {
     _scheduleIntersectionObservationUpdate();
-    super.addToScene(builder, layerOffset);
+    super.addToScene(builder);
   }
 
   /// See [AbstractNode.attach].
@@ -251,7 +246,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   /// global coordinates.
   Rect _computeElementBounds() {
     final r = _localRectToGlobal(this, _elementOffset & _elementSize);
-    return r.shift(_paintOffset + _layerOffset);
+    return r.shift(_paintOffset);
   }
 
   // https://github.com/google/flutter.widgets/blob/master/packages/visibility_detector/lib/src/visibility_detector_layer.dart#L130

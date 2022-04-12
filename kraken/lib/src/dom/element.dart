@@ -7,8 +7,6 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
@@ -16,7 +14,6 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
-import 'package:meta/meta.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
@@ -176,6 +173,20 @@ abstract class Element
     }
     _updateRenderBoxModel();
     return renderBoxModel!;
+  }
+
+  String? collectElementChildText() {
+    StringBuffer buffer = StringBuffer();
+    childNodes.forEach((node) {
+      if (node is TextNode) {
+        buffer.write(node.data);
+      }
+    });
+    if (buffer.isNotEmpty) {
+      return buffer.toString();
+    } else {
+      return null;
+    }
   }
 
   // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-htmlelement-interface

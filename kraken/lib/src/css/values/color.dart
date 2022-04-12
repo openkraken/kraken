@@ -3,7 +3,6 @@
  */
 
 import 'dart:math';
-import 'dart:ui' show Color;
 
 import 'package:quiver/collection.dart';
 import 'package:flutter/material.dart';

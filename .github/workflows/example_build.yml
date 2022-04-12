@@ -10,7 +10,7 @@ on:
 env:
   nodeVersion: "16"
   cmakeVersion: "3.22.x"
-  flutterVersion: "2.5.3"
+  flutterVersion: "2.8.1"
 
 jobs:
   build_android-app_in_macos:

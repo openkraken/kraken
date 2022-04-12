@@ -1194,6 +1194,9 @@ class KrakenController {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
       }
 
+      // entry point start parse.
+      _view.document.parsing = true;
+
       Uint8List data = entrypoint.data!;
       if (entrypoint.isHTML) {
         parseHTML(contextId, await resolveStringFromData(data));
@@ -1206,6 +1209,17 @@ class KrakenController {
         throw FlutterError('Can\'t evaluate content of $url');
       }
 
+      // entry point end parse.
+      _view.document.parsing = false;
+
+      // Should check completed when parse end.
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        // UICommand list is read in the next frame, so we need to determine whether there are labels
+        // such as images and scripts after it to check is completed.
+        checkCompleted();
+      });
+      SchedulerBinding.instance!.scheduleFrame();
+
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
       }
@@ -1214,25 +1228,51 @@ class KrakenController {
       entrypoint.dispose();
 
       // trigger DOMContentLoaded event
-      module.requestAnimationFrame((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.window;
         window.dispatchEvent(event);
-        // @HACK: window.load should trigger after all image had loaded.
-        // Someone needs to fix this in the future.
-        module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          window.dispatchEvent(event);
-        });
       });
+      SchedulerBinding.instance!.scheduleFrame();
+    }
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.h#L470
+  bool _isComplete = false;
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.cpp#L840
+  // Check whether the document has been loaded, such as html has parsed (main of JS has evaled) and images/scripts has loaded.
+  void checkCompleted() {
+    if (_isComplete) return;
+
+    // Are we still parsing?
+    if (_view.document.parsing) return;
+
+    // Still waiting for images/scripts?
+    if (_view.document.hasPendingRequest) return;
+
+    // Still waiting for elements that don't go through a FrameLoader?
+    if (_view.document.isDelayingLoadEvent) return;
+
+    // Any frame that hasn't completed yet?
+    // TODO:
+
+    _isComplete = true;
+
+    _dispatchWindowLoadEvent();
+  }
+
+  void _dispatchWindowLoadEvent() {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      Event event = Event(EVENT_LOAD);
+      _view.window.dispatchEvent(event);
 
       if (onLoad != null) {
-        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-        module.requestAnimationFrame((_) {
-          onLoad!(this);
-        });
+        onLoad!(this);
       }
-    }
+    });
+    SchedulerBinding.instance!.scheduleFrame();
   }
 }
 
