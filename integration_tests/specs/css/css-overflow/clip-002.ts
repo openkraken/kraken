@@ -94,6 +94,6 @@ describe('clip-002', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await snapshot(0.1);
+    await snapshot(0.5);
   });
 });
