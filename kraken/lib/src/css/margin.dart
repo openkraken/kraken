@@ -79,7 +79,7 @@ mixin CSSMarginMixin on RenderStyle {
   double get collapsedMarginTop {
     RenderBoxModel boxModel = renderBoxModel!;
     int hashCode = boxModel.hashCode;
-    String propertyName = 'collapsedMarginBottom';
+    String propertyName = 'collapsedMarginTop';
 
     // Use cached value if exits.
     double? cachedValue = getCachedComputedValue(hashCode, propertyName);
@@ -377,7 +377,7 @@ mixin CSSMarginMixin on RenderStyle {
       && effectiveOverflowY == CSSOverflowType.clip;
 
     // Margin top and bottom of empty block collapse.
-    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
+    // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
     if (boxModel.hasSize
       && boxModel.boxSize!.height == 0
       && effectiveDisplay != CSSDisplay.flex

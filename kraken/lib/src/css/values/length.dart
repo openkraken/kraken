@@ -409,7 +409,7 @@ class CSSLengthValue {
 
 final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
 
-// Cache resolved length value during perform layout.
+// Cache computed length value during perform layout.
 // format: { hashCode: { renderStyleKey: renderStyleValue } }
 final LinkedLruHashMap<int, Map<String, double>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
 

@@ -96,7 +96,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     double marginVertical = 0;
 
     if (child is RenderBoxModel) {
-      marginVertical = child.renderStyle.collapsedMarginTop + child.renderStyle.collapsedMarginBottom;
+      marginVertical = _getChildMarginTop(child) + _getChildMarginBottom(child);
     }
     Size childSize = _getChildSize(child) ?? Size.zero;
 
@@ -379,8 +379,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         double childMarginTop = 0;
         double childMarginBottom = 0;
         if (child is RenderBoxModel) {
-          childMarginTop = child.renderStyle.collapsedMarginTop;
-          childMarginBottom = child.renderStyle.collapsedMarginBottom;
+          childMarginTop = _getChildMarginTop(child);
+          childMarginBottom = _getChildMarginBottom(child);
         }
 
         Size childSize = _getChildSize(child)!;
@@ -690,7 +690,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
         if (childRenderBoxModel is RenderBoxModel) {
           childMarginLeft = childRenderBoxModel.renderStyle.marginLeft.computedValue;
-          childMarginTop = childRenderBoxModel.renderStyle.collapsedMarginTop;
+          childMarginTop = _getChildMarginTop(childRenderBoxModel);
         }
 
         // No need to add padding and border for scrolling content box.
@@ -749,9 +749,8 @@ class RenderFlowLayout extends RenderLayoutBox {
         : _lineBoxMetrics[0];
     // Use the max baseline of the children as the baseline in flow layout.
     lineMetrics.runChildren.forEach((int? hashCode, RenderBox child) {
-      double? childMarginTop = child is RenderBoxModel
-        ? child.renderStyle.collapsedMarginTop
-        : 0;
+      double? childMarginTop =
+          child is RenderBoxModel ? _getChildMarginTop(child) : 0;
       RenderLayoutParentData? childParentData =
           child.parentData as RenderLayoutParentData?;
       double? childBaseLineDistance;
@@ -928,8 +927,8 @@ class RenderFlowLayout extends RenderLayoutBox {
           // Add offset of margin.
           childOffsetX += childRenderStyle.marginLeft.computedValue
             + childRenderStyle.marginRight.computedValue;
-          childOffsetY += child.renderStyle.collapsedMarginTop
-            + child.renderStyle.collapsedMarginBottom;
+          childOffsetY += _getChildMarginTop(child)
+            + _getChildMarginBottom(child);
 
           // Add offset of position relative.
           // Offset of position absolute and fixed is added in layout stage of positioned renderBox.
@@ -1024,8 +1023,8 @@ class RenderFlowLayout extends RenderLayoutBox {
     double? childMarginTop = 0;
     double? childMarginBottom = 0;
     if (child is RenderBoxModel) {
-      childMarginTop = child.renderStyle.collapsedMarginTop;
-      childMarginBottom = child.renderStyle.collapsedMarginBottom;
+      childMarginTop = _getChildMarginTop(child);
+      childMarginBottom = _getChildMarginBottom(child);
     }
 
     Size? childSize = _getChildSize(child);
@@ -1088,6 +1087,20 @@ class RenderFlowLayout extends RenderLayoutBox {
       }
     }
     return false;
+  }
+
+  double _getChildMarginTop(RenderBoxModel child) {
+    if (child.isScrollingContentBox) {
+      return 0;
+    }
+    return child.renderStyle.collapsedMarginTop;
+  }
+
+  double _getChildMarginBottom(RenderBoxModel child) {
+    if (child.isScrollingContentBox) {
+      return 0;
+    }
+    return child.renderStyle.collapsedMarginBottom;
   }
 
   @override
