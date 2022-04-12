@@ -843,28 +843,6 @@ task('run-benchmark', async (done) => {
         await uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
-
-
-        // Get average of list.
-        let sumLoadTimes = 0;
-        performanceDatas.forEach(item => sumLoadTimes += item);
-        let averageLoadTime = (sumLoadTimes / performanceDatas.length).toFixed();
-
-        // Save average time to file and upload to OSS.
-        const averageFile = path.join(__dirname, `../${viewType}-average-load-time.txt`);
-        fs.writeFileSync(averageFile, averageLoadTime.toString());
-        
-        let KrakenPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-average-load-time.txt`;
-        await uploader(KrakenPerformanceOSSPath, averageFile).then(() => {
-          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceOSSPath}`);
-        }).catch(err => done(err));
-        
-        // Save performance data of Kraken with kraken version.
-        let KrakenPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-average-load-time.txt`;
-        await uploader(KrakenPerformanceWithVersionOSSPath, averageFile).then(() => {
-          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${KrakenPerformanceWithVersionOSSPath}`);
-        }).catch(err => done(err));
-
       } catch {
         const err = new Error('The performance info parse exception.');
         done(err);
