@@ -18,15 +18,20 @@ class Element;
 // TODO: refactor for better W3C standard support and higher performance.
 class ElementAttributes : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
-
  public:
+  using ImplType = ElementAttributes*;
+
+  static ElementAttributes* Create(Element* element) {
+    return MakeGarbageCollected<ElementAttributes>(element);
+  }
+
   ElementAttributes(Element) = delete;
   ElementAttributes(Element* element);
 
   AtomicString GetAttribute(const AtomicString& name);
-  bool SetAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state);
-  bool HasAttribute(const AtomicString& name);
-  void RemoveAttribute(const AtomicString& name);
+  bool setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state);
+  bool hasAttribute(const AtomicString& name, ExceptionState& exception_state);
+  void removeAttribute(const AtomicString& name, ExceptionState& exception_state);
   void CopyWith(ElementAttributes* attributes);
   std::shared_ptr<SpaceSplitString> ClassName();
   std::string ToString();

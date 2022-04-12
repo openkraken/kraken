@@ -203,7 +203,7 @@ function generateOverLoadSwitchBody(overloadMethods: FunctionDeclaration[]) {
   return `
 ${callBodyList.join('\n')}
 
-return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv)
+return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv);
 `;
 }
 
@@ -284,11 +284,13 @@ export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
         });
 
         let overloadMethods = {};
-        object.methods.forEach(method => {
+        let filtedMethods: FunctionDeclaration[] = [];
+        object.methods.forEach((method, i) => {
           if (overloadMethods.hasOwnProperty(method.name)) {
-            overloadMethods[method.name].push(method);
+            overloadMethods[method.name].push(method)
           } else {
             overloadMethods[method.name] = [method];
+            filtedMethods.push(method);
             options.classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
           }
         });
@@ -306,6 +308,7 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
           generateFunctionBody,
           generateOverLoadSwitchBody,
           overloadMethods,
+          filtedMethods,
           generateTypeConverter
         });
       }

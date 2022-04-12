@@ -31,14 +31,21 @@ void ScriptPromiseResolver::ResolveOrRejectImmediately(JSValue value) {
     if (state_ == kResolving) {
       JSValue arguments[] = {value};
       JSValue return_value = JS_Call(context_->ctx(), resolve_func_, JS_NULL, 1, arguments);
+      if (JS_IsException(return_value)) {
+        context_->HandleException(&return_value);
+      }
       JS_FreeValue(context_->ctx(), return_value);
     } else {
       assert(state_ == kRejecting);
       JSValue arguments[] = {value};
       JSValue return_value = JS_Call(context_->ctx(), reject_func_, JS_NULL, 1, arguments);
+      if (JS_IsException(return_value)) {
+        context_->HandleException(&return_value);
+      }
       JS_FreeValue(context_->ctx(), return_value);
     }
   }
+  context_->DrainPendingPromiseJobs();
 }
 
 }  // namespace kraken

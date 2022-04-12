@@ -4,6 +4,14 @@
   },
   "data": [
     "click",
+    "scroll",
+    "scrollBy",
+    "clientTop",
+    "clientLeft",
+    "clientWidth",
+    "clientHeight",
+    "scrollLeft",
+    "scrollTop",
     "getBoundingClientRect",
     ["getPropertyMagic", "%g"],
     ["setPropertyMagic", "%s"]

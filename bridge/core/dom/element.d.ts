@@ -1,6 +1,7 @@
 import {Node} from "./node";
 import {Document} from "./document";
 import {ScrollToOptions} from "./scroll_to_options";
+import { ElementAttributes } from './legacy/element_attribute';
 
 interface Element extends Node {
   readonly attributes: ElementAttributes;
@@ -9,17 +10,11 @@ interface Element extends Node {
   readonly clientLeft: number;
   readonly clientTop: number;
   readonly clientWidth: number;
-  /**
-   * Returns the value of element's id content attribute. Can be set to change it.
-   */
-  id: string;
   outerHTML: string;
   innerHTML: string;
   readonly ownerDocument: Document;
-  readonly scrollHeight: number;
   scrollLeft: number;
   scrollTop: number;
-  readonly scrollWidth: number;
   /**
    * Returns the HTML-uppercased qualified name.
    */
@@ -44,4 +39,7 @@ interface Element extends Node {
   scrollBy(x: number, y: number): void;
   scrollTo(options?: ScrollToOptions): void;
   scrollTo(x: number, y: number): void;
+
+  // Kraken special API.
+  toBlob(devicePixelRatioValue?: double): Promise<ArrayBuffer>;
 }

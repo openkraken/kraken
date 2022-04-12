@@ -26,7 +26,7 @@ NativeValue BindingObject::InvokeBindingMethod(const AtomicString& method,
                                                const NativeValue* argv,
                                                ExceptionState& exception_state) const {
   if (binding_object_.invoke_bindings_methods_from_native == nullptr) {
-    exception_state.ThrowException(context_->ctx(), RangeError,
+    exception_state.ThrowException(context_->ctx(), ErrorType::InternalError,
                                    "Failed to call dart method: invokeBindingMethod not initialized.");
     return Native_NewNull();
   }

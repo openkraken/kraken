@@ -28,7 +28,7 @@ AtomicString ElementAttributes::GetAttribute(const AtomicString& name) {
   return attributes_[name];
 }
 
-bool ElementAttributes::SetAttribute(const AtomicString& name,
+bool ElementAttributes::setAttribute(const AtomicString& name,
                                      const AtomicString& value,
                                      ExceptionState& exception_state) {
   bool numberIndex = IsNumberIndex(name.ToStdString());
@@ -50,7 +50,7 @@ bool ElementAttributes::SetAttribute(const AtomicString& name,
   return true;
 }
 
-bool ElementAttributes::HasAttribute(const AtomicString& name) {
+bool ElementAttributes::hasAttribute(const AtomicString& name, ExceptionState& exception_state) {
   bool numberIndex = IsNumberIndex(name.ToStdString());
 
   if (numberIndex) {
@@ -60,7 +60,7 @@ bool ElementAttributes::HasAttribute(const AtomicString& name) {
   return attributes_.count(name) > 0;
 }
 
-void ElementAttributes::RemoveAttribute(const AtomicString& name) {
+void ElementAttributes::removeAttribute(const AtomicString& name, ExceptionState& exception_state) {
   attributes_.erase(name);
 }
 

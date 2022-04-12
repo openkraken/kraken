@@ -20,6 +20,8 @@ class Element : public ContainerNode {
  public:
   Element(Document* document, const AtomicString& tag_name, ConstructionType = kCreateElement);
 
+  ElementAttributes* attributes() const { return attributes_; }
+
   bool hasAttribute(const AtomicString&, ExceptionState& exception_state) const;
   AtomicString getAttribute(const AtomicString&, ExceptionState& exception_state) const;
 
@@ -33,18 +35,38 @@ class Element : public ContainerNode {
   void scroll(ExceptionState& exception_state);
   void scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
   void scroll(double x, double y, ExceptionState& exception_state);
+  void scrollTo(ExceptionState& exception_state);
+  void scrollTo(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
+  void scrollTo(double x, double y, ExceptionState& exception_state);
+  void scrollBy(ExceptionState& exception_state);
+  void scrollBy(double x, double y, ExceptionState& exception_state);
+  void scrollBy(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
 
-  //  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  //  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  //  static JSValue scroll(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
-  //  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  ScriptPromise toBlob(double device_pixel_ratio, ExceptionState& exception_state);
+  ScriptPromise toBlob(ExceptionState& exception_state);
 
-  AtomicString TagName() const { return tag_name_; }
+  double clientHeight() const;
+  double clientWidth() const;
+  double clientLeft() const;
+  double clientTop() const;
+
+  double scrollTop() const;
+  void setScrollTop(double v);
+  double scrollLeft() const;
+  void setScrollLeft(double v);
+
+  std::string outerHTML() const;
+  void setOuterHTML(const AtomicString& value);
+  std::string innerHTML() const;
+  void setInnerHTML(const AtomicString& value);
+
+  AtomicString tagName() const { return tag_name_; }
 
   bool HasEquivalentAttributes(const Element& other) const;
 
  protected:
  private:
+
   void _notifyNodeRemoved(Node* node);
   void _notifyChildRemoved();
   void _notifyNodeInsert(Node* insertNode);

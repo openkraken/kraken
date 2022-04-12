@@ -322,6 +322,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_collection.h
     core/html/html_element.cc
     core/html/html_element.h
+    core/html/html_template_element.cc
+    core/html/html_template_element.h
     # Legacy implements, should remove them in the future.
     core/dom/legacy/space_split_string.cc
     core/dom/legacy/space_split_string.h
@@ -370,6 +372,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_event_target.h
     out/qjs_node.h
     out/qjs_node.cc
+    out/qjs_element.cc
+    out/qjs_element.h
+    out/qjs_element_attribute.cc
+    out/qjs_element_attribute.h
     out/event_type_names.h
     out/event_type_names.cc
     out/built_in_string.cc

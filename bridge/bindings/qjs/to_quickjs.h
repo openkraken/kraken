@@ -25,6 +25,9 @@ inline JSValue toQuickJS(JSContext* ctx, int32_t v) {
 inline JSValue toQuickJS(JSContext* ctx, uint32_t v) {
   return JS_NewUint32(ctx, v);
 }
+inline JSValue toQuickJS(JSContext* ctx, ExceptionState& exception_state) {
+  return exception_state.ToQuickJS();
+};
 
 // String
 inline JSValue toQuickJS(JSContext* ctx, const std::string& str) {

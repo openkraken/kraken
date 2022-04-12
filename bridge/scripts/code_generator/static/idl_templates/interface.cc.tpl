@@ -4,7 +4,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
 }
 <% } %>
 
-<% _.forEach(object.methods, function(method, index) { %>
+<% _.forEach(filtedMethods, function(method, index) { %>
 
   <% if (overloadMethods[method.name] && overloadMethods[method.name].length > 1) { %>
     <% _.forEach(overloadMethods[method.name], function(overloadMethod, index) { %>

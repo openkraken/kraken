@@ -25,6 +25,7 @@
 #include "qjs_event_listener_options.h"
 #include "qjs_node.h"
 #include "qjs_scroll_to_options.h"
+#include "qjs_element_attribute.h"
 
 namespace kraken {
 
@@ -486,6 +487,13 @@ struct Converter<ScrollToOptions> : ConverterBase<ScrollToOptions> {
   }
 };
 
-}  // namespace kraken
+template<>
+struct Converter<ElementAttributes> : ConverterBase<ElementAttributes> {
+  static JSValue ToValue(JSContext* ctx, ImplType value) {
+    return value->ToQuickJS();
+  }
+};
+
+};  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_CONVERTER_IMPL_H_
