@@ -35,7 +35,7 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
 
 void UICommandBuffer::addCommand(int32_t id,
                                  int32_t type,
-                                 const std::unique_ptr<NativeString>& args_01,
+                                 NativeString* args_01,
                                  void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
@@ -44,14 +44,14 @@ void UICommandBuffer::addCommand(int32_t id,
 #endif
   }
 
-  UICommandItem item{id, type, args_01.get(), nativePtr};
+  UICommandItem item{id, type, args_01, nativePtr};
   queue.emplace_back(item);
 }
 
 void UICommandBuffer::addCommand(int32_t id,
                                  int32_t type,
-                                 const std::unique_ptr<NativeString>& args_01,
-                                 const std::unique_ptr<NativeString>& args_02,
+                                 NativeString* args_01,
+                                 NativeString* args_02,
                                  void* nativePtr) {
 #if FLUTTER_BACKEND
   if (!update_batched) {
@@ -59,7 +59,7 @@ void UICommandBuffer::addCommand(int32_t id,
     update_batched = true;
   }
 #endif
-  UICommandItem item{id, type, args_01.get(), args_02.get(), nativePtr};
+  UICommandItem item{id, type, args_01, args_02, nativePtr};
   queue.emplace_back(item);
 }
 

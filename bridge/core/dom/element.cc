@@ -44,7 +44,7 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value, 
   std::unique_ptr<NativeString> args_02 = value.ToNativeString();
 
   GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), static_cast<int32_t>(UICommand::setAttribute),
-                                                       args_01, args_02, nullptr);
+                                                       args_01.release(), args_02.release(), nullptr);
 }
 
 void Element::removeAttribute(const AtomicString& name, ExceptionState& exception_state) {
