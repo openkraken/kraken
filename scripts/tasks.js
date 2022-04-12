@@ -831,15 +831,15 @@ task('run-benchmark', async (done) => {
         performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
         
         // Save performance list to file and upload to OSS.
-        const listFile = path.join(__dirname, `${viewType}-load-time-list.txt`);
-        fs.writeFileSync(listFile, performanceDatas.toString());
+        const listFile = path.join(__dirname, `${viewType}-load-time-list.js`);
+        fs.writeFileSync(listFile, `performanceCallback('${viewType}LoadtimeList', [${performanceDatas.toString()}]);`);
 
-        let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-load-time-list.txt`;
+        let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-loadtimeList.js`;
         await uploader(WebviewPerformanceOSSPath, listFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
         }).catch(err => done(err));
         // Save performance data of Webview with kraken version.
-        let WebviewPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-load-time-list.txt`;
+        let WebviewPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-loadtimeList.js`;
         await uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
           console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
         }).catch(err => done(err));
