@@ -5,9 +5,23 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
 <% } %>
 
 <% _.forEach(object.methods, function(method, index) { %>
-static JSValue <%= method.name %>(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  <%= generateFunctionBody(blob, method, {isInstanceMethod: true}) %>
-}
+
+  <% if (overloadMethods[method.name] && overloadMethods[method.name].length > 1) { %>
+    <% _.forEach(overloadMethods[method.name], function(overloadMethod, index) { %>
+static JSValue <%= overloadMethod.name %>_overload_<%= index %>(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+        <%= generateFunctionBody(blob, overloadMethod, {isInstanceMethod: true}) %>
+      }
+    <% }); %>
+    static JSValue <%= method.name %>(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+      <%= generateOverLoadSwitchBody(overloadMethods[method.name]) %>
+    }
+  <% } else { %>
+
+  static JSValue <%= method.name %>(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+    <%= generateFunctionBody(blob, method, {isInstanceMethod: true}) %>
+  }
+  <% } %>
+
 <% }) %>
 
 <% _.forEach(object.props, function(prop, index) { %>

@@ -188,6 +188,25 @@ ${optionalArgumentsInit.join('\n')}
 `;
 }
 
+type OverLoadMethods = {
+  [name: string]: FunctionDeclaration[];
+};
+
+function generateOverLoadSwitchBody(overloadMethods: FunctionDeclaration[]) {
+  let callBodyList = overloadMethods.map((overload, index) => {
+    return `if (${overload.args.length} == argc) {
+  return ${overload.name}_overload_${index}(ctx, this_val, argc, argv);
+}
+    `;
+  });
+
+  return `
+${callBodyList.join('\n')}
+
+return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv)
+`;
+}
+
 function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
   if (type[0] == FunctionArgumentType.void) return '';
 
@@ -263,12 +282,20 @@ export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
         object.props.forEach(prop => {
           options.classMethodsInstallList.push(`{"${prop.name}", ${prop.name}AttributeGetCallback, ${prop.readonly ? 'nullptr' : `${prop.name}AttributeSetCallback`}}`)
         });
+
+        let overloadMethods = {};
         object.methods.forEach(method => {
-          options.classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
+          if (overloadMethods.hasOwnProperty(method.name)) {
+            overloadMethods[method.name].push(method);
+          } else {
+            overloadMethods[method.name] = [method];
+            options.classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
+          }
         });
         if (object.construct) {
           options.constructorInstallList.push(`{"${getClassName(blob)}", nullptr, nullptr, constructor}`)
         }
+
         options.wrapperTypeInfoInit = `
 const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ${object.construct ? `QJS${getClassName(blob)}::ConstructorCallback` : 'nullptr'}};
 const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::wrapper_type_info_;`;
@@ -277,6 +304,8 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
           blob: blob,
           object: object,
           generateFunctionBody,
+          generateOverLoadSwitchBody,
+          overloadMethods,
           generateTypeConverter
         });
       }
