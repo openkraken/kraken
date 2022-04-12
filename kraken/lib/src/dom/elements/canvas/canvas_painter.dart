@@ -72,8 +72,9 @@ class CanvasPainter extends CustomPainter {
     }
 
     // Paint new actions
+    List<CanvasAction>? actions;
     if (_shouldPainting) {
-      context!.performActions(recordCanvas, size);
+      actions = context!.performActions(recordCanvas, size);
     }
 
     // Must pair each call to save()/saveLayer() with a later matching call to restore().
@@ -90,8 +91,8 @@ class CanvasPainter extends CustomPainter {
     // Dispose the used picture.
     picture.dispose();
     // Clear actions after snapshot was created, or next frame call may empty.
-    if (_shouldPainting) {
-      context!.clearActions();
+    if (actions != null) {
+      context!.clearActions(actions);
     }
   }
 

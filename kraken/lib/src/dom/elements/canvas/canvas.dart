@@ -27,16 +27,6 @@ class RenderCanvasPaint extends RenderCustomPaint {
           foregroundPainter: null, // Ignore foreground painter
           preferredSize: preferredSize,
         );
-
-  @override
-  void markNeedsPaint() {
-    CustomPainter? canvasPainter = painter;
-    if (canvasPainter != null
-        && canvasPainter.shouldRepaint(canvasPainter)) {
-      super.markNeedsPaint();
-    }
-    // Avoid unnecessary mark of repaint.
-  }
 }
 
 class CanvasElement extends Element {
