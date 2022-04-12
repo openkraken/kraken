@@ -19,6 +19,8 @@ class CanvasPainter extends CustomPainter {
   // Cache the last paint image.
   Image? _snapshot;
   bool _shouldRepaint = false;
+  // Indicate that snapshot is not generated yet, should not to perform next frame now.
+  bool _updatingSnapshot = false;
 
   bool get _shouldPainting => context != null && context!.actionCount > 0;
   bool get _hasSnapshot => context != null && _snapshot != null;
@@ -83,7 +85,8 @@ class CanvasPainter extends CustomPainter {
     canvas.drawPicture(picture);
 
     // Must flat picture to image, or raster will accept a growing command buffer.
-    _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
+    await _createSnapshot(picture, size);
+
     // Dispose the used picture.
     picture.dispose();
     // Clear actions after snapshot was created, or next frame call may empty.
@@ -92,13 +95,19 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
+  Future<void> _createSnapshot(Picture picture, Size size) async {
+    _updatingSnapshot = true;
+    _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
+    _updatingSnapshot = false;
+  }
+
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) {
     if (_shouldRepaint) {
       _shouldRepaint = false;
       return true;
     }
-    return false;
+    return !_updatingSnapshot;
   }
 
   void _resetPaintingContext() {
