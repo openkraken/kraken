@@ -1157,4 +1157,32 @@ describe("Margin collapse", () => {
     });
   });
 
+  it('should work with empty block and margin top with parent collapse', async () => {
+    let div1;
+    let div2;
+    div1 = createElement(
+      'div',
+      {
+        style: {
+          margin: '0 0 20px',
+        },
+      },
+    );
+    div2 = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '50px',
+          background: 'green',
+          color: 'white',
+        },
+      },
+    );
+
+    BODY.appendChild(div1);
+    BODY.appendChild(div2);
+
+    await snapshot();
+  });
 });

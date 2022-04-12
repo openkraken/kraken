@@ -4387,6 +4387,6 @@ describe('absolute-non', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
 });
