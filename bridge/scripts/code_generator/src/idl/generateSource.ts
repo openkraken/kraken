@@ -45,6 +45,9 @@ export function generateTypeValue(type: ParameterType[]): string {
     case FunctionArgumentType.void: {
       return 'void';
     }
+    case FunctionArgumentType.double: {
+      return 'double';
+    }
     case FunctionArgumentType.boolean: {
       return 'bool';
     }
@@ -267,7 +270,7 @@ export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
           options.constructorInstallList.push(`{"${getClassName(blob)}", nullptr, nullptr, constructor}`)
         }
         options.wrapperTypeInfoInit = `
-const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, QJS${getClassName(blob)}::ConstructorCallback};
+const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {JS_CLASS_${getClassName(blob).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ${object.construct ? `QJS${getClassName(blob)}::ConstructorCallback` : 'nullptr'}};
 const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::wrapper_type_info_;`;
         return _.template(readTemplate('interface'))({
           className: getClassName(blob),

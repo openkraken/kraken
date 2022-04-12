@@ -64,7 +64,7 @@ Node* Node::insertBefore(Node* new_child, Node* ref_child, ExceptionState& excep
   if (this_node)
     return this_node->InsertBefore(new_child, ref_child, exception_state);
 
-  exception_state.ThrowException(ErrorType::TypeError, "This node type does not support this method.");
+  exception_state.ThrowException(ctx(), ErrorType::TypeError, "This node type does not support this method.");
   return nullptr;
 }
 
@@ -73,7 +73,7 @@ Node* Node::replaceChild(Node* new_child, Node* old_child, ExceptionState& excep
   if (this_node)
     return this_node->ReplaceChild(new_child, old_child, exception_state);
 
-  exception_state.ThrowException(ErrorType::TypeError, "This node type does not support this method.");
+  exception_state.ThrowException(ctx(), ErrorType::TypeError, "This node type does not support this method.");
   return nullptr;
 }
 
@@ -82,7 +82,7 @@ Node* Node::removeChild(Node* old_child, ExceptionState& exception_state) {
   if (this_node)
     return this_node->RemoveChild(old_child, exception_state);
 
-  exception_state.ThrowException(ErrorType::TypeError, "This node type does not support this method.");
+  exception_state.ThrowException(ctx(), ErrorType::TypeError, "This node type does not support this method.");
   return nullptr;
 }
 

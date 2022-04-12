@@ -64,4 +64,8 @@ void Element::click(ExceptionState& exception_state) {
   InvokeBindingMethod(binding_call_methods::kclick, 0, nullptr, exception_state);
 }
 
+bool Element::HasEquivalentAttributes(const Element& other) const {
+  return other.attributes_->IsEquivalent(*attributes_);
+}
+
 }  // namespace kraken

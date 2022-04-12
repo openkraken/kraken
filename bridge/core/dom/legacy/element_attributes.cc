@@ -85,6 +85,17 @@ std::string ElementAttributes::ToString() {
   return s;
 }
 
+bool ElementAttributes::IsEquivalent(const ElementAttributes& other) const {
+  if (attributes_.size() != other.attributes_.size()) return false;
+  for(auto& entry: attributes_) {
+    auto it = other.attributes_.find(entry.first);
+    if (it == other.attributes_.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void ElementAttributes::Trace(GCVisitor* visitor) const {}
 
 }  // namespace kraken

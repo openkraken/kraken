@@ -10,6 +10,7 @@
 #include "container_node.h"
 #include "legacy/bounding_client_rect.h"
 #include "legacy/element_attributes.h"
+#include "qjs_scroll_to_options.h"
 
 namespace kraken {
 
@@ -29,6 +30,9 @@ class Element : public ContainerNode {
   void removeAttribute(const AtomicString&, ExceptionState& exception_state);
   BoundingClientRect* getBoundingClientRect(ExceptionState& exception_state);
   void click(ExceptionState& exception_state);
+  void scroll(ExceptionState& exception_state);
+  void scroll(const std::shared_ptr<ScrollToOptions> &options, ExceptionState& exception_state);
+  void scroll(double x, double y, ExceptionState& exception_state);
 
   //  static JSValue toBlob(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   //  static JSValue click(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
@@ -36,6 +40,8 @@ class Element : public ContainerNode {
   //  static JSValue scrollBy(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
   AtomicString TagName() const { return tag_name_; }
+
+  bool HasEquivalentAttributes(const Element& other) const;
 
  protected:
  private:

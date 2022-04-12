@@ -33,6 +33,15 @@ class BoundingClientRect : public ScriptWrappable {
   FORCE_INLINE const char* GetHumanReadableName() const override { return "BoundingClientRect"; }
   void Trace(GCVisitor* visitor) const override;
 
+  double x() const { return x_; }
+  double y() const { return y_; }
+  double width() const { return width_; }
+  double height() const { return height_; }
+  double top() const { return top_; }
+  double right() const { return right_; }
+  double bottom() const { return bottom_; }
+  double left() const { return left_; }
+
  private:
   double x_;
   double y_;

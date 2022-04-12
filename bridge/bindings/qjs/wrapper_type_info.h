@@ -18,7 +18,10 @@ enum {
   JS_CLASS_EVENT,
   JS_CLASS_ERROREVENT,
   JS_CLASS_EVENTTARGET,
-  JS_CLASS_NODE
+  JS_CLASS_NODE,
+  JS_CLASS_ELEMENT,
+  JS_CLASS_DOCUMENT,
+  JS_CLASS_BOUNDINGCLIENTRECT
 };
 
 // This struct provides a way to store a bunch of information that is helpful

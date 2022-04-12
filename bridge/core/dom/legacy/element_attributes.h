@@ -22,8 +22,6 @@ class ElementAttributes : public ScriptWrappable {
  public:
   ElementAttributes(Element) = delete;
   ElementAttributes(Element* element);
-  FORCE_INLINE const char* GetHumanReadableName() const override { return "ElementAttributes"; }
-  void Trace(GCVisitor* visitor) const override;
 
   AtomicString GetAttribute(const AtomicString& name);
   bool SetAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state);
@@ -32,6 +30,11 @@ class ElementAttributes : public ScriptWrappable {
   void CopyWith(ElementAttributes* attributes);
   std::shared_ptr<SpaceSplitString> ClassName();
   std::string ToString();
+
+  bool IsEquivalent(const ElementAttributes& other) const;
+
+  FORCE_INLINE const char* GetHumanReadableName() const override { return "ElementAttributes"; }
+  void Trace(GCVisitor* visitor) const override;
 
  private:
   std::unordered_map<AtomicString, AtomicString, AtomicString::KeyHasher> attributes_;

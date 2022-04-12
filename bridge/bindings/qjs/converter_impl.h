@@ -24,6 +24,7 @@
 #include "qjs_event_init.h"
 #include "qjs_event_listener_options.h"
 #include "qjs_node.h"
+#include "qjs_scroll_to_options.h"
 
 namespace kraken {
 
@@ -475,6 +476,14 @@ DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLElement);
 template <>
 struct Converter<NodeList> : public ConverterBase<NodeList> {
   static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
+};
+
+template<>
+struct Converter<ScrollToOptions> : ConverterBase<ScrollToOptions> {
+  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    assert(!JS_IsException(value));
+    return ScrollToOptions::Create(ctx, value, exception_state);
+  }
 };
 
 }  // namespace kraken
