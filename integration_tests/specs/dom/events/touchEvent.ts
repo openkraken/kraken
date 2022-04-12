@@ -184,8 +184,13 @@ describe('TouchEvent', () => {
     div.style.position = 'fixed';
     document.body.appendChild(div);
 
-    document.body.addEventListener('touchmove', () => done())
+    document.body.addEventListener('touchmove', function callback() {
+      document.body.removeEventListener('touchmove', callback);
+      done();
+    });
 
-    await simulateSwipe(0, 0, 0, 100, 0.5);
+    requestAnimationFrame(() => {
+      simulateSwipe(10, 10, 10, 100, 0.5);
+    });
   });
 });

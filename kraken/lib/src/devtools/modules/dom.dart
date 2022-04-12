@@ -87,7 +87,7 @@ class InspectDOMModule extends UIInspectorModule {
 
     // BoxModel design to BorderBox in kraken.
     if (element != null && element.renderBoxModel != null && element.renderBoxModel!.hasSize) {
-      ui.Offset contentBoxOffset = element.renderBoxModel!.localToGlobal(ui.Offset.zero);
+      ui.Offset contentBoxOffset = element.renderBoxModel!.localToGlobal(ui.Offset.zero, ancestor: element.ownerDocument.viewport);
 
       int widthWithinBorder = element.renderBoxModel!.size.width.toInt();
       int heightWithinBorder = element.renderBoxModel!.size.height.toInt();
