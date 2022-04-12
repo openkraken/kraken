@@ -11,7 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier;
+import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier, TextEditingActionTarget;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -39,7 +39,7 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
-class EditableTextDelegate implements TextSelectionDelegate {
+class EditableTextDelegate with TextEditingActionTarget implements TextSelectionDelegate {
   final TextFormControlElement _textFormControlElement;
   EditableTextDelegate(this._textFormControlElement);
 
@@ -132,6 +132,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) {
+    super.copySelection(cause);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -159,6 +160,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void cutSelection(SelectionChangedCause cause) {
+    super.cutSelection(cause);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
@@ -167,6 +169,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
+    super.pasteText(cause);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
@@ -175,10 +178,43 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void selectAll(SelectionChangedCause cause) async {
+    super.selectAll(cause);
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
     }
   }
+
+  @override
+  void debugAssertLayoutUpToDate() {
+    RenderEditable? editable = _textFormControlElement.renderEditable;
+    assert(editable != null);
+    editable!.debugAssertLayoutUpToDate();
+  }
+
+
+  @override
+  bool get obscureText => _textFormControlElement.obscureText;
+
+  @override
+  bool get readOnly => _textFormControlElement.readOnly;
+
+  @override
+  bool get selectionEnabled => _textFormControlElement.renderEditable?.selectionEnabled ?? false;
+
+  @override
+  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+    if (newValue == textEditingValue) {
+      return;
+    }
+
+    RenderEditable? renderEditable = _textFormControlElement.renderEditable;
+    if (renderEditable != null) {
+      renderEditable.textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
+    }
+  }
+
+  @override
+  TextLayoutMetrics get textLayoutMetrics => _textFormControlElement.renderEditable!;
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
@@ -188,7 +224,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     this.defaultStyle,
     this.isReplacedElement,
   }) : super(context, defaultStyle: _defaultStyle, isReplacedElement: true) {
-    _textSelectionDelegate = EditableTextDelegate(this);
+    textSelectionDelegate = EditableTextDelegate(this);
     _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
     _scrollable = KrakenScrollable(
       axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right
@@ -233,7 +269,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   bool obscureText = false;
   bool autoCorrect = true;
-  late EditableTextDelegate _textSelectionDelegate;
+  late EditableTextDelegate textSelectionDelegate;
   TextSpan? _actualText;
   RenderTextControlLeaderLayer? renderTextControlLeaderLayer;
 
@@ -264,7 +300,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   bool? isReplacedElement = false;
 
   String _getValue() {
-    TextEditingValue value = _textSelectionDelegate._textEditingValue;
+    TextEditingValue value = textSelectionDelegate._textEditingValue;
     return value.text;
   }
 
@@ -316,7 +352,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   String setValue(String? text) {
     String newValue = sanitizeValue(text);
-    TextRange composing = _textSelectionDelegate._textEditingValue.composing;
+    TextRange composing = textSelectionDelegate._textEditingValue.composing;
     TextSelection selection = TextSelection.collapsed(offset: newValue.length);
     TextEditingValue newTextEditingValue = TextEditingValue(
       text: newValue,
@@ -554,7 +590,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // Rebuilt text span, for style has changed.
     _actualText = _buildTextSpan(text: _actualText?.text);
     TextEditingValue value = TextEditingValue(text: _actualText!.text!);
-    _textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+    textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
     if (renderEditable != null) {
       renderEditable!.text = _actualText!.text!.isEmpty
@@ -643,7 +679,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void _handleEditable(Event event) {
     if (event.type == EVENT_TOUCH_START) {
       _hideSelectionOverlayIfNeeded();
-      _textSelectionDelegate.hideToolbar(false);
+      textSelectionDelegate.hideToolbar(false);
 
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
@@ -697,10 +733,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       renderEditable!.handleTap();
     } else if (event.type == EVENT_LONG_PRESS) {
       renderEditable!.handleLongPress();
-      _textSelectionDelegate.showToolbar();
+      textSelectionDelegate.showToolbar();
     } else if (event.type == EVENT_DOUBLE_CLICK) {
       renderEditable!.handleDoubleTap();
-      _textSelectionDelegate.showToolbar();
+      textSelectionDelegate.showToolbar();
     }
   }
 
@@ -763,7 +799,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     updateEditingValue(_value.copyWith(selection: TextSelection(baseOffset: 0, extentOffset: 0)));
 
     // Hide input handles and toolbar.
-    _textSelectionDelegate.hideToolbar();
+    textSelectionDelegate.hideToolbar();
 
     _cursorVisibilityNotifier.value = false;
     if (_textInputConnection != null && _textInputConnection!.attached) {
@@ -817,7 +853,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       cursorRadius: cursorRadius,
       cursorOffset: Offset.zero,
       enableInteractiveSelection: true,
-      textSelectionDelegate: _textSelectionDelegate,
+      textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: window.devicePixelRatio,
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
@@ -906,9 +942,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     _lastKnownRemoteTextEditingValue = localValue;
   }
 
-  TextEditingValue get _value => _textSelectionDelegate._textEditingValue;
+  TextEditingValue get _value => textSelectionDelegate._textEditingValue;
   set _value(TextEditingValue value) {
-    _textSelectionDelegate._textEditingValue = value;
+    textSelectionDelegate._textEditingValue = value;
   }
 
 
@@ -1035,7 +1071,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
           endHandleLayerLink: _endHandleLayerLink,
           renderObject: renderEditable!,
           selectionControls: _selectionControls,
-          selectionDelegate: _textSelectionDelegate,
+          selectionDelegate: textSelectionDelegate,
           dragStartBehavior: DragStartBehavior.start,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
         );
@@ -1067,7 +1103,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           if (cause == SelectionChangedCause.longPress) {
-            _textSelectionDelegate.bringIntoView(selection.base);
+            textSelectionDelegate.bringIntoView(selection.base);
           }
           return;
         case TargetPlatform.android:
@@ -1096,7 +1132,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   /// Toggle the toolbar when a selection handle is tapped.
   void _handleSelectionHandleTapped() {
     if (_value.selection.isCollapsed) {
-      _textSelectionDelegate.toggleToolbar();
+      textSelectionDelegate.toggleToolbar();
     }
   }
 
@@ -1122,7 +1158,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       _handleSelectionChanged(value.selection, SelectionChangedCause.keyboard);
     } else {
       _showCaretOnScreen();
-      _textSelectionDelegate.hideToolbar();
+      textSelectionDelegate.hideToolbar();
     }
     _formatAndSetValue(value, userInteraction: true, cause: SelectionChangedCause.keyboard);
 
@@ -1135,7 +1171,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   void _triggerChangeEvent() {
-    String currentValue = _textSelectionDelegate._textEditingValue.text;
+    String currentValue = textSelectionDelegate._textEditingValue.text;
     if (_inputValueAtBegin != currentValue) {
       Event changeEvent = Event(EVENT_CHANGE);
       dispatchEvent(changeEvent);
@@ -1398,7 +1434,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   // Abstract class method added after flutter@1.15
   @override
-  TextEditingValue get currentTextEditingValue => _textSelectionDelegate._textEditingValue;
+  TextEditingValue get currentTextEditingValue => textSelectionDelegate._textEditingValue;
 
   @override
   // TODO: implement currentAutofillScope
