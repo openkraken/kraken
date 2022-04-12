@@ -233,7 +233,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.2);
   });
   it('replaced-height-003', async () => {
     let p;
@@ -2777,7 +2777,7 @@ describe('absolute-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: margin auto alignment should not take effect on position absolute element. 
+  // @TODO: margin auto alignment should not take effect on position absolute element.
   xit('replaced-width-008', async () => {
     let p;
     let containingblock;
