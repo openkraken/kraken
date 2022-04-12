@@ -7,7 +7,6 @@ import 'dart:ui';
 import 'package:flutter/animation.dart' show Curve;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:kraken/src/css/animation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
