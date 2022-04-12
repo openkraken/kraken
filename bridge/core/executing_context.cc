@@ -42,7 +42,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   init_list_head(&node_job_list);
   init_list_head(&module_job_list);
   init_list_head(&module_callback_job_list);
-  init_list_head(&native_function_job_list);
 
   time_origin_ = std::chrono::system_clock::now();
 
@@ -83,15 +82,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 ExecutingContext::~ExecutingContext() {
   valid_contexts[context_id_] = false;
   ctx_invalid_ = true;
-
-  // Free unreleased native_functions.
-  {
-    struct list_head *el, *el1;
-    list_for_each_safe(el, el1, &native_function_job_list) {
-      auto* job = list_entry(el, NativeFunctionContext, link);
-      delete job;
-    }
-  }
 
   // Check if current context have unhandled exceptions.
   JSValue exception = JS_GetException(script_state_.ctx());

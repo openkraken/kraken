@@ -101,7 +101,6 @@ class ExecutingContext {
   struct list_head node_job_list;
   struct list_head module_job_list;
   struct list_head module_callback_job_list;
-  struct list_head native_function_job_list;
 
   static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
                                                     JSValueConst promise,

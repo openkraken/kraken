@@ -5,4 +5,10 @@
 
 #include "document.h"
 
-namespace kraken {}  // namespace kraken
+namespace kraken {
+
+Text* Document::createTextNode(const AtomicString& value) {
+  return nullptr;
+}
+
+}  // namespace kraken

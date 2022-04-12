@@ -11,6 +11,8 @@
 
 namespace kraken {
 
+class Text;
+
 // A document (https://dom.spec.whatwg.org/#concept-document) is the root node
 // of a tree of DOM nodes, generally resulting from the parsing of a markup
 // (typically, HTML) resource.
@@ -19,6 +21,8 @@ class Document : public Node, TreeScope {
 
  public:
   using ImplType = Document*;
+
+  Text* createTextNode(const AtomicString& value);
 
   void IncrementNodeCount() { node_count_++; }
   void DecrementNodeCount() {

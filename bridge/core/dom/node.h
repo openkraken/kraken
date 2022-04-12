@@ -11,6 +11,7 @@
 #include "events/event_target.h"
 #include "foundation/macros.h"
 #include "tree_scope.h"
+#include "node_data.h"
 
 namespace kraken {
 
@@ -23,7 +24,6 @@ class Element;
 class Document;
 class DocumentFragment;
 class ContainerNode;
-class NodeData;
 class NodeList;
 
 enum class CustomElementState : uint32_t {
@@ -62,7 +62,7 @@ class Node : public EventTarget {
   bool HasTagName(const AtomicString&) const;
   virtual std::string nodeName() const = 0;
   virtual std::string nodeValue() const;
-  virtual void setNodeValue(const AtomicString&);
+  virtual void setNodeValue(const AtomicString&, ExceptionState&);
   virtual NodeType nodeType() const = 0;
 
   ContainerNode* parentNode() const;
@@ -92,7 +92,7 @@ class Node : public EventTarget {
   bool isSameNode(const Node* other, ExceptionState& exception_state) const { return this == other; }
 
   AtomicString textContent(bool convert_brs_to_newlines = false) const;
-  virtual void setTextContent(const AtomicString&);
+  virtual void setTextContent(const AtomicString&, ExceptionState& exception_state);
 
   // Other methods (not part of DOM)
   FORCE_INLINE bool IsTextNode() const { return GetDOMNodeType() == DOMNodeType::kText; }

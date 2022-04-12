@@ -6,7 +6,7 @@
 
 namespace kraken {
 
-void CharacterData::setData(const std::string& data) {
+void CharacterData::setData(const AtomicString& data) {
   data_ = data;
 }
 }  // namespace kraken

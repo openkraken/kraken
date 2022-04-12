@@ -14,7 +14,7 @@ class CharacterData : public Node {
 
  public:
   const AtomicString& data() const { return data_; }
-  void setData(const std::string& data);
+  void setData(const AtomicString& data);
 
  protected:
   CharacterData(Document& tree_scope, const AtomicString& text, ConstructionType type)

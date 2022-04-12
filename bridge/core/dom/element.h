@@ -51,14 +51,14 @@ class Element : public ContainerNode {
   double clientTop() const;
 
   double scrollTop() const;
-  void setScrollTop(double v);
+  void setScrollTop(double v, ExceptionState& exception_state);
   double scrollLeft() const;
-  void setScrollLeft(double v);
+  void setScrollLeft(double v, ExceptionState& exception_state);
 
   std::string outerHTML() const;
-  void setOuterHTML(const AtomicString& value);
+  void setOuterHTML(const AtomicString& value, ExceptionState& exception_state);
   std::string innerHTML() const;
-  void setInnerHTML(const AtomicString& value);
+  void setInnerHTML(const AtomicString& value, ExceptionState& exception_state);
 
   AtomicString tagName() const { return tag_name_; }
 

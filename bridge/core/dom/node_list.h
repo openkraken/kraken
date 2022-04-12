@@ -32,7 +32,6 @@ class NodeList : public ScriptWrappable {
   virtual Node* VirtualOwnerNode() const { return nullptr; }
 
  protected:
-  NodeList() = default;
 };
 
 }  // namespace kraken

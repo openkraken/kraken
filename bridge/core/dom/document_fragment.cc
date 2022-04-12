@@ -8,8 +8,7 @@
 
 namespace kraken {
 
-DocumentFragment* DocumentFragment::Create(ExecutingContext* context,
-                                           Document* document,
+DocumentFragment* DocumentFragment::Create(Document* document,
                                            ExceptionState& exception_state) {
   return MakeGarbageCollected<DocumentFragment>(document, ConstructionType::kCreateDocumentFragment);
 }
@@ -25,10 +24,11 @@ Node::NodeType DocumentFragment::nodeType() const {
 }
 
 Node* DocumentFragment::Clone(Document& factory, CloneChildrenFlag flag) const {
-  DocumentFragment* clone = Create(factory);
-  if (flag != CloneChildrenFlag::kSkip)
-    clone->CloneChildNodesFrom(*this, flag);
-  return clone;
+//  ExceptionState exception_state;
+//  DocumentFragment* clone = Create(&factory, exception_state);
+//  if (flag != CloneChildrenFlag::kSkip)
+//    clone->CloneChildNodesFrom(*this, flag);
+//  return clone;
 }
 
 bool DocumentFragment::ChildTypeAllowed(NodeType type) const {

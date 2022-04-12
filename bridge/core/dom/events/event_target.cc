@@ -192,7 +192,9 @@ DispatchEventResult EventTarget::DispatchEventInternal(Event& event, ExceptionSt
   return dispatch_result;
 }
 
-NativeValue EventTarget::HandleCallFromDartSide(NativeString* method, int32_t argc, const NativeValue* argv) const {}
+NativeValue EventTarget::HandleCallFromDartSide(NativeString* method, int32_t argc, const NativeValue* argv) const {
+  return Native_NewNull();
+}
 
 const char* EventTarget::GetHumanReadableName() const {
   return "EventTarget";

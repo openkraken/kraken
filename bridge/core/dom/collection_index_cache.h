@@ -5,6 +5,7 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_COLLECTION_INDEX_CACHE_H_
 #define KRAKENBRIDGE_CORE_DOM_COLLECTION_INDEX_CACHE_H_
 
+#include <assert.h>
 #include <climits>
 #include "bindings/qjs/gc_visitor.h"
 #include "foundation/macros.h"

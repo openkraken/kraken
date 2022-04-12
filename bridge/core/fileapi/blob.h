@@ -21,6 +21,7 @@ class Blob : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  static Blob* Create(ExecutingContext* context, ExceptionState& exception_state);
   static Blob* Create(ExecutingContext* context);
   static Blob* Create(ExecutingContext* context,
                       std::vector<std::shared_ptr<BlobPart>>& data,

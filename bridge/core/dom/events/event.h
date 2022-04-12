@@ -137,7 +137,7 @@ class Event : public ScriptWrappable {
   virtual void DoneDispatchingEventAtCurrentTarget() {}
 
   bool cancelBubble() const { return propagationStopped(); }
-  void setCancelBubble(bool cancel) {
+  void setCancelBubble(bool cancel, ExceptionState& exception_state) {
     if (cancel) {
       propagation_stopped_ = true;
     }

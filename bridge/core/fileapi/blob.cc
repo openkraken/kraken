@@ -50,6 +50,10 @@ void BlobReaderClient::DidFinishLoading() {
   delete this;
 }
 
+Blob* Blob::Create(ExecutingContext* context, ExceptionState& exception_state) {
+  return MakeGarbageCollected<Blob>(context->ctx());
+}
+
 Blob* Blob::Create(ExecutingContext* context) {
   return MakeGarbageCollected<Blob>(context->ctx());
 }

@@ -9,7 +9,10 @@
 
 namespace kraken {
 
-HTMLCollection* ContainerNode::Children() {}
+HTMLCollection* ContainerNode::Children() {
+  //TODO: add children implements.
+  return nullptr;
+}
 
 unsigned ContainerNode::CountChildren() const {
   unsigned count = 0;
@@ -60,16 +63,12 @@ bool ContainerNode::IsHostIncludingInclusiveAncestorOfThis(const Node& new_child
     return false;
 
   bool child_contains_parent = false;
-  if (GetDocument().IsTemplateDocument()) {
+  const Node& root = TreeRoot();
+  auto* fragment = DynamicTo<DocumentFragment>(root);
+  if (fragment && fragment->IsTemplateContent()) {
     child_contains_parent = new_child.ContainsIncludingHostElements(*this);
   } else {
-    const Node& root = TreeRoot();
-    auto* fragment = DynamicTo<DocumentFragment>(root);
-    if (fragment && fragment->IsTemplateContent()) {
-      child_contains_parent = new_child.ContainsIncludingHostElements(*this);
-    } else {
-      child_contains_parent = new_child.contains(this);
-    }
+    child_contains_parent = new_child.contains(this, exception_state);
   }
   if (child_contains_parent) {
     exception_state.ThrowException(ctx(), ErrorType::TypeError, "The new child element contains the parent.");
@@ -274,14 +273,14 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
     return CheckReferenceChildParent(*this, next, old_child, exception_state);
   }
 
-  if (auto* document = DynamicTo<Document>(this)) {
-    // Step 2 is unnecessary. No one can have a Document child.
-    // Step 3:
-    if (!CheckReferenceChildParent(*this, next, old_child, exception_state))
-      return false;
-    // Step 4-6.
-    return document->CanAcceptChild(new_child, next, old_child, exception_state);
-  }
+//  if (auto* document = DynamicTo<Document>(this)) {
+//    // Step 2 is unnecessary. No one can have a Document child.
+//    // Step 3:
+//    if (!CheckReferenceChildParent(*this, next, old_child, exception_state))
+//      return false;
+//    // Step 4-6.
+//    return document->CanAcceptChild(new_child, next, old_child, exception_state);
+//  }
 
   // 2. If node is a host-including inclusive ancestor of parent, throw a
   // HierarchyRequestError.

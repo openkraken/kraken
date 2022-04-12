@@ -3,7 +3,6 @@
  */
 
 #include "node.h"
-#include "attr.h"
 #include "character_data.h"
 #include "child_node_list.h"
 #include "document.h"
@@ -18,10 +17,10 @@
 namespace kraken {
 
 Node* Node::Create(ExecutingContext* context, ExceptionState& exception_state) {
-  exception_state.ThrowException(ErrorType::TypeError, "Illegal constructor");
+  exception_state.ThrowException(context->ctx(), ErrorType::TypeError, "Illegal constructor");
 }
 
-void Node::setNodeValue(const AtomicString& value) {
+void Node::setNodeValue(const AtomicString& value, ExceptionState& exception_state) {
   // By default, setting nodeValue has no effect.
 }
 
@@ -91,7 +90,7 @@ Node* Node::appendChild(Node* new_child, ExceptionState& exception_state) {
   if (this_node)
     return this_node->AppendChild(new_child, exception_state);
 
-  exception_state.ThrowException(ErrorType::TypeError, "This node type does not support this method.");
+  exception_state.ThrowException(ctx(), ErrorType::TypeError, "This node type does not support this method.");
   return nullptr;
 }
 
@@ -123,16 +122,19 @@ bool Node::isEqualNode(Node* other, ExceptionState& exception_state) const {
   if (nodeValue() != other->nodeValue())
     return false;
 
-  if (auto* this_attr = DynamicTo<Attr>(this)) {
-    auto* other_attr = To<Attr>(other);
-    if (this_attr->localName() != other_attr->localName())
-      return false;
+//  if (auto* this_attr = DynamicTo<Attr>(this)) {
+//    auto* other_attr = To<Attr>(other);
+//    if (this_attr->localName() != other_attr->localName())
+//      return false;
+//
+//    if (this_attr->namespaceURI() != other_attr->namespaceURI())
+//      return false;
+//  } else
 
-    if (this_attr->namespaceURI() != other_attr->namespaceURI())
-      return false;
-  } else if (auto* this_element = DynamicTo<Element>(this)) {
+
+  if (auto* this_element = DynamicTo<Element>(this)) {
     auto* other_element = DynamicTo<Element>(other);
-    if (this_element->TagName() != other_element->TagName())
+    if (this_element->tagName() != other_element->tagName())
       return false;
 
     if (!this_element->HasEquivalentAttributes(*other_element))
@@ -171,8 +173,8 @@ AtomicString Node::textContent(bool convert_brs_to_newlines) const {
     return character_data->data();
 
   // Attribute nodes have their attribute values as textContent.
-  if (auto* attr = DynamicTo<Attr>(this))
-    return attr->value();
+//  if (auto* attr = DynamicTo<Attr>(this))
+//    return attr->value();
 
   // Documents and non-container nodes (that are not CharacterData)
   // have null textContent.
@@ -188,12 +190,12 @@ AtomicString Node::textContent(bool convert_brs_to_newlines) const {
   return AtomicString(ctx(), content);
 }
 
-void Node::setTextContent(const AtomicString& text) {
+void Node::setTextContent(const AtomicString& text, ExceptionState& exception_state) {
   switch (nodeType()) {
     case kAttributeNode:
     case kTextNode:
     case kCommentNode:
-      setNodeValue(text);
+      setNodeValue(text, exception_state);
       return;
     case kElementNode:
     case kDocumentFragmentNode: {
@@ -212,7 +214,7 @@ void Node::setTextContent(const AtomicString& text) {
         container->RemoveChildren();
       } else {
         container->RemoveChildren();
-        container->AppendChild(GetDocument().createTextNode(text), ExceptionState());
+        container->AppendChild(GetDocument().createTextNode(text), exception_state);
       }
       return;
     }
@@ -381,7 +383,6 @@ Node::Node(Document* document, ConstructionType type)
       node_flags_(type),
       parent_or_shadow_host_node_(nullptr),
       previous_(nullptr),
-      document_(document),
       next_(nullptr) {}
 
 void Node::Trace(GCVisitor*) const {}

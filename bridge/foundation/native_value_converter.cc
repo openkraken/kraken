@@ -9,29 +9,29 @@ namespace kraken {
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
 
-void call_native_function(NativeFunctionContext* functionContext,
-                          int32_t argc,
-                          NativeValue* argv,
-                          NativeValue* returnValue) {
-  //  auto* context = functionContext->m_context;
-  //  auto* arguments = new JSValue[argc];
-  //  for (int i = 0; i < argc; i++) {
-  //    arguments[i] = nativeValueToJSValue(context, argv[i]);
-  //  }
-  //  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->Global(), argc, arguments);
-  //  context->DrainPendingPromiseJobs();
-  //  if (context->HandleException(&result)) {
-  //    *returnValue = jsValueToNativeValue(context->ctx(), result);
-  //  }
-  //
-  //  JS_FreeValue(context->ctx(), result);
-  //
-  //  for (int i = 0; i < argc; i++) {
-  //    JS_FreeValue(context->ctx(), arguments[i]);
-  //  }
-  //  delete[] arguments;
-  //  delete functionContext;
-}
+//void call_native_function(NativeFunctionContext* functionContext,
+//                          int32_t argc,
+//                          NativeValue* argv,
+//                          NativeValue* returnValue) {
+//  //  auto* context = functionContext->m_context;
+//  //  auto* arguments = new JSValue[argc];
+//  //  for (int i = 0; i < argc; i++) {
+//  //    arguments[i] = nativeValueToJSValue(context, argv[i]);
+//  //  }
+//  //  JSValue result = JS_Call(context->ctx(), functionContext->m_callback, context->Global(), argc, arguments);
+//  //  context->DrainPendingPromiseJobs();
+//  //  if (context->HandleException(&result)) {
+//  //    *returnValue = jsValueToNativeValue(context->ctx(), result);
+//  //  }
+//  //
+//  //  JS_FreeValue(context->ctx(), result);
+//  //
+//  //  for (int i = 0; i < argc; i++) {
+//  //    JS_FreeValue(context->ctx(), arguments[i]);
+//  //  }
+//  //  delete[] arguments;
+//  //  delete functionContext;
+//}
 
 static JSValue anonymousFunction(JSContext* ctx,
                                  JSValueConst this_val,

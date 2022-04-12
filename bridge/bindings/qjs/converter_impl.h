@@ -25,7 +25,7 @@
 #include "qjs_event_listener_options.h"
 #include "qjs_node.h"
 #include "qjs_scroll_to_options.h"
-#include "qjs_element_attribute.h"
+#include "qjs_element_attributes.h"
 
 namespace kraken {
 

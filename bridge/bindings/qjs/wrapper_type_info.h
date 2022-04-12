@@ -21,7 +21,8 @@ enum {
   JS_CLASS_NODE,
   JS_CLASS_ELEMENT,
   JS_CLASS_DOCUMENT,
-  JS_CLASS_BOUNDINGCLIENTRECT
+  JS_CLASS_BOUNDINGCLIENTRECT,
+  JS_CLASS_ELEMENTATTRIBUTES
 };
 
 // This struct provides a way to store a bunch of information that is helpful

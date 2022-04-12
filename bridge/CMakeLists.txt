@@ -98,6 +98,7 @@ list(APPEND BRIDGE_SOURCE
   foundation/native_value.h
   foundation/native_type.h
   foundation/native_value_converter.h
+  foundation/native_value_converter.cc
   foundation/casting.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
@@ -289,8 +290,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/binding_object.cc
     core/dom/node.cc
     core/dom/node.h
-    core/dom/attr.cc
-    core/dom/attr.h
     core/dom/node_traversal.cc
     core/dom/node_traversal.h
     core/dom/template_content_document_fragment.h
@@ -374,12 +373,14 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_node.cc
     out/qjs_element.cc
     out/qjs_element.h
-    out/qjs_element_attribute.cc
-    out/qjs_element_attribute.h
+    out/qjs_element_attributes.cc
+    out/qjs_element_attributes.h
     out/event_type_names.h
     out/event_type_names.cc
     out/built_in_string.cc
     out/built_in_string.h
+    out/binding_call_methods.cc
+    out/binding_call_methods.h
     out/qjs_scroll_options.cc
     out/qjs_scroll_options.h
     out/qjs_scroll_to_options.cc
