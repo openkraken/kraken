@@ -36,58 +36,6 @@ Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder placeholder, Rend
   return placeholderOffset;
 }
 
-
-// Margin auto has special rules for positioned element
-// which will override the default position rule
-// https://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width
-Offset _getAutoMarginPositionedElementOffset(double? x, double? y, RenderBoxModel child, Size parentSize) {
-  RenderStyle childRenderStyle = child.renderStyle;
-
-  CSSLengthValue marginLeft = childRenderStyle.marginLeft;
-  CSSLengthValue marginRight = childRenderStyle.marginRight;
-  CSSLengthValue marginTop = childRenderStyle.marginTop;
-  CSSLengthValue marginBottom = childRenderStyle.marginBottom;
-  CSSLengthValue width = childRenderStyle.width;
-  CSSLengthValue height = childRenderStyle.height;
-  CSSLengthValue left = childRenderStyle.left;
-  CSSLengthValue right = childRenderStyle.right;
-  CSSLengthValue top = childRenderStyle.top;
-  CSSLengthValue bottom = childRenderStyle.bottom;
-
-  // 'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right'
-  // + 'border-right-width' + 'margin-right' + 'right' = width of containing block
-  if (left.isNotAuto && right.isNotAuto &&
-    (child is! RenderReplaced || width.isNotAuto)) {
-    if (marginLeft.isAuto) {
-      double leftValue = left.computedValue;
-      double rightValue = right.computedValue;
-      double remainingSpace = parentSize.width - child.boxSize!.width - leftValue - rightValue;
-
-      if (marginRight.isAuto) {
-        x = leftValue + remainingSpace / 2;
-      } else {
-        x = leftValue + remainingSpace;
-      }
-    }
-  }
-
-  if (top.isNotAuto && bottom.isNotAuto &&
-    (child is! RenderReplaced || height.isNotAuto)) {
-    if (marginTop.isAuto) {
-      double topValue = top.computedValue;
-      double bottomValue = bottom.computedValue;
-      double remainingSpace = parentSize.height - child.boxSize!.height - topValue - bottomValue;
-
-      if (marginBottom.isAuto) {
-        y = topValue + remainingSpace / 2;
-      } else {
-        y = topValue + remainingSpace;
-      }
-    }
-  }
-  return Offset(x ?? 0, y ?? 0);
-}
-
 class CSSPositionedLayout {
   static RenderLayoutParentData getPositionParentData(RenderBoxModel renderBoxModel, RenderLayoutParentData parentData) {
     CSSPositionType positionType = renderBoxModel.renderStyle.position;
@@ -345,109 +293,149 @@ class CSSPositionedLayout {
     }
   }
 
+  // Position of position element involves inset, width/height and margin.
+  // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
   static void applyPositionedChildOffset(
     RenderBoxModel parent,
     RenderBoxModel child,
   ) {
     final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
-    Size? parentSize = parent.boxSize;
+    Size size = child.boxSize!;
+    Size parentSize = parent.boxSize!;
+    RenderStyle parentRenderStyle = parent.renderStyle;
 
+    // Calculate offset to overflow container box first, then subtract border and padding
+    // to get the offset to scrolling content box.
     if (parent.isScrollingContentBox) {
       RenderLayoutBox overflowContainerBox = parent.parent as RenderLayoutBox;
-
-      if(overflowContainerBox.widthSizeType == BoxSizeType.specified && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
-        parentSize = Size(
-            overflowContainerBox.renderStyle.width.computedValue,
-            overflowContainerBox.renderStyle.height.computedValue
-        );
-      } else {
-        parentSize = parent.boxSize;
-      }
-    } else {
-      parentSize = parent.boxSize;
+      parentRenderStyle = overflowContainerBox.renderStyle;
+      parentSize = Size(
+        parentSize.width
+          - parentRenderStyle.effectiveBorderLeftWidth.computedValue
+          - parentRenderStyle.effectiveBorderRightWidth.computedValue,
+        parentSize.height
+          - parentRenderStyle.effectiveBorderTopWidth.computedValue
+          - parentRenderStyle.effectiveBorderBottomWidth.computedValue,
+      );
     }
 
-    // Calc x,y by parentData.
-    double? x, y;
+    CSSLengthValue parentBorderLeftWidth = parentRenderStyle.effectiveBorderLeftWidth;
+    CSSLengthValue parentBorderRightWidth = parentRenderStyle.effectiveBorderRightWidth;
+    CSSLengthValue parentBorderTopWidth = parentRenderStyle.effectiveBorderTopWidth;
+    CSSLengthValue parentBorderBottomWidth = parentRenderStyle.effectiveBorderBottomWidth;
 
-    double? childMarginTop = 0;
-    double? childMarginBottom = 0;
-    double? childMarginLeft = 0;
-    double? childMarginRight = 0;
+    // The containing block of not an inline box is formed by the padding edge of the ancestor.
+    // Thus the final offset of child need to add the border of parent.
+    // https://www.w3.org/TR/css-position-3/#def-cb
+    Size containingBlockSize = Size(
+      parentSize.width
+        - parentBorderLeftWidth.computedValue
+        - parentBorderRightWidth.computedValue,
+      parentSize.height
+        - parentBorderTopWidth.computedValue
+        - parentBorderBottomWidth.computedValue
+    );
 
     RenderStyle childRenderStyle = child.renderStyle;
-    childMarginTop = childRenderStyle.marginTop.computedValue;
-    childMarginBottom = childRenderStyle.marginBottom.computedValue;
-    childMarginLeft = childRenderStyle.marginLeft.computedValue;
-    childMarginRight = childRenderStyle.marginRight.computedValue;
+    CSSLengthValue left = childRenderStyle.left;
+    CSSLengthValue right = childRenderStyle.right;
+    CSSLengthValue top = childRenderStyle.top;
+    CSSLengthValue bottom = childRenderStyle.bottom;
+    CSSLengthValue marginLeft = childRenderStyle.marginLeft;
+    CSSLengthValue marginRight = childRenderStyle.marginRight;
+    CSSLengthValue marginTop = childRenderStyle.marginTop;
+    CSSLengthValue marginBottom = childRenderStyle.marginBottom;
 
-    // Offset to global coordinate system of base.
-    if (childParentData.isPositioned) {
-      EdgeInsets borderEdge = parent.renderStyle.border;
-      double borderLeft = borderEdge.left;
-      double borderRight = borderEdge.right;
-      double borderTop = borderEdge.top;
-      double borderBottom = borderEdge.bottom;
-      RenderStyle childRenderStyle = child.renderStyle;
-      Offset? placeholderOffset;
-
-      // ScrollTop and scrollLeft will be added to offset of renderBox in the paint stage
-      // for positioned fixed element.
-      if (child.renderStyle.position == CSSPositionType.fixed) {
-        Element rootElement = parent.renderStyle.target;
-        child.scrollingOffsetX = rootElement.scrollLeft;
-        child.scrollingOffsetY = rootElement.scrollTop;
-      }
-
-      double top;
-      if (childRenderStyle.top.isNotAuto) {
-        top = childRenderStyle.top.computedValue + borderTop + childMarginTop;
-
-        if (parent.isScrollingContentBox) {
-          RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= overflowContainingBox.renderStyle.paddingTop.computedValue;
-        }
-      } else if (childRenderStyle.bottom.isNotAuto) {
-        top = parentSize!.height - child.boxSize!.height - borderBottom - childMarginBottom - childRenderStyle.bottom.computedValue;
-
-        if (parent.isScrollingContentBox) {
-          RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          top -= (overflowContainingBox.renderStyle.effectiveBorderTopWidth.computedValue + overflowContainingBox.renderStyle.effectiveBorderBottomWidth.computedValue
-              + overflowContainingBox.renderStyle.paddingTop.computedValue);
-        }
-      } else {
-        placeholderOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
-        // Use original offset in normal flow if no top and bottom is set.
-        top = placeholderOffset.dy;
-      }
-
-      double left;
-      if (childRenderStyle.left.isNotAuto) {
-        left = childRenderStyle.left.computedValue + borderLeft + childMarginLeft;
-
-        if (parent.isScrollingContentBox) {
-          RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= overflowContainingBox.renderStyle.paddingLeft.computedValue;
-        }
-      } else if (childRenderStyle.right.isNotAuto) {
-        left = parentSize!.width - child.boxSize!.width - borderRight - childMarginRight - childRenderStyle.right.computedValue;
-
-        if (parent.isScrollingContentBox) {
-          RenderLayoutBox overflowContainingBox = parent.parent as RenderLayoutBox;
-          left -= (overflowContainingBox.renderStyle.effectiveBorderLeftWidth.computedValue + overflowContainingBox.renderStyle.effectiveBorderRightWidth.computedValue
-            + overflowContainingBox.renderStyle.paddingLeft.computedValue);
-        }
-      } else {
-        placeholderOffset ??= _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
-        // Use original offset in normal flow if no left and right is set.
-        left = placeholderOffset.dx;
-      }
-
-      x = left;
-      y = top;
+    // ScrollTop and scrollLeft will be added to offset of renderBox in the paint stage
+    // for positioned fixed element.
+    if (childRenderStyle.position == CSSPositionType.fixed) {
+      Element rootElement = parentRenderStyle.target;
+      child.scrollingOffsetX = rootElement.scrollLeft;
+      child.scrollingOffsetY = rootElement.scrollTop;
     }
 
-    Offset offset = _getAutoMarginPositionedElementOffset(x, y, child, parentSize!);
-    childParentData.offset = offset;
+    // https://www.w3.org/TR/CSS2/visudet.html#static-position
+    Offset staticPosition = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
+
+    // Final position of child.
+    double x;
+    double y;
+
+    // left + margin-left + border-left-width + padding-left + width + padding-right
+    // + border-right-width + margin-right + right = width of containing block
+    if (left.isAuto && right.isAuto) {
+      // left -> static pos
+      x = staticPosition.dx;
+    } else if (left.isNotAuto && right.isNotAuto) {
+      double freeSpace = containingBlockSize.width - size.width
+        - left.computedValue - right.computedValue;
+
+      // Resolved margin left value.
+      double marginLeftValue;
+      if (marginLeft.isAuto && marginRight.isAuto) {
+        // margins split positive free space, right margin gets negative free space
+        marginLeftValue = freeSpace / 2;
+      } else if (marginLeft.isAuto && marginRight.isNotAuto) {
+        // auto margin left -> free space
+        marginLeftValue = freeSpace - marginRight.computedValue;
+      } else {
+        marginLeftValue = marginLeft.computedValue;
+      }
+
+      x = parentBorderLeftWidth.computedValue + left.computedValue + marginLeftValue;
+    } else if (left.isAuto && right.isNotAuto) {
+      // auto margins -> zero
+      // left → solve
+      double leftValue = containingBlockSize.width - size.width - right.computedValue
+        - marginLeft.computedValue - marginRight.computedValue;
+
+      x = parentBorderLeftWidth.computedValue + leftValue + marginLeft.computedValue;
+    } else {
+      // left → as specified
+      x = parentBorderLeftWidth.computedValue + left.computedValue + marginLeft.computedValue;
+    }
+
+    // top + margin-top + border-top-width + padding-top + height + padding-bottom
+    // + border-bottom-width + margin-bottom + bottom = height of containing block
+    if (top.isAuto && bottom.isAuto) {
+      // top -> static pos
+      y = staticPosition.dy;
+    } else if (top.isNotAuto && bottom.isNotAuto) {
+      double freeSpace = containingBlockSize.height - size.height
+        - top.computedValue - bottom.computedValue;
+
+      // Resolved margin top value.
+      double marginTopValue;
+      if (marginTop.isAuto && marginBottom.isAuto) {
+        // margins split positive free space, bottom margin gets negative free space
+        marginTopValue = freeSpace / 2;
+      } else if (marginTop.isAuto && marginBottom.isNotAuto) {
+        // auto margin top -> free space
+        marginTopValue = freeSpace - marginBottom.computedValue;
+      } else {
+        marginTopValue = marginTop.computedValue;
+      }
+
+      y = parentBorderTopWidth.computedValue + top.computedValue + marginTopValue;
+    } else if (top.isAuto && bottom.isNotAuto) {
+      // auto margins -> zero
+      // top → solve
+      double topValue = containingBlockSize.height - size.height - bottom.computedValue
+        - marginTop.computedValue - marginBottom.computedValue;
+
+      y = parentBorderTopWidth.computedValue + topValue + marginTop.computedValue;
+    } else {
+      // top → as specified
+      y = parentBorderTopWidth.computedValue + top.computedValue + marginTop.computedValue;
+    }
+
+    // Convert position relative to scrolling content box.
+    // Scrolling content box positions relative to the content edge of its parent.
+    if (parent.isScrollingContentBox) {
+      x -= parentRenderStyle.effectiveBorderLeftWidth.computedValue + parentRenderStyle.paddingLeft.computedValue;
+      y -= parentRenderStyle.effectiveBorderTopWidth.computedValue + parentRenderStyle.paddingTop.computedValue;
+    }
+
+    childParentData.offset = Offset(x, y);
   }
 }
