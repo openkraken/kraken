@@ -156,7 +156,7 @@ class IsolateInspectorServer {
   IsolateInspectorServer(this.port, this.address, this.bundleURL) {
     // registerModule(InspectRuntimeModule(this));
     // registerModule(InspectDebuggerModule(this));
-    registerModule(InspectorLogModule(this));
+    // registerModule(InspectorLogModule(this));
   }
 
   // final Inspector inspector;
