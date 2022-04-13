@@ -4,8 +4,8 @@
 
 import 'package:kraken/devtools.dart';
 
-class InspectorLogModule extends UIInspectorModule {
-  InspectorLogModule(ChromeDevToolsService server): super(server){
+class InspectLogModule extends UIInspectorModule {
+  InspectLogModule(ChromeDevToolsService server): super(server){
     devtoolsService.controller!.onJSLog = (level,message) {
       handleMessage(level, message);
     };
