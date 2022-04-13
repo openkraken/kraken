@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class SinegleEngineFlutterViewController: FlutterViewController {
     
@@ -48,8 +49,15 @@ class SinegleEngineFlutterViewController: FlutterViewController {
     }
     
     func methodShow() -> Void {
-        
-        print("Flutter Show Method")
+        guard let showView = view.viewWithTag(101) else {
+            print("Flutter Show Method: showView init")
+            let tagView = UIView(frame: CGRect(x: 10, y: 84, width: 40, height: 40))
+            tagView.tag = 101
+            tagView.backgroundColor = UIColor.blue
+            view.addSubview(tagView)
+            return
+        }
+        showView.removeFromSuperview()
     }
     
     func methodt2() -> Void {
