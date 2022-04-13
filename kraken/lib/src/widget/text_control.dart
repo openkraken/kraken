@@ -4,7 +4,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/text_layout_metrics.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart' as dom;
