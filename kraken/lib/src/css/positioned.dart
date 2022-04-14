@@ -363,6 +363,7 @@ class CSSPositionedLayout {
     Offset staticPositionOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
 
     double x = _computePositionedOffset(
+      Axis.horizontal,
       parent.isScrollingContentBox,
       parentBorderLeftWidth,
       parentPaddingLeft,
@@ -376,6 +377,7 @@ class CSSPositionedLayout {
     );
 
     double y = _computePositionedOffset(
+      Axis.vertical,
       parent.isScrollingContentBox,
       parentBorderTopWidth,
       parentPaddingTop,
@@ -393,6 +395,7 @@ class CSSPositionedLayout {
 
   // Compute the offset of positioned element in one axis.
   static double _computePositionedOffset(
+    Axis axis,
     bool isParentScrollingContentBox,
     CSSLengthValue parentBorderBeforeWidth,
     CSSLengthValue parentPaddingBefore,
@@ -404,7 +407,6 @@ class CSSPositionedLayout {
     CSSLengthValue marginBefore,
     CSSLengthValue marginAfter,
   ) {
-
     // Offset of positioned element in one axis.
     double offset;
 
@@ -413,39 +415,57 @@ class CSSPositionedLayout {
     // Refer to the table of `Summary of rules for dir=ltr in horizontal writing modes` in following spec.
     // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
     if (insetBefore.isAuto && insetAfter.isAuto) {
-      // left → static pos
+      // If all three of left, width, and right are auto: First set any auto values for margin-left
+      // and margin-right to 0. Then, if the direction property of the element establishing the
+      // static-position containing block is ltr set left to the static position.
       offset = staticPosition;
+
     } else {
       if (insetBefore.isNotAuto && insetAfter.isNotAuto) {
         double freeSpace = containingBlockLength - length
           - insetBefore.computedValue - insetAfter.computedValue;
-
         double marginBeforeValue;
 
         if (marginBefore.isAuto && marginAfter.isAuto) {
-          if (freeSpace < 0) {
-            // margin-left → '0', solve for margin-right
+          // Note: There is difference for auto margin resolve rule of horizontal and vertical axis.
+          // margin-left is resolved as 0 only in horizontal axis and resolved as equal values of free space
+          // in vertical axis, refer to following doc in the spec:
+          //
+          // If both margin-left and margin-right are auto, solve the equation under the extra constraint
+          // that the two margins get equal values, unless this would make them negative, in which case
+          // when direction of the containing block is ltr (rtl), set margin-left (margin-right) to 0
+          // and solve for margin-right (margin-left).
+          // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
+          //
+          // If both margin-top and margin-bottom are auto, solve the equation under the extra constraint
+          // that the two margins get equal values.
+          // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
+          if (freeSpace < 0 && axis == Axis.horizontal) {
+            // margin-left → '0', solve the above equation for margin-right
             marginBeforeValue = 0;
           } else {
             // margins split positive free space
             marginBeforeValue = freeSpace / 2;
           }
         } else if (marginBefore.isAuto && marginAfter.isNotAuto) {
-          // auto margin left → free space
+          // If one of margin-left or margin-right is auto, solve the equation for that value.
+          // Solve for margin-left in this case.
           marginBeforeValue = freeSpace - marginAfter.computedValue;
         } else {
+          // If one of margin-left or margin-right is auto, solve the equation for that value.
+          // Use specified margin-left in this case.
           marginBeforeValue = marginBefore.computedValue;
         }
-
         offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBeforeValue;
+
       } else if (insetBefore.isAuto && insetAfter.isNotAuto) {
-        // auto margins → zero, left → solve
+        // If left is auto, width and right are not auto, then solve for left.
         double insetBeforeValue = containingBlockLength - length - insetAfter.computedValue
           - marginBefore.computedValue - marginAfter.computedValue;
-
         offset = parentBorderBeforeWidth.computedValue + insetBeforeValue + marginBefore.computedValue;
+
       } else {
-        // left → as specified
+        // If right is auto, left and width are not auto, then solve for right.
         offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBefore.computedValue;
       }
 
