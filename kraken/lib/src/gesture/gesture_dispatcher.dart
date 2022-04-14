@@ -13,17 +13,14 @@ import 'package:kraken/src/scheduler/throttle.dart';
 const int _MAX_STEP_MS = 16;
 
 class _DragEventInfo extends Drag {
-  static _DragEventInfo? _instance;
-  static _DragEventInfo get instance {
-    return _instance ??= _DragEventInfo._();
-  }
+  _DragEventInfo(this.gestureDispatcher);
 
-  _DragEventInfo._();
+  GestureDispatcher gestureDispatcher;
 
   /// The pointer has moved.
   @override
   void update(DragUpdateDetails details) {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
   /// The pointer is no longer in contact with the screen.
@@ -32,7 +29,7 @@ class _DragEventInfo extends Drag {
   /// the screen is available in the `details`.
   @override
   void end(DragEndDetails details) {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
   /// The input from the pointer is no longer directed towards this receiver.
@@ -41,7 +38,7 @@ class _DragEventInfo extends Drag {
   /// in the middle of the drag.
   @override
   void cancel() {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_CANCEL);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_CANCEL);
   }
 }
 
@@ -70,42 +67,35 @@ class TouchPoint {
 }
 
 class GestureDispatcher {
-
-  static GestureDispatcher? _instance;
-  static GestureDispatcher get instance {
-    if (_instance == null) {
-      GestureDispatcher instance = _instance = GestureDispatcher._();
-      _addAllGestureRecognizer(instance);
-    }
-    return _instance!;
-  }
-
-  static void _addAllGestureRecognizer(GestureDispatcher instance) {
-    Map<String, GestureRecognizer> gestureRecognizers = instance._gestureRecognizers;
+  GestureDispatcher() {
     // Tap Recognizer
-    gestureRecognizers[EVENT_CLICK] = TapGestureRecognizer()..onTapUp = instance._onClick;
+    _gestureRecognizers[EVENT_CLICK] = TapGestureRecognizer()..onTapUp = _onClick;
     // DoubleTap Recognizer
-    gestureRecognizers[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer()..onDoubleTapDown = instance._onDoubleClick;
+    _gestureRecognizers[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer()..onDoubleTapDown = _onDoubleClick;
     // Swipe Recognizer
-    gestureRecognizers[EVENT_SWIPE] = SwipeGestureRecognizer()..onSwipe = instance._onSwipe;
+    _gestureRecognizers[EVENT_SWIPE] = SwipeGestureRecognizer()..onSwipe = _onSwipe;
     // Pan Recognizer
-    gestureRecognizers[EVENT_PAN] = PanGestureRecognizer()
-      ..onStart = instance._onPanStart
-      ..onUpdate = instance._onPanUpdate
-      ..onEnd = instance._onPanEnd;
+    _gestureRecognizers[EVENT_PAN] = PanGestureRecognizer()
+      ..onStart = _onPanStart
+      ..onUpdate = _onPanUpdate
+      ..onEnd = _onPanEnd;
     // LongPress Recognizer
-    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPress = instance._onLongPress;
+    _gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPress = _onLongPress;
     // Scale Recognizer
-    gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
-      ..onStart = instance._onScaleStart
-      ..onUpdate = instance._onScaleUpdate
-      ..onEnd = instance._onScaleEnd;
+    _gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
+      ..onStart = _onScaleStart
+      ..onUpdate = _onScaleUpdate
+      ..onEnd = _onScaleEnd;
     // Drag Recognizer
-    gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
-      ..onStart = instance._onDragStart;
+    _gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
+      ..onStart = _onDragStart;
+
+    _dragEventInfo = _DragEventInfo(this);
   }
 
   GestureDispatcher._();
+
+  late _DragEventInfo _dragEventInfo;
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
@@ -290,7 +280,7 @@ class GestureDispatcher {
 
   Drag? _onDragStart(Offset position) {
     _handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_START, deltaX: position.dx, deltaY: position.dy);
-    return _DragEventInfo.instance;
+    return _dragEventInfo;
   }
 
   void _handleMouseEvent(String type, {

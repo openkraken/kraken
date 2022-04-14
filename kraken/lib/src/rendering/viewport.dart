@@ -66,11 +66,11 @@ class RenderViewportBox extends RenderProxyBox
     super.handleEvent(event, entry as BoxHitTestEntry);
 
     // Add pointer to gesture dispatcher.
-    GestureDispatcher.instance.handlePointerEvent(event);
+    controller?.gestureDispatcher.handlePointerEvent(event);
 
     if (event is PointerDownEvent) {
       // Set event path at begin stage and reset it at end stage on viewport render box.
-      GestureDispatcher.instance.resetEventPath();
+      controller?.gestureDispatcher.resetEventPath();
     }
   }
 
