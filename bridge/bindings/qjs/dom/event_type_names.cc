@@ -1,6 +1,6 @@
-//
-// Created by andycall on 2022/4/14.
-//
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 
 #include "event_type_names.h"
 #include <vector>
