@@ -8,14 +8,14 @@
 #include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/script_promise.h"
 #include "bindings/qjs/script_promise_resolver.h"
-#include "foundation/native_value_converter.h"
 #include "core/fileapi/blob.h"
 #include "core/html/html_template_element.h"
+#include "foundation/native_value_converter.h"
 
 namespace kraken {
 
-Element::Element(Document* document, const AtomicString& tag_name, Node::ConstructionType construction_type)
-    : ContainerNode(document, construction_type), attributes_(ElementAttributes::Create(this)) {}
+Element::Element(const AtomicString& tag_name, Document* document, Node::ConstructionType construction_type)
+    : ContainerNode(document, construction_type), tag_name_(tag_name), attributes_(ElementAttributes::Create(this)) {}
 
 bool Element::hasAttribute(const AtomicString& name, ExceptionState& exception_state) const {
   return attributes_->hasAttribute(name, exception_state);
@@ -121,13 +121,24 @@ std::string Element::nodeValue() const {
   return "";
 }
 
+std::string Element::nodeName() const {
+  return tag_name_.ToStdString();
+}
+
 bool Element::HasEquivalentAttributes(const Element& other) const {
   return other.attributes_->IsEquivalent(*attributes_);
 }
 
+Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
+  return nullptr;
+}
+
 class ElementSnapshotReader {
  public:
-  ElementSnapshotReader(ExecutingContext* context, Element* element, ScriptPromiseResolver* resolver, double device_pixel_ratio)
+  ElementSnapshotReader(ExecutingContext* context,
+                        Element* element,
+                        ScriptPromiseResolver* resolver,
+                        double device_pixel_ratio)
       : context_(context), element_(element), resolver_(resolver), device_pixel_ratio_(device_pixel_ratio) {
     Start();
   };
@@ -156,7 +167,8 @@ void ElementSnapshotReader::Start() {
     delete reader;
   };
 
-  context_->dartMethodPtr()->toBlob(this, context_->contextId(), callback, element_->eventTargetId(), device_pixel_ratio_);
+  context_->dartMethodPtr()->toBlob(this, context_->contextId(), callback, element_->eventTargetId(),
+                                    device_pixel_ratio_);
 }
 
 void ElementSnapshotReader::HandleSnapshot(uint8_t* bytes, int32_t length) {
@@ -183,69 +195,75 @@ ScriptPromise Element::toBlob(double device_pixel_ratio, ExceptionState& excepti
 
 double Element::clientHeight() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kclientHeight, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kclientHeight, exception_state));
 }
 
 double Element::clientWidth() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kclientWidth, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kclientWidth, exception_state));
 }
 
 double Element::clientLeft() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kclientLeft, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kclientLeft, exception_state));
 }
 
 double Element::clientTop() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kclientTop, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kclientTop, exception_state));
 }
 
 double Element::scrollTop() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kscrollTop, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kscrollTop, exception_state));
 }
 
 void Element::setScrollTop(double v, ExceptionState& exception_state) {
-  SetBindingProperty(binding_call_methods::kscrollTop, NativeValueConverter<NativeTypeDouble>::ToNativeValue(v), exception_state);
+  SetBindingProperty(binding_call_methods::kscrollTop, NativeValueConverter<NativeTypeDouble>::ToNativeValue(v),
+                     exception_state);
 }
 
 double Element::scrollLeft() const {
   ExceptionState exception_state;
-  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(GetBindingProperty(binding_call_methods::kclientTop, exception_state));
+  return NativeValueConverter<NativeTypeDouble>::FromNativeValue(
+      GetBindingProperty(binding_call_methods::kclientTop, exception_state));
 }
 
 void Element::setScrollLeft(double v, ExceptionState& exception_state) {
-  SetBindingProperty(binding_call_methods::kscrollLeft, NativeValueConverter<NativeTypeDouble>::ToNativeValue(v), exception_state);
+  SetBindingProperty(binding_call_methods::kscrollLeft, NativeValueConverter<NativeTypeDouble>::ToNativeValue(v),
+                     exception_state);
 }
 
 std::string Element::outerHTML() const {
-//  std::string s = "<" + tag_name_.ToStdString();
-//
-//  // Read attributes
-//  std::string attributes = attributes_->ToString();
-//  // Read style
-//  std::string style = m_style->toString();
-//
-//  if (!attributes.empty()) {
-//    s += " " + attributes;
-//  }
-//  if (!style.empty()) {
-//    s += " style=\"" + style;
-//  }
-//
-//  s += ">";
-//
-//  std::string childHTML = innerHTML();
-//  s += childHTML;
-//  s += "</" + TagName().ToStdString() + ">";
+  //  std::string s = "<" + tag_name_.ToStdString();
+  //
+  //  // Read attributes
+  //  std::string attributes = attributes_->ToString();
+  //  // Read style
+  //  std::string style = m_style->toString();
+  //
+  //  if (!attributes.empty()) {
+  //    s += " " + attributes;
+  //  }
+  //  if (!style.empty()) {
+  //    s += " style=\"" + style;
+  //  }
+  //
+  //  s += ">";
+  //
+  //  std::string childHTML = innerHTML();
+  //  s += childHTML;
+  //  s += "</" + TagName().ToStdString() + ">";
 
-//  return s;
+  //  return s;
 }
 
-void Element::setOuterHTML(const AtomicString& value, ExceptionState& exception_state) {
-
-}
+void Element::setOuterHTML(const AtomicString& value, ExceptionState& exception_state) {}
 
 std::string Element::innerHTML() const {
   std::string s;
@@ -253,57 +271,48 @@ std::string Element::innerHTML() const {
   // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
   const Node* parent = DynamicTo<Node>(this);
 
-//  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
-//    parent = DynamicTo<Node>(template_element->content());
-//  }
+  //  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
+  //    parent = DynamicTo<Node>(template_element->content());
+  //  }
 
-// TODO: add innerHTML support.
-//  // Children toString
-//  int32_t childLen = arrayGetLength(m_ctx, parent->childNodes);
-//
-//  if (childLen == 0)
-//    return s;
-//
-//  for (int i = 0; i < childLen; i++) {
-//    JSValue c = JS_GetPropertyUint32(m_ctx, parent->childNodes, i);
-//    auto* node = static_cast<NodeInstance*>(JS_GetOpaque(c, Node::classId(c)));
-//    if (node->nodeType == NodeType::ELEMENT_NODE) {
-//      s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
-//    } else if (node->nodeType == NodeType::TEXT_NODE) {
-//      s += reinterpret_cast<TextNodeInstance*>(node)->toString();
-//    }
-//
-//    JS_FreeValue(m_ctx, c);
-//  }
-//  return s;
+  // TODO: add innerHTML support.
+  //  // Children toString
+  //  int32_t childLen = arrayGetLength(m_ctx, parent->childNodes);
+  //
+  //  if (childLen == 0)
+  //    return s;
+  //
+  //  for (int i = 0; i < childLen; i++) {
+  //    JSValue c = JS_GetPropertyUint32(m_ctx, parent->childNodes, i);
+  //    auto* node = static_cast<NodeInstance*>(JS_GetOpaque(c, Node::classId(c)));
+  //    if (node->nodeType == NodeType::ELEMENT_NODE) {
+  //      s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
+  //    } else if (node->nodeType == NodeType::TEXT_NODE) {
+  //      s += reinterpret_cast<TextNodeInstance*>(node)->toString();
+  //    }
+  //
+  //    JS_FreeValue(m_ctx, c);
+  //  }
+  //  return s;
 }
 
-void Element::setInnerHTML(const AtomicString& value, ExceptionState& exception_state) {
+void Element::setInnerHTML(const AtomicString& value, ExceptionState& exception_state) {}
 
-}
+void Element::_notifyNodeRemoved(Node* node) {}
 
-void Element::_notifyNodeRemoved(Node* node) {
+void Element::_notifyChildRemoved() {}
 
-}
-
-void Element::_notifyChildRemoved() {
-
-}
-
-void Element::_notifyNodeInsert(Node* insertNode) {
+void Element::_notifyNodeInsert(Node* insertNode){
 
 };
 
-void Element::_notifyChildInsert() {
+void Element::_notifyChildInsert() {}
 
+void Element::_didModifyAttribute(const AtomicString& name, const AtomicString& oldId, const AtomicString& newId) {}
+
+void Element::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {}
+
+Node::NodeType Element::nodeType() const {
+  return kElementNode;
 }
-
-void Element::_didModifyAttribute(const AtomicString& name, const AtomicString& oldId, const AtomicString& newId) {
-
-}
-
-void Element::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {
-
-}
-
 }  // namespace kraken

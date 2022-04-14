@@ -65,15 +65,12 @@ JSValue ScriptValue::QJSValue() const {
 }
 
 ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) const {
-  JSValue stringifyedValue = JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL);
-  ScriptValue result = ScriptValue(ctx_);
+  ScriptValue result = ScriptValue(ctx_, JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL));
   // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
-  if (JS_IsException(stringifyedValue)) {
-    exception->ThrowException(ctx_, stringifyedValue);
-  } else {
-    result = ScriptValue(ctx_, stringifyedValue);
+  if (result.IsException()) {
+    exception->ThrowException(ctx_, result.value_);
+    result = ScriptValue::Empty(ctx_);
   }
-  JS_FreeValue(ctx_, stringifyedValue);
   return result;
 }
 
@@ -108,7 +105,7 @@ NativeValue ScriptValue::ToNative() const {
 //    auto* functionContext = new NativeFunctionContext{context, value_};
 //    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
 //  }
-//  
+//
   else if (JS_IsObject(value_)) {
     //    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
     //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));

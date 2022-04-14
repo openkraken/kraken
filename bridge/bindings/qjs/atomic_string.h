@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include "foundation/macros.h"
+#include "foundation/string_view.h"
 #include "foundation/native_string.h"
 #include "native_string_utils.h"
 #include "qjs_engine_patch.h"
@@ -20,6 +21,7 @@ namespace kraken {
 // identical. Comparing two AtomicString instances is much faster than comparing
 // two String instances because we just check string storage identity.
 class AtomicString {
+  KRAKEN_DISALLOW_NEW();
  public:
   enum class StringKind { kIsLowerCase, kIsUpperCase, kIsMixed };
 
@@ -36,7 +38,10 @@ class AtomicString {
   ~AtomicString() { JS_FreeAtomRT(runtime_, atom_); };
 
   // Return the undefined string value from atom key.
-  JSValue ToQuickJS(JSContext* ctx) const { return JS_AtomToValue(ctx, atom_); };
+  JSValue ToQuickJS(JSContext* ctx) const {
+    assert(ctx_ != nullptr);
+    return JS_AtomToValue(ctx, atom_);
+  };
 
   bool IsNull() const;
   bool IsEmpty() const;
@@ -47,6 +52,8 @@ class AtomicString {
 
   [[nodiscard]] std::string ToStdString() const;
   [[nodiscard]] std::unique_ptr<NativeString> ToNativeString() const;
+
+  StringView ToStringView() const;
 
   AtomicString ToUpperIfNecessary() const;
   const AtomicString ToUpperSlow() const;

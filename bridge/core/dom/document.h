@@ -22,6 +22,7 @@ class Document : public Node, TreeScope {
  public:
   using ImplType = Document*;
 
+  Element* createElement(const AtomicString& name, ExceptionState& exception_state);
   Text* createTextNode(const AtomicString& value);
 
   void IncrementNodeCount() { node_count_++; }
@@ -30,6 +31,10 @@ class Document : public Node, TreeScope {
     node_count_--;
   }
   int NodeCount() const { return node_count_; }
+
+  // The following implements the rule from HTML 4 for what valid names are.
+  static bool IsValidName(const AtomicString& name);
+
 
  private:
   int node_count_;

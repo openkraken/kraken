@@ -18,7 +18,7 @@ class Element : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  Element(Document* document, const AtomicString& tag_name, ConstructionType = kCreateElement);
+  Element(const AtomicString& tag_name, Document* document, ConstructionType = kCreateElement);
 
   ElementAttributes* attributes() const { return attributes_; }
 
@@ -62,11 +62,18 @@ class Element : public ContainerNode {
 
   std::string nodeValue() const override;
   AtomicString tagName() const { return tag_name_; }
+  std::string nodeName() const override;
+
+  NodeType nodeType() const override;
 
   bool HasEquivalentAttributes(const Element& other) const;
 
  protected:
  private:
+
+  // Clone is private so that non-virtual CloneElementWithChildren and
+  // CloneElementWithoutChildren are used inst
+  Node* Clone(Document&, CloneChildrenFlag) const;
 
   void _notifyNodeRemoved(Node* node);
   void _notifyChildRemoved();
@@ -76,7 +83,7 @@ class Element : public ContainerNode {
   void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
   ElementAttributes* attributes_{nullptr};
-  AtomicString tag_name_;
+  AtomicString tag_name_ = AtomicString::Empty(ctx());
 };
 
 }  // namespace kraken

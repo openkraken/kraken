@@ -22,14 +22,7 @@ std::unique_ptr<NativeString> jsValueToNativeString(JSContext* ctx, JSValue valu
 // Encode utf-8 to utf-16, and return a full copy of NativeString.
 std::unique_ptr<NativeString> stringToNativeString(const std::string& string);
 
-// Return a full copy of NativeString form JSAtom.
-std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom);
-
-// Convert to string and return a full copy of std::string from JSValue.
-std::string jsValueToStdString(JSContext* ctx, JSValue& value);
-
-// Return a full copy of std::string form JSAtom.
-std::string jsAtomToStdString(JSContext* ctx, JSAtom atom);
+std::string nativeStringToStdString(const NativeString* native_string);
 
 template <typename T>
 std::string toUTF8(const std::basic_string<T, std::char_traits<T>, std::allocator<T>>& source) {

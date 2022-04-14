@@ -90,7 +90,7 @@ TEST(AtomicString, CopyAssignment) {
     struct P {
       AtomicString str;
     };
-    P p;
+    P p{AtomicString::Empty(ctx)};
     p.str = str;
     EXPECT_EQ(p.str == str, true);
   });
@@ -106,7 +106,7 @@ TEST(AtomicString, MoveAssignment) {
 
 TEST(AtomicString, CopyToRightReference) {
   TestAtomicString([](JSContext* ctx) {
-    AtomicString str;
+    AtomicString str = AtomicString::Empty(ctx);
     if (1 + 1 == 2) {
       str = AtomicString(ctx, "helloworld");
     }

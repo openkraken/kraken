@@ -11,10 +11,18 @@ namespace kraken {
 
 class HTMLElement : public Element {
   DEFINE_WRAPPERTYPEINFO();
-
  public:
+  HTMLElement(const AtomicString& tag_name, Document* document, ConstructionType);
+
  private:
 };
+
+inline HTMLElement::HTMLElement(const AtomicString& tag_name,
+                                Document* document,
+                                ConstructionType type = kCreateHTMLElement)
+    : Element(tag_name, document, type) {
+}
+
 
 }  // namespace kraken
 

@@ -12,9 +12,15 @@
 namespace kraken {
 namespace <%= name %> {
 
-<% _.forEach(data, function(name, index) { %><% if (_.isArray(name)) { %>extern const AtomicString& k<%= name[0] %>;
-<% } else { %>extern const AtomicString& k<%= name %>;
-<% } %><% }) %>
+<% _.forEach(data, function(name, index) { %>
+  <% if (_.isArray(name)) { %>
+    extern const AtomicString& k<%= name[0] %>;
+  <% } else if (_.isObject(name)) { %>
+    extern const AtomicString& k<%= name.name %>;
+  <% } else { %>
+  extern const AtomicString& k<%= name %>;
+  <% } %>
+<% }) %>
 
 constexpr unsigned kNamesCount = <%= data.length %>;
 

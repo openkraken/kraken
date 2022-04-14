@@ -1,6 +1,11 @@
 {
   "metadata": {
-    "templates": ["make_names"]
+    "templates": [
+      {
+        "template": "make_names",
+        "filename": "binding_call_methods"
+      }
+    ]
   },
   "data": [
     "click",

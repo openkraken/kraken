@@ -47,9 +47,17 @@ AtomicString::StringKind GetStringKind(JSValue stringValue) {
 }  // namespace
 
 AtomicString::AtomicString(JSContext* ctx, const std::string& string)
-    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_NewAtom(ctx, string.c_str())), kind_(GetStringKind(string)), length_(string.size()) {}
+    : runtime_(JS_GetRuntime(ctx)),
+      ctx_(ctx),
+      atom_(JS_NewAtom(ctx, string.c_str())),
+      kind_(GetStringKind(string)),
+      length_(string.size()) {}
 AtomicString::AtomicString(JSContext* ctx, JSValue value)
-    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)), kind_(GetStringKind(value)), length_(JS_VALUE_GET_STRING(value)->len) {
+    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)) {
+  if (JS_IsString(value)) {
+    kind_ = GetStringKind(value);
+    length_ = JS_VALUE_GET_STRING(value)->len;
+  }
 }
 
 bool AtomicString::IsNull() const {
@@ -73,6 +81,14 @@ std::unique_ptr<NativeString> AtomicString::ToNativeString() const {
   uint16_t* bytes = JS_ToUnicode(ctx_, stringValue, &length);
   JS_FreeValue(ctx_, stringValue);
   return std::make_unique<NativeString>(bytes, length);
+}
+
+StringView AtomicString::ToStringView() const {
+  JSValue stringValue = JS_AtomToValue(ctx_, atom_);
+  JSString* string = JS_VALUE_GET_STRING(stringValue);
+  assert(string->header.ref_count > 1);
+  JS_FreeValue(ctx_, stringValue);
+  return StringView(string->u.str8, string->len, string->is_wide_char);
 }
 
 AtomicString::AtomicString(const AtomicString& value) {

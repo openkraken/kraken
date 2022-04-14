@@ -9,7 +9,9 @@ function generateHeader(blob: JSONBlob, template: JSONTemplate): string {
     name: blob.filename,
     template_path: blob.source,
     data: blob.json.data
-  });
+  }).split('\n').filter(str => {
+    return str.trim().length > 0;
+  }).join('\n');
 }
 
 function generateBody(blob: JSONBlob, template: JSONTemplate): string {
@@ -18,7 +20,9 @@ function generateBody(blob: JSONBlob, template: JSONTemplate): string {
     template_path: blob.source,
     name: blob.filename,
     data: blob.json.data
-  });
+  }).split('\n').filter(str => {
+    return str.trim().length > 0;
+  }).join('\n');
 }
 
 export function generateJSONTemplate(blob: JSONBlob, headerTemplate: JSONTemplate, bodyTemplate?: JSONTemplate) {

@@ -11,6 +11,7 @@ namespace <%= name %> {
 void* names_storage[kNamesCount * ((sizeof(AtomicString) + sizeof(void *) - 1) / sizeof(void *))];
 
 <% _.forEach(data, function(name, index) { %><% if (_.isArray(name)) { %>const AtomicString& k<%= name[0] %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
+<% } else if (_.isObject(name)) { %>const AtomicString& k<%= name.name %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];
 <% } else { %>const AtomicString& k<%= name %> = reinterpret_cast<AtomicString*>(&names_storage)[<%= index %>];<% } %>
 <% }) %>
 
@@ -20,7 +21,7 @@ void Init(JSContext* ctx) {
    };
 
   static const NameEntry kNames[] = {
-      <% _.forEach(data, function(name) { %><% if (Array.isArray(name)) { %>{ "<%= name[1] %>" },<% } else { %>{ "<%= name %>" },<% } %>
+      <% _.forEach(data, function(name) { %><% if (Array.isArray(name)) { %>{ "<%= name[1] %>" },<% } else if(_.isObject(name)) { %>{ "<%= name.name %>" },<% } else { %>{ "<%= name %>" },<% } %>
       <% }); %>
   };
 

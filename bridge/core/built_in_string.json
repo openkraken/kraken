@@ -1,6 +1,11 @@
 {
   "metadata": {
-    "templates": ["make_names"]
+    "templates": [
+      {
+        "template": "make_names",
+        "filename": "built_in_string"
+      }
+    ]
   },
   "data": [
     ["null", "null"],

@@ -9,7 +9,7 @@
 
 namespace kraken {
 
-static inline bool IsNumberIndex(const std::string& name) {
+static inline bool IsNumberIndex(const std::string_view& name) {
   if (name.empty())
     return false;
   char f = name[0];
@@ -19,7 +19,7 @@ static inline bool IsNumberIndex(const std::string& name) {
 ElementAttributes::ElementAttributes(Element* element) : ScriptWrappable(element->ctx()) {}
 
 AtomicString ElementAttributes::GetAttribute(const AtomicString& name) {
-  bool numberIndex = IsNumberIndex(name.ToStdString());
+  bool numberIndex = IsNumberIndex(name.ToStringView8());
 
   if (numberIndex) {
     AtomicString::Empty(ctx());
@@ -31,7 +31,7 @@ AtomicString ElementAttributes::GetAttribute(const AtomicString& name) {
 bool ElementAttributes::setAttribute(const AtomicString& name,
                                      const AtomicString& value,
                                      ExceptionState& exception_state) {
-  bool numberIndex = IsNumberIndex(name.ToStdString());
+  bool numberIndex = IsNumberIndex(name.ToStringView8());
 
   if (numberIndex) {
     exception_state.ThrowException(
@@ -51,7 +51,7 @@ bool ElementAttributes::setAttribute(const AtomicString& name,
 }
 
 bool ElementAttributes::hasAttribute(const AtomicString& name, ExceptionState& exception_state) {
-  bool numberIndex = IsNumberIndex(name.ToStdString());
+  bool numberIndex = IsNumberIndex(name.ToStringView8());
 
   if (numberIndex) {
     return false;

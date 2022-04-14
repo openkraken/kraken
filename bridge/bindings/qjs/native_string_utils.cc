@@ -35,6 +35,11 @@ std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
   return std::make_unique<NativeString>(tmp.string(), tmp.length());
 }
 
+std::string nativeStringToStdString(const NativeString* native_string) {
+  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(native_string->string()), native_string->length());
+  return toUTF8(u16EventType);
+}
+
 std::unique_ptr<NativeString> atomToNativeString(JSContext* ctx, JSAtom atom) {
   JSValue stringValue = JS_AtomToString(ctx, atom);
   std::unique_ptr<NativeString> string = jsValueToNativeString(ctx, stringValue);

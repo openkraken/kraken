@@ -94,6 +94,8 @@ list(APPEND BRIDGE_SOURCE
   foundation/inspector_task_queue.cc
   foundation/task_queue.cc
   foundation/task_queue.h
+  foundation/string_view.cc
+  foundation/string_view.h
   foundation/native_value.cc
   foundation/native_value.h
   foundation/native_type.h
@@ -247,6 +249,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/page.cc
     core/executing_context_data.cc
     core/executing_context_data.h
+    core/html_element_factory.cc
+    core/html_element_factory.h
     core/dart_methods.h
     core/fileapi/blob.h
     core/fileapi/blob.cc
@@ -321,6 +325,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_collection.h
     core/html/html_element.cc
     core/html/html_element.h
+    core/html/html_div_element.cc
+    core/html/html_div_element.h
     core/html/html_template_element.cc
     core/html/html_template_element.h
     # Legacy implements, should remove them in the future.
