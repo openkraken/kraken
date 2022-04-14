@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:kraken/dom.dart';
@@ -224,8 +226,13 @@ class GestureDispatcher {
     }
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _removePoint(touchPoint);
-      _unbindEventTargetWithTouchPoint(touchPoint);
+      // We should clear the target in the next microTask to dispatch event in callback of recognizer.
+      // Because the recognizer fires at the end of the path of HitTestResult.
+      scheduleMicrotask(() {
+        _removePoint(touchPoint);
+        _unbindEventTargetWithTouchPoint(touchPoint);
+        _target = null;
+      });
     }
   }
 
