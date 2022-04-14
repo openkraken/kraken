@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('clip-002', () => {
-  it('ref', async () => {
+  xit('ref', async () => {
     let inner;
     let inner_1;
     let inner_2;
