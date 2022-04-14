@@ -407,8 +407,6 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
-final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
-
 // Cache computed length value during perform layout.
 // format: { hashCode: { renderStyleKey: renderStyleValue } }
 final LinkedLruHashMap<int, Map<String, double>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
@@ -489,10 +487,6 @@ class CSSLength {
   }
 
   static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
-    if (_cachedParsedLength.containsKey(text)) {
-      return _cachedParsedLength[text]!;
-    }
-
     double? value;
     CSSLengthType unit = CSSLengthType.PX;
     if (text == ZERO) {
@@ -579,11 +573,11 @@ class CSSLength {
     }
 
     if (value == 0) {
-      return _cachedParsedLength[text] = CSSLengthValue.zero;
+      return CSSLengthValue.zero;
     } else if (value == null) {
-      return _cachedParsedLength[text] = CSSLengthValue.unknown;
+      return CSSLengthValue.unknown;
     } else if (unit == CSSLengthType.PX){
-      return _cachedParsedLength[text] = CSSLengthValue(value, unit);
+      return CSSLengthValue(value, unit);
     } else {
       return CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
     }
