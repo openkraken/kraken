@@ -14,12 +14,11 @@ class DocumentFragment;
 
 class HTMLTemplateElement : public Element {
   DEFINE_WRAPPERTYPEINFO();
- public:
 
+ public:
   DocumentFragment* content() const;
 
  private:
-
 };
 
 }  // namespace kraken

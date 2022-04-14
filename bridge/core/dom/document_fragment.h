@@ -18,7 +18,7 @@ class DocumentFragment : public ContainerNode {
   static DocumentFragment* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   DocumentFragment(Document* document, ConstructionType type);
-  ~DocumentFragment() override {};
+  ~DocumentFragment() override{};
 
   virtual bool IsTemplateContent() const { return false; }
 

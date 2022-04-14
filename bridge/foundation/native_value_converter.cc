@@ -9,7 +9,7 @@ namespace kraken {
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
 
-//void call_native_function(NativeFunctionContext* functionContext,
+// void call_native_function(NativeFunctionContext* functionContext,
 //                          int32_t argc,
 //                          NativeValue* argv,
 //                          NativeValue* returnValue) {

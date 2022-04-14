@@ -10,11 +10,10 @@ namespace kraken {
 
 Element* Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
-    exception_state.ThrowException(ctx(), ErrorType::InternalError, "The tag name provided ('" + name.ToStdString() + "') is not a valid name.");
+    exception_state.ThrowException(ctx(), ErrorType::InternalError,
+                                   "The tag name provided ('" + name.ToStdString() + "') is not a valid name.");
     return nullptr;
   }
-
-
 }
 
 Text* Document::createTextNode(const AtomicString& value) {
@@ -22,16 +21,14 @@ Text* Document::createTextNode(const AtomicString& value) {
 }
 
 template <typename CharType>
-static inline bool IsValidNameASCII(const CharType* characters,
-                                    unsigned length) {
+static inline bool IsValidNameASCII(const CharType* characters, unsigned length) {
   CharType c = characters[0];
   if (!(IsASCIIAlpha(c) || c == ':' || c == '_'))
     return false;
 
   for (unsigned i = 1; i < length; ++i) {
     c = characters[i];
-    if (!(IsASCIIAlphanumeric(c) || c == ':' || c == '_' || c == '-' ||
-        c == '.'))
+    if (!(IsASCIIAlphanumeric(c) || c == ':' || c == '_' || c == '-' || c == '.'))
       return false;
   }
 

@@ -9,8 +9,8 @@
 #include <functional>
 #include <memory>
 #include "foundation/macros.h"
-#include "foundation/string_view.h"
 #include "foundation/native_string.h"
+#include "foundation/string_view.h"
 #include "native_string_utils.h"
 #include "qjs_engine_patch.h"
 
@@ -22,6 +22,7 @@ namespace kraken {
 // two String instances because we just check string storage identity.
 class AtomicString {
   KRAKEN_DISALLOW_NEW();
+
  public:
   enum class StringKind { kIsLowerCase, kIsUpperCase, kIsMixed };
 

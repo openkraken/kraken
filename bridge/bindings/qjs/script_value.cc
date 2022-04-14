@@ -100,12 +100,12 @@ NativeValue ScriptValue::ToNative() const {
     return NativeValueConverter<NativeTypeString>::ToNativeValue(string);
   }
 
-//  else if (JS_IsFunction(ctx_, value_)) {
-//    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
-//    auto* functionContext = new NativeFunctionContext{context, value_};
-//    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
-//  }
-//
+  //  else if (JS_IsFunction(ctx_, value_)) {
+  //    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
+  //    auto* functionContext = new NativeFunctionContext{context, value_};
+  //    return Native_NewPtr(JSPointerType::NativeFunctionContext, functionContext);
+  //  }
+  //
   else if (JS_IsObject(value_)) {
     //    auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
     //    auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));

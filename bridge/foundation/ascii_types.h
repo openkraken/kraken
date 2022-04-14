@@ -3,7 +3,6 @@
  * Author: Kraken Team.
  */
 
-
 #ifndef KRAKENBRIDGE_FOUNDATION_ASCII_TYPES_H_
 #define KRAKENBRIDGE_FOUNDATION_ASCII_TYPES_H_
 
@@ -53,8 +52,7 @@ inline bool IsASCIIUpper(CharType c) {
 }
 
 template <typename CharacterType>
-inline bool IsLowerASCII(const CharacterType* characters,
-                         size_t length) {
+inline bool IsLowerASCII(const CharacterType* characters, size_t length) {
   bool contains_upper_case = false;
   for (size_t i = 0; i < length; i++) {
     contains_upper_case |= IsASCIIUpper(characters[i]);
@@ -62,6 +60,6 @@ inline bool IsLowerASCII(const CharacterType* characters,
   return !contains_upper_case;
 }
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_FOUNDATION_ASCII_TYPES_H_

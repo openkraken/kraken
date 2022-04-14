@@ -18,12 +18,11 @@ class Element;
 // TODO: refactor for better W3C standard support and higher performance.
 class ElementAttributes : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = ElementAttributes*;
 
-  static ElementAttributes* Create(Element* element) {
-    return MakeGarbageCollected<ElementAttributes>(element);
-  }
+  static ElementAttributes* Create(Element* element) { return MakeGarbageCollected<ElementAttributes>(element); }
 
   ElementAttributes(Element) = delete;
   ElementAttributes(Element* element);

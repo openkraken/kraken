@@ -6,6 +6,4 @@
 #include "qjs_interface_bridge.h"
 #include "core/executing_context.h"
 
-namespace kraken {
-
-}  // namespace kraken
+namespace kraken {}  // namespace kraken

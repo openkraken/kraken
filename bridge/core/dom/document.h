@@ -35,7 +35,6 @@ class Document : public Node, TreeScope {
   // The following implements the rule from HTML 4 for what valid names are.
   static bool IsValidName(const AtomicString& name);
 
-
  private:
   int node_count_;
 };

@@ -6,11 +6,11 @@
 #include <sys/time.h>
 #include <vector>
 
+#include "bindings/qjs/native_string_utils.h"
 #include "core/dom/frame_request_callback_collection.h"
 #include "core/frame/dom_timer.h"
 #include "core/page.h"
 #include "foundation/native_string.h"
-#include "bindings/qjs/native_string_utils.h"
 #include "kraken_bridge_test.h"
 #include "kraken_test_env.h"
 

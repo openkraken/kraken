@@ -5,8 +5,4 @@
 
 #include "html_template_element.h"
 
-namespace kraken {
-
-
-
-}  // namespace kraken
+namespace kraken {}  // namespace kraken

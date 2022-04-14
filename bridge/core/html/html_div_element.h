@@ -11,14 +11,13 @@ namespace kraken {
 
 class HTMLDivElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
- public:
 
+ public:
   explicit HTMLDivElement(Document&);
 
  private:
-
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_DIV_ELEMENT_H_

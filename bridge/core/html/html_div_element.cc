@@ -7,6 +7,6 @@
 
 namespace kraken {
 
-HTMLDivElement::HTMLDivElement(Document& document) : HTMLElement(html_names::kdiv, &document){}
+HTMLDivElement::HTMLDivElement(Document& document) : HTMLElement(html_names::kdiv, &document) {}
 
-}
+}  // namespace kraken

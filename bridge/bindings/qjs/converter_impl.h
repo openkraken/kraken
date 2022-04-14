@@ -20,12 +20,12 @@
 #include "js_event_listener.h"
 #include "native_string_utils.h"
 #include "qjs_add_event_listener_options.h"
+#include "qjs_element_attributes.h"
 #include "qjs_error_event_init.h"
 #include "qjs_event_init.h"
 #include "qjs_event_listener_options.h"
 #include "qjs_node.h"
 #include "qjs_scroll_to_options.h"
-#include "qjs_element_attributes.h"
 
 namespace kraken {
 
@@ -487,11 +487,9 @@ struct Converter<ScrollToOptions> : ConverterBase<ScrollToOptions> {
   }
 };
 
-template<>
+template <>
 struct Converter<ElementAttributes> : ConverterBase<ElementAttributes> {
-  static JSValue ToValue(JSContext* ctx, ImplType value) {
-    return value->ToQuickJS();
-  }
+  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
 };
 
 };  // namespace kraken

@@ -70,7 +70,6 @@ class Element : public ContainerNode {
 
  protected:
  private:
-
   // Clone is private so that non-virtual CloneElementWithChildren and
   // CloneElementWithoutChildren are used inst
   Node* Clone(Document&, CloneChildrenFlag) const;

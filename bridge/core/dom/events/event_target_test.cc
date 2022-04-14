@@ -29,7 +29,7 @@ TEST(EventTarget, addEventListener) {
   EXPECT_EQ(errorCalled, false);
 }
 
-//TEST(EventTarget, removeEventListener) {
+// TEST(EventTarget, removeEventListener) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -41,14 +41,14 @@ TEST(EventTarget, addEventListener) {
 //  });
 //  auto context = bridge->getContext();
 //  const char* code =
-//      "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); "
-//      "div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
+//      "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f);
+//      " "div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
 //  bridge->evaluateScript(code, strlen(code), "vm://", 0);
 //
 //  EXPECT_EQ(logCalled, false);
 //}
 //
-//TEST(EventTarget, setNoEventTargetProperties) {
+// TEST(EventTarget, setNoEventTargetProperties) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -68,7 +68,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(errorCalled, false);
 //}
 //
-//TEST(EventTarget, propertyEventHandler) {
+// TEST(EventTarget, propertyEventHandler) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -91,7 +91,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, setUnExpectedAttributeEventHandler) {
+// TEST(EventTarget, setUnExpectedAttributeEventHandler) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -113,7 +113,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, false);
 //}
 //
-//TEST(EventTarget, propertyEventOnWindow) {
+// TEST(EventTarget, propertyEventOnWindow) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -133,7 +133,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, asyncFunctionCallback) {
+// TEST(EventTarget, asyncFunctionCallback) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -175,7 +175,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, ClassInheritEventTarget) {
+// TEST(EventTarget, ClassInheritEventTarget) {
 //  bool static errorCalled = false;
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
@@ -188,14 +188,14 @@ TEST(EventTarget, addEventListener) {
 //  });
 //  auto context = bridge->getContext();
 //  std::string code = std::string(R"(
-//class Sample extends EventTarget {
+// class Sample extends EventTarget {
 //  constructor() {
 //    super();
 //  }
 //}
 //
-//let s = new Sample();
-//console.log(s.addEventListener, s.removeEventListener)
+// let s = new Sample();
+// console.log(s.addEventListener, s.removeEventListener)
 //)");
 //  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 //
@@ -203,7 +203,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, wontLeakWithStringProperty) {
+// TEST(EventTarget, wontLeakWithStringProperty) {
 //  auto bridge = TEST_init();
 //  std::string code =
 //      "var img = new Image();\n"
@@ -211,7 +211,7 @@ TEST(EventTarget, addEventListener) {
 //  bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
 //}
 //
-//TEST(EventTarget, dispatchEventOnGC) {
+// TEST(EventTarget, dispatchEventOnGC) {
 //  using namespace kraken;
 //
 //  bool static errorCalled = false;
@@ -225,11 +225,11 @@ TEST(EventTarget, addEventListener) {
 //  std::string code = std::string(R"(
 //{
 //// Wrap div in a block scope will be freed by GC
-//let div = document.createElement('div');
+// let div = document.createElement('div');
 //}
-//window.onclick = () => {console.log(1234);}
+// window.onclick = () => {console.log(1234);}
 //
-//setTimeout(() => {});
+// setTimeout(() => {});
 //)");
 //
 //  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
@@ -254,7 +254,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, globalBindListener) {
+// TEST(EventTarget, globalBindListener) {
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
 //    logCalled = true;
@@ -266,7 +266,7 @@ TEST(EventTarget, addEventListener) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(EventTarget, shouldKeepAtom) {
+// TEST(EventTarget, shouldKeepAtom) {
 //  auto bridge = TEST_init();
 //  bool static logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

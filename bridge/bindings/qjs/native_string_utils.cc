@@ -36,7 +36,8 @@ std::unique_ptr<NativeString> stringToNativeString(const std::string& string) {
 }
 
 std::string nativeStringToStdString(const NativeString* native_string) {
-  std::u16string u16EventType = std::u16string(reinterpret_cast<const char16_t*>(native_string->string()), native_string->length());
+  std::u16string u16EventType =
+      std::u16string(reinterpret_cast<const char16_t*>(native_string->string()), native_string->length());
   return toUTF8(u16EventType);
 }
 

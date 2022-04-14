@@ -10,8 +10,8 @@
 
 #include "events/event_target.h"
 #include "foundation/macros.h"
-#include "tree_scope.h"
 #include "node_data.h"
+#include "tree_scope.h"
 
 namespace kraken {
 

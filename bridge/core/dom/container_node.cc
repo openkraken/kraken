@@ -10,7 +10,7 @@
 namespace kraken {
 
 HTMLCollection* ContainerNode::Children() {
-  //TODO: add children implements.
+  // TODO: add children implements.
   return nullptr;
 }
 
@@ -273,14 +273,14 @@ bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
     return CheckReferenceChildParent(*this, next, old_child, exception_state);
   }
 
-//  if (auto* document = DynamicTo<Document>(this)) {
-//    // Step 2 is unnecessary. No one can have a Document child.
-//    // Step 3:
-//    if (!CheckReferenceChildParent(*this, next, old_child, exception_state))
-//      return false;
-//    // Step 4-6.
-//    return document->CanAcceptChild(new_child, next, old_child, exception_state);
-//  }
+  //  if (auto* document = DynamicTo<Document>(this)) {
+  //    // Step 2 is unnecessary. No one can have a Document child.
+  //    // Step 3:
+  //    if (!CheckReferenceChildParent(*this, next, old_child, exception_state))
+  //      return false;
+  //    // Step 4-6.
+  //    return document->CanAcceptChild(new_child, next, old_child, exception_state);
+  //  }
 
   // 2. If node is a host-including inclusive ancestor of parent, throw a
   // HierarchyRequestError.

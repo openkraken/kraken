@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_QJS_INTERFACE_BRIDGE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_QJS_INTERFACE_BRIDGE_H_
 
-#include "script_wrappable.h"
 #include "core/executing_context.h"
+#include "script_wrappable.h"
 
 namespace kraken {
 
