@@ -93,13 +93,6 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
 };
 #endif
 
-enum class MessageLevel : uint8_t {
-  Log = 1,
-  Warning = 2,
-  Error = 3,
-  Debug = 4,
-  Info = 5,
-};
 
 void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx) {
   MessageLevel _log_level = MessageLevel::Info;
@@ -131,6 +124,11 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
   if (kraken::KrakenPage::consoleMessageHandler != nullptr) {
     kraken::KrakenPage::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
   }
+
+  if (kraken::getDartMethod()->onJsLog != nullptr) {
+    kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(_log_level), stream.str().c_str());
+  }
+
 }
 
 }  // namespace foundation

@@ -22,6 +22,14 @@ constexpr LogSeverity DEBUG = 3;
 constexpr LogSeverity ERROR = 4;
 constexpr LogSeverity FATAL = 5;
 
+enum class MessageLevel : uint8_t {
+  Log = 1,
+  Warning = 2,
+  Error = 3,
+  Debug = 4,
+  Info = 5,
+};
+
 class LogMessageVoidify {
  public:
   void operator&(std::ostream&) {}
