@@ -309,14 +309,15 @@ class CSSPositionedLayout {
     if (parent.isScrollingContentBox) {
       RenderLayoutBox overflowContainerBox = parent.parent as RenderLayoutBox;
       parentRenderStyle = overflowContainerBox.renderStyle;
-      parentSize = Size(
-        parentSize.width
-          - parentRenderStyle.effectiveBorderLeftWidth.computedValue
-          - parentRenderStyle.effectiveBorderRightWidth.computedValue,
-        parentSize.height
-          - parentRenderStyle.effectiveBorderTopWidth.computedValue
-          - parentRenderStyle.effectiveBorderBottomWidth.computedValue,
-      );
+
+      // Overflow scroll container has width and height specified surely.
+      if(overflowContainerBox.widthSizeType == BoxSizeType.specified
+        && overflowContainerBox.heightSizeType == BoxSizeType.specified) {
+        parentSize = Size(
+          overflowContainerBox.renderStyle.width.computedValue,
+          overflowContainerBox.renderStyle.height.computedValue
+        );
+      }
     }
 
     CSSLengthValue parentBorderLeftWidth = parentRenderStyle.effectiveBorderLeftWidth;
