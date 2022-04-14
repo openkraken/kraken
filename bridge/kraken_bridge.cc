@@ -60,6 +60,10 @@ void printError(int32_t contextId, const char* errmsg) {
   if (kraken::getDartMethod()->onJsError != nullptr) {
     kraken::getDartMethod()->onJsError(contextId, errmsg);
   }
+  if (kraken::getDartMethod()->onJsLog != nullptr) {
+    kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(foundation::MessageLevel::Error), errmsg);
+  }
+
   KRAKEN_LOG(ERROR) << errmsg << std::endl;
 }
 
