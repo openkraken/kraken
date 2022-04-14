@@ -371,6 +371,22 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
+typedef NativeJSLog = Void Function(Int32 contextId, Int32 level, Pointer<Utf8>);
+
+void _onJSLog(int contextId, int level, Pointer<Utf8> charStr) {
+  String msg = charStr.toDartString();
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  if (controller != null) {
+    JSLogHandler? jsLogHandler = controller.onJSLog;
+    if (jsLogHandler != null) {
+      jsLogHandler(level, msg);
+    }
+  }
+}
+
+final Pointer<NativeFunction<NativeJSLog>> _nativeOnJsLog = Pointer.fromFunction(_onJSLog);
+
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -387,6 +403,7 @@ final List<int> _dartNativeMethods = [
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
+  _nativeOnJsLog.address,
 ];
 
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

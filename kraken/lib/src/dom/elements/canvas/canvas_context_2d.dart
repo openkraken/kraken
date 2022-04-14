@@ -278,6 +278,13 @@ class CanvasRenderingContext2D extends BindingObject {
     }
   }
 
+  @override
+  void dispose() {
+    _actions.clear();
+    _pendingActions.clear();
+    super.dispose();
+  }
+
   final CanvasRenderingContext2DSettings _settings = CanvasRenderingContext2DSettings();
 
   CanvasRenderingContext2DSettings getContextAttributes() => _settings;
@@ -290,7 +297,8 @@ class CanvasRenderingContext2D extends BindingObject {
 
   int get actionCount => _actions.length;
 
-  final List<CanvasAction> _actions = [];
+  List<CanvasAction> _actions = [];
+  List<CanvasAction> _pendingActions = [];
 
   void addAction(CanvasAction action) {
     _actions.add(action);
@@ -299,22 +307,25 @@ class CanvasRenderingContext2D extends BindingObject {
   }
 
   // Perform canvas drawing.
-  void performActions(Canvas canvas, Size size) {
+  List<CanvasAction> performActions(Canvas canvas, Size size) {
     // HACK: Must sync transform first because each paint will saveLayer and restore that make the transform not effect
     if (!_lastMatrix.isIdentity()) {
       canvas.transform(_lastMatrix.storage);
     }
-    for (int i = 0; i < _actions.length; i++) {
-      _actions[i](canvas, size);
+    _pendingActions = _actions;
+    _actions = [];
+    for (int i = 0; i < _pendingActions.length; i++) {
+      _pendingActions[i](canvas, size);
     }
+    return _pendingActions;
   }
 
-  // Clear the saved actions.
-  void clearActions() {
+  // Clear the saved pending actions.
+  void clearActions(List<CanvasAction> actions) {
     if (_lastMatrix != _matrix) {
       _lastMatrix = _matrix.clone();
     }
-    _actions.clear();
+    actions.clear();
   }
 
   static TextAlign? parseTextAlign(String value) {
@@ -907,7 +918,8 @@ class CanvasRenderingContext2D extends BindingObject {
   // Reset the rendering context to its default state.
   // Called while canvas element's dimensions were changed.
   void reset() {
-    clearActions();
+    _pendingActions = [];
+    _actions = [];
     _states.clear();
     _matrix = Matrix4.identity();
     _lastMatrix = Matrix4.identity();
