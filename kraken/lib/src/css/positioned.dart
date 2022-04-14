@@ -293,7 +293,7 @@ class CSSPositionedLayout {
     }
   }
 
-  // Position of position element involves inset, width/height and margin.
+  // Position of positioned element involves inset, size , margin and its containing block size.
   // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
   static void applyPositionedChildOffset(
     RenderBoxModel parent,
@@ -354,80 +354,32 @@ class CSSPositionedLayout {
       child.scrollingOffsetY = rootElement.scrollTop;
     }
 
+    // The static position of positioned element is its offset when its position property had been static
+    // which equals to the position of its placeholder renderBox.
     // https://www.w3.org/TR/CSS2/visudet.html#static-position
-    Offset staticPosition = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
+    Offset staticPositionOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
 
-    // Final position of child.
-    double x;
-    double y;
+    double x = _computePositionedOffset(
+      parentBorderBeforeWidth: parentBorderLeftWidth,
+      containingBlockLength: containingBlockSize.width,
+      length: size.width,
+      staticPosition: staticPositionOffset.dx,
+      insetBefore: left,
+      insetAfter: right,
+      marginBefore: marginLeft,
+      marginAfter: marginRight,
+    );
 
-    // left + margin-left + border-left-width + padding-left + width + padding-right
-    // + border-right-width + margin-right + right = width of containing block
-    if (left.isAuto && right.isAuto) {
-      // left -> static pos
-      x = staticPosition.dx;
-    } else if (left.isNotAuto && right.isNotAuto) {
-      double freeSpace = containingBlockSize.width - size.width
-        - left.computedValue - right.computedValue;
-
-      // Resolved margin left value.
-      double marginLeftValue;
-      if (marginLeft.isAuto && marginRight.isAuto) {
-        // margins split positive free space, right margin gets negative free space
-        marginLeftValue = freeSpace / 2;
-      } else if (marginLeft.isAuto && marginRight.isNotAuto) {
-        // auto margin left -> free space
-        marginLeftValue = freeSpace - marginRight.computedValue;
-      } else {
-        marginLeftValue = marginLeft.computedValue;
-      }
-
-      x = parentBorderLeftWidth.computedValue + left.computedValue + marginLeftValue;
-    } else if (left.isAuto && right.isNotAuto) {
-      // auto margins -> zero
-      // left → solve
-      double leftValue = containingBlockSize.width - size.width - right.computedValue
-        - marginLeft.computedValue - marginRight.computedValue;
-
-      x = parentBorderLeftWidth.computedValue + leftValue + marginLeft.computedValue;
-    } else {
-      // left → as specified
-      x = parentBorderLeftWidth.computedValue + left.computedValue + marginLeft.computedValue;
-    }
-
-    // top + margin-top + border-top-width + padding-top + height + padding-bottom
-    // + border-bottom-width + margin-bottom + bottom = height of containing block
-    if (top.isAuto && bottom.isAuto) {
-      // top -> static pos
-      y = staticPosition.dy;
-    } else if (top.isNotAuto && bottom.isNotAuto) {
-      double freeSpace = containingBlockSize.height - size.height
-        - top.computedValue - bottom.computedValue;
-
-      // Resolved margin top value.
-      double marginTopValue;
-      if (marginTop.isAuto && marginBottom.isAuto) {
-        // margins split positive free space, bottom margin gets negative free space
-        marginTopValue = freeSpace / 2;
-      } else if (marginTop.isAuto && marginBottom.isNotAuto) {
-        // auto margin top -> free space
-        marginTopValue = freeSpace - marginBottom.computedValue;
-      } else {
-        marginTopValue = marginTop.computedValue;
-      }
-
-      y = parentBorderTopWidth.computedValue + top.computedValue + marginTopValue;
-    } else if (top.isAuto && bottom.isNotAuto) {
-      // auto margins -> zero
-      // top → solve
-      double topValue = containingBlockSize.height - size.height - bottom.computedValue
-        - marginTop.computedValue - marginBottom.computedValue;
-
-      y = parentBorderTopWidth.computedValue + topValue + marginTop.computedValue;
-    } else {
-      // top → as specified
-      y = parentBorderTopWidth.computedValue + top.computedValue + marginTop.computedValue;
-    }
+    double y = _computePositionedOffset(
+      parentBorderBeforeWidth: parentBorderTopWidth,
+      containingBlockLength: containingBlockSize.height,
+      length: size.height,
+      staticPosition: staticPositionOffset.dy,
+      insetBefore: top,
+      insetAfter: bottom,
+      marginBefore: marginTop,
+      marginAfter: marginBottom,
+    );
 
     // Convert position relative to scrolling content box.
     // Scrolling content box positions relative to the content edge of its parent.
@@ -437,5 +389,63 @@ class CSSPositionedLayout {
     }
 
     childParentData.offset = Offset(x, y);
+  }
+
+  // Compute the offset of positioned element in one axis.
+  static double _computePositionedOffset({
+    required CSSLengthValue parentBorderBeforeWidth,
+    required double containingBlockLength,
+    required double length,
+    required double staticPosition,
+    required CSSLengthValue insetBefore,
+    required CSSLengthValue insetAfter,
+    required CSSLengthValue marginBefore,
+    required CSSLengthValue marginAfter,
+  }) {
+
+    // Offset of positioned element in one axis.
+    double offset;
+
+    // Take horizontal axis for example.
+    // left + margin-left + width + margin-right + right = width of containing block
+    // Refer to the table of `Summary of rules for dir=ltr in horizontal writing modes` in following spec.
+    // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
+    if (insetBefore.isAuto && insetAfter.isAuto) {
+      // left → static pos
+      offset = staticPosition;
+    } else if (insetBefore.isNotAuto && insetAfter.isNotAuto) {
+      double freeSpace = containingBlockLength - length
+        - insetBefore.computedValue - insetAfter.computedValue;
+
+      double marginBeforeValue;
+
+      if (marginBefore.isAuto && marginAfter.isAuto) {
+        if (freeSpace < 0) {
+          // margin-left → '0', solve for margin-right
+          marginBeforeValue = 0;
+        } else {
+          // margins split positive free space
+          marginBeforeValue = freeSpace / 2;
+        }
+      } else if (marginBefore.isAuto && marginAfter.isNotAuto) {
+        // auto margin left → free space
+        marginBeforeValue = freeSpace - marginAfter.computedValue;
+      } else {
+        marginBeforeValue = marginBefore.computedValue;
+      }
+
+      offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBeforeValue;
+    } else if (insetBefore.isAuto && insetAfter.isNotAuto) {
+      // auto margins → zero, left → solve
+      double leftValue = containingBlockLength - length - insetAfter.computedValue
+        - marginBefore.computedValue - marginAfter.computedValue;
+
+      offset = parentBorderBeforeWidth.computedValue + leftValue + marginBefore.computedValue;
+    } else {
+      // left → as specified
+      offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBefore.computedValue;
+    }
+
+    return offset;
   }
 }
