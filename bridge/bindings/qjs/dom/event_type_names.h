@@ -5,7 +5,6 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_TYPE_NAMES_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_TYPE_NAMES_H_
 
-
 #include <string>
 #include <vector>
 

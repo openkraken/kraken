@@ -7,7 +7,7 @@
 
 namespace kraken::binding::qjs {
 
-static std::vector<std::string> eventTypeNames {
+static std::vector<std::string> eventTypeNames{
     "onabort",
     "onanimationend",
     "onanimationiteration",
@@ -58,4 +58,4 @@ bool qjs::EventTypeNames::isEventTypeName(const std::string& name) {
   return std::find(eventTypeNames.begin(), eventTypeNames.end(), name) != eventTypeNames.end();
 }
 
-}
+}  // namespace kraken::binding::qjs
