@@ -93,7 +93,6 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
 };
 #endif
 
-
 void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx) {
   MessageLevel _log_level = MessageLevel::Info;
   switch (level[0]) {
@@ -128,7 +127,6 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
   if (kraken::getDartMethod()->onJsLog != nullptr) {
     kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(_log_level), stream.str().c_str());
   }
-
 }
 
 }  // namespace foundation

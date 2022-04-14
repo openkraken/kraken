@@ -229,6 +229,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/document.h
     bindings/qjs/dom/text_node.cc
     bindings/qjs/dom/text_node.h
+    bindings/qjs/dom/event_type_names.h
+    bindings/qjs/dom/event_type_names.cc
     bindings/qjs/dom/comment_node.cc
     bindings/qjs/dom/comment_node.h
     bindings/qjs/dom/document_fragment.cc
