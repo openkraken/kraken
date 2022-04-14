@@ -104,7 +104,7 @@ class CSSPositionedLayout {
         renderStyle.right.isNotAuto);
   }
 
-  /// Set horizontal offset of sticky element
+  // Set horizontal offset of sticky element.
   static bool _applyStickyChildHorizontalOffset(
     RenderBoxModel scrollContainer,
     RenderBoxModel child,
@@ -160,7 +160,7 @@ class CSSPositionedLayout {
     return isHorizontalFixed;
   }
 
-  /// Set vertical offset of sticky element
+  // Set vertical offset of sticky element.
   static bool _applyStickyChildVerticalOffset(
     RenderBoxModel scrollContainer,
     RenderBoxModel child,
@@ -216,11 +216,11 @@ class CSSPositionedLayout {
     return isVerticalFixed;
   }
 
-  /// Set sticky child offset according to scroll offset and direction,
-  /// when axisDirection param is null compute the both axis direction.
-  /// Sticky positioning is similar to relative positioning except
-  /// the offsets are automatically calculated in reference to the nearest scrollport.
-  /// https://www.w3.org/TR/css-position-3/#stickypos-insets
+  // Set sticky child offset according to scroll offset and direction,
+  // when axisDirection param is null compute the both axis direction.
+  // Sticky positioning is similar to relative positioning except
+  // the offsets are automatically calculated in reference to the nearest scrollport.
+  // https://www.w3.org/TR/css-position-3/#stickypos-insets
   static void applyStickyChildOffset(RenderBoxModel scrollContainer, RenderBoxModel child) {
     RenderPositionPlaceholder childRenderPositionHolder = child.renderPositionPlaceholder!;
     RenderLayoutParentData childPlaceHolderParentData = childRenderPositionHolder.parentData as RenderLayoutParentData;
@@ -323,6 +323,8 @@ class CSSPositionedLayout {
     CSSLengthValue parentBorderRightWidth = parentRenderStyle.effectiveBorderRightWidth;
     CSSLengthValue parentBorderTopWidth = parentRenderStyle.effectiveBorderTopWidth;
     CSSLengthValue parentBorderBottomWidth = parentRenderStyle.effectiveBorderBottomWidth;
+    CSSLengthValue parentPaddingLeft = parentRenderStyle.paddingLeft;
+    CSSLengthValue parentPaddingTop = parentRenderStyle.paddingTop;
 
     // The containing block of not an inline box is formed by the padding edge of the ancestor.
     // Thus the final offset of child need to add the border of parent.
@@ -360,48 +362,47 @@ class CSSPositionedLayout {
     Offset staticPositionOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
 
     double x = _computePositionedOffset(
-      parentBorderBeforeWidth: parentBorderLeftWidth,
-      containingBlockLength: containingBlockSize.width,
-      length: size.width,
-      staticPosition: staticPositionOffset.dx,
-      insetBefore: left,
-      insetAfter: right,
-      marginBefore: marginLeft,
-      marginAfter: marginRight,
+      parent.isScrollingContentBox,
+      parentBorderLeftWidth,
+      parentPaddingLeft,
+      containingBlockSize.width,
+      size.width,
+      staticPositionOffset.dx,
+      left,
+      right,
+      marginLeft,
+      marginRight,
     );
 
     double y = _computePositionedOffset(
-      parentBorderBeforeWidth: parentBorderTopWidth,
-      containingBlockLength: containingBlockSize.height,
-      length: size.height,
-      staticPosition: staticPositionOffset.dy,
-      insetBefore: top,
-      insetAfter: bottom,
-      marginBefore: marginTop,
-      marginAfter: marginBottom,
+      parent.isScrollingContentBox,
+      parentBorderTopWidth,
+      parentPaddingTop,
+      containingBlockSize.height,
+      size.height,
+      staticPositionOffset.dy,
+      top,
+      bottom,
+      marginTop,
+      marginBottom,
     );
-
-    // Convert position relative to scrolling content box.
-    // Scrolling content box positions relative to the content edge of its parent.
-    if (parent.isScrollingContentBox) {
-      x -= parentRenderStyle.effectiveBorderLeftWidth.computedValue + parentRenderStyle.paddingLeft.computedValue;
-      y -= parentRenderStyle.effectiveBorderTopWidth.computedValue + parentRenderStyle.paddingTop.computedValue;
-    }
 
     childParentData.offset = Offset(x, y);
   }
 
   // Compute the offset of positioned element in one axis.
-  static double _computePositionedOffset({
-    required CSSLengthValue parentBorderBeforeWidth,
-    required double containingBlockLength,
-    required double length,
-    required double staticPosition,
-    required CSSLengthValue insetBefore,
-    required CSSLengthValue insetAfter,
-    required CSSLengthValue marginBefore,
-    required CSSLengthValue marginAfter,
-  }) {
+  static double _computePositionedOffset(
+    bool isParentScrollingContentBox,
+    CSSLengthValue parentBorderBeforeWidth,
+    CSSLengthValue parentPaddingBefore,
+    double containingBlockLength,
+    double length,
+    double staticPosition,
+    CSSLengthValue insetBefore,
+    CSSLengthValue insetAfter,
+    CSSLengthValue marginBefore,
+    CSSLengthValue marginAfter,
+  ) {
 
     // Offset of positioned element in one axis.
     double offset;
@@ -413,37 +414,47 @@ class CSSPositionedLayout {
     if (insetBefore.isAuto && insetAfter.isAuto) {
       // left → static pos
       offset = staticPosition;
-    } else if (insetBefore.isNotAuto && insetAfter.isNotAuto) {
-      double freeSpace = containingBlockLength - length
-        - insetBefore.computedValue - insetAfter.computedValue;
+    } else {
+      if (insetBefore.isNotAuto && insetAfter.isNotAuto) {
+        double freeSpace = containingBlockLength - length
+          - insetBefore.computedValue - insetAfter.computedValue;
 
-      double marginBeforeValue;
+        double marginBeforeValue;
 
-      if (marginBefore.isAuto && marginAfter.isAuto) {
-        if (freeSpace < 0) {
-          // margin-left → '0', solve for margin-right
-          marginBeforeValue = 0;
+        if (marginBefore.isAuto && marginAfter.isAuto) {
+          if (freeSpace < 0) {
+            // margin-left → '0', solve for margin-right
+            marginBeforeValue = 0;
+          } else {
+            // margins split positive free space
+            marginBeforeValue = freeSpace / 2;
+          }
+        } else if (marginBefore.isAuto && marginAfter.isNotAuto) {
+          // auto margin left → free space
+          marginBeforeValue = freeSpace - marginAfter.computedValue;
         } else {
-          // margins split positive free space
-          marginBeforeValue = freeSpace / 2;
+          marginBeforeValue = marginBefore.computedValue;
         }
-      } else if (marginBefore.isAuto && marginAfter.isNotAuto) {
-        // auto margin left → free space
-        marginBeforeValue = freeSpace - marginAfter.computedValue;
+
+        offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBeforeValue;
+      } else if (insetBefore.isAuto && insetAfter.isNotAuto) {
+        // auto margins → zero, left → solve
+        double insetBeforeValue = containingBlockLength - length - insetAfter.computedValue
+          - marginBefore.computedValue - marginAfter.computedValue;
+
+        offset = parentBorderBeforeWidth.computedValue + insetBeforeValue + marginBefore.computedValue;
       } else {
-        marginBeforeValue = marginBefore.computedValue;
+        // left → as specified
+        offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBefore.computedValue;
       }
 
-      offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBeforeValue;
-    } else if (insetBefore.isAuto && insetAfter.isNotAuto) {
-      // auto margins → zero, left → solve
-      double leftValue = containingBlockLength - length - insetAfter.computedValue
-        - marginBefore.computedValue - marginAfter.computedValue;
-
-      offset = parentBorderBeforeWidth.computedValue + leftValue + marginBefore.computedValue;
-    } else {
-      // left → as specified
-      offset = parentBorderBeforeWidth.computedValue + insetBefore.computedValue + marginBefore.computedValue;
+      // Convert position relative to scrolling content box.
+      // Scrolling content box positions relative to the content edge of its parent.
+      if (isParentScrollingContentBox) {
+        offset = offset
+          - parentBorderBeforeWidth.computedValue
+          - parentPaddingBefore.computedValue;
+      }
     }
 
     return offset;
