@@ -32,7 +32,7 @@ const int DOCUMENT_ID = -2;
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
-typedef JSLogHandler = void Function(int level,String message);
+typedef JSLogHandler = void Function(int level, String message);
 typedef PendingCallback = void Function();
 
 typedef TraverseElementCallback = void Function(Element element);

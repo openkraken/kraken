@@ -5,13 +5,13 @@
 import 'package:kraken/devtools.dart';
 
 class InspectLogModule extends UIInspectorModule {
-  InspectLogModule(ChromeDevToolsService server): super(server){
-    devtoolsService.controller!.onJSLog = (level,message) {
+  InspectLogModule(ChromeDevToolsService server) : super(server) {
+    devtoolsService.controller!.onJSLog = (level, message) {
       handleMessage(level, message);
     };
   }
 
-  void handleMessage(int level, String message){
+  void handleMessage(int level, String message) {
     sendEventToFrontend(LogEntryEvent(
       text: message,
       level: getLevelStr(level),
@@ -23,8 +23,8 @@ class InspectLogModule extends UIInspectorModule {
   /// Error = 3,
   /// Debug = 4,
   /// Info = 5,
-  String getLevelStr(int level){
-    switch (level){
+  String getLevelStr(int level) {
+    switch (level) {
       case 1:
         return 'verbose';
       case 2:

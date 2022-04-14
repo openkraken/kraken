@@ -376,10 +376,9 @@ typedef NativeJSLog = Void Function(Int32 contextId, Int32 level, Pointer<Utf8>)
 void _onJSLog(int contextId, int level, Pointer<Utf8> charStr) {
   String msg = charStr.toDartString();
   KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
-  if(controller != null){
+  if (controller != null) {
     JSLogHandler? jsLogHandler = controller.onJSLog;
     if (jsLogHandler != null) {
-      print('_onJSLog $level $msg');
       jsLogHandler(level, msg);
     }
   }
