@@ -4,7 +4,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/services/text_layout_metrics.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart' as dom;
@@ -219,8 +218,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteText(DeleteTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .delete(SelectionChangedCause.keyboard);
     }
   }
@@ -228,8 +227,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteByWordText(DeleteByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .deleteByWord(SelectionChangedCause.keyboard, false);
     }
   }
@@ -237,8 +236,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteByLineText(DeleteByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .deleteByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -246,8 +245,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteForwardText(DeleteForwardTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .deleteForward(SelectionChangedCause.keyboard);
     }
   }
@@ -255,8 +254,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteForwardByWordText(DeleteForwardByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .deleteForwardByWord(SelectionChangedCause.keyboard, false);
     }
   }
@@ -264,8 +263,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleDeleteForwardByLineText(DeleteForwardByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .deleteForwardByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -274,8 +273,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleSelectAllText(SelectAllTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .selectAll(SelectionChangedCause.keyboard);
     }
   }
@@ -283,8 +282,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleCopySelectionText(CopySelectionTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .copySelection(SelectionChangedCause.keyboard);
     }
   }
@@ -292,8 +291,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleCutSelectionText(CutSelectionTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .cutSelection(SelectionChangedCause.keyboard);
     }
   }
@@ -301,8 +300,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handlePasteText(PasteTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .pasteText(SelectionChangedCause.keyboard);
     }
   }
@@ -310,8 +309,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionRightByLine(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -321,8 +320,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionLeftByLine(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -332,8 +331,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionRightByWord(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -343,8 +342,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionLeftByWord(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -354,8 +353,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionUp(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -365,8 +364,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionDown(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -376,8 +375,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionLeft(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -387,8 +386,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionRight(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -398,8 +397,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionToEnd(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -409,8 +408,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .moveSelectionToStart(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -420,8 +419,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionLeft(SelectionChangedCause.keyboard);
       // Make caret visible while moving cursor.
       focusedElement.scrollToCaret();
@@ -431,8 +430,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionRight(SelectionChangedCause.keyboard);
     }
   }
@@ -440,8 +439,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionUp(SelectionChangedCause.keyboard);
     }
   }
@@ -449,8 +448,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionDown(SelectionChangedCause.keyboard);
     }
   }
@@ -458,8 +457,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .expandSelectionToEnd(SelectionChangedCause.keyboard);
     }
   }
@@ -467,8 +466,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .expandSelectionToStart(SelectionChangedCause.keyboard);
     }
   }
@@ -476,8 +475,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExpandSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .expandSelectionLeftByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -485,8 +484,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExpandSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .expandSelectionRightByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -494,8 +493,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionLeftByWord(SelectionChangedCause.keyboard);
     }
   }
@@ -503,8 +502,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionLeftByLineText(ExtendSelectionLeftByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionLeftByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -512,8 +511,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionLeftByWordAndStopAtReversalText(ExtendSelectionLeftByWordAndStopAtReversalTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
     }
   }
@@ -521,8 +520,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionRightByWord(SelectionChangedCause.keyboard);
     }
   }
@@ -530,8 +529,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionRightByLineText(ExtendSelectionRightByLineTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionRightByLine(SelectionChangedCause.keyboard);
     }
   }
@@ -539,8 +538,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   void _handleExtendSelectionRightByWordAndStopAtReversalText(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      _ElementTextEditingActionTarget
-        .fromElement(focusedElement)
+      focusedElement
+        .textSelectionDelegate
         .extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
     }
   }
@@ -749,53 +748,4 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
 
     return _selectionControls;
   }
-}
-
-class _ElementTextEditingActionTarget extends TextEditingActionTarget {
-  factory _ElementTextEditingActionTarget.fromElement(dom.TextFormControlElement element) {
-    return (element.textEditingActionTarget as _ElementTextEditingActionTarget?)
-        ?? _ElementTextEditingActionTarget._(element);
-  }
-
-  _ElementTextEditingActionTarget._(this.element) {
-    element.textEditingActionTarget = this;
-  }
-
-  dom.TextFormControlElement element;
-
-  RenderEditable? get _renderEditable => element.renderEditable;
-
-  @override
-  void debugAssertLayoutUpToDate() {
-    RenderEditable? editable = _renderEditable;
-    assert(editable != null);
-    editable!.debugAssertLayoutUpToDate();
-  }
-
-  @override
-  bool get obscureText => element.obscureText;
-
-  @override
-  bool get readOnly => element.readOnly;
-
-  @override
-  bool get selectionEnabled => _renderEditable?.selectionEnabled ?? false;
-
-  @override
-  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    if (newValue == textEditingValue) {
-      return;
-    }
-
-    RenderEditable? renderEditable = _renderEditable;
-    if (renderEditable != null) {
-      renderEditable.textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
-    }
-  }
-
-  @override
-  TextEditingValue get textEditingValue => element.currentTextEditingValue;
-
-  @override
-  TextLayoutMetrics get textLayoutMetrics => _renderEditable!;
 }
