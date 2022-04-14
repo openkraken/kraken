@@ -126,7 +126,6 @@ describe('flexbox flex-basis', () => {
       ]
     );
     BODY.appendChild(div);
-
     await snapshot();
   });
   
