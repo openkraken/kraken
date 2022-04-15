@@ -17,9 +17,9 @@
 #include "core/html/html_<%= item %>_element.h"
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceHeaderDir) { %>
-#include "<%= item.interfaceHeaderDir %>/html_<%= item.name %>_element.h"
-    <% } else if (!item.interfaceName) { %>
-#include "core/html/html_<%= item.name %>_element.h"
+#include "<%= item.interfaceHeaderDir %>/html_<%= item.filename ? item.filename : item.name  %>_element.h"
+    <% } else if (item.interfaceName != 'HTMLElement'){ %>
+#include "core/html/<%= item.filename ? item.filename : `html_${item.name}_element` %>.h"
     <% } %>
   <% } %>
 <% }); %>

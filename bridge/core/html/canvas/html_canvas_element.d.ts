@@ -1,3 +1,5 @@
+import {HTMLElement} from "../html_element";
+
 interface CanvasRenderingContext2D {
   fillStyle: string;
   direction: string;
@@ -43,7 +45,7 @@ interface CanvasRenderingContext2D {
   translate(x: number, y: number): void;
 }
 
-interface CanvasElement extends Element {
+interface HTMLCanvasElement extends HTMLElement {
   width: int64;
   height: int64;
   getContext: (contextType: string) => CanvasRenderingContext2D;

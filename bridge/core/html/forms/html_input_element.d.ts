@@ -1,4 +1,6 @@
-interface InputElement extends Element {
+import {HTMLElement} from "../html_element";
+
+interface HTMLInputElement extends HTMLElement {
   width: number;
   height: number;
   value: string;

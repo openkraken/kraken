@@ -1,10 +1,20 @@
-//
-// Created by andycall on 2022/1/29.
-//
+/*
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_HTML_ANCHOR_ELEMENT_H
 #define KRAKENBRIDGE_HTML_ANCHOR_ELEMENT_H
 
-class html_anchor_element {};
+#include "html_element.h"
+
+namespace kraken {
+
+class HTMLAnchorElement : public HTMLElement {
+ public:
+  explicit HTMLAnchorElement(Document&);
+};
+
+}
 
 #endif  // KRAKENBRIDGE_HTML_ANCHOR_ELEMENT_H

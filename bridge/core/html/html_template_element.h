@@ -6,16 +6,18 @@
 #ifndef KRAKENBRIDGE_HTML_TEMPLATE_ELEMENT_H
 #define KRAKENBRIDGE_HTML_TEMPLATE_ELEMENT_H
 
-#include "core/dom/element.h"
+#include "html_element.h"
 
 namespace kraken {
 
 class DocumentFragment;
 
-class HTMLTemplateElement : public Element {
+class HTMLTemplateElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
-
  public:
+
+  explicit HTMLTemplateElement(Document& document);
+
   DocumentFragment* content() const;
 
  private:

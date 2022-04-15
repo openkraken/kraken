@@ -3,11 +3,11 @@
  * Author: Kraken Team.
  */
 
-#include "html_script_element.h"
+#include "html_input_element.h"
 #include "html_names.h"
 
 namespace kraken {
 
-HTMLScriptElement::HTMLScriptElement(Document& document) : HTMLElement(html_names::kscript, &document) {}
+HTMLInputElement::HTMLInputElement(Document& document) : HTMLElement(html_names::kinput, &document) {}
 
 }  // namespace kraken

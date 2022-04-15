@@ -326,8 +326,20 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_element.h
     core/html/html_div_element.cc
     core/html/html_div_element.h
+    core/html/html_body_element.h
+    core/html/html_body_element.cc
+    core/html/html_anchor_element.h
+    core/html/html_anchor_element.cc
     core/html/html_template_element.cc
     core/html/html_template_element.h
+    core/html/forms/html_input_element.cc
+    core/html/forms/html_input_element.h
+    core/html/forms/html_textarea_element.cc
+    core/html/forms/html_textarea_element.h
+    core/html/html_image_element.cc
+    core/html/html_image_element.h
+    core/html/html_script_element.cc
+    core/html/html_script_element.h
     # Legacy implements, should remove them in the future.
     core/dom/legacy/space_split_string.cc
     core/dom/legacy/space_split_string.h

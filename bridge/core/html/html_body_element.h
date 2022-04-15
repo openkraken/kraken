@@ -1,10 +1,21 @@
-//
-// Created by yhtree on 2022/4/15.
-//
+/*
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #ifndef KRAKENBRIDGE_CORE_HTML_HTML_BODY_ELEMENT_H_
 #define KRAKENBRIDGE_CORE_HTML_HTML_BODY_ELEMENT_H_
 
-class html_body_element {};
+#include "html_element.h"
+
+namespace kraken {
+
+class HTMLBodyElement : public HTMLElement {
+ public:
+  explicit HTMLBodyElement(Document&);
+};
+
+
+}
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_BODY_ELEMENT_H_

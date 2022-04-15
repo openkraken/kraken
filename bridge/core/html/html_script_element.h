@@ -1,10 +1,25 @@
-//
-// Created by andycall on 2022/1/29.
-//
+/*
+ * Copyright (C) 2021 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
-#ifndef KRAKENBRIDGE_HTML_SCRIPT_ELEMENT_H
-#define KRAKENBRIDGE_HTML_SCRIPT_ELEMENT_H
+#ifndef KRAKENBRIDGE_CORE_HTML_HTML_SCRIPT_ELEMENT_H_
+#define KRAKENBRIDGE_CORE_HTML_HTML_SCRIPT_ELEMENT_H_
 
-class html_script_element {};
+#include "html_element.h"
 
-#endif  // KRAKENBRIDGE_HTML_SCRIPT_ELEMENT_H
+namespace kraken {
+
+class HTMLScriptElement : public HTMLElement {
+  DEFINE_WRAPPERTYPEINFO();
+ public:
+
+  explicit HTMLScriptElement(Document& document);
+
+ private:
+
+};
+
+}
+
+#endif  // KRAKENBRIDGE_CORE_HTML_HTML_SCRIPT_ELEMENT_H_

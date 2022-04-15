@@ -1,3 +1,5 @@
+import {Element} from "../dom/element";
+
 interface AnchorElement extends Element {
   href: string;
   target: string;
