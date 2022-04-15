@@ -93,8 +93,6 @@ class GestureDispatcher {
     _dragEventInfo = _DragEventInfo(this);
   }
 
-  GestureDispatcher._();
-
   late _DragEventInfo _dragEventInfo;
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
