@@ -15,7 +15,7 @@ const int _MAX_STEP_MS = 16;
 class _DragEventInfo extends Drag {
   _DragEventInfo(this.gestureDispatcher);
 
-  GestureDispatcher gestureDispatcher;
+  final GestureDispatcher gestureDispatcher;
 
   /// The pointer has moved.
   @override
