@@ -290,6 +290,11 @@ int EventTargetInstance::hasProperty(JSContext* ctx, JSValue obj, JSAtom atom) {
   JS_FreeValue(ctx, atomString);
 
   if (!p->is_wide_char && p->u.str8[0] == 'o' && p->u.str8[1] == 'n') {
+    const char* eventTypeName = reinterpret_cast<const char*>(p->u.str8);
+    if (EventTypeNames::isEventTypeName(eventTypeName)) {
+      return true;
+    }
+
     return !JS_IsNull(eventTarget->getAttributesEventHandler(p));
   }
 
