@@ -34,6 +34,7 @@ class StringView final {
   const char16_t* Characters16() const { return static_cast<const char16_t*>(bytes_); }
 
   unsigned length() const { return length_; }
+  bool Empty() const { return length_ == 0; }
 
  private:
   const void* bytes_;

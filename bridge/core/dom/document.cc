@@ -4,9 +4,18 @@
  */
 
 #include "document.h"
+#include "core/html/html_element.h"
+#include "core/html/html_unknown_element.h"
 #include "foundation/ascii_types.h"
+#include "html_element_factory.h"
 
 namespace kraken {
+
+Document* Document::Create(ExecutingContext* context, ExceptionState& exception_state) {
+  return MakeGarbageCollected<Document>(context);
+}
+
+Document::Document(ExecutingContext* context) : Node(this, ConstructionType::kCreateDocument), TreeScope(*this) {}
 
 Element* Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
@@ -14,10 +23,28 @@ Element* Document::createElement(const AtomicString& name, ExceptionState& excep
                                    "The tag name provided ('" + name.ToStdString() + "') is not a valid name.");
     return nullptr;
   }
+
+  if (auto* element = HTMLElementFactory::Create(name, *this)) {
+    return element;
+  }
+
+  return MakeGarbageCollected<HTMLUnknownElement>(name, *this);
 }
 
 Text* Document::createTextNode(const AtomicString& value) {
   return nullptr;
+}
+
+std::string Document::nodeName() const {
+  return "#document";
+}
+
+std::string Document::nodeValue() const {
+  return "";
+}
+
+Node::NodeType Document::nodeType() const {
+  return kDocumentNode;
 }
 
 template <typename CharType>
@@ -56,6 +83,10 @@ bool Document::IsValidName(const AtomicString& name) {
   }
 
   return false;
+}
+
+Node* Document::Clone(Document&, CloneChildrenFlag) const {
+  return nullptr;
 }
 
 }  // namespace kraken

@@ -18,12 +18,20 @@ class Text;
 // (typically, HTML) resource.
 class Document : public Node, TreeScope {
   DEFINE_WRAPPERTYPEINFO();
-
  public:
   using ImplType = Document*;
 
+  explicit Document(ExecutingContext* context);
+
+  static Document* Create(ExecutingContext* context, ExceptionState& exception_state);
+
   Element* createElement(const AtomicString& name, ExceptionState& exception_state);
   Text* createTextNode(const AtomicString& value);
+
+  std::string nodeName() const override;
+  std::string nodeValue() const override;
+  NodeType nodeType() const override;
+  Node * Clone(Document &, CloneChildrenFlag) const override;
 
   void IncrementNodeCount() { node_count_++; }
   void DecrementNodeCount() {

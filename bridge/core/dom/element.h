@@ -72,7 +72,7 @@ class Element : public ContainerNode {
  private:
   // Clone is private so that non-virtual CloneElementWithChildren and
   // CloneElementWithoutChildren are used inst
-  Node* Clone(Document&, CloneChildrenFlag) const;
+  Node* Clone(Document&, CloneChildrenFlag) const override;
 
   void _notifyNodeRemoved(Node* node);
   void _notifyChildRemoved();

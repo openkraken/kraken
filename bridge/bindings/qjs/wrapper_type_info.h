@@ -27,6 +27,9 @@ enum {
   JS_CLASS_DOCUMENT_FRAGMENT,
   JS_CLASS_BOUNDING_CLIENT_RECT,
   JS_CLASS_ELEMENT_ATTRIBUTES,
+  JS_CLASS_HTML_ELEMENT,
+  JS_CLASS_HTML_DIV_ELEMENT,
+  JS_CLASS_HTML_UNKNOWN_ELEMENT
 };
 
 // This struct provides a way to store a bunch of information that is helpful

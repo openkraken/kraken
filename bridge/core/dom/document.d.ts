@@ -1,8 +1,9 @@
 import {Node} from "./node";
+import {Element} from "./element";
 
 interface Document extends Node {
-  /**
-   * Returns the children.
-   */
-  readonly childNodes: number;
+
+  createElement(tagName: string): Element;
+
+  new(): Document;
 }

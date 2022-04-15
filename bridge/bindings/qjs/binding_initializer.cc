@@ -11,6 +11,8 @@
 #include "qjs_event_target.h"
 #include "qjs_module_manager.h"
 #include "qjs_window.h"
+#include "qjs_document.h"
+#include "qjs_node.h"
 
 namespace kraken {
 
@@ -20,6 +22,8 @@ void InstallBindings(ExecutingContext* context) {
   QJSConsole::Install(context);
   QJSEventTarget::Install(context);
   QJSEvent::Install(context);
+  QJSNode::Install(context);
+  QJSDocument::Install(context);
 }
 
 }  // namespace kraken

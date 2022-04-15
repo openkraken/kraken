@@ -326,20 +326,22 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_element.h
     core/html/html_div_element.cc
     core/html/html_div_element.h
-    core/html/html_body_element.h
-    core/html/html_body_element.cc
-    core/html/html_anchor_element.h
-    core/html/html_anchor_element.cc
-    core/html/html_template_element.cc
-    core/html/html_template_element.h
-    core/html/forms/html_input_element.cc
-    core/html/forms/html_input_element.h
-    core/html/forms/html_textarea_element.cc
-    core/html/forms/html_textarea_element.h
-    core/html/html_image_element.cc
-    core/html/html_image_element.h
-    core/html/html_script_element.cc
-    core/html/html_script_element.h
+#    core/html/html_body_element.h
+#    core/html/html_body_element.cc
+#    core/html/html_anchor_element.h
+#    core/html/html_anchor_element.cc
+#    core/html/html_template_element.cc
+#    core/html/html_template_element.h
+#    core/html/forms/html_input_element.cc
+#    core/html/forms/html_input_element.h
+#    core/html/forms/html_textarea_element.cc
+#    core/html/forms/html_textarea_element.h
+#    core/html/html_image_element.cc
+#    core/html/html_image_element.h
+#    core/html/html_script_element.cc
+#    core/html/html_script_element.h
+    core/html/html_unknown_element.cc
+    core/html/html_unknown_element.h
     # Legacy implements, should remove them in the future.
     core/dom/legacy/space_split_string.cc
     core/dom/legacy/space_split_string.h
@@ -388,6 +390,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_event_target.h
     out/qjs_node.h
     out/qjs_node.cc
+    out/qjs_document.cc
+    out/qjs_document.h
     out/qjs_element.cc
     out/qjs_element.h
     out/qjs_element_attributes.cc
@@ -412,8 +416,16 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_scroll_options.h
     out/qjs_scroll_to_options.cc
     out/qjs_scroll_to_options.h
+    out/qjs_html_element.cc
+    out/qjs_html_element.h
+    out/qjs_html_div_element.cc
+    out/qjs_html_div_element.h
+    out/qjs_html_unknown_element.cc
+    out/qjs_html_unknown_element.h
     out/html_element_factory.cc
     out/html_element_factory.h
+    out/html_names.cc
+    out/html_names.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2

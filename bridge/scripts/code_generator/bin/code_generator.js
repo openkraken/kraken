@@ -57,7 +57,7 @@ function genCodeFromTypeDefine() {
 
 // Generate code from json data.
 function genCodeFromJSONData() {
-  let jsonFiles = glob.sync('**/*.json', {
+  let jsonFiles = glob.sync('**/*.json5', {
     cwd: source
   });
   let templateFiles = glob.sync('**/*.tpl', {
