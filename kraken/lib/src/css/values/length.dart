@@ -205,7 +205,7 @@ class CSSLengthValue {
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
-              if (relativeParentHeight  != null) {
+              if (relativeParentHeight != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
                 // Mark parent to relayout to get renderer height of parent.
@@ -249,12 +249,11 @@ class CSSLengthValue {
             // will ensure parent exists.
             RenderStyle parentRenderStyle = renderStyle!.parent!;
             double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
-              parentRenderStyle.contentBoxLogicalWidth :
-              parentRenderStyle.contentBoxLogicalHeight;
+              parentContentBoxWidth : parentContentBoxHeight;
             if (mainContentSize != null) {
               _computedValue = mainContentSize * value!;
             } else {
-              // @TODO: Not supported when parent has no logical main size.
+              // Resolves as 0 when parent's inner main size is not specified.
               _computedValue = 0;
             }
             // Refer to the flex container's inner main size.
