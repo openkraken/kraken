@@ -202,10 +202,7 @@ class GestureDispatcher {
       _gatherEventsInPath();
 
       // Clear timer to prevent accidental clear target.
-      if (_clearTargetTimer != null) {
-        _clearTargetTimer?.cancel();
-        _clearTargetTimer = null;
-      }
+      _stopClearTargetTimer();
 
       // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
@@ -229,6 +226,13 @@ class GestureDispatcher {
   }
 
   Timer? _clearTargetTimer;
+
+  void _stopClearTargetTimer() {
+    if (_clearTargetTimer != null) {
+      _clearTargetTimer?.cancel();
+      _clearTargetTimer = null;
+    }
+  }
 
   void _clearTarget() {
     // We should clear the target in the next microTask to dispatch event in callback of recognizer.
