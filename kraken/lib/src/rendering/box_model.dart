@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -1438,7 +1439,13 @@ class RenderBoxModel extends RenderBox
   }
 
   Future<Image> toImage({double pixelRatio = 1.0}) {
-    assert(layer != null);
+    if (layer == null) {
+      Completer<Image> completer = Completer<Image>();
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        completer.complete(toImage(pixelRatio: pixelRatio));
+      });
+      return completer.future;
+    }
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);

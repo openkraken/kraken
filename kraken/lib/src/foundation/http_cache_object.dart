@@ -189,12 +189,6 @@ class HttpCacheObject {
         index += 4;
       }
 
-      // Invalid cache blob size, mark as invalid.
-      if (await _blob.length != contentLength) {
-        _valid = false;
-        return;
-      }
-
       int urlLength;
       if (index + 4 <= byteLength) {
         // Read url.
@@ -226,7 +220,6 @@ class HttpCacheObject {
         }
         index += eTagLength;
       }
-
 
       int headersLength;
       if (index + 4 <= byteLength) {
@@ -370,16 +363,37 @@ class HttpCacheObject {
     return await _blob.exists();
   }
 
-  Future<HttpClientResponse?> toHttpClientResponse() async {
+  Future<HttpClientResponse?> toHttpClientResponse([HttpClient? httpClient]) async {
     if (!await _exists) {
       return null;
+    }
+    HttpHeaders responseHeaders = createHttpHeaders(initialHeaders: _getResponseHeaders());
+
+    // Unless content-encoding specified, like gzip or delfate, the real size is decoded size.
+    // Trust the blob length.
+    if (responseHeaders.value(HttpHeaders.contentEncodingHeader) == null) {
+      int blobLength = await _blob.length;
+      if (contentLength != blobLength) {
+        contentLength = blobLength;
+      }
     }
 
     return HttpClientStreamResponse(
       _blob.openRead(),
       statusCode: HttpStatus.ok,
-      responseHeaders: _getResponseHeaders(),
-    );
+      initialHeaders: responseHeaders,
+    )..compressionState = _getCompressionState(httpClient, responseHeaders);
+  }
+
+
+  static HttpClientResponseCompressionState _getCompressionState(HttpClient? httpClient, HttpHeaders responseHeaders) {
+    if (httpClient != null && responseHeaders.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
+      return httpClient.autoUncompress
+          ? HttpClientResponseCompressionState.decompressed
+          : HttpClientResponseCompressionState.compressed;
+    } else {
+      return HttpClientResponseCompressionState.notCompressed;
+    }
   }
 
   Future<Uint8List?> toBinaryContent() async {
@@ -431,10 +445,13 @@ class HttpCacheObject {
     }
 
     // Update content length.
-    int contentLength = response.headers.contentLength;
-    if (!contentLength.isNegative && contentLength != this.contentLength) {
-      this.contentLength = contentLength;
-      indexChanged = true;
+    // Only update content length while status code equals 200.
+    if (response.statusCode == HttpStatus.ok) {
+      int contentLength = response.headers.contentLength;
+      if (!contentLength.isNegative && contentLength != this.contentLength) {
+        this.contentLength = contentLength;
+        indexChanged = true;
+      }
     }
 
     // Update index.
