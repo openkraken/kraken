@@ -222,7 +222,7 @@ class GestureDispatcher {
       _removePoint(touchPoint);
       _unbindEventTargetWithTouchPoint(touchPoint);
       // Clear target in the next task or start a timer.
-      _startClearTargetTimer();
+      _startClearTargetTask();
     }
   }
 
@@ -239,7 +239,7 @@ class GestureDispatcher {
     _target = null;
   }
 
-  void _startClearTargetTimer() {
+  void _startClearTargetTask() {
     // We should clear the target in the next microTask to dispatch event in callback of recognizer.
     // When listening on dblclick or longpress, you need to wait for the maximum delay.
     // Because the recognizer fires at the end of the path of HitTestResult.
