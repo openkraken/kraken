@@ -201,6 +201,12 @@ class GestureDispatcher {
     if (event is PointerDownEvent) {
       _gatherEventsInPath();
 
+      // Clear timer to prevent accidental clear target.
+      if (_clearTargetTimer != null) {
+        _clearTargetTimer?.cancel();
+        _clearTargetTimer = null;
+      }
+
       // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
       if (_target != null) {
@@ -222,16 +228,18 @@ class GestureDispatcher {
     }
   }
 
+  Timer? _clearTargetTimer;
+
   void _clearTarget() {
     // We should clear the target in the next microTask to dispatch event in callback of recognizer.
     // When listening on dblclick or longpress, you need to wait for the maximum delay.
     // Because the recognizer fires at the end of the path of HitTestResult.
     if (_eventsInPath.containsKey(EVENT_DOUBLE_CLICK)) {
-      Timer(kDoubleTapTimeout, () {
+      _clearTargetTimer = Timer(kDoubleTapTimeout, () {
         _target = null;
       });
     } else if (_eventsInPath.containsKey(EVENT_LONG_PRESS)) {
-      Timer(kLongPressTimeout, () {
+      _clearTargetTimer = Timer(kLongPressTimeout, () {
         _target = null;
       });
     } else {
