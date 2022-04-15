@@ -8,20 +8,25 @@ import 'package:kraken/src/gesture/gesture_dispatcher.dart';
 
 typedef HandleGetEventTarget = EventTarget Function();
 
+typedef HandleGetGestureDispather = GestureDispatcher Function();
+
 mixin RenderEventListenerMixin on RenderBox {
 
   HandleGetEventTarget? getEventTarget;
+
+  HandleGetGestureDispather? getGestureDispather;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     // Set event path at begin stage and reset it at end stage on viewport render box.
     // And if event path existed, it means current render box is not the first in path.
-    if (getEventTarget != null) {
+    if (getEventTarget != null && getGestureDispather != null) {
       if (event is PointerDownEvent) {
         // Store the first handleEvent the event path list.
-        if (GestureDispatcher.instance.getEventPath().isEmpty) {
-          GestureDispatcher.instance.setEventPath(getEventTarget!());
+        GestureDispatcher gestureDispatcher = getGestureDispather!();
+        if (gestureDispatcher.getEventPath().isEmpty) {
+          gestureDispatcher.setEventPath(getEventTarget!());
         }
       }
     }

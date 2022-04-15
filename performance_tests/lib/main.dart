@@ -12,7 +12,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 const benchMarkServer = String.fromEnvironment("SERVER");
 
 void main() {
-  print('benchMarkServer=$benchMarkServer');
   runApp(MyApp());
 }
 

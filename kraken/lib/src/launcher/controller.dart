@@ -859,6 +859,8 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  GestureDispatcher gestureDispatcher = GestureDispatcher();
+
   WidgetDelegate? widgetDelegate;
 
   LoadHandler? onLoad;
