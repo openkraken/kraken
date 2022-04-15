@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
     - uses: actions/checkout@v2
-    - uses: subosito/flutter-action@v1
+    - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
     - name: Run Test

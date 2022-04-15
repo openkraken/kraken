@@ -248,7 +248,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     _setChildrenOffset(_runMetrics);
 
     // Set the size of scrollable overflow area for flow layout.
-    _setMaxScrollableSize(_runMetrics, children);
+    _setMaxScrollableSize(_runMetrics);
   }
 
   // Layout children in normal flow order to calculate metrics of lines according to its constraints
@@ -874,7 +874,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // Set the size of scrollable overflow area for flow layout.
   // https://drafts.csswg.org/css-overflow-3/#scrollable
-  void _setMaxScrollableSize(List<_RunMetrics> runMetrics, List<RenderBox> children) {
+  void _setMaxScrollableSize(List<_RunMetrics> runMetrics) {
     // Scrollable main size collection of each line.
     List<double> scrollableMainSizeOfLines = [];
     // Scrollable cross size collection of each line.

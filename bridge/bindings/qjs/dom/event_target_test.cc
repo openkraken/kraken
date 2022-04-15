@@ -82,6 +82,26 @@ TEST(EventTarget, propertyEventHandler) {
   EXPECT_EQ(logCalled, true);
 }
 
+TEST(EventTarget, attributeEventHandlerShouldExit) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+    EXPECT_STREQ(message.c_str(), "true");
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
+    KRAKEN_LOG(VERBOSE) << errmsg;
+    errorCalled = true;
+  });
+  auto context = bridge->getContext();
+  const char* code =
+      "let div = document.createElement('div'); "
+      "console.log('onclick' in div)";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(EventTarget, setUnExpectedAttributeEventHandler) {
   bool static errorCalled = false;
   bool static logCalled = false;
