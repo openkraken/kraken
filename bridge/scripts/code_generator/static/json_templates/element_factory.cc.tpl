@@ -18,7 +18,7 @@
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceHeaderDir) { %>
 #include "<%= item.interfaceHeaderDir %>/html_<%= item.name %>_element.h"
-    <% } else { %>
+    <% } else if (!item.interfaceName) { %>
 #include "core/html/html_<%= item.name %>_element.h"
     <% } %>
   <% } %>
@@ -47,7 +47,7 @@ static HTMLElement* HTML<%= item[0].toUpperCase() + item.slice(1) %>Constructor(
 }
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceName) { %>
-static HTMLElement* <%= item.interfaceName %>Constructor(Document& document) {
+static HTMLElement* HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor(Document& document) {
   return MakeGarbageCollected<<%= item.interfaceName %>>(document);
 }
     <% } else { %>
@@ -71,7 +71,7 @@ static void CreateHTMLFunctionMap() {
       {html_names::k<%= item %>, HTML<%= item[0].toUpperCase() + item.slice(1) %>Constructor},
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceName) { %>
-      {html_names::k<%= item.name %>, <%= item.interfaceName %>Constructor},
+      {html_names::k<%= item.name %>, HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor},
     <% } else { %>
       {html_names::k<%= item.name %>, HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor},
     <% } %>

@@ -7,7 +7,7 @@
       },
       {
         "template": "element_factory",
-        "filename": "element_factory"
+        "filename": "html_element_factory"
       }
     ]
   },

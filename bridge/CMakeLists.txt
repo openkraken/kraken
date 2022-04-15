@@ -249,8 +249,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/page.cc
     core/executing_context_data.cc
     core/executing_context_data.h
-    core/html_element_factory.cc
-    core/html_element_factory.h
+    core/dart_methods.h
     core/dart_methods.h
     core/fileapi/blob.h
     core/fileapi/blob.cc
@@ -401,6 +400,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_scroll_options.h
     out/qjs_scroll_to_options.cc
     out/qjs_scroll_to_options.h
+    out/html_element_factory.cc
+    out/html_element_factory.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
