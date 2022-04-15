@@ -1,7 +1,6 @@
 /*auto generated*/
 describe('multiline-min', () => {
-  // @TODO: flexg-grow calculation wrong when flex-basis with max-width.
-  xit('max', async () => {
+  it('max', async () => {
     let log;
     let flexOne;
     let flexOne_1;

@@ -1292,7 +1292,7 @@ describe('flex-minimum', () => {
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/200x200-green.png',
+          'assets/200x200-green.png',
           style: {
             'max-height': '100px',
             'box-sizing': 'border-box',

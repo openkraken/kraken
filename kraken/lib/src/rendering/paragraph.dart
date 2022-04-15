@@ -567,6 +567,12 @@ class KrakenRenderParagraph extends RenderBox
     if (lineHeight != null) {
       // Adjust text paint offset of each line according to line-height.
       for (int i = 0; i < _lineTextPainters.length; i++) {
+        // _lineTextPainters and _lineOffset may not have the same length in some edge cases
+        // cause _lineTextPainters is computed from [getBoxesForSelection] api while
+        // _lineOffset is computed from [computeLineMetrics] api.
+        // Add protection here to prevent access the overflow index of _lineOffset list.
+        if (i >= _lineOffset.length) continue;
+
         TextPainter _lineTextPainter = _lineTextPainters[i];
         Offset lineOffset = Offset(offset.dx, offset.dy + _lineOffset[i]);
         _lineTextPainter.paint(context.canvas, lineOffset);

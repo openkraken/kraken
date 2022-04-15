@@ -719,7 +719,11 @@ class CSSStyleProperty {
         grow = value;
       } else if (shrink == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         shrink = value;
-      } else if (basis == null && ((isValueVariableFunction || CSSLength.isNonNegativeLength(value) || value == AUTO))) {
+      } else if (basis == null && ((isValueVariableFunction
+        || CSSLength.isNonNegativeLength(value)
+        || CSSPercentage.isPercentage(value)
+        || value == AUTO))
+      ) {
         basis = value;
       } else {
         return null;

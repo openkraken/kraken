@@ -3,6 +3,7 @@
  */
 
 #include "event_type_names.h"
+#include <algorithm>
 #include <vector>
 
 namespace kraken::binding::qjs {
