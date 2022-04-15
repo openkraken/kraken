@@ -241,15 +241,17 @@ class GestureDispatcher {
 
   void _startClearTargetTask() {
     // We should clear the target in the next microTask to dispatch event in callback of recognizer.
-    // When listening on dblclick or longpress, you need to wait for the maximum delay.
     // Because the recognizer fires at the end of the path of HitTestResult.
-    if (_eventsInPath.containsKey(EVENT_DOUBLE_CLICK)) {
-      _clearTargetTimer = Timer(kDoubleTapTimeout, _clearTarget);
-    } else if (_eventsInPath.containsKey(EVENT_LONG_PRESS)) {
-      _clearTargetTimer = Timer(kLongPressTimeout, _clearTarget);
-    } else {
-      scheduleMicrotask(_clearTarget);
-    }
+    // When listening on dblclick or longpress, you need to wait for the maximum delay.
+    scheduleMicrotask(() {
+      if (_eventsInPath.containsKey(EVENT_DOUBLE_CLICK)) {
+        _clearTargetTimer = Timer(kDoubleTapTimeout, _clearTarget);
+      } else if (_eventsInPath.containsKey(EVENT_LONG_PRESS)) {
+        _clearTargetTimer = Timer(kLongPressTimeout, _clearTarget);
+      } else {
+        _clearTarget();
+      }
+    });
   }
 
   void resetEventPath() {
