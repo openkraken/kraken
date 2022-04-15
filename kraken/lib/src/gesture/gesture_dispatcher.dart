@@ -216,14 +216,30 @@ class GestureDispatcher {
     }
 
     if (event is PointerUpEvent || event is PointerCancelEvent) {
-      // We should clear the target in the next microTask to dispatch event in callback of recognizer.
-      // Because the recognizer fires at the end of the path of HitTestResult.
+      _removePoint(touchPoint);
+      _unbindEventTargetWithTouchPoint(touchPoint);
+      _clearTarget();
+    }
+  }
+
+  void _clearTarget() {
+    // We should clear the target in the next microTask to dispatch event in callback of recognizer.
+    // When listening on dblclick or longpress, you need to wait for the maximum delay.
+    // Because the recognizer fires at the end of the path of HitTestResult.
+    if (_eventsInPath.containsKey(EVENT_DOUBLE_CLICK)) {
+      Timer(kDoubleTapTimeout, () {
+        _target = null;
+      });
+    } else if (_eventsInPath.containsKey(EVENT_LONG_PRESS)) {
+      Timer(kLongPressTimeout, () {
+        _target = null;
+      });
+    } else {
       scheduleMicrotask(() {
-        _removePoint(touchPoint);
-        _unbindEventTargetWithTouchPoint(touchPoint);
         _target = null;
       });
     }
+
   }
 
   void resetEventPath() {
