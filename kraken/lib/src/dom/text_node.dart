@@ -6,6 +6,8 @@ import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/foundation.dart';
 
+import '../../kraken.dart';
+
 const String WHITE_SPACE_CHAR = ' ';
 const String NEW_LINE_CHAR = '\n';
 const String RETURN_CHAR = '\r';
@@ -80,7 +82,10 @@ class TextNode extends Node {
 
     createRenderer();
 
-    if (parent.renderBoxModel is RenderLayoutBox) {
+    // If element attach WidgetElement, render object should be attach to render tree when mount.
+    if (parent is WidgetElement) {
+      _applyTextStyle();
+    } else if (parent.renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
