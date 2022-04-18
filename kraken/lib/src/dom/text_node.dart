@@ -86,7 +86,6 @@ class TextNode extends Node {
       RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
-      _applyTextStyle();
     }
 
     _applyTextStyle();
