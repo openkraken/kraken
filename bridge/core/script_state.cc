@@ -6,6 +6,9 @@
 #include "script_state.h"
 #include "built_in_string.h"
 #include "event_type_names.h"
+#include "html_names.h"
+#include "binding_call_methods.h"
+#include "html_element_factory.h"
 
 namespace kraken {
 
@@ -26,6 +29,8 @@ ScriptState::ScriptState() {
   if (first_loaded) {
     built_in_string::Init(ctx_);
     event_type_names::Init(ctx_);
+    html_names::Init(ctx_);
+    binding_call_methods::Init(ctx_);
   }
 }
 
@@ -44,6 +49,9 @@ ScriptState::~ScriptState() {
     // Prebuilt strings stored in JSRuntime. Only needs to dispose when runtime disposed.
     built_in_string::Dispose();
     event_type_names::Dispose();
+    html_names::Dispose();
+    binding_call_methods::Dispose();
+    HTMLElementFactory::Dispose();
 
     JS_FreeRuntime(runtime_);
     runtime_ = nullptr;

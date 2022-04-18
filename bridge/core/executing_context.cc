@@ -7,6 +7,7 @@
 #include "built_in_string.h"
 #include "event_type_names.h"
 #include "polyfill.h"
+#include "core/dom/document.h"
 
 #include "foundation/logging.h"
 
@@ -62,6 +63,9 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 
   // Register all built-in native bindings.
   InstallBindings(this);
+
+
+  InstallDocument();
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -364,78 +368,16 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 //  return &pending_promises_;
 //}
 
+void ExecutingContext::InstallDocument() {
+  document_ = MakeGarbageCollected<Document>(this);
+  DefineGlobalProperty("document", document_->ToQuickJS());
+}
+
 // An lock free context validator.
 bool isContextValid(int32_t contextId) {
   if (contextId > running_context_list)
     return false;
   return valid_contexts[contextId];
-}
-
-void arrayPushValue(JSContext* ctx, JSValue array, JSValue val) {
-  JSValue pushMethod = JS_GetPropertyStr(ctx, array, "push");
-  JSValue arguments[] = {val};
-  JSValue result = JS_Call(ctx, pushMethod, array, 1, arguments);
-  JS_FreeValue(ctx, pushMethod);
-  JS_FreeValue(ctx, result);
-}
-
-void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount) {
-  JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
-  JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, deleteCount)};
-  JSValue result = JS_Call(ctx, spliceMethod, array, 2, arguments);
-  JS_FreeValue(ctx, spliceMethod);
-  JS_FreeValue(ctx, result);
-}
-
-void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue) {
-  JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
-  JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, deleteCount), replacedValue};
-  JSValue result = JS_Call(ctx, spliceMethod, array, 3, arguments);
-  JS_FreeValue(ctx, spliceMethod);
-  JS_FreeValue(ctx, result);
-}
-
-void arrayInsert(JSContext* ctx, JSValue array, uint32_t start, JSValue targetValue) {
-  JSValue spliceMethod = JS_GetPropertyStr(ctx, array, "splice");
-  JSValue arguments[] = {JS_NewUint32(ctx, start), JS_NewUint32(ctx, 0), targetValue};
-  JSValue result = JS_Call(ctx, spliceMethod, array, 3, arguments);
-  JS_FreeValue(ctx, spliceMethod);
-  JS_FreeValue(ctx, result);
-}
-
-int32_t arrayGetLength(JSContext* ctx, JSValue array) {
-  JSValue lenVal = JS_GetPropertyStr(ctx, array, "length");
-  int32_t len;
-  JS_ToInt32(ctx, &len, lenVal);
-  JS_FreeValue(ctx, lenVal);
-  return len;
-}
-
-int32_t arrayFindIdx(JSContext* ctx, JSValue array, JSValue target) {
-  int32_t len = arrayGetLength(ctx, array);
-  for (int i = 0; i < len; i++) {
-    JSValue v = JS_GetPropertyUint32(ctx, array, i);
-    if (JS_VALUE_GET_PTR(v) == JS_VALUE_GET_PTR(target)) {
-      JS_FreeValue(ctx, v);
-      return i;
-    };
-    JS_FreeValue(ctx, v);
-  }
-  return -1;
-}
-
-JSValue objectGetKeys(JSContext* ctx, JSValue obj) {
-  JSValue globalObject = JS_GetGlobalObject(ctx);
-  JSValue object = JS_GetPropertyStr(ctx, globalObject, "Object");
-  JSValue keysFunc = JS_GetPropertyStr(ctx, object, "keys");
-
-  JSValue result = JS_Call(ctx, keysFunc, obj, 1, &obj);
-
-  JS_FreeValue(ctx, keysFunc);
-  JS_FreeValue(ctx, object);
-  JS_FreeValue(ctx, globalObject);
-
-  return result;
 }
 
 }  // namespace kraken

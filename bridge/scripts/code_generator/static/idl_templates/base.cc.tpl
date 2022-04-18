@@ -17,7 +17,7 @@ namespace kraken {
 <% } %>
 <%= content %>
 
-<% if (globalFunctionInstallList.length > 0 || classPropsInstallList.length > 0 || classMethodsInstallList.length > 0) { %>
+<% if (globalFunctionInstallList.length > 0 || classPropsInstallList.length > 0 || classMethodsInstallList.length > 0 || constructorInstallList.length > 0) { %>
 void QJS<%= className %>::Install(ExecutingContext* context) {
   <% if (globalFunctionInstallList.length > 0) { %> InstallGlobalFunctions(context); <% } %>
   <% if(classPropsInstallList.length > 0) { %> InstallPrototypeProperties(context); <% } %>

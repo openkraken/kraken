@@ -117,6 +117,10 @@ void Element::scrollTo(const std::shared_ptr<ScrollToOptions>& options, Exceptio
   return scroll(options, exception_state);
 }
 
+bool Element::HasTagName(const AtomicString& name) const {
+  return name == tag_name_;
+}
+
 std::string Element::nodeValue() const {
   return "";
 }

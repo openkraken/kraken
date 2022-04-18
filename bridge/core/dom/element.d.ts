@@ -1,7 +1,7 @@
 import {Node} from "./node";
 import {Document} from "./document";
 import {ScrollToOptions} from "./scroll_to_options";
-import { ElementAttributes } from './legacy/element_attribute';
+import { ElementAttributes } from './legacy/element_attributes';
 
 interface Element extends Node {
   readonly attributes: ElementAttributes;
@@ -42,4 +42,6 @@ interface Element extends Node {
 
   // Kraken special API.
   toBlob(devicePixelRatioValue?: double): Promise<ArrayBuffer>;
+
+  new(): void;
 }

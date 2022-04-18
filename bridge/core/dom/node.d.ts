@@ -3,10 +3,10 @@ import { Document } from './document';
 
 /** Node is an interface from which a number of DOM API object types inherit. It allows those types to be treated similarly; for example, inheriting the same set of methods, or being tested in the same way. */
 interface Node extends EventTarget {
-  /**
-   * Returns the children.
-   */
-  readonly childNodes: NodeList;
+  // /**
+  //  * Returns the children.
+  //  */
+  // readonly childNodes: NodeList;
   /**
    * Returns the first child.
    */
@@ -68,5 +68,5 @@ interface Node extends EventTarget {
   removeChild(oldChild: Node): Node;
   replaceChild(newChild: Node, oldChild: Node): Node;
 
-  new(): Node;
+  new(): void;
 }

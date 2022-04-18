@@ -16,6 +16,7 @@ class HTMLElementFactory {
  public:
   // If |local_name| is unknown, nullptr is returned.
   static HTMLElement* Create(const AtomicString& local_name, Document&);
+  static void Dispose();
 };
 
 }  // namespace kraken

@@ -6,6 +6,7 @@
 #include "bindings/qjs/garbage_collected.h"
 #include "document_fragment.h"
 #include "node_traversal.h"
+#include "document.h"
 
 namespace kraken {
 
@@ -320,7 +321,7 @@ std::string ContainerNode::nodeValue() const {
   return "";
 }
 
-ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document, type) {}
+ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document->GetExecutingContext(), document, type) {}
 
 void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& old_child) {
   assert(old_child.parentNode() == this);

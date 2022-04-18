@@ -15,7 +15,8 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
   return MakeGarbageCollected<Document>(context);
 }
 
-Document::Document(ExecutingContext* context) : Node(this, ConstructionType::kCreateDocument), TreeScope(*this) {}
+Document::Document(ExecutingContext* context)
+    : Node(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {}
 
 Element* Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
@@ -31,8 +32,16 @@ Element* Document::createElement(const AtomicString& name, ExceptionState& excep
   return MakeGarbageCollected<HTMLUnknownElement>(name, *this);
 }
 
-Text* Document::createTextNode(const AtomicString& value) {
-  return nullptr;
+Text* Document::createTextNode(const AtomicString& value, ExceptionState& exception_state) {
+  return Text::Create(*this, value);
+}
+
+DocumentFragment* Document::createDocumentFragment(ExceptionState& exception_state) {
+  return DocumentFragment::Create(*this);
+}
+
+Comment* Document::createComment(ExceptionState& exception_state) {
+  return Comment::Create(*this);
 }
 
 std::string Document::nodeName() const {

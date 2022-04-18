@@ -221,7 +221,7 @@ void Node::setTextContent(const AtomicString& text, ExceptionState& exception_st
         container->RemoveChildren();
       } else {
         container->RemoveChildren();
-        container->AppendChild(GetDocument().createTextNode(text), exception_state);
+        container->AppendChild(GetDocument().createTextNode(text, exception_state), exception_state);
       }
       return;
     }
@@ -385,8 +385,8 @@ Node* Node::CommonAncestor(const Node& other, ContainerNode* (*parent)(const Nod
   return nullptr;
 }
 
-Node::Node(Document* document, ConstructionType type)
-    : EventTarget(document->GetExecutingContext()),
+Node::Node(ExecutingContext* context, Document* document, ConstructionType type)
+    : EventTarget(context),
       node_flags_(type),
       parent_or_shadow_host_node_(nullptr),
       previous_(nullptr),

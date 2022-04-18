@@ -13,10 +13,18 @@
 #include "qjs_window.h"
 #include "qjs_document.h"
 #include "qjs_node.h"
+#include "qjs_character_data.h"
+#include "qjs_text.h"
+#include "qjs_comment.h"
+#include "qjs_element.h"
+#include "qjs_html_element.h"
+#include "qjs_html_div_element.h"
 
 namespace kraken {
 
 void InstallBindings(ExecutingContext* context) {
+  // Must follow the inheritance order when install.
+  // Exp: Node extends EventTarget, EventTarget must be install first.
   QJSWindow::installGlobalFunctions(context);
   QJSModuleManager::Install(context);
   QJSConsole::Install(context);
@@ -24,6 +32,12 @@ void InstallBindings(ExecutingContext* context) {
   QJSEvent::Install(context);
   QJSNode::Install(context);
   QJSDocument::Install(context);
+  QJSCharacterData::Install(context);
+  QJSText::Install(context);
+  QJSComment::Install(context);
+  QJSElement::Install(context);
+  QJSHTMLElement::Install(context);
+  QJSHTMLDivElement::Install(context);
 }
 
 }  // namespace kraken

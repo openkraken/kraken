@@ -112,6 +112,9 @@ class ExecutingContext {
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
  private:
+
+  void InstallDocument();
+
   static void promiseRejectTracker(JSContext* ctx,
                                    JSValueConst promise,
                                    JSValueConst reason,
@@ -158,17 +161,6 @@ class ObjectProperty {
 };
 
 std::unique_ptr<ExecutingContext> createJSContext(int32_t contextId, const JSExceptionHandler& handler, void* owner);
-
-// JS array operation utilities.
-void arrayPushValue(JSContext* ctx, JSValue array, JSValue val);
-void arrayInsert(JSContext* ctx, JSValue array, uint32_t start, JSValue targetValue);
-int32_t arrayGetLength(JSContext* ctx, JSValue array);
-int32_t arrayFindIdx(JSContext* ctx, JSValue array, JSValue target);
-void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount);
-void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t deleteCount, JSValue replacedValue);
-
-// JS object operation utilities.
-JSValue objectGetKeys(JSContext* ctx, JSValue obj);
 
 }  // namespace kraken
 

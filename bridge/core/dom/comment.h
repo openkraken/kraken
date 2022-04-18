@@ -6,41 +6,25 @@
 #ifndef KRAKENBRIDGE_COMMENT_H
 #define KRAKENBRIDGE_COMMENT_H
 
-#include "node.h"
+#include "character_data.h"
 
 namespace kraken {
 
-void bindCommentNode(ExecutionContext* context);
+class Comment : public CharacterData {
+  DEFINE_WRAPPERTYPEINFO();
 
-class CommentInstance;
-
-class Comment : public Node {
  public:
-  static JSClassID classId;
-  static Comment* create(JSContext* ctx);
-  static JSValue constructor(ExecutionContext* context);
-  static JSValue prototype(ExecutionContext* context);
+  static Comment* Create(ExecutingContext* context, ExceptionState& exception_state);
+  static Comment* Create(Document&);
 
-  //  static JSClassID kCommentClassId;
-  //  static JSClassID classId();
-  //  Comment() = delete;
-  //  explicit Comment(ExecutionContext* context);
+  explicit Comment(Document& document, ConstructionType type);
 
-  //  JSValue instanceConstructor(JSContext* ctx, JSValue func_obj, JSValue this_val, int argc, JSValue* argv) override;
+  NodeType nodeType() const override;
 
  private:
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(data);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(nodeName);
-  DEFINE_PROTOTYPE_READONLY_PROPERTY(length);
-
-  friend CommentInstance;
+  std::string nodeName() const override;
+  Node* Clone(Document&, CloneChildrenFlag) const override;
 };
-
-auto commentCreator =
-    [](JSContext* ctx, JSValueConst func_obj, JSValueConst this_val, int argc, JSValueConst* argv, int flags)
-    -> JSValue {};
-
-const WrapperTypeInfo commentTypeInfo = {"Comment", &nodeTypeInfo, commentCreator};
 
 }  // namespace kraken
 

@@ -20,8 +20,8 @@ class SpaceSplitString {
   bool containsAll(std::string s);
 
  private:
-  static std::string delimiter_;
-  std::vector<std::string> sz_data_;
+  static std::string m_delimiter;
+  std::vector<std::string> m_szData;
 };
 
 }  // namespace kraken

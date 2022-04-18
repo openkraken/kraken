@@ -298,6 +298,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/template_content_document_fragment.h
     core/dom/character_data.cc
     core/dom/character_data.h
+    core/dom/comment.cc
+    core/dom/comment.h
     core/dom/text.cc
     core/dom/text.h
     core/dom/tree_scope.cc
@@ -398,6 +400,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_element_attributes.h
     out/qjs_character_data.cc
     out/qjs_character_data.h
+    out/qjs_comment.cc
+    out/qjs_comment.h
     out/qjs_document_fragment.cc
     out/qjs_document_fragment.h
     out/qjs_bounding_client_rect.cc

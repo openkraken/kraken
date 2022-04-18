@@ -6,22 +6,22 @@
 
 namespace kraken {
 
-std::string SpaceSplitString::delimiter_{""};
+std::string SpaceSplitString::m_delimiter{" "};
 
 void SpaceSplitString::set(std::string& string) {
   size_t pos = 0;
   std::string token;
   std::string s = string;
-  while ((pos = s.find(delimiter_)) != std::string::npos) {
+  while ((pos = s.find(m_delimiter)) != std::string::npos) {
     token = s.substr(0, pos);
-    sz_data_.push_back(token);
-    s.erase(0, pos + delimiter_.length());
+    m_szData.push_back(token);
+    s.erase(0, pos + m_delimiter.length());
   }
-  sz_data_.push_back(s);
+  m_szData.push_back(s);
 }
 
 bool SpaceSplitString::contains(std::string& string) {
-  for (std::string& s : sz_data_) {
+  for (std::string& s : m_szData) {
     if (s == string) {
       return true;
     }
@@ -34,17 +34,17 @@ bool SpaceSplitString::containsAll(std::string s) {
   size_t pos = 0;
   std::string token;
 
-  while ((pos = s.find(delimiter_)) != std::string::npos) {
+  while ((pos = s.find(m_delimiter)) != std::string::npos) {
     token = s.substr(0, pos);
     szData.push_back(token);
-    s.erase(0, pos + delimiter_.length());
+    s.erase(0, pos + m_delimiter.length());
   }
   szData.push_back(s);
 
   bool flag = true;
   for (std::string& str : szData) {
     bool isContains = false;
-    for (std::string& data : sz_data_) {
+    for (std::string& data : m_szData) {
       if (data == str) {
         isContains = true;
         break;

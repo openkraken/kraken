@@ -191,6 +191,7 @@ function walkProgram(statement: ts.Statement) {
               let p = paramsNodeToArguments(params);
               c.args.push(p);
             });
+            c.returnType = getParameterType(m.type);
             obj.construct = c;
             break;
           }

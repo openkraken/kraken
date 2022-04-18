@@ -8,10 +8,11 @@
 
 #include "container_node.h"
 #include "tree_scope.h"
+#include "core/dom/document_fragment.h"
+#include "core/dom/text.h"
+#include "core/dom/comment.h"
 
 namespace kraken {
-
-class Text;
 
 // A document (https://dom.spec.whatwg.org/#concept-document) is the root node
 // of a tree of DOM nodes, generally resulting from the parsing of a markup
@@ -26,7 +27,9 @@ class Document : public Node, TreeScope {
   static Document* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   Element* createElement(const AtomicString& name, ExceptionState& exception_state);
-  Text* createTextNode(const AtomicString& value);
+  Text* createTextNode(const AtomicString& value, ExceptionState& exception_state);
+  DocumentFragment* createDocumentFragment(ExceptionState& exception_state);
+  Comment* createComment(ExceptionState& exception_state);
 
   std::string nodeName() const override;
   std::string nodeValue() const override;

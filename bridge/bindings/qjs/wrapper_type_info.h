@@ -12,6 +12,7 @@
 
 namespace kraken {
 
+// Define all built-in wrapper class id.
 enum {
   JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 1,
   JS_CLASS_BLOB,
@@ -23,6 +24,7 @@ enum {
   JS_CLASS_DOCUMENT,
   JS_CLASS_CHARACTER_DATA,
   JS_CLASS_TEXT,
+  JS_CLASS_COMMENT,
   JS_CLASS_NODE_LIST,
   JS_CLASS_DOCUMENT_FRAGMENT,
   JS_CLASS_BOUNDING_CLIENT_RECT,

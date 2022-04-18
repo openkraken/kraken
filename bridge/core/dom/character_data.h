@@ -9,6 +9,8 @@
 
 namespace kraken {
 
+class Document;
+
 class CharacterData : public Node {
   DEFINE_WRAPPERTYPEINFO();
 
@@ -20,10 +22,7 @@ class CharacterData : public Node {
   std::string nodeValue() const override;
 
  protected:
-  CharacterData(Document& tree_scope, const AtomicString& text, ConstructionType type)
-      : Node(&tree_scope, type), data_(!text.IsNull() ? text : AtomicString::Empty(ctx())) {
-    assert(type == kCreateOther || type == kCreateText);
-  }
+  CharacterData(Document& document, const AtomicString& text, ConstructionType type);
 
  private:
   AtomicString data_;

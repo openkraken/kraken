@@ -14,7 +14,7 @@ class DocumentFragment : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  static DocumentFragment* Create(Document* document, ExceptionState& exception_state);
+  static DocumentFragment* Create(Document& document);
   static DocumentFragment* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   DocumentFragment(Document* document, ConstructionType type);

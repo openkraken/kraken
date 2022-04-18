@@ -8,8 +8,8 @@
 
 namespace kraken {
 
-DocumentFragment* DocumentFragment::Create(Document* document, ExceptionState& exception_state) {
-  return MakeGarbageCollected<DocumentFragment>(document, ConstructionType::kCreateDocumentFragment);
+DocumentFragment* DocumentFragment::Create(Document& document) {
+  return MakeGarbageCollected<DocumentFragment>(&document, ConstructionType::kCreateDocumentFragment);
 }
 
 DocumentFragment* DocumentFragment::Create(ExecutingContext* context, ExceptionState& exception_state) {
