@@ -14,7 +14,8 @@ namespace kraken {
 
 // Define all built-in wrapper class id.
 enum {
-  JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 1,
+  // We assume there will no other class id could overwrite by JS_NewClassID, at least 200.
+  JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 200,
   JS_CLASS_BLOB,
   JS_CLASS_EVENT,
   JS_CLASS_ERROR_EVENT,

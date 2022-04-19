@@ -19,6 +19,7 @@
 #include "qjs_element.h"
 #include "qjs_html_element.h"
 #include "qjs_html_div_element.h"
+#include "qjs_element_attributes.h"
 
 namespace kraken {
 
@@ -38,6 +39,7 @@ void InstallBindings(ExecutingContext* context) {
   QJSElement::Install(context);
   QJSHTMLElement::Install(context);
   QJSHTMLDivElement::Install(context);
+  QJSElementAttributes::Install(context);
 }
 
 }  // namespace kraken

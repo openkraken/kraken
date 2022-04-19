@@ -25,9 +25,13 @@ class ElementAttributes : public ScriptWrappable {
   static ElementAttributes* Create(Element* element) {
     return MakeGarbageCollected<ElementAttributes>(element);
   }
+  static ElementAttributes* Create(ExecutingContext* context, ExceptionState& exception_state) {
+    return MakeGarbageCollected<ElementAttributes>(context);
+  }
 
   ElementAttributes(Element) = delete;
   ElementAttributes(Element* element);
+  ElementAttributes(ExecutingContext* context);
 
   AtomicString GetAttribute(const AtomicString& name);
   bool setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state);
@@ -39,7 +43,6 @@ class ElementAttributes : public ScriptWrappable {
 
   bool IsEquivalent(const ElementAttributes& other) const;
 
-  FORCE_INLINE const char* GetHumanReadableName() const override { return "ElementAttributes"; }
   void Trace(GCVisitor* visitor) const override;
 
  private:

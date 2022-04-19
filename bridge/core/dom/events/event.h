@@ -114,7 +114,6 @@ class Event : public ScriptWrappable {
                  ComposedMode composed_mode,
                  double timeStamp);
 
-  const char* GetHumanReadableName() const override;
   bool propagationStopped() const { return propagation_stopped_; }
   bool bubbles() { return bubbles_; };
   double timeStamp() { return time_stamp_; }

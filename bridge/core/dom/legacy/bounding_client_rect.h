@@ -30,7 +30,6 @@ class BoundingClientRect : public ScriptWrappable {
   static BoundingClientRect* Create(ExecutingContext* context, NativeBoundingClientRect* native_bounding_client_rect);
   explicit BoundingClientRect(ExecutingContext* context, NativeBoundingClientRect* nativeBoundingClientRect);
 
-  FORCE_INLINE const char* GetHumanReadableName() const override { return "BoundingClientRect"; }
   void Trace(GCVisitor* visitor) const override;
 
   double x() const { return x_; }

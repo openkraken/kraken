@@ -64,10 +64,6 @@ Event::Event(ExecutingContext* context,
       current_target_(nullptr),
       time_stamp_(time_stamp) {}
 
-const char* Event::GetHumanReadableName() const {
-  return "Event";
-}
-
 void Event::SetType(const AtomicString& type) {
   type_ = type;
 }

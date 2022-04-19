@@ -53,12 +53,14 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   FORCE_INLINE JSContext* ctx() const { return ctx_; }
   FORCE_INLINE JSRuntime* runtime() const { return runtime_; }
 
+  void InitializeQuickJSObject() override;
+
  private:
-  bool wrapped_{false};
-  void InitializeQuickJSObject();
   JSValue jsObject_{JS_NULL};
+  bool wrapped_{false};
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
+  friend class GCVisitor;
 };
 
 // Converts a QuickJS object back to a ScriptWrappable.

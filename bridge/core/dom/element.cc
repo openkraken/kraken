@@ -133,6 +133,10 @@ bool Element::HasEquivalentAttributes(const Element& other) const {
   return other.attributes_->IsEquivalent(*attributes_);
 }
 
+void Element::Trace(GCVisitor* visitor) const {
+  visitor->Trace(attributes_);
+}
+
 Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
   return nullptr;
 }

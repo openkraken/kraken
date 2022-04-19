@@ -18,18 +18,18 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 Document::Document(ExecutingContext* context)
     : Node(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {}
 
-Element* Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
+ScriptValue Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
     exception_state.ThrowException(ctx(), ErrorType::InternalError,
                                    "The tag name provided ('" + name.ToStdString() + "') is not a valid name.");
-    return nullptr;
+    return ScriptValue::Empty(ctx());
   }
 
   if (auto* element = HTMLElementFactory::Create(name, *this)) {
-    return element;
+    return element->ToValue();
   }
 
-  return MakeGarbageCollected<HTMLUnknownElement>(name, *this);
+  return MakeGarbageCollected<HTMLUnknownElement>(name, *this)->ToValue();
 }
 
 Text* Document::createTextNode(const AtomicString& value, ExceptionState& exception_state) {

@@ -135,8 +135,6 @@ class EventTarget : public ScriptWrappable, public BindingObject {
   virtual EventTargetData* GetEventTargetData() = 0;
   virtual EventTargetData& EnsureEventTargetData() = 0;
 
-  const char* GetHumanReadableName() const override;
-
  private:
   int32_t event_target_id_;
   bool FireEventListeners(Event&, EventTargetData*, EventListenerVector&, ExceptionState&);

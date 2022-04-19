@@ -28,8 +28,6 @@ class NodeList : public ScriptWrappable {
   virtual bool IsEmptyNodeList() const { return false; }
   virtual bool IsChildNodeList() const { return false; }
 
-  const char* GetHumanReadableName() const override { return "NodeList"; };
-
   virtual Node* VirtualOwnerNode() const { return nullptr; }
 
  protected:

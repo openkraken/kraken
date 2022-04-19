@@ -79,9 +79,6 @@ uint8_t* Blob::bytes() {
   return _data.data();
 }
 
-const char* Blob::GetHumanReadableName() const {
-  return "Blob";
-}
 void Blob::Trace(GCVisitor* visitor) const {}
 
 Blob* Blob::slice(ExceptionState& exception_state) {

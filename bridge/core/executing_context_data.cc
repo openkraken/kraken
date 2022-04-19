@@ -32,6 +32,8 @@ JSValue ExecutionContextData::constructorForIdSlowCase(const WrapperTypeInfo* ty
   // Allocate a new unique classID from QuickJS.
   JS_NewClassID(&class_id);
 
+  assert(class_id < JS_CLASS_GC_TRACKER);
+
   // Create class template for behavior.
   JSClassDef def{};
   def.class_name = type->className;

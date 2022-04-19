@@ -10,7 +10,7 @@ namespace kraken {
 
 void GCVisitor::Trace(ScriptWrappable* target) {
   if (target != nullptr) {
-    JS_MarkValue(runtime_, target->ToQuickJS(), markFunc_);
+    JS_MarkValue(runtime_, target->jsObject_, markFunc_);
   }
 }
 

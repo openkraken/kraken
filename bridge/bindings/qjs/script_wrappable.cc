@@ -11,14 +11,7 @@ namespace kraken {
 ScriptWrappable::ScriptWrappable(JSContext* ctx) : ctx_(ctx), runtime_(JS_GetRuntime(ctx)) {}
 
 JSValue ScriptWrappable::ToQuickJS() {
-  if (wrapped_) {
-    return JS_DupValue(ctx_, jsObject_);
-  }
-
-  // Initialize the corresponding quickjs object.
-  InitializeQuickJSObject();
-
-  return jsObject_;
+  return JS_DupValue(ctx_, jsObject_);
 }
 
 ScriptValue ScriptWrappable::ToValue() {
@@ -34,7 +27,7 @@ void ScriptWrappable::InitializeQuickJSObject() {
     /// Basic template to describe the behavior about this class.
     JSClassDef def{};
 
-    def.class_name = GetHumanReadableName();
+    def.class_name = wrapperTypeInfo->className;
 
     /// This callback will be called when QuickJS GC is running at marking stage.
     /// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to

@@ -27,6 +27,7 @@ class GCVisitor final {
  private:
   JSRuntime* runtime_{nullptr};
   JS_MarkFunc* markFunc_{nullptr};
+  friend class ScriptWrappable;
 };
 
 }  // namespace kraken

@@ -196,10 +196,6 @@ NativeValue EventTarget::HandleCallFromDartSide(NativeString* method, int32_t ar
   return Native_NewNull();
 }
 
-const char* EventTarget::GetHumanReadableName() const {
-  return "EventTarget";
-}
-
 bool EventTarget::FireEventListeners(Event& event,
                                      EventTargetData* d,
                                      EventListenerVector& entry,

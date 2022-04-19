@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "foundation/macros.h"
+#include "foundation/casting.h"
 #include "gc_visitor.h"
 #include "qjs_engine_patch.h"
 
@@ -44,13 +45,7 @@ class GarbageCollected {
    */
   virtual void Trace(GCVisitor* visitor) const = 0;
 
-  /**
-   * Specifies a name for the garbage-collected object. Such names will never
-   * be hidden, as they are explicitly specified by the user of this API.
-   *
-   * @returns a human readable name for the object.
-   */
-  [[nodiscard]] FORCE_INLINE virtual const char* GetHumanReadableName() const = 0;
+  virtual void InitializeQuickJSObject() = 0;
 
  protected:
   GarbageCollected(){};
@@ -64,6 +59,9 @@ class MakeGarbageCollectedTrait {
   template <typename... Args>
   static T* Allocate(Args&&... args) {
     T* object = ::new T(std::forward<Args>(args)...);
+    if (auto* scriptwrappable = DynamicTo<ScriptWrappable>(object)) {
+      scriptwrappable->InitializeQuickJSObject();
+    }
     return object;
   }
 

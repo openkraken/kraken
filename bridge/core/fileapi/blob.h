@@ -63,7 +63,6 @@ class Blob : public ScriptWrappable {
   std::string StringResult();
   ArrayBufferData ArrayBufferResult();
 
-  const char* GetHumanReadableName() const override;
   void Trace(GCVisitor* visitor) const override;
 
  protected:

@@ -6,7 +6,7 @@ import {DocumentFragment} from "./document_fragment";
 
 interface Document extends Node {
 
-  createElement(tagName: string): Element;
+  createElement(tagName: string): any;
   createTextNode(value: string): Text;
   createDocumentFragment(): DocumentFragment;
   createComment(): Comment;
