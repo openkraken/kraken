@@ -475,8 +475,8 @@ class RenderFlowLayout extends RenderLayoutBox {
 
     size = getBoxSize(layoutContentSize);
 
-    autoMinWidth = _getMainAxisAutoSize(_runMetrics);
-    autoMinHeight = _getCrossAxisAutoSize(_runMetrics);
+    minContentWidth = _getMainAxisAutoSize(_runMetrics);
+    minContentHeight = _getCrossAxisAutoSize(_runMetrics);
   }
 
   // Set size when layout has no child.
@@ -797,7 +797,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     void iterateRunChildren(int? hashCode, RenderBox runChild) {
       double runChildMainSize = runChild.size.width;
       if (runChild is RenderTextBox) {
-        runChildMainSize = runChild.autoMinWidth;
+        runChildMainSize = runChild.minContentWidth;
       }
       // Should add horizontal margin of child to the main axis auto size of parent.
       if (runChild is RenderBoxModel) {
@@ -844,7 +844,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     void iterateRunChildren(int? hashCode, RenderBox runChild) {
       double runChildCrossSize = runChild.size.height;
       if (runChild is RenderTextBox) {
-        runChildCrossSize = runChild.autoMinHeight;
+        runChildCrossSize = runChild.minContentHeight;
       }
       runChildrenCrossSize.add(runChildCrossSize);
     }

@@ -75,8 +75,8 @@ class RenderReplaced extends RenderBoxModel
       setMaxScrollableSize(childSize);
       size = getBoxSize(childSize);
 
-      autoMinWidth = size.width;
-      autoMinHeight = size.height;
+      minContentWidth = renderStyle.intrinsicWidth;
+      minContentHeight = renderStyle.intrinsicHeight;
 
       didLayout();
     } else {

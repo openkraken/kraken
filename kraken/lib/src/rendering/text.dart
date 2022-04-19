@@ -101,11 +101,11 @@ class RenderTextBox extends RenderBox
   BoxSizeType? widthSizeType;
   BoxSizeType? heightSizeType;
 
-  // Auto value for min-width
-  double autoMinWidth = 0;
-
-  // Auto value for min-height
-  double autoMinHeight = 0;
+  // Nominally, the smallest size a box could take that doesn’t lead to overflow that could be avoided by choosing
+  // a larger size. Formally, the size of the box when sized under a min-content constraint.
+  // https://www.w3.org/TR/css-sizing-3/#min-content
+  double minContentWidth = 0;
+  double minContentHeight = 0;
 
   // Box size equals to RenderBox.size to avoid flutter complain when read size property.
   Size? _boxSize;
@@ -314,8 +314,8 @@ class RenderTextBox extends RenderBox
       // which cannot be calculated in Flutter currently.
       // Set minimum width to 0 to allow flex item containing text to shrink into
       // flex container which is similar to the effect of word-break: break-all in the browser.
-      autoMinWidth = 0;
-      autoMinHeight = size.height;
+      minContentWidth = 0;
+      minContentHeight = size.height;
     } else {
       performResize();
     }
