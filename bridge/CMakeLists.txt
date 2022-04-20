@@ -229,6 +229,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/generated_code_helper.h
     bindings/qjs/exception_state.cc
     bindings/qjs/exception_state.h
+    bindings/qjs/exception_message.cc
+    bindings/qjs/exception_message.h
     bindings/qjs/gc_visitor.cc
     bindings/qjs/gc_visitor.h
     bindings/qjs/rejected_promises.h

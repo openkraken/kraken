@@ -108,7 +108,10 @@ export function generateTypeConverter(type: ParameterType[]): string {
 
 function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
   let type = generateTypeConverter(argument.type);
-  return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);`;
+  return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);
+if (exception_state.HasException()) {
+  return exception_state.ToQuickJS();
+}`;
 }
 
 function generateCallMethodName(name: string) {

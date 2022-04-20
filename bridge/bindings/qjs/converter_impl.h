@@ -20,14 +20,21 @@
 #include "core/html/html_element.h"
 #include "core/html/html_head_element.h"
 #include "core/html/html_html_element.h"
+#include "exception_message.h"
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
 #include "qjs_add_event_listener_options.h"
+#include "qjs_document.h"
 #include "qjs_element_attributes.h"
 #include "qjs_error_event_init.h"
 #include "qjs_event_init.h"
 #include "qjs_event_listener_options.h"
+#include "qjs_html_body_element.h"
+#include "qjs_html_div_element.h"
+#include "qjs_html_element.h"
+#include "qjs_html_head_element.h"
+#include "qjs_html_html_element.h"
 #include "qjs_node.h"
 #include "qjs_scroll_to_options.h"
 
@@ -464,14 +471,27 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
   }
 };
 
-#define DEFINE_SCRIPT_WRAPPABLE_CONVERTER(class_name)                                           \
-  template <>                                                                                   \
-  struct Converter<class_name> : public ConverterBase<class_name> {                             \
-    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) { \
-      assert(!JS_IsException(value));                                                           \
-      return toScriptWrappable<class_name>(JS_DupValue(ctx, value));                            \
-    }                                                                                           \
-    static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }       \
+#define DEFINE_SCRIPT_WRAPPABLE_CONVERTER(class_name)                                                                \
+  template <>                                                                                                        \
+  struct Converter<class_name> : public ConverterBase<class_name> {                                                  \
+    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {                      \
+      assert(!JS_IsException(value));                                                                                \
+      return toScriptWrappable<class_name>(JS_DupValue(ctx, value));                                                 \
+    }                                                                                                                \
+    static ImplType ArgumentsValue(ExecutingContext* context,                                                        \
+                                   JSValue value,                                                                    \
+                                   uint32_t argv_index,                                                              \
+                                   ExceptionState& exception_state) {                                                \
+      assert(!JS_IsException(value));                                                                                \
+      if (QJS##class_name::HasInstance(context, value)) {                                                            \
+        return FromValue(context->ctx(), value, exception_state);                                                    \
+      }                                                                                                              \
+      auto* wrapper_type_info = QJS##class_name::GetWrapperTypeInfo();                                               \
+      exception_state.ThrowException(context->ctx(), ErrorType::TypeError,                                           \
+                                     ExceptionMessage::ArgumentNotOfType(argv_index, wrapper_type_info->className)); \
+      return nullptr;                                                                                                \
+    }                                                                                                                \
+    static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }                            \
   };
 
 DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Node);
