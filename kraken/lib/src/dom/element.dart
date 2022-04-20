@@ -466,8 +466,10 @@ abstract class Element
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-    // Ensure that the child is attached.
-    ensureChildAttached();
+    if (this is! WidgetElement) {
+      // Ensure that the child is attached.
+      ensureChildAttached();
+    }
   }
 
   @override
