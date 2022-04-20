@@ -326,29 +326,27 @@ class RenderFlexLayout extends RenderLayoutBox {
   double _getMaxMainAxisSize(RenderBox child) {
     double? maxMainSize;
     if (child is RenderBoxModel) {
-      double? maxWidth = child.renderStyle.maxWidth.isNone ?
-        null : child.renderStyle.maxWidth.computedValue;
-      double? maxHeight = child.renderStyle.maxHeight.isNone ?
-        null : child.renderStyle.maxHeight.computedValue;
-      maxMainSize = _isHorizontalFlexDirection
-              ? maxWidth : maxHeight;
+      if (_isHorizontalFlexDirection) {
+        maxMainSize = child.renderStyle.maxWidth.isNone
+          ? null : child.renderStyle.maxWidth.computedValue;
+      } else {
+        maxMainSize = child.renderStyle.maxHeight.isNone
+          ? null : child.renderStyle.maxHeight.computedValue;
+      }
     }
     return maxMainSize ?? double.infinity;
   }
 
-  double _getMinMainAxisSize2(RenderBox child) {
+  double _getMinMainAxisSize(RenderBox child) {
     double? minMainSize;
     if (child is RenderBoxModel) {
-      double? minWidth = child.renderStyle.maxWidth.isAuto ?
-        null : child.renderStyle.maxWidth.computedValue;
-      double? minHeight = child.renderStyle.maxHeight.isAuto ?
-        null : child.renderStyle.maxHeight.computedValue;
-      minMainSize = _isHorizontalFlexDirection
-        ? minWidth : minHeight;
-
-      if (minMainSize == null) {
-        double autoMinSize = _getAutoMinSize(child);
-        minMainSize = autoMinSize;
+      double autoMinSize = _getAutoMinSize(child);
+      if (_isHorizontalFlexDirection) {
+        minMainSize = child.renderStyle.minWidth.isAuto
+          ? autoMinSize : child.renderStyle.minWidth.computedValue;
+      } else {
+        minMainSize = child.renderStyle.minHeight.isAuto
+          ? autoMinSize : child.renderStyle.minHeight.computedValue;
       }
     }
 
@@ -361,7 +359,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     RenderStyle? childRenderStyle = child.renderStyle;
     double? childAspectRatio = childRenderStyle.aspectRatio;
     double? childLogicalWidth = child.renderStyle.borderBoxLogicalWidth;
-    double? childLogicalHeight = child.renderStyle.borderBoxLogicalWidth;
+    double? childLogicalHeight = child.renderStyle.borderBoxLogicalHeight;
 
     // If the item’s computed main size property is definite, then the specified size suggestion is that size
     // (clamped by its max main size property if it’s definite). It is otherwise undefined.
@@ -426,59 +424,6 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     return autoMinSize;
-  }
-
-  // Calculate automatic minimum size of flex item.
-  // Refer to https://www.w3.org/TR/css-flexbox-1/#min-size-auto for detail rules
-  double? _getMinMainAxisSize(RenderBoxModel child) {
-    double? minMainSize;
-
-    double? contentSize = 0;
-    // Min width of flex item if min-width is not specified use auto min width instead.
-    double? minWidth = 0;
-    // Min height of flex item if min-height is not specified use auto min height instead.
-    double? minHeight = 0;
-
-    RenderStyle? childRenderStyle = child.renderStyle;
-
-    minWidth = childRenderStyle.minWidth.isAuto
-        ? child.minContentWidth
-        : childRenderStyle.minWidth.computedValue;
-    minHeight = childRenderStyle.minHeight.isAuto
-        ? child.minContentHeight
-        : childRenderStyle.minHeight.computedValue;
-
-
-    contentSize = _isHorizontalFlexDirection
-        ? minWidth
-        : minHeight;
-
-    if (child is RenderReplaced &&
-        childRenderStyle.aspectRatio != null &&
-        _isHorizontalFlexDirection &&
-        childRenderStyle.width.isAuto) {
-      double transferredSize = childRenderStyle.height.isNotAuto
-          ? childRenderStyle.height.computedValue * childRenderStyle.aspectRatio!
-          : childRenderStyle.intrinsicWidth;
-      minMainSize = math.min(contentSize, transferredSize);
-    } else if (child is RenderReplaced &&
-        childRenderStyle.aspectRatio != null &&
-        !_isHorizontalFlexDirection &&
-        childRenderStyle.height.isAuto) {
-      double transferredSize = childRenderStyle.width.isNotAuto
-          ? childRenderStyle.width.computedValue / childRenderStyle.aspectRatio!
-          : childRenderStyle.intrinsicHeight;
-      minMainSize = math.min(contentSize, transferredSize);
-    } else {
-      double? specifiedMainSize = _isHorizontalFlexDirection
-          ? child.renderStyle.contentBoxLogicalWidth
-          : child.renderStyle.contentBoxLogicalHeight;
-      minMainSize = specifiedMainSize != null
-          ? math.min(contentSize, specifiedMainSize)
-          : contentSize;
-    }
-
-    return minMainSize;
   }
 
   double _getShrinkConstraints(RenderBox child,
@@ -1125,7 +1070,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
       // Find all the violations by comparing min and max size of flex items.
       if (child is RenderBoxModel && !_isChildMainAxisClip(child)) {
-        double minMainAxisSize = _getMinMainAxisSize(child)!;
+        double minMainAxisSize = _getMinMainAxisSize(child);
         double maxMainAxisSize = _getMaxMainAxisSize(child);
         if (computedSize < minMainAxisSize) {
           flexedMainSize = minMainAxisSize;
