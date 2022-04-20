@@ -1405,8 +1405,7 @@ describe('flex-minimum', () => {
     await snapshot(0.1);
   })
 
-  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
-  xit("width-flex-items-013", async () => {
+  it("width-flex-items-013", async () => {
     let p;
     let referenceOverlappedRed;
     let div;

@@ -1158,9 +1158,15 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     double? maxMainSize = _isHorizontalFlexDirection ? containerWidth : containerHeight;
+
+    // Flexbox has several additional cases where a length can be considered definite.
+    // 3. Once the cross size of a flex line has been determined, items in auto-sized flex containers are
+    // also considered definite for the purpose of layout;
+    // https://www.w3.org/TR/css-flexbox-1/#definite-sizes
     bool isMainSizeDefinite = _isHorizontalFlexDirection
       ? contentBoxLogicalWidth != null
       : contentBoxLogicalHeight != null;
+
     final BoxSizeType mainSizeType =
         maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
@@ -1195,8 +1201,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       runChildren.forEach(calTotalSpace);
 
       // Flexbox with no size on main axis should adapt the main axis size with children.
-//      double initialFreeSpace = mainSizeType != BoxSizeType.automatic ?
-//        maxMainSize - totalSpace : 0;
       double initialFreeSpace = isMainSizeDefinite
         ? maxMainSize - totalSpace : 0;
 
