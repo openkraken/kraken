@@ -36,6 +36,11 @@ class DocumentFragment : public ContainerNode {
   bool ChildTypeAllowed(NodeType) const override;
 };
 
+template<>
+struct DowncastTraits<DocumentFragment> {
+  static bool AllowFrom(const Node& node) { return node.IsDocumentFragment(); }
+};
+
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_DOCUMENT_FRAGMENT_H

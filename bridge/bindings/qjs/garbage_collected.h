@@ -59,9 +59,7 @@ class MakeGarbageCollectedTrait {
   template <typename... Args>
   static T* Allocate(Args&&... args) {
     T* object = ::new T(std::forward<Args>(args)...);
-    if (auto* scriptwrappable = DynamicTo<ScriptWrappable>(object)) {
-      scriptwrappable->InitializeQuickJSObject();
-    }
+    object->InitializeQuickJSObject();
     return object;
   }
 

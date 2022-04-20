@@ -17,7 +17,7 @@ class Comment : public CharacterData {
   static Comment* Create(ExecutingContext* context, ExceptionState& exception_state);
   static Comment* Create(Document&);
 
-  explicit Comment(Document& document, ConstructionType type);
+  explicit Comment(TreeScope& tree_scope, ConstructionType type);
 
   NodeType nodeType() const override;
 

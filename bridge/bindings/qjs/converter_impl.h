@@ -15,7 +15,11 @@
 #include "core/dom/ng/node_list.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
+#include "core/html/html_body_element.h"
+#include "core/html/html_div_element.h"
 #include "core/html/html_element.h"
+#include "core/html/html_head_element.h"
+#include "core/html/html_html_element.h"
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
@@ -465,7 +469,7 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
   struct Converter<class_name> : public ConverterBase<class_name> {                             \
     static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) { \
       assert(!JS_IsException(value));                                                           \
-      return toScriptWrappable<class_name>(value);                                              \
+      return toScriptWrappable<class_name>(JS_DupValue(ctx, value));                            \
     }                                                                                           \
     static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }       \
   };
@@ -473,6 +477,10 @@ struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptio
 DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Node);
 DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Document);
 DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLElement);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLDivElement);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLBodyElement);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLHeadElement);
+DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLHtmlElement);
 
 template <>
 struct Converter<NodeList> : public ConverterBase<NodeList> {

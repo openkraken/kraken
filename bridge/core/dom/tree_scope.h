@@ -5,13 +5,20 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_TREE_SCOPE_H_
 #define KRAKENBRIDGE_CORE_DOM_TREE_SCOPE_H_
 
-#include <assert.h>
+#include <cassert>
 
 namespace kraken {
 
 class ContainerNode;
 class Document;
 
+// The root node of a document tree (in which case this is a Document) or of a
+// shadow tree (in which case this is a ShadowRoot). Various things, like
+// element IDs, are scoped to the TreeScope in which they are rooted, if any.
+//
+// A class which inherits both Node and TreeScope must call clearRareData() in
+// its destructor so that the Node destructor no longer does problematic
+// NodeList cache manipulation in the destructor.
 class TreeScope {
   friend class Node;
 
@@ -22,7 +29,7 @@ class TreeScope {
   }
 
  protected:
-  explicit TreeScope(ContainerNode&, Document&);
+  explicit TreeScope(Document&);
 
  private:
   ContainerNode* root_node_;

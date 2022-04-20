@@ -65,6 +65,14 @@ class JSEventHandler : public JSBasedEventListener {
   const HandlerType type_;
 };
 
+template <>
+struct DowncastTraits<JSEventHandler> {
+  static bool AllowFrom(const EventListener& event_listener) {
+    auto* js_based = DynamicTo<JSBasedEventListener>(event_listener);
+    return js_based && js_based->IsJSEventHandler();
+  }
+};
+
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_HANDLER_H_

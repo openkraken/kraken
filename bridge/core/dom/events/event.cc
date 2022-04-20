@@ -88,6 +88,50 @@ void Event::SetCurrentTarget(EventTarget* target) {
   current_target_ = target;
 }
 
+bool Event::IsUIEvent() const {
+  return false;
+}
+
+bool Event::IsMouseEvent() const {
+  return false;
+}
+
+bool Event::IsFocusEvent() const {
+  return false;
+}
+
+bool Event::IsKeyboardEvent() const {
+  return false;
+}
+
+bool Event::IsTouchEvent() const {
+  return false;
+}
+
+bool Event::IsGestureEvent() const {
+  return false;
+}
+
+bool Event::IsPointerEvent() const {
+  return false;
+}
+
+bool Event::IsInputEvent() const {
+  return false;
+}
+
+bool Event::IsDragEvent() const {
+  return false;
+}
+
+bool Event::IsBeforeUnloadEvent() const {
+  return false;
+}
+
+bool Event::IsErrorEvent() const {
+  return false;
+}
+
 void Event::preventDefault(ExceptionState& exception_state) {
   if (handling_passive_ != PassiveMode::kNotPassive && handling_passive_ != PassiveMode::kNotPassiveDefault) {
     return;

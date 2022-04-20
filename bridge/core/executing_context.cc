@@ -8,6 +8,7 @@
 #include "event_type_names.h"
 #include "polyfill.h"
 #include "core/dom/document.h"
+#include "core/html/html_html_element.h"
 
 #include "foundation/logging.h"
 
@@ -370,6 +371,10 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 
 void ExecutingContext::InstallDocument() {
   document_ = MakeGarbageCollected<Document>(this);
+  HTMLHtmlElement* html_element = MakeGarbageCollected<HTMLHtmlElement>(*document_);
+  ExceptionState exception_state;
+  document_->AppendChild(html_element, exception_state);
+  document_->SetDocumentElement(html_element);
   DefineGlobalProperty("document", document_->ToValue().QJSValue());
 }
 

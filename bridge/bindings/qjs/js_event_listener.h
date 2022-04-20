@@ -43,6 +43,14 @@ class JSEventListener final : public JSBasedEventListener {
   const std::shared_ptr<QJSFunction> event_listener_;
 };
 
+template <>
+struct DowncastTraits<JSEventListener> {
+  static bool AllowFrom(const EventListener& event_listener) {
+    auto* js_based = DynamicTo<JSBasedEventListener>(event_listener);
+    return js_based && js_based->IsJSEventListener();
+  }
+};
+
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_JS_EVENT_LISTENER_H_

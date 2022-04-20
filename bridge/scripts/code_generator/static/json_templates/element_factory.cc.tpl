@@ -42,17 +42,17 @@ struct CreateHTMLFunctionMapData {
 <% _.forEach(data, (item, index) => { %>
   <% if (_.isString(item)) { %>
 
-static HTMLElement* HTML<%= item[0].toUpperCase() + item.slice(1) %>Constructor(Document& document) {
-  return MakeGarbageCollected<HTML<%= item[0].toUpperCase() + item.slice(1) %>Element>(document);
+static HTMLElement* HTML<%= _.upperFirst(item) %>Constructor(Document& document) {
+  return MakeGarbageCollected<HTML<%= _.upperFirst(item) %>Element>(document);
 }
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceName) { %>
-static HTMLElement* HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor(Document& document) {
+static HTMLElement* HTML<%= _.upperFirst(item.name) %>Constructor(Document& document) {
   return MakeGarbageCollected<<%= item.interfaceName %>>(document);
 }
     <% } else { %>
-static HTMLElement* HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor(Document& document) {
-  return MakeGarbageCollected<HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Element>(document);
+static HTMLElement* HTML<%= _.upperFirst(item.name)  %>Constructor(Document& document) {
+  return MakeGarbageCollected<HTML<%= _.upperFirst(item.name)  %>Element>(document);
 }
     <% } %>
   <% } %>
@@ -68,12 +68,12 @@ static void CreateHTMLFunctionMap() {
 
 <% _.forEach(data, (item, index) => { %>
   <% if (_.isString(item)) { %>
-      {html_names::k<%= item %>, HTML<%= item[0].toUpperCase() + item.slice(1) %>Constructor},
+      {html_names::k<%= item %>, HTML<%= _.upperFirst(item) %>Constructor},
   <% } else if (_.isObject(item)) { %>
     <% if (item.interfaceName) { %>
-      {html_names::k<%= item.name %>, HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor},
+      {html_names::k<%= item.name %>, HTML<%= _.upperFirst(item.name)  %>Constructor},
     <% } else { %>
-      {html_names::k<%= item.name %>, HTML<%= item.name[0].toUpperCase() + item.name.slice(1) %>Constructor},
+      {html_names::k<%= item.name %>, HTML<%= _.upperFirst(item.name)  %>Constructor},
     <% } %>
   <% } %>
 <% }); %>

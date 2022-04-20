@@ -3,6 +3,7 @@
  */
 
 #include "text.h"
+#include "document.h"
 
 namespace kraken {
 

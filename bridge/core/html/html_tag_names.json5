@@ -8,6 +8,10 @@
       {
         "template": "element_factory",
         "filename": "html_element_factory"
+      },
+      {
+        "template": "element_type_helper",
+        "filename": "html_element_type_helper"
       }
     ]
   },
@@ -21,7 +25,9 @@
 //      "interfaceName": "HTMLAnchorElement",
 //      "filename": "html_anchor_element"
 //    },
-//    "body",
+    "html",
+    "body",
+    "head",
     "div",
 //    {
 //      "name": "input",

@@ -286,7 +286,7 @@ class Node : public EventTarget {
 
   void SetTreeScope(TreeScope* scope) { tree_scope_ = scope; }
 
-  Node(ExecutingContext* context, Document*, ConstructionType);
+  Node(ExecutingContext* context, TreeScope*, ConstructionType);
   Node() = delete;
 
  private:

@@ -22,10 +22,15 @@ class CharacterData : public Node {
   std::string nodeValue() const override;
 
  protected:
-  CharacterData(Document& document, const AtomicString& text, ConstructionType type);
+  CharacterData(TreeScope& tree_scope, const AtomicString& text, ConstructionType type);
 
  private:
   AtomicString data_;
+};
+
+template<>
+struct DowncastTraits<CharacterData> {
+  static bool AllowFrom(const Node& node) { return node.IsCharacterDataNode(); }
 };
 
 }  // namespace kraken

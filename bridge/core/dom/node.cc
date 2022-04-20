@@ -385,13 +385,17 @@ Node* Node::CommonAncestor(const Node& other, ContainerNode* (*parent)(const Nod
   return nullptr;
 }
 
-Node::Node(ExecutingContext* context, Document* document, ConstructionType type)
+Node::Node(ExecutingContext* context, TreeScope* tree_scope, ConstructionType type)
     : EventTarget(context),
       node_flags_(type),
       parent_or_shadow_host_node_(nullptr),
       previous_(nullptr),
-      next_(nullptr) {}
+      tree_scope_(tree_scope),
+      next_(nullptr),
+      data_(nullptr) {}
 
-void Node::Trace(GCVisitor*) const {}
+void Node::Trace(GCVisitor* visitor) const {
+  EventTarget::Trace(visitor);
+}
 
 }  // namespace kraken

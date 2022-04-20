@@ -135,6 +135,7 @@ bool Element::HasEquivalentAttributes(const Element& other) const {
 
 void Element::Trace(GCVisitor* visitor) const {
   visitor->Trace(attributes_);
+  ContainerNode::Trace(visitor);
 }
 
 Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
@@ -277,7 +278,7 @@ std::string Element::innerHTML() const {
   std::string s;
 
   // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
-  const Node* parent = DynamicTo<Node>(this);
+  const Node* parent = To<Node>(this);
 
   //  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
   //    parent = DynamicTo<Node>(template_element->content());
@@ -323,4 +324,17 @@ void Element::_beforeUpdateId(JSValue oldIdValue, JSValue newIdValue) {}
 Node::NodeType Element::nodeType() const {
   return kElementNode;
 }
+
+bool Element::ChildTypeAllowed(NodeType type) const {
+  switch (type) {
+    case kElementNode:
+    case kTextNode:
+    case kCommentNode:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
 }  // namespace kraken

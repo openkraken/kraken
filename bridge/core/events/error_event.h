@@ -49,6 +49,11 @@ class ErrorEvent : public Event {
   ScriptValue error_;
 };
 
+template <>
+struct DowncastTraits<ErrorEvent> {
+  static bool AllowFrom(const Event& event) { return event.IsErrorEvent(); }
+};
+
 }  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_DOM_EVENTS_ERROR_EVENT_H_

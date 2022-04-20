@@ -321,7 +321,8 @@ std::string ContainerNode::nodeValue() const {
   return "";
 }
 
-ContainerNode::ContainerNode(Document* document, ConstructionType type) : Node(document->GetExecutingContext(), document, type) {}
+ContainerNode::ContainerNode(TreeScope* tree_scope, ConstructionType type) : Node(tree_scope->GetDocument().GetExecutingContext(), tree_scope, type) {}
+ContainerNode::ContainerNode(ExecutingContext* context, Document* document, ConstructionType type): Node(context, document, type) {}
 
 void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& old_child) {
   assert(old_child.parentNode() == this);
@@ -415,6 +416,10 @@ void ContainerNode::NotifyNodeRemoved(Node& root) {
 }
 
 void ContainerNode::Trace(GCVisitor* visitor) const {
+  for(Node& node: NodeTraversal::ChildrenOf(*this)) {
+    visitor->Trace(&node);
+  }
+
   Node::Trace(visitor);
 }
 

@@ -3,12 +3,12 @@
  */
 
 #include "tree_scope.h"
-#include "container_node.h"
+#include "document.h"
 
 namespace kraken {
 
-TreeScope::TreeScope(ContainerNode& root_node, Document& document) : root_node_(&root_node), document_(&document) {
-  root_node.SetTreeScope(this);
+TreeScope::TreeScope(Document& document) : root_node_(&document), document_(&document) {
+  root_node_->SetTreeScope(this);
 }
 
 }  // namespace kraken

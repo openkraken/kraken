@@ -129,6 +129,22 @@ class Event : public ScriptWrappable {
   uint8_t eventPhase() const { return event_phase_; }
   void SetEventPhase(uint8_t event_phase) { event_phase_ = event_phase; }
 
+  // These events are general classes of events.
+  virtual bool IsUIEvent() const;
+  virtual bool IsMouseEvent() const;
+  virtual bool IsFocusEvent() const;
+  virtual bool IsKeyboardEvent() const;
+  virtual bool IsTouchEvent() const;
+  virtual bool IsGestureEvent() const;
+  virtual bool IsPointerEvent() const;
+  virtual bool IsInputEvent() const;
+
+  // Drag events are a subset of mouse events.
+  virtual bool IsDragEvent() const;
+
+  virtual bool IsBeforeUnloadEvent() const;
+  virtual bool IsErrorEvent() const;
+
   // This callback is invoked when an event listener has been dispatched
   // at the current target. It should only be used to influence UMA metrics
   // and not change functionality since observing the presence of listeners

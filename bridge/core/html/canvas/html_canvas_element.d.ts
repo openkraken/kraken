@@ -21,9 +21,9 @@ interface CanvasRenderingContext2D {
   clearRect(x: number, y: number, w: number, h: number): void;
   closePath(): void;
   clip(path?: string): void;
-  drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
-  drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
-  drawImage(image: CanvasImageSource, dx: number, dy: number): void;
+  drawImage(image: HTMLImageElement, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+  drawImage(image: HTMLImageElement, dx: number, dy: number, dw: number, dh: number): void;
+  drawImage(image: HTMLImageElement, dx: number, dy: number): void;
   ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
   fill(path?: string): void;
   fillRect(x: number, y: number, w: number, h: number): void;

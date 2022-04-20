@@ -11,6 +11,7 @@
 namespace kraken {
 
 class HTMLBodyElement : public HTMLElement {
+  DEFINE_WRAPPERTYPEINFO();
  public:
   explicit HTMLBodyElement(Document&);
 };

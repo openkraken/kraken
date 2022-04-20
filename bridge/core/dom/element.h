@@ -68,6 +68,7 @@ class Element : public ContainerNode {
   std::string nodeName() const override;
 
   NodeType nodeType() const override;
+  bool ChildTypeAllowed(NodeType) const override;
 
   bool HasEquivalentAttributes(const Element& other) const;
 
@@ -88,6 +89,27 @@ class Element : public ContainerNode {
   ElementAttributes* attributes_{nullptr};
   AtomicString tag_name_ = AtomicString::Empty(ctx());
 };
+
+template <typename T>
+bool IsElementOfType(const Node&);
+template <>
+inline bool IsElementOfType<const Element>(const Node& node) {
+  return node.IsElementNode();
+}
+template <typename T>
+inline bool IsElementOfType(const Element& element) {
+  return IsElementOfType<T>(static_cast<const Node&>(element));
+}
+template <>
+inline bool IsElementOfType<const Element>(const Element&) {
+  return true;
+}
+
+template <>
+struct DowncastTraits<Element> {
+  static bool AllowFrom(const Node& node) { return node.IsElementNode(); }
+};
+
 
 }  // namespace kraken
 

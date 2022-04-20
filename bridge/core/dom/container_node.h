@@ -51,7 +51,8 @@ class ContainerNode : public Node {
   void Trace(GCVisitor* visitor) const override;
 
  protected:
-  ContainerNode(Document* document, ConstructionType = kCreateContainer);
+  ContainerNode(TreeScope* tree_scope, ConstructionType = kCreateContainer);
+  ContainerNode(ExecutingContext* context, Document* document, ConstructionType = kCreateContainer);
 
   void SetFirstChild(Node* child) { first_child_ = child; }
   void SetLastChild(Node* child) { last_child_ = child; }
@@ -81,8 +82,8 @@ class ContainerNode : public Node {
   inline bool IsChildTypeAllowed(const Node& child) const;
   inline bool IsHostIncludingInclusiveAncestorOfThis(const Node&, ExceptionState&) const;
 
-  Node* first_child_;
-  Node* last_child_;
+  Node* first_child_{nullptr};
+  Node* last_child_{nullptr};
 };
 
 inline Node* Node::firstChild() const {
@@ -108,6 +109,11 @@ inline bool ContainerNode::HasChildCount(unsigned count) const {
   }
   return !count && !child;
 }
+
+template <>
+struct DowncastTraits<ContainerNode> {
+  static bool AllowFrom(const Node& node) { return node.IsContainerNode(); }
+};
 
 }  // namespace kraken
 

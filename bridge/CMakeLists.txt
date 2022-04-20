@@ -306,6 +306,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/tree_scope.h
     core/dom/element.cc
     core/dom/element.h
+    core/dom/element_traversal.h
     core/dom/document.cc
     core/dom/document.h
     core/dom/node_data.cc
@@ -328,8 +329,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_element.h
     core/html/html_div_element.cc
     core/html/html_div_element.h
-#    core/html/html_body_element.h
-#    core/html/html_body_element.cc
+    core/html/html_head_element.cc
+    core/html/html_head_element.h
+    core/html/html_body_element.h
+    core/html/html_body_element.cc
+    core/html/html_html_element.cc
+    core/html/html_html_element.h
 #    core/html/html_anchor_element.h
 #    core/html/html_anchor_element.cc
 #    core/html/html_template_element.cc
@@ -424,6 +429,13 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_html_element.h
     out/qjs_html_div_element.cc
     out/qjs_html_div_element.h
+    out/qjs_html_head_element.cc
+    out/qjs_html_head_element.h
+    out/qjs_html_body_element.cc
+    out/qjs_html_body_element.h
+    out/qjs_html_html_element.cc
+    out/qjs_html_html_element.h
+    out/html_element_type_helper.h
     out/qjs_html_unknown_element.cc
     out/qjs_html_unknown_element.h
     out/html_element_factory.cc

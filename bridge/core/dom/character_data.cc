@@ -14,8 +14,8 @@ void CharacterData::setData(const AtomicString& data) {
 std::string CharacterData::nodeValue() const {
   return data_.ToStdString();
 }
-CharacterData::CharacterData(Document& document, const AtomicString& text, Node::ConstructionType type)
-    : Node(document.GetExecutingContext(), &document, type), data_(!text.IsNull() ? text : AtomicString::Empty(ctx())) {
+CharacterData::CharacterData(TreeScope& tree_scope, const AtomicString& text, Node::ConstructionType type)
+    : Node(tree_scope.GetDocument().GetExecutingContext(), &tree_scope, type), data_(!text.IsNull() ? text : AtomicString::Empty(ctx())) {
   assert(type == kCreateOther || type == kCreateText);
 }
 

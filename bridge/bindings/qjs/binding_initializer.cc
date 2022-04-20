@@ -19,6 +19,9 @@
 #include "qjs_element.h"
 #include "qjs_html_element.h"
 #include "qjs_html_div_element.h"
+#include "qjs_html_head_element.h"
+#include "qjs_html_body_element.h"
+#include "qjs_html_html_element.h"
 #include "qjs_element_attributes.h"
 
 namespace kraken {
@@ -39,6 +42,11 @@ void InstallBindings(ExecutingContext* context) {
   QJSElement::Install(context);
   QJSHTMLElement::Install(context);
   QJSHTMLDivElement::Install(context);
+  QJSHTMLHeadElement::Install(context);
+  QJSHTMLBodyElement::Install(context);
+  QJSHTMLHtmlElement::Install(context);
+
+  // Legacy bindings, not standard.
   QJSElementAttributes::Install(context);
 }
 

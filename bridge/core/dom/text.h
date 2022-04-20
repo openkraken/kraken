@@ -19,13 +19,20 @@ class Text : public CharacterData {
   static Text* Create(ExecutingContext* context, ExceptionState& executing_context);
   static Text* Create(ExecutingContext* context, const AtomicString& value, ExceptionState& executing_context);
 
-  Text(Document& document, const AtomicString& data, ConstructionType type) : CharacterData(document, data, type) {}
+  Text(TreeScope& tree_scope, const AtomicString& data, ConstructionType type) : CharacterData(tree_scope, data, type) {}
 
   NodeType nodeType() const override;
+
+
 
  private:
   std::string nodeName() const override;
   Node* Clone(Document&, CloneChildrenFlag) const override;
+};
+
+template<>
+struct DowncastTraits<Text> {
+  static bool AllowFrom(const Node& node) { return node.IsTextNode(); };
 };
 
 }  // namespace kraken

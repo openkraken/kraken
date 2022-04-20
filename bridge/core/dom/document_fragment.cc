@@ -5,6 +5,7 @@
 
 #include "document_fragment.h"
 #include "events/event_target.h"
+#include "document.h"
 
 namespace kraken {
 

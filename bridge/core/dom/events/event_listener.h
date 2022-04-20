@@ -33,6 +33,8 @@ class EventListener {
   // Invokes this event listener.
   virtual void Invoke(ExecutingContext* context, Event*, ExceptionState& exception_state) = 0;
 
+  virtual bool IsJSBasedEventListener() const { return false; }
+
   // Returns true if this implements IDL EventHandler family.
   virtual bool IsEventHandler() const { return false; }
 

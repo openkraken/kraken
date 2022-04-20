@@ -4,8 +4,13 @@
  */
 
 #include "document.h"
+#include "core/dom/element.h"
 #include "core/html/html_element.h"
+#include "core/html/html_html_element.h"
 #include "core/html/html_unknown_element.h"
+#include "core/html/html_body_element.h"
+#include "core/html/html_head_element.h"
+#include "element_traversal.h"
 #include "foundation/ascii_types.h"
 #include "html_element_factory.h"
 
@@ -16,7 +21,8 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 }
 
 Document::Document(ExecutingContext* context)
-    : Node(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {}
+    : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {
+}
 
 ScriptValue Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
@@ -54,6 +60,28 @@ std::string Document::nodeValue() const {
 
 Node::NodeType Document::nodeType() const {
   return kDocumentNode;
+}
+
+bool Document::ChildTypeAllowed(NodeType type) const {
+  switch (type) {
+    case kAttributeNode:
+    case kDocumentFragmentNode:
+    case kDocumentNode:
+    case kTextNode:
+      return false;
+    case kCommentNode:
+      return true;
+    case kDocumentTypeNode:
+    case kElementNode:
+      // Documents may contain no more than one of each of these.
+      // (One Element and one DocumentType.)
+      for (Node& c : NodeTraversal::ChildrenOf(*this)) {
+        if (c.nodeType() == type)
+          return false;
+      }
+      return true;
+  }
+  return false;
 }
 
 template <typename CharType>
@@ -96,6 +124,32 @@ bool Document::IsValidName(const AtomicString& name) {
 
 Node* Document::Clone(Document&, CloneChildrenFlag) const {
   return nullptr;
+}
+
+
+HTMLBodyElement* Document::body() const {
+  if (!IsA<HTMLHtmlElement>(documentElement()))
+    return nullptr;
+
+  for (HTMLElement* child = Traversal<HTMLElement>::FirstChild(*documentElement()); child;
+       child = Traversal<HTMLElement>::NextSibling(*child)) {
+    if (IsA<HTMLBodyElement>(*child))
+      return DynamicTo<HTMLBodyElement>(child);
+  }
+
+  return nullptr;
+}
+
+HTMLHeadElement* Document::head() const {
+  Node* de = documentElement();
+  if (de == nullptr)
+    return nullptr;
+
+  return Traversal<HTMLHeadElement>::FirstChild(*de);
+}
+
+void Document::Trace(GCVisitor* visitor) const {
+  ContainerNode::Trace(visitor);
 }
 
 }  // namespace kraken

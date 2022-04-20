@@ -20,7 +20,7 @@ class JSBasedEventListener : public EventListener {
  public:
   // Implements step 2. of "inner invoke".
   // See: https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-  void Invoke(ExecutingContext* context, Event* event, ExceptionState& exception_state);
+  void Invoke(ExecutingContext* context, Event* event, ExceptionState& exception_state) override;
 
   // Implements "get the current value of the event handler".
   // https://html.spec.whatwg.org/C/#getting-the-current-value-of-the-event-handler
@@ -33,6 +33,7 @@ class JSBasedEventListener : public EventListener {
   // throwing any exception.
   virtual JSValue GetEffectiveFunction(EventTarget&) = 0;
 
+  bool IsJSBasedEventListener() const override { return true; }
   virtual bool IsJSEventListener() const { return false; }
   virtual bool IsJSEventHandler() const { return false; }
 
@@ -47,6 +48,13 @@ class JSBasedEventListener : public EventListener {
   // See step 2-10:
   // https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
   virtual void InvokeInternal(EventTarget&, Event&, ExceptionState& exception_state) = 0;
+};
+
+template <>
+struct DowncastTraits<JSBasedEventListener> {
+  static bool AllowFrom(const EventListener& event_listener) {
+    return event_listener.IsJSBasedEventListener();
+  }
 };
 
 }  // namespace kraken
