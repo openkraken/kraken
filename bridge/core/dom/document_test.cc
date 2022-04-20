@@ -40,7 +40,8 @@ TEST(Document, body) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
-  const char* code = "let div = {};"
+  const char* code =
+      "let div = {};"
       "document.documentElement.appendChild(div);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);

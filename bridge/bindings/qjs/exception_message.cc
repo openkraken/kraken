@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019 Alibaba Inc. All rights reserved.
-* Author: Kraken Team.
-*/
+ * Copyright (C) 2019 Alibaba Inc. All rights reserved.
+ * Author: Kraken Team.
+ */
 
 #include "exception_message.h"
 #include <vector>
@@ -43,8 +43,7 @@ std::string FormatString(const char* format, ...) {
 }
 
 std::string ExceptionMessage::ArgumentNotOfType(int argument_index, const char* expected_type) {
-  return FormatString("parameter %d is not of type '%s'.", argument_index + 1,
-                        expected_type);
+  return FormatString("parameter %d is not of type '%s'.", argument_index + 1, expected_type);
 }
 
-}
+}  // namespace kraken

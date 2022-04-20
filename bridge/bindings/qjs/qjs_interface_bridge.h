@@ -19,7 +19,8 @@ class QJSInterfaceBridge {
   }
 
   static bool HasInstance(ExecutingContext* context, JSValue value) {
-    return JS_IsInstanceOf(context->ctx(), value, context->contextData()->constructorForType(QJST::GetWrapperTypeInfo()));
+    return JS_IsInstanceOf(context->ctx(), value,
+                           context->contextData()->constructorForType(QJST::GetWrapperTypeInfo()));
   };
 };
 
