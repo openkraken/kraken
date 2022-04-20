@@ -389,13 +389,27 @@ class RenderFlexLayout extends RenderLayoutBox {
       ? child.minContentWidth
       : child.minContentHeight;
 
-    // Newer version of Blink and Gecko will obey stretch size in replaced items' content size suggestion
-    // which is different from the behavior of WebKit.
-    // https://github.com/w3c/csswg-drafts/issues/6693
-    // https://github.com/web-platform-tests/wpt/pull/30900
-    if (transferredSize != null) {
+    CSSLengthValue childCrossSize = _isHorizontalFlexDirection
+      ? childRenderStyle.height
+      : childRenderStyle.width;
+
+    if (childCrossSize.isNotAuto && transferredSize != null) {
       contentSize = transferredSize;
     }
+
+    double? crossSize = _isHorizontalFlexDirection
+      ? renderStyle.contentBoxLogicalHeight
+      : renderStyle.contentBoxLogicalWidth;
+
+    // Content size suggestion of replaced flex item will use the cross axis preferred size which came from flexbox's
+    // fixed cross size in newer version of Blink and Gecko which is different from the behavior of WebKit.
+    // https://github.com/w3c/csswg-drafts/issues/6693
+    bool isChildCrossSizeStretched = _needToStretchChildCrossSize(child) && crossSize != null;
+
+    if (isChildCrossSizeStretched && transferredSize != null) {
+      contentSize = transferredSize;
+    }
+
     CSSLengthValue maxMainLength = _isHorizontalFlexDirection
       ? childRenderStyle.maxWidth
       : childRenderStyle.maxHeight;
@@ -1160,15 +1174,10 @@ class RenderFlexLayout extends RenderLayoutBox {
     double? maxMainSize = _isHorizontalFlexDirection ? containerWidth : containerHeight;
 
     // Flexbox has several additional cases where a length can be considered definite.
-    // 3. Once the cross size of a flex line has been determined, items in auto-sized flex containers are
-    // also considered definite for the purpose of layout;
     // https://www.w3.org/TR/css-flexbox-1/#definite-sizes
     bool isMainSizeDefinite = _isHorizontalFlexDirection
       ? contentBoxLogicalWidth != null
       : contentBoxLogicalHeight != null;
-
-    final BoxSizeType mainSizeType =
-        maxMainSize == 0.0 ? BoxSizeType.automatic : BoxSizeType.specified;
 
     for (int i = 0; i < _runMetrics.length; ++i) {
       final _RunMetrics metrics = _runMetrics[i];
@@ -1220,6 +1229,74 @@ class RenderFlexLayout extends RenderLayoutBox {
         while (_resolveFlexibleLengths(metrics, totalFlexFactor, initialFreeSpace)) {}
       }
 
+      // Cross axis size of children after flexible length resolved.
+      double crossAxisExtent = 0;
+
+//      double maxSizeAboveBaseline = 0;
+//      double maxSizeBelowBaseline = 0;
+
+      for (_RunChild runChild in runChildrenList) {
+        RenderBox child = runChild.child;
+        double childMainSize = _isHorizontalFlexDirection
+          ? child.size.width
+          : child.size.height;
+        double childCrossSize = _isHorizontalFlexDirection
+          ? child.size.height
+          : child.size.width;
+        double childCrossMargin = 0;
+        if (child is RenderBoxModel) {
+          childCrossMargin = _isHorizontalFlexDirection
+            ? child.renderStyle.marginTop.computedValue + child.renderStyle.marginBottom.computedValue
+            : child.renderStyle.marginLeft.computedValue + child.renderStyle.marginRight.computedValue;
+        }
+        double childCrossExtent = childCrossSize + childCrossMargin;
+
+        if (runChild.flexedMainSize != childMainSize
+          && child is RenderReplaced
+          && child.renderStyle.aspectRatio != null
+        ) {
+          double childAspectRatio = child.renderStyle.aspectRatio!;
+          if (_isHorizontalFlexDirection && child.renderStyle.height.isAuto) {
+            childCrossSize = runChild.flexedMainSize / childAspectRatio;
+          } else if (!_isHorizontalFlexDirection && child.renderStyle.width.isAuto) {
+            childCrossSize = runChild.flexedMainSize * childAspectRatio;
+          }
+          childCrossExtent = childCrossSize + childCrossMargin;
+        }
+
+//        if (_isHorizontalFlexDirection && (alignSelf == AlignSelf.baseline ||
+//          renderStyle.alignItems == AlignItems.baseline)) {
+//          // Distance from top to baseline of child
+//          double childAscent = _getChildAscent(child);
+//          double? childMarginTop = 0;
+//          double? childMarginBottom = 0;
+//          if (child is RenderBoxModel) {
+//            childMarginTop = child.renderStyle.marginTop.computedValue;
+//            childMarginBottom = child.renderStyle.marginBottom.computedValue;
+//          }
+//          maxSizeAboveBaseline = math.max(
+//            childAscent,
+//            maxSizeAboveBaseline,
+//          );
+//          maxSizeBelowBaseline = math.max(
+//            childMarginTop +
+//              childMarginBottom +
+//              childSize!.height -
+//              childAscent,
+//            maxSizeBelowBaseline,
+//          );
+//          childCrossExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+//        }
+
+        crossAxisExtent = math.max(
+          crossAxisExtent,
+          childCrossExtent
+        );
+      }
+
+      // Update run metrics after child size has been adjusted.
+      metrics.crossAxisExtent = crossAxisExtent;
+
       // Main axis size of children after child layouted.
       double mainAxisExtent = 0;
 
@@ -1241,12 +1318,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         if ((isFlexGrow && flexGrow > 0) || (isFlexShrink && flexShrink > 0)) {
           childFlexedMainSize = runChild.flexedMainSize;
         }
-        // Child cross size adjusted due to align-items/align-self style.
-        double? childStretchedCrossSize = _getChildStretchedCrossSize(
-          child,
-          metrics.crossAxisExtent,
-          runBetweenSpace
-        );
 
         // Original size of child.
         double childOldMainSize = _isHorizontalFlexDirection
@@ -1258,8 +1329,19 @@ class RenderFlexLayout extends RenderLayoutBox {
         // due to flex-grow/flex-shrink/align-items/align-self specified.
         bool childMainSizeChanged =
           childFlexedMainSize != null && childFlexedMainSize != childOldMainSize;
-        bool childCrossSizeChanged =
-          childStretchedCrossSize != null && childStretchedCrossSize != childOldCrossSize;
+
+        bool childCrossSizeChanged = false;
+        // Child cross size adjusted due to align-items/align-self style.
+        double? childStretchedCrossSize;
+
+        if (_needToStretchChildCrossSize(child)) {
+          childStretchedCrossSize = _getChildStretchedCrossSize(
+            child,
+            metrics.crossAxisExtent,
+            runBetweenSpace
+          );
+          childCrossSizeChanged = childStretchedCrossSize != childOldCrossSize;
+        }
 
         bool isChildNeedsLayout = childMainSizeChanged || childCrossSizeChanged;
 
@@ -1740,8 +1822,40 @@ class RenderFlexLayout extends RenderLayoutBox {
         : Size(maxScrollableCrossSize, maxScrollableMainSize);
   }
 
-  // Get flex line cross size according to flex-wrap style.
   double _getFlexLineCrossSize(
+    RenderBox child,
+    double runCrossAxisExtent,
+    double runBetweenSpace,
+  ) {
+    bool isSingleLine = (renderStyle.flexWrap != FlexWrap.wrap &&
+      renderStyle.flexWrap != FlexWrap.wrapReverse);
+
+    if (isSingleLine) {
+      // Normally the height of flex line in single line equals to flex container's cross size.
+      // But it may change in cases of the cross size of replaced flex item tranferred from
+      // its flexed main size.
+      bool isCrossSizeDefinite = _isHorizontalFlexDirection
+        ? renderStyle.contentBoxLogicalHeight != null
+        : renderStyle.contentBoxLogicalWidth != null;
+      if (_needToStretchChildCrossSize(child) && !isCrossSizeDefinite) {
+        return runCrossAxisExtent;
+      } else {
+        return _getContentCrossSize();
+      }
+    } else {
+      // Flex line of align-content stretch should includes between space.
+      bool isMultiLineStretch = renderStyle.alignContent == AlignContent.stretch;
+      if (isMultiLineStretch) {
+        return runCrossAxisExtent + runBetweenSpace;
+      } else {
+        return runCrossAxisExtent;
+      }
+    }
+  }
+
+  // Get flex line cross size according to flex-wrap style.
+  double _getFlexLineCrossSize2(
+    RenderBox child,
     double runCrossAxisExtent,
     double runBetweenSpace,
   ) {
@@ -2067,23 +2181,17 @@ class RenderFlexLayout extends RenderLayoutBox {
   }
 
   // Whether need to stretch child in the cross axis according to alignment property and child cross length.
-  // Returns null when child does not need to stretch.
-  double? _getChildStretchedCrossSize(
-    RenderBox child,
-    double runCrossAxisExtent,
-    double runBetweenSpace,
-  ) {
+  bool _needToStretchChildCrossSize(RenderBox child) {
     // Position placeholder and BR element has size of zero, so they can not be stretched.
     // The absolutely-positioned box is considered to be “fixed-size”, a value of stretch
     // is treated the same as flex-start.
     // https://www.w3.org/TR/css-flexbox-1/#abspos-items
     final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
     if (child is! RenderBoxModel
-      || child is RenderPositionPlaceholder
       || child is RenderLineBreak
       || (childParentData.isPositioned)
     ) {
-      return null;
+      return false;
     }
 
     AlignSelf alignSelf = _getAlignSelf(child);
@@ -2096,48 +2204,57 @@ class RenderFlexLayout extends RenderLayoutBox {
       : child.renderStyle.width.isAuto;
 
     // If the cross size property of the flex item computes to auto, and neither of
-    // the cross-axis margins are auto, the flex item is stretched.
+    // the cross axis margins are auto, the flex item is stretched.
     // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-stretch
     if (isChildAlignmentStretch
       && !_isChildCrossAxisMarginAutoExist(child)
       && isChildLengthAuto
     ) {
-      bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap
-        || renderStyle.flexWrap == FlexWrap.wrapReverse;
-      double childCrossAxisMargin = _isHorizontalFlexDirection
-        ? child.renderStyle.margin.vertical : child.renderStyle.margin.horizontal;
-      double maxCrossSizeConstraints = _isHorizontalFlexDirection
-        ? constraints.maxHeight : constraints.maxWidth;
-      double flexLineCrossSize = _getFlexLineCrossSize(runCrossAxisExtent, runBetweenSpace);
-      // Should subtract margin when stretch flex item.
-      double childStretchedCrossSize = flexLineCrossSize - childCrossAxisMargin;
-      // Flex line cross size should not exceed container's cross size if specified when flex-wrap is nowrap.
-      if (!isFlexWrap && maxCrossSizeConstraints.isFinite) {
-        double crossAxisBorder = _isHorizontalFlexDirection
-          ? renderStyle.border.vertical : renderStyle.border.horizontal;
-        double crossAxisPadding = _isHorizontalFlexDirection
-          ? renderStyle.padding.vertical : renderStyle.padding.horizontal;
-        childStretchedCrossSize = math.min(
-          maxCrossSizeConstraints - crossAxisBorder - crossAxisPadding,
-          childStretchedCrossSize);
-      }
-
-      // Constrain stretched size by max-width/max-height.
-      double? maxCrossSize;
-      if (_isHorizontalFlexDirection && child.renderStyle.maxHeight.isNotNone) {
-        maxCrossSize = child.renderStyle.maxHeight.computedValue;
-      } else if (!_isHorizontalFlexDirection && child.renderStyle.maxWidth.isNotNone) {
-        maxCrossSize = child.renderStyle.maxWidth.computedValue;
-      }
-      if (maxCrossSize != null) {
-        childStretchedCrossSize = childStretchedCrossSize > maxCrossSize
-          ? maxCrossSize : childStretchedCrossSize;
-      }
-
-      return childStretchedCrossSize;
+      return true;
     }
 
-    return null;
+    return false;
+  }
+
+  // Get child stretched size in the cross axis.
+  double _getChildStretchedCrossSize(
+    RenderBoxModel child,
+    double runCrossAxisExtent,
+    double runBetweenSpace,
+  ) {
+    bool isFlexWrap = renderStyle.flexWrap == FlexWrap.wrap
+      || renderStyle.flexWrap == FlexWrap.wrapReverse;
+    double childCrossAxisMargin = _isHorizontalFlexDirection
+      ? child.renderStyle.margin.vertical : child.renderStyle.margin.horizontal;
+    double maxCrossSizeConstraints = _isHorizontalFlexDirection
+      ? constraints.maxHeight : constraints.maxWidth;
+    double flexLineCrossSize = _getFlexLineCrossSize(child, runCrossAxisExtent, runBetweenSpace);
+    // Should subtract margin when stretch flex item.
+    double childStretchedCrossSize = flexLineCrossSize - childCrossAxisMargin;
+    // Flex line cross size should not exceed container's cross size if specified when flex-wrap is nowrap.
+    if (!isFlexWrap && maxCrossSizeConstraints.isFinite) {
+      double crossAxisBorder = _isHorizontalFlexDirection
+        ? renderStyle.border.vertical : renderStyle.border.horizontal;
+      double crossAxisPadding = _isHorizontalFlexDirection
+        ? renderStyle.padding.vertical : renderStyle.padding.horizontal;
+      childStretchedCrossSize = math.min(
+        maxCrossSizeConstraints - crossAxisBorder - crossAxisPadding,
+        childStretchedCrossSize);
+    }
+
+    // Constrain stretched size by max-width/max-height.
+    double? maxCrossSize;
+    if (_isHorizontalFlexDirection && child.renderStyle.maxHeight.isNotNone) {
+      maxCrossSize = child.renderStyle.maxHeight.computedValue;
+    } else if (!_isHorizontalFlexDirection && child.renderStyle.maxWidth.isNotNone) {
+      maxCrossSize = child.renderStyle.maxWidth.computedValue;
+    }
+    if (maxCrossSize != null) {
+      childStretchedCrossSize = childStretchedCrossSize > maxCrossSize
+        ? maxCrossSize : childStretchedCrossSize;
+    }
+
+    return childStretchedCrossSize;
   }
 
   // Whether margin auto of child is set in the main axis.
@@ -2193,6 +2310,7 @@ class RenderFlexLayout extends RenderLayoutBox {
     }
 
     double flexLineCrossSize = _getFlexLineCrossSize(
+      child,
       runCrossAxisExtent,
       runBetweenSpace,
     );
