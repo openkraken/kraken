@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_CASTING_H_
 #define KRAKENBRIDGE_FOUNDATION_CASTING_H_
 
-#include <type_traits>
 #include <cassert>
+#include <type_traits>
 
 namespace kraken {
 

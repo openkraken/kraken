@@ -12,12 +12,13 @@ namespace kraken {
 
 class HTMLUnknownElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   explicit HTMLUnknownElement(const AtomicString&, Document& document);
- private:
 
+ private:
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_UNKNOWN_ELEMENT_H_

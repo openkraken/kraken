@@ -9,8 +9,8 @@
 #include <quickjs/quickjs.h>
 #include <memory>
 
-#include "foundation/macros.h"
 #include "foundation/casting.h"
+#include "foundation/macros.h"
 #include "gc_visitor.h"
 #include "qjs_engine_patch.h"
 

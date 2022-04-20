@@ -8,6 +8,6 @@
 
 namespace kraken {
 
-HTMLImageElement::HTMLImageElement(Document& document): HTMLElement(html_names::kimg, &document) {}
+HTMLImageElement::HTMLImageElement(Document& document) : HTMLElement(html_names::kimg, &document) {}
 
-}
+}  // namespace kraken

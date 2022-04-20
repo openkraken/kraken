@@ -15,6 +15,6 @@ class HTMLCanvasElement : public HTMLElement {
   explicit HTMLCanvasElement(Document&);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_CANVAS_HTML_CANVAS_ELEMENT_H_

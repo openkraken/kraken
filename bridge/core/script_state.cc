@@ -4,11 +4,11 @@
  */
 
 #include "script_state.h"
+#include "binding_call_methods.h"
 #include "built_in_string.h"
 #include "event_type_names.h"
-#include "html_names.h"
-#include "binding_call_methods.h"
 #include "html_element_factory.h"
+#include "html_names.h"
 
 namespace kraken {
 

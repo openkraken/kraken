@@ -5,10 +5,10 @@
 
 #include "executing_context.h"
 #include "built_in_string.h"
-#include "event_type_names.h"
-#include "polyfill.h"
 #include "core/dom/document.h"
 #include "core/html/html_html_element.h"
+#include "event_type_names.h"
+#include "polyfill.h"
 
 #include "foundation/logging.h"
 
@@ -64,7 +64,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 
   // Register all built-in native bindings.
   InstallBindings(this);
-
 
   InstallDocument();
 

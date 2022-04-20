@@ -36,7 +36,7 @@ class DocumentFragment : public ContainerNode {
   bool ChildTypeAllowed(NodeType) const override;
 };
 
-template<>
+template <>
 struct DowncastTraits<DocumentFragment> {
   static bool AllowFrom(const Node& node) { return node.IsDocumentFragment(); }
 };

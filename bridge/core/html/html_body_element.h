@@ -12,11 +12,11 @@ namespace kraken {
 
 class HTMLBodyElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   explicit HTMLBodyElement(Document&);
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_BODY_ELEMENT_H_

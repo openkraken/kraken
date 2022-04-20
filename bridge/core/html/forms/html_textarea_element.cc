@@ -10,5 +10,4 @@ namespace kraken {
 
 HTMLTextareaElement::HTMLTextareaElement(Document& document) : HTMLElement(html_names::ktextarea, &document) {}
 
-
-}
+}  // namespace kraken

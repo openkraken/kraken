@@ -5,11 +5,11 @@
 
 #include "document.h"
 #include "core/dom/element.h"
+#include "core/html/html_body_element.h"
 #include "core/html/html_element.h"
+#include "core/html/html_head_element.h"
 #include "core/html/html_html_element.h"
 #include "core/html/html_unknown_element.h"
-#include "core/html/html_body_element.h"
-#include "core/html/html_head_element.h"
 #include "element_traversal.h"
 #include "foundation/ascii_types.h"
 #include "html_element_factory.h"
@@ -21,8 +21,7 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 }
 
 Document::Document(ExecutingContext* context)
-    : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {
-}
+    : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {}
 
 ScriptValue Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {
@@ -125,7 +124,6 @@ bool Document::IsValidName(const AtomicString& name) {
 Node* Document::Clone(Document&, CloneChildrenFlag) const {
   return nullptr;
 }
-
 
 HTMLBodyElement* Document::body() const {
   if (!IsA<HTMLHtmlElement>(documentElement()))

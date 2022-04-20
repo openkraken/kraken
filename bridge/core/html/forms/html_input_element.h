@@ -15,6 +15,6 @@ class HTMLInputElement : public HTMLElement {
   explicit HTMLInputElement(Document&);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_FORMS_HTML_INPUT_ELEMENT_H_

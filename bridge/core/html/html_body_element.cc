@@ -8,6 +8,6 @@
 
 namespace kraken {
 
-HTMLBodyElement::HTMLBodyElement(Document& document): HTMLElement(html_names::kbody, &document){}
+HTMLBodyElement::HTMLBodyElement(Document& document) : HTMLElement(html_names::kbody, &document) {}
 
-}
+}  // namespace kraken

@@ -15,6 +15,6 @@ class HTMLTextareaElement : public HTMLElement {
   explicit HTMLTextareaElement(Document&);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_FORMS_HTML_TEXTAREA_ELEMENT_H_

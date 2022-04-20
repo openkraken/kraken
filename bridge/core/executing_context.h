@@ -112,7 +112,6 @@ class ExecutingContext {
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
  private:
-
   void InstallDocument();
 
   static void promiseRejectTracker(JSContext* ctx,

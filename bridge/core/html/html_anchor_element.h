@@ -15,6 +15,6 @@ class HTMLAnchorElement : public HTMLElement {
   explicit HTMLAnchorElement(Document&);
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_HTML_ANCHOR_ELEMENT_H

@@ -22,7 +22,7 @@ TEST(Document, createElement) {
   auto context = bridge->getContext();
   const char* code =
       "let div = document.createElement('div');"
-"console.log(div);";
+      "console.log(div);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
@@ -40,8 +40,7 @@ TEST(Document, body) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
-  const char* code =
-      "console.log(document.body)";
+  const char* code = "console.log(document.body)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);

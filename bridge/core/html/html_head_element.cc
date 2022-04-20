@@ -10,5 +10,4 @@ namespace kraken {
 
 HTMLHeadElement::HTMLHeadElement(Document& document) : HTMLElement(html_names::khead, &document) {}
 
-
-}
+}  // namespace kraken

@@ -23,7 +23,6 @@ inline HTMLElement::HTMLElement(const AtomicString& tag_name,
                                 ConstructionType type = kCreateHTMLElement)
     : Element(tag_name, document, type) {}
 
-
 template <typename T>
 bool IsElementOfType(const HTMLElement&);
 template <>

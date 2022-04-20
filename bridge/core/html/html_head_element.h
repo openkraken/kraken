@@ -19,6 +19,6 @@ class HTMLHeadElement : public HTMLElement {
  private:
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_HTML_HTML_HEAD_ELEMENT_H_

@@ -52,9 +52,7 @@ class JSBasedEventListener : public EventListener {
 
 template <>
 struct DowncastTraits<JSBasedEventListener> {
-  static bool AllowFrom(const EventListener& event_listener) {
-    return event_listener.IsJSBasedEventListener();
-  }
+  static bool AllowFrom(const EventListener& event_listener) { return event_listener.IsJSBasedEventListener(); }
 };
 
 }  // namespace kraken

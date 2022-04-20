@@ -20,9 +20,7 @@ class Element : public ContainerNode {
  public:
   Element(const AtomicString& tag_name, Document* document, ConstructionType = kCreateElement);
 
-  ElementAttributes* attributes() const {
-    return attributes_;
-  }
+  ElementAttributes* attributes() const { return attributes_; }
 
   bool hasAttribute(const AtomicString&, ExceptionState& exception_state) const;
   AtomicString getAttribute(const AtomicString&, ExceptionState& exception_state) const;
@@ -72,7 +70,8 @@ class Element : public ContainerNode {
 
   bool HasEquivalentAttributes(const Element& other) const;
 
-  void Trace(GCVisitor *visitor) const override;
+  void Trace(GCVisitor* visitor) const override;
+
  protected:
  private:
   // Clone is private so that non-virtual CloneElementWithChildren and
@@ -109,7 +108,6 @@ template <>
 struct DowncastTraits<Element> {
   static bool AllowFrom(const Node& node) { return node.IsElementNode(); }
 };
-
 
 }  // namespace kraken
 

@@ -14,8 +14,8 @@ class DocumentFragment;
 
 class HTMLTemplateElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
- public:
 
+ public:
   explicit HTMLTemplateElement(Document& document);
 
   DocumentFragment* content() const;

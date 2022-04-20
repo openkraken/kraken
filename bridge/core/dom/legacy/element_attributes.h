@@ -22,9 +22,7 @@ class ElementAttributes : public ScriptWrappable {
  public:
   using ImplType = ElementAttributes*;
 
-  static ElementAttributes* Create(Element* element) {
-    return MakeGarbageCollected<ElementAttributes>(element);
-  }
+  static ElementAttributes* Create(Element* element) { return MakeGarbageCollected<ElementAttributes>(element); }
   static ElementAttributes* Create(ExecutingContext* context, ExceptionState& exception_state) {
     return MakeGarbageCollected<ElementAttributes>(context);
   }

@@ -28,7 +28,7 @@ class CharacterData : public Node {
   AtomicString data_;
 };
 
-template<>
+template <>
 struct DowncastTraits<CharacterData> {
   static bool AllowFrom(const Node& node) { return node.IsCharacterDataNode(); }
 };

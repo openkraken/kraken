@@ -47,9 +47,7 @@ class Document : public ContainerNode, public TreeScope {
   Node* Clone(Document&, CloneChildrenFlag) const override;
 
   [[nodiscard]] Element* documentElement() const { return document_element_; }
-  void SetDocumentElement(Element* element) {
-    document_element_ = element;
-  };
+  void SetDocumentElement(Element* element) { document_element_ = element; };
 
   // "body element" as defined by HTML5
   // (https://html.spec.whatwg.org/C/#the-body-element-2).

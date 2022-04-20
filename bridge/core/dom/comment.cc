@@ -4,9 +4,9 @@
  */
 
 #include "comment.h"
-#include "tree_scope.h"
-#include "document.h"
 #include "built_in_string.h"
+#include "document.h"
+#include "tree_scope.h"
 
 namespace kraken {
 
