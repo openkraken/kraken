@@ -396,6 +396,8 @@ class RenderFlexLayout extends RenderLayoutBox {
       contentSize = transferredSize;
     }
 
+    // Transferred min and max size.
+    // https://www.w3.org/TR/css-sizing-4/#aspect-ratio-size-transfers
     double? transferredMinSize;
     double? transferredMaxSize;
     if (childAspectRatio != null) {
