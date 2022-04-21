@@ -40,7 +40,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
-  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement) {
+  KrakenRenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, RenderObjectElement parentElement, bool needBuild) {
     Element? element;
 
     owner.lockState(() {
@@ -48,11 +48,17 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
       assert(element != null);
     });
 
-    owner.buildScope(element!, () {
+    if (!needBuild) {
       if (element != null) {
         element?.mount(parentElement, null);
       }
-    });
+    } else {
+      owner.buildScope(element!, () {
+        if (element != null) {
+          element?.mount(parentElement, null);
+        }
+      });
+    }
 
     return element! as KrakenRenderObjectToWidgetElement<T>;
   }
@@ -249,7 +255,7 @@ abstract class WidgetElement extends dom.Element {
       parentFlutterElement = (parentNode as dom.Element).flutterElement;
     }
 
-    renderObjectElement = adaptor.attachToRenderTree(rootFlutterElement.owner!, (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement);
+    renderObjectElement = adaptor.attachToRenderTree(rootFlutterElement.owner!, (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement, parentFlutterElement == null);
   }
 
   void deactivate() {
