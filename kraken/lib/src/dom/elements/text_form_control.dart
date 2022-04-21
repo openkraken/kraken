@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart' hide RenderEditable;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -129,92 +130,6 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
     _textFormControlElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
-
-  @override
-  void copySelection(SelectionChangedCause cause) {
-    super.copySelection(cause);
-    if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar(false);
-
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          break;
-        case TargetPlatform.macOS:
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
-          userUpdateTextEditingValue(
-            TextEditingValue(
-              text: textEditingValue.text,
-              selection: TextSelection.collapsed(offset: textEditingValue.selection.end),
-            ),
-            SelectionChangedCause.toolbar,
-          );
-          break;
-      }
-    }
-  }
-
-  @override
-  void cutSelection(SelectionChangedCause cause) {
-    super.cutSelection(cause);
-    if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
-    }
-  }
-
-  @override
-  Future<void> pasteText(SelectionChangedCause cause) async {
-    super.pasteText(cause);
-    if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
-      hideToolbar();
-    }
-  }
-
-  @override
-  void selectAll(SelectionChangedCause cause) async {
-    super.selectAll(cause);
-    if (cause == SelectionChangedCause.toolbar) {
-      bringIntoView(textEditingValue.selection.extent);
-    }
-  }
-
-  @override
-  void debugAssertLayoutUpToDate() {
-    RenderEditable? editable = _textFormControlElement.renderEditable;
-    assert(editable != null);
-    editable!.debugAssertLayoutUpToDate();
-  }
-
-
-  @override
-  bool get obscureText => _textFormControlElement.obscureText;
-
-  @override
-  bool get readOnly => _textFormControlElement.readOnly;
-
-  @override
-  bool get selectionEnabled => _textFormControlElement.renderEditable?.selectionEnabled ?? false;
-
-  @override
-  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    if (newValue == textEditingValue) {
-      return;
-    }
-
-    RenderEditable? renderEditable = _textFormControlElement.renderEditable;
-    if (renderEditable != null) {
-      renderEditable.textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
-    }
-  }
-
-  @override
-  TextLayoutMetrics get textLayoutMetrics => _textFormControlElement.renderEditable!;
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
@@ -227,14 +142,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     textSelectionDelegate = EditableTextDelegate(this);
     _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
     _scrollable = KrakenScrollable(
-      axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right
+        axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right
     );
     scrollOffset = _scrollable.position;
   }
-
-  // The [TextEditableActionTarget] used to apply actions.
-  // See also widgets/text_control.dart
-  Object? textEditingActionTarget;
 
   bool isMultiline;
   int? get _maxLines {
@@ -286,9 +197,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextSpan get placeholderTextSpan {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
-      text: placeholderText,
-      // The color of placeholder.
-      color: Color.fromARGB(255, 169, 169, 169)
+        text: placeholderText,
+        // The color of placeholder.
+        color: Color.fromARGB(255, 169, 169, 169)
     );
   }
 
@@ -305,6 +216,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   }
 
   static String obscuringCharacter = '•';
+
 
   int get width => int.tryParse(getAttribute('width') ?? '') ?? 0;
   set width(int value) {
@@ -565,18 +477,18 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void _onStyleChanged(String property, String? original, String present) {
     // Need to rebuild text span when text related style changed.
     if (property == COLOR
-      || property == FONT_WEIGHT
-      || property == FONT_STYLE
-      || property == FONT_FAMILY
-      || property == FONT_SIZE
-      || property == LINE_HEIGHT
-      || property == LETTER_SPACING
-      || property == WORD_SPACING
-      || property == WHITE_SPACE
-      || property == TEXT_DECORATION_LINE
-      || property == TEXT_DECORATION_COLOR
-      || property == TEXT_DECORATION_STYLE
-      || property == TEXT_SHADOW
+        || property == FONT_WEIGHT
+        || property == FONT_STYLE
+        || property == FONT_FAMILY
+        || property == FONT_SIZE
+        || property == LINE_HEIGHT
+        || property == LETTER_SPACING
+        || property == WORD_SPACING
+        || property == WHITE_SPACE
+        || property == TEXT_DECORATION_LINE
+        || property == TEXT_DECORATION_COLOR
+        || property == TEXT_DECORATION_STYLE
+        || property == TEXT_SHADOW
     ) {
       _rebuildTextSpan();
     }
@@ -601,12 +513,12 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   TextSpan _buildTextSpan({ String? text, Color? color }) {
     return CSSTextMixin.createTextSpan(text ?? '', renderStyle,
-      color: color,
-      // For multiline editing, lineHeight works for inner text in the element,
-      // so it needs to set line-height of textSpan for RenderEditable to use.
-      height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
-      : null
+        color: color,
+        // For multiline editing, lineHeight works for inner text in the element,
+        // so it needs to set line-height of textSpan for RenderEditable to use.
+        height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
+            ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
+            : null
     );
   }
 
@@ -626,14 +538,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   // cause RenderEditable does not expose textPainter.
   Size getTextSize() {
     TextPainter textPainter = TextPainter(
-      text: renderEditable!.text,
-      maxLines: _maxLines,
-      textDirection: TextDirection.ltr
+        text: renderEditable!.text,
+        maxLines: _maxLines,
+        textDirection: TextDirection.ltr
     );
 
     double maxWidth = isMultiline
-      ? renderEditable!.size.width
-      : double.infinity;
+        ? renderEditable!.size.width
+        : double.infinity;
 
     textPainter.layout(maxWidth: maxWidth);
 
@@ -649,11 +561,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       locale: CSSText.getLocale(),
     );
     TextPainter painter = TextPainter(
-      text: TextSpan(
-        text: '0',
-        style: textStyle,
-      ),
-      textDirection: TextDirection.ltr
+        text: TextSpan(
+          text: '0',
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr
     );
     painter.layout();
 
@@ -705,7 +617,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
     } else if (event.type == EVENT_TOUCH_MOVE ||
-      event.type == EVENT_TOUCH_END
+        event.type == EVENT_TOUCH_END
     ) {
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
@@ -716,7 +628,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       // Disable text selection and enable scrolling when text size is larger than
       // text form control element size.
       if ((!isMultiline && (_textSize!.width > renderEditable!.size.width))
-       || (isMultiline && (_textSize!.height > renderEditable!.size.height))) {
+          || (isMultiline && (_textSize!.height > renderEditable!.size.height))) {
         return;
       }
 
@@ -773,8 +685,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       obscureText: obscureText,
       autocorrect: autoCorrect,
       inputAction: _textInputType == TextInputType.multiline
-        ? TextInputAction.newline
-        : _textInputAction,
+          ? TextInputAction.newline
+          : _textInputAction,
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
@@ -878,9 +790,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void performAction(TextInputAction action) {
     switch (action) {
       case TextInputAction.newline:
-        // If this is a multiline EditableText, do nothing for a "newline"
-        // action; The newline is already inserted. Otherwise, finalize
-        // editing.
+      // If this is a multiline EditableText, do nothing for a "newline"
+      // action; The newline is already inserted. Otherwise, finalize
+      // editing.
         if (!isMultiline)
           blur();
         break;
@@ -888,37 +800,37 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         blur();
         break;
       case TextInputAction.none:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.unspecified:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.go:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.search:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.send:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.next:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.previous:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.continueAction:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.join:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.route:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
       case TextInputAction.emergencyCall:
-        // TODO: Handle this case.
+      // TODO: Handle this case.
         break;
     }
   }
@@ -994,9 +906,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // changed. Also, the user long pressing should always send a selection change
     // as well.
     if (selectionChanged ||
-      (userInteraction &&
-      (cause == SelectionChangedCause.longPress ||
-        cause == SelectionChangedCause.keyboard))) {
+        (userInteraction &&
+            (cause == SelectionChangedCause.longPress ||
+                cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(value.selection, cause);
     }
 
@@ -1144,7 +1056,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   @override
   void updateEditingValue(TextEditingValue value) {
-     _lastKnownRemoteTextEditingValue = value;
+    _lastKnownRemoteTextEditingValue = value;
 
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
@@ -1209,7 +1121,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         textInputType = TextInputType.text;
         _enablePassword();
         break;
-      // @TODO: more types.
+    // @TODO: more types.
     }
   }
 
@@ -1328,10 +1240,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     if (!isMultiline) {
       additionalOffset = rect.width >= editableSize.width
       // Center `rect` if it's oversized.
-        ? editableSize.width / 2 - rect.center.dx
+          ? editableSize.width / 2 - rect.center.dx
       // Valid additional offsets range from (rect.right - size.width)
       // to (rect.left). Pick the closest one if out of range.
-        : 0.0.clamp(rect.right - editableSize.width, rect.left);
+          : 0.0.clamp(rect.right - editableSize.width, rect.left);
       unitOffset = const Offset(1, 0);
     } else {
       // The caret is vertically centered within the line. Expand the caret's
@@ -1344,15 +1256,15 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
-        ? editableSize.height / 2 - expandedRect.center.dy
-        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
+          ? editableSize.height / 2 - expandedRect.center.dy
+          : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }
 
     // No over scrolling when encountering tall fonts/scripts that extend past
     // the ascent.
     final double targetOffset = (additionalOffset + _scrollable.position!.pixels)
-      .clamp(
+        .clamp(
       _scrollable.position!.minScrollExtent,
       _scrollable.position!.maxScrollExtent,
     );
@@ -1451,11 +1363,4 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // TODO: implement showAutocorrectionPromptRect
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
-
-  @override
-  void dispose() {
-    textEditingActionTarget = null;
-    super.dispose();
-  }
 }
-

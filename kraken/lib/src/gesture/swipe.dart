@@ -166,7 +166,7 @@ class SwipeGestureRecognizer extends OneSequenceGestureRecognizer {
   /// inertia, for example.
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
 
     return ((_direction == DIRECTION_LEFT || _direction == DIRECTION_RIGHT) && (estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance)
     || (_direction == DIRECTION_UP || _direction == DIRECTION_DOWN) && (estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance));
