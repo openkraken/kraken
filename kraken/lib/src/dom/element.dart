@@ -765,6 +765,26 @@ abstract class Element
     renderBoxModel = null;
   }
 
+  void applyStyle() {
+    _applyStyle(style);
+
+    if (renderer != null) {
+      // Flush pending style before child attached.
+      style.flushPendingProperties();
+    }
+  }
+
+  void ensureChildApplyStyle() {
+    if (isRendererAttached) {
+      for (Node child in childNodes) {
+        if (child is Element) {
+          child.applyStyle();
+          child.ensureChildApplyStyle();
+        }
+      }
+    }
+  }
+
   @override
   void ensureChildAttached() {
     if (isRendererAttached) {
