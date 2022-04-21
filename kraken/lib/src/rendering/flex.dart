@@ -837,13 +837,13 @@ class RenderFlexLayout extends RenderLayoutBox {
       runMainAxisExtent += childMainAxisExtent;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
 
-      // Calculate baseline extent of layout box.
-      AlignSelf alignSelf = _getAlignSelf(child);
-
       // Vertical align is only valid for inline box.
       // Baseline alignment in column direction behave the same as flex-start.
-      if (_isHorizontalFlexDirection && (alignSelf == AlignSelf.baseline ||
-        renderStyle.alignItems == AlignItems.baseline)) {
+      AlignSelf alignSelf = _getAlignSelf(child);
+      bool isBaselineAlign = alignSelf == AlignSelf.baseline
+        || renderStyle.alignItems == AlignItems.baseline;
+
+      if (_isHorizontalFlexDirection && isBaselineAlign) {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
         double? childMarginTop = 0;
@@ -1229,73 +1229,9 @@ class RenderFlexLayout extends RenderLayoutBox {
         while (_resolveFlexibleLengths(metrics, totalFlexFactor, initialFreeSpace)) {}
       }
 
-      // Cross axis size of children after flexible length resolved.
-      double crossAxisExtent = 0;
-
-//      double maxSizeAboveBaseline = 0;
-//      double maxSizeBelowBaseline = 0;
-
-      for (_RunChild runChild in runChildrenList) {
-        RenderBox child = runChild.child;
-        double childMainSize = _isHorizontalFlexDirection
-          ? child.size.width
-          : child.size.height;
-        double childCrossSize = _isHorizontalFlexDirection
-          ? child.size.height
-          : child.size.width;
-        double childCrossMargin = 0;
-        if (child is RenderBoxModel) {
-          childCrossMargin = _isHorizontalFlexDirection
-            ? child.renderStyle.marginTop.computedValue + child.renderStyle.marginBottom.computedValue
-            : child.renderStyle.marginLeft.computedValue + child.renderStyle.marginRight.computedValue;
-        }
-        double childCrossExtent = childCrossSize + childCrossMargin;
-
-        if (runChild.flexedMainSize != childMainSize
-          && child is RenderReplaced
-          && child.renderStyle.aspectRatio != null
-        ) {
-          double childAspectRatio = child.renderStyle.aspectRatio!;
-          if (_isHorizontalFlexDirection && child.renderStyle.height.isAuto) {
-            childCrossSize = runChild.flexedMainSize / childAspectRatio;
-          } else if (!_isHorizontalFlexDirection && child.renderStyle.width.isAuto) {
-            childCrossSize = runChild.flexedMainSize * childAspectRatio;
-          }
-          childCrossExtent = childCrossSize + childCrossMargin;
-        }
-
-//        if (_isHorizontalFlexDirection && (alignSelf == AlignSelf.baseline ||
-//          renderStyle.alignItems == AlignItems.baseline)) {
-//          // Distance from top to baseline of child
-//          double childAscent = _getChildAscent(child);
-//          double? childMarginTop = 0;
-//          double? childMarginBottom = 0;
-//          if (child is RenderBoxModel) {
-//            childMarginTop = child.renderStyle.marginTop.computedValue;
-//            childMarginBottom = child.renderStyle.marginBottom.computedValue;
-//          }
-//          maxSizeAboveBaseline = math.max(
-//            childAscent,
-//            maxSizeAboveBaseline,
-//          );
-//          maxSizeBelowBaseline = math.max(
-//            childMarginTop +
-//              childMarginBottom +
-//              childSize!.height -
-//              childAscent,
-//            maxSizeBelowBaseline,
-//          );
-//          childCrossExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
-//        }
-
-        crossAxisExtent = math.max(
-          crossAxisExtent,
-          childCrossExtent
-        );
-      }
-
-      // Update run metrics after child size has been adjusted.
-      metrics.crossAxisExtent = crossAxisExtent;
+      // Update run cross axis extent after flex item main size is adjusted which may
+      // affect its cross size such as replaced element.
+      metrics.crossAxisExtent = _recomputeRunCrossExtent(metrics);
 
       // Main axis size of children after child layouted.
       double mainAxisExtent = 0;
@@ -1388,9 +1324,88 @@ class RenderFlexLayout extends RenderLayoutBox {
             childLayoutStart.microsecondsSinceEpoch);
         }
       }
-      // Update run metrics after child size has been adjusted.
+
+      // Update run main axis extent after child is relayouted.
       metrics.mainAxisExtent = mainAxisExtent;
     }
+  }
+
+  // Adjust flex line cross extent caused by flex item stretch due to alignment properties
+  // in the cross axis (align-items/align-self).
+  double _recomputeRunCrossExtent(_RunMetrics metrics) {
+    final Map<int?, _RunChild> runChildren = metrics.runChildren;
+    final List<_RunChild> runChildrenList = runChildren.values.toList();
+
+    double runCrossAxisExtent = 0;
+
+    double maxSizeAboveBaseline = 0;
+    double maxSizeBelowBaseline = 0;
+
+    for (_RunChild runChild in runChildrenList) {
+      RenderBox child = runChild.child;
+      double childMainSize = _isHorizontalFlexDirection
+        ? child.size.width
+        : child.size.height;
+      double childCrossSize = _isHorizontalFlexDirection
+        ? child.size.height
+        : child.size.width;
+      double childCrossMargin = 0;
+      if (child is RenderBoxModel) {
+        childCrossMargin = _isHorizontalFlexDirection
+          ? child.renderStyle.marginTop.computedValue + child.renderStyle.marginBottom.computedValue
+          : child.renderStyle.marginLeft.computedValue + child.renderStyle.marginRight.computedValue;
+      }
+      double childCrossExtent = childCrossSize + childCrossMargin;
+
+      if (runChild.flexedMainSize != childMainSize
+        && child is RenderReplaced
+        && child.renderStyle.aspectRatio != null
+      ) {
+        double childAspectRatio = child.renderStyle.aspectRatio!;
+        if (_isHorizontalFlexDirection && child.renderStyle.height.isAuto) {
+          childCrossSize = runChild.flexedMainSize / childAspectRatio;
+        } else if (!_isHorizontalFlexDirection && child.renderStyle.width.isAuto) {
+          childCrossSize = runChild.flexedMainSize * childAspectRatio;
+        }
+        childCrossExtent = childCrossSize + childCrossMargin;
+      }
+
+      // Vertical align is only valid for inline box.
+      // Baseline alignment in column direction behave the same as flex-start.
+      AlignSelf alignSelf = _getAlignSelf(child);
+      bool isBaselineAlign = alignSelf == AlignSelf.baseline
+        || renderStyle.alignItems == AlignItems.baseline;
+
+      if (_isHorizontalFlexDirection && isBaselineAlign) {
+        // Distance from top to baseline of child
+        double childAscent = _getChildAscent(child);
+        double? childMarginTop = 0;
+        double? childMarginBottom = 0;
+        if (child is RenderBoxModel) {
+          childMarginTop = child.renderStyle.marginTop.computedValue;
+          childMarginBottom = child.renderStyle.marginBottom.computedValue;
+        }
+        maxSizeAboveBaseline = math.max(
+          childAscent,
+          maxSizeAboveBaseline,
+        );
+        maxSizeBelowBaseline = math.max(
+          childMarginTop +
+            childMarginBottom +
+            childCrossSize -
+            childAscent,
+          maxSizeBelowBaseline,
+        );
+        runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
+      } else {
+        runCrossAxisExtent = math.max(
+          runCrossAxisExtent,
+          childCrossExtent
+        );
+      }
+    }
+
+    return runCrossAxisExtent;
   }
 
   // Get constraints of flex items which needs to change size due to
