@@ -143,8 +143,7 @@ describe('block-replaced', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: Inline replaced element not stretch according to intrinsic ratio.
-  xit('height-003', async () => {
+  it('height-003', async () => {
     let p;
     let div;
     p = createElement(
@@ -204,8 +203,9 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
   it('height-004-ref', async () => {
     let p;
     let div;
