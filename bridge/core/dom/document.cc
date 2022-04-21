@@ -125,6 +125,11 @@ Node* Document::Clone(Document&, CloneChildrenFlag) const {
   return nullptr;
 }
 
+void Document::InitDocumentElement() {
+  ExceptionState exception_state;
+  AppendChild(document_element_, exception_state);
+}
+
 HTMLBodyElement* Document::body() const {
   if (!IsA<HTMLHtmlElement>(documentElement()))
     return nullptr;
@@ -147,6 +152,7 @@ HTMLHeadElement* Document::head() const {
 }
 
 void Document::Trace(GCVisitor* visitor) const {
+  visitor->Trace(document_element_);
   ContainerNode::Trace(visitor);
 }
 

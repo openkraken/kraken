@@ -5,6 +5,7 @@
 
 #include "script_value.h"
 #include <vector>
+#include "cppgc/gc_visitor.h"
 #include "core/executing_context.h"
 #include "foundation/native_value_converter.h"
 #include "native_string_utils.h"

@@ -3,6 +3,7 @@
  */
 
 #include "child_node_list.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 
 namespace kraken {
 

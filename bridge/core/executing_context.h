@@ -20,7 +20,6 @@
 #include "bindings/qjs/pending_promises.h"
 #include "bindings/qjs/rejected_promises.h"
 #include "bindings/qjs/script_value.h"
-#include "bindings/qjs/script_wrappable.h"
 #include "foundation/macros.h"
 #include "foundation/ui_command_buffer.h"
 

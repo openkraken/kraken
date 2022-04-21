@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_ELEMENT_H
 #define KRAKENBRIDGE_ELEMENT_H
 
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 #include "container_node.h"
 #include "legacy/bounding_client_rect.h"
 #include "legacy/element_attributes.h"
@@ -18,6 +18,7 @@ class Element : public ContainerNode {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  using ImplType = Element*;
   Element(const AtomicString& tag_name, Document* document, ConstructionType = kCreateElement);
 
   ElementAttributes* attributes() const { return attributes_; }
@@ -85,7 +86,7 @@ class Element : public ContainerNode {
   void _didModifyAttribute(const AtomicString& name, const AtomicString& oldId, const AtomicString& newId);
   void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
-  ElementAttributes* attributes_{nullptr};
+  Member<ElementAttributes> attributes_;
   AtomicString tag_name_ = AtomicString::Empty(ctx());
 };
 

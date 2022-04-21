@@ -4,7 +4,7 @@
  */
 
 #include "dom_timer.h"
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 #include "bindings/qjs/qjs_engine_patch.h"
 #include "core/executing_context.h"
 

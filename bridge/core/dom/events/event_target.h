@@ -9,9 +9,11 @@
 #include "bindings/qjs/js_event_listener.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/cppgc/member.h"
 #include "core/dom/binding_object.h"
 #include "event_listener_map.h"
 #include "foundation/native_string.h"
+#include "qjs_add_event_listener_options.h"
 
 #if UNIT_TEST
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);
@@ -21,9 +23,6 @@ void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, 
 #define SetPropertyMagic "%s"
 
 namespace kraken {
-
-class AddEventListenerOptions;
-class EventListenerOptions;
 
 enum class DispatchEventResult {
   // Event was not canceled by event handler or default event handler.

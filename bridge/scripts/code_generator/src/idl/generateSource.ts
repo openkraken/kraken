@@ -108,8 +108,18 @@ export function generateTypeConverter(type: ParameterType[]): string {
 
 function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
   let type = generateTypeConverter(argument.type);
-  return `auto&& args_${argument.name} = Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state);
-if (exception_state.HasException()) {
+
+  let hasArgumentCheck = type.indexOf('Element') >= 0 || type.indexOf('Node') >=0 || type === 'EventTarget';
+
+  let body = '';
+  if (hasArgumentCheck) {
+    body = `Converter<${type}>::ArgumentsValue(context, argv[${argsIndex}], ${argsIndex}, exception_state)`
+  } else {
+    body = `Converter<${type}>::FromValue(ctx, argv[${argsIndex}], exception_state)`;
+  }
+
+  return `auto&& args_${argument.name} = ${body};
+if (UNLIKELY(exception_state.HasException())) {
   return exception_state.ToQuickJS();
 }`;
 }
@@ -134,7 +144,7 @@ ${returnValueAssignment} self->${generateCallMethodName(declare.name)}(${[...pre
 
 
   return `auto&& args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
-if (exception_state.HasException()) {
+if (UNLIKELY(exception_state.HasException())) {
   return exception_state.ToQuickJS();
 }
 
@@ -261,7 +271,7 @@ function generateFunctionBody(blob: IDLBlob, declare: FunctionDeclaration, optio
 ${addIndent(callBody, 4)}
   } while (false);
 
-  if (exception_state.HasException()) {
+  if (UNLIKELY(exception_state.HasException())) {
     return exception_state.ToQuickJS();
   }
   return ${returnValueResult};

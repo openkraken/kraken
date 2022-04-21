@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_LOCATION_H
 #define KRAKENBRIDGE_LOCATION_H
 
+#include "bindings/qjs/cppgc/garbage_collected.h"
 #include "bindings/qjs/executing_context.h"
-#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/wrapper_type_info.h"
 
 namespace kraken {

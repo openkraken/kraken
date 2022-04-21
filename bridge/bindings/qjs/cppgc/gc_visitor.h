@@ -8,6 +8,7 @@
 
 #include <quickjs/quickjs.h>
 #include "foundation/macros.h"
+#include "member.h"
 
 namespace kraken {
 
@@ -21,7 +22,13 @@ class GCVisitor final {
  public:
   explicit GCVisitor(JSRuntime* rt, JS_MarkFunc* markFunc) : runtime_(rt), markFunc_(markFunc){};
 
-  void Trace(ScriptWrappable* target);
+  template<typename T>
+  void Trace(const Member<T>& target) {
+    if (target.Get() != nullptr) {
+      JS_MarkValue(runtime_, target.Get()->jsObject_, markFunc_);
+    }
+  };
+
   void Trace(JSValue value);
 
  private:

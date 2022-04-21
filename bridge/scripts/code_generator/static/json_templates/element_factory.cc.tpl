@@ -10,7 +10,7 @@
 #include "html_element_factory.h"
 #include <unordered_map>
 #include "html_names.h"
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 
 <% _.forEach(data, (item, index) => { %>
   <% if (_.isString(item)) { %>

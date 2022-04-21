@@ -13,6 +13,7 @@ class HTMLDivElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  using ImplType  = HTMLDivElement*;
   explicit HTMLDivElement(Document&);
 
  private:

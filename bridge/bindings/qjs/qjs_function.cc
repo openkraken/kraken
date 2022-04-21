@@ -5,6 +5,7 @@
 
 #include "qjs_function.h"
 #include <algorithm>
+#include "cppgc/gc_visitor.h"
 
 namespace kraken {
 

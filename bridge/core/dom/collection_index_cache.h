@@ -7,7 +7,7 @@
 
 #include <assert.h>
 #include <climits>
-#include "bindings/qjs/gc_visitor.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 #include "foundation/macros.h"
 
 namespace kraken {
@@ -46,7 +46,7 @@ class CollectionIndexCache {
   virtual void Trace(GCVisitor* visitor) const { visitor->Trace(current_node_); }
 
  protected:
-  FORCE_INLINE NodeType* CachedNode() const { return current_node_; }
+  FORCE_INLINE NodeType* CachedNode() const { return current_node_.Get(); }
   FORCE_INLINE unsigned CachedNodeIndex() const {
     assert(CachedNode());
     return cached_node_index_;
@@ -68,7 +68,7 @@ class CollectionIndexCache {
   NodeType* NodeBeforeCachedNode(const Collection&, unsigned index);
   NodeType* NodeAfterCachedNode(const Collection&, unsigned index);
 
-  NodeType* current_node_;
+  Member<NodeType> current_node_;
   unsigned cached_node_count_;
   unsigned cached_node_index_ : 31;
   unsigned is_length_cache_valid_ : 1;

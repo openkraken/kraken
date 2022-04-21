@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 #define KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 
-#include <assert.h>
+#include <cassert>
 #include <quickjs/quickjs.h>
 #include "bindings/qjs/qjs_engine_patch.h"
 

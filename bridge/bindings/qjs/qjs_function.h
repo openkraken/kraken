@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_QJS_FUNCTION_H
 #define KRAKENBRIDGE_QJS_FUNCTION_H
 
-#include "garbage_collected.h"
 #include "script_value.h"
 
 namespace kraken {

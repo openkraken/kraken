@@ -3,7 +3,8 @@
  */
 
 #include "container_node.h"
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 #include "document.h"
 #include "document_fragment.h"
 #include "node_traversal.h"
@@ -418,9 +419,11 @@ void ContainerNode::NotifyNodeRemoved(Node& root) {
 }
 
 void ContainerNode::Trace(GCVisitor* visitor) const {
-  for (Node& node : NodeTraversal::ChildrenOf(*this)) {
-    visitor->Trace(&node);
-  }
+//  for (Node& node : NodeTraversal::ChildrenOf(*this)) {
+//    visitor->Trace(&node);
+//  }
+  visitor->Trace(first_child_);
+  visitor->Trace(last_child_);
 
   Node::Trace(visitor);
 }

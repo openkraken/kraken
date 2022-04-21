@@ -14,6 +14,7 @@ class HTMLBodyElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  using ImplType  = HTMLBodyElement*;
   explicit HTMLBodyElement(Document&);
 };
 

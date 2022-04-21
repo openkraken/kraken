@@ -204,7 +204,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/member_installer.h
     bindings/qjs/source_location.cc
     bindings/qjs/source_location.h
-    bindings/qjs/garbage_collected.h
+    bindings/qjs/cppgc/garbage_collected.h
+    bindings/qjs/cppgc/gc_visitor.cc
+    bindings/qjs/cppgc/gc_visitor.h
+    bindings/qjs/cppgc/member.h
+    bindings/qjs/cppgc/member.cc
     bindings/qjs/script_wrappable.cc
     bindings/qjs/script_wrappable.h
     bindings/qjs/wrapper_type_info.h
@@ -231,16 +235,12 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/exception_state.h
     bindings/qjs/exception_message.cc
     bindings/qjs/exception_message.h
-    bindings/qjs/gc_visitor.cc
-    bindings/qjs/gc_visitor.h
     bindings/qjs/rejected_promises.h
     bindings/qjs/rejected_promises.cc
     bindings/qjs/pending_promises.cc
     bindings/qjs/pending_promises.h
     bindings/qjs/qjs_window.cc
     bindings/qjs/qjs_window.h
-    bindings/qjs/qjs_page.cc
-    bindings/qjs/qjs_page.h
 
     # Core sources
     core/executing_context.cc

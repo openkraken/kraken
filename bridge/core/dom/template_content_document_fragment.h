@@ -5,7 +5,7 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_TEMPLATE_CONTENT_DOCUMENT_FRAGMENT_H_
 #define KRAKENBRIDGE_CORE_DOM_TEMPLATE_CONTENT_DOCUMENT_FRAGMENT_H_
 
-#include "bindings/qjs/gc_visitor.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 #include "document_fragment.h"
 #include "element.h"
 
@@ -16,7 +16,7 @@ class TemplateContentDocumentFragment final : public DocumentFragment {
   TemplateContentDocumentFragment(Document& document, Element* host)
       : DocumentFragment(&document, kCreateDocumentFragment), host_(host) {}
 
-  Element* Host() const { return host_; }
+  Element* Host() const { return host_.Get(); }
 
   void Trace(GCVisitor* visitor) const override {
     visitor->Trace(host_);
@@ -25,7 +25,7 @@ class TemplateContentDocumentFragment final : public DocumentFragment {
 
  private:
   bool IsTemplateContent() const override { return true; }
-  Element* host_;
+  Member<Element> host_;
 };
 
 }  // namespace kraken

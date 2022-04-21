@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_DICTIONARY_BASE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_DICTIONARY_BASE_H_
 
-#include "garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 
 namespace kraken {
 

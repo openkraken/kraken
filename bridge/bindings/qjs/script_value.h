@@ -13,13 +13,13 @@
 #include "exception_state.h"
 #include "foundation/macros.h"
 #include "foundation/native_string.h"
-#include "gc_visitor.h"
 
 namespace kraken {
 
 class ExecutingContext;
 class WrapperTypeInfo;
 class NativeValue;
+class GCVisitor;
 
 // ScriptValue is a stack allocate only QuickJS JSValue wrapper ScriptValuewhich hold all information to hide out
 // QuickJS running details.

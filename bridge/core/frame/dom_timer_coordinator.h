@@ -9,7 +9,6 @@
 #include <quickjs/quickjs.h>
 #include <unordered_map>
 #include <vector>
-#include "bindings/qjs/gc_visitor.h"
 
 namespace kraken {
 

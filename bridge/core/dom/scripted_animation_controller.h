@@ -6,7 +6,7 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_BOM_SCRIPT_ANIMATION_CONTROLLER_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_BOM_SCRIPT_ANIMATION_CONTROLLER_H_
 
-#include "bindings/qjs/garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 #include "frame_request_callback_collection.h"
 
 namespace kraken {

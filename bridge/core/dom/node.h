@@ -67,8 +67,8 @@ class Node : public EventTarget {
 
   ContainerNode* parentNode() const;
   Element* parentElement() const;
-  Node* previousSibling() const { return previous_; }
-  Node* nextSibling() const { return next_; }
+  Node* previousSibling() const { return previous_.Get(); }
+  Node* nextSibling() const { return next_.Get(); }
   NodeList* childNodes();
   Node* firstChild() const;
   Node* lastChild() const;
@@ -291,15 +291,15 @@ class Node : public EventTarget {
 
  private:
   uint32_t node_flags_;
-  Node* parent_or_shadow_host_node_;
-  Node* previous_;
-  Node* next_;
+  Member<Node> parent_or_shadow_host_node_;
+  Member<Node> previous_;
+  Member<Node> next_;
   TreeScope* tree_scope_;
   std::unique_ptr<NodeData> data_;
 };
 
 inline ContainerNode* Node::ParentOrShadowHostNode() const {
-  return reinterpret_cast<ContainerNode*>(parent_or_shadow_host_node_);
+  return reinterpret_cast<ContainerNode*>(parent_or_shadow_host_node_.Get());
 }
 
 inline void Node::SetParentOrShadowHostNode(ContainerNode* parent) {

@@ -7,12 +7,13 @@
 #define KRAKENBRIDGE_SCRIPT_WRAPPABLE_H
 
 #include <quickjs/quickjs.h>
-#include "garbage_collected.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
 #include "wrapper_type_info.h"
 
 namespace kraken {
 
 class ScriptValue;
+class GCVisitor;
 
 // Defines |GetWrapperTypeInfo| virtual method which returns the WrapperTypeInfo
 // of the instance. Also declares a static member of type WrapperTypeInfo, of

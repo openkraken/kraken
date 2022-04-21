@@ -24,19 +24,6 @@
 #include "idl_type.h"
 #include "js_event_listener.h"
 #include "native_string_utils.h"
-#include "qjs_add_event_listener_options.h"
-#include "qjs_document.h"
-#include "qjs_element_attributes.h"
-#include "qjs_error_event_init.h"
-#include "qjs_event_init.h"
-#include "qjs_event_listener_options.h"
-#include "qjs_html_body_element.h"
-#include "qjs_html_div_element.h"
-#include "qjs_html_element.h"
-#include "qjs_html_head_element.h"
-#include "qjs_html_html_element.h"
-#include "qjs_node.h"
-#include "qjs_scroll_to_options.h"
 
 namespace kraken {
 
@@ -56,6 +43,16 @@ struct Converter<IDLOptional<T>, std::enable_if_t<std::is_pointer<typename Conve
       return nullptr;
     }
     return Converter<T>::FromValue(ctx, value, exception);
+  }
+
+  static ImplType ArgumentsValue(ExecutingContext* context,
+                                 JSValue value,
+                                 uint32_t argv_index,
+                                 ExceptionState& exception_state) {
+    if (JS_IsUndefined(value)) {
+      return nullptr;
+    }
+    return Converter<T>::ArgumentsValue(context, value, argv_index, exception_state);
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
@@ -78,6 +75,16 @@ struct Converter<IDLNullable<T>, std::enable_if_t<std::is_pointer<typename Conve
       return nullptr;
     }
     return Converter<T>::FromValue(ctx, value, exception_state);
+  }
+
+  static ImplType ArgumentsValue(ExecutingContext* context,
+                                 JSValue value,
+                                 uint32_t argv_index,
+                                 ExceptionState& exception_state) {
+    if (JS_IsNull(value)) {
+      return nullptr;
+    }
+    return Converter<T>::ArgumentsValue(context, value, argv_index, exception_state);
   }
 
   static JSValue ToValue(JSContext* ctx, typename Converter<T>::ImplType value) {
@@ -354,71 +361,6 @@ struct Converter<BlobPropertyBag> : public ConverterBase<BlobPropertyBag> {
   }
 };
 
-// EventListener
-// template <>
-// struct Converter<EventListener> : public ConverterBase<EventListener> {
-//  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-//    assert(!JS_IsException(value));
-//    if (!JS_IsFunction(ctx, value)) {
-//      return nullptr;
-//    }
-//
-//    return EventListener::Create(ctx, value);
-//  }
-//};
-//
-// template <>
-// struct Converter<IDLNullable<EventListener>> : public ConverterBase<EventListener> {
-//  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-//    assert(!JS_IsException(value));
-//    if (JS_IsNull(value)) {
-//      return nullptr;
-//    }
-//
-//    return Converter<EventListener>::FromValue(ctx, value, exception_state);
-//  }
-//};
-
-template <>
-struct Converter<EventTarget> : public ConverterBase<EventTarget> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    return toScriptWrappable<EventTarget>(value);
-  }
-
-  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
-};
-
-template <>
-struct Converter<IDLNullable<EventTarget>> : public ConverterBase<EventTarget> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    if (JS_IsNull(value)) {
-      return nullptr;
-    }
-
-    assert(!JS_IsException(value));
-    return Converter<EventTarget>::FromValue(ctx, value, exception_state);
-  }
-
-  static JSValue ToValue(JSContext* ctx, ImplType value) {
-    if (value == nullptr)
-      return JS_NULL;
-    return Converter<EventTarget>::ToValue(ctx, value);
-  }
-};
-
-template <>
-struct Converter<Event> : public ConverterBase<Event> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    return toScriptWrappable<Event>(value);
-  }
-
-  static JSValue ToValue(JSContext* ctx, ImplType value) {
-    return reinterpret_cast<ScriptWrappable*>(value)->ToQuickJS();
-  }
-};
-
 template <>
 struct Converter<JSEventListener> : public ConverterBase<JSEventListener> {
   static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
@@ -439,86 +381,39 @@ struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventLis
   }
 };
 
-template <>
-struct Converter<EventInit> : public ConverterBase<EventInit> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+// DictionaryBase and Derived class.
+template<typename T>
+struct Converter<T, typename std::enable_if_t<std::is_base_of<DictionaryBase, T>::value>> : public ConverterBase<T> {
+  static typename T::ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
-    return EventInit::Create(ctx, value, exception_state);
+    return T::Create(ctx, value, exception_state);
   }
 };
 
-template <>
-struct Converter<ErrorEventInit> : public ConverterBase<ErrorEventInit> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+// ScriptWrappable and Derived class.
+template <typename T>
+struct Converter<T, typename std::enable_if_t<std::is_base_of<ScriptWrappable, T>::value>> : public ConverterBase<T> {
+  static T* FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
-    return ErrorEventInit::Create(ctx, value, exception_state);
+    return toScriptWrappable<T>(value);
   }
-};
-
-template <>
-struct Converter<AddEventListenerOptions> : public ConverterBase<AddEventListenerOptions> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+  static T* ArgumentsValue(ExecutingContext* context,
+                          JSValue value,
+                          uint32_t argv_index,
+                          ExceptionState& exception_state) {
     assert(!JS_IsException(value));
-    return AddEventListenerOptions::Create(ctx, value, exception_state);
-  };
-};
-
-template <>
-struct Converter<EventListenerOptions> : public ConverterBase<EventListenerOptions> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    return EventListenerOptions::Create(ctx, value, exception_state);
+    const WrapperTypeInfo* wrapper_type_info = Node::GetStaticWrapperTypeInfo();
+    if (JS_IsInstanceOf(context->ctx(), value, context->contextData()->constructorForType(wrapper_type_info))) {
+      return FromValue(context->ctx(), value, exception_state);
+    }
+    exception_state.ThrowException(context->ctx(), ErrorType::TypeError,
+                                   ExceptionMessage::ArgumentNotOfType(argv_index,
+                                   wrapper_type_info->className));
+    return nullptr;
   }
+  static JSValue ToValue(JSContext* ctx, T* value) { return value->ToQuickJS(); }
 };
 
-#define DEFINE_SCRIPT_WRAPPABLE_CONVERTER(class_name)                                                                \
-  template <>                                                                                                        \
-  struct Converter<class_name> : public ConverterBase<class_name> {                                                  \
-    static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {                      \
-      assert(!JS_IsException(value));                                                                                \
-      return toScriptWrappable<class_name>(JS_DupValue(ctx, value));                                                 \
-    }                                                                                                                \
-    static ImplType ArgumentsValue(ExecutingContext* context,                                                        \
-                                   JSValue value,                                                                    \
-                                   uint32_t argv_index,                                                              \
-                                   ExceptionState& exception_state) {                                                \
-      assert(!JS_IsException(value));                                                                                \
-      if (QJS##class_name::HasInstance(context, value)) {                                                            \
-        return FromValue(context->ctx(), value, exception_state);                                                    \
-      }                                                                                                              \
-      auto* wrapper_type_info = QJS##class_name::GetWrapperTypeInfo();                                               \
-      exception_state.ThrowException(context->ctx(), ErrorType::TypeError,                                           \
-                                     ExceptionMessage::ArgumentNotOfType(argv_index, wrapper_type_info->className)); \
-      return nullptr;                                                                                                \
-    }                                                                                                                \
-    static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }                            \
-  };
-
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Node);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(Document);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLElement);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLDivElement);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLBodyElement);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLHeadElement);
-DEFINE_SCRIPT_WRAPPABLE_CONVERTER(HTMLHtmlElement);
-
-template <>
-struct Converter<NodeList> : public ConverterBase<NodeList> {
-  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
-};
-
-template <>
-struct Converter<ScrollToOptions> : ConverterBase<ScrollToOptions> {
-  static ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
-    assert(!JS_IsException(value));
-    return ScrollToOptions::Create(ctx, value, exception_state);
-  }
-};
-
-template <>
-struct Converter<ElementAttributes> : ConverterBase<ElementAttributes> {
-  static JSValue ToValue(JSContext* ctx, ImplType value) { return value->ToQuickJS(); }
-};
 
 };  // namespace kraken
 

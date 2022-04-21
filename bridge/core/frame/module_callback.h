@@ -7,7 +7,6 @@
 #define KRAKENBRIDGE_MODULE_CALLBACK_H
 
 #include <quickjs/list.h>
-#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_function.h"
 
 namespace kraken {

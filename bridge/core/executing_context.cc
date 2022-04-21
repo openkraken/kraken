@@ -7,7 +7,6 @@
 #include "built_in_string.h"
 #include "core/dom/document.h"
 #include "core/html/html_html_element.h"
-#include "event_type_names.h"
 #include "polyfill.h"
 
 #include "foundation/logging.h"
@@ -65,7 +64,9 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   // Register all built-in native bindings.
   InstallBindings(this);
 
+  // Install document.
   InstallDocument();
+
 
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
@@ -370,10 +371,7 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 
 void ExecutingContext::InstallDocument() {
   document_ = MakeGarbageCollected<Document>(this);
-  HTMLHtmlElement* html_element = MakeGarbageCollected<HTMLHtmlElement>(*document_);
-  ExceptionState exception_state;
-  document_->AppendChild(html_element, exception_state);
-  document_->SetDocumentElement(html_element);
+  document_->InitDocumentElement();
   DefineGlobalProperty("document", document_->ToValue().QJSValue());
 }
 

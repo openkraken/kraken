@@ -6,7 +6,7 @@
 #define KRAKENBRIDGE_CORE_DOM_CONTAINER_NODE_H_
 
 #include <vector>
-#include "bindings/qjs/gc_visitor.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 #include "node.h"
 
 namespace kraken {
@@ -20,10 +20,10 @@ using NodeVector = std::vector<Node*>;
 
 class ContainerNode : public Node {
  public:
-  Node* firstChild() const { return first_child_; }
-  Node* lastChild() const { return last_child_; }
-  bool hasChildren() const { return first_child_; }
-  bool HasChildren() const { return first_child_; }
+  Node* firstChild() const { return first_child_.Get(); }
+  Node* lastChild() const { return last_child_.Get(); }
+  bool hasChildren() const { return first_child_.Get(); }
+  bool HasChildren() const { return first_child_.Get(); }
 
   bool HasOneChild() const { return first_child_ && !first_child_->nextSibling(); }
   bool HasOneTextChild() const { return HasOneChild() && first_child_->IsTextNode(); }
@@ -82,8 +82,8 @@ class ContainerNode : public Node {
   inline bool IsChildTypeAllowed(const Node& child) const;
   inline bool IsHostIncludingInclusiveAncestorOfThis(const Node&, ExceptionState&) const;
 
-  Node* first_child_{nullptr};
-  Node* last_child_{nullptr};
+  Member<Node> first_child_;
+  Member<Node> last_child_;
 };
 
 inline Node* Node::firstChild() const {
@@ -102,7 +102,7 @@ inline Node* Node::lastChild() const {
 }
 
 inline bool ContainerNode::HasChildCount(unsigned count) const {
-  Node* child = first_child_;
+  Node* child = first_child_.Get();
   while (count && child) {
     child = child->nextSibling();
     --count;

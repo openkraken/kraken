@@ -6,7 +6,6 @@
 #ifndef KRAKENBRIDGE_MODULE_LISTENER_H
 #define KRAKENBRIDGE_MODULE_LISTENER_H
 
-#include "bindings/qjs/garbage_collected.h"
 #include "bindings/qjs/qjs_function.h"
 
 namespace kraken {

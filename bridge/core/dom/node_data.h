@@ -6,8 +6,8 @@
 #define KRAKENBRIDGE_CORE_DOM_NODE_DATA_H_
 
 #include <cinttypes>
-#include "bindings/qjs/garbage_collected.h"
-#include "bindings/qjs/gc_visitor.h"
+#include "bindings/qjs/cppgc/garbage_collected.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 
 namespace kraken {
 

@@ -11,6 +11,7 @@
 #include "core/dom/document_fragment.h"
 #include "core/dom/text.h"
 #include "tree_scope.h"
+#include "html_element_type_helper.h"
 
 namespace kraken {
 
@@ -46,8 +47,8 @@ class Document : public ContainerNode, public TreeScope {
 
   Node* Clone(Document&, CloneChildrenFlag) const override;
 
-  [[nodiscard]] Element* documentElement() const { return document_element_; }
-  void SetDocumentElement(Element* element) { document_element_ = element; };
+  [[nodiscard]] HTMLHtmlElement* documentElement() const { return DynamicTo<HTMLHtmlElement>(document_element_.Get()); }
+  void InitDocumentElement();
 
   // "body element" as defined by HTML5
   // (https://html.spec.whatwg.org/C/#the-body-element-2).
@@ -66,7 +67,7 @@ class Document : public ContainerNode, public TreeScope {
 
  private:
   int node_count_;
-  Element* document_element_{nullptr};
+  Member<Element> document_element_{MakeGarbageCollected<HTMLHtmlElement>(*this)};
 };
 
 }  // namespace kraken

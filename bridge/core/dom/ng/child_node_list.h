@@ -5,7 +5,7 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_CHILD_NODE_LIST_H_
 #define KRAKENBRIDGE_CORE_DOM_CHILD_NODE_LIST_H_
 
-#include "bindings/qjs/gc_visitor.h"
+#include "bindings/qjs/cppgc/gc_visitor.h"
 #include "core/dom/collection_index_cache.h"
 #include "core/dom/container_node.h"
 #include "node_list.h"
@@ -26,7 +26,7 @@ class ChildNodeList : public NodeList {
 
   // Non-DOM API.
   void InvalidateCache() { collection_index_cache_.Invalidate(); }
-  ContainerNode& OwnerNode() const { return *parent_; }
+  ContainerNode& OwnerNode() const { return *parent_.Get(); }
 
   ContainerNode& RootNode() const { return OwnerNode(); }
 
@@ -43,7 +43,7 @@ class ChildNodeList : public NodeList {
   bool IsChildNodeList() const override { return true; }
   Node* VirtualOwnerNode() const override;
 
-  ContainerNode* parent_;
+  Member<ContainerNode> parent_;
   mutable CollectionIndexCache<ChildNodeList, Node> collection_index_cache_;
 };
 

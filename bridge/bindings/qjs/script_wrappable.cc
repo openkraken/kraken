@@ -5,6 +5,7 @@
 
 #include "script_wrappable.h"
 #include "core/executing_context.h"
+#include "cppgc/gc_visitor.h"
 
 namespace kraken {
 

@@ -13,6 +13,7 @@ class HTMLElement : public Element {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
+  using ImplType = HTMLElement*;
   HTMLElement(const AtomicString& tag_name, Document* document, ConstructionType);
 
  private:

@@ -95,7 +95,7 @@ Node* Node::removeChild(Node* old_child, ExceptionState& exception_state) {
 
 Node* Node::appendChild(Node* new_child, ExceptionState& exception_state) {
   auto* this_node = DynamicTo<ContainerNode>(this);
-  if (this_node)
+  if (LIKELY(this_node))
     return this_node->AppendChild(new_child, exception_state);
 
   exception_state.ThrowException(ctx(), ErrorType::TypeError, "This node type does not support this method.");
@@ -395,6 +395,9 @@ Node::Node(ExecutingContext* context, TreeScope* tree_scope, ConstructionType ty
       data_(nullptr) {}
 
 void Node::Trace(GCVisitor* visitor) const {
+  visitor->Trace(previous_);
+  visitor->Trace(next_);
+  visitor->Trace(parent_or_shadow_host_node_);
   EventTarget::Trace(visitor);
 }
 

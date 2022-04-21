@@ -8,7 +8,6 @@
 
 #include <quickjs/quickjs.h>
 #include "foundation/macros.h"
-#include "gc_visitor.h"
 #include "script_value.h"
 
 namespace kraken {
