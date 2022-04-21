@@ -161,7 +161,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  @mustCallSuper
   void didAttachRenderer() {
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (renderer is RenderBoxModel) {
@@ -170,7 +169,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  @mustCallSuper
   void willDetachRenderer() {
     // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (renderer is RenderBoxModel) {

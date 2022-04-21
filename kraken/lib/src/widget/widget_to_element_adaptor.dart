@@ -194,8 +194,6 @@ abstract class WidgetElement extends dom.Element {
 
   @override
   void didAttachRenderer() {
-    super.didAttachRenderer();
-
     _attachWidget(_widget);
   }
 
