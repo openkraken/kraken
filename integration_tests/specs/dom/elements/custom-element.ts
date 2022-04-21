@@ -83,6 +83,7 @@ describe('custom widget element', () => {
 
     const element = document.createElement('div');
     element.style.backgroundColor = 'red';
+    element.style.textAlign = 'center';
     element.appendChild(document.createTextNode('div element'));
     container.appendChild(element);
 
