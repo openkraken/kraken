@@ -680,7 +680,7 @@ class CSSRenderStyle
         break;
     }
 
-    // Get width by intrinsic ratio for replaced element if width is auto.
+    // Get width by aspect ratio for replaced element if width is auto.
     if (logicalWidth == null && aspectRatio != null) {
       logicalWidth = renderStyle.getWidthByAspectRatio();
     }
@@ -766,7 +766,7 @@ class CSSRenderStyle
       }
     }
 
-    // Get height by intrinsic ratio for replaced element if height is auto.
+    // Get height by aspect ratio for replaced element if height is auto.
     if (logicalHeight == null && aspectRatio != null) {
       logicalHeight = renderStyle.getHeightByAspectRatio();
     }
