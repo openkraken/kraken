@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
 import 'package:kraken/css.dart';
 
 // Position and size info of each run (flex line) in flex layout.
@@ -1865,29 +1864,6 @@ class RenderFlexLayout extends RenderLayoutBox {
       } else {
         return runCrossAxisExtent;
       }
-    }
-  }
-
-  // Get flex line cross size according to flex-wrap style.
-  double _getFlexLineCrossSize2(
-    RenderBox child,
-    double runCrossAxisExtent,
-    double runBetweenSpace,
-  ) {
-    // Flex line of align-content stretch should includes between space.
-    bool isMultiLineStretch = (renderStyle.flexWrap == FlexWrap.wrap ||
-            renderStyle.flexWrap == FlexWrap.wrapReverse) &&
-        renderStyle.alignContent == AlignContent.stretch;
-    // The height of flex line in single line equals to flex container's cross size.
-    bool isSingleLine = (renderStyle.flexWrap != FlexWrap.wrap &&
-        renderStyle.flexWrap != FlexWrap.wrapReverse);
-
-    if (isSingleLine) {
-      return _getContentCrossSize();
-    } else if (isMultiLineStretch) {
-      return runCrossAxisExtent + runBetweenSpace;
-    } else {
-      return runCrossAxisExtent;
     }
   }
 
