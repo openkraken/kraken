@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    - uses: subosito/flutter-action@v1
+    - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
     - run: flutter doctor -v

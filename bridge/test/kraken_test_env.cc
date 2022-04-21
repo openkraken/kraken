@@ -159,6 +159,8 @@ void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 
 void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
+void TEST_onJsLog(int32_t contextId, int32_t level, const char*) {}
+
 #if ENABLE_PROFILE
 NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
   return nullptr;
@@ -313,5 +315,6 @@ void TEST_mockDartMethods(OnJSError onJSError) {
 #endif
 
   mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJSError));
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_onJsLog));
   registerDartMethods(mockMethods.data(), mockMethods.size());
 }

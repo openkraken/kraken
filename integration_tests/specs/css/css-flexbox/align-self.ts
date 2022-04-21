@@ -68,8 +68,7 @@ describe('align-self', () => {
     await snapshot();
   });
 
-  // @TODO: Negative margin offset calculation is wrong.
-  xit('002', async () => {
+  it('002', async () => {
     let test;
     let cover;
     test = createElement(
@@ -425,8 +424,7 @@ describe('align-self', () => {
     await snapshot();
   });
 
-  // @TODO: Negative margin offset calculation is wrong.
-  xit('008', async () => {
+  it('008', async () => {
     let p;
     let test;
     let cover;
@@ -509,8 +507,7 @@ describe('align-self', () => {
     await snapshot();
   });
 
-  // @TODO: Negative margin offset calculation is wrong.
-  xit('009', async () => {
+  it('009', async () => {
     let p;
     let test;
     let top;

@@ -233,7 +233,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.2);
   });
   it('replaced-height-003', async () => {
     let p;
@@ -295,8 +295,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: margin-bottom of position absolute element offset wrong.
-  xit('replaced-height-004', async () => {
+  it('replaced-height-004', async () => {
     let p;
     let div1;
     p = createElement(
@@ -463,7 +462,7 @@ describe('absolute-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.5);
   });
   it('replaced-height-006', async () => {
     let p;
@@ -1362,8 +1361,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: margin-bottom of position absolute element offset wrong.
-  xit('replaced-max-height-004', async () => {
+  it('replaced-max-height-004', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2416,8 +2414,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: margin auto alignment should not take effect on position absolute element.
-  xit('replaced-width-004', async () => {
+  it('replaced-width-004', async () => {
     let p;
     let div1;
     p = createElement(
@@ -2493,7 +2490,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: margin auto alignment should not take effect on position absolute element.
+  // @TODO: Support direction.
   xit('replaced-width-005', async () => {
     let p;
     let div1;
@@ -2646,7 +2643,7 @@ describe('absolute-non', () => {
     await snapshot();
   });
 
-  // @TODO: margin auto alignment should not take effect on position absolute element.
+  // @TODO: Support direction.
   xit('replaced-width-007', async () => {
     let p;
     let div1;
@@ -2777,8 +2774,7 @@ describe('absolute-non', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: margin auto alignment should not take effect on position absolute element. 
-  xit('replaced-width-008', async () => {
+  it('replaced-width-008', async () => {
     let p;
     let containingblock;
     p = createElement(
@@ -4387,6 +4383,6 @@ describe('absolute-non', () => {
     BODY.appendChild(p_1);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.5);
   });
 });

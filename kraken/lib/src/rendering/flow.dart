@@ -248,7 +248,7 @@ class RenderFlowLayout extends RenderLayoutBox {
     _setChildrenOffset(_runMetrics);
 
     // Set the size of scrollable overflow area for flow layout.
-    _setMaxScrollableSize(_runMetrics, children);
+    _setMaxScrollableSize(_runMetrics);
   }
 
   // Layout children in normal flow order to calculate metrics of lines according to its constraints
@@ -400,10 +400,17 @@ class RenderFlowLayout extends RenderLayoutBox {
           extentBelowBaseline,
           maxSizeBelowBaseline,
         );
-        runCrossAxisExtent = math.max(runCrossAxisExtent, maxSizeAboveBaseline + maxSizeBelowBaseline);
-      } else {
-        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+        childCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;
       }
+
+      if (runCrossAxisExtent > 0 && childCrossAxisExtent > 0) {
+        runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
+      } else if (runCrossAxisExtent < 0 && childCrossAxisExtent < 0) {
+        runCrossAxisExtent = math.min(runCrossAxisExtent, childCrossAxisExtent);
+      } else {
+        runCrossAxisExtent = runCrossAxisExtent + childCrossAxisExtent;
+      }
+
       runChildren[childNodeId] = child;
 
       childParentData.runIndex = _runMetrics.length;
@@ -874,7 +881,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   // Set the size of scrollable overflow area for flow layout.
   // https://drafts.csswg.org/css-overflow-3/#scrollable
-  void _setMaxScrollableSize(List<_RunMetrics> runMetrics, List<RenderBox> children) {
+  void _setMaxScrollableSize(List<_RunMetrics> runMetrics) {
     // Scrollable main size collection of each line.
     List<double> scrollableMainSizeOfLines = [];
     // Scrollable cross size collection of each line.
@@ -1082,258 +1089,18 @@ class RenderFlowLayout extends RenderLayoutBox {
     return false;
   }
 
-  // Get the collapsed margin top with the margin-bottom of its previous sibling.
-  double _getCollapsedMarginTopWithPreSibling(RenderBoxModel renderBoxModel, RenderObject preSibling, double marginTop) {
-    if (preSibling is RenderBoxModel &&
-      (preSibling.renderStyle.effectiveDisplay == CSSDisplay.block ||
-      preSibling.renderStyle.effectiveDisplay == CSSDisplay.flex)
-    ) {
-      double preSiblingMarginBottom = _getChildMarginBottom(preSibling);
-      if (marginTop > 0 && preSiblingMarginBottom > 0) {
-        return math.max(marginTop - preSiblingMarginBottom, 0);
-      }
-    }
-    return marginTop;
-  }
-
-  // Get the collapsed margin top with parent if it is the first child of its parent.
-  double _getCollapsedMarginTopWithParent(RenderBoxModel renderBoxModel, double marginTop) {
-    RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
-    // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
-    // the same with its parent.
-    RenderStyle parentRenderStyle = parent.isScrollingContentBox ?
-      (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
-
-    bool isParentOverflowVisible = parentRenderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isParentOverflowClip = parentRenderStyle.effectiveOverflowY == CSSOverflowType.clip;
-    // Margin top of first child with parent which is in flow layout collapse with parent
-    // which makes the margin top of itself 0.
-    // Margin collapse does not work on document root box.
-    if (!parent.isDocumentRootBox &&
-      parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
-      (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingTop.computedValue == 0 &&
-      parentRenderStyle.effectiveBorderTopWidth.computedValue == 0 &&
-      parent.parent is RenderFlowLayout
-    ) {
-      return 0;
-    }
-    return marginTop;
-  }
-
-  // Get the collapsed margin top with its nested first child.
-  double _getCollapsedMarginTopWithNestedFirstChild(RenderBoxModel renderBoxModel) {
-    // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
-    // the same with its parent.
-    RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
-      (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
-    double paddingTop = renderStyle.paddingTop.computedValue;
-    double borderTop = renderStyle.effectiveBorderTopWidth.computedValue;
-
-    // Use own renderStyle of margin-top cause scrollingContentBox has margin-top of 0
-    // which is correct.
-    double marginTop = renderBoxModel.renderStyle.marginTop.computedValue;
-
-    bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isOverflowClip = renderStyle.effectiveOverflowY == CSSOverflowType.clip;
-
-    if (renderBoxModel is RenderLayoutBox &&
-      renderStyle.effectiveDisplay == CSSDisplay.block &&
-      (isOverflowVisible || isOverflowClip) &&
-      paddingTop == 0 &&
-      borderTop == 0
-    ) {
-      RenderObject? firstChild = renderBoxModel.firstChild != null ?
-        renderBoxModel.firstChild as RenderObject : null;
-      if (firstChild is RenderBoxModel &&
-        (firstChild.renderStyle.effectiveDisplay == CSSDisplay.block ||
-        firstChild.renderStyle.effectiveDisplay == CSSDisplay.flex)
-      ) {
-        double childMarginTop = firstChild is RenderFlowLayout ?
-        _getCollapsedMarginTopWithNestedFirstChild(firstChild) : firstChild.renderStyle.marginTop.computedValue;
-        if (marginTop < 0 && childMarginTop < 0) {
-          return math.min(marginTop, childMarginTop);
-        } else if ((marginTop < 0 && childMarginTop > 0) || (marginTop > 0 && childMarginTop < 0)) {
-          return marginTop + childMarginTop;
-        } else {
-          return math.max(marginTop, childMarginTop);
-        }
-      }
-    }
-    return marginTop;
-  }
-
-  // Get the collapsed margin top of child due to the margin collapse rule.
-  // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginTop(RenderBoxModel child) {
-    CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
-    // Margin is invalid for inline element.
-    if (childEffectiveDisplay == CSSDisplay.inline) {
+    if (child.isScrollingContentBox) {
       return 0;
     }
-    double originalMarginTop = child.renderStyle.marginTop.computedValue;
-    // Margin collapse does not work on following case:
-    // 1. Document root element(HTML)
-    // 2. Inline level elements
-    // 3. Inner renderBox of element with overflow auto/scroll
-    if (child.isDocumentRootBox ||
-      (childEffectiveDisplay != CSSDisplay.block &&
-      childEffectiveDisplay != CSSDisplay.flex)
-    ) {
-      return originalMarginTop;
-    }
-
-    RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
-    RenderObject? preSibling = childParentData.previousSibling != null ?
-      childParentData.previousSibling as RenderObject : null;
-
-    // Margin top collapse with its nested first child when meeting following cases at the same time:
-    // 1. No padding, border is set.
-    // 2. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
-    double marginTop = _getCollapsedMarginTopWithNestedFirstChild(child);
-    bool isChildOverflowVisible = child.renderStyle.effectiveOverflowX == CSSOverflowType.visible &&
-      child.renderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isChildOverflowClip = child.renderStyle.effectiveOverflowX == CSSOverflowType.clip &&
-      child.renderStyle.effectiveOverflowY == CSSOverflowType.clip;
-
-    // Margin top and bottom of empty block collapse.
-    // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
-    if (child.boxSize!.height == 0 &&
-      childEffectiveDisplay != CSSDisplay.flex &&
-      (isChildOverflowVisible || isChildOverflowClip)
-    ) {
-      double marginBottom = child.renderStyle.marginBottom.computedValue;
-      marginTop = math.max(marginTop, marginBottom);
-    }
-    if (preSibling == null) {
-      // Margin top collapse with its parent if it is the first child of its parent and its value is 0.
-      marginTop = _getCollapsedMarginTopWithParent(child, marginTop);
-    } else {
-      // Margin top collapse with margin-bottom of its previous sibling, get the difference between
-      // the margin top of itself and the margin bottom of ite previous sibling. Set it to 0 if the
-      // difference is negative.
-      marginTop = _getCollapsedMarginTopWithPreSibling(child, preSibling, marginTop);
-    }
-    return marginTop;
+    return child.renderStyle.collapsedMarginTop;
   }
 
-  // Get the collapsed margin bottom with parent if it is the last child of its parent.
-  double _getCollapsedMarginBottomWithParent(RenderBoxModel renderBoxModel, double marginBottom) {
-    RenderLayoutBox parent = renderBoxModel.parent as RenderLayoutBox;
-    // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
-    // the same with its parent.
-    RenderStyle parentRenderStyle = parent.isScrollingContentBox ?
-      (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
-
-    bool isParentOverflowVisible = parentRenderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isParentOverflowClip = parentRenderStyle.effectiveOverflowY == CSSOverflowType.clip;
-    // Margin bottom of first child with parent which is in flow layout collapse with parent
-    // which makes the margin top of itself 0.
-    // Margin collapse does not work on document root box.
-    if (!parent.isDocumentRootBox &&
-      parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
-      (isParentOverflowVisible || isParentOverflowClip) &&
-      parentRenderStyle.paddingBottom.computedValue == 0 &&
-      parentRenderStyle.effectiveBorderBottomWidth.computedValue == 0 &&
-      parent.parent is RenderFlowLayout
-    ) {
-      return 0;
-    }
-    return marginBottom;
-  }
-
-  // Get the collapsed margin bottom with its nested last child.
-  double _getCollapsedMarginBottomWithNestedLastChild(RenderBoxModel renderBoxModel) {
-    // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
-    // the same with its parent.
-    RenderStyle renderStyle = renderBoxModel.isScrollingContentBox ?
-      (renderBoxModel.parent as RenderBoxModel).renderStyle : renderBoxModel.renderStyle;
-    double paddingBottom = renderStyle.paddingBottom.computedValue;
-    double borderBottom = renderStyle.effectiveBorderBottomWidth.computedValue;
-    bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isOverflowClip = renderStyle.effectiveOverflowY == CSSOverflowType.clip;
-
-    // Use own renderStyle of margin-top cause scrollingContentBox has margin-bottom of 0
-    // which is correct.
-    double marginBottom = renderBoxModel.renderStyle.marginBottom.computedValue;
-
-    if (renderBoxModel is RenderLayoutBox &&
-      renderStyle.height.isAuto &&
-      renderStyle.minHeight.isAuto &&
-      renderStyle.maxHeight.isNone &&
-      renderStyle.effectiveDisplay == CSSDisplay.block &&
-      (isOverflowVisible || isOverflowClip) &&
-      paddingBottom == 0 &&
-      borderBottom == 0
-    ) {
-      RenderObject? lastChild = renderBoxModel.lastChild != null ?
-        renderBoxModel.lastChild as RenderObject : null;
-      if (lastChild is RenderBoxModel &&
-        lastChild.renderStyle.effectiveDisplay == CSSDisplay.block) {
-        double childMarginBottom = lastChild is RenderLayoutBox ?
-        _getCollapsedMarginBottomWithNestedLastChild(lastChild) : lastChild.renderStyle.marginBottom.computedValue;
-        if (marginBottom < 0 && childMarginBottom < 0) {
-          return math.min(marginBottom, childMarginBottom);
-        } else if ((marginBottom < 0 && childMarginBottom > 0) || (marginBottom > 0 && childMarginBottom < 0)) {
-          return marginBottom + childMarginBottom;
-        } else {
-          return math.max(marginBottom, childMarginBottom);
-        }
-      }
-    }
-
-    return marginBottom;
-  }
-
-  // Get the collapsed margin bottom of child due to the margin collapse rule.
-  // https://www.w3.org/TR/CSS2/box.html#collapsing-margins
   double _getChildMarginBottom(RenderBoxModel child) {
-    CSSDisplay? childEffectiveDisplay = child.renderStyle.effectiveDisplay;
-    // Margin is invalid for inline element.
-    if (childEffectiveDisplay == CSSDisplay.inline) {
+    if (child.isScrollingContentBox) {
       return 0;
     }
-    double originalMarginBottom = child.renderStyle.marginBottom.computedValue;
-    // Margin collapse does not work on following case:
-    // 1. Document root element(HTML)
-    // 2. Inline level elements
-    // 3. Inner renderBox of element with overflow auto/scroll
-    if (child.isDocumentRootBox ||
-      (childEffectiveDisplay != CSSDisplay.block &&
-      childEffectiveDisplay != CSSDisplay.flex)
-    ) {
-      return originalMarginBottom;
-    }
-
-    bool isChildOverflowVisible = child.renderStyle.effectiveOverflowX == CSSOverflowType.visible &&
-      child.renderStyle.effectiveOverflowY == CSSOverflowType.visible;
-    bool isChildOverflowClip = child.renderStyle.effectiveOverflowX == CSSOverflowType.clip &&
-      child.renderStyle.effectiveOverflowY == CSSOverflowType.clip;
-
-    // Margin top and bottom of empty block collapse.
-    // Make collapsed marign-top to the max of its top and bottom and margin-bottom as 0.
-    if (child.boxSize!.height == 0 &&
-      childEffectiveDisplay != CSSDisplay.flex &&
-      (isChildOverflowVisible || isChildOverflowClip)
-    ) {
-      return 0;
-    }
-
-    RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
-    RenderObject? nextSibling = childParentData.nextSibling != null ?
-      childParentData.nextSibling as RenderObject : null;
-
-    // Margin bottom collapse with its nested last child when meeting following cases at the same time:
-    // 1. No padding, border is set.
-    // 2. No height, min-height, max-height is set.
-    // 3. No block formatting context of itself (eg. overflow scroll and position absolute) is created.
-    double marginBottom = _getCollapsedMarginBottomWithNestedLastChild(child);
-    if (nextSibling == null) {
-      // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
-      marginBottom = _getCollapsedMarginBottomWithParent(child, marginBottom);
-    }
-
-    return marginBottom;
+    return child.renderStyle.collapsedMarginBottom;
   }
 
   @override

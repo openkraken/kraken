@@ -1392,8 +1392,7 @@ describe('flexbox_flex-0', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('1-0', async () => {
+  it('1-0', async () => {
     let div;
     div = createElement(
       'div',
@@ -2179,8 +2178,7 @@ describe('flexbox_flex-0', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('1-Npercent', async () => {
+  it('1-Npercent', async () => {
     let div;
     div = createElement(
       'div',
@@ -2801,8 +2799,7 @@ describe('flexbox_flex-0', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('N-0', async () => {
+  it('N-0', async () => {
     let div;
     div = createElement(
       'div',
@@ -3429,8 +3426,7 @@ describe('flexbox_flex-0', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('N-Npercent', async () => {
+  it('N-Npercent', async () => {
     let div;
     div = createElement(
       'div',

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -14,6 +15,9 @@ import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 
 import 'debug_overlay.dart';
+
+// The hashCode of all the renderBox which is in layout.
+List<int> renderBoxInLayoutHashCodes = [];
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
@@ -787,6 +791,8 @@ class RenderBoxModel extends RenderBox
 
   @override
   void layout(Constraints newConstraints, {bool parentUsesSize = false}) {
+    renderBoxInLayoutHashCodes.add(hashCode);
+
     if (hasSize) {
       // Constraints changes between tight and no tight will cause reLayoutBoundary change
       // which will then cause its children to be marked as needsLayout in Flutter
@@ -796,6 +802,12 @@ class RenderBoxModel extends RenderBox
       }
     }
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
+
+    renderBoxInLayoutHashCodes.remove(hashCode);
+    // Clear length cache when no renderBox is in layout.
+    if (renderBoxInLayoutHashCodes.isEmpty) {
+      clearComputedValueCache();
+    }
   }
 
   void markAdjacentRenderParagraphNeedsLayout() {
@@ -1438,7 +1450,13 @@ class RenderBoxModel extends RenderBox
   }
 
   Future<Image> toImage({double pixelRatio = 1.0}) {
-    assert(layer != null);
+    if (layer == null) {
+      Completer<Image> completer = Completer<Image>();
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        completer.complete(toImage(pixelRatio: pixelRatio));
+      });
+      return completer.future;
+    }
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);

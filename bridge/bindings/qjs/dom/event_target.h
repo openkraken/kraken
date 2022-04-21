@@ -13,6 +13,7 @@
 #include "bindings/qjs/native_value.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "event_listener_map.h"
+#include "event_type_names.h"
 
 #if UNIT_TEST
 void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv);

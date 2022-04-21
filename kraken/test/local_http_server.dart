@@ -87,6 +87,7 @@ class LocalHttpServer {
                 .then((Uint8List bytes) => utf8.decode(bytes))
                 .then((String input) => _format(input))
                 .then((String content) => utf8.encode(content))
+                .catchError((Object err, StackTrace? stack) => file.readAsBytes())
                 .then(socket.add)
                 .then((_) => socket.close());
             }

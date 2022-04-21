@@ -397,8 +397,7 @@ describe('flexbox_flex', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('natural', async () => {
+  it('natural', async () => {
     let div;
     let flex;
     div = createElement(

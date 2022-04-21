@@ -175,8 +175,7 @@ describe('flexbox_justifycontent-spacebetween', () => {
     await snapshot();
   });
 
-  // @TODO: Percentage of flex-basis not working.
-  xit('only', async () => {
+  it('only', async () => {
     let div;
     div = createElement(
       'div',
