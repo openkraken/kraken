@@ -1210,7 +1210,8 @@ class KrakenController {
       if (entrypoint.isHTML) {
         parseHTML(contextId, await resolveStringFromData(data));
       } else if (entrypoint.isJavascript) {
-        evaluateScripts(contextId, await resolveStringFromData(data), url: url);
+        // Prefer sync decode in loading entrypoint.
+        evaluateScripts(contextId, await resolveStringFromData(data, preferSync: true), url: url);
       } else if (entrypoint.isBytecode) {
         evaluateQuickjsByteCode(contextId, data);
       } else {
