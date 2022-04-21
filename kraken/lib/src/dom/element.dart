@@ -774,17 +774,6 @@ abstract class Element
     }
   }
 
-  void ensureChildApplyStyle() {
-    if (isRendererAttached) {
-      for (Node child in childNodes) {
-        if (child is Element) {
-          child.applyStyle();
-          child.ensureChildApplyStyle();
-        }
-      }
-    }
-  }
-
   @override
   void ensureChildAttached() {
     if (isRendererAttached) {
