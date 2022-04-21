@@ -923,4 +923,37 @@ describe('block-replaced', () => {
 
     await snapshot(0.1);
   });
+
+  it('width and height not work for non replaced element of display inline', async () => {
+    let div;
+
+    div = createElement('div', {
+      style: {
+        display: 'inline',
+        width: '100px',
+        height: '100px',
+        background: 'yellow'
+      },
+    });
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('width and height works for replaced element of display inline', async () => {
+    let div;
+
+    div = createElement('img', {
+      src: 'assets/blue15x15.png',
+      style: {
+        display: 'inline',
+        width: '100px',
+        height: '100px',
+        background: 'yellow'
+      },
+    });
+    BODY.appendChild(div);
+
+    await snapshot(0.1);
+  });
 });
