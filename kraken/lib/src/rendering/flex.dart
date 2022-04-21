@@ -396,6 +396,32 @@ class RenderFlexLayout extends RenderLayoutBox {
       contentSize = transferredSize;
     }
 
+    double? transferredMinSize;
+    double? transferredMaxSize;
+    if (childAspectRatio != null) {
+      if (_isHorizontalFlexDirection) {
+        if (childRenderStyle.minHeight.isNotAuto) {
+          transferredMinSize = childRenderStyle.minHeight.computedValue * childAspectRatio;
+        } else if (childRenderStyle.maxHeight.isNotNone) {
+          transferredMaxSize = childRenderStyle.maxHeight.computedValue * childAspectRatio;
+        }
+      } else if (!_isHorizontalFlexDirection) {
+        if (childRenderStyle.minWidth.isNotAuto) {
+          transferredMinSize = childRenderStyle.minWidth.computedValue / childAspectRatio;
+        } else if (childRenderStyle.maxWidth.isNotNone) {
+          transferredMaxSize = childRenderStyle.maxWidth.computedValue * childAspectRatio;
+        }
+      }
+    }
+
+    // Clamped by any definite min and max cross size properties converted through the aspect ratio.
+    if (transferredMinSize != null && contentSize < transferredMinSize) {
+      contentSize = transferredMinSize;
+    }
+    if (transferredMaxSize != null && contentSize > transferredMaxSize) {
+      contentSize = transferredMaxSize;
+    }
+
     double? crossSize = _isHorizontalFlexDirection
       ? renderStyle.contentBoxLogicalHeight
       : renderStyle.contentBoxLogicalWidth;
@@ -412,6 +438,8 @@ class RenderFlexLayout extends RenderLayoutBox {
     CSSLengthValue maxMainLength = _isHorizontalFlexDirection
       ? childRenderStyle.maxWidth
       : childRenderStyle.maxHeight;
+
+    // Further clamped by the max main size property if that is definite.
     if (maxMainLength.isNotNone) {
       contentSize = math.max(contentSize, maxMainLength.computedValue);
     }
@@ -1836,6 +1864,7 @@ class RenderFlexLayout extends RenderLayoutBox {
         : Size(maxScrollableCrossSize, maxScrollableMainSize);
   }
 
+  // Get the cross size of flex line based on flex-wrap and align-items/align-self properties.
   double _getFlexLineCrossSize(
     RenderBox child,
     double runCrossAxisExtent,
