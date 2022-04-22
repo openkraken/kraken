@@ -7,7 +7,10 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 
-final RegExp _whiteSpaceReg = RegExp(r'\s+');
+//final RegExp _whiteSpaceReg = RegExp(r'[\s]+');
+final RegExp _whiteSpaceReg = RegExp(r'[\u0020\u0009\u000A]+');
+final RegExp _trimLeftReg = RegExp(r'^[\u0020\u0009\u000A]([^\u0020\u0009\u000A]+)');
+final RegExp _trimRightReg = RegExp(r'([^\u0020\u0009\u000A]+)[\u0020\u0009\u000A]$');
 
 class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -66,25 +69,30 @@ class RenderTextBox extends RenderBox
         RenderObject? previousSibling = (parentData as RenderLayoutParentData).previousSibling;
 
         if (previousSibling == null) {
-          collapsedData = collapsedData.trimLeft();
+//          collapsedData = collapsedData.trimLeft();
+          collapsedData = _trimLeft(collapsedData);
         } else if (previousSibling is RenderBoxModel &&(previousSibling.renderStyle.display == CSSDisplay.block || previousSibling.renderStyle.display == CSSDisplay.flex)) {
           // If previousSibling is block,should trimLeft slef.
           CSSDisplay? display = previousSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
-            collapsedData = collapsedData.trimLeft();
+//            collapsedData = collapsedData.trimLeft();
+            collapsedData = _trimLeft(collapsedData);
           }
         } else if (previousSibling is RenderTextBox && isEndWithSpace(previousSibling.data)) {
-          collapsedData = collapsedData.trimLeft();
+//          collapsedData = collapsedData.trimLeft();
+          collapsedData = _trimLeft(collapsedData);
         }
 
         RenderObject? nextSibling = (parentData as RenderLayoutParentData).nextSibling;
         if (nextSibling == null) {
-          collapsedData = collapsedData.trimRight();
+//          collapsedData = collapsedData.trimRight();
+          collapsedData = _trimRight(collapsedData);
         } else if (nextSibling is RenderBoxModel && (nextSibling.renderStyle.display == CSSDisplay.block || nextSibling.renderStyle.display == CSSDisplay.flex)) {
           // If nextSibling is block,should trimRight slef.
           CSSDisplay? display = nextSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
-            collapsedData = collapsedData.trimRight();
+//            collapsedData = collapsedData.trimRight();
+            collapsedData = _trimRight(collapsedData);
           }
         }
 
@@ -295,6 +303,14 @@ class RenderTextBox extends RenderBox
   // '  a b  c   \n' => ' a b c '
   static String _collapseWhitespace(String string) {
     return string.replaceAll(_whiteSpaceReg, WHITE_SPACE_CHAR);
+  }
+
+  static String _trimLeft(String string) {
+    return string.replaceAllMapped(_trimLeftReg, (Match m) => '${m[1]}');
+  }
+
+  static String _trimRight(String string) {
+    return string.replaceAllMapped(_trimRightReg, (Match m) => '${m[1]}');
   }
 
   @override
