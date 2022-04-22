@@ -27,22 +27,31 @@ class ScriptRunner {
   final int _contextId;
 
   final List<KrakenBundle> _scriptsToExecute = [];
+  final List<KrakenBundle> _asyncScriptsToExecute = [];
 
-  void _executeScripts() async {
+  static void _evaluateScriptBundle(int contextId, KrakenBundle bundle, { bool async = false }) async {
+    // Evaluate bundle.
+    if (bundle.isJavascript) {
+      final String contentInString = await resolveStringFromData(bundle.data!, preferSync: !async);
+      evaluateScripts(contextId, contentInString, url: bundle.url);
+    } else if (bundle.isBytecode) {
+      evaluateQuickjsByteCode(contextId, bundle.data!);
+    } else {
+      throw FlutterError('Unknown type for <script> to execute. $url');
+    }
+  }
+
+  void _executeScripts(List<KrakenBundle> scripts, { bool async = false }) async {
     while (_scriptsToExecute.isNotEmpty) {
       KrakenBundle bundle = _scriptsToExecute.first;
 
       // If bundle is not resolved, should wait for it resolve to prevent the next script running.
       if (!bundle.isResolved) break;
 
-      // Evaluate bundle.
-      if (bundle.isJavascript) {
-        final String contentInString = await resolveStringFromData(bundle.data!);
-        evaluateScripts(_contextId, contentInString, url: bundle.url);
-      } else if (bundle.isBytecode) {
-        evaluateQuickjsByteCode(_contextId, bundle.data!);
-      } else {
-        throw FlutterError('Unknown type for <script> to execute. $url');
+      try {
+        _evaluateScriptBundle(_contextId, bundle, async: async);
+      } catch (err, stack) {
+        print('$err\n$stack');
       }
 
       _scriptsToExecute.remove(bundle);
@@ -54,6 +63,10 @@ class ScriptRunner {
     }
   }
 
+  void _executeAsyncScripts(List<KrakenBundle> asyncScripts) {
+    _executeScripts(asyncScripts, async: true);
+  }
+
   void queueScriptForExecution(ScriptElement element) async {
     // Increment load event delay count before eval.
     _document.incrementLoadEventDelayCount();
@@ -63,7 +76,11 @@ class ScriptRunner {
     // Obtain bundle.
     KrakenBundle bundle = KrakenBundle.fromUrl(url);
 
-    _scriptsToExecute.add(bundle);
+    if (element.async || element.defer) {
+      _asyncScriptsToExecute.add(bundle);
+    } else {
+      _scriptsToExecute.add(bundle);
+    }
 
     try {
       // Increment count when request.
@@ -75,11 +92,12 @@ class ScriptRunner {
       // Decrement count when response.
       _document.decrementRequestCount();
 
-      _executeScripts();
+      _executeScripts(_scriptsToExecute);
 
       // Successful load.
       Timer.run(() {
         element.dispatchEvent(Event(EVENT_LOAD));
+        compute(_executeAsyncScripts, _asyncScriptsToExecute);
       });
     } catch (e, st) {
       // An error occurred.
