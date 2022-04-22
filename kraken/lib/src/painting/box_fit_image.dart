@@ -2,21 +2,21 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
+import 'dart:typed_data';
 import 'dart:ui';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:kraken/foundation.dart';
 
 class BoxFitImageKey {
   const BoxFitImageKey({
-    required this.descriptor,
-    this.scale = 1.0,
+    required this.url,
     this.configuration,
   });
 
-  final ImageDescriptor descriptor;
-  final double scale;
+  final Uri url;
   final ImageConfiguration? configuration;
 
   @override
@@ -24,40 +24,62 @@ class BoxFitImageKey {
     if (other.runtimeType != runtimeType)
       return false;
     return other is BoxFitImageKey
-        && other.descriptor == descriptor
+        && other.url == url
         && other.configuration == configuration;
   }
 
   @override
-  int get hashCode => hashValues(configuration, descriptor);
+  int get hashCode => hashValues(configuration, url);
 }
 
+typedef LoadImage = Future<Uint8List> Function(Uri url);
+typedef OnImageLoad = void Function(int naturalWidth, int naturalHeight);
+
 class BoxFitImage extends ImageProvider<BoxFitImageKey> {
-  const BoxFitImage({
-    required this.descriptor,
+  BoxFitImage({
+    required this.loadImage,
+    required this.url,
     required this.boxFit,
+    this.onImageLoad,
   });
 
-  final ImageDescriptor descriptor;
+  final LoadImage loadImage;
+  final Uri url;
   final BoxFit boxFit;
+  final OnImageLoad? onImageLoad;
 
   @override
   Future<BoxFitImageKey> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<BoxFitImageKey>(BoxFitImageKey(
-      descriptor: descriptor,
+      url: url,
       configuration: configuration,
     ));
   }
 
+  Future<Codec> _loadAsync(BoxFitImageKey key) async {
+    Uint8List bytes = await loadImage(url);
+    final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
+    final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
+    scheduleMicrotask(() {
+      if (onImageLoad != null) {
+        onImageLoad!(descriptor.width, descriptor.height);
+      }
+      _imageStreamCompleter!.setDimension(Dimension(descriptor.width, descriptor.height));
+    });
+    return _instantiateImageCodec(descriptor,
+      boxFit: boxFit,
+      preferredWidth: key.configuration?.size?.width.toInt(),
+      preferredHeight: key.configuration?.size?.height.toInt(),
+    );
+  }
+
+  DimensionedMultiFrameImageStreamCompleter? _imageStreamCompleter;
+
   @override
   ImageStreamCompleter load(BoxFitImageKey key, DecoderCallback decode) {
-    return MultiFrameImageStreamCompleter(
-      codec: _instantiateImageCodec(key.descriptor,
-        boxFit: boxFit,
-        preferredWidth: key.configuration?.size?.width.toInt(),
-        preferredHeight: key.configuration?.size?.height.toInt(),
-      ),
-      scale: key.scale,
+    return _imageStreamCompleter = DimensionedMultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: 1.0,
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<ImageProvider>('Image provider', this),
@@ -65,6 +87,32 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
         ];
       },
     );
+  }
+
+  @override
+  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, BoxFitImageKey key, ImageErrorListener handleError) {
+    if (stream.completer != null) {
+      final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+        key,
+        () => stream.completer!,
+        onError: handleError,
+      );
+      assert(identical(completer, stream.completer));
+      return;
+    }
+    final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+      key,
+      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      onError: handleError,
+    );
+    if (_imageStreamCompleter == null && completer is DimensionedMultiFrameImageStreamCompleter && onImageLoad != null) {
+      completer.dimension.then((Dimension dimension) {
+        onImageLoad!(dimension.width, dimension.height);
+      });
+    }
+    if (completer != null) {
+      stream.setCompleter(completer);
+    }
   }
 
   static Future<Codec> _instantiateImageCodec(ImageDescriptor descriptor, {
@@ -144,5 +192,40 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
       targetWidth: targetWidth,
       targetHeight: targetHeight,
     );
+  }
+}
+
+// The [MultiFrameImageStreamCompleter] that saved the natural dimention of image.
+class DimensionedMultiFrameImageStreamCompleter extends MultiFrameImageStreamCompleter {
+  DimensionedMultiFrameImageStreamCompleter({
+    required Future<Codec> codec,
+    required double scale,
+    String? debugLabel,
+    Stream<ImageChunkEvent>? chunkEvents,
+    InformationCollector? informationCollector,
+  }) : super(codec: codec, scale: scale, debugLabel: debugLabel,
+      chunkEvents: chunkEvents, informationCollector: informationCollector);
+
+  final List<Completer<Dimension>> _dimensionCompleter = [];
+  Dimension? _dimension;
+
+  Future<Dimension> get dimension async {
+    if (_dimension != null) {
+      return _dimension!;
+    } else {
+      Completer<Dimension> completer = Completer<Dimension>();
+      _dimensionCompleter.add(completer);
+      return completer.future;
+    }
+  }
+
+  void setDimension(Dimension dimension) {
+    _dimension = dimension;
+    if (_dimensionCompleter.isNotEmpty) {
+      _dimensionCompleter.forEach((Completer<Dimension> completer) {
+        completer.complete(dimension);
+      });
+      _dimensionCompleter.clear();
+    }
   }
 }
