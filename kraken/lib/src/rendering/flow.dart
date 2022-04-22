@@ -134,6 +134,7 @@ class RenderFlowLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    doingThisLayout = true;
     if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
@@ -154,6 +155,7 @@ class RenderFlowLayout extends RenderLayoutBox {
       PerformanceTiming.instance().mark(PERF_FLOW_LAYOUT_END,
         uniqueId: hashCode, startTime: amendEndTime);
     }
+    doingThisLayout = false;
   }
 
   void _doPerformLayout() {
@@ -1106,32 +1108,6 @@ class RenderFlowLayout extends RenderLayoutBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
     return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  void performPaint(PaintingContext context, Offset offset) {
-    for (int i = 0; i < paintingOrder.length; i++) {
-      RenderObject child = paintingOrder[i];
-      if (child is! RenderPositionPlaceholder) {
-        late DateTime childPaintStart;
-        if (kProfileMode && PerformanceTiming.enabled()) {
-          childPaintStart = DateTime.now();
-        }
-        final RenderLayoutParentData childParentData =
-            child.parentData as RenderLayoutParentData;
-        context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode && PerformanceTiming.enabled()) {
-          DateTime childPaintEnd = DateTime.now();
-          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
-              childPaintStart.microsecondsSinceEpoch);
-        }
-      }
-    }
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
   }
 }
 

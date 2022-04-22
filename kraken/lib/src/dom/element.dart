@@ -720,16 +720,22 @@ abstract class Element
     }
   }
 
+  bool _obtainSliverChild() {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
+      // Sliver should not create renderer here, but need to trigger
+      // render sliver list dynamical rebuild child by element tree.
+      parentElement?._renderLayoutBox?.markNeedsLayout();
+      return true;
+    }
+    return false;
+  }
+
   // Attach renderObject of current node to parent
   @override
   void attachTo(Node parent, {RenderBox? after}) {
     _applyStyle(style);
 
-    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
-      // Sliver should not create renderer here, but need to trigger
-      // render sliver list dynamical rebuild child by element tree.
-      parentElement?._renderLayoutBox?.markNeedsLayout();
-    } else {
+    if (!_obtainSliverChild()) {
       willAttachRenderer();
     }
 
@@ -748,15 +754,20 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = false }) {
+  void unmountRenderObject({ bool deep = false, bool keepPositionedAlive = false }) {
     if (renderBoxModel == null) return;
+
+
+    if (keepPositionedAlive && renderStyle.position == CSSPositionType.fixed) {
+      return;
+    }
 
     willDetachRenderer();
 
     // Dispose all renderObject when deep.
     if (deep) {
       for (Node child in childNodes) {
-        child.unmountRenderObject(deep: true);
+        child.unmountRenderObject(deep: deep, keepPositionedAlive: keepPositionedAlive);
       }
     }
 
@@ -969,7 +980,7 @@ abstract class Element
     _updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
-      // If element attach WidgetElement, render obeject should be attach to render tree when mount.
+      // If element attach WidgetElement, render object should be attach to render tree when mount.
       if (parentNode is! WidgetElement) {
         RenderBoxModel _renderBoxModel = renderBoxModel!;
         // Find the renderBox of its containing block.
