@@ -795,7 +795,7 @@ class RenderBoxModel extends RenderBox
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         markNeedsLayout();
       });
-    } else if (!needsLayout) {
+    } else {
       needsLayout = true;
       super.markNeedsLayout();
     }
