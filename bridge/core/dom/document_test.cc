@@ -138,8 +138,7 @@ TEST(Document, FreedByOutOfScope) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
-  const char* code =
-      "(() => { let img = document.createElement('div');  })();";
+  const char* code = "(() => { let img = document.createElement('div');  })();";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, false);

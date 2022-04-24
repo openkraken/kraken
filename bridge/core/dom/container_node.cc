@@ -419,9 +419,9 @@ void ContainerNode::NotifyNodeRemoved(Node& root) {
 }
 
 void ContainerNode::Trace(GCVisitor* visitor) const {
-//  for (Node& node : NodeTraversal::ChildrenOf(*this)) {
-//    visitor->Trace(&node);
-//  }
+  //  for (Node& node : NodeTraversal::ChildrenOf(*this)) {
+  //    visitor->Trace(&node);
+  //  }
   visitor->Trace(first_child_);
   visitor->Trace(last_child_);
 

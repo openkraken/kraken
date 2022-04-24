@@ -67,7 +67,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   // Install document.
   InstallDocument();
 
-
 #if ENABLE_PROFILE
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_END);
   nativePerformance.mark(PERF_JS_POLYFILL_INIT_START);

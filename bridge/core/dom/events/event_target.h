@@ -6,10 +6,10 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
+#include "bindings/qjs/cppgc/member.h"
 #include "bindings/qjs/js_event_listener.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/script_wrappable.h"
-#include "bindings/qjs/cppgc/member.h"
 #include "core/dom/binding_object.h"
 #include "event_listener_map.h"
 #include "foundation/native_string.h"

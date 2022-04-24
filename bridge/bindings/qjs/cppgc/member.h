@@ -6,9 +6,9 @@
 #define KRAKENBRIDGE_BINDINGS_QJS_CPPGC_MEMBER_H_
 
 #include <type_traits>
+#include "bindings/qjs/qjs_engine_patch.h"
 #include "bindings/qjs/script_value.h"
 #include "bindings/qjs/script_wrappable.h"
-#include "bindings/qjs/qjs_engine_patch.h"
 #include "foundation/casting.h"
 
 namespace kraken {
@@ -19,7 +19,7 @@ template <typename T, typename = std::is_base_of<ScriptWrappable, T>>
 class Member {
  public:
   Member() = default;
-  Member(T* ptr): raw_(ptr), runtime_(ptr != nullptr ? ptr->runtime() : nullptr) {}
+  Member(T* ptr) : raw_(ptr), runtime_(ptr != nullptr ? ptr->runtime() : nullptr) {}
   ~Member() {
     if (raw_ != nullptr) {
       assert(runtime_ != nullptr);
@@ -36,7 +36,8 @@ class Member {
 
   T* Get() const { return raw_; }
   void Clear() {
-    if (raw_ == nullptr) return;
+    if (raw_ == nullptr)
+      return;
     auto* wrappable = To<ScriptWrappable>(raw_);
     JS_FreeValue(wrappable->ctx(), wrappable->ToValue().QJSValue());
     raw_ = nullptr;

@@ -28,7 +28,6 @@ struct JSString {
   } u;
 };
 
-
 typedef enum {
   JS_GC_PHASE_NONE,
   JS_GC_PHASE_DECREF,

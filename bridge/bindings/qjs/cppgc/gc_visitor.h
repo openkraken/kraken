@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_GC_VISITOR_H
 #define KRAKENBRIDGE_GC_VISITOR_H
 
-#include <quickjs/quickjs.h>
 #include <bindings/qjs/script_wrappable.h>
+#include <quickjs/quickjs.h>
 
 #include "foundation/macros.h"
 #include "member.h"
@@ -24,7 +24,7 @@ class GCVisitor final {
  public:
   explicit GCVisitor(JSRuntime* rt, JS_MarkFunc* markFunc) : runtime_(rt), markFunc_(markFunc){};
 
-  template<typename T>
+  template <typename T>
   void Trace(const Member<T>& target) {
     if (target.Get() != nullptr) {
       JS_MarkValue(runtime_, target.Get()->jsObject_, markFunc_);

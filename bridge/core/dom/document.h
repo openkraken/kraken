@@ -10,8 +10,8 @@
 #include "core/dom/comment.h"
 #include "core/dom/document_fragment.h"
 #include "core/dom/text.h"
-#include "tree_scope.h"
 #include "html_element_type_helper.h"
+#include "tree_scope.h"
 
 namespace kraken {
 

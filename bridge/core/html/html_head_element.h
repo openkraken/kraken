@@ -14,7 +14,7 @@ class HTMLHeadElement : public HTMLElement {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  using ImplType  = HTMLHeadElement*;
+  using ImplType = HTMLHeadElement*;
   explicit HTMLHeadElement(Document&);
 
  private:

@@ -382,7 +382,7 @@ struct Converter<IDLNullable<JSEventListener>> : public ConverterBase<JSEventLis
 };
 
 // DictionaryBase and Derived class.
-template<typename T>
+template <typename T>
 struct Converter<T, typename std::enable_if_t<std::is_base_of<DictionaryBase, T>::value>> : public ConverterBase<T> {
   static typename T::ImplType FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     assert(!JS_IsException(value));
@@ -398,22 +398,20 @@ struct Converter<T, typename std::enable_if_t<std::is_base_of<ScriptWrappable, T
     return toScriptWrappable<T>(value);
   }
   static T* ArgumentsValue(ExecutingContext* context,
-                          JSValue value,
-                          uint32_t argv_index,
-                          ExceptionState& exception_state) {
+                           JSValue value,
+                           uint32_t argv_index,
+                           ExceptionState& exception_state) {
     assert(!JS_IsException(value));
     const WrapperTypeInfo* wrapper_type_info = Node::GetStaticWrapperTypeInfo();
     if (JS_IsInstanceOf(context->ctx(), value, context->contextData()->constructorForType(wrapper_type_info))) {
       return FromValue(context->ctx(), value, exception_state);
     }
     exception_state.ThrowException(context->ctx(), ErrorType::TypeError,
-                                   ExceptionMessage::ArgumentNotOfType(argv_index,
-                                   wrapper_type_info->className));
+                                   ExceptionMessage::ArgumentNotOfType(argv_index, wrapper_type_info->className));
     return nullptr;
   }
   static JSValue ToValue(JSContext* ctx, T* value) { return value->ToQuickJS(); }
 };
-
 
 };  // namespace kraken
 

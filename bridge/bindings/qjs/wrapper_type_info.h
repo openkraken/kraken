@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 #define KRAKENBRIDGE_WRAPPER_TYPE_INFO_H
 
-#include <cassert>
 #include <quickjs/quickjs.h>
+#include <cassert>
 #include "bindings/qjs/qjs_engine_patch.h"
 
 namespace kraken {
