@@ -87,7 +87,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       if (index < renderNodes.length) {
         renderNodes
           .elementAt(index)
-          .unmountRenderObject(deep: true, keepPositionedAlive: true);
+          .unmountRenderObject(deep: true, keepFixedAlive: true);
         return;
       }
     }

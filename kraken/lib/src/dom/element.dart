@@ -754,11 +754,15 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = false, bool keepPositionedAlive = false }) {
-    if (renderBoxModel == null) return;
+  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {
+    // No need for unmount if renderer is not created or attached.
+    if (!isRendererAttached) {
+      return;
+    }
 
-
-    if (keepPositionedAlive && renderStyle.position == CSSPositionType.fixed) {
+    // Ignore the fixed element to unmount render object.
+    // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
+    if (keepFixedAlive && _isFixed) {
       return;
     }
 
@@ -767,7 +771,7 @@ abstract class Element
     // Dispose all renderObject when deep.
     if (deep) {
       for (Node child in childNodes) {
-        child.unmountRenderObject(deep: deep, keepPositionedAlive: keepPositionedAlive);
+        child.unmountRenderObject(deep: deep, keepFixedAlive: keepFixedAlive);
       }
     }
 
@@ -972,7 +976,7 @@ abstract class Element
 
     // Destroy renderer of element when display is changed to none.
     if (presentDisplay == CSSDisplay.none) {
-      unmountRenderObject();
+      unmountRenderObject(deep: true);
       return;
     }
 
@@ -1520,6 +1524,8 @@ abstract class Element
     }
     return offset;
   }
+
+  bool get _isFixed => renderStyle.position == CSSPositionType.fixed;
 
   // The HTMLElement.offsetParent read-only property returns a reference to the element
   // which is the closest (nearest in the containment hierarchy) positioned ancestor element.

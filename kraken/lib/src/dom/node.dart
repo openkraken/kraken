@@ -144,7 +144,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Unmount referenced render object.
-  void unmountRenderObject({ bool deep = false, bool keepPositionedAlive = false }) {}
+  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {}
 
   /// Release any resources held by this node.
   @override
@@ -223,15 +223,12 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @mustCallSuper
   Node removeChild(Node child) {
-
-    // Not remove node type which is not present in RenderObject tree such as Comment
-    // Only append node types which is visible in RenderObject tree
-    // Only remove childNode when it has parent
-    if (child.isRendererAttached) {
-      child.unmountRenderObject();
-    }
-
     if (childNodes.contains(child)) {
+      // Not remove node type which is not present in RenderObject tree such as Comment
+      // Only append node types which is visible in RenderObject tree
+      // Only remove childNode when it has parent
+      child.unmountRenderObject();
+
       bool isConnected = child.isConnected;
       childNodes.remove(child);
       child.parentNode = null;
