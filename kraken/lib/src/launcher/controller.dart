@@ -1207,13 +1207,13 @@ class KrakenController {
       _view.document.parsing = true;
 
       Uint8List data = entrypoint.data!;
-      if (entrypoint.isHTML) {
-        parseHTML(contextId, await resolveStringFromData(data));
-      } else if (entrypoint.isJavascript) {
+      if (entrypoint.isJavascript) {
         // Prefer sync decode in loading entrypoint.
         evaluateScripts(contextId, await resolveStringFromData(data, preferSync: true), url: url);
       } else if (entrypoint.isBytecode) {
         evaluateQuickjsByteCode(contextId, data);
+      } else if (entrypoint.isHTML) {
+        parseHTML(contextId, await resolveStringFromData(data));
       } else {
         // The resource type can not be evaluated.
         throw FlutterError('Can\'t evaluate content of $url');

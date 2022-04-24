@@ -12,42 +12,33 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 
-const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
-const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
-const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const String DEFAULT_URL = 'about:blank';
+const String UTF_8 = 'utf-8';
 
-final ContentType _cssContentType = ContentType('text', 'css', charset: 'utf-8');
+final ContentType _cssContentType = ContentType('text', 'css', charset: UTF_8);
 // MIME types suits JavaScript: https://mathiasbynens.be/demo/javascript-mime-type
-final ContentType _javascriptContentType = ContentType('text', 'javascript', charset: 'utf-8');
-final ContentType _javascriptApplicationContentType = ContentType('application', 'javascript', charset: 'utf-8');
-final ContentType _xJavascriptContentType = ContentType('application', 'x-javascript', charset: 'utf-8');
+final ContentType _javascriptContentType = ContentType('text', 'javascript', charset: UTF_8);
+final ContentType _javascriptApplicationContentType = ContentType('application', 'javascript', charset: UTF_8);
+final ContentType _xJavascriptContentType = ContentType('application', 'x-javascript', charset: UTF_8);
 final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.kraken.bc1');
 
+const List<String> _supportedByteCodeVersions = ['1'];
 
-String? getBundleURLFromEnv() {
-  return Platform.environment[BUNDLE_URL];
-}
-
-String? getBundlePathFromEnv() {
-  return Platform.environment[BUNDLE_PATH];
-}
-
-List<String> _supportedByteCodeVersions = ['1'];
-
-bool _isBytecodeSupported(String mimeType, Uri uri) {
+bool _isSupportedBytecode(String mimeType, Uri uri) {
   for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
     if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
+    // @NOTE: This is useful for most http server that did not recognize a .kbc1 file.
+    // Simply treat some.kbc1 file as the bytecode.
     if (uri.path.endsWith('.kbc' + _supportedByteCodeVersions[i])) return true;
   }
   return false;
 }
 
 // The default accept request header.
+// The order is HTML -> KBC -> JavaScript.
 String _acceptHeader() {
   String bc = _supportedByteCodeVersions.map((String v) => 'application/vnd.kraken.bc$v').join(',');
-  return 'text/html,application/javascript,$bc';
+  return 'text/html,$bc,application/javascript';
 }
 
 bool _isAssetsScheme(String path) {
@@ -91,7 +82,8 @@ abstract class KrakenBundle {
   bool get isResolved => _uri != null && data != null;
 
   // Content type for data.
-  ContentType contentType = ContentType.binary;
+  // The default value is plain text.
+  ContentType contentType = ContentType.text;
 
   @mustCallSuper
   Future<void> resolve(int? contextId) async {
@@ -137,22 +129,12 @@ abstract class KrakenBundle {
     return DataBundle(data, url, contentType: _krakenBc1ContentType);
   }
 
-  bool get isHTML => contentType.mimeType == ContentType.html.mimeType || _isUriExt('.html');
-  bool get isCSS => contentType.mimeType == _cssContentType.mimeType || _isUriExt('.css');
+  bool get isHTML => contentType.mimeType == ContentType.html.mimeType;
+  bool get isCSS => contentType.mimeType == _cssContentType.mimeType;
   bool get isJavascript => contentType.mimeType == _javascriptContentType.mimeType ||
                             contentType.mimeType == _javascriptApplicationContentType.mimeType ||
-                            contentType.mimeType == _xJavascriptContentType.mimeType ||
-                            _isUriExt('.js');
-  bool get isBytecode => _isBytecodeSupported(contentType.mimeType, _uri!);
-
-  bool _isUriExt(String ext) {
-    Uri? uri = resolvedUri;
-    if (uri != null) {
-      return uri.path.endsWith(ext);
-    }
-    return false;
-  }
-
+                            contentType.mimeType == _xJavascriptContentType.mimeType;
+  bool get isBytecode => _isSupportedBytecode(contentType.mimeType, _uri!);
 }
 
 // The bundle that output input data.
