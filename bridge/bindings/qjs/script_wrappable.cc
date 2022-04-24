@@ -15,12 +15,29 @@ JSValue ScriptWrappable::ToQuickJS() {
   return JS_DupValue(ctx_, jsObject_);
 }
 
-JSValue ScriptWrappable::ToQuickJSUnsafe() {
+JSValue ScriptWrappable::ToQuickJSUnsafe() const {
   return jsObject_;
 }
 
 ScriptValue ScriptWrappable::ToValue() {
   return ScriptValue(ctx_, jsObject_);
+}
+
+/// This callback will be called when QuickJS GC is running at marking stage.
+/// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to
+/// tell GC which member of their class should be collected by GC.
+static void HandleJSObjectGCMark(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
+  auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+  GCVisitor visitor{rt, mark_func};
+  object->Trace(&visitor);
+}
+
+/// This callback will be called when QuickJS GC will release the `jsObject` object memory of this class.
+/// The deconstruct method of this class will be called and all memory about this class will be freed when finalize
+/// completed.
+static void HandleJSObjectFinalized(JSRuntime* rt, JSValue val) {
+  auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
+  delete object;
 }
 
 void ScriptWrappable::InitializeQuickJSObject() {
@@ -34,27 +51,14 @@ void ScriptWrappable::InitializeQuickJSObject() {
 
     def.class_name = wrapperTypeInfo->className;
 
-    /// This callback will be called when QuickJS GC is running at marking stage.
-    /// Users of this class should override `void Trace(JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func)` to
-    /// tell GC which member of their class should be collected by GC.
-    def.gc_mark = [](JSRuntime* rt, JSValueConst val, JS_MarkFunc* mark_func) {
-      auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      GCVisitor visitor{rt, mark_func};
-      object->Trace(&visitor);
-    };
+    def.gc_mark = HandleJSObjectGCMark;
 
     /// Define custom behavior when call GetProperty, SetProperty on object.
     if (wrapperTypeInfo->exoticMethods != nullptr) {
       def.exotic = wrapperTypeInfo->exoticMethods;
     }
 
-    /// This callback will be called when QuickJS GC will release the `jsObject` object memory of this class.
-    /// The deconstruct method of this class will be called and all memory about this class will be freed when finalize
-    /// completed.
-    def.finalizer = [](JSRuntime* rt, JSValue val) {
-      auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(val, JSValueGetClassId(val)));
-      delete object;
-    };
+    def.finalizer = HandleJSObjectFinalized;
 
     JS_NewClass(runtime, wrapperTypeInfo->classId, &def);
   }

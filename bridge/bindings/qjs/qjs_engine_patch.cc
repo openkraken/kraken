@@ -8,12 +8,6 @@
 #include <quickjs/list.h>
 #include <cstring>
 
-typedef enum {
-  JS_GC_PHASE_NONE,
-  JS_GC_PHASE_DECREF,
-  JS_GC_PHASE_REMOVE_CYCLES,
-} JSGCPhaseEnum;
-
 typedef struct JSProxyData {
   JSValue target;
   JSValue handler;
@@ -353,4 +347,8 @@ bool JS_HasClassId(JSRuntime* runtime, JSClassID classId) {
 JSValue JS_GetProxyTarget(JSValue value) {
   JSObject* p = JS_VALUE_GET_OBJ(value);
   return p->u.proxy_data->target;
+}
+
+JSGCPhaseEnum JS_GetEnginePhase(JSRuntime* runtime) {
+  return runtime->gc_phase;
 }

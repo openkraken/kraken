@@ -28,6 +28,13 @@ struct JSString {
   } u;
 };
 
+
+typedef enum {
+  JS_GC_PHASE_NONE,
+  JS_GC_PHASE_DECREF,
+  JS_GC_PHASE_REMOVE_CYCLES,
+} JSGCPhaseEnum;
+
 enum {
   /* classid tag        */ /* union usage   | properties */
   JS_CLASS_OBJECT = 1,     /* must be first */
@@ -116,6 +123,7 @@ bool JS_IsArrayBuffer(JSValue value);
 bool JS_IsArrayBufferView(JSValue value);
 bool JS_HasClassId(JSRuntime* runtime, JSClassID classId);
 JSValue JS_GetProxyTarget(JSValue value);
+JSGCPhaseEnum JS_GetEnginePhase(JSRuntime* runtime);
 
 #ifdef __cplusplus
 }
