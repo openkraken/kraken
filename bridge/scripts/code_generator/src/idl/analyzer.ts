@@ -52,7 +52,11 @@ function getParameterName(name: ts.BindingName) : string {
 
 export type ParameterType =  FunctionArgumentType | string;
 
-function getParameterBaseType(type: ts.TypeNode): ParameterType {
+class ParameterMode {
+  newObject?: boolean;
+}
+
+function getParameterBaseType(type: ts.TypeNode, mode?: ParameterMode): ParameterType {
   if (type.kind === ts.SyntaxKind.StringKeyword) {
     return FunctionArgumentType.dom_string;
   } else if (type.kind === ts.SyntaxKind.NumberKeyword) {
@@ -82,28 +86,33 @@ function getParameterBaseType(type: ts.TypeNode): ParameterType {
       return FunctionArgumentType.int64;
     } else if (identifier === 'double') {
       return FunctionArgumentType.double;
+    } else if (identifier === 'NewObject') {
+      if (mode) mode.newObject = true;
+      let argument = typeReference.typeArguments![0];
+      // @ts-ignore
+      return argument.typeName.text;
     }
 
     return identifier;
   } else if (type.kind === ts.SyntaxKind.LiteralType) {
     // @ts-ignore
-    return getParameterBaseType((type as ts.LiteralTypeNode).literal);
+    return getParameterBaseType((type as ts.LiteralTypeNode).literal, mode);
   }
 
   return FunctionArgumentType.any;
 }
 
-function getParameterType(type: ts.TypeNode): ParameterType[] {
+function getParameterType(type: ts.TypeNode, mode?: ParameterMode): ParameterType[] {
   if (type.kind == ts.SyntaxKind.ArrayType) {
     let arrayType = type as unknown as ts.ArrayTypeNode;
-    return [FunctionArgumentType.array, getParameterBaseType(arrayType.elementType)];
+    return [FunctionArgumentType.array, getParameterBaseType(arrayType.elementType, mode)];
   } else if (type.kind === ts.SyntaxKind.UnionType) {
     let node = type as unknown as ts.UnionType;
     let types = node.types;
     // @ts-ignore
-    return types.map(type => getParameterBaseType(type as unknown as ts.TypeNode));
+    return types.map(type => getParameterBaseType(type as unknown as ts.TypeNode, mode));
   }
-  return [getParameterBaseType(type)];
+  return [getParameterBaseType(type, mode)];
 }
 
 function paramsNodeToArguments(parameter: ts.ParameterDeclaration): FunctionArguments {
@@ -178,7 +187,9 @@ function walkProgram(statement: ts.Statement) {
             });
             obj.methods.push(f);
             if (m.type) {
-              f.returnType = getParameterType(m.type);
+              let mode = new ParameterMode();
+              f.returnType = getParameterType(m.type, mode);
+              f.returnTypeMode = mode.newObject ? 'newObject' : 'normal';
             }
             break;
           }

@@ -32,7 +32,7 @@ class Document : public ContainerNode, public TreeScope {
 
   static Document* Create(ExecutingContext* context, ExceptionState& exception_state);
 
-  ScriptValue createElement(const AtomicString& name, ExceptionState& exception_state);
+  Element* createElement(const AtomicString& name, ExceptionState& exception_state);
   Text* createTextNode(const AtomicString& value, ExceptionState& exception_state);
   DocumentFragment* createDocumentFragment(ExceptionState& exception_state);
   Comment* createComment(ExceptionState& exception_state);

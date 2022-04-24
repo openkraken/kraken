@@ -15,6 +15,10 @@ JSValue ScriptWrappable::ToQuickJS() {
   return JS_DupValue(ctx_, jsObject_);
 }
 
+JSValue ScriptWrappable::ToQuickJSUnsafe() {
+  return jsObject_;
+}
+
 ScriptValue ScriptWrappable::ToValue() {
   return ScriptValue(ctx_, jsObject_);
 }

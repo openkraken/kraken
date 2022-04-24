@@ -28,9 +28,12 @@ export class PropsDeclaration {
   readonly: boolean;
 }
 
+type FunctionReturnTypeMode = 'normal' | 'newObject';
+
 export class FunctionDeclaration extends PropsDeclaration {
   args: FunctionArguments[] =  [];
   returnType: ParameterType[] = [];
+  returnTypeMode: FunctionReturnTypeMode;
 }
 
 export enum ClassObjectKind {

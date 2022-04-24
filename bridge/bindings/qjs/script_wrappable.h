@@ -47,6 +47,8 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   void Trace(GCVisitor* visitor) const override{};
 
   JSValue ToQuickJS();
+  JSValue ToQuickJSUnsafe();
+
   ScriptValue ToValue();
   FORCE_INLINE ExecutingContext* GetExecutingContext() const {
     return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));

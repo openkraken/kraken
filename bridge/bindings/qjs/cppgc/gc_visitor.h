@@ -7,6 +7,8 @@
 #define KRAKENBRIDGE_GC_VISITOR_H
 
 #include <quickjs/quickjs.h>
+#include <bindings/qjs/script_wrappable.h>
+
 #include "foundation/macros.h"
 #include "member.h"
 

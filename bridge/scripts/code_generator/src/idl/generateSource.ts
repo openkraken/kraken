@@ -236,17 +236,19 @@ function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: 
   return `Converter<${generateTypeConverter(type)}>::ImplType return_value;`;
 }
 
-function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
+function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode: string, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
   if (type[0] == FunctionArgumentType.void) return 'JS_NULL';
+  let method = mode === 'newObject' ? 'ToQuickJSUnsafe' : 'ToQuickJS';
+
   if (options.isConstructor) {
-    return `return_value->ToQuickJS()`;
+    return `return_value->${method}()`;
   }
 
   if (typeof type[0] === 'string') {
     if (type[0] === 'Promise') {
-      return 'return_value.ToQuickJS()';
+      return `return_value.${method}()`;
     } else {
-      return `return_value->ToQuickJS()`;
+      return `return_value->${method}()`;
     }
   }
 
@@ -259,7 +261,7 @@ function generateFunctionBody(blob: IDLBlob, declare: FunctionDeclaration, optio
   let paramCheck = generateMethodArgumentsCheck(declare);
   let callBody = generateFunctionCallBody(blob, declare, options);
   let returnValueInit = generateReturnValueInit(blob, declare.returnType, options);
-  let returnValueResult = generateReturnValueResult(blob, declare.returnType, options);
+  let returnValueResult = generateReturnValueResult(blob, declare.returnType, declare.returnTypeMode, options);
 
   return `${paramCheck}
 
