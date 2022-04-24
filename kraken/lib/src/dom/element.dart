@@ -755,8 +755,8 @@ abstract class Element
   /// Unmount [renderBoxModel].
   @override
   void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {
-    // No need for unmount if renderer is not created or attached.
-    if (!isRendererAttached) {
+    // No need for unmount if renderer is not created.
+    if (renderer == null) {
       return;
     }
 
