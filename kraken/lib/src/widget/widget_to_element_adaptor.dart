@@ -187,6 +187,9 @@ abstract class WidgetElement extends dom.Element {
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
 
   @override
+  bool isManageRenderBoxBySelf = false;
+
+  @override
   void didDetachRenderer() {
     super.didDetachRenderer();
   }
