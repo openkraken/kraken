@@ -97,7 +97,10 @@ class ScriptRunner {
       // Successful load.
       Timer.run(() {
         element.dispatchEvent(Event(EVENT_LOAD));
-        compute(_executeAsyncScripts, _asyncScriptsToExecute);
+        // @TODO: Use requestIdleCallback
+        scheduleMicrotask(() {
+          _executeAsyncScripts(_asyncScriptsToExecute);
+        });
       });
     } catch (e, st) {
       // An error occurred.
