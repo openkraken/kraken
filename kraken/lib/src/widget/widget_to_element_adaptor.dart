@@ -186,6 +186,7 @@ abstract class WidgetElement extends dom.Element {
 
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
 
+  // The render object is inserted by Flutter framework when element is WidgetElement.
   @override
   bool isManageRenderBoxBySelf = false;
 

@@ -88,7 +88,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   // https://dom.spec.whatwg.org/#dom-node-ownerdocument
   late Document ownerDocument;
 
-  // The render object is inserted by Flutter framework when element is WidgetElement, so kraken need not manage render object when changed.
+  // Whether Kraken is needed to manage when render object.
   bool isManageRenderBoxBySelf = true;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
