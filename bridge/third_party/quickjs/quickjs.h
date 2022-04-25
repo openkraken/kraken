@@ -423,6 +423,9 @@ void JS_DumpMemoryUsage(FILE *fp, const JSMemoryUsage *s, JSRuntime *rt);
 
 /* atom support */
 #define JS_ATOM_NULL 0
+#define JS_ATOM_TAG_INT (1U << 31)
+#define JS_ATOM_MAX_INT (JS_ATOM_TAG_INT - 1)
+#define JS_ATOM_MAX     ((1U << 30) - 1)
 
 enum {
   __JS_ATOM_NULL = JS_ATOM_NULL,

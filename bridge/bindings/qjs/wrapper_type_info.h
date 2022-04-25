@@ -39,6 +39,22 @@ enum {
   JS_CLASS_CUSTOM_CLASS_INIT_COUNT /* last entry for predefined classes */
 };
 
+// Callback when get property using index.
+// exp: obj[0]
+using IndexedPropertyGetterHandler = JSValue (*)(JSContext* ctx, JSValue obj, uint32_t index);
+
+// Callback when get property using string or symbol.
+// exp: obj['hello']
+using StringPropertyGetterHandler = JSValue (*)(JSContext* ctx, JSValue obj, JSAtom atom);
+
+// Callback when set property using index.
+// exp: obj[0] = value;
+using IndexedPropertySetterHandler = bool (*)(JSContext* ctx, JSValueConst obj, uint32_t index, JSValueConst value);
+
+// Callback when set property using string or symbol.
+// exp: obj['hello'] = value;
+using StringPropertySetterHandler = bool (*)(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value);
+
 // This struct provides a way to store a bunch of information that is helpful
 // when creating quickjs objects. Each quickjs bindings class has exactly one static
 // WrapperTypeInfo member, so comparing pointers is a safe way to determine if
@@ -59,7 +75,10 @@ class WrapperTypeInfo final {
   const char* className{nullptr};
   const WrapperTypeInfo* parent_class{nullptr};
   JSClassCall* callFunc{nullptr};
-  JSClassExoticMethods* exoticMethods{nullptr};
+  IndexedPropertyGetterHandler indexed_property_getter_handler_{nullptr};
+  StringPropertyGetterHandler string_property_getter_handler_{nullptr};
+  IndexedPropertySetterHandler indexed_property_setter_handler_{nullptr};
+  StringPropertySetterHandler string_property_setter_handler_{nullptr};
 };
 
 }  // namespace kraken

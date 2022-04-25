@@ -124,6 +124,21 @@ bool JS_HasClassId(JSRuntime* runtime, JSClassID classId);
 JSValue JS_GetProxyTarget(JSValue value);
 JSGCPhaseEnum JS_GetEnginePhase(JSRuntime* runtime);
 
+static inline bool JS_AtomIsTaggedInt(JSAtom v)
+{
+  return (v & JS_ATOM_TAG_INT) != 0;
+}
+
+static inline JSAtom JS_AtomFromUInt32(uint32_t v)
+{
+  return v | JS_ATOM_TAG_INT;
+}
+
+static inline uint32_t JS_AtomToUInt32(JSAtom atom)
+{
+  return atom & ~JS_ATOM_TAG_INT;
+}
+
 #ifdef __cplusplus
 }
 #endif
