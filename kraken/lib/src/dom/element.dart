@@ -762,7 +762,7 @@ abstract class Element
 
     // Ignore the fixed element to unmount render object.
     // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
-    if (keepFixedAlive && _isFixed) {
+    if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
       return;
     }
 
@@ -1524,8 +1524,6 @@ abstract class Element
     }
     return offset;
   }
-
-  bool get _isFixed => renderStyle.position == CSSPositionType.fixed;
 
   // The HTMLElement.offsetParent read-only property returns a reference to the element
   // which is the closest (nearest in the containment hierarchy) positioned ancestor element.
