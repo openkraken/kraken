@@ -96,6 +96,7 @@ HTMLElement* HTMLElementFactory::Create(const AtomicString& name, Document& docu
 
 void HTMLElementFactory::Dispose() {
   delete g_html_constructors;
+  g_html_constructors = nullptr;
 }
 
 }  // namespace kraken

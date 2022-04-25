@@ -23,6 +23,7 @@
 #include "qjs_node.h"
 #include "qjs_text.h"
 #include "qjs_window.h"
+#include "qjs_node_list.h"
 
 namespace kraken {
 
@@ -35,6 +36,7 @@ void InstallBindings(ExecutingContext* context) {
   QJSEventTarget::Install(context);
   QJSEvent::Install(context);
   QJSNode::Install(context);
+  QJSNodeList::Install(context);
   QJSDocument::Install(context);
   QJSCharacterData::Install(context);
   QJSText::Install(context);

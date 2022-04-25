@@ -3,10 +3,10 @@
  * Author: Kraken Team.
  */
 
-#include "event_target.h"
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "page.h"
+
+using namespace kraken;
 
 TEST(Node, appendChild) {
   bool static errorCalled = false;
@@ -47,6 +47,23 @@ TEST(Node, childNodes) {
       "document.body.childNodes[1] === div2,"
       "div1.nextSibling === div2,"
       "div2.previousSibling === div1)";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(Node, textNodeHaveEmptyChildNodes) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    logCalled = true;
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto context = bridge->getContext();
+  const char* code =
+      "let text = document.createTextNode('helloworld');"
+      "console.log(text.childNodes);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 
   EXPECT_EQ(errorCalled, false);

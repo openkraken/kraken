@@ -3,6 +3,7 @@
  */
 
 #include "node.h"
+#include <unordered_map>
 #include "character_data.h"
 #include "document.h"
 #include "document_fragment.h"
@@ -38,10 +39,41 @@ NodeList* Node::childNodes() {
   return EnsureData().EnsureEmptyChildNodeList(*this);
 }
 
-EventTargetData* Node::GetEventTargetData() {
-  return nullptr;
+namespace {
+
+//// Helper object to allocate EventTargetData which is otherwise only used
+//// through EventTargetWithInlineData.
+class EventTargetDataObject final : public GarbageCollected<EventTargetDataObject> {
+ public:
+  void Trace(GCVisitor* visitor) const { data_.Trace(visitor); }
+
+  EventTargetData& GetEventTargetData() { return data_; }
+
+ private:
+  EventTargetData data_;
+};
+
+}  // namespace
+
+using EventTargetDataMap = std::unordered_map<Node*, EventTargetDataObject*>;
+static EventTargetDataMap& GetEventTargetDataMap() {
+  static thread_local EventTargetDataMap map;
+  return map;
 }
-EventTargetData& Node::EnsureEventTargetData() {}
+
+EventTargetData* Node::GetEventTargetData() {
+  return HasEventTargetData() ? &GetEventTargetDataMap().at(this)->GetEventTargetData() : nullptr;
+}
+
+EventTargetData& Node::EnsureEventTargetData() {
+  if (HasEventTargetData())
+    return GetEventTargetDataMap().at(this)->GetEventTargetData();
+  assert(GetEventTargetDataMap().count(this) == 0);
+  auto* data = MakeGarbageCollected<EventTargetDataObject>();
+  GetEventTargetDataMap().insert(std::make_pair(this, data));
+  SetHasEventTargetData(true);
+  return data->GetEventTargetData();
+}
 
 NodeData& Node::CreateData() {
   data_ = std::make_unique<NodeData>();
@@ -394,10 +426,16 @@ Node::Node(ExecutingContext* context, TreeScope* tree_scope, ConstructionType ty
       next_(nullptr),
       data_(nullptr) {}
 
+Node::~Node() {
+  GetEventTargetDataMap().erase(this);
+}
+
 void Node::Trace(GCVisitor* visitor) const {
   visitor->Trace(previous_);
   visitor->Trace(next_);
   visitor->Trace(parent_or_shadow_host_node_);
+  if (data_ != nullptr)
+    data_->Trace(visitor);
   EventTarget::Trace(visitor);
 }
 

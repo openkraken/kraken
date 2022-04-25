@@ -33,7 +33,7 @@ class NodeData {
   void Trace(GCVisitor* visitor) const;
 
  private:
-  NodeList* child_node_list_;
+  Member<NodeList> child_node_list_;
 };
 
 }  // namespace kraken

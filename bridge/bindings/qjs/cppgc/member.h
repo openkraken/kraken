@@ -15,11 +15,18 @@ namespace kraken {
 
 class ScriptWrappable;
 
+/**
+ * Members are used in classes to contain strong pointers to other garbage
+ * collected objects. All Member fields of a class must be traced in the class'
+ * trace method.
+ */
 template <typename T, typename = std::is_base_of<ScriptWrappable, T>>
 class Member {
  public:
   Member() = default;
-  Member(T* ptr) : raw_(ptr), runtime_(ptr != nullptr ? ptr->runtime() : nullptr) {}
+  Member(T* ptr) {
+    Initialize(ptr);
+  }
   ~Member() {
     if (raw_ != nullptr) {
       assert(runtime_ != nullptr);
@@ -39,8 +46,15 @@ class Member {
     if (raw_ == nullptr)
       return;
     auto* wrappable = To<ScriptWrappable>(raw_);
-    JS_FreeValue(wrappable->ctx(), wrappable->ToValue().QJSValue());
+    JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     raw_ = nullptr;
+  }
+
+  void Initialize(T* p) {
+    inited_ = true;
+    if (p == nullptr) return;
+    raw_ = p;
+    runtime_ = p->runtime();
   }
 
   // Copy assignment.
@@ -73,17 +87,20 @@ class Member {
 
  private:
   void SetRaw(T* p) {
+    assert(inited_);
     if (p != nullptr) {
       auto* wrappable = To<ScriptWrappable>(p);
       runtime_ = wrappable->runtime();
-      JS_DupValue(wrappable->ctx(), wrappable->ToValue().QJSValue());
+      JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     }
     raw_ = p;
   }
 
   T* raw_{nullptr};
   JSRuntime* runtime_{nullptr};
+  bool inited_{false};
 };
+
 
 }  // namespace kraken
 

@@ -23,6 +23,7 @@ list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./core/frame/module_manager_test.cc
   ./core/dom/events/event_target_test.cc
   ./core/dom/document_test.cc
+  ./core/dom/node_test.cc
   #  ./bindings/qjs/bom/timer_test.cc
 #  ./bindings/qjs/qjs_patch_test.cc
 #  ./bindings/qjs/garbage_collected_test.cc

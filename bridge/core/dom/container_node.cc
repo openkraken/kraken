@@ -323,9 +323,9 @@ std::string ContainerNode::nodeValue() const {
 }
 
 ContainerNode::ContainerNode(TreeScope* tree_scope, ConstructionType type)
-    : Node(tree_scope->GetDocument().GetExecutingContext(), tree_scope, type) {}
+    : ContainerNode(tree_scope->GetDocument().GetExecutingContext(), &tree_scope->GetDocument(), type) {}
 ContainerNode::ContainerNode(ExecutingContext* context, Document* document, ConstructionType type)
-    : Node(context, document, type) {}
+    : Node(context, document, type), first_child_(nullptr), last_child_(nullptr) {}
 
 void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& old_child) {
   assert(old_child.parentNode() == this);

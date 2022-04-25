@@ -14,8 +14,7 @@ namespace kraken {
 
 // Define all built-in wrapper class id.
 enum {
-  // We assume there will no other class id could overwrite by JS_NewClassID, at least 200.
-  JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 200,
+  JS_CLASS_GC_TRACKER = JS_CLASS_INIT_COUNT + 1,
   JS_CLASS_BLOB,
   JS_CLASS_EVENT,
   JS_CLASS_ERROR_EVENT,
@@ -35,7 +34,9 @@ enum {
   JS_CLASS_HTML_BODY_ELEMENT,
   JS_CLASS_HTML_HEAD_ELEMENT,
   JS_CLASS_HTML_HTML_ELEMENT,
-  JS_CLASS_HTML_UNKNOWN_ELEMENT
+  JS_CLASS_HTML_UNKNOWN_ELEMENT,
+
+  JS_CLASS_CUSTOM_CLASS_INIT_COUNT  /* last entry for predefined classes */
 };
 
 // This struct provides a way to store a bunch of information that is helpful

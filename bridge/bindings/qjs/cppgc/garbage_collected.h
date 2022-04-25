@@ -45,7 +45,7 @@ class GarbageCollected {
    */
   virtual void Trace(GCVisitor* visitor) const = 0;
 
-  virtual void InitializeQuickJSObject() = 0;
+  virtual void InitializeQuickJSObject() {};
 
  protected:
   GarbageCollected(){};

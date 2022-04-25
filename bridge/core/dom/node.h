@@ -288,6 +288,7 @@ class Node : public EventTarget {
 
   Node(ExecutingContext* context, TreeScope*, ConstructionType);
   Node() = delete;
+  ~Node();
 
  private:
   uint32_t node_flags_;
