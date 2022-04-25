@@ -1133,11 +1133,14 @@ class CSSRenderStyle
     while(parentRenderStyle != null) {
       RenderStyle? grandParentRenderStyle = parentRenderStyle.parent;
       // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
-      // even if parents have width.
+      // even if parents have width when flex direction is row.
       if (grandParentRenderStyle != null) {
         bool isGrandParentFlex = grandParentRenderStyle.display == CSSDisplay.flex ||
           grandParentRenderStyle.display == CSSDisplay.inlineFlex;
-        if (isGrandParentFlex && parentRenderStyle.flexShrink == 0) {
+        bool isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(grandParentRenderStyle.flexDirection);
+        if (isGrandParentFlex
+          && isHorizontalDirection
+          && parentRenderStyle.flexShrink == 0) {
           return null;
         }
       }
