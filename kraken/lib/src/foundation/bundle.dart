@@ -24,12 +24,14 @@ final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.kraken
 
 const List<String> _supportedByteCodeVersions = ['1'];
 
-bool _isSupportedBytecode(String mimeType, Uri uri) {
-  for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
-    if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
-    // @NOTE: This is useful for most http server that did not recognize a .kbc1 file.
-    // Simply treat some.kbc1 file as the bytecode.
-    if (uri.path.endsWith('.kbc' + _supportedByteCodeVersions[i])) return true;
+bool _isSupportedBytecode(String mimeType, Uri? uri) {
+  if (uri != null) {
+    for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
+      if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
+      // @NOTE: This is useful for most http server that did not recognize a .kbc1 file.
+      // Simply treat some.kbc1 file as the bytecode.
+      if (uri.path.endsWith('.kbc' + _supportedByteCodeVersions[i])) return true;
+    }
   }
   return false;
 }
@@ -134,7 +136,7 @@ abstract class KrakenBundle {
   bool get isJavascript => contentType.mimeType == _javascriptContentType.mimeType ||
                             contentType.mimeType == _javascriptApplicationContentType.mimeType ||
                             contentType.mimeType == _xJavascriptContentType.mimeType;
-  bool get isBytecode => _isSupportedBytecode(contentType.mimeType, _uri!);
+  bool get isBytecode => _isSupportedBytecode(contentType.mimeType, _uri);
 }
 
 // The bundle that output input data.
@@ -196,7 +198,7 @@ class NetworkBundle extends KrakenBundle {
   }
 }
 
-class AssetsBundle extends KrakenBundle {
+class AssetsBundle extends KrakenBundle with _ExtensionContentTypeResolver {
   AssetsBundle(String url) : super(url);
 
   @override
@@ -228,7 +230,7 @@ class AssetsBundle extends KrakenBundle {
 }
 
 /// The bundle that source from local io.
-class FileBundle extends KrakenBundle {
+class FileBundle extends KrakenBundle with _ExtensionContentTypeResolver {
   FileBundle(String url) : super(url);
 
   @override
@@ -241,19 +243,38 @@ class FileBundle extends KrakenBundle {
 
     if (await file.exists()) {
       data = await file.readAsBytes();
-      if (isHTML) {
-        contentType = ContentType.html;
-      } else if (isBytecode) {
-        contentType = _krakenBc1ContentType;
-      } else if (isCSS) {
-        contentType = _cssContentType;
-      } else {
-        // Fallback to javascript.
-        contentType = _javascriptContentType;
-      }
     } else {
       _failedToResolveBundle(url);
     }
     return this;
+  }
+}
+
+/// [_ExtensionContentTypeResolver] is useful for [KrakenBundle] to determine
+/// content-type by uri's extension.
+mixin _ExtensionContentTypeResolver on KrakenBundle {
+  ContentType? _contentType;
+
+  @override
+  ContentType get contentType => _contentType ??= _resolveContentType(_uri);
+
+  static ContentType _resolveContentType(Uri? uri) {
+    if (_isUriExt(uri, '.js')) {
+      return _javascriptApplicationContentType;
+    } else if (_isUriExt(uri, '.html')) {
+      return ContentType.html;
+    } else if (_isSupportedBytecode('', uri)) {
+      return _krakenBc1ContentType;
+    } else if (_isUriExt(uri, '.css')) {
+      return _cssContentType;
+    }
+    return ContentType.text;
+  }
+
+  static bool _isUriExt(Uri? uri, String ext) {
+    if (uri == null) {
+      return false;
+    }
+    return uri.path.toLowerCase().endsWith(ext);
   }
 }

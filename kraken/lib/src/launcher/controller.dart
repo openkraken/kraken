@@ -1214,6 +1214,14 @@ class KrakenController {
         evaluateQuickjsByteCode(contextId, data);
       } else if (entrypoint.isHTML) {
         parseHTML(contextId, await resolveStringFromData(data));
+      } else if (entrypoint.contentType.primaryType == 'text') {
+        // Fallback treating text content as JavaScript.
+        try {
+          evaluateScripts(contextId, await resolveStringFromData(data, preferSync: true), url: url);
+        } catch (error) {
+          print('Fallback to execute JavaScript content of $url');
+          rethrow;
+        }
       } else {
         // The resource type can not be evaluated.
         throw FlutterError('Can\'t evaluate content of $url');
