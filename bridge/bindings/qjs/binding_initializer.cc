@@ -21,9 +21,9 @@
 #include "qjs_html_html_element.h"
 #include "qjs_module_manager.h"
 #include "qjs_node.h"
+#include "qjs_node_list.h"
 #include "qjs_text.h"
 #include "qjs_window.h"
-#include "qjs_node_list.h"
 
 namespace kraken {
 
