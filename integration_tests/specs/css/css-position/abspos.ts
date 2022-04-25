@@ -515,8 +515,7 @@ describe('abspos', () => {
     await snapshot();
   });
 
-  // @TODO: White space on the start is incorrectly trimmed on position absolute element.
-  xit('011', async () => {
+  it('011', async () => {
     let p;
     let p_1;
     let p_2;

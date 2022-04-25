@@ -172,4 +172,94 @@ describe('TextNode', () => {
       expect(text.nodeValue).toEqual(TEXT);
     });
   });
+
+  it('should work with whitespace trim and collapse of space', async () => {
+    let div;
+ 
+    div = createElement(
+      'div',
+      {
+        style: {
+          font: '60px monospace',
+        },
+      },
+      [createText(`\u0020  \u0020A\u0020  \u0020B`)]
+    );
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with whitespace trim and collapse of tab', async () => {
+    let div;
+ 
+    div = createElement(
+      'div',
+      {
+        style: {
+          font: '60px monospace',
+        },
+      },
+      [createText(`\u0009\u0009\u0009A\u0009\u0009\u0009B`)]
+    );
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with whitespace trim and collapse of segment break', async () => {
+    let div;
+ 
+    div = createElement(
+      'div',
+      {
+        style: {
+          font: '60px monospace',
+        },
+      },
+      [createText(`\u000a\u000a\u000aA\u000a\u000a\u000aB`)]
+    );
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should work with whitespace trim and collapse of carriage return', async () => {
+    let div;
+ 
+    div = createElement(
+      'div',
+      {
+        style: {
+          font: '60px monospace',
+        },
+      },
+      [createText(`\u000d\u000d\u000dA\u000d\u000d\u000dB`)]
+    );
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('should not work with whitespace trim and collapse of no-break space', async () => {
+    let div;
+ 
+    div = createElement(
+      'div',
+      {
+        style: {
+          font: '60px monospace',
+        },
+      },
+      [createText(`\u00a0\u00a0\u00a0A\u00a0\u00a0\u00a0B`)]
+    );
+    
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
 });
