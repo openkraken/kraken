@@ -21,22 +21,23 @@ describe('script element', () => {
   });
 
   it('async script execute in delayed order', async (done) => {
-    const script1 = document.createElement('script');
-    script1.async = true;
-    script1.src = 'assets:///assets/defineA.js';
-    document.body.appendChild(script1);
+    const scriptA = document.createElement('script');
+    scriptA.async = true;
+    scriptA.src = 'assets:///assets/defineA.js';
 
-    const script2 = document.createElement('script');
-    script2.async = true;
-    script2.src = 'assets:///assets/defineB.js';
-    document.body.appendChild(script2);
+    const scriptB = document.createElement('script');
+    scriptB.src = 'assets:///assets/defineB.js';
+
+    document.body.appendChild(scriptA);
+    document.body.appendChild(scriptB);
 
     script1.onload = () => {
       // expect bundle B has already loaded.
       expect(window.A).toEqual('A');
       expect(window.B).toEqual('B');
 
-      expect(window.bundleBLoadTime - window.bundleALoadTime > 0).toEqual(true);
+      // Bundle B load earlier than A.
+      expect(window.bundleALoadTime - window.bundleBLoadTime > 0).toEqual(true);
       done();
     };
   });
