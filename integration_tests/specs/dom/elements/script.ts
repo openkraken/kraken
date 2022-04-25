@@ -31,7 +31,7 @@ describe('script element', () => {
     document.body.appendChild(scriptA);
     document.body.appendChild(scriptB);
 
-    script1.onload = () => {
+    scriptA.onload = () => {
       // expect bundle B has already loaded.
       expect(window.A).toEqual('A');
       expect(window.B).toEqual('B');
