@@ -35,55 +35,43 @@ Element* Node::parentElement() const {
 NodeList* Node::childNodes() {
   auto* this_node = DynamicTo<ContainerNode>(this);
   if (this_node)
-    return EnsureData().EnsureChildNodeList(*this_node);
-  return EnsureData().EnsureEmptyChildNodeList(*this);
+    return EnsureNodeData().EnsureChildNodeList(*this_node);
+  return EnsureNodeData().EnsureEmptyChildNodeList(*this);
 }
-
-namespace {
 
 //// Helper object to allocate EventTargetData which is otherwise only used
 //// through EventTargetWithInlineData.
-class EventTargetDataObject final : public GarbageCollected<EventTargetDataObject> {
+class EventTargetDataObject final {
  public:
   void Trace(GCVisitor* visitor) const { data_.Trace(visitor); }
-
   EventTargetData& GetEventTargetData() { return data_; }
 
  private:
   EventTargetData data_;
 };
 
-}  // namespace
-
-using EventTargetDataMap = std::unordered_map<Node*, EventTargetDataObject*>;
-static EventTargetDataMap& GetEventTargetDataMap() {
-  static thread_local EventTargetDataMap map;
-  return map;
-}
-
 EventTargetData* Node::GetEventTargetData() {
-  return HasEventTargetData() ? &GetEventTargetDataMap().at(this)->GetEventTargetData() : nullptr;
+  return HasEventTargetData() ? &event_target_data_->GetEventTargetData() : nullptr;
 }
 
 EventTargetData& Node::EnsureEventTargetData() {
   if (HasEventTargetData())
-    return GetEventTargetDataMap().at(this)->GetEventTargetData();
-  assert(GetEventTargetDataMap().count(this) == 0);
-  auto* data = MakeGarbageCollected<EventTargetDataObject>();
-  GetEventTargetDataMap().insert(std::make_pair(this, data));
+    return event_target_data_->GetEventTargetData();
+  assert(event_target_data_ == nullptr);
+  event_target_data_ = std::make_unique<EventTargetDataObject>();
   SetHasEventTargetData(true);
-  return data->GetEventTargetData();
+  return event_target_data_->GetEventTargetData();
 }
 
-NodeData& Node::CreateData() {
-  data_ = std::make_unique<NodeData>();
+NodeData& Node::CreateNodeData() {
+  node_data_ = std::make_unique<NodeData>();
   return *Data();
 }
 
-NodeData& Node::EnsureData() {
+NodeData& Node::EnsureNodeData() {
   if (HasData())
     return *Data();
-  return CreateData();
+  return CreateNodeData();
 }
 
 Node& Node::TreeRoot() const {
@@ -424,18 +412,20 @@ Node::Node(ExecutingContext* context, TreeScope* tree_scope, ConstructionType ty
       previous_(nullptr),
       tree_scope_(tree_scope),
       next_(nullptr),
-      data_(nullptr) {}
+      node_data_(nullptr) {}
 
 Node::~Node() {
-  GetEventTargetDataMap().erase(this);
 }
 
 void Node::Trace(GCVisitor* visitor) const {
   visitor->Trace(previous_);
   visitor->Trace(next_);
   visitor->Trace(parent_or_shadow_host_node_);
-  if (data_ != nullptr)
-    data_->Trace(visitor);
+  if (node_data_ != nullptr)
+    node_data_->Trace(visitor);
+  if (event_target_data_ != nullptr) {
+    event_target_data_->Trace(visitor);
+  }
   EventTarget::Trace(visitor);
 }
 

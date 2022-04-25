@@ -25,6 +25,7 @@ class Document;
 class DocumentFragment;
 class ContainerNode;
 class NodeList;
+class EventTargetDataObject;
 
 enum class CustomElementState : uint32_t {
   // https://dom.spec.whatwg.org/#concept-element-custom-element-state
@@ -203,11 +204,11 @@ class Node : public EventTarget {
   void SetSelfOrAncestorHasDirAutoAttribute() { SetFlag(kSelfOrAncestorHasDirAutoAttribute); }
   void ClearSelfOrAncestorHasDirAutoAttribute() { ClearFlag(kSelfOrAncestorHasDirAutoAttribute); }
 
-  NodeData& CreateData();
+  NodeData& CreateNodeData();
   bool HasData() const { return GetFlag(kHasDataFlag); }
   // |RareData| cannot be replaced or removed once assigned.
-  NodeData* Data() const { return data_.get(); }
-  NodeData& EnsureData();
+  NodeData* Data() const { return node_data_.get(); }
+  NodeData& EnsureNodeData();
 
   void Trace(GCVisitor*) const override;
 
@@ -296,7 +297,8 @@ class Node : public EventTarget {
   Member<Node> previous_;
   Member<Node> next_;
   TreeScope* tree_scope_;
-  std::unique_ptr<NodeData> data_;
+  std::unique_ptr<EventTargetDataObject> event_target_data_;
+  std::unique_ptr<NodeData> node_data_;
 };
 
 inline ContainerNode* Node::ParentOrShadowHostNode() const {

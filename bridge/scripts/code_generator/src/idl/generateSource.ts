@@ -238,7 +238,7 @@ function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: 
 
 function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode: string, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
   if (type[0] == FunctionArgumentType.void) return 'JS_NULL';
-  let method = mode === 'newObject' ? 'ToQuickJSUnsafe' : 'ToQuickJS';
+  let method = (mode === 'newObject' || options.isConstructor) ? 'ToQuickJSUnsafe' : 'ToQuickJS';
 
   if (options.isConstructor) {
     return `return_value->${method}()`;
