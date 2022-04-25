@@ -124,7 +124,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
     JS_FreeValue(ctx, callback);
   }
 
-  if (eventHandlers.empty() && eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
+  if (eventHandlers.empty() && !eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
