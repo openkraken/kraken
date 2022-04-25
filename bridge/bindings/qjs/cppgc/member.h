@@ -24,9 +24,7 @@ template <typename T, typename = std::is_base_of<ScriptWrappable, T>>
 class Member {
  public:
   Member() = default;
-  Member(T* ptr) {
-    Initialize(ptr);
-  }
+  Member(T* ptr) { Initialize(ptr); }
   ~Member() {
     if (raw_ != nullptr) {
       assert(runtime_ != nullptr);
@@ -52,7 +50,8 @@ class Member {
 
   void Initialize(T* p) {
     inited_ = true;
-    if (p == nullptr) return;
+    if (p == nullptr)
+      return;
     raw_ = p;
     runtime_ = p->runtime();
   }
@@ -100,7 +99,6 @@ class Member {
   JSRuntime* runtime_{nullptr};
   bool inited_{false};
 };
-
 
 }  // namespace kraken
 

@@ -5,9 +5,9 @@
 #include "node_data.h"
 #include "bindings/qjs/cppgc/garbage_collected.h"
 #include "container_node.h"
-#include "ng/node_list.h"
 #include "ng/child_node_list.h"
 #include "ng/empty_node_list.h"
+#include "ng/node_list.h"
 
 namespace kraken {
 

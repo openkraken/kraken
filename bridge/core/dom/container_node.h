@@ -6,8 +6,8 @@
 #define KRAKENBRIDGE_CORE_DOM_CONTAINER_NODE_H_
 
 #include <vector>
-#include "ng/node_list.h"
 #include "bindings/qjs/cppgc/gc_visitor.h"
+#include "ng/node_list.h"
 #include "node.h"
 
 namespace kraken {

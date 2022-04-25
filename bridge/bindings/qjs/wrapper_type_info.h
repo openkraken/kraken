@@ -36,7 +36,7 @@ enum {
   JS_CLASS_HTML_HTML_ELEMENT,
   JS_CLASS_HTML_UNKNOWN_ELEMENT,
 
-  JS_CLASS_CUSTOM_CLASS_INIT_COUNT  /* last entry for predefined classes */
+  JS_CLASS_CUSTOM_CLASS_INIT_COUNT /* last entry for predefined classes */
 };
 
 // This struct provides a way to store a bunch of information that is helpful

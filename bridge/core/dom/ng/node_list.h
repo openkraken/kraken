@@ -14,12 +14,11 @@ class ExceptionState;
 
 class NodeList : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = NodeList*;
 
-  static NodeList* Create(ExecutingContext* context, ExceptionState& exception_state) {
-    return nullptr;
-  };
+  static NodeList* Create(ExecutingContext* context, ExceptionState& exception_state) { return nullptr; };
 
   NodeList(JSContext* ctx) : ScriptWrappable(ctx){};
   ~NodeList() override = default;
@@ -34,7 +33,7 @@ class NodeList : public ScriptWrappable {
 
   virtual Node* VirtualOwnerNode() const { return nullptr; }
 
-  void Trace(GCVisitor *visitor) const override {};
+  void Trace(GCVisitor* visitor) const override{};
 
  protected:
 };
