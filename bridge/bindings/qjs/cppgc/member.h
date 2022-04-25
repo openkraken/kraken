@@ -24,7 +24,10 @@ template <typename T, typename = std::is_base_of<ScriptWrappable, T>>
 class Member {
  public:
   Member() = default;
-  Member(T* ptr) { Initialize(ptr); }
+  Member(T* ptr) {
+    inited_ = true;
+    SetRaw(ptr);
+  }
   ~Member() {
     if (raw_ != nullptr) {
       assert(runtime_ != nullptr);

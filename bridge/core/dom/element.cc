@@ -15,14 +15,21 @@
 namespace kraken {
 
 Element::Element(const AtomicString& tag_name, Document* document, Node::ConstructionType construction_type)
-    : ContainerNode(document, construction_type), tag_name_(tag_name), attributes_(ElementAttributes::Create(this)) {}
+    : ContainerNode(document, construction_type), tag_name_(tag_name) {}
 
-bool Element::hasAttribute(const AtomicString& name, ExceptionState& exception_state) const {
-  return attributes_->hasAttribute(name, exception_state);
+ElementAttributes & Element::EnsureElementAttributes() {
+  if (attributes_ == nullptr) {
+    attributes_.Initialize(ElementAttributes::Create(this));
+  }
+  return *attributes_;
 }
 
-AtomicString Element::getAttribute(const AtomicString& name, ExceptionState& exception_state) const {
-  return attributes_->GetAttribute(name);
+bool Element::hasAttribute(const AtomicString& name, ExceptionState& exception_state) {
+  return EnsureElementAttributes().hasAttribute(name, exception_state);
+}
+
+AtomicString Element::getAttribute(const AtomicString& name, ExceptionState& exception_state) {
+  return EnsureElementAttributes().GetAttribute(name);
 }
 
 void Element::setAttribute(const AtomicString& name, const AtomicString& value) {
@@ -31,14 +38,14 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value) 
 }
 
 void Element::setAttribute(const AtomicString& name, const AtomicString& value, ExceptionState& exception_state) {
-  if (attributes_->hasAttribute(name, exception_state)) {
-    AtomicString&& oldAttribute = attributes_->GetAttribute(name);
-    if (!attributes_->setAttribute(name, value, exception_state)) {
+  if (EnsureElementAttributes().hasAttribute(name, exception_state)) {
+    AtomicString&& oldAttribute = EnsureElementAttributes().GetAttribute(name);
+    if (!EnsureElementAttributes().setAttribute(name, value, exception_state)) {
       return;
     };
     _didModifyAttribute(name, oldAttribute, value);
   } else {
-    if (!attributes_->setAttribute(name, value, exception_state)) {
+    if (!EnsureElementAttributes().setAttribute(name, value, exception_state)) {
       return;
     };
     _didModifyAttribute(name, AtomicString::Empty(ctx()), value);
@@ -52,7 +59,7 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value, 
 }
 
 void Element::removeAttribute(const AtomicString& name, ExceptionState& exception_state) {
-  attributes_->removeAttribute(name, exception_state);
+  EnsureElementAttributes().removeAttribute(name, exception_state);
 }
 
 BoundingClientRect* Element::getBoundingClientRect(ExceptionState& exception_state) {
@@ -130,7 +137,7 @@ std::string Element::nodeName() const {
 }
 
 bool Element::HasEquivalentAttributes(const Element& other) const {
-  return other.attributes_->IsEquivalent(*attributes_);
+  return attributes_ != nullptr && other.attributes_ != nullptr && other.attributes_->IsEquivalent(*attributes_);
 }
 
 void Element::Trace(GCVisitor* visitor) const {

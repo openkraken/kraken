@@ -21,7 +21,9 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 }
 
 Document::Document(ExecutingContext* context)
-    : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {}
+    : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {
+  document_element_.Initialize(MakeGarbageCollected<HTMLHtmlElement>(*this));
+}
 
 Element* Document::createElement(const AtomicString& name, ExceptionState& exception_state) {
   if (!IsValidName(name)) {

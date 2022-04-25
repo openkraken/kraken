@@ -65,6 +65,7 @@ EventTargetData& Node::EnsureEventTargetData() {
 
 NodeData& Node::CreateNodeData() {
   node_data_ = std::make_unique<NodeData>();
+  SetFlag(kHasDataFlag);
   return *Data();
 }
 

@@ -67,7 +67,7 @@ class Document : public ContainerNode, public TreeScope {
 
  private:
   int node_count_;
-  Member<Element> document_element_{MakeGarbageCollected<HTMLHtmlElement>(*this)};
+  Member<Element> document_element_;
 };
 
 }  // namespace kraken

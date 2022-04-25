@@ -21,10 +21,11 @@ class Element : public ContainerNode {
   using ImplType = Element*;
   Element(const AtomicString& tag_name, Document* document, ConstructionType = kCreateElement);
 
-  ElementAttributes* attributes() const { return attributes_; }
+  ElementAttributes* attributes() { return &EnsureElementAttributes(); }
+  ElementAttributes& EnsureElementAttributes();
 
-  bool hasAttribute(const AtomicString&, ExceptionState& exception_state) const;
-  AtomicString getAttribute(const AtomicString&, ExceptionState& exception_state) const;
+  bool hasAttribute(const AtomicString&, ExceptionState& exception_state);
+  AtomicString getAttribute(const AtomicString&, ExceptionState& exception_state);
 
   // Passing null as the second parameter removes the attribute when
   // calling either of these set methods.

@@ -13,7 +13,7 @@ TEST(Document, createElement) {
   bool static logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "<div>");
+    EXPECT_STREQ(message.c_str(), "<div/>");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
