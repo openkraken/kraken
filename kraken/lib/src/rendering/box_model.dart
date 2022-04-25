@@ -16,6 +16,9 @@ import 'package:kraken/rendering.dart';
 
 import 'debug_overlay.dart';
 
+// The hashCode of all the renderBox which is in layout.
+List<int> renderBoxInLayoutHashCodes = [];
+
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
 
@@ -788,6 +791,8 @@ class RenderBoxModel extends RenderBox
 
   @override
   void layout(Constraints newConstraints, {bool parentUsesSize = false}) {
+    renderBoxInLayoutHashCodes.add(hashCode);
+
     if (hasSize) {
       // Constraints changes between tight and no tight will cause reLayoutBoundary change
       // which will then cause its children to be marked as needsLayout in Flutter
@@ -797,6 +802,12 @@ class RenderBoxModel extends RenderBox
       }
     }
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
+
+    renderBoxInLayoutHashCodes.remove(hashCode);
+    // Clear length cache when no renderBox is in layout.
+    if (renderBoxInLayoutHashCodes.isEmpty) {
+      clearComputedValueCache();
+    }
   }
 
   void markAdjacentRenderParagraphNeedsLayout() {

@@ -1226,7 +1226,7 @@ describe('flex-minimum', () => {
       [
         (testFlexItemOverlappingGreen = createElement('img', {
           id: 'test-flex-item-overlapping-green',
-          src: 'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/60x60-green.png',
+          src: 'assets/60x60-green.png',
           style: {
             'min-height': '100px',
             'box-sizing': 'border-box',
@@ -1463,7 +1463,7 @@ describe('flex-minimum', () => {
       [
         createElement('img', {
           src:
-          'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/300x150-green.png',
+          'assets/300x150-green.png',
           style: {
             'box-sizing': 'border-box',
             height: '25px',
