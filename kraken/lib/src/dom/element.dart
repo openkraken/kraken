@@ -734,7 +734,7 @@ abstract class Element
 
     if (renderer != null) {
       // If element attach WidgetElement, render object should be attach to render tree when mount.
-      if (parent.isManageRenderBoxBySelf) {
+      if (parent.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }
 
@@ -796,7 +796,7 @@ abstract class Element
     RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && renderLayoutBox != null && isManageRenderBoxBySelf) {
+      if (!child.isRendererAttached && renderLayoutBox != null && renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
@@ -969,7 +969,7 @@ abstract class Element
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
       // If element attach WidgetElement, render object should be attach to render tree when mount.
-      if (parentElement!.isManageRenderBoxBySelf) {
+      if (parentElement!.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBoxModel _renderBoxModel = renderBoxModel!;
         // Find the renderBox of its containing block.
         RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();

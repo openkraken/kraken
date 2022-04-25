@@ -16,6 +16,11 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE,
 }
 
+enum RenderObjectManagerType {
+  FLUTTER_ELEMENT,
+  KRAKEN_NODE
+}
+
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
@@ -87,9 +92,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   // FIXME: The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
   // https://dom.spec.whatwg.org/#dom-node-ownerdocument
   late Document ownerDocument;
-
-  // Whether Kraken is needed to manage when render object.
-  bool isManageRenderBoxBySelf = true;
 
   /// The Node.parentElement read-only property returns the DOM node's parent Element,
   /// or null if the node either has no parent, or its parent isn't a DOM Element.
@@ -307,6 +309,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @override
   EventTarget? get parentEventTarget => parentNode;
+
+  // Whether Kraken Node need to manage render object.
+  RenderObjectManagerType get renderObjectManagerType => RenderObjectManagerType.KRAKEN_NODE;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

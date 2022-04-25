@@ -188,7 +188,7 @@ abstract class WidgetElement extends dom.Element {
 
   // The render object is inserted by Flutter framework when element is WidgetElement.
   @override
-  bool isManageRenderBoxBySelf = false;
+  dom.RenderObjectManagerType get renderObjectManagerType => dom.RenderObjectManagerType.FLUTTER_ELEMENT;
 
   @override
   void didDetachRenderer() {

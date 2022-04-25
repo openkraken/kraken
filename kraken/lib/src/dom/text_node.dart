@@ -81,7 +81,7 @@ class TextNode extends Node {
     createRenderer();
 
     // If element attach WidgetElement, render object should be attach to render tree when mount.
-    if (parent.isManageRenderBoxBySelf && parent.renderBoxModel is RenderLayoutBox) {
+    if (parent.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE && parent.renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
