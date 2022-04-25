@@ -723,7 +723,7 @@ abstract class Element
   // Attach renderObject of current node to parent
   @override
   void attachTo(Node parent, {RenderBox? after}) {
-    _applyStyle(style);
+    applyStyle(style);
 
     if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
       // Sliver should not create renderer here, but need to trigger
@@ -763,15 +763,6 @@ abstract class Element
     didDetachRenderer();
     renderBoxModel?.dispose();
     renderBoxModel = null;
-  }
-
-  void applyStyle() {
-    _applyStyle(style);
-
-    if (renderer != null) {
-      // Flush pending style before child attached.
-      style.flushPendingProperties();
-    }
   }
 
   @override
@@ -1408,7 +1399,7 @@ abstract class Element
     style.setProperty(property, value, true);
   }
 
-  void _applyStyle(CSSStyleDeclaration style) {
+  void applyStyle(CSSStyleDeclaration style) {
     // Apply default style.
     _applyDefaultStyle(style);
     // Init display from style directly cause renderStyle is not flushed yet.
@@ -1423,7 +1414,7 @@ abstract class Element
     if (renderBoxModel != null && classList.isNotEmpty) {
       // Diff style.
       CSSStyleDeclaration newStyle = CSSStyleDeclaration();
-      _applyStyle(newStyle);
+      applyStyle(newStyle);
       Map<String, String?> diffs = style.diff(newStyle);
       if (diffs.isNotEmpty) {
         // Update render style.

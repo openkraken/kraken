@@ -38,7 +38,12 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
 
     if (widget._krakenNode is dom.Element) {
       dom.Element element = (widget._krakenNode as dom.Element);
-      element.applyStyle();
+      element.applyStyle(element.style);
+
+      if (element.renderer != null) {
+        // Flush pending style before child attached.
+        element.style.flushPendingProperties();
+      }
     }
   }
 
