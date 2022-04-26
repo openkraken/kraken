@@ -186,7 +186,7 @@ class GestureDispatcher {
 
 
   void handlePointerEvent(PointerEvent event) {
-    if (event is PointerDownEvent || event is PointerUpEvent || event is PointerMoveEvent || event is PointerCancelEvent) {
+    if (!(event is PointerDownEvent || event is PointerUpEvent || event is PointerMoveEvent || event is PointerCancelEvent)) {
       // Only basic Point events are handled, other event does nothing and returns directly such as hover and scroll.
       return;
     }
