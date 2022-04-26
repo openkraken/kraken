@@ -409,10 +409,7 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  enum SetAttributeEventHandlerOperation {
-    kAddEventListener,
-    kRemoveEventListener
-  };
+  enum SetAttributeEventHandlerOperation { kAddEventListener, kRemoveEventListener };
 
   SetAttributeEventHandlerOperation operation;
   if (JS_IsFunction(m_ctx, value)) {
