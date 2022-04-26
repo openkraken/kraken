@@ -48,6 +48,7 @@ class KrakenRenderObjectToWidgetAdapter<T extends RenderObject> extends RenderOb
       assert(element != null);
     });
 
+    // If renderview is building,skip the buildScope phase.
     if (!needBuild) {
       if (element != null) {
         element?.mount(parentElement, null);
