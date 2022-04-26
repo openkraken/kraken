@@ -771,10 +771,10 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = true, bool keepPositionedAlive = false }) {
-    // Ignore the positioned element to unmount render object.
-    // It's useful for sliver manager to unmount child render object, but excluding positioned elements.
-    if (keepPositionedAlive && renderBoxModel?.renderPositionPlaceholder != null) {
+  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false }) {
+    // Ignore the fixed element to unmount render object.
+    // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
+    if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
       return;
     }
 
@@ -783,7 +783,7 @@ abstract class Element
     // Dispose all renderObject when deep.
     if (deep) {
       for (Node child in [...childNodes]) {
-        child.unmountRenderObject(deep: deep, keepPositionedAlive: keepPositionedAlive);
+        child.unmountRenderObject(deep: deep, keepFixedAlive: keepFixedAlive);
       }
     }
 
