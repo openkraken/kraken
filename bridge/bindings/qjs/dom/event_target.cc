@@ -212,8 +212,9 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
 
   // Dispatch event listener white by 'on' prefix property.
   if (m_eventHandlerMap.contains(eventType)) {
+    auto* window = static_cast<EventTargetInstance*>(JS_GetOpaque(context()->global(), 1));
     // Let special error event handling be true if event is an ErrorEvent.
-    bool specialErrorEventHanding = eventTypeStr == "error";
+    bool specialErrorEventHanding = eventTypeStr == "error" && eventInstance->currentTarget() == window;
 
     if (specialErrorEventHanding) {
       auto _dispatchErrorEvent = [&eventInstance, this, eventTypeStr](JSValue handler) {
