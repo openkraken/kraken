@@ -417,7 +417,7 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   } else {
     m_eventHandlerMap.erase(atom);
     JS_FreeAtom(m_ctx, atom);
-    // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
+    // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks.
     operation = SetAttributeEventHandlerOperation::kRemoveEventListener;
   }
 

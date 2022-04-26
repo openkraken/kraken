@@ -376,7 +376,7 @@ describe('Event', () => {
     expect(e.type).toBe(type);
   });
 
-  it('Event Level 0 removal', (done) => {
+  it('Event Level 0 removal', () => {
     var el = createElement('div', {
       style: {
         width: '100px',
@@ -403,7 +403,7 @@ describe('Event', () => {
     expect(ret).toEqual('12');
   });
 
-  it('Event Level 2 listen multi-times', (done) => {
+  it('Event Level 2 listen multi-times', () => {
     var el = createElement('div', {
       style: {
         width: '100px',
@@ -426,7 +426,7 @@ describe('Event', () => {
     expect(ret).toEqual('12');
   });
 
-  it('Event Level 2 listen multi-times with removal', (done) => {
+  it('Event Level 2 listen multi-times with removal', () => {
     var el = createElement('div', {
       style: {
         width: '100px',
@@ -451,4 +451,24 @@ describe('Event', () => {
 
     expect(ret).toEqual('');
   });
+
+  it('Add multi event types', () => {
+      var el = createElement('div', {
+        style: {
+          width: '100px',
+          height: '100px',
+          background: 'red'
+        }
+      });
+      let ret = '';
+      function fn1() {
+        ret += '1';
+      }
+      el.addEventListener('click', fn1);
+      el.addEventListener('scroll', fn1);
+
+      el.click();
+
+      expect(ret).toEqual('1');
+    });
 });
