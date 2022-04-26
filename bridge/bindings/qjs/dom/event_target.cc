@@ -107,8 +107,12 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsObject(callback)) {
+  if (!JS_IsString(eventTypeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventName should be an string.");
+  }
+
+  if (!JS_IsObject(callback) || !JS_IsObject(callback)) {
+    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventHandler should be an object or function.");
   }
 
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
@@ -409,21 +413,23 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  enum SetAttributeEventHandlerOperation { kAddEventListener, kRemoveEventListener };
+  enum SetAttributeEventHandlerOperation { kAddEventListener, kRemoveEventListener, kDoNothing };
 
-  SetAttributeEventHandlerOperation operation;
+  SetAttributeEventHandlerOperation operation = kDoNothing;
   if (JS_IsFunction(m_ctx, value)) {
     operation = SetAttributeEventHandlerOperation::kAddEventListener;
   } else {
-    m_eventHandlerMap.erase(atom);
+    if (m_eventHandlerMap.contains(atom)) {
+      // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks.
+      operation = SetAttributeEventHandlerOperation::kRemoveEventListener;
+      m_eventHandlerMap.erase(atom);
+    }
     JS_FreeAtom(m_ctx, atom);
-    // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks.
-    operation = SetAttributeEventHandlerOperation::kRemoveEventListener;
   }
 
-  if (!m_eventListenerMap.contains(atom) && !m_eventHandlerMap.contains(atom)) {
+  if (operation != kDoNothing && !m_eventListenerMap.contains(atom) && !m_eventHandlerMap.contains(atom)) {
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
-    UICommand type = operation == SetAttributeEventHandlerOperation::kAddEventListener ? UICommand::addEvent : UICommand::removeEvent;
+    UICommand type = operation == kAddEventListener ? UICommand::addEvent : UICommand::removeEvent;
     m_context->uiCommandBuffer()->addCommand(m_eventTargetId, type, *args_01, nullptr);
   }
 
