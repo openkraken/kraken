@@ -75,7 +75,7 @@ JSValue EventTarget::addEventListener(JSContext* ctx, JSValue this_val, int argc
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
 
   // Dart needs to be notified for the first registration event.
-  if (!eventTargetInstance->m_eventListenerMap.contains(eventType) || eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
+  if (!eventTargetInstance->m_eventListenerMap.contains(eventType) && !eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
     NativeString args_01{};
@@ -107,8 +107,12 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
   JSValue eventTypeValue = argv[0];
   JSValue callback = argv[1];
 
-  if (!JS_IsString(eventTypeValue) || !JS_IsObject(callback) || !JS_IsObject(callback)) {
+  if (!JS_IsString(eventTypeValue)) {
     return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventName should be an string.");
+  }
+
+  if (!JS_IsObject(callback) || !JS_IsObject(callback)) {
+    return JS_ThrowTypeError(ctx, "Failed to removeEventListener: eventHandler should be an object or function.");
   }
 
   JSAtom eventType = JS_ValueToAtom(ctx, eventTypeValue);
@@ -124,7 +128,7 @@ JSValue EventTarget::removeEventListener(JSContext* ctx, JSValue this_val, int a
     JS_FreeValue(ctx, callback);
   }
 
-  if (eventHandlers.empty() && !eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
+  if (!eventHandlers.contains(eventType) && !eventTargetInstance->m_eventHandlerMap.contains(eventType)) {
     // Dart needs to be notified for handles is empty.
     int32_t contextId = eventTargetInstance->prototype()->contextId();
 
@@ -203,13 +207,6 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
     JS_FreeValue(m_ctx, returnedValue);
   };
 
-  if (m_eventListenerMap.contains(eventType)) {
-    const EventListenerVector* vector = m_eventListenerMap.find(eventType);
-    for (auto& eventHandler : *vector) {
-      _dispatchEvent(eventHandler);
-    }
-  }
-
   // Dispatch event listener white by 'on' prefix property.
   if (m_eventHandlerMap.contains(eventType)) {
     auto* window = static_cast<EventTargetInstance*>(JS_GetOpaque(context()->global(), 1));
@@ -238,6 +235,14 @@ bool EventTargetInstance::internalDispatchEvent(EventInstance* eventInstance) {
       _dispatchErrorEvent(m_eventHandlerMap.getProperty(eventType));
     } else {
       _dispatchEvent(m_eventHandlerMap.getProperty(eventType));
+    }
+  }
+
+  // Dispatch DOM Event Level 0 handlers.
+  if (m_eventListenerMap.contains(eventType)) {
+    const EventListenerVector* vector = m_eventListenerMap.find(eventType);
+    for (auto& eventHandler : *vector) {
+      _dispatchEvent(eventHandler);
     }
   }
 
@@ -409,20 +414,28 @@ void EventTargetInstance::setAttributesEventHandler(JSString* p, JSValue value) 
   memcpy(eventType, &p->u.str8[2], p->len + 1 - 2);
   JSAtom atom = JS_NewAtom(m_ctx, eventType);
 
-  // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks
-  if (JS_IsNull(value)) {
-    m_eventHandlerMap.erase(atom);
+  enum SetAttributeEventHandlerOperation { kAddEventListener, kRemoveEventListener, kDoNothing };
+
+  SetAttributeEventHandlerOperation operation = kDoNothing;
+  if (JS_IsFunction(m_ctx, value)) {
+    operation = SetAttributeEventHandlerOperation::kAddEventListener;
+  } else {
+    if (m_eventHandlerMap.contains(atom)) {
+      // When evaluate scripts like 'element.onclick = null', we needs to remove the event handlers callbacks.
+      operation = SetAttributeEventHandlerOperation::kRemoveEventListener;
+      m_eventHandlerMap.erase(atom);
+    }
     JS_FreeAtom(m_ctx, atom);
-    return;
   }
 
-  m_eventHandlerMap.setProperty(atom, JS_DupValue(m_ctx, value));
-
-  if (JS_IsFunction(m_ctx, value) && m_eventListenerMap.empty()) {
-    int32_t contextId = m_context->getContextId();
+  if (operation != kDoNothing && !m_eventListenerMap.contains(atom) && !m_eventHandlerMap.contains(atom)) {
     std::unique_ptr<NativeString> args_01 = atomToNativeString(m_ctx, atom);
-    int32_t type = JS_IsFunction(m_ctx, value) ? UICommand::addEvent : UICommand::removeEvent;
+    UICommand type = operation == kAddEventListener ? UICommand::addEvent : UICommand::removeEvent;
     m_context->uiCommandBuffer()->addCommand(m_eventTargetId, type, *args_01, nullptr);
+  }
+
+  if (operation == SetAttributeEventHandlerOperation::kAddEventListener) {
+    m_eventHandlerMap.setProperty(atom, JS_DupValue(m_ctx, value));
   }
 }
 
