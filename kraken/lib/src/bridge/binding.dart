@@ -142,12 +142,14 @@ abstract class BindingBridge {
   }
 
   static void listenEvent(EventTarget target, String type) {
-    assert(_debugShouldNotListenMultiTimes(target, type), '$target $type');
+    assert(_debugShouldNotListenMultiTimes(target, type),
+      'Failed to listen event \'$type\' for $target, for which is already bound.');
     target.addEventListener(type, _dispatchBindingEvent);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
-    assert(_debugShouldNotUnlistenEmpty(target, type), '$target $type');
+    assert(_debugShouldNotUnlistenEmpty(target, type),
+      'Failed to unlisten event \'$type\' for $target, for which is already unbound.');
     target.removeEventListener(type, _dispatchBindingEvent);
   }
 
