@@ -17,6 +17,22 @@ class QJS<%= className %> : public QJSInterfaceBridge<QJS<%= className %>, <%= c
  <% if (classMethodsInstallList.length > 0) { %> static void InstallPrototypeMethods(ExecutingContext* context); <% } %>
  <% if (classPropsInstallList.length > 0) { %> static void InstallPrototypeProperties(ExecutingContext* context); <% } %>
  <% if (object.construct) { %> static void InstallConstructor(ExecutingContext* context); <% } %>
+
+ <% if (object.indexedProp) { %>
+  <% if (object.indexedProp.indexKeyType == 'number') { %>
+  static JSValue IndexedPropertyGetterCallback(JSContext* ctx, JSValue obj, uint32_t index);
+  <% } else { %>
+  static JSValue StringPropertyGetterCallback(JSContext* ctx, JSValue obj, JSAtom key);
+  <% } %>
+  <% if (!object.indexedProp.readonly) { %>
+
+    <% if (object.indexedProp.indexKeyType == 'number') { %>
+  static bool IndexedPropertySetterCallback(JSContext* ctx, JSValueConst obj, uint32_t index, JSValueConst value);
+    <% } else { %>
+  static bool StringPropertySetterCallback(JSContext* ctx, JSValueConst obj, JSAtom key, JSValueConst value);
+    <% } %>
+  <% } %>
+ <% } %>
 };
 
 

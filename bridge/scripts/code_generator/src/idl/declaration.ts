@@ -22,18 +22,26 @@ export class FunctionArguments {
   required: boolean;
 }
 
+export class ParameterMode {
+  newObject?: boolean;
+  dartImpl?: boolean;
+}
+
 export class PropsDeclaration {
   type: ParameterType[] = [];
+  typeMode: ParameterMode;
   name: string;
   readonly: boolean;
 }
 
-type FunctionReturnTypeMode = 'normal' | 'newObject';
+export class IndexedPropertyDeclaration extends PropsDeclaration {
+  indexKeyType: 'string' | 'number';
+}
 
 export class FunctionDeclaration extends PropsDeclaration {
   args: FunctionArguments[] =  [];
   returnType: ParameterType[] = [];
-  returnTypeMode: FunctionReturnTypeMode;
+  returnTypeMode?: ParameterMode;
 }
 
 export enum ClassObjectKind {
@@ -45,6 +53,7 @@ export class ClassObject {
   name: string;
   parent: string;
   props: PropsDeclaration[] = [];
+  indexedProp?: IndexedPropertyDeclaration;
   methods: FunctionDeclaration[] = [];
   construct?: FunctionDeclaration;
   kind: ClassObjectKind = ClassObjectKind.interface

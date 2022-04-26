@@ -6,7 +6,7 @@ import {
   FunctionArguments,
   FunctionArgumentType,
   FunctionDeclaration,
-  FunctionObject,
+  FunctionObject, IndexedPropertyDeclaration, ParameterMode,
   PropsDeclaration,
 } from './declaration';
 import {generatorSource} from './generator';
@@ -52,10 +52,6 @@ function getParameterName(name: ts.BindingName) : string {
 
 export type ParameterType =  FunctionArgumentType | string;
 
-class ParameterMode {
-  newObject?: boolean;
-}
-
 function getParameterBaseType(type: ts.TypeNode, mode?: ParameterMode): ParameterType {
   if (type.kind === ts.SyntaxKind.StringKeyword) {
     return FunctionArgumentType.dom_string;
@@ -88,6 +84,11 @@ function getParameterBaseType(type: ts.TypeNode, mode?: ParameterMode): Paramete
       return FunctionArgumentType.double;
     } else if (identifier === 'NewObject') {
       if (mode) mode.newObject = true;
+      let argument = typeReference.typeArguments![0];
+      // @ts-ignore
+      return argument.typeName.text;
+    } else if (identifier === 'DartImpl') {
+      if (mode) mode.dartImpl = true;
       let argument = typeReference.typeArguments![0];
       // @ts-ignore
       return argument.typeName.text;
@@ -189,8 +190,23 @@ function walkProgram(statement: ts.Statement) {
             if (m.type) {
               let mode = new ParameterMode();
               f.returnType = getParameterType(m.type, mode);
-              f.returnTypeMode = mode.newObject ? 'newObject' : 'normal';
+              f.returnTypeMode = mode;
             }
+            break;
+          }
+          case ts.SyntaxKind.IndexSignature: {
+            let m = (member as ts.IndexSignatureDeclaration);
+            let prop = new IndexedPropertyDeclaration();
+            let modifier = m.modifiers;
+            prop.readonly = !!(modifier && modifier[0].kind == ts.SyntaxKind.ReadonlyKeyword);
+
+            let params = m.parameters;
+            prop.indexKeyType = params[0].type!.kind === ts.SyntaxKind.NumberKeyword ? 'number' : 'string';
+
+            let mode = new ParameterMode();
+            prop.type = getParameterType(m.type, mode);
+            prop.typeMode = mode;
+            obj.indexedProp = prop;
             break;
           }
           case ts.SyntaxKind.ConstructSignature: {

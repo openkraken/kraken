@@ -5,6 +5,7 @@ import {
   FunctionArgumentType,
   FunctionDeclaration,
   FunctionObject,
+  ParameterMode,
 } from "./declaration";
 import {addIndent, getClassName} from "./utils";
 import {ParameterType} from "./analyzer";
@@ -35,7 +36,7 @@ function generateMethodArgumentsCheck(m: FunctionDeclaration) {
 }
 
 export function generateTypeValue(type: ParameterType[]): string {
-  switch(type[0]) {
+  switch (type[0]) {
     case FunctionArgumentType.int64: {
       return 'int64_t';
     }
@@ -58,6 +59,11 @@ export function generateTypeValue(type: ParameterType[]): string {
       return 'ScriptValue';
     }
   }
+
+  if (typeof type[0] == 'string') {
+    return type[0] + '*';
+  }
+
   return '';
 }
 
@@ -70,7 +76,7 @@ export function generateTypeConverter(type: ParameterType[]): string {
   } else if (typeof type[0] === 'string') {
     returnValue = type[0];
   } else {
-    switch(type[0]) {
+    switch (type[0]) {
       case FunctionArgumentType.int32:
         returnValue = `IDLInt32`;
         break;
@@ -81,7 +87,7 @@ export function generateTypeConverter(type: ParameterType[]): string {
         returnValue = `IDLDouble`;
         break;
       case FunctionArgumentType.function:
-        returnValue =  `IDLCallback`;
+        returnValue = `IDLCallback`;
         break;
       case FunctionArgumentType.boolean:
         returnValue = `IDLBoolean`;
@@ -109,7 +115,7 @@ export function generateTypeConverter(type: ParameterType[]): string {
 function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
   let type = generateTypeConverter(argument.type);
 
-  let hasArgumentCheck = type.indexOf('Element') >= 0 || type.indexOf('Node') >=0 || type === 'EventTarget';
+  let hasArgumentCheck = type.indexOf('Element') >= 0 || type.indexOf('Node') >= 0 || type === 'EventTarget';
 
   let body = '';
   if (hasArgumentCheck) {
@@ -154,7 +160,10 @@ if (argc <= ${argsIndex + 1}) {
 }`;
 }
 
-function generateFunctionCallBody(blob: IDLBlob, declaration: FunctionDeclaration, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
+function generateFunctionCallBody(blob: IDLBlob, declaration: FunctionDeclaration, options: GenFunctionBodyOptions = {
+  isConstructor: false,
+  isInstanceMethod: false
+}) {
   let minimalRequiredArgc = 0;
   declaration.args.forEach(m => {
     if (m.required) minimalRequiredArgc++;
@@ -172,7 +181,7 @@ function generateFunctionCallBody(blob: IDLBlob, declaration: FunctionDeclaratio
   let optionalArgumentsInit: string[] = [];
   let totalArguments: string[] = requiredArguments.slice();
 
-  for (let i = minimalRequiredArgc; i < declaration.args.length; i ++) {
+  for (let i = minimalRequiredArgc; i < declaration.args.length; i++) {
     optionalArgumentsInit.push(generateOptionalInitBody(blob, declaration, declaration.args[i], i, totalArguments, options));
     totalArguments.push(`args_${declaration.args[i].name}`);
   }
@@ -220,7 +229,10 @@ return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv);
 `;
 }
 
-function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}) {
+function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: GenFunctionBodyOptions = {
+  isConstructor: false,
+  isInstanceMethod: false
+}) {
   if (type[0] == FunctionArgumentType.void) return '';
 
   if (options.isConstructor) {
@@ -236,9 +248,12 @@ function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: 
   return `Converter<${generateTypeConverter(type)}>::ImplType return_value;`;
 }
 
-function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode: string, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod: false}): string {
+function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode?: ParameterMode, options: GenFunctionBodyOptions = {
+  isConstructor: false,
+  isInstanceMethod: false
+}): string {
   if (type[0] == FunctionArgumentType.void) return 'JS_NULL';
-  let method = (mode === 'newObject' || options.isConstructor) ? 'ToQuickJSUnsafe' : 'ToQuickJS';
+  let method = (mode && mode.newObject || options.isConstructor) ? 'ToQuickJSUnsafe' : 'ToQuickJS';
 
   if (options.isConstructor) {
     return `return_value->${method}()`;
@@ -255,9 +270,16 @@ function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode: s
   return `Converter<${generateTypeConverter(type)}>::ToValue(ctx, std::move(return_value))`;
 }
 
-type GenFunctionBodyOptions = {isConstructor?: boolean, isInstanceMethod?: boolean};
+type GenFunctionBodyOptions = { isConstructor?: boolean, isInstanceMethod?: boolean };
 
-function generateFunctionBody(blob: IDLBlob, declare: FunctionDeclaration, options: GenFunctionBodyOptions = {isConstructor: false, isInstanceMethod : false}) {
+function generateIndexedPropertyBody() {
+
+}
+
+function generateFunctionBody(blob: IDLBlob, declare: FunctionDeclaration, options: GenFunctionBodyOptions = {
+  isConstructor: false,
+  isInstanceMethod: false
+}) {
   let paramCheck = generateMethodArgumentsCheck(declare);
   let callBody = generateFunctionCallBody(blob, declare, options);
   let returnValueInit = generateReturnValueInit(blob, declare.returnType, options);
@@ -291,7 +313,7 @@ export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
     const templateKind = getTemplateKind(object);
     if (templateKind === TemplateKind.null) return '';
 
-    switch(templateKind) {
+    switch (templateKind) {
       case TemplateKind.Interface: {
         object = object as ClassObject;
         object.props.forEach(prop => {
@@ -309,18 +331,45 @@ export function generateCppSource(blob: IDLBlob, options: GenerateOptions) {
             options.classPropsInstallList.push(`{"${method.name}", ${method.name}, ${method.args.length}}`)
           }
         });
+
         if (object.construct) {
           options.constructorInstallList.push(`{"${getClassName(blob)}", nullptr, nullptr, constructor}`)
         }
 
+        let wrapperTypeRegisterList = [
+          `JS_CLASS_${_.snakeCase(getClassName(blob)).toUpperCase()}`,                        // ClassId
+          `"${getClassName(blob)}"`,                                                          // ClassName
+          object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr', // parentClassWrapper
+          object.construct ? `QJS${getClassName(blob)}::ConstructorCallback` : 'nullptr',     // ConstructorCallback
+        ];
+
+        // Generate indexed property callback.
+        if (object.indexedProp) {
+          if (object.indexedProp.indexKeyType == 'number') {
+            wrapperTypeRegisterList.push(`IndexedPropertyGetterCallback`);
+            if (!object.indexedProp.readonly) {
+              wrapperTypeRegisterList.push(`IndexedPropertySetterCallback`);
+            }
+          } else {
+            wrapperTypeRegisterList.push('nullptr');
+            wrapperTypeRegisterList.push('nullptr');
+
+            wrapperTypeRegisterList.push(`StringPropertyGetterCallback`);
+            if (!object.indexedProp.readonly) {
+              wrapperTypeRegisterList.push(`StringPropertySetterCallback`);
+            }
+          }
+        }
+
         options.wrapperTypeInfoInit = `
-const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {JS_CLASS_${_.snakeCase(getClassName(blob)).toUpperCase()}, "${getClassName(blob)}", ${object.parent != null ? `${object.parent}::GetStaticWrapperTypeInfo()` : 'nullptr'}, ${object.construct ? `QJS${getClassName(blob)}::ConstructorCallback` : 'nullptr'}};
+const WrapperTypeInfo QJS${getClassName(blob)}::wrapper_type_info_ {${wrapperTypeRegisterList.join(', ')}};
 const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClassName(blob)}::wrapper_type_info_;`;
         return _.template(readTemplate('interface'))({
           className: getClassName(blob),
           blob: blob,
           object: object,
           generateFunctionBody,
+          generateTypeValue,
           generateOverLoadSwitchBody,
           overloadMethods,
           filtedMethods,
@@ -356,5 +405,7 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
     className: getClassName(blob),
     blob: blob,
     ...options
-  });
+  }).split('\n').filter(str => {
+    return str.trim().length > 0;
+  }).join('\n');
 }

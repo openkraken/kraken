@@ -55,6 +55,10 @@ using IndexedPropertySetterHandler = bool (*)(JSContext* ctx, JSValueConst obj, 
 // exp: obj['hello'] = value;
 using StringPropertySetterHandler = bool (*)(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst value);
 
+// Callback when check property exist on object.
+// exp: 'hello' in obj;
+using StringPropertyCheckerHandler = bool (*)(JSContext *ctx, JSValueConst obj, JSAtom atom);
+
 // This struct provides a way to store a bunch of information that is helpful
 // when creating quickjs objects. Each quickjs bindings class has exactly one static
 // WrapperTypeInfo member, so comparing pointers is a safe way to determine if
@@ -76,9 +80,10 @@ class WrapperTypeInfo final {
   const WrapperTypeInfo* parent_class{nullptr};
   JSClassCall* callFunc{nullptr};
   IndexedPropertyGetterHandler indexed_property_getter_handler_{nullptr};
-  StringPropertyGetterHandler string_property_getter_handler_{nullptr};
   IndexedPropertySetterHandler indexed_property_setter_handler_{nullptr};
+  StringPropertyGetterHandler string_property_getter_handler_{nullptr};
   StringPropertySetterHandler string_property_setter_handler_{nullptr};
+  StringPropertyCheckerHandler string_property_checker_handler_{nullptr};
 };
 
 }  // namespace kraken

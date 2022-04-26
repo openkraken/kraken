@@ -4,6 +4,57 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
 }
 <% } %>
 
+<% if (object.indexedProp) { %>
+  <% if (object.indexedProp.indexKeyType == 'number') { %>
+  JSValue QJS<%= className %>::IndexedPropertyGetterCallback(JSContext* ctx, JSValue obj, uint32_t index) {
+    auto* self = toScriptWrappable<NodeList>(obj);
+    if (index >= self->length()) {
+      return JS_UNDEFINED;
+    }
+    ExceptionState exception_state;
+    <%= generateTypeValue(object.indexedProp.type) %> result = self->item(index, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return exception_state.ToQuickJS();
+    }
+    return result->ToQuickJS();
+  };
+  <% } else { %>
+  JSValue QJS<%= className %>::StringPropertyGetterCallback(JSContext* ctx, JSValue obj, JSAtom key) {
+    auto* self = toScriptWrappable<NodeList>(obj);
+    ExceptionState exception_state;
+    ${generateTypeValue(object.indexedProp.type)} result = self->item(key, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return exception_state.ToQuickJS();
+    }
+    return result->ToQuickJS();
+  };
+  <% } %>
+  <% if (!object.indexedProp.readonly) { %>
+    <% if (object.indexedProp.indexKeyType == 'number') { %>
+  bool QJS<%= className %>::IndexedPropertySetterCallback(JSContext* ctx, JSValueConst obj, uint32_t index, JSValueConst value) {
+    auto* self = toScriptWrappable<NodeList>(obj);
+    ExceptionState exception_state;
+    bool success = self->SetItem(index, value, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return false;
+    }
+    return success;
+  };
+    <% } else { %>
+  bool QJS<%= className %>::StringPropertySetterCallback(JSContext* ctx, JSValueConst obj, JSAtom key, JSValueConst value) {
+    auto* self = toScriptWrappable<NodeList>(obj);
+    ExceptionState exception_state;
+    bool success = self->SetItem(key, value, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return false;
+    }
+    return success;
+  };
+    <% } %>
+  <% } %>
+ <% } %>
+
+
 <% _.forEach(filtedMethods, function(method, index) { %>
 
   <% if (overloadMethods[method.name] && overloadMethods[method.name].length > 1) { %>

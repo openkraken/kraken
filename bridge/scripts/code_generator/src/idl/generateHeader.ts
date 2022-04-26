@@ -84,5 +84,7 @@ export function generateCppHeader(blob: IDLBlob, options: GenerateOptions) {
   return _.template(baseTemplate)({
     content: contents.join('\n'),
     blob: blob
-  });
+  }).split('\n').filter(str => {
+    return str.trim().length > 0;
+  }).join('\n');
 }

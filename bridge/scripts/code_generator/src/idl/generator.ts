@@ -7,6 +7,7 @@ function generateSupportedOptions(): GenerateOptions {
   let classMethodsInstallList: string[] = [];
   let constructorInstallList: string[] = [];
   let classPropsInstallList: string[] = [];
+  let indexedProperty: string = '';
   let wrapperTypeInfoInit = '';
 
   return {
@@ -14,6 +15,7 @@ function generateSupportedOptions(): GenerateOptions {
     classPropsInstallList,
     classMethodsInstallList,
     constructorInstallList,
+    indexedProperty,
     wrapperTypeInfoInit
   };
 }
@@ -24,6 +26,7 @@ export type GenerateOptions = {
   constructorInstallList: string[];
   classPropsInstallList: string[];
   wrapperTypeInfoInit: string;
+  indexedProperty: string;
 };
 
 export function generatorSource(blob: IDLBlob) {
