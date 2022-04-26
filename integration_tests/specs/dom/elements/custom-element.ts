@@ -48,6 +48,14 @@ describe('custom widget element', () => {
     await snapshot();
   });
 
+  it('text node should be child of flutter container and append before container append to body', async () => {
+    const container = document.createElement('flutter-container');
+    const text = document.createTextNode('text');
+    container.appendChild(text);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
   it('element should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     const element = document.createElement('div');
@@ -75,6 +83,7 @@ describe('custom widget element', () => {
 
     const element = document.createElement('div');
     element.style.backgroundColor = 'red';
+    element.style.textAlign = 'center';
     element.appendChild(document.createTextNode('div element'));
     container.appendChild(element);
 
