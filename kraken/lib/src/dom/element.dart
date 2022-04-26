@@ -13,7 +13,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/widget.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
@@ -733,7 +732,7 @@ abstract class Element
   // Attach renderObject of current node to parent
   @override
   void attachTo(Node parent, {RenderBox? after}) {
-    _applyStyle(style);
+    applyStyle(style);
 
     if (!_obtainSliverChild()) {
       willAttachRenderer();
@@ -741,7 +740,7 @@ abstract class Element
 
     if (renderer != null) {
       // If element attach WidgetElement, render object should be attach to render tree when mount.
-      if (parent is! WidgetElement) {
+      if (parent.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }
 
@@ -812,7 +811,7 @@ abstract class Element
     RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && renderLayoutBox != null && this is! WidgetElement) {
+      if (!child.isRendererAttached && renderLayoutBox != null && renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
@@ -985,7 +984,7 @@ abstract class Element
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
       // If element attach WidgetElement, render object should be attach to render tree when mount.
-      if (parentNode is! WidgetElement) {
+      if (parentElement!.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBoxModel _renderBoxModel = renderBoxModel!;
         // Find the renderBox of its containing block.
         RenderBox? containingBlockRenderBox = getContainingBlockRenderBox();
@@ -1414,7 +1413,7 @@ abstract class Element
     style.setProperty(property, value, true);
   }
 
-  void _applyStyle(CSSStyleDeclaration style) {
+  void applyStyle(CSSStyleDeclaration style) {
     // Apply default style.
     _applyDefaultStyle(style);
     // Init display from style directly cause renderStyle is not flushed yet.
@@ -1429,7 +1428,7 @@ abstract class Element
     if (renderBoxModel != null && classList.isNotEmpty) {
       // Diff style.
       CSSStyleDeclaration newStyle = CSSStyleDeclaration();
-      _applyStyle(newStyle);
+      applyStyle(newStyle);
       Map<String, String?> diffs = style.diff(newStyle);
       if (diffs.isNotEmpty) {
         // Update render style.

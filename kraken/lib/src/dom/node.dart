@@ -16,6 +16,11 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE,
 }
 
+enum RenderObjectManagerType {
+  FLUTTER_ELEMENT,
+  KRAKEN_NODE
+}
+
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
 /// rendering of the application.
@@ -161,7 +166,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  @mustCallSuper
   void didAttachRenderer() {
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (renderer is RenderBoxModel) {
@@ -170,7 +174,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   @override
-  @mustCallSuper
   void willDetachRenderer() {
     // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     if (renderer is RenderBoxModel) {
@@ -305,6 +308,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @override
   EventTarget? get parentEventTarget => parentNode;
+
+  // Whether Kraken Node need to manage render object.
+  RenderObjectManagerType get renderObjectManagerType => RenderObjectManagerType.KRAKEN_NODE;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

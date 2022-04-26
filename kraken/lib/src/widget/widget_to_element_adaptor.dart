@@ -187,6 +187,10 @@ abstract class WidgetElement extends dom.Element {
 
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
 
+  // The render object is inserted by Flutter framework when element is WidgetElement.
+  @override
+  dom.RenderObjectManagerType get renderObjectManagerType => dom.RenderObjectManagerType.FLUTTER_ELEMENT;
+
   @override
   void didDetachRenderer() {
     super.didDetachRenderer();
@@ -194,8 +198,7 @@ abstract class WidgetElement extends dom.Element {
 
   @override
   void didAttachRenderer() {
-    super.didAttachRenderer();
-
+    // Children of WidgetElement should insert render object by Flutter Framework.
     _attachWidget(_widget);
   }
 

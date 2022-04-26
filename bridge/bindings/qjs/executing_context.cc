@@ -212,7 +212,6 @@ void* ExecutionContext::getOwner() {
 bool ExecutionContext::handleException(JSValue* exception) {
   if (JS_IsException(*exception)) {
     JSValue error = JS_GetException(m_ctx);
-    reportError(error);
     dispatchGlobalErrorEvent(this, error);
     JS_FreeValue(m_ctx, error);
     return false;
