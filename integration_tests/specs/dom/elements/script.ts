@@ -17,7 +17,7 @@ describe('script element', () => {
     script.onerror = () => {
       done();
     };
-    script.src = 'http://g.alicdn.com/path/to/404';
+    script.src = 'http://127.0.0.1/path/to/a/file';
   });
 
   it('async script execute in delayed order', async (done) => {
