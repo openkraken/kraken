@@ -11,7 +11,19 @@ import 'package:kraken/kraken.dart';
 
 typedef ConnectedCallback = void Function();
 
+const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
+const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
+const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
+const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
 const _white = Color(0xFFFFFFFF);
+
+String? getBundleURLFromEnv() {
+  return Platform.environment[BUNDLE_URL];
+}
+
+String? getBundlePathFromEnv() {
+  return Platform.environment[BUNDLE_PATH];
+}
 
 void launch({
   KrakenBundle? bundle,
