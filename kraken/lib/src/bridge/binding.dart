@@ -142,10 +142,30 @@ abstract class BindingBridge {
   }
 
   static void listenEvent(EventTarget target, String type) {
+    assert(_debugShouldNotListenMultiTimes(target, type), '$target $type');
     target.addEventListener(type, _dispatchBindingEvent);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
+    assert(_debugShouldNotUnlistenEmpty(target, type), '$target $type');
     target.removeEventListener(type, _dispatchBindingEvent);
+  }
+
+  static bool _debugShouldNotListenMultiTimes(EventTarget target, String type) {
+    Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
+    List<EventHandler>? handlers = eventHandlers[type];
+    if (handlers != null) {
+      return !handlers.contains(_dispatchBindingEvent);
+    }
+    return true;
+  }
+
+  static bool _debugShouldNotUnlistenEmpty(EventTarget target, String type) {
+    Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
+    List<EventHandler>? handlers = eventHandlers[type];
+    if (handlers != null) {
+      return handlers.contains(_dispatchBindingEvent);
+    }
+    return false;
   }
 }
