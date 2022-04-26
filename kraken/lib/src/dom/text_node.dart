@@ -101,7 +101,7 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {
+  void unmountRenderObject({ bool deep = false, bool keepPositionedAlive = false }) {
     _detachRenderTextBox();
     _renderTextBox = null;
   }

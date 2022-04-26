@@ -1556,7 +1556,7 @@ class RenderBoxModel extends RenderBox
 
   // Detach renderBox from tree.
   static void detachRenderBox(RenderObject renderBox) {
-    if (renderBox.parent == null) return;
+    if (renderBox.parent == null || !renderBox.attached) return;
 
     // Remove reference from parent.
     RenderObject? parentRenderObject = renderBox.parent as RenderObject;

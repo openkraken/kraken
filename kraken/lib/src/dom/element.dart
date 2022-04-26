@@ -165,6 +165,16 @@ abstract class Element
   @override
   RenderBox? get renderer => renderBoxModel;
 
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element/children
+  // The children is defined at interface [ParentNode].
+  List<Element> get children {
+    List<Element> _children = [];
+    for (Node child in childNodes) {
+      if (child is Element) _children.add(child);
+    }
+    return _children;
+  }
+
   @override
   RenderBox createRenderer() {
     if (renderBoxModel != null) {
@@ -456,6 +466,7 @@ abstract class Element
 
   @override
   void willAttachRenderer() {
+    super.willAttachRenderer();
     // Init render box model.
     if (renderStyle.display != CSSDisplay.none) {
       createRenderer();
@@ -465,6 +476,8 @@ abstract class Element
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
+    // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+    renderBoxModel?.markAdjacentRenderParagraphNeedsLayout();
     // Ensure that the child is attached.
     ensureChildAttached();
   }
@@ -476,23 +489,28 @@ abstract class Element
     // Cancel running transition.
     renderStyle.cancelRunningTransition();
 
-    RenderBoxModel _renderBoxModel = renderBoxModel!;
+    RenderBoxModel? renderBoxModel = this.renderBoxModel;
+    if (renderBoxModel != null) {
+      // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
+      renderBoxModel.markAdjacentRenderParagraphNeedsLayout();
 
-    // Remove all intersection change listeners.
-    _renderBoxModel.clearIntersectionChangeListeners();
+      // Remove all intersection change listeners.
+      renderBoxModel.clearIntersectionChangeListeners();
 
-    // Remove fixed children from root when element disposed.
-    _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
+      // Remove fixed children from root when element disposed.
+      _removeFixedChild(renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
 
-    // Remove renderBox.
-    _renderBoxModel.detachFromContainingBlock();
+      // Remove renderBox.
+      renderBoxModel.detachFromContainingBlock();
 
-    // Clear pointer listener
-    clearEventResponder(renderBoxModel!);
+      // Clear pointer listener
+      clearEventResponder(renderBoxModel);
+    }
   }
 
   @override
   void didDetachRenderer() {
+    super.didDetachRenderer();
     style.reset();
   }
 
@@ -753,15 +771,10 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {
-    // No need for unmount if renderer is not created.
-    if (renderer == null) {
-      return;
-    }
-
-    // Ignore the fixed element to unmount render object.
-    // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
-    if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
+  void unmountRenderObject({ bool deep = true, bool keepPositionedAlive = false }) {
+    // Ignore the positioned element to unmount render object.
+    // It's useful for sliver manager to unmount child render object, but excluding positioned elements.
+    if (keepPositionedAlive && renderBoxModel?.renderPositionPlaceholder != null) {
       return;
     }
 
@@ -769,8 +782,8 @@ abstract class Element
 
     // Dispose all renderObject when deep.
     if (deep) {
-      for (Node child in childNodes) {
-        child.unmountRenderObject(deep: deep, keepFixedAlive: keepFixedAlive);
+      for (Node child in [...childNodes]) {
+        child.unmountRenderObject(deep: deep, keepPositionedAlive: keepPositionedAlive);
       }
     }
 
