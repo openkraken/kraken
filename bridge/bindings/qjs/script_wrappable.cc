@@ -57,8 +57,11 @@ static JSValue HandleJSPropertyGetterCallback(JSContext *ctx, JSValueConst obj, 
 
   if (wrapper_type_info->indexed_property_getter_handler_ != nullptr && JS_AtomIsTaggedInt(atom)) {
     return wrapper_type_info->indexed_property_getter_handler_(ctx, obj, JS_AtomToUInt32(atom));
+  } else if (wrapper_type_info->string_property_getter_handler_ != nullptr) {
+    return wrapper_type_info->string_property_getter_handler_(ctx, obj, atom);
   }
-  return wrapper_type_info->string_property_getter_handler_(ctx, obj, atom);
+
+  return JS_UNDEFINED;
 }
 
 /// This callback will be called when JS code set property on this object using [] or `.` operator.
@@ -70,9 +73,11 @@ static int HandleJSPropertySetterCallback(JSContext *ctx, JSValueConst obj, JSAt
 
   if (wrapper_type_info->indexed_property_setter_handler_ != nullptr && JS_AtomIsTaggedInt(atom)) {
     return wrapper_type_info->indexed_property_setter_handler_(ctx, obj, JS_AtomToUInt32(atom), value);
+  } else if (wrapper_type_info->string_property_setter_handler_ != nullptr) {
+    return wrapper_type_info->string_property_setter_handler_(ctx, obj, atom, value);
   }
 
-  return wrapper_type_info->string_property_setter_handler_(ctx, obj, atom, value);
+  return false;
 }
 
 /// This callback will be called when JS code check property exit on this object using `in` operator.
