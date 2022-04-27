@@ -185,7 +185,7 @@ abstract class WidgetElement extends dom.Element {
     _widget = _KrakenAdapterWidget(_state!);
   }
 
-  Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children);
+  Widget build(BuildContext context, Map<String, String> attributes, List<Widget> children);
 
   // The render object is inserted by Flutter framework when element is WidgetElement.
   @override
@@ -287,20 +287,20 @@ class _KrakenAdapterWidget extends StatefulWidget {
 
 
 class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
-  Map<String, dynamic> _properties;
+  Map<String, String> _attributes;
   final WidgetElement _element;
   late List<dom.Node> _childNodes;
 
-  _KrakenAdapterWidgetState(this._element, this._properties, this._childNodes) {
+  _KrakenAdapterWidgetState(this._element, this._attributes, this._childNodes) {
   }
 
-  void onAttributeChanged(Map<String, dynamic> properties) {
+  void onAttributeChanged(Map<String, String> attributes) {
     if (mounted) {
       setState(() {
-        _properties = properties;
+        _attributes = attributes;
       });
     } else {
-      _properties = properties;
+      _attributes = attributes;
     }
   }
 
@@ -329,6 +329,6 @@ class _KrakenAdapterWidgetState extends State<_KrakenAdapterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _element.build(context, _properties, convertNodeListToWidgetList(_childNodes));
+    return _element.build(context, _attributes, convertNodeListToWidgetList(_childNodes));
   }
 }
