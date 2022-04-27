@@ -243,6 +243,31 @@ class RenderLayoutBox extends RenderBoxModel
     }
   }
 
+  @override
+  void performPaint(PaintingContext context, Offset offset) {
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderBox child = paintingOrder[i];
+      if (!isPositionPlaceholder(child)) {
+
+        late DateTime childPaintStart;
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          childPaintStart = DateTime.now();
+        }
+
+        final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
+        if (child.hasSize) {
+          context.paintChild(child, childParentData.offset + offset);
+        }
+
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          DateTime childPaintEnd = DateTime.now();
+          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
+              childPaintStart.microsecondsSinceEpoch);
+        }
+      }
+    }
+  }
+
   bool _childrenNeedsSort = false;
   void markChildrenNeedsSort() {
     _childrenNeedsSort = true;
@@ -756,13 +781,24 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Mirror debugDoingThisLayout flag in flutter.
+  // [debugDoingThisLayout] indicate whether [performLayout] for this render object is currently running.
+  bool doingThisLayout = false;
+
   // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
   bool needsLayout = false;
 
   @override
   void markNeedsLayout() {
-    super.markNeedsLayout();
-    needsLayout = true;
+    if (doingThisLayout) {
+      // Push delay the [markNeedsLayout] after owner [PipelineOwner] finishing current [flushLayout].
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        markNeedsLayout();
+      });
+    } else {
+      needsLayout = true;
+      super.markNeedsLayout();
+    }
   }
 
   /// Mark children needs layout when drop child as Flutter did
@@ -1029,17 +1065,13 @@ class RenderBoxModel extends RenderBox
 
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
-
   Size get scrollableSize => _maxScrollableSize;
-
   set scrollableSize(Size value) {
     _maxScrollableSize = value;
   }
 
-  late Size _scrollableViewportSize;
-
+  Size _scrollableViewportSize = Size.zero;
   Size get scrollableViewportSize => _scrollableViewportSize;
-
   set scrollableViewportSize(Size value) {
     _scrollableViewportSize = value;
   }
@@ -1253,7 +1285,6 @@ class RenderBoxModel extends RenderBox
       // If the element's position is 'relative' or 'static',
       // the containing block is formed by the content edge of the nearest block container ancestor box.
       attachRenderBox(containingBlockRenderBox, renderBoxModel, after: after);
-
       if (positionType == CSSPositionType.sticky) {
         // Placeholder of sticky renderBox need to inherit offset from original renderBox,
         // so it needs to layout before original renderBox.
@@ -1525,7 +1556,7 @@ class RenderBoxModel extends RenderBox
 
   // Detach renderBox from tree.
   static void detachRenderBox(RenderObject renderBox) {
-    if (renderBox.parent == null) return;
+    if (renderBox.parent == null || !renderBox.attached) return;
 
     // Remove reference from parent.
     RenderObject? parentRenderObject = renderBox.parent as RenderObject;

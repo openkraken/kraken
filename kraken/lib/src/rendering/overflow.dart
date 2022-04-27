@@ -120,14 +120,19 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   void _scrollXListener() {
     assert(scrollListener != null);
-    scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
-    markNeedsPaint();
+    // If scroll is happening, that element has been unmounted, prevent null usage.
+    if (scrollOffsetX != null) {
+      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+      markNeedsPaint();
+    }
   }
 
   void _scrollYListener() {
     assert(scrollListener != null);
-    scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
-    markNeedsPaint();
+    if (scrollOffsetY != null) {
+      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+      markNeedsPaint();
+    }
   }
 
   void _setUpScrollX() {
