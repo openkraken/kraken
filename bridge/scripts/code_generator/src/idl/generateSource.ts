@@ -290,7 +290,7 @@ function generateFunctionBody(blob: IDLBlob, declare: FunctionDeclaration, optio
   ExceptionState exception_state;
   ${returnValueInit}
   ExecutingContext* context = ExecutingContext::From(ctx);
-  MutationScope scope{ExecutingContext::From(ctx)};
+  MemberMutationScope scope{ExecutingContext::From(ctx)};
 
   do {  // Dummy loop for use of 'break'.
 ${addIndent(callBody, 4)}

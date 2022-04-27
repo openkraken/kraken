@@ -33,7 +33,7 @@ TEST(Document, body) {
   bool static logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
-    EXPECT_STREQ(message.c_str(), "<body>");
+    EXPECT_STREQ(message.c_str(), "<body/>");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;

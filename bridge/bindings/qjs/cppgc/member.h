@@ -48,8 +48,9 @@ class Member {
     if (raw_ == nullptr)
       return;
     auto* wrappable = To<ScriptWrappable>(raw_);
-    if (wrappable->GetExecutingContext()->HasMutationScope()) {
-      wrappable->GetExecutingContext()->mutationScope().RecordFree(wrappable);
+    // Record the free operation to avoid JSObject had been freed immediately.
+    if (LIKELY(wrappable->GetExecutingContext()->HasMutationScope())) {
+      wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
     } else {
       JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     }
@@ -102,11 +103,7 @@ class Member {
       // This JSObject was created just now and used at first time.
       // Because there are already one reference count when JSObject created, so we skip duplicate.
       if (!p->fresh()) {
-        if (wrappable->GetExecutingContext()->HasMutationScope()) {
-          wrappable->GetExecutingContext()->mutationScope().RecordDup(wrappable);
-        } else {
-          JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
-        }
+        JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
       }
       // This object had been used, no long fresh at all.
       p->MakeOld();

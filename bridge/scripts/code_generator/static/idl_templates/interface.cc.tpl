@@ -34,7 +34,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
   bool QJS<%= className %>::IndexedPropertySetterCallback(JSContext* ctx, JSValueConst obj, uint32_t index, JSValueConst value) {
     auto* self = toScriptWrappable<NodeList>(obj);
     ExceptionState exception_state;
-    MutationScope scope{ExecutingContext::From(ctx)};
+    MemberMutationScope scope{ExecutingContext::From(ctx)};
     bool success = self->SetItem(index, value, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
@@ -45,7 +45,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
   bool QJS<%= className %>::StringPropertySetterCallback(JSContext* ctx, JSValueConst obj, JSAtom key, JSValueConst value) {
     auto* self = toScriptWrappable<NodeList>(obj);
     ExceptionState exception_state;
-    MutationScope scope{ExecutingContext::From(ctx)};
+    MemberMutationScope scope{ExecutingContext::From(ctx)};
     bool success = self->SetItem(key, value, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
@@ -91,7 +91,7 @@ static JSValue <%= prop.name %>AttributeSetCallback(JSContext* ctx, JSValueConst
   if (exception_state.HasException()) {
     return exception_state.ToQuickJS();
   }
-  MutationScope scope{ExecutingContext::From(ctx)};
+  MemberMutationScope scope{ExecutingContext::From(ctx)};
 
   <%= blob.filename %>->set<%= prop.name[0].toUpperCase() + prop.name.slice(1) %>(v, exception_state);
   if (exception_state.HasException()) {

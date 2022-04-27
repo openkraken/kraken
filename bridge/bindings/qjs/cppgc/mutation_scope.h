@@ -17,20 +17,23 @@ class ScriptWrappable;
 /**
  * A stack-allocated class that record all members mutations in stack scope.
  */
-class MutationScope {
+class MemberMutationScope {
   KRAKEN_DISALLOW_NEW();
 
  public:
-  MutationScope() = delete;
-  explicit MutationScope(ExecutingContext* context);
-  ~MutationScope();
+  MemberMutationScope() = delete;
+  explicit MemberMutationScope(ExecutingContext* context);
+  ~MemberMutationScope();
 
-  void RecordDup(ScriptWrappable* wrappable);
+  void SetParent(MemberMutationScope* parent_scope);
+  [[nodiscard]] MemberMutationScope* Parent() const;
+
   void RecordFree(ScriptWrappable* wrappable);
 
  private:
   void ApplyRecord();
 
+  MemberMutationScope* parent_scope_{nullptr};
   ExecutingContext* context_;
   std::unordered_map<ScriptWrappable*, int> mutation_records_;
 };

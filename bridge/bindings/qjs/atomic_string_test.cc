@@ -67,6 +67,8 @@ TEST(AtomicString, ToQuickJS) {
     JSValue qjs_value = value.ToQuickJS(ctx);
     const char* buffer = JS_ToCString(ctx, qjs_value);
     EXPECT_STREQ(buffer, "helloworld");
+    JS_FreeValue(ctx, qjs_value);
+    JS_FreeCString(ctx, buffer);
   });
 }
 

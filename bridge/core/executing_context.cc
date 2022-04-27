@@ -360,6 +360,19 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
   return &module_callbacks_;
 }
 
+void ExecutingContext::SetMutationScope(MemberMutationScope& mutation_scope) {
+  // MemberMutationScope may be called by other MemberMutationScope in the call stack.
+  // Should save the tree corresponding to the call stack.
+  if (active_mutation_scope != nullptr) {
+    mutation_scope.SetParent(active_mutation_scope);
+  }
+  active_mutation_scope = &mutation_scope;
+}
+
+void ExecutingContext::ClearMutationScope() {
+  active_mutation_scope = active_mutation_scope->Parent();
+}
+
 // PendingPromises* ExecutingContext::PendingPromises() {
 //  return &pending_promises_;
 //}

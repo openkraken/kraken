@@ -66,12 +66,14 @@ JSValue ScriptValue::QJSValue() const {
 }
 
 ScriptValue ScriptValue::ToJSONStringify(ExceptionState* exception) const {
-  ScriptValue result = ScriptValue(ctx_, JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL));
+  JSValue stringifyed = JS_JSONStringify(ctx_, value_, JS_NULL, JS_NULL);
+  ScriptValue result = ScriptValue(ctx_, stringifyed);
   // JS_JSONStringify may return JS_EXCEPTION if object is not valid. Return JS_EXCEPTION and let quickjs to handle it.
   if (result.IsException()) {
     exception->ThrowException(ctx_, result.value_);
     result = ScriptValue::Empty(ctx_);
   }
+  JS_FreeValue(ctx_, stringifyed);
   return result;
 }
 
