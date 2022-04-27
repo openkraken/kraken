@@ -2,7 +2,9 @@ describe('Transition events', () => {
   it('basic transitionrun', (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    container1.addEventListener('transitionrun', async () => {
+    container1.addEventListener('transitionrun', function self() {
+      container1.removeEventListener('transitionstart', self);
+      document.body.removeChild(container1);
       done();
     });
     setElementStyle(container1, {
