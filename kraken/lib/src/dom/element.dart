@@ -1471,7 +1471,7 @@ abstract class Element
   // about the size of an element and its position relative to the viewport.
   // https://drafts.csswg.org/cssom-view/#dom-element-getboundingclientrect
   BoundingClientRect get boundingClientRect {
-    BoundingClientRect boundingClientRect = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
+    BoundingClientRect boundingClientRect = BoundingClientRect.zero;
     if (isRendererAttached) {
       flushLayout();
       RenderBox sizedBox = renderBoxModel!;
@@ -1507,11 +1507,8 @@ abstract class Element
     if (!isRendererAttached) {
       return offset;
     }
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    if (selfRenderBoxModel.attached) {
-      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dx.toInt();
-    }
+    Offset relative = _getOffset(renderBoxModel!, ancestor: offsetParent);
+    offset += relative.dx.toInt();
     return offset;
   }
 
@@ -1523,11 +1520,8 @@ abstract class Element
     if (!isRendererAttached) {
       return offset;
     }
-    RenderBoxModel selfRenderBoxModel = renderBoxModel!;
-    if (selfRenderBoxModel.attached) {
-      Offset relative = _getOffset(selfRenderBoxModel, ancestor: offsetParent);
-      offset += relative.dy.toInt();
-    }
+    Offset relative = _getOffset(renderBoxModel!, ancestor: offsetParent);
+    offset += relative.dy.toInt();
     return offset;
   }
 
@@ -1559,7 +1553,7 @@ abstract class Element
   // Get the offset of current element relative to specified ancestor element.
   Offset _getOffset(RenderBox renderBox, { Element? ancestor }) {
     // Need to flush layout to get correct size.
-    ownerDocument.documentElement!.renderBoxModel!.owner!.flushLayout();
+    flushLayout();
 
     // Returns (0, 0) when ancestor is null.
     if (ancestor == null) {
@@ -1589,10 +1583,10 @@ abstract class Element
   }
 
   Future<Uint8List> toBlob({ double? devicePixelRatio }) {
-    Completer<Uint8List> completer = Completer();
+    flushLayout();
     forceToRepaintBoundary = true;
-    renderBoxModel!.owner!.flushLayout();
 
+    Completer<Uint8List> completer = Completer();
     SchedulerBinding.instance!.addPostFrameCallback((_) async {
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
@@ -1609,7 +1603,7 @@ abstract class Element
       completer.complete(captured);
       forceToRepaintBoundary = false;
       // May be disposed before this callback.
-      _renderBoxModel.owner?.flushLayout();
+      flushLayout();
     });
     SchedulerBinding.instance!.scheduleFrame();
 

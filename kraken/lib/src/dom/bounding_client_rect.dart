@@ -7,6 +7,8 @@ import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
 
 class BoundingClientRect {
+  static const BoundingClientRect zero = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
+
   final double x;
   final double y;
   final double width;
@@ -16,7 +18,7 @@ class BoundingClientRect {
   final double bottom;
   final double left;
 
-  BoundingClientRect(this.x, this.y, this.width, this.height, this.top, this.right, this.bottom, this.left);
+  const BoundingClientRect(this.x, this.y, this.width, this.height, this.top, this.right, this.bottom, this.left);
 
   Pointer<NativeBoundingClientRect> toNative() {
     Pointer<NativeBoundingClientRect> nativeBoundingClientRect = malloc.allocate<NativeBoundingClientRect>(sizeOf<NativeBoundingClientRect>());
@@ -31,7 +33,7 @@ class BoundingClientRect {
     return nativeBoundingClientRect;
   }
 
-  Map<String, dynamic> toJSON() {
+  Map<String, double> toJSON() {
     return {
       'x': x,
       'y': y,

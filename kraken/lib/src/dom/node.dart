@@ -105,6 +105,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
+    // If renderer is attached, which means node must been connected.
+    if (isRendererAttached) return true;
+
     Node parent = this;
     while (parent.parentNode != null) {
       parent = parent.parentNode!;
