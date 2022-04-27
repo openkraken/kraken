@@ -1402,7 +1402,7 @@ class RenderBoxModel extends RenderBox
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
+      transform: renderStyle.effectiveTransformMatrix,
       position: position,
       hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(

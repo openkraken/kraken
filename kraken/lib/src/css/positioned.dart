@@ -33,6 +33,14 @@ Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder placeholder, Rend
   }
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
   Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
+
+  // LocalToGlobal only calculate the offset to layout offset of parent but not
+  // including the transform offset.
+  Offset? parentTransformOffset = parent.renderStyle.effectiveTransformOffset;
+  if (parentTransformOffset != null) {
+    placeholderOffset = placeholderOffset - parentTransformOffset;
+  }
+
   return placeholderOffset;
 }
 
