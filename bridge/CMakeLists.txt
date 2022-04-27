@@ -316,11 +316,11 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/document_fragment.h
     core/dom/document_fragment.cc
     core/dom/collection_index_cache.h
-    core/dom/ng/child_node_list.cc
-    core/dom/ng/child_node_list.h
-    core/dom/ng/empty_node_list.cc
-    core/dom/ng/empty_node_list.h
-    core/dom/ng/node_list.h
+    core/dom/child_node_list.cc
+    core/dom/child_node_list.h
+    core/dom/empty_node_list.cc
+    core/dom/empty_node_list.h
+    core/dom/node_list.h
     core/dom/container_node.cc
     core/dom/container_node.h
     core/events/error_event.cc

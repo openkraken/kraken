@@ -8,7 +8,7 @@
 #include "bindings/qjs/cppgc/gc_visitor.h"
 #include "core/dom/collection_index_cache.h"
 #include "core/dom/container_node.h"
-#include "node_list.h"
+#include "core/dom/node_list.h"
 
 namespace kraken {
 

@@ -5,10 +5,10 @@
 #include "node.h"
 #include <unordered_map>
 #include "character_data.h"
+#include "child_node_list.h"
 #include "document.h"
 #include "document_fragment.h"
-#include "ng/child_node_list.h"
-#include "ng/empty_node_list.h"
+#include "empty_node_list.h"
 #include "node_data.h"
 #include "node_traversal.h"
 #include "template_content_document_fragment.h"

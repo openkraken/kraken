@@ -12,7 +12,7 @@
 #include "core/dom/document.h"
 #include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
-#include "core/dom/ng/node_list.h"
+#include "core/dom/node_list.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
 #include "core/html/html_body_element.h"

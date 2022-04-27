@@ -7,8 +7,8 @@
 
 #include <vector>
 #include "bindings/qjs/cppgc/gc_visitor.h"
-#include "ng/node_list.h"
 #include "node.h"
+#include "node_list.h"
 
 namespace kraken {
 
