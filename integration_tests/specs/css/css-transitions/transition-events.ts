@@ -24,7 +24,9 @@ describe('Transition events', () => {
   it('basic transitionstart', (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
-    container1.addEventListener('transitionstart', async () => {
+    container1.addEventListener('transitionstart', function self() {
+      container1.removeEventListener('transitionstart', self);
+      document.body.removeChild(container1);
       done();
     });
 
@@ -37,7 +39,7 @@ describe('Transition events', () => {
       transition: 'transform 1s linear',
     });
 
-    requestAnimationFrame(async () => {
+    requestAnimationFrame(() => {
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
@@ -63,7 +65,6 @@ describe('Transition events', () => {
       done();
     });
     requestAnimationFrame(async () => {
-  
       await snapshot();
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',
