@@ -1656,8 +1656,9 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
   while (parent != null) {
     bool isNonStatic = parent.renderStyle.position != CSSPositionType.static;
     bool hasTransform = parent.renderStyle.transform != null;
+    bool isSliverItem = parent.renderStyle.parent?.display == CSSDisplay.sliver;
     // https://www.w3.org/TR/CSS2/visudet.html#containing-block-details
-    if (parent == viewportElement || isNonStatic || hasTransform) {
+    if (parent == viewportElement || isNonStatic || hasTransform || isSliverItem) {
       break;
     }
     parent = parent.parentElement;
