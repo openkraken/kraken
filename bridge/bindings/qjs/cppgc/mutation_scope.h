@@ -5,9 +5,9 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_CPPGC_MUTATION_SCOPE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_CPPGC_MUTATION_SCOPE_H_
 
-#include "foundation/macros.h"
 #include <quickjs/quickjs.h>
 #include <unordered_map>
+#include "foundation/macros.h"
 
 namespace kraken {
 
@@ -19,6 +19,7 @@ class ScriptWrappable;
  */
 class MutationScope {
   KRAKEN_DISALLOW_NEW();
+
  public:
   MutationScope() = delete;
   explicit MutationScope(ExecutingContext* context);
@@ -28,14 +29,12 @@ class MutationScope {
   void RecordFree(ScriptWrappable* wrappable);
 
  private:
-
   void ApplyRecord();
 
   ExecutingContext* context_;
   std::unordered_map<ScriptWrappable*, int> mutation_records_;
 };
 
-
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_CPPGC_MUTATION_SCOPE_H_

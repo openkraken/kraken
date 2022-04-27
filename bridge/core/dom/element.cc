@@ -17,7 +17,7 @@ namespace kraken {
 Element::Element(const AtomicString& tag_name, Document* document, Node::ConstructionType construction_type)
     : ContainerNode(document, construction_type), tag_name_(tag_name) {}
 
-ElementAttributes & Element::EnsureElementAttributes() {
+ElementAttributes& Element::EnsureElementAttributes() {
   if (attributes_ == nullptr) {
     attributes_.Initialize(ElementAttributes::Create(this));
   }

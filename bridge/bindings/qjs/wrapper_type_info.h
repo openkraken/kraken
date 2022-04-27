@@ -57,7 +57,7 @@ using StringPropertySetterHandler = bool (*)(JSContext* ctx, JSValueConst obj, J
 
 // Callback when check property exist on object.
 // exp: 'hello' in obj;
-using StringPropertyCheckerHandler = bool (*)(JSContext *ctx, JSValueConst obj, JSAtom atom);
+using StringPropertyCheckerHandler = bool (*)(JSContext* ctx, JSValueConst obj, JSAtom atom);
 
 // This struct provides a way to store a bunch of information that is helpful
 // when creating quickjs objects. Each quickjs bindings class has exactly one static

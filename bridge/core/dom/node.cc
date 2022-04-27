@@ -415,8 +415,7 @@ Node::Node(ExecutingContext* context, TreeScope* tree_scope, ConstructionType ty
       next_(nullptr),
       node_data_(nullptr) {}
 
-Node::~Node() {
-}
+Node::~Node() {}
 
 void Node::Trace(GCVisitor* visitor) const {
   visitor->Trace(previous_);

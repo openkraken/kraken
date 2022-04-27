@@ -29,7 +29,7 @@ TEST(EventTarget, addEventListener) {
   EXPECT_EQ(errorCalled, false);
 }
 
- TEST(EventTarget, removeEventListener) {
+TEST(EventTarget, removeEventListener) {
   bool static errorCalled = false;
   bool static logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

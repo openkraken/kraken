@@ -43,8 +43,7 @@ static void HandleJSObjectFinalized(JSRuntime* rt, JSValue val) {
 /// This callback will be called when JS code access this object using [] or `.` operator.
 /// When exec `obj[1]`, it will call indexed_property_getter_handler_ defined in WrapperTypeInfo.
 /// When exec `obj['hello']`, it will call string_property_getter_handler_ defined in WrapperTypeInfo.
-static JSValue HandleJSPropertyGetterCallback(JSContext *ctx, JSValueConst obj, JSAtom atom,
-                                                   JSValueConst receiver) {
+static JSValue HandleJSPropertyGetterCallback(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValueConst receiver) {
   ExecutingContext* context = ExecutingContext::From(ctx);
   auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   auto* wrapper_type_info = object->GetWrapperTypeInfo();
@@ -66,8 +65,12 @@ static JSValue HandleJSPropertyGetterCallback(JSContext *ctx, JSValueConst obj, 
 
 /// This callback will be called when JS code set property on this object using [] or `.` operator.
 /// When exec `obj[1] = 1`, it will call
-static int HandleJSPropertySetterCallback(JSContext *ctx, JSValueConst obj, JSAtom atom,
-                                          JSValueConst value, JSValueConst receiver, int flags) {
+static int HandleJSPropertySetterCallback(JSContext* ctx,
+                                          JSValueConst obj,
+                                          JSAtom atom,
+                                          JSValueConst value,
+                                          JSValueConst receiver,
+                                          int flags) {
   auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   auto* wrapper_type_info = object->GetWrapperTypeInfo();
 
@@ -82,7 +85,7 @@ static int HandleJSPropertySetterCallback(JSContext *ctx, JSValueConst obj, JSAt
 
 /// This callback will be called when JS code check property exit on this object using `in` operator.
 /// Wehn exec `'prop' in obj`, it will call.
-static int HandleJSPropertyCheckerCallback(JSContext *ctx, JSValueConst obj, JSAtom atom) {
+static int HandleJSPropertyCheckerCallback(JSContext* ctx, JSValueConst obj, JSAtom atom) {
   auto* object = static_cast<ScriptWrappable*>(JS_GetOpaque(obj, JSValueGetClassId(obj)));
   auto* wrapper_type_info = object->GetWrapperTypeInfo();
 
@@ -108,12 +111,14 @@ void ScriptWrappable::InitializeQuickJSObject() {
     auto* exotic_methods = new JSClassExoticMethods{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
     // Define the callback when access object property.
-    if (UNLIKELY(wrapper_type_info->indexed_property_getter_handler_ != nullptr || wrapper_type_info->string_property_getter_handler_ != nullptr)) {
+    if (UNLIKELY(wrapper_type_info->indexed_property_getter_handler_ != nullptr ||
+                 wrapper_type_info->string_property_getter_handler_ != nullptr)) {
       exotic_methods->get_property = HandleJSPropertyGetterCallback;
     }
 
     // Define the callback when set object property.
-    if (UNLIKELY(wrapper_type_info->indexed_property_getter_handler_ != nullptr || wrapper_type_info->string_property_setter_handler_ != nullptr)) {
+    if (UNLIKELY(wrapper_type_info->indexed_property_getter_handler_ != nullptr ||
+                 wrapper_type_info->string_property_setter_handler_ != nullptr)) {
       exotic_methods->set_property = HandleJSPropertySetterCallback;
     }
 

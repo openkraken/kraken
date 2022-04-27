@@ -144,29 +144,31 @@ TEST(Node, replaceBody) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
-//  const char* code = "let newbody = document.createElement('body'); document.documentElement.replaceChild(newbody, document.body)";
+  //  const char* code = "let newbody = document.createElement('body'); document.documentElement.replaceChild(newbody,
+  //  document.body)";
   const char* code = "document.body = document.createElement('body');";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 
   EXPECT_EQ(errorCalled, false);
 }
 //
-//TEST(Node, cloneNode) {
+// TEST(Node, cloneNode) {
 //  std::string code = R"(
-//const div = document.createElement('div');
-//div.style.width = '100px';
-//div.style.height = '100px';
-//div.style.backgroundColor = 'yellow';
-//let str = '1234';
-//div.setAttribute('id', str);
-//document.body.appendChild(div);
+// const div = document.createElement('div');
+// div.style.width = '100px';
+// div.style.height = '100px';
+// div.style.backgroundColor = 'yellow';
+// let str = '1234';
+// div.setAttribute('id', str);
+// document.body.appendChild(div);
 //
-//const div2 = div.cloneNode(true);
-//document.body.appendChild(div2);
+// const div2 = div.cloneNode(true);
+// document.body.appendChild(div2);
 //
-//div2.setAttribute('id', '456');
+// div2.setAttribute('id', '456');
 //
-//console.log(div.style.width == div2.style.height, div.getAttribute('id') == '1234', div2.getAttribute('id') == '456');
+// console.log(div.style.width == div2.style.height, div.getAttribute('id') == '1234', div2.getAttribute('id') ==
+// '456');
 //)";
 //
 //  bool static errorCalled = false;
@@ -186,34 +188,35 @@ TEST(Node, replaceBody) {
 //  EXPECT_EQ(logCalled, true);
 //}
 //
-//TEST(Node, nestedNode) {
+// TEST(Node, nestedNode) {
 //  std::string code = R"(
-//const div = document.createElement('div');
-//div.style.width = '100px';
-//div.style.height = '100px';
-//div.style.backgroundColor = 'green';
-//div.setAttribute('id', '123');
-//document.body.appendChild(div)
+// const div = document.createElement('div');
+// div.style.width = '100px';
+// div.style.height = '100px';
+// div.style.backgroundColor = 'green';
+// div.setAttribute('id', '123');
+// document.body.appendChild(div)
 //
-//const child = document.createElement('div');
-//child.style.width = '10px';
-//child.style.height = '10px';
-//child.style.backgroundColor = 'blue';
-//child.setAttribute('id', 'child123');
-//div.appendChild(child);
+// const child = document.createElement('div');
+// child.style.width = '10px';
+// child.style.height = '10px';
+// child.style.backgroundColor = 'blue';
+// child.setAttribute('id', 'child123');
+// div.appendChild(child);
 //
-//const child2 = document.createElement('div');
-//child2.style.width = '10px';
-//child2.style.height = '10px';
-//child2.style.backgroundColor = 'yellow';
-//child2.setAttribute('id', 'child123');
-//div.appendChild(child2);
+// const child2 = document.createElement('div');
+// child2.style.width = '10px';
+// child2.style.height = '10px';
+// child2.style.backgroundColor = 'yellow';
+// child2.setAttribute('id', 'child123');
+// div.appendChild(child2);
 //
-//const div2 = div.cloneNode(true);
-//document.body.appendChild(div2);
+// const div2 = div.cloneNode(true);
+// document.body.appendChild(div2);
 //
-//console.log(
-//  div2.firstChild.getAttribute('id') === 'child123', div2.firstChild.style.width === '10px', div2.firstChild.style.height === '10px'
+// console.log(
+//  div2.firstChild.getAttribute('id') === 'child123', div2.firstChild.style.width === '10px',
+//  div2.firstChild.style.height === '10px'
 //);
 //)";
 //

@@ -98,11 +98,19 @@ class Node : public EventTarget {
   [[nodiscard]] FORCE_INLINE bool IsTextNode() const { return GetDOMNodeType() == DOMNodeType::kText; }
   [[nodiscard]] FORCE_INLINE bool IsContainerNode() const { return GetFlag(kIsContainerFlag); }
   [[nodiscard]] FORCE_INLINE bool IsElementNode() const { return GetDOMNodeType() == DOMNodeType::kElement; }
-  [[nodiscard]] FORCE_INLINE bool IsDocumentFragment() const { return GetDOMNodeType() == DOMNodeType::kDocumentFragment; }
+  [[nodiscard]] FORCE_INLINE bool IsDocumentFragment() const {
+    return GetDOMNodeType() == DOMNodeType::kDocumentFragment;
+  }
 
-  [[nodiscard]] FORCE_INLINE bool IsHTMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kHTML; }
-  [[nodiscard]] FORCE_INLINE bool IsMathMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kMathML; }
-  [[nodiscard]] FORCE_INLINE bool IsSVGElement() const { return GetElementNamespaceType() == ElementNamespaceType::kSVG; }
+  [[nodiscard]] FORCE_INLINE bool IsHTMLElement() const {
+    return GetElementNamespaceType() == ElementNamespaceType::kHTML;
+  }
+  [[nodiscard]] FORCE_INLINE bool IsMathMLElement() const {
+    return GetElementNamespaceType() == ElementNamespaceType::kMathML;
+  }
+  [[nodiscard]] FORCE_INLINE bool IsSVGElement() const {
+    return GetElementNamespaceType() == ElementNamespaceType::kSVG;
+  }
 
   [[nodiscard]] CustomElementState GetCustomElementState() const {
     return static_cast<CustomElementState>(node_flags_ & kCustomElementStateMask);
@@ -250,7 +258,9 @@ class Node : public EventTarget {
     kOther = 3 << kDOMNodeTypeShift,
   };
 
-  [[nodiscard]] FORCE_INLINE DOMNodeType GetDOMNodeType() const { return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask); }
+  [[nodiscard]] FORCE_INLINE DOMNodeType GetDOMNodeType() const {
+    return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask);
+  }
 
   enum class ElementNamespaceType : uint32_t {
     kHTML = 0,

@@ -65,7 +65,8 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   JSValue GetJSObject() const;
   JSValue jsObject_{JS_NULL};
   // Indicate this JSObject are created by MakeGarbageCollected traits and no one had used it.
-  // There are extra one reference count when JSObject are created by MakeGarbageCollected and needs to be special handled by cppgc.
+  // There are extra one reference count when JSObject are created by MakeGarbageCollected and needs to be special
+  // handled by cppgc.
   mutable bool fresh_{false};
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
