@@ -1,7 +1,6 @@
 /*auto generated*/
 describe('abspos-paged', () => {
-  // @TODO: White space on the start is incorrectly trimmed on position absolute element.
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let div;
     let div_1;

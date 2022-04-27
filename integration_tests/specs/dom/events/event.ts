@@ -166,7 +166,7 @@ describe('Event', () => {
     block.style.width = '100px';
     block.style.height = '100px';
     block.style.backgroundColor = 'green';
-    block.addEventListener('click', () => clickCount++); 
+    block.addEventListener('click', () => clickCount++);
 
     const block2 =document.createElement('div');
     block2.style.width = '100px';
@@ -201,7 +201,7 @@ describe('Event', () => {
     block.style.width = '300px';
     block.style.height = '50px';
     block.style.backgroundColor = 'green';
-    block.addEventListener('click', () => clickCount++); 
+    block.addEventListener('click', () => clickCount++);
     container.appendChild(block);
 
     await simulateClick(50, 20);
@@ -225,7 +225,7 @@ describe('Event', () => {
     block.style.width = '300px';
     block.style.height = '50px';
     block.style.backgroundColor = 'green';
-    block.addEventListener('click', () => clickCount++); 
+    block.addEventListener('click', () => clickCount++);
     container.appendChild(block);
 
     await simulateClick(50, 20);
@@ -248,7 +248,7 @@ describe('Event', () => {
     block.style.width = '300px';
     block.style.height = '50px';
     block.style.backgroundColor = 'green';
-    block.addEventListener('click', () => clickCount++); 
+    block.addEventListener('click', () => clickCount++);
     container.appendChild(block);
 
     await simulateClick(50, 20);
@@ -375,4 +375,100 @@ describe('Event', () => {
     e.initEvent(type, true, true);
     expect(e.type).toBe(type);
   });
+
+  it('Event Level 0 removal', () => {
+    var el = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    let ret = '';
+    function fn1() {
+      ret += '1';
+    }
+    function fn2() {
+      ret += '2';
+    }
+    el.onclick = fn1;
+    el.click();
+
+    el.onclick = null;
+    el.click();
+
+    el.onclick = fn2;
+    el.click();
+
+    expect(ret).toEqual('12');
+  });
+
+  it('Event Level 2 listen multi-times', () => {
+    var el = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    let ret = '';
+    function fn1() {
+      ret += '1';
+    }
+    function fn2() {
+      ret += '2';
+    }
+    el.addEventListener('click', fn1);
+    el.addEventListener('click', fn1);
+    el.addEventListener('click', fn2);
+    el.click();
+
+    expect(ret).toEqual('12');
+  });
+
+  it('Event Level 2 listen multi-times with removal', () => {
+    var el = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    let ret = '';
+    function fn1() {
+      ret += '1';
+    }
+    function fn2() {
+      ret += '2';
+    }
+    el.addEventListener('click', fn1);
+    el.addEventListener('click', fn1);
+    el.addEventListener('click', fn2);
+
+    el.removeEventListener('click', fn1);
+    el.removeEventListener('click', fn2);
+    el.click();
+
+    expect(ret).toEqual('');
+  });
+
+  it('Add multi event types', () => {
+      var el = createElement('div', {
+        style: {
+          width: '100px',
+          height: '100px',
+          background: 'red'
+        }
+      });
+      let ret = '';
+      function fn1() {
+        ret += '1';
+      }
+      el.addEventListener('click', fn1);
+      el.addEventListener('scroll', fn1);
+
+      el.click();
+
+      expect(ret).toEqual('1');
+    });
 });

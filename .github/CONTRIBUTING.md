@@ -3,7 +3,7 @@
 0. Prerequisites
     * [Node.js](https://nodejs.org/) v12.0 or later
     * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
-    * [CMake](https://cmake.org/) v3.2.0 or later
+    * [CMake](https://cmake.org/) v3.10.0 or later
     * [Xcode](https://developer.apple.com/xcode/) (10.12) or later (Running on macOS or iOS)
     * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `21.4.7075529` (Running on Android)
 
