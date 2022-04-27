@@ -9,6 +9,7 @@
 #include "bindings/qjs/qjs_engine_patch.h"
 #include "bindings/qjs/script_value.h"
 #include "bindings/qjs/script_wrappable.h"
+#include "mutation_scope.h"
 #include "foundation/casting.h"
 
 namespace kraken {
@@ -47,7 +48,11 @@ class Member {
     if (raw_ == nullptr)
       return;
     auto* wrappable = To<ScriptWrappable>(raw_);
-    JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+    if (wrappable->GetExecutingContext()->HasMutationScope()) {
+      wrappable->GetExecutingContext()->mutationScope().RecordFree(wrappable);
+    } else {
+      JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+    }
     raw_ = nullptr;
   }
 
@@ -97,7 +102,11 @@ class Member {
       // This JSObject was created just now and used at first time.
       // Because there are already one reference count when JSObject created, so we skip duplicate.
       if (!p->fresh()) {
-        JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+        if (wrappable->GetExecutingContext()->HasMutationScope()) {
+          wrappable->GetExecutingContext()->mutationScope().RecordDup(wrappable);
+        } else {
+          JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+        }
       }
       // This object had been used, no long fresh at all.
       p->MakeOld();

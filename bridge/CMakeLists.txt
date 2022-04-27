@@ -207,6 +207,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/cppgc/garbage_collected.h
     bindings/qjs/cppgc/gc_visitor.cc
     bindings/qjs/cppgc/gc_visitor.h
+    bindings/qjs/cppgc/mutation_scope.cc
+    bindings/qjs/cppgc/mutation_scope.h
     bindings/qjs/cppgc/member.h
     bindings/qjs/cppgc/member.cc
     bindings/qjs/script_wrappable.cc

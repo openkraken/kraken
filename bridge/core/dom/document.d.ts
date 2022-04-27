@@ -8,7 +8,7 @@ import {HTMLHtmlElement} from "../html/html_html_element";
 import {Element} from "./element";
 
 interface Document extends Node {
-  readonly body: HTMLBodyElement | null;
+  body: HTMLBodyElement | null;
   readonly head: HTMLHeadElement | null;
   readonly documentElement: HTMLHtmlElement;
 

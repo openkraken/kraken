@@ -39,6 +39,7 @@ struct NativeByteCode {
 
 class ExecutingContext;
 class Document;
+class MutationScope;
 
 using JSExceptionHandler = std::function<void(ExecutingContext* context, const char* message)>;
 
@@ -90,6 +91,14 @@ class ExecutingContext {
   // Get current script state.
   ScriptState* GetScriptState() { return &script_state_; }
 
+  void SetMutationScope(MutationScope& mutation_scope) { active_mutation_scope = &mutation_scope; }
+  bool HasMutationScope() const { return active_mutation_scope != nullptr; }
+  MutationScope& mutationScope() const {
+    assert(active_mutation_scope != nullptr);
+    return *active_mutation_scope;
+  }
+  void ClearMutationScope() { active_mutation_scope = nullptr; }
+
   FORCE_INLINE Document* document() { return document_; };
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &ui_command_buffer_; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return dart_method_ptr_; }
@@ -97,9 +106,6 @@ class ExecutingContext {
   std::chrono::time_point<std::chrono::system_clock> time_origin_;
 
   int32_t unique_id_;
-  struct list_head node_job_list;
-  struct list_head module_job_list;
-  struct list_head module_callback_job_list;
 
   static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
                                                     JSValueConst promise,
@@ -138,6 +144,7 @@ class ExecutingContext {
   std::unique_ptr<DartMethodPointer> dart_method_ptr_ = std::make_unique<DartMethodPointer>();
   RejectedPromises rejected_promises_;
   PendingPromises pending_promises_;
+  MutationScope* active_mutation_scope{nullptr};
 };
 
 class ObjectProperty {

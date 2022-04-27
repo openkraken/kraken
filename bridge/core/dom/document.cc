@@ -4,6 +4,7 @@
  */
 
 #include "document.h"
+#include "bindings/qjs/exception_message.h"
 #include "core/dom/element.h"
 #include "core/html/html_body_element.h"
 #include "core/html/html_element.h"
@@ -143,6 +144,35 @@ HTMLBodyElement* Document::body() const {
   }
 
   return nullptr;
+}
+
+void Document::setBody(HTMLBodyElement* new_body, ExceptionState& exception_state) {
+  if (!new_body) {
+    exception_state.ThrowException(ctx(), ErrorType::TypeError,
+                                   ExceptionMessage::ArgumentNullOrIncorrectType(1, "HTMLBodyElement"));
+    return;
+  }
+
+  if (!documentElement()) {
+    exception_state.ThrowException(ctx(), ErrorType::TypeError, "No document element exists.");
+    return;
+  }
+
+  if (!IsA<HTMLBodyElement>(*new_body)) {
+    exception_state.ThrowException(ctx(), ErrorType::TypeError,
+                                   "The new body element is of type '" + new_body->tagName().ToStdString() +
+                                       "'. It must be either a 'BODY' element.");
+    return;
+  }
+
+  HTMLElement* old_body = body();
+  if (old_body == new_body)
+    return;
+
+  if (old_body)
+    documentElement()->ReplaceChild(new_body, old_body, exception_state);
+  else
+    documentElement()->AppendChild(new_body, exception_state);
 }
 
 HTMLHeadElement* Document::head() const {

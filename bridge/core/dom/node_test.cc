@@ -110,29 +110,29 @@ TEST(Node, setTextContent) {
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
-//
-//TEST(Node, ensureDetached) {
-//  bool static errorCalled = false;
-//  bool static logCalled = false;
-//  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-//    EXPECT_STREQ(message.c_str(), "true true");
-//    logCalled = true;
-//  };
-//  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-//  auto context = bridge->getContext();
-//  const char* code =
-//      "let div = document.createElement('div');"
-//      "document.body.appendChild(div);"
-//      "let container = document.createElement('div');"
-//      "container.appendChild(div);"
-//      "document.body.appendChild(container);"
-//      "console.log(document.body.firstChild === container, container.firstChild === div);";
-//  bridge->evaluateScript(code, strlen(code), "vm://", 0);
-//
-//  EXPECT_EQ(errorCalled, false);
-//  EXPECT_EQ(logCalled, true);
-//}
-//
+
+TEST(Node, ensureDetached) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "true true");
+    logCalled = true;
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto context = bridge->getContext();
+  const char* code =
+      "let div = document.createElement('div');"
+      "document.body.appendChild(div);"
+      "let container = document.createElement('div');"
+      "container.appendChild(div);"
+      "document.body.appendChild(container);"
+      "console.log(document.body.firstChild === container, container.firstChild === div);";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
 TEST(Node, replaceBody) {
   bool static errorCalled = false;
   bool static logCalled = false;
@@ -144,6 +144,7 @@ TEST(Node, replaceBody) {
     errorCalled = true;
   });
   auto context = bridge->getContext();
+//  const char* code = "let newbody = document.createElement('body'); document.documentElement.replaceChild(newbody, document.body)";
   const char* code = "document.body = document.createElement('body');";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
 

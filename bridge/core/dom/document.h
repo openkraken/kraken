@@ -54,7 +54,9 @@ class Document : public ContainerNode, public TreeScope {
   // (https://html.spec.whatwg.org/C/#the-body-element-2).
   // That is, the first body or frameset child of the document element.
   [[nodiscard]] HTMLBodyElement* body() const;
+  void setBody(HTMLBodyElement* body, ExceptionState& exception_state);
   [[nodiscard]] HTMLHeadElement* head() const;
+  void setHead(HTMLHeadElement* head, ExceptionState& exception_state);
 
   void IncrementNodeCount() { node_count_++; }
   void DecrementNodeCount() {

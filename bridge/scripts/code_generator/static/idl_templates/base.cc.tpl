@@ -8,6 +8,7 @@
 #include "bindings/qjs/converter_impl.h"
 #include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/script_promise.h"
+#include "bindings/qjs/cppgc/mutation_scope.h"
 #include "core/executing_context.h"
 
 namespace kraken {

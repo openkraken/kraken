@@ -8,7 +8,7 @@
 
 namespace kraken {
 
-std::string FormatString(const char* format, ...) {
+std::string ExceptionMessage::FormatString(const char* format, ...) {
   va_list args;
 
   static const unsigned kDefaultSize = 256;
@@ -44,6 +44,10 @@ std::string FormatString(const char* format, ...) {
 
 std::string ExceptionMessage::ArgumentNotOfType(int argument_index, const char* expected_type) {
   return FormatString("parameter %d is not of type '%s'.", argument_index + 1, expected_type);
+}
+
+std::string ExceptionMessage::ArgumentNullOrIncorrectType(int argument_index, const char* expect_type) {
+  return FormatString("The %d argument provided is either null, or an invalid %s object.", argument_index, expect_type);
 }
 
 }  // namespace kraken

@@ -40,10 +40,6 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   if (contextId > running_context_list)
     running_context_list = contextId;
 
-  init_list_head(&node_job_list);
-  init_list_head(&module_job_list);
-  init_list_head(&module_callback_job_list);
-
   time_origin_ = std::chrono::system_clock::now();
 
   JSContext* ctx = script_state_.ctx();
