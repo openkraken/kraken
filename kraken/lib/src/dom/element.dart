@@ -508,12 +508,6 @@ abstract class Element
     }
   }
 
-  @override
-  void didDetachRenderer() {
-    super.didDetachRenderer();
-    style.reset();
-  }
-
   BoundingClientRect getBoundingClientRect() => boundingClientRect;
 
   bool _shouldConsumeScrollTicker = false;
