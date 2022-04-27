@@ -49,6 +49,9 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   JSValue ToQuickJS();
   JSValue ToQuickJSUnsafe() const;
 
+  bool fresh() const { return fresh_; }
+  void MakeOld() const { fresh_ = false; }
+
   ScriptValue ToValue();
   FORCE_INLINE ExecutingContext* GetExecutingContext() const {
     return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
@@ -59,8 +62,11 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   void InitializeQuickJSObject() override;
 
  private:
+  JSValue GetJSObject() const;
   JSValue jsObject_{JS_NULL};
-  bool wrapped_{false};
+  // Indicate this JSObject are created by MakeGarbageCollected traits and no one had used it.
+  // There are extra one reference count when JSObject are created by MakeGarbageCollected and needs to be special handled by cppgc.
+  mutable bool fresh_{false};
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
   friend class GCVisitor;

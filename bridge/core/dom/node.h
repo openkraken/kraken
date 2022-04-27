@@ -60,20 +60,19 @@ class Node : public EventTarget {
   static Node* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   // DOM methods & attributes for Node
-  bool HasTagName(const AtomicString&) const;
   virtual std::string nodeName() const = 0;
   virtual std::string nodeValue() const = 0;
   virtual void setNodeValue(const AtomicString&, ExceptionState&);
   virtual NodeType nodeType() const = 0;
 
-  ContainerNode* parentNode() const;
-  Element* parentElement() const;
-  Node* previousSibling() const { return previous_.Get(); }
-  Node* nextSibling() const { return next_.Get(); }
+  [[nodiscard]] ContainerNode* parentNode() const;
+  [[nodiscard]] Element* parentElement() const;
+  [[nodiscard]] Node* previousSibling() const { return previous_.Get(); }
+  [[nodiscard]] Node* nextSibling() const { return next_.Get(); }
   NodeList* childNodes();
-  Node* firstChild() const;
-  Node* lastChild() const;
-  Node& TreeRoot() const;
+  [[nodiscard]] Node* firstChild() const;
+  [[nodiscard]] Node* lastChild() const;
+  [[nodiscard]] Node& TreeRoot() const;
   void remove(ExceptionState&);
 
   Node* insertBefore(Node* new_child, Node* ref_child, ExceptionState&);
@@ -92,40 +91,40 @@ class Node : public EventTarget {
   bool isEqualNode(Node*) const;
   bool isSameNode(const Node* other, ExceptionState& exception_state) const { return this == other; }
 
-  AtomicString textContent(bool convert_brs_to_newlines = false) const;
+  [[nodiscard]] AtomicString textContent(bool convert_brs_to_newlines = false) const;
   virtual void setTextContent(const AtomicString&, ExceptionState& exception_state);
 
   // Other methods (not part of DOM)
-  FORCE_INLINE bool IsTextNode() const { return GetDOMNodeType() == DOMNodeType::kText; }
-  FORCE_INLINE bool IsContainerNode() const { return GetFlag(kIsContainerFlag); }
-  FORCE_INLINE bool IsElementNode() const { return GetDOMNodeType() == DOMNodeType::kElement; }
-  FORCE_INLINE bool IsDocumentFragment() const { return GetDOMNodeType() == DOMNodeType::kDocumentFragment; }
+  [[nodiscard]] FORCE_INLINE bool IsTextNode() const { return GetDOMNodeType() == DOMNodeType::kText; }
+  [[nodiscard]] FORCE_INLINE bool IsContainerNode() const { return GetFlag(kIsContainerFlag); }
+  [[nodiscard]] FORCE_INLINE bool IsElementNode() const { return GetDOMNodeType() == DOMNodeType::kElement; }
+  [[nodiscard]] FORCE_INLINE bool IsDocumentFragment() const { return GetDOMNodeType() == DOMNodeType::kDocumentFragment; }
 
-  FORCE_INLINE bool IsHTMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kHTML; }
-  FORCE_INLINE bool IsMathMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kMathML; }
-  FORCE_INLINE bool IsSVGElement() const { return GetElementNamespaceType() == ElementNamespaceType::kSVG; }
+  [[nodiscard]] FORCE_INLINE bool IsHTMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kHTML; }
+  [[nodiscard]] FORCE_INLINE bool IsMathMLElement() const { return GetElementNamespaceType() == ElementNamespaceType::kMathML; }
+  [[nodiscard]] FORCE_INLINE bool IsSVGElement() const { return GetElementNamespaceType() == ElementNamespaceType::kSVG; }
 
-  CustomElementState GetCustomElementState() const {
+  [[nodiscard]] CustomElementState GetCustomElementState() const {
     return static_cast<CustomElementState>(node_flags_ & kCustomElementStateMask);
   }
   bool IsCustomElement() const { return GetCustomElementState() != CustomElementState::kUncustomized; }
   void SetCustomElementState(CustomElementState);
 
-  virtual bool IsMediaElement() const { return false; }
-  virtual bool IsAttributeNode() const { return false; }
-  virtual bool IsCharacterDataNode() const { return false; }
+  [[nodiscard]] virtual bool IsMediaElement() const { return false; }
+  [[nodiscard]] virtual bool IsAttributeNode() const { return false; }
+  [[nodiscard]] virtual bool IsCharacterDataNode() const { return false; }
 
   // StyledElements allow inline style (style="border: 1px"), presentational
   // attributes (ex. color), class names (ex. class="foo bar") and other
   // non-basic styling features. They also control if this element can
   // participate in style sharing.
-  bool IsStyledElement() const { return IsHTMLElement() || IsSVGElement() || IsMathMLElement(); }
+  [[nodiscard]] bool IsStyledElement() const { return IsHTMLElement() || IsSVGElement() || IsMathMLElement(); }
 
-  bool IsDocumentNode() const;
+  [[nodiscard]] bool IsDocumentNode() const;
 
   // Node's parent, shadow tree host.
-  ContainerNode* ParentOrShadowHostNode() const;
-  Element* ParentOrShadowHostElement() const;
+  [[nodiscard]] ContainerNode* ParentOrShadowHostNode() const;
+  [[nodiscard]] Element* ParentOrShadowHostElement() const;
   void SetParentOrShadowHostNode(ContainerNode*);
 
   // ---------------------------------------------------------------------------
@@ -146,48 +145,48 @@ class Node : public EventTarget {
   virtual void RemovedFrom(ContainerNode& insertion_point);
 
   // Knows about all kinds of hosts.
-  ContainerNode* ParentOrShadowHostOrTemplateHostNode() const;
+  [[nodiscard]] ContainerNode* ParentOrShadowHostOrTemplateHostNode() const;
 
   // Returns the parent node, but nullptr if the parent node is a ShadowRoot.
-  ContainerNode* NonShadowBoundaryParentNode() const;
+  [[nodiscard]] ContainerNode* NonShadowBoundaryParentNode() const;
 
   // These low-level calls give the caller responsibility for maintaining the
   // integrity of the tree.
   void SetPreviousSibling(Node* previous) { previous_ = previous; }
   void SetNextSibling(Node* next) { next_ = next; }
 
-  bool HasEventTargetData() const { return GetFlag(kHasEventTargetDataFlag); }
+  [[nodiscard]] bool HasEventTargetData() const { return GetFlag(kHasEventTargetDataFlag); }
   void SetHasEventTargetData(bool flag) { SetFlag(flag, kHasEventTargetDataFlag); }
 
-  unsigned NodeIndex() const;
+  [[nodiscard]] unsigned NodeIndex() const;
 
   // Returns the DOM ownerDocument attribute. This method never returns null,
   // except in the case of a Document node.
-  Document* ownerDocument() const;
+  [[nodiscard]] Document* ownerDocument() const;
 
   // Returns the document associated with this node. A Document node returns
   // itself.
-  Document& GetDocument() const { return GetTreeScope().GetDocument(); }
+  [[nodiscard]] Document& GetDocument() const { return GetTreeScope().GetDocument(); }
 
-  TreeScope& GetTreeScope() const {
+  [[nodiscard]] TreeScope& GetTreeScope() const {
     assert(tree_scope_);
     return *tree_scope_;
   };
 
   // Returns true if this node is connected to a document, false otherwise.
   // See https://dom.spec.whatwg.org/#connected for the definition.
-  bool isConnected() const { return GetFlag(kIsConnectedFlag); }
+  [[nodiscard]] bool isConnected() const { return GetFlag(kIsConnectedFlag); }
 
-  bool IsInDocumentTree() const { return isConnected(); }
-  bool IsInTreeScope() const { return GetFlag(static_cast<NodeFlags>(kIsConnectedFlag)); }
+  [[nodiscard]] bool IsInDocumentTree() const { return isConnected(); }
+  [[nodiscard]] bool IsInTreeScope() const { return GetFlag(static_cast<NodeFlags>(kIsConnectedFlag)); }
 
-  bool IsDocumentTypeNode() const { return nodeType() == kDocumentTypeNode; }
-  virtual bool ChildTypeAllowed(NodeType) const { return false; }
-  unsigned CountChildren() const;
+  [[nodiscard]] bool IsDocumentTypeNode() const { return nodeType() == kDocumentTypeNode; }
+  [[nodiscard]] virtual bool ChildTypeAllowed(NodeType) const { return false; }
+  [[nodiscard]] unsigned CountChildren() const;
 
   bool IsDescendantOf(const Node*) const;
   bool contains(const Node*, ExceptionState&) const;
-  bool ContainsIncludingHostElements(const Node&) const;
+  [[nodiscard]] bool ContainsIncludingHostElements(const Node&) const;
   Node* CommonAncestor(const Node&, ContainerNode* (*parent)(const Node&)) const;
 
   enum ShadowTreesTreatment { kTreatShadowTreesAsDisconnected, kTreatShadowTreesAsComposed };
@@ -195,19 +194,19 @@ class Node : public EventTarget {
   EventTargetData* GetEventTargetData() override;
   EventTargetData& EnsureEventTargetData() override;
 
-  bool IsFinishedParsingChildren() const { return GetFlag(kIsFinishedParsingChildrenFlag); }
+  [[nodiscard]] bool IsFinishedParsingChildren() const { return GetFlag(kIsFinishedParsingChildrenFlag); }
 
   void SetHasDuplicateAttributes() { SetFlag(kHasDuplicateAttributes); }
-  bool HasDuplicateAttribute() const { return GetFlag(kHasDuplicateAttributes); }
+  [[nodiscard]] bool HasDuplicateAttribute() const { return GetFlag(kHasDuplicateAttributes); }
 
-  bool SelfOrAncestorHasDirAutoAttribute() const { return GetFlag(kSelfOrAncestorHasDirAutoAttribute); }
+  [[nodiscard]] bool SelfOrAncestorHasDirAutoAttribute() const { return GetFlag(kSelfOrAncestorHasDirAutoAttribute); }
   void SetSelfOrAncestorHasDirAutoAttribute() { SetFlag(kSelfOrAncestorHasDirAutoAttribute); }
   void ClearSelfOrAncestorHasDirAutoAttribute() { ClearFlag(kSelfOrAncestorHasDirAutoAttribute); }
 
   NodeData& CreateNodeData();
-  bool HasData() const { return GetFlag(kHasDataFlag); }
+  [[nodiscard]] bool HasData() const { return GetFlag(kHasDataFlag); }
   // |RareData| cannot be replaced or removed once assigned.
-  NodeData* Data() const { return node_data_.get(); }
+  [[nodiscard]] NodeData* Data() const { return node_data_.get(); }
   NodeData& EnsureNodeData();
 
   void Trace(GCVisitor*) const override;
@@ -239,7 +238,7 @@ class Node : public EventTarget {
     // 2 bits remaining.
   };
 
-  FORCE_INLINE bool GetFlag(NodeFlags mask) const { return node_flags_ & mask; }
+  [[nodiscard]] FORCE_INLINE bool GetFlag(NodeFlags mask) const { return node_flags_ & mask; }
   void SetFlag(bool f, NodeFlags mask) { node_flags_ = (node_flags_ & ~mask) | (-(int32_t)f & mask); }
   void SetFlag(NodeFlags mask) { node_flags_ |= mask; }
   void ClearFlag(NodeFlags mask) { node_flags_ &= ~mask; }
@@ -251,7 +250,7 @@ class Node : public EventTarget {
     kOther = 3 << kDOMNodeTypeShift,
   };
 
-  FORCE_INLINE DOMNodeType GetDOMNodeType() const { return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask); }
+  [[nodiscard]] FORCE_INLINE DOMNodeType GetDOMNodeType() const { return static_cast<DOMNodeType>(node_flags_ & kDOMNodeTypeMask); }
 
   enum class ElementNamespaceType : uint32_t {
     kHTML = 0,
@@ -259,7 +258,7 @@ class Node : public EventTarget {
     kSVG = 2 << kElementNamespaceTypeShift,
     kOther = 3 << kElementNamespaceTypeShift,
   };
-  FORCE_INLINE ElementNamespaceType GetElementNamespaceType() const {
+  [[nodiscard]] FORCE_INLINE ElementNamespaceType GetElementNamespaceType() const {
     return static_cast<ElementNamespaceType>(node_flags_ & kElementNamespaceTypeMask);
   }
 

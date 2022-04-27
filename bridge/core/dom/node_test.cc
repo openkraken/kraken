@@ -69,47 +69,47 @@ TEST(Node, textNodeHaveEmptyChildNodes) {
   EXPECT_EQ(errorCalled, false);
   EXPECT_EQ(logCalled, true);
 }
-//
-//TEST(Node, textContent) {
-//  bool static errorCalled = false;
-//  bool static logCalled = false;
-//  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-//    EXPECT_STREQ(message.c_str(), "1234helloworld");
-//    logCalled = true;
-//  };
-//  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-//  auto context = bridge->getContext();
-//  const char* code =
-//      "let text1 = document.createTextNode('1234');"
-//      "let text2 = document.createTextNode('helloworld');"
-//      "let div = document.createElement('div');"
-//      "div.appendChild(text1);"
-//      "div.appendChild(text2);"
-//      "console.log(div.textContent)";
-//  bridge->evaluateScript(code, strlen(code), "vm://", 0);
-//
-//  EXPECT_EQ(errorCalled, false);
-//  EXPECT_EQ(logCalled, true);
-//}
-//
-//TEST(Node, setTextContent) {
-//  bool static errorCalled = false;
-//  bool static logCalled = false;
-//  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
-//    EXPECT_STREQ(message.c_str(), "1234");
-//    logCalled = true;
-//  };
-//  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-//  auto context = bridge->getContext();
-//  const char* code =
-//      "let div = document.createElement('div');"
-//      "div.textContent = '1234';"
-//      "console.log(div.textContent);";
-//  bridge->evaluateScript(code, strlen(code), "vm://", 0);
-//
-//  EXPECT_EQ(errorCalled, false);
-//  EXPECT_EQ(logCalled, true);
-//}
+
+TEST(Node, textContent) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "1234helloworld");
+    logCalled = true;
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto context = bridge->getContext();
+  const char* code =
+      "let text1 = document.createTextNode('1234');"
+      "let text2 = document.createTextNode('helloworld');"
+      "let div = document.createElement('div');"
+      "div.appendChild(text1);"
+      "div.appendChild(text2);"
+      "console.log(div.textContent)";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
+
+TEST(Node, setTextContent) {
+  bool static errorCalled = false;
+  bool static logCalled = false;
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    EXPECT_STREQ(message.c_str(), "1234");
+    logCalled = true;
+  };
+  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
+  auto context = bridge->getContext();
+  const char* code =
+      "let div = document.createElement('div');"
+      "div.textContent = '1234';"
+      "console.log(div.textContent);";
+  bridge->evaluateScript(code, strlen(code), "vm://", 0);
+
+  EXPECT_EQ(errorCalled, false);
+  EXPECT_EQ(logCalled, true);
+}
 //
 //TEST(Node, ensureDetached) {
 //  bool static errorCalled = false;

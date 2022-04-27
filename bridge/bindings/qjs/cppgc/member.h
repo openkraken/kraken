@@ -57,6 +57,7 @@ class Member {
       return;
     raw_ = p;
     runtime_ = p->runtime();
+    p->MakeOld();
   }
 
   // Copy assignment.
@@ -93,7 +94,13 @@ class Member {
     if (p != nullptr) {
       auto* wrappable = To<ScriptWrappable>(p);
       runtime_ = wrappable->runtime();
-      JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+      // This JSObject was created just now and used at first time.
+      // Because there are already one reference count when JSObject created, so we skip duplicate.
+      if (!p->fresh()) {
+        JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+      }
+      // This object had been used, no long fresh at all.
+      p->MakeOld();
     }
     raw_ = p;
   }

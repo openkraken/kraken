@@ -370,8 +370,8 @@ ModuleCallbackCoordinator* ExecutingContext::ModuleCallbacks() {
 
 void ExecutingContext::InstallDocument() {
   document_ = MakeGarbageCollected<Document>(this);
+  DefineGlobalProperty("document", document_->ToQuickJSUnsafe());
   document_->InitDocumentElement();
-  DefineGlobalProperty("document", document_->ToValue().QJSValue());
 }
 
 // An lock free context validator.
