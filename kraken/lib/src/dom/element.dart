@@ -486,11 +486,11 @@ abstract class Element
   void willDetachRenderer() {
     super.willDetachRenderer();
 
-    // Cancel running transition.
-    renderStyle.cancelRunningTransition();
-
     RenderBoxModel? renderBoxModel = this.renderBoxModel;
     if (renderBoxModel != null) {
+      // Cancel running transition.
+      renderStyle.cancelRunningTransition();
+
       // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
       renderBoxModel.markAdjacentRenderParagraphNeedsLayout();
 
