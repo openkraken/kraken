@@ -149,7 +149,7 @@ TEST(Document, createElementShouldWorkWithMultipleContext) {
 
   kraken::KrakenPage* bridge1;
 
-  const char* code = "(() => { let img = document.createElement('div');  })();";
+  const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
 
   {
     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
@@ -157,13 +157,13 @@ TEST(Document, createElementShouldWorkWithMultipleContext) {
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
     bridge1 = bridge.release();
   }
-  //
-  //   {
-  //     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
-  //     auto context = bridge->getContext();
-  //     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
-  //     bridge->evaluateScript(code, strlen(code), "vm://", 0);
-  //   }
+
+  {
+    auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
+    auto context = bridge->getContext();
+    const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
+    bridge->evaluateScript(code, strlen(code), "vm://", 0);
+  }
 
   bridge1->evaluateScript(code, strlen(code), "vm://", 0);
 
