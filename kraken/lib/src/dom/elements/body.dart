@@ -22,4 +22,18 @@ class BodyElement extends Element {
 
     super.addEventListener(eventType, eventHandler);
   }
+
+  @override
+  void setRenderStyle(String property, String present) {
+    // UAs must apply the overflow-* values set on the root element to the viewport when the root element’s display value is not none.
+    // However, when the root element is an [HTML] html element (including XML syntax for HTML) whose overflow value is visible (in both axes),
+    // and that element has as a child a body element whose display value is also not none,
+    // user agents must instead apply the overflow-* values of the first such child element to the viewport.
+    // The element from which the value is propagated must then have a used overflow value of visible.
+    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+    if (property == OVERFLOW || property == OVERFLOW_X || property == OVERFLOW_Y) {
+      ownerDocument.documentElement?.setRenderStyle(property, present);
+    }
+    super.setRenderStyle(property, present);
+  }
 }
