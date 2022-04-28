@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_EVENT_TARGET_H
 #define KRAKENBRIDGE_EVENT_TARGET_H
 
+#include "foundation/logging.h"
 #include "bindings/qjs/cppgc/member.h"
 #include "bindings/qjs/js_event_listener.h"
 #include "bindings/qjs/qjs_function.h"

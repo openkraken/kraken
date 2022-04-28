@@ -125,6 +125,7 @@ bool Document::IsValidName(const AtomicString& name) {
 }
 
 Node* Document::Clone(Document&, CloneChildrenFlag) const {
+  assert(false);
   return nullptr;
 }
 

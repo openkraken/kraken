@@ -56,7 +56,7 @@ interface Node extends EventTarget {
   /**
    * Returns a copy of node. If deep is true, the copy also includes the node's descendants.
    */
-  cloneNode(deep?: boolean): Node;
+  cloneNode(deep?: boolean): NewObject<Node>;
   /**
    * Returns true if other is an inclusive descendant of node, and false otherwise.
    */

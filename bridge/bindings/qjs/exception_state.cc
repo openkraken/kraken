@@ -35,6 +35,10 @@ bool ExceptionState::HasException() {
   return !JS_IsNull(exception_);
 }
 
+ExceptionState& ExceptionState::ReturnThis() {
+  return *this;
+}
+
 JSValue ExceptionState::ToQuickJS() {
   return exception_;
 }

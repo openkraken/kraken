@@ -257,6 +257,10 @@ Node* ContainerNode::AppendChild(Node* new_child, ExceptionState& exception_stat
   return new_child;
 }
 
+Node * ContainerNode::AppendChild(Node* new_child) {
+  return AppendChild(new_child, ASSERT_NO_EXCEPTION());
+}
+
 bool ContainerNode::EnsurePreInsertionValidity(const Node& new_child,
                                                const Node* next,
                                                const Node* old_child,
@@ -315,6 +319,13 @@ void ContainerNode::RemoveChildren() {
 
   while (Node* child = first_child_) {
     RemoveBetween(nullptr, child->nextSibling(), *child);
+  }
+}
+
+void ContainerNode::CloneChildNodesFrom(const ContainerNode& node, CloneChildrenFlag flag) {
+  assert(flag != CloneChildrenFlag::kSkip);
+  for (const Node& child : NodeTraversal::ChildrenOf(node)) {
+    AppendChild(child.Clone(GetDocument(), flag));
   }
 }
 

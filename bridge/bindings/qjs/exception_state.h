@@ -10,6 +10,8 @@
 #include <string>
 #include "foundation/macros.h"
 
+#define ASSERT_NO_EXCEPTION()  ExceptionState().ReturnThis()
+
 namespace kraken {
 
 enum ErrorType { TypeError, InternalError, RangeError, ReferenceError, SyntaxError };
@@ -23,6 +25,9 @@ class ExceptionState {
   void ThrowException(JSContext* ctx, ErrorType type, const std::string& message);
   void ThrowException(JSContext* ctx, JSValue exception);
   bool HasException();
+
+  ExceptionState& ReturnThis();
+
   JSValue ToQuickJS();
 
  private:

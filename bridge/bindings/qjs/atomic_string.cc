@@ -97,6 +97,8 @@ AtomicString::AtomicString(const AtomicString& value) {
   }
   ctx_ = value.ctx_;
   runtime_ = value.runtime_;
+  length_ = value.length_;
+  kind_ = value.kind_;
 }
 
 AtomicString& AtomicString::operator=(const AtomicString& other) {
@@ -105,6 +107,8 @@ AtomicString& AtomicString::operator=(const AtomicString& other) {
   }
   runtime_ = other.runtime_;
   ctx_ = other.ctx_;
+  length_ = other.length_;
+  kind_ = other.kind_;
   return *this;
 }
 
@@ -114,6 +118,8 @@ AtomicString::AtomicString(AtomicString&& value) noexcept {
   }
   ctx_ = value.ctx_;
   runtime_ = value.runtime_;
+  length_ = value.length_;
+  kind_ = value.kind_;
 }
 
 AtomicString& AtomicString::operator=(AtomicString&& value) noexcept {
@@ -122,6 +128,8 @@ AtomicString& AtomicString::operator=(AtomicString&& value) noexcept {
   }
   ctx_ = value.ctx_;
   runtime_ = value.runtime_;
+  length_ = value.length_;
+  kind_ = value.kind_;
   return *this;
 }
 

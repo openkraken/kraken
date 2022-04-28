@@ -136,6 +136,25 @@ std::string Element::nodeName() const {
   return tag_name_.ToStdString();
 }
 
+Element& Element::CloneWithChildren(CloneChildrenFlag flag, Document* document) const {
+  Element& clone = CloneWithoutAttributesAndChildren(document ? *document : GetDocument());
+  // This will catch HTML elements in the wrong namespace that are not correctly
+  // copied.  This is a sanity check as HTML overloads some of the DOM methods.
+  assert(IsHTMLElement() == clone.IsHTMLElement());
+
+  clone.CloneAttributesFrom(*this);
+  clone.CloneNonAttributePropertiesFrom(*this, flag);
+  clone.CloneChildNodesFrom(*this, flag);
+  return clone;
+}
+
+Element& Element::CloneWithoutChildren(Document* document) const {}
+
+void Element::CloneAttributesFrom(const Element& other) {
+  if (other.attributes_ == nullptr) return;
+  EnsureElementAttributes().CopyWith(other.attributes_);
+}
+
 bool Element::HasEquivalentAttributes(const Element& other) const {
   return attributes_ != nullptr && other.attributes_ != nullptr && other.attributes_->IsEquivalent(*attributes_);
 }
@@ -146,7 +165,15 @@ void Element::Trace(GCVisitor* visitor) const {
 }
 
 Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
-  return nullptr;
+  if (flag == CloneChildrenFlag::kSkip)
+    return &CloneWithoutChildren(&factory);
+  Element* copy = &CloneWithChildren(flag, &factory);
+  return copy;
+}
+
+Element& Element::CloneWithoutAttributesAndChildren(Document& factory) const {
+  KRAKEN_LOG(VERBOSE) << tagName().ToStdString();
+  return *factory.createElement(tagName(), ASSERT_NO_EXCEPTION());
 }
 
 class ElementSnapshotReader {

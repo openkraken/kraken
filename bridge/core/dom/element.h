@@ -67,10 +67,20 @@ class Element : public ContainerNode {
   AtomicString tagName() const { return tag_name_; }
   std::string nodeName() const override;
 
+
+  Element& CloneWithChildren(CloneChildrenFlag flag, Document* = nullptr) const;
+  Element& CloneWithoutChildren(Document* = nullptr) const;
+
   NodeType nodeType() const override;
   bool ChildTypeAllowed(NodeType) const override;
 
+  // Clones attributes only.
+  void CloneAttributesFrom(const Element&);
   bool HasEquivalentAttributes(const Element& other) const;
+
+  // Step 5 of https://dom.spec.whatwg.org/#concept-node-clone
+  virtual void CloneNonAttributePropertiesFrom(const Element&,
+                                               CloneChildrenFlag) {}
 
   void Trace(GCVisitor* visitor) const override;
 
@@ -79,6 +89,7 @@ class Element : public ContainerNode {
   // Clone is private so that non-virtual CloneElementWithChildren and
   // CloneElementWithoutChildren are used inst
   Node* Clone(Document&, CloneChildrenFlag) const override;
+  virtual Element& CloneWithoutAttributesAndChildren(Document& factory) const;
 
   void _notifyNodeRemoved(Node* node);
   void _notifyChildRemoved();

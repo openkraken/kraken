@@ -38,12 +38,15 @@ class ContainerNode : public Node {
   Node* ReplaceChild(Node* new_child, Node* old_child, ExceptionState&);
   Node* RemoveChild(Node* child, ExceptionState&);
   Node* AppendChild(Node* new_child, ExceptionState&);
+  Node* AppendChild(Node* new_child);
   bool EnsurePreInsertionValidity(const Node& new_child,
                                   const Node* next,
                                   const Node* old_child,
                                   ExceptionState&) const;
 
   void RemoveChildren();
+
+  void CloneChildNodesFrom(const ContainerNode&, CloneChildrenFlag);
 
   std::string nodeValue() const override;
 

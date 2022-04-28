@@ -32,11 +32,10 @@ std::string DocumentFragment::nodeValue() const {
 }
 
 Node* DocumentFragment::Clone(Document& factory, CloneChildrenFlag flag) const {
-  //  ExceptionState exception_state;
-  //  DocumentFragment* clone = Create(&factory, exception_state);
-  //  if (flag != CloneChildrenFlag::kSkip)
-  //    clone->CloneChildNodesFrom(*this, flag);
-  //  return clone;
+  DocumentFragment* clone = Create(factory);
+  if (flag != CloneChildrenFlag::kSkip)
+    clone->CloneChildNodesFrom(*this, flag);
+  return clone;
 }
 
 bool DocumentFragment::ChildTypeAllowed(NodeType type) const {
