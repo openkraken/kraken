@@ -406,19 +406,19 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
-// Cache computed value during perform layout.
+// Cache computed length value during perform layout.
 // format: { hashCode: { renderStyleKey: renderStyleValue } }
-final LinkedLruHashMap<int, Map<String, dynamic>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
+final LinkedLruHashMap<int, Map<String, double>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
 
 // Get computed length value from cache only in perform layout stage.
-dynamic getCachedComputedValue(int hashCode, String propertyName) {
+double? getCachedComputedValue(int hashCode, String propertyName) {
   if (renderBoxInLayoutHashCodes.isNotEmpty) {
     return _cachedComputedValue[hashCode]?[propertyName];
   }
 }
 
 // Cache computed length value only in perform layout stage.
-void cacheComputedValue(int hashCode, String propertyName, value) {
+void cacheComputedValue(int hashCode, String propertyName, double value) {
   if (renderBoxInLayoutHashCodes.isNotEmpty) {
     _cachedComputedValue[hashCode] = _cachedComputedValue[hashCode] ?? {};
     _cachedComputedValue[hashCode]![propertyName] = value;
