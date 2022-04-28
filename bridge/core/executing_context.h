@@ -93,9 +93,7 @@ class ExecutingContext {
 
   void SetMutationScope(MemberMutationScope& mutation_scope);
   bool HasMutationScope() const { return active_mutation_scope != nullptr; }
-  MemberMutationScope* mutationScope() const {
-    return active_mutation_scope;
-  }
+  MemberMutationScope* mutationScope() const { return active_mutation_scope; }
   void ClearMutationScope();
 
   FORCE_INLINE Document* document() { return document_; };
