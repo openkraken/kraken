@@ -138,7 +138,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
-          if (renderBoxModel.scrollOffsetX == null) {
+          if (_scrollableX == null) {
             _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
             renderBoxModel.scrollOffsetX = _scrollableX!.position;
           }
@@ -173,7 +173,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
-          if (renderBoxModel.scrollOffsetY == null) {
+          if (_scrollableY == null) {
             _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
             renderBoxModel.scrollOffsetY = _scrollableY!.position;
           }
