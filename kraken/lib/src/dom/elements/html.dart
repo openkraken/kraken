@@ -27,4 +27,21 @@ class HTMLElement extends Element {
     }
     super.dispatchEvent(event);
   }
+
+  @override
+  void setRenderStyle(String property, String present) {
+    switch (property) {
+    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        if (present == VISIBLE || present == '') {
+          present = AUTO;
+        } else if (present == CLIP) {
+          present = HIDDEN;
+        }
+        break;
+    }
+    super.setRenderStyle(property, present);
+  }
 }
