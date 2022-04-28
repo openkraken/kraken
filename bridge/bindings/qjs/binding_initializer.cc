@@ -21,6 +21,7 @@
 #include "qjs_html_html_element.h"
 #include "qjs_html_unknown_element.h"
 #include "qjs_module_manager.h"
+#include "qjs_css_style_declaration.h"
 #include "qjs_node.h"
 #include "qjs_node_list.h"
 #include "qjs_text.h"
@@ -49,6 +50,7 @@ void InstallBindings(ExecutingContext* context) {
   QJSHTMLBodyElement::Install(context);
   QJSHTMLHtmlElement::Install(context);
   QJSHTMLUnknownElement::Install(context);
+  QJSCSSStyleDeclaration::Install(context);
 
   // Legacy bindings, not standard.
   QJSElementAttributes::Install(context);

@@ -54,7 +54,7 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value, 
   std::unique_ptr<NativeString> args_01 = name.ToNativeString();
   std::unique_ptr<NativeString> args_02 = value.ToNativeString();
 
-  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), static_cast<int32_t>(UICommand::setAttribute),
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::setAttribute,
                                                        args_01.release(), args_02.release(), nullptr);
 }
 
@@ -136,10 +136,21 @@ std::string Element::nodeName() const {
   return tag_name_.ToStdString();
 }
 
+CSSStyleDeclaration* Element::style() {
+  if (!IsStyledElement())
+    return nullptr;
+  return &EnsureCSSStyleDeclaration();
+}
+
+CSSStyleDeclaration& Element::EnsureCSSStyleDeclaration() {
+  if (cssom_wrapper_ == nullptr) {
+    cssom_wrapper_.Initialize(MakeGarbageCollected<CSSStyleDeclaration>(GetExecutingContext(), eventTargetId()));
+  }
+  return *cssom_wrapper_;
+}
+
 Element& Element::CloneWithChildren(CloneChildrenFlag flag, Document* document) const {
   Element& clone = CloneWithoutAttributesAndChildren(document ? *document : GetDocument());
-  // This will catch HTML elements in the wrong namespace that are not correctly
-  // copied.  This is a sanity check as HTML overloads some of the DOM methods.
   assert(IsHTMLElement() == clone.IsHTMLElement());
 
   clone.CloneAttributesFrom(*this);
@@ -148,10 +159,20 @@ Element& Element::CloneWithChildren(CloneChildrenFlag flag, Document* document) 
   return clone;
 }
 
-Element& Element::CloneWithoutChildren(Document* document) const {}
+Element& Element::CloneWithoutChildren(Document* document) const {
+  Element& clone = CloneWithoutAttributesAndChildren(
+      document ? *document : GetDocument());
+
+  assert(IsHTMLElement() == clone.IsHTMLElement());
+
+  clone.CloneAttributesFrom(*this);
+  clone.CloneNonAttributePropertiesFrom(*this, CloneChildrenFlag::kSkip);
+  return clone;
+}
 
 void Element::CloneAttributesFrom(const Element& other) {
-  if (other.attributes_ == nullptr) return;
+  if (other.attributes_ == nullptr)
+    return;
   EnsureElementAttributes().CopyWith(other.attributes_);
 }
 
@@ -161,6 +182,7 @@ bool Element::HasEquivalentAttributes(const Element& other) const {
 
 void Element::Trace(GCVisitor* visitor) const {
   visitor->Trace(attributes_);
+  visitor->Trace(cssom_wrapper_);
   ContainerNode::Trace(visitor);
 }
 
@@ -172,7 +194,6 @@ Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
 }
 
 Element& Element::CloneWithoutAttributesAndChildren(Document& factory) const {
-  KRAKEN_LOG(VERBOSE) << tagName().ToStdString();
   return *factory.createElement(tagName(), ASSERT_NO_EXCEPTION());
 }
 

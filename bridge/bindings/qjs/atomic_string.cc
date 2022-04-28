@@ -52,12 +52,20 @@ AtomicString::AtomicString(JSContext* ctx, const std::string& string)
       atom_(JS_NewAtom(ctx, string.c_str())),
       kind_(GetStringKind(string)),
       length_(string.size()) {}
+
 AtomicString::AtomicString(JSContext* ctx, JSValue value)
     : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_ValueToAtom(ctx, value)) {
   if (JS_IsString(value)) {
     kind_ = GetStringKind(value);
     length_ = JS_VALUE_GET_STRING(value)->len;
   }
+}
+
+AtomicString::AtomicString(JSContext* ctx, JSAtom atom): runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_DupAtom(ctx, atom)) {
+  JSValue string = JS_AtomToValue(ctx, atom);
+  kind_ = GetStringKind(string);
+  length_ = JS_VALUE_GET_STRING(string)->len;
+  JS_FreeValue(ctx, string);
 }
 
 bool AtomicString::IsNull() const {

@@ -19,6 +19,10 @@ export function getClassName(blob: IDLBlob) {
     return 'HTML' + raw.slice(4);
   }
 
+  if (raw.slice(0, 3) == 'css') {
+    return 'CSS' + raw.slice(3);
+  }
+
   return `${raw[0].toUpperCase() + raw.slice(1)}`;
 }
 

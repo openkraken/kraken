@@ -10,6 +10,7 @@
 #include "container_node.h"
 #include "legacy/bounding_client_rect.h"
 #include "legacy/element_attributes.h"
+#include "core/css/legacy/css_style_declaration.h"
 #include "qjs_scroll_to_options.h"
 
 namespace kraken {
@@ -67,6 +68,8 @@ class Element : public ContainerNode {
   AtomicString tagName() const { return tag_name_; }
   std::string nodeName() const override;
 
+  CSSStyleDeclaration* style();
+  CSSStyleDeclaration& EnsureCSSStyleDeclaration();
 
   Element& CloneWithChildren(CloneChildrenFlag flag, Document* = nullptr) const;
   Element& CloneWithoutChildren(Document* = nullptr) const;
@@ -99,6 +102,7 @@ class Element : public ContainerNode {
   void _beforeUpdateId(JSValue oldIdValue, JSValue newIdValue);
 
   Member<ElementAttributes> attributes_;
+  Member<CSSStyleDeclaration> cssom_wrapper_;
   AtomicString tag_name_ = AtomicString::Empty(ctx());
 };
 

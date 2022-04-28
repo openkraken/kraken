@@ -11,17 +11,17 @@ namespace kraken {
 
 UICommandBuffer::UICommandBuffer(ExecutingContext* context) : m_context(context) {}
 
-void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr, bool batchedUpdate) {
+void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
     m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
     update_batched = true;
   }
 
-  UICommandItem item{id, type, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), nativePtr};
   queue.emplace_back(item);
 }
 
-void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
     m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
@@ -29,11 +29,11 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, void* nativePtr) {
     update_batched = true;
   }
 
-  UICommandItem item{id, type, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), nativePtr};
   queue.emplace_back(item);
 }
 
-void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString* args_01, void* nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, UICommand type, NativeString* args_01, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
     m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
@@ -41,12 +41,12 @@ void UICommandBuffer::addCommand(int32_t id, int32_t type, NativeString* args_01
 #endif
   }
 
-  UICommandItem item{id, type, args_01, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), args_01, nativePtr};
   queue.emplace_back(item);
 }
 
 void UICommandBuffer::addCommand(int32_t id,
-                                 int32_t type,
+                                 UICommand type,
                                  NativeString* args_01,
                                  NativeString* args_02,
                                  void* nativePtr) {
@@ -56,7 +56,7 @@ void UICommandBuffer::addCommand(int32_t id,
     update_batched = true;
   }
 #endif
-  UICommandItem item{id, type, args_01, args_02, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), args_01, args_02, nativePtr};
   queue.emplace_back(item);
 }
 

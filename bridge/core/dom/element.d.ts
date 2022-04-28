@@ -2,9 +2,11 @@ import {Node} from "./node";
 import {Document} from "./document";
 import {ScrollToOptions} from "./scroll_to_options";
 import { ElementAttributes } from './legacy/element_attributes';
+import {CSSStyleDeclaration} from "../css/legacy/css_style_declaration";
 
 interface Element extends Node {
   readonly attributes: ElementAttributes;
+  readonly style: CSSStyleDeclaration;
 
   readonly clientHeight: number;
   readonly clientLeft: number;

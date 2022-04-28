@@ -7,7 +7,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
 <% if (object.indexedProp) { %>
   <% if (object.indexedProp.indexKeyType == 'number') { %>
   JSValue QJS<%= className %>::IndexedPropertyGetterCallback(JSContext* ctx, JSValue obj, uint32_t index) {
-    auto* self = toScriptWrappable<NodeList>(obj);
+    auto* self = toScriptWrappable<<%= className %>>(obj);
     if (index >= self->length()) {
       return JS_UNDEFINED;
     }
@@ -16,26 +16,31 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
     if (UNLIKELY(exception_state.HasException())) {
       return exception_state.ToQuickJS();
     }
-    return result->ToQuickJS();
+
+    return Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
   };
   <% } else { %>
   JSValue QJS<%= className %>::StringPropertyGetterCallback(JSContext* ctx, JSValue obj, JSAtom key) {
-    auto* self = toScriptWrappable<NodeList>(obj);
+    auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
-    ${generateTypeValue(object.indexedProp.type)} result = self->item(key, exception_state);
+    ${generateTypeValue(object.indexedProp.type)} result = self->item(AtomicString(ctx, key), exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return exception_state.ToQuickJS();
     }
-    return result->ToQuickJS();
+    return Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
   };
   <% } %>
   <% if (!object.indexedProp.readonly) { %>
     <% if (object.indexedProp.indexKeyType == 'number') { %>
   bool QJS<%= className %>::IndexedPropertySetterCallback(JSContext* ctx, JSValueConst obj, uint32_t index, JSValueConst value) {
-    auto* self = toScriptWrappable<NodeList>(obj);
+    auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
     MemberMutationScope scope{ExecutingContext::From(ctx)};
-    bool success = self->SetItem(index, value, exception_state);
+    auto&& v = Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return false;
+    }
+    bool success = self->SetItem(index, v, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
     }
@@ -43,10 +48,14 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
   };
     <% } else { %>
   bool QJS<%= className %>::StringPropertySetterCallback(JSContext* ctx, JSValueConst obj, JSAtom key, JSValueConst value) {
-    auto* self = toScriptWrappable<NodeList>(obj);
+    auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
     MemberMutationScope scope{ExecutingContext::From(ctx)};
-    bool success = self->SetItem(key, value, exception_state);
+    auto&& v = Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
+    if (UNLIKELY(exception_state.HasException())) {
+      return false;
+    }
+    bool success = self->SetItem(AtomicString(ctx, key), v, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
     }
