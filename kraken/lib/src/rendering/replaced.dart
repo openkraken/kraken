@@ -134,7 +134,9 @@ class RenderReplaced extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (shouldPaint) {
+    if (_isInLazyRendering) {
+      paintIntersectionObserver(context, offset, paintNothing);
+    } else if (shouldPaint) {
       paintBoxModel(context, offset);
     }
   }
