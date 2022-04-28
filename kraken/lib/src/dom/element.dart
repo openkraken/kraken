@@ -1657,7 +1657,6 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
 
 // Cache fixed renderObject to root element
 void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  // rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (!fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.add(childRenderBoxModel);
@@ -1666,7 +1665,6 @@ void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRend
 
 // Remove non fixed renderObject from root element
 void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  // rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.remove(childRenderBoxModel);
