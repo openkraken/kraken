@@ -29,6 +29,7 @@ class BodyElement extends Element {
     // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
     if (property == OVERFLOW || property == OVERFLOW_X || property == OVERFLOW_Y) {
       ownerDocument.documentElement?.setRenderStyle(property, present);
+      return;
     }
     super.setRenderStyle(property, present);
   }
