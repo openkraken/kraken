@@ -290,8 +290,8 @@ class ImageElement extends Element {
   }
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
-    print('$exception\n$stackTrace');
-    _dispatchErrorEvent();
+    debugPrint('$exception\n$stackTrace');
+    Timer.run(_dispatchErrorEvent);
   }
 
   void _resizeImage() {
@@ -406,6 +406,7 @@ class ImageElement extends Element {
   void _onImageLoad(int width, int height) {
     naturalWidth = width;
     naturalHeight = height;
+    _resizeImage();
 
     // Decrement load event delay count after decode.
     ownerDocument.decrementLoadEventDelayCount();
@@ -446,10 +447,9 @@ class ImageElement extends Element {
     }
 
     // Image may be detached when image frame loaded.
-    if (!isRendererAttached) return;
-
-    _attachImage();
-    _resizeImage();
+    if (isRendererAttached) {
+      _attachImage();
+    }
   }
 
   String get scaling => getAttribute(SCALING) ?? '';
