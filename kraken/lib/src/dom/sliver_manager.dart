@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -87,8 +86,8 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       Iterable<Node> renderNodes = _renderNodes;
       if (index < renderNodes.length) {
         renderNodes
-            .elementAt(index)
-            .unmountRenderObject(deep: true);
+          .elementAt(index)
+          .unmountRenderObject(deep: true, keepFixedAlive: true);
         return;
       }
     }
