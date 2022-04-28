@@ -33,7 +33,7 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
 
 // Compute the layout offset of renderObject to its ancestor which does not include the paint offset
 // such as scroll or transform.
-Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor) {
+Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
   final List<RenderObject> renderers = <RenderObject>[];
   for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
     renderers.add(renderer);
@@ -45,7 +45,11 @@ Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor) {
   for (int index = renderers.length - 1; index > 0; index -= 1) {
     final BoxParentData childParentData = renderers[index - 1].parentData! as BoxParentData;
     final Offset childOffset = childParentData.offset;
-    offset = offset + childOffset;
+    offset += childOffset;
+    if (excludeScrollOffset) {
+      RenderBoxModel renderer = renderers[index] as RenderBoxModel;
+      offset -= Offset(renderer.scrollLeft, renderer.scrollTop);
+    }
   }
 
   return offset;
