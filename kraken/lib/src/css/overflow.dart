@@ -165,6 +165,7 @@ mixin ElementOverflowMixin on ElementBase {
       switch(overflowY) {
         case CSSOverflowType.hidden:
           // @TODO: Content of overflow hidden can be scrolled programmatically.
+          // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
           if (renderBoxModel.scrollOffsetY == null) {
             _scrollableY = null;
           }
