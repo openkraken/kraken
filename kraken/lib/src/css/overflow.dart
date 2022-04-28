@@ -163,22 +163,20 @@ mixin ElementOverflowMixin on ElementBase {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
       switch(overflowY) {
-        case CSSOverflowType.hidden:
-          // @TODO: Content of overflow hidden can be scrolled programmatically.
-          // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
-          if (renderBoxModel.scrollOffsetY == null) {
-            _scrollableY = null;
-          }
-          break;
         case CSSOverflowType.clip:
           _scrollableY = null;
           break;
+        case CSSOverflowType.hidden:
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
+          // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
           if (renderBoxModel.scrollOffsetY == null) {
             _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
             renderBoxModel.scrollOffsetY = _scrollableY!.position;
           }
+          // Reset canDrag by overflow because hidden is can't drag.
+          bool canDrag = overflowY != CSSOverflowType.hidden;
+          _scrollableY!.setCanDrag(canDrag);
           break;
         case CSSOverflowType.visible:
         default:
