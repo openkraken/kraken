@@ -31,6 +31,7 @@ class HTMLElement extends Element {
   @override
   void setRenderStyle(String property, String present) {
     switch (property) {
+    // Visible should be interpreted as auto and clip should be interpreted as hidden when overflow apply to html.
     // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
       case OVERFLOW:
       case OVERFLOW_X:
