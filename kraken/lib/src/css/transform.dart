@@ -73,16 +73,7 @@ mixin CSSTransformMixin on RenderStyle {
   Matrix4 get effectiveTransformMatrix {
     // Make sure it is used after renderBoxModel been created.
     assert(renderBoxModel != null);
-
     RenderBoxModel boxModel = renderBoxModel!;
-    int hashCode = boxModel.hashCode;
-    String propertyName = 'effectiveTransformMatrix';
-    // Use cached value if exits.
-    dynamic cachedValue = getCachedComputedValue(hashCode, propertyName);
-    if (cachedValue != null) {
-      return cachedValue;
-    }
-
     final Matrix4 result = Matrix4.identity();
     result.translate(transformOffset.dx, transformOffset.dy);
     late Offset translation;
@@ -99,10 +90,8 @@ mixin CSSTransformMixin on RenderStyle {
 
     if (transformAlignment != Alignment.topLeft)
       result.translate(-translation.dx, -translation.dy);
-    result.translate(-transformOffset.dx, -transformOffset.dy);
 
-    // Cache computed value.
-    cacheComputedValue(hashCode, propertyName, result);
+    result.translate(-transformOffset.dx, -transformOffset.dy);
 
     return result;
   }
@@ -111,21 +100,7 @@ mixin CSSTransformMixin on RenderStyle {
   Offset? get effectiveTransformOffset {
     // Make sure it is used after renderBoxModel been created.
     assert(renderBoxModel != null);
-
-    RenderBoxModel boxModel = renderBoxModel!;
-    int hashCode = boxModel.hashCode;
-    String propertyName = 'effectiveTransformOffset';
-    // Use cached value if exits.
-    dynamic cachedValue = getCachedComputedValue(hashCode, propertyName);
-    if (cachedValue != null) {
-      return cachedValue;
-    }
-
     Offset? offset = MatrixUtils.getAsTranslation(effectiveTransformMatrix);
-
-    // Cache computed value.
-    cacheComputedValue(hashCode, propertyName, offset);
-
     return offset;
   }
 

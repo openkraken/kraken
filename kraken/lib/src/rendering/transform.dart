@@ -15,7 +15,7 @@ mixin RenderTransformMixin on RenderBoxModelBase {
       PaintingContextCallback callback) {
     if (renderStyle.transformMatrix != null) {
       final Matrix4 transform = renderStyle.effectiveTransformMatrix;
-      final Offset? childOffset = renderStyle.effectiveTransformOffset;
+      final Offset? childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
         _transformLayer.layer = context.pushTransform(
           needsCompositing,
