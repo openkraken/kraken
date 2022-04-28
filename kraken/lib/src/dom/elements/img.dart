@@ -423,11 +423,10 @@ class ImageElement extends Element {
 
   // Attach image to renderImage box.
   void _attachImage() {
-    if (_cachedImageInfo == null) return;
-
-    assert(isRendererAttached);
-    assert(_renderImage != null);
-    _renderImage!.image = _cachedImageInfo!.image.clone();
+    ui.Image? clonedImage = _cachedImageInfo?.image.clone();
+    if (clonedImage != null) {
+      _renderImage?.image = clonedImage;
+    }
   }
 
   // Callback when image are loaded, encoded and available to use.
@@ -446,8 +445,8 @@ class ImageElement extends Element {
       renderReplaced.isInLazyRendering = false;
     }
 
-    // Image may be detached when image frame loaded.
-    if (isRendererAttached) {
+    // Image may be attached when render objects are ready.
+    if (isRendererAttached && _renderImage != null) {
       _attachImage();
     }
   }
