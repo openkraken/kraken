@@ -25,12 +25,16 @@ class BodyElement extends Element {
 
   @override
   void setRenderStyle(String property, String present) {
-    // The overflow of body should apply to html.
-    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
-    if (property == OVERFLOW || property == OVERFLOW_X || property == OVERFLOW_Y) {
-      ownerDocument.documentElement?.setRenderStyle(property, present);
-      return;
+    switch (property) {
+      // The overflow of body should apply to html.
+      // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        ownerDocument.documentElement?.setRenderStyle(property, present);
+        break;
+      default:
+        super.setRenderStyle(property, present);
     }
-    super.setRenderStyle(property, present);
   }
 }
