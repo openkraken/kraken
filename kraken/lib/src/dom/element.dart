@@ -1349,7 +1349,7 @@ abstract class Element
   void _applyDefaultStyle(CSSStyleDeclaration style) {
     if (_defaultStyle.isNotEmpty) {
       _defaultStyle.forEach((propertyName, value) {
-        style.setProperty(propertyName, value);
+        setStyleProperty(propertyName, value);
       });
     }
   }
@@ -1358,7 +1358,7 @@ abstract class Element
     if (inlineStyle.isNotEmpty) {
       inlineStyle.forEach((propertyName, value) {
         // Force inline style to be applied as important priority.
-        style.setProperty(propertyName, value, true);
+        setStyleProperty(propertyName, value, true);
       });
     }
   }
@@ -1374,7 +1374,7 @@ abstract class Element
             if (rule is CSSStyleRule && rule.selectorText == (classSelectorPrefix + className)) {
               var sheetStyle = rule.style;
               for (String propertyName in sheetStyle.keys) {
-                style.setProperty(propertyName, sheetStyle[propertyName], false);
+                setStyleProperty(propertyName, sheetStyle[propertyName], false);
               }
             }
           }
@@ -1395,7 +1395,7 @@ abstract class Element
   void setInlineStyle(String property, String value) {
     // Current only for mark property is setting by inline style.
     inlineStyle[property] = value;
-    style.setProperty(property, value, true);
+    setStyleProperty(property, value, true);
   }
 
   void applyStyle(CSSStyleDeclaration style) {
@@ -1418,11 +1418,15 @@ abstract class Element
       if (diffs.isNotEmpty) {
         // Update render style.
         diffs.forEach((String propertyName, String? value) {
-          style.setProperty(propertyName, value);
+          setStyleProperty(propertyName, value);
         });
         style.flushPendingProperties();
       }
     }
+  }
+
+  void setStyleProperty(String propertyName, String? value, [bool? isImportant]) {
+    style.setProperty(propertyName, value, isImportant);
   }
 
   void recalculateNestedStyle() {
