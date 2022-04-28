@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -49,12 +50,10 @@ class ImageElement extends Element {
 
   bool _isListeningStream = false;
 
-  bool get _isInLazyLoading {
-    RenderReplaced? renderReplaced;
-    if (renderBoxModel != null) {
-      renderReplaced = renderBoxModel as RenderReplaced;
-    }
-    return renderReplaced != null && renderReplaced.isInLazyRendering;
+  // Useful for img to operate RenderPlaced is in lazy rendering.
+  bool get _isInLazyLoading => (renderBoxModel as RenderReplaced?)?.isInLazyRendering == true;
+  set _isInLazyRendering(bool value) {
+    (renderBoxModel as RenderReplaced?)?.isInLazyRendering = value;
   }
 
   // https://html.spec.whatwg.org/multipage/embedded-content.html#dom-img-complete-dev
@@ -183,7 +182,6 @@ class ImageElement extends Element {
   ImageStreamListener? _imageStreamListener;
   ImageStreamListener get _listener => _imageStreamListener ??= ImageStreamListener(_handleImageFrame, onError: _onImageError);
 
-
   void _listenToStream() {
     if (_isListeningStream)
       return;
@@ -269,6 +267,8 @@ class ImageElement extends Element {
       // Once appear remove the listener
       _removeIntersectionChangeListener();
       _loadImage();
+      _decode();
+      _isInLazyRendering = false;
     }
   }
 
@@ -291,7 +291,7 @@ class ImageElement extends Element {
 
   void _onImageError(Object exception, StackTrace? stackTrace) {
     debugPrint('$exception\n$stackTrace');
-    Timer.run(_dispatchErrorEvent);
+    scheduleMicrotask(_dispatchErrorEvent);
   }
 
   void _resizeImage() {
@@ -415,9 +415,10 @@ class ImageElement extends Element {
   void _replaceImage({required ImageInfo? info}) {
     _cachedImageInfo = info;
 
-    if (_currentRequest?.state != _ImageRequestState.completelyAvailable) {
-      _currentRequest?.state = _ImageRequestState.completelyAvailable;
-      scheduleMicrotask(() => _dispatchLoadEvent());
+    if (info != null) {
+      if (_currentRequest?.state != _ImageRequestState.completelyAvailable) {
+        _currentRequest?.state = _ImageRequestState.completelyAvailable;
+      }
     }
   }
 
@@ -440,14 +441,17 @@ class ImageElement extends Element {
       forceToRepaintBoundary = true;
     }
 
-    if (renderBoxModel != null) {
-      RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
-      renderReplaced.isInLazyRendering = false;
-    }
-
-    // Image may be attached when render objects are ready.
-    if (isRendererAttached && _renderImage != null) {
-      _attachImage();
+    _attachImage();
+    // Fire load at the first frame comes.
+    if (_frameCount == 1) {
+      if (_shouldLazyLoading) {
+        // Lazy load will delay to composite due to intersecting layer.
+        SchedulerBinding.instance!.scheduleFrameCallback((_) {
+          scheduleMicrotask(_dispatchLoadEvent);
+        });
+      } else {
+        scheduleMicrotask(_dispatchLoadEvent);
+      }
     }
   }
 
