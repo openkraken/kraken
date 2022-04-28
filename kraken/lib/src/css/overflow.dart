@@ -165,15 +165,19 @@ mixin ElementOverflowMixin on ElementBase {
       switch(overflowY) {
         case CSSOverflowType.hidden:
           // @TODO: Content of overflow hidden can be scrolled programmatically.
-          _scrollableY = null;
+          if (renderBoxModel.scrollOffsetY == null) {
+            _scrollableY = null;
+          }
           break;
         case CSSOverflowType.clip:
           _scrollableY = null;
           break;
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
-          _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
-          renderBoxModel.scrollOffsetY = _scrollableY!.position;
+          if (renderBoxModel.scrollOffsetY == null) {
+            _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+            renderBoxModel.scrollOffsetY = _scrollableY!.position;
+          }
           break;
         case CSSOverflowType.visible:
         default:
@@ -282,6 +286,8 @@ mixin ElementOverflowMixin on ElementBase {
         _detachScrollingContentBox();
       }
     }
+
+
   }
 
   void updateScrollingContentBox() {

@@ -540,9 +540,9 @@ abstract class Element
   /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void _applyFixedChildrenOffset(double scrollOffset, AxisDirection axisDirection) {
-    // Only root element has fixed children
+    // Only root element has fixed children.
     if (this == ownerDocument.documentElement && renderBoxModel != null) {
-      RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
+      RenderBoxModel layoutBox = renderBoxModel!;
       for (RenderBoxModel child in layoutBox.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
@@ -1657,7 +1657,7 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
 
 // Cache fixed renderObject to root element
 void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
+  // rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (!fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.add(childRenderBoxModel);
@@ -1666,7 +1666,7 @@ void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRend
 
 // Remove non fixed renderObject from root element
 void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
+  // rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
   List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
   if (fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.remove(childRenderBoxModel);

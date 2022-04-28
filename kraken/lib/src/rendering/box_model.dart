@@ -616,6 +616,9 @@ class RenderBoxModel extends RenderBox
       opacityAlwaysNeedsCompositing();
   }
 
+  // Cache all the fixed children of renderBoxModel of root element
+  List<RenderBoxModel> fixedChildren = [];
+
   RenderPositionPlaceholder? renderPositionPlaceholder;
 
   bool _debugShouldPaintOverlay = false;
@@ -687,9 +690,6 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -738,6 +738,8 @@ class RenderBoxModel extends RenderBox
 
       // Copy renderPositionHolder
       ..renderPositionPlaceholder = renderPositionPlaceholder
+
+      ..fixedChildren = fixedChildren
 
       // Copy parentData
       ..parentData = parentData;
