@@ -307,13 +307,15 @@ class ImageElement extends Element {
       renderStyle.height = CSSLengthValue(_attrHeight, CSSLengthType.PX);
     }
 
-    renderStyle.intrinsicWidth = naturalWidth.toDouble();
-    renderStyle.intrinsicHeight = naturalHeight.toDouble();
+    if (_renderImage != null) {
+      renderStyle.intrinsicWidth = naturalWidth.toDouble();
+      renderStyle.intrinsicHeight = naturalHeight.toDouble();
 
-    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderStyle.intrinsicRatio = null;
-    } else {
-      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
+      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+        renderStyle.intrinsicRatio = null;
+      } else {
+        renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
+      }
     }
   }
 
@@ -427,6 +429,7 @@ class ImageElement extends Element {
     ui.Image? clonedImage = _cachedImageInfo?.image.clone();
     if (clonedImage != null) {
       _renderImage?.image = clonedImage;
+      _resizeImage();
     }
   }
 
