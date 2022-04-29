@@ -146,19 +146,8 @@ class ImageElement extends Element {
   @override
   void didAttachRenderer() {
     super.didAttachRenderer();
-    // Should add image box after style has applied to ensure intersection observer
-    // attached to correct renderBoxModel
-    if (!_isInLazyLoading || _renderImage == null) {
-      // Image dimensions (width or height) should specified for performance when lazy-load.
-      if (_shouldLazyLoading) {
-        RenderReplaced renderReplaced = renderBoxModel! as RenderReplaced;
-        renderReplaced.isInLazyRendering = true;
-
-        // When detach renderer, all listeners will be cleared.
-        renderReplaced.addIntersectionChangeListener(_handleIntersectionChange);
-      } else {
-        _loadImage();
-      }
+    if (_resolvedUri != null) {
+      _updateImageData();
     }
   }
 
@@ -166,7 +155,6 @@ class ImageElement extends Element {
     _constructImage();
     // Try to attach image if image is cached.
     _attachImage();
-    _listenToStream();
   }
 
   @override
@@ -266,8 +254,9 @@ class ImageElement extends Element {
     if (entry.isIntersecting) {
       // Once appear remove the listener
       _removeIntersectionChangeListener();
-      _loadImage();
       _decode();
+      _loadImage();
+      _listenToStream();
       _isInLazyRendering = false;
     }
   }
@@ -281,8 +270,14 @@ class ImageElement extends Element {
     addChild(image);
   }
 
+  // To prevent trigger load event more than once.
+  bool _loaded = false;
+
   void _dispatchLoadEvent() {
-    dispatchEvent(Event(EVENT_LOAD));
+    if (!_loaded) {
+      _loaded = true;
+      dispatchEvent(Event(EVENT_LOAD));
+    }
   }
 
   void _dispatchErrorEvent() {
@@ -410,6 +405,11 @@ class ImageElement extends Element {
     naturalHeight = height;
     _resizeImage();
 
+    // If renderer is present, on load trigger after first frame come.
+    if (_isInLazyLoading || renderer == null) {
+      scheduleMicrotask(_dispatchLoadEvent);
+    }
+
     // Decrement load event delay count after decode.
     ownerDocument.decrementLoadEventDelayCount();
   }
@@ -445,16 +445,10 @@ class ImageElement extends Element {
     }
 
     _attachImage();
-    // Fire load at the first frame comes.
-    if (_frameCount == 1) {
-      if (_shouldLazyLoading) {
-        // Lazy load will delay to composite due to intersecting layer.
-        SchedulerBinding.instance!.scheduleFrameCallback((_) {
-          scheduleMicrotask(_dispatchLoadEvent);
-        });
-      } else {
-        scheduleMicrotask(_dispatchLoadEvent);
-      }
+
+    // Fire the load event.
+    if (_frameCount == 1 && !_loaded) {
+      scheduleMicrotask(_dispatchLoadEvent);
     }
   }
 
@@ -465,18 +459,32 @@ class ImageElement extends Element {
 
   String get src => _resolvedUri?.toString() ?? '';
   set src(String value) {
-    internalSetAttribute('src', value);
-    _resolveResourceUri(value);
-
-    _updateImageData();
+    if (src != value) {
+      _loaded = false;
+      internalSetAttribute('src', value);
+      _resolveResourceUri(value);
+      if (_resolvedUri != null) {
+        _updateImageData();
+      }
+    }
   }
 
   // https://html.spec.whatwg.org/multipage/images.html#update-the-image-data
-  void _updateImageData() async {
-    // Update image source if image already attached except image is lazy loading.
+  void _updateImageData() {
+    // Should add image box after style has applied to ensure intersection observer
+    // attached to correct renderBoxModel
     if (!_isInLazyLoading) {
-      _listenToStream();
-      _decode(updateImageProvider: true);
+      // Image dimensions (width or height) should specified for performance when lazy-load.
+      if (_shouldLazyLoading) {
+        RenderReplaced? renderReplaced = renderBoxModel as RenderReplaced?;
+        renderReplaced?..isInLazyRendering = true
+          // When detach renderer, all listeners will be cleared.
+          ..addIntersectionChangeListener(_handleIntersectionChange);
+      } else {
+        _decode(updateImageProvider: true);
+        _listenToStream();
+        _loadImage();
+      }
     }
   }
 

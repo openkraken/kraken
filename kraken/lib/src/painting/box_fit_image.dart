@@ -30,6 +30,9 @@ class BoxFitImageKey {
 
   @override
   int get hashCode => hashValues(configuration, url);
+
+  @override
+  String toString() => 'BoxFitImageKey($url, $configuration)';
 }
 
 typedef LoadImage = Future<Uint8List> Function(Uri url);
@@ -60,17 +63,20 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
     Uint8List bytes = await loadImage(url);
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
     final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
+    final Codec codec = await _instantiateImageCodec(descriptor,
+      boxFit: boxFit,
+      preferredWidth: key.configuration?.size?.width.toInt(),
+      preferredHeight: key.configuration?.size?.height.toInt(),
+    );
+
+    // Fire image on load after codec created.
     scheduleMicrotask(() {
       if (onImageLoad != null) {
         onImageLoad!(descriptor.width, descriptor.height);
       }
       _imageStreamCompleter!.setDimension(Dimension(descriptor.width, descriptor.height));
     });
-    return _instantiateImageCodec(descriptor,
-      boxFit: boxFit,
-      preferredWidth: key.configuration?.size?.width.toInt(),
-      preferredHeight: key.configuration?.size?.height.toInt(),
-    );
+    return codec;
   }
 
   DimensionedMultiFrameImageStreamCompleter? _imageStreamCompleter;
