@@ -31,6 +31,30 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
+// Compute the layout offset of renderObject to its ancestor which does not include the paint offset
+// such as scroll or transform.
+Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+  final List<RenderObject> renderers = <RenderObject>[];
+  for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
+    renderers.add(renderer);
+    assert(renderer.parent != null);
+  }
+  renderers.add(ancestor);
+
+  Offset offset = Offset(0, 0);
+  for (int index = renderers.length - 1; index > 0; index -= 1) {
+    final BoxParentData childParentData = renderers[index - 1].parentData! as BoxParentData;
+    final Offset childOffset = childParentData.offset;
+    offset += childOffset;
+    if (excludeScrollOffset) {
+      RenderBoxModel renderer = renderers[index] as RenderBoxModel;
+      offset -= Offset(renderer.scrollLeft, renderer.scrollTop);
+    }
+  }
+
+  return offset;
+}
+
 /// Modified from Flutter rendering/box.dart.
 /// A mixin that provides useful default behaviors for boxes with children
 /// managed by the [ContainerRenderObjectMixin] mixin.
@@ -1252,6 +1276,12 @@ class RenderBoxModel extends RenderBox
     return null;
   }
 
+  // Get the layout offset of renderObject to its ancestor which does not include the paint offset
+  // such as scroll or transform.
+  Offset getOffsetToAncestor(RenderObject ancestor) {
+    return computeOffsetToAncestor(this, ancestor);
+  }
+
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
@@ -1433,7 +1463,7 @@ class RenderBoxModel extends RenderBox
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
+      transform: renderStyle.effectiveTransformMatrix,
       position: position,
       hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
