@@ -313,6 +313,9 @@ class ImageElement extends Element {
     // Only need to resize image after image is fully loaded.
     if (!complete) return;
 
+    // Resize when image render object has created.
+    if (_renderImage == null) return;
+
     if (_styleWidth == null && _attrWidth != null) {
       // The intrinsic width of the image in pixels. Must be an integer without a unit.
       renderStyle.width = CSSLengthValue(_attrWidth, CSSLengthType.PX);
@@ -322,15 +325,13 @@ class ImageElement extends Element {
       renderStyle.height = CSSLengthValue(_attrHeight, CSSLengthType.PX);
     }
 
-    if (_renderImage != null) {
-      renderStyle.intrinsicWidth = naturalWidth.toDouble();
-      renderStyle.intrinsicHeight = naturalHeight.toDouble();
+    renderStyle.intrinsicWidth = naturalWidth.toDouble();
+    renderStyle.intrinsicHeight = naturalHeight.toDouble();
 
-      if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-        renderStyle.intrinsicRatio = null;
-      } else {
-        renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
-      }
+    if (naturalWidth == 0.0 || naturalHeight == 0.0) {
+      renderStyle.intrinsicRatio = null;
+    } else {
+      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
     }
   }
 
