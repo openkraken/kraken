@@ -80,7 +80,7 @@ describe('position-applies', () => {
 
     await snapshot();
   });
-  xit('to-010', async () => {
+  it('to-010', async () => {
     let p;
     let div;
     p = createElement(

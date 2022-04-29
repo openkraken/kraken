@@ -10,7 +10,7 @@ on:
 env:
   nodeVersion: "16"
   cmakeVersion: "3.22.x"
-  flutterVersion: "2.5.3"
+  flutterVersion: "2.8.1"
 
 jobs:
   build_android-app_in_macos:
@@ -28,7 +28,7 @@ jobs:
       - run: npm run build:bridge:android:release
 
       # Install Flutter SDK
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutterVersion }}
       - run: flutter doctor -v
@@ -53,7 +53,7 @@ jobs:
       - run: npm i
       - run: npm run build:bridge:ios:release
 
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutterVersion }}
       - run: flutter doctor -v
@@ -78,7 +78,7 @@ jobs:
       - run: npm i
       - run: npm run build:bridge:macos:release
 
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutterVersion }}
       - run: flutter config --enable-macos-desktop
@@ -105,7 +105,7 @@ jobs:
       - run: npm i
       - run: npm run build:bridge:linux:release
 
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.flutterVersion }}
       - run: flutter config --enable-linux-desktop

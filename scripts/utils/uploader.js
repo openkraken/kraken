@@ -11,6 +11,8 @@ function createClient(ak, sk) {
 }
 
 async function uploader(filename, filepath) {
+  const client = createClient(process.env.OSS_AK, process.env.OSS_SK);
+  
   return client.multipartUpload(filename, filepath, {
     parallel: 4,
     partSize: 1024 * 1024
@@ -22,7 +24,5 @@ async function uploader(filename, filepath) {
     }
   });
 }
-
-const client = createClient(process.env.OSS_AK, process.env.OSS_SK);
 
 module.exports = uploader;

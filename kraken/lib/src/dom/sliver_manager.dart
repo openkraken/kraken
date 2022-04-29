@@ -1,8 +1,6 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -51,16 +49,8 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
     Node childNode = renderNodes.elementAt(index);
     childNode.willAttachRenderer();
 
-    RenderBox? child;
-    if (childNode is Node) {
-      child = childNode.renderer;
-    } else {
-      if (!kReleaseMode)
-        throw FlutterError('Sliver unsupported type ${childNode.runtimeType} $childNode');
-    }
-
     // If renderer is not created, use an empty RenderBox to occupy the position, but not do layout or paint.
-    child ??= _createEmptyRenderObject();
+    RenderBox child = childNode.renderer ?? _createEmptyRenderObject();
 
     if (_hasLayout) {
       _sliverListLayout.insertSliverChild(child, after: after);
@@ -96,8 +86,8 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
       Iterable<Node> renderNodes = _renderNodes;
       if (index < renderNodes.length) {
         renderNodes
-            .elementAt(index)
-            .unmountRenderObject(deep: true);
+          .elementAt(index)
+          .unmountRenderObject(deep: true, keepFixedAlive: true);
         return;
       }
     }

@@ -657,8 +657,7 @@ describe('Baseline-rules flexbox', () => {
   });
 });
 
-// @TODO: deps on inline-block features.
-xdescribe('Baseline-rules inline-block', () => {
+describe('Baseline-rules inline-block', () => {
   const wrapperStyle = {
     border: '1px solid block',
     position: 'relative',
@@ -684,10 +683,10 @@ xdescribe('Baseline-rules inline-block', () => {
     backgroundColor: 'yellow'
   };
 
-  xit('synthesized-baseline-inline-block-001', async () => {
-    let wrapper = create('div', wrapperStyle);
-    let left = create('canvas', canvasStyle);
-    let box = create('div', {
+  it('synthesized-baseline-inline-block-001', async () => {
+    let wrapper = createElementWithStyle('div', wrapperStyle);
+    let left = createElementWithStyle('canvas', canvasStyle);
+    let box = createElementWithStyle('div', {
       borderPaddingMargin,
       display: 'inline-flex'
     });

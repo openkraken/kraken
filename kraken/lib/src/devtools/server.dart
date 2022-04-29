@@ -8,12 +8,9 @@ import 'dart:isolate';
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:kraken/module.dart';
-import 'package:kraken/bridge.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/devtools.dart';
 import 'package:ffi/ffi.dart';
-import '../bridge/dynamic_library.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';
@@ -159,7 +156,7 @@ class IsolateInspectorServer {
   IsolateInspectorServer(this.port, this.address, this.bundleURL) {
     // registerModule(InspectRuntimeModule(this));
     // registerModule(InspectDebuggerModule(this));
-    registerModule(InspectorLogModule(this));
+    // registerModule(InspectorLogModule(this));
   }
 
   // final Inspector inspector;

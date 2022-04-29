@@ -32,6 +32,7 @@ const int DOCUMENT_ID = -2;
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
 typedef JSErrorHandler = void Function(String message);
+typedef JSLogHandler = void Function(int level, String message);
 typedef PendingCallback = void Function();
 
 typedef TraverseElementCallback = void Function(Element element);
@@ -160,6 +161,7 @@ class KrakenViewController
     window = Window(
         BindingContext(_contextId, windowNativePtrMap[_contextId]!),
         document);
+    _registerPlatformBrightnessChange();
     _setEventTarget(WINDOW_ID, window);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
@@ -252,6 +254,7 @@ class KrakenViewController
     debugDOMTreeChanged = null;
 
     _teardownObserver();
+    _unregisterPlatformBrightnessChange();
 
     // Should clear previous page cached ui commands
     clearUICommand(_contextId);
@@ -263,6 +266,25 @@ class KrakenViewController
     document.dispose();
     window.dispose();
     _disposed = true;
+  }
+
+  VoidCallback? _originalOnPlatformBrightnessChanged;
+
+  void _registerPlatformBrightnessChange() {
+    _originalOnPlatformBrightnessChanged = ui.window.onPlatformBrightnessChanged;
+    ui.window.onPlatformBrightnessChanged = _onPlatformBrightnessChanged;
+  }
+
+  void _unregisterPlatformBrightnessChange() {
+    ui.window.onPlatformBrightnessChanged = _originalOnPlatformBrightnessChanged;
+    _originalOnPlatformBrightnessChanged = null;
+  }
+
+  void _onPlatformBrightnessChanged() {
+    if (_originalOnPlatformBrightnessChanged != null) {
+      _originalOnPlatformBrightnessChanged!();
+    }
+    window.dispatchEvent(ColorSchemeChangeEvent(window.colorScheme));
   }
 
   Map<int, EventTarget> _eventTargets = <int, EventTarget>{};
@@ -837,6 +859,8 @@ class KrakenController {
     return getControllerOfJSContextId(contextId);
   }
 
+  GestureDispatcher gestureDispatcher = GestureDispatcher();
+
   WidgetDelegate? widgetDelegate;
 
   LoadHandler? onLoad;
@@ -853,6 +877,12 @@ class KrakenController {
   KrakenMethodChannel? _methodChannel;
 
   KrakenMethodChannel? get methodChannel => _methodChannel;
+
+  JSLogHandler? _onJSLog;
+  JSLogHandler? get onJSLog => _onJSLog;
+  set onJSLog(JSLogHandler? jsLogHandler) {
+    _onJSLog = jsLogHandler;
+  }
 
   String? _name;
   String? get name => _name;
@@ -1173,17 +1203,40 @@ class KrakenController {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_START);
       }
 
+      // entry point start parse.
+      _view.document.parsing = true;
+
       Uint8List data = entrypoint.data!;
-      if (entrypoint.isHTML) {
-        parseHTML(contextId, await resolveStringFromData(data));
-      } else if (entrypoint.isJavascript) {
-        evaluateScripts(contextId, await resolveStringFromData(data), url: url);
+      if (entrypoint.isJavascript) {
+        // Prefer sync decode in loading entrypoint.
+        evaluateScripts(contextId, await resolveStringFromData(data, preferSync: true), url: url);
       } else if (entrypoint.isBytecode) {
         evaluateQuickjsByteCode(contextId, data);
+      } else if (entrypoint.isHTML) {
+        parseHTML(contextId, await resolveStringFromData(data));
+      } else if (entrypoint.contentType.primaryType == 'text') {
+        // Fallback treating text content as JavaScript.
+        try {
+          evaluateScripts(contextId, await resolveStringFromData(data, preferSync: true), url: url);
+        } catch (error) {
+          print('Fallback to execute JavaScript content of $url');
+          rethrow;
+        }
       } else {
         // The resource type can not be evaluated.
         throw FlutterError('Can\'t evaluate content of $url');
       }
+
+      // entry point end parse.
+      _view.document.parsing = false;
+
+      // Should check completed when parse end.
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        // UICommand list is read in the next frame, so we need to determine whether there are labels
+        // such as images and scripts after it to check is completed.
+        checkCompleted();
+      });
+      SchedulerBinding.instance!.scheduleFrame();
 
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -1193,25 +1246,51 @@ class KrakenController {
       entrypoint.dispose();
 
       // trigger DOMContentLoaded event
-      module.requestAnimationFrame((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.window;
         window.dispatchEvent(event);
-        // @HACK: window.load should trigger after all image had loaded.
-        // Someone needs to fix this in the future.
-        module.requestAnimationFrame((_) {
-          Event event = Event(EVENT_LOAD);
-          window.dispatchEvent(event);
-        });
       });
+      SchedulerBinding.instance!.scheduleFrame();
+    }
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.h#L470
+  bool _isComplete = false;
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/FrameLoader.cpp#L840
+  // Check whether the document has been loaded, such as html has parsed (main of JS has evaled) and images/scripts has loaded.
+  void checkCompleted() {
+    if (_isComplete) return;
+
+    // Are we still parsing?
+    if (_view.document.parsing) return;
+
+    // Still waiting for images/scripts?
+    if (_view.document.hasPendingRequest) return;
+
+    // Still waiting for elements that don't go through a FrameLoader?
+    if (_view.document.isDelayingLoadEvent) return;
+
+    // Any frame that hasn't completed yet?
+    // TODO:
+
+    _isComplete = true;
+
+    _dispatchWindowLoadEvent();
+  }
+
+  void _dispatchWindowLoadEvent() {
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      // DOM element are created at next frame, so we should trigger onload callback in the next frame.
+      Event event = Event(EVENT_LOAD);
+      _view.window.dispatchEvent(event);
 
       if (onLoad != null) {
-        // DOM element are created at next frame, so we should trigger onload callback in the next frame.
-        module.requestAnimationFrame((_) {
-          onLoad!(this);
-        });
+        onLoad!(this);
       }
-    }
+    });
+    SchedulerBinding.instance!.scheduleFrame();
   }
 }
 

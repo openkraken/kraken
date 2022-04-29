@@ -11,7 +11,6 @@ import 'package:kraken/gesture.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/src/dom/sliver_manager.dart';
-import 'package:meta/meta.dart';
 
 class RenderSliverListLayout extends RenderLayoutBox {
   // Expose viewport for sliver mixin.
@@ -149,6 +148,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    doingThisLayout = true;
     if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
@@ -205,6 +205,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
           startTime:
               DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
     }
+    doingThisLayout = false;
   }
 
   @override

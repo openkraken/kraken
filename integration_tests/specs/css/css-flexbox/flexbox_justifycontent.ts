@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flexbox_justifycontent', () => {
-  xit('center', async () => {
+  it('center', async () => {
     let div;
     div = createElement(
       'div',
@@ -68,7 +68,8 @@ describe('flexbox_justifycontent', () => {
 
     await snapshot();
   });
-  xit('spacearound', async () => {
+
+  it('spacearound', async () => {
     let div;
     div = createElement(
       'div',
@@ -136,7 +137,8 @@ describe('flexbox_justifycontent', () => {
 
     await snapshot();
   });
-  xit('spacebetween', async () => {
+
+  it('spacebetween', async () => {
     let div;
     div = createElement(
       'div',

@@ -153,7 +153,8 @@ describe('flexbox_flex', () => {
 
     await snapshot();
   });
-  xit('basis', async () => {
+
+  it('basis', async () => {
     let div;
     div = createElement(
       'div',
@@ -395,7 +396,8 @@ describe('flexbox_flex', () => {
 
     await snapshot();
   });
-  xit('natural', async () => {
+
+  it('natural', async () => {
     let div;
     let flex;
     div = createElement(

@@ -174,7 +174,8 @@ describe('flexbox_justifycontent-spacebetween', () => {
 
     await snapshot();
   });
-  xit('only', async () => {
+
+  it('only', async () => {
     let div;
     div = createElement(
       'div',

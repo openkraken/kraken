@@ -1,0 +1,15 @@
+{
+  "targets": [
+    "web",
+    "kraken"
+  ],
+  "webpack5": true,
+  "web": {
+    "mpa": true
+  },
+  "kraken": {
+    "mpa": true
+  },
+  "plugins": [],
+  "publicPath": "/web/"
+}

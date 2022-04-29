@@ -73,7 +73,8 @@ describe('flexbox_justifycontent-flex', () => {
 
     await snapshot();
   });
-  xit('end', async () => {
+
+  it('end', async () => {
     let div;
     div = createElement(
       'div',
@@ -214,7 +215,8 @@ describe('flexbox_justifycontent-flex', () => {
 
     await snapshot();
   });
-  xit('start', async () => {
+
+  it('start', async () => {
     let div;
     div = createElement(
       'div',

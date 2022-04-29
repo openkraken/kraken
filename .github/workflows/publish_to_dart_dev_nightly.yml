@@ -47,8 +47,5 @@ jobs:
       with:
         name: linux_binary
         path: bridge/build/linux/
-    - uses: subosito/flutter-action@v1
-      with:
-        flutter-version: ${{ env.flutterVersion }}
     - name: Publish to dart.dev
       run: cd kraken && flutter pub publish --force

@@ -15,6 +15,7 @@ export 'src/dom/document.dart';
 export 'src/dom/comment.dart';
 export 'src/dom/document_fragment.dart';
 export 'src/dom/sliver_manager.dart';
+export 'src/dom/screen.dart';
 export 'src/dom/element_registry.dart';
 
 // Elements
@@ -34,5 +35,6 @@ export 'src/dom/elements/text_form_control.dart';
 export 'src/dom/elements/textarea.dart';
 export 'src/dom/elements/object.dart';
 export 'src/dom/elements/head.dart';
+export 'src/dom/elements/script.dart';
 export 'src/dom/elements/html.dart';
 export 'src/dom/elements/template.dart';

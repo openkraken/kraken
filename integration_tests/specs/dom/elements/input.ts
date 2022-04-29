@@ -28,7 +28,7 @@ describe('Tags input', () => {
     await snapshot();
   });
 
-    
+
   it('with size attribute change when width is not set', async (done) => {
     const input = document.createElement('input');
     input.style.fontSize = '16px';
@@ -70,7 +70,7 @@ describe('Tags input', () => {
       done();
     });
   });
-  
+
   it('with defaultValue property', async () => {
     const input = document.createElement('input');
     input.style.fontSize = '16px';
@@ -125,8 +125,7 @@ describe('Tags input', () => {
     BODY.appendChild(div);
   });
 
-  // @TODO: line-height should not take effect for input element itself.
-  xit('line-height set and is smaller than text size', async (done) => {
+  it('line-height set and is smaller than text size', async () => {
     let input;
     input = createElement(
       'input',
@@ -309,7 +308,7 @@ describe('Tags input', () => {
     document.body.appendChild(input2);
 
     input1.addEventListener('change', function handler(event) {
-      expect(input1.value).toEqual(VALUE);      
+      expect(input1.value).toEqual(VALUE);
       done();
     });
 
@@ -317,7 +316,7 @@ describe('Tags input', () => {
 
     requestAnimationFrame(() => {
       input1.setAttribute('value', VALUE);
-      input2.focus(); 
+      input2.focus();
     });
   });
 
@@ -426,7 +425,7 @@ describe('Tags input', () => {
     });
   });
 
-  it('support maxlength', (done) => {
+  xit('support maxlength', (done) => {
     const input = <input maxlength="3" />;
     document.body.appendChild(input);
     input.focus();
@@ -485,15 +484,15 @@ describe('Tags input', () => {
 
     input.defaultValue = 'default value';
     expect(input.defaultValue).toBe('default value');
-    expect(input.value).toBe('default value'); 
+    expect(input.value).toBe('default value');
 
     input.value = 'property value';
     expect(input.defaultValue).toBe('default value');
-    expect(input.value).toBe('property value'); 
- 
+    expect(input.value).toBe('property value');
+
     input.setAttribute('value', 'attribute value 2');
     expect(input.defaultValue).toBe('attribute value 2');
     // @ts-ignore
-    expect(input.value).toBe('property value'); 
+    expect(input.value).toBe('property value');
   });
 });

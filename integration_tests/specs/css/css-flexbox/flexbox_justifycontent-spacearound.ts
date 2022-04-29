@@ -171,7 +171,8 @@ describe('flexbox_justifycontent-spacearound', () => {
 
     await snapshot();
   });
-  xit('only', async () => {
+
+  it('only', async () => {
     let div;
     div = createElement(
       'div',

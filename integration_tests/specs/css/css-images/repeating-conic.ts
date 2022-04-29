@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('repeating-conic', () => {
+  // @TODO: conic-gradient with percentage impl differs from browser.
   xit('gradient-ref', async () => {
     let gradient;
     gradient = createElement('div', {
@@ -16,6 +17,8 @@ describe('repeating-conic', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-conic-gradient with percentage impl differs from browser.
   xit('gradient', async () => {
     let gradient;
     gradient = createElement('div', {

@@ -3,7 +3,6 @@
  */
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -457,7 +456,7 @@ mixin ElementOverflowMixin on ElementBase {
 
   void _scroll(num aim, Axis direction, { bool? withAnimation = false }) {
     KrakenScrollable? scrollable = _getScrollable(direction);
-    if (scrollable != null && aim is num) {
+    if (scrollable != null) {
       double distance = aim.toDouble();
 
       // Apply scroll effect after layout.

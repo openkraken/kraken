@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('multiline-min', () => {
-  xit('max', async () => {
+  it('max', async () => {
     let log;
     let flexOne;
     let flexOne_1;

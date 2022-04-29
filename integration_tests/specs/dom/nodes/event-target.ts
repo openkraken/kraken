@@ -171,4 +171,32 @@ describe('DOM EventTarget', () => {
     expect(shouldNotBeTrue).toEqual(false);
   });
 
+
+  it('removeEventListener should work', (done) => {
+    let num = 0;
+    var ele = createElement('div', {
+      style: {
+        width: '100px',
+        height: '100px',
+        background: 'red'
+      }
+    });
+    document.body.appendChild(ele);
+    ele.addEventListener('click', fn1);
+    ele.removeEventListener('click', fn1);
+    ele.addEventListener('click', fn2);
+
+    function fn1() {
+      num++;
+    }
+
+    function fn2() {
+      num++;
+      expect(num).toEqual(1);
+      done();
+    }
+
+    ele.click();
+  });
+
 });

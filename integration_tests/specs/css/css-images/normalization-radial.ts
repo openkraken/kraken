@@ -15,6 +15,8 @@ describe('normalization-radial', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-radial-gradient with percentage impl differs from browser.
   xit('degenerate', async () => {
     let gradient;
     gradient = createElement('div', {

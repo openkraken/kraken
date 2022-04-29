@@ -103,7 +103,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
         Stream.value(data),
         statusCode: response.statusCode,
         reasonPhrase: response.reasonPhrase,
-        responseHeaders: _getHttpHeaders(response.headers));
+        initialHeaders: createHttpHeaders(initialHeaders: _getHttpHeaders(response.headers)));
 
     HttpClientInterceptor? customHttpClientInterceptor = _customHttpClientInterceptor;
     if (customHttpClientInterceptor != null) {

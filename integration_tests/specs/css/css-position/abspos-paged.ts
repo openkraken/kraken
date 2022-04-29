@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('abspos-paged', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let div;
     let div_1;
@@ -130,7 +130,7 @@ describe('abspos-paged', () => {
 
     await snapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let div;
     let div_1;
     let div_2;

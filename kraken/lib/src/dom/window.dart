@@ -3,11 +3,11 @@
  */
 import 'dart:ui';
 
+import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
-import 'package:kraken/launcher.dart';
+import 'package:kraken/rendering.dart';
 import 'package:kraken/module.dart';
-import 'package:kraken/bridge.dart';
 
 import 'background_tasks.dart';
 
@@ -15,23 +15,25 @@ const String WINDOW = 'WINDOW';
 
 class Window extends EventTarget with ScheduleBackgroundTasks {
   final Document document;
+  final Screen screen;
+
+  Window(BindingContext? context, this.document)
+      : screen = Screen(context), super(context);
 
   @override
   EventTarget? get parentEventTarget => null;
-
-  Window(BindingContext? context, this.document) : super(context) {
-    window.onPlatformBrightnessChanged = () {
-      ColorSchemeChangeEvent event = ColorSchemeChangeEvent((window.platformBrightness == Brightness.light) ? 'light' : 'dart');
-      dispatchEvent(event);
-    };
-  }
 
   // https://www.w3.org/TR/cssom-view-1/#extensions-to-the-window-interface
   @override
   getBindingProperty(String key) {
     switch (key) {
+      case 'innerWidth': return innerWidth;
+      case 'innerHeight': return innerHeight;
       case 'scrollX': return scrollX;
       case 'scrollY': return scrollY;
+      case 'screen': return screen;
+      case 'colorScheme': return colorScheme;
+      case 'devicePixelRatio': return devicePixelRatio;
       default: return super.getBindingProperty(key);
     }
   }
@@ -57,9 +59,7 @@ class Window extends EventTarget with ScheduleBackgroundTasks {
   }
 
   void open(String url) {
-    KrakenController rootController = document.controller.view.rootController;
-    String? sourceUrl = rootController.url;
-
+    String? sourceUrl = document.controller.view.rootController.url;
     document.controller.view.handleNavigationAction(sourceUrl, url, KrakenNavigationType.navigate);
   }
 
@@ -78,6 +78,27 @@ class Window extends EventTarget with ScheduleBackgroundTasks {
       ..flushLayout()
       ..scrollBy(x, y);
   }
+
+  String get colorScheme => window.platformBrightness == Brightness.light ? 'light' : 'dark';
+
+  double get devicePixelRatio => window.devicePixelRatio;
+
+  // The innerWidth/innerHeight attribute must return the viewport width/height
+  // including the size of a rendered scroll bar (if any), or zero if there is no viewport.
+  // https://drafts.csswg.org/cssom-view/#dom-window-innerwidth
+  // This is a read only idl attribute.
+  int get innerWidth => _viewportSize.width.toInt();
+  int get innerHeight => _viewportSize.height.toInt();
+
+  Size get _viewportSize {
+    RenderViewportBox? viewport = document.viewport;
+    if (viewport != null && viewport.hasSize) {
+      return viewport.size;
+    } else {
+      return Size.zero;
+    }
+  }
+
 
   @override
   void dispatchEvent(Event event) {

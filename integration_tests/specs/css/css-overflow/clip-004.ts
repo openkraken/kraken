@@ -1,6 +1,7 @@
 /*auto generated*/
-xdescribe('clip-004', () => {
-  it('ref', async () => {
+describe('clip-004', () => {
+  // @TODO: disable for opacity render delay.
+  xit('ref', async () => {
     let inner;
     let inner_1;
     let inner_2;
@@ -94,6 +95,6 @@ xdescribe('clip-004', () => {
     BODY.appendChild(outer_1);
     BODY.appendChild(outer_2);
 
-    await snapshot();
+    await snapshot(0.5);
   });
 });

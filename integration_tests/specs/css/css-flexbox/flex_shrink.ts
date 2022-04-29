@@ -825,7 +825,7 @@ describe('flexbox flex-shrink', () => {
     );
 
     document.body.appendChild(container);
-    await snapshot(0.1);
+    await snapshot(0.2);
   });
 
   it('should work with flex item with overflow hidden', async () => {
@@ -904,7 +904,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -917,7 +917,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -930,7 +930,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -943,7 +943,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -956,11 +956,11 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
           ])
       ]);
-    
+
     BODY.appendChild(div);
 
     await snapshot();
@@ -998,7 +998,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -1011,7 +1011,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -1024,7 +1024,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -1037,7 +1037,7 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
               createElement(
               'div',
@@ -1050,11 +1050,11 @@ describe('flexbox flex-shrink', () => {
                       boxSizing: 'border-box',
                   },
               }, [
-                  
+
               ]),
           ])
       ]);
-    
+
     BODY.appendChild(div);
 
     await snapshot();

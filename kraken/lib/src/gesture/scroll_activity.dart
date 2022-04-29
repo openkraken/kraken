@@ -15,7 +15,6 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'gesture_detector.dart';
 import 'scroll_position_with_single_context.dart';
 
 /// A backend for a [ScrollActivity].

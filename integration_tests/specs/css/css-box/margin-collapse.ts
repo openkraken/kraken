@@ -42,6 +42,37 @@ describe("Margin collapse", () => {
       await snapshot();
     });
 
+    it("should work with negative margin-top collapse with parent", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+            width: "300px",
+            height: "100px",
+            backgroundColor: "grey",
+          }
+        },
+        [
+          createElement(
+            "div",
+            {
+              style: {
+                width: "250px",
+                height: "50px",
+                backgroundColor: "lightgreen",
+                margin: "-50px 0"
+              }
+            },
+          )
+        ]
+      );
+
+      BODY.appendChild(div1);
+
+      await snapshot();
+    });
+
     it("should not work with element of display inline-block", async () => {
       let div1 = createElement(
         "div",
@@ -309,6 +340,48 @@ describe("Margin collapse", () => {
           }
         },
         []
+      );
+
+      BODY.appendChild(div1);
+      BODY.appendChild(div2);
+
+      await snapshot();
+    });
+
+    it("should work with negative margin-bottom collapse with parent", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            position: "relative",
+            width: "300px",
+            backgroundColor: "grey",
+          }
+        },
+        [
+          createElement(
+            "div",
+            {
+              style: {
+                width: "250px",
+                height: "50px",
+                backgroundColor: "lightgreen",
+                marginBottom: "-80px"
+              }
+            },
+          )
+        ]
+      );
+
+      let div2 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "coral"
+          }
+        },
       );
 
       BODY.appendChild(div1);
@@ -618,6 +691,37 @@ describe("Margin collapse", () => {
             height: "100px",
             backgroundColor: "coral",
             margin: "100px 0"
+          }
+        },
+        []
+      );
+
+      BODY.appendChild(div1);
+      BODY.appendChild(div2);
+
+      await snapshot();
+    });
+
+    it("should work with negative margin-top collapse with the previous sibling", async () => {
+      let div1 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "grey",
+          }
+        },
+      );
+
+      let div2 = createElement(
+        "div",
+        {
+          style: {
+            width: "300px",
+            height: "100px",
+            backgroundColor: "coral",
+            marginTop: "-150px"
           }
         },
         []
@@ -1053,4 +1157,32 @@ describe("Margin collapse", () => {
     });
   });
 
+  it('should work with empty block and margin top with parent collapse', async () => {
+    let div1;
+    let div2;
+    div1 = createElement(
+      'div',
+      {
+        style: {
+          margin: '0 0 20px',
+        },
+      },
+    );
+    div2 = createElement(
+      'div',
+      {
+        style: {
+          width: '200px',
+          height: '50px',
+          background: 'green',
+          color: 'white',
+        },
+      },
+    );
+
+    BODY.appendChild(div1);
+    BODY.appendChild(div2);
+
+    await snapshot();
+  });
 });

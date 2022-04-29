@@ -1,3 +1,28 @@
+## 0.11.0
+
+**Breaking Changes**
+
++ Update flutter requirement to 2.8.x https://github.com/openkraken/kraken/pull/1298
+
+**Bug Fixed**
+
+- Fix Kraken widget instance memory leak from window. https://github.com/openkraken/kraken/pull/1297
+
+## 0.10.4
+
+**Features**
+
++ Support window.innerWidth & window.innerHeight, and screen.availWidth & screen.availHeight. https://github.com/openkraken/kraken/pull/1256
+
+**Bug Fixed**
+
++ Fix error when using KrakenBundle.fromByteCode(). https://github.com/openkraken/kraken/pull/1245
++ Fix DataBundle string with non latin. https://github.com/openkraken/kraken/pull/1263
+
+** Others **
+
++ Change copyright to `The Kraken authors`.
+
 ## 0.10.3
 
 **Bug Fixed**

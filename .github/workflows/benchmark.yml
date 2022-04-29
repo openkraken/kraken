@@ -1,20 +1,23 @@
 name: Sample Page Benchmark
 
-on: [workflow_dispatch, pull_request]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 env:
   nodeVersion: "16"
   cmakeVersion: "3.22.x"
-  flutterVersion: "2.5.3"
+  flutterVersion: "2.8.1"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   benchmark:
-    runs-on: [self-hosted, benchmark, flutter_2.5.3]
+    runs-on: [self-hosted, benchmark]
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
-    - uses: subosito/flutter-action@v1
+    - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
     - run: flutter doctor -v

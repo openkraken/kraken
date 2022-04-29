@@ -28,10 +28,9 @@ typedef int32_t (*RequestAnimationFrame)(void* callbackContext, int32_t contextI
 typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
 typedef NativeScreen* (*GetScreen)(int32_t contextId);
-typedef double (*DevicePixelRatio)(int32_t contextId);
-typedef NativeString* (*PlatformBrightness)(int32_t contextId);
 typedef void (*ToBlob)(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char*);
+typedef void (*OnJSLog)(int32_t contextId, int32_t level, const char*);
 typedef void (*FlushUICommand)();
 typedef void (*InitWindow)(int32_t contextId, void* nativePtr);
 typedef void (*InitDocument)(int32_t contextId, void* nativePtr);
@@ -69,10 +68,9 @@ struct DartMethodPointer {
   RequestAnimationFrame requestAnimationFrame{nullptr};
   CancelAnimationFrame cancelAnimationFrame{nullptr};
   GetScreen getScreen{nullptr};
-  DevicePixelRatio devicePixelRatio{nullptr};
-  PlatformBrightness platformBrightness{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
+  OnJSLog onJsLog{nullptr};
   MatchImageSnapshot matchImageSnapshot{nullptr};
   Environment environment{nullptr};
   SimulatePointer simulatePointer{nullptr};

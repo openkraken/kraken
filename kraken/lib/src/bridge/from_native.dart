@@ -9,15 +9,10 @@ import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/module.dart';
 import 'package:kraken/src/module/performance_timing.dart';
-
-import 'native_types.dart';
-import 'dynamic_library.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -284,29 +279,6 @@ void _cancelAnimationFrame(int contextId, int timerId) {
 final Pointer<NativeFunction<NativeCancelAnimationFrame>> _nativeCancelAnimationFrame =
     Pointer.fromFunction(_cancelAnimationFrame);
 
-// Register devicePixelRatio
-typedef NativeDevicePixelRatio = Double Function();
-
-double _devicePixelRatio() {
-  return window.devicePixelRatio;
-}
-
-final Pointer<NativeFunction<NativeDevicePixelRatio>> _nativeDevicePixelRatio =
-    Pointer.fromFunction(_devicePixelRatio, 0.0);
-
-// Register platformBrightness
-typedef NativePlatformBrightness = Pointer<NativeString> Function();
-
-final Pointer<NativeString> _dark = stringToNativeString('dark');
-final Pointer<NativeString> _light = stringToNativeString('light');
-
-Pointer<NativeString> _platformBrightness() {
-  return window.platformBrightness == Brightness.dark ? _dark : _light;
-}
-
-final Pointer<NativeFunction<NativePlatformBrightness>> _nativePlatformBrightness =
-    Pointer.fromFunction(_platformBrightness);
-
 typedef NativeGetScreen = Pointer<Void> Function();
 
 Pointer<Void> _getScreen() {
@@ -399,6 +371,22 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
+typedef NativeJSLog = Void Function(Int32 contextId, Int32 level, Pointer<Utf8>);
+
+void _onJSLog(int contextId, int level, Pointer<Utf8> charStr) {
+  String msg = charStr.toDartString();
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  if (controller != null) {
+    JSLogHandler? jsLogHandler = controller.onJSLog;
+    if (jsLogHandler != null) {
+      jsLogHandler(level, msg);
+    }
+  }
+}
+
+final Pointer<NativeFunction<NativeJSLog>> _nativeOnJsLog = Pointer.fromFunction(_onJSLog);
+
+
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -409,14 +397,13 @@ final List<int> _dartNativeMethods = [
   _nativeRequestAnimationFrame.address,
   _nativeCancelAnimationFrame.address,
   _nativeGetScreen.address,
-  _nativeDevicePixelRatio.address,
-  _nativePlatformBrightness.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
   _nativeInitWindow.address,
   _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
+  _nativeOnJsLog.address,
 ];
 
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);

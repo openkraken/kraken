@@ -73,7 +73,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let p;
     let test;
     let container;
@@ -239,7 +239,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let description;
     let control;
     description = createElement(
@@ -351,7 +351,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('008', async () => {
+  it('008', async () => {
     let p;
     let inner;
     let outer;
@@ -429,7 +429,6 @@ describe('abspos', () => {
           {
             class: 'control',
             style: {
-              float: 'left',
               color: 'yellow',
               background: 'red',
               'box-sizing': 'border-box',
@@ -499,7 +498,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('010', async () => {
+  it('010', async () => {
     let p;
     p = createElement(
       'p',
@@ -515,7 +514,8 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('011', async () => {
+
+  it('011', async () => {
     let p;
     let p_1;
     let p_2;
@@ -575,7 +575,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('013', async () => {
+  it('013', async () => {
     let a;
     let b;
     a = createElement(
@@ -663,7 +663,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('015', async () => {
+  it('015', async () => {
     let a;
     let b;
     a = createElement(
@@ -839,7 +839,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('019', async () => {
+  it('019', async () => {
     let a;
     let b;
     a = createElement(
@@ -927,7 +927,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('022', async () => {
+  it('022', async () => {
     let c3;
     let c2;
     let c1;
@@ -1017,7 +1017,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('023', async () => {
+  it('023', async () => {
     let p;
     let test;
     let container;
@@ -1078,7 +1078,7 @@ describe('abspos', () => {
 
     await snapshot();
   });
-  xit('024', async () => {
+  it('024', async () => {
     let p;
     let test;
     let control;

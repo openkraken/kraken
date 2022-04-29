@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('block-image', () => {
+  // @TODO: Display inline element height calculation wrong.
   xit('percentage-max-height-inside-inline', async () => {
     let p;
     let div;

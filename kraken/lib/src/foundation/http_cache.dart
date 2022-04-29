@@ -9,8 +9,6 @@ import 'package:async/async.dart';
 import 'package:kraken/foundation.dart';
 import 'package:path/path.dart' as path;
 
-import 'http_cache_object.dart';
-
 enum HttpCacheMode {
 
   /// Default cache usage mode. If the navigation type doesn't impose any specific
@@ -115,12 +113,13 @@ class HttpCacheController {
   Future<HttpClientResponse> interceptResponse(
       HttpClientRequest request,
       HttpClientResponse response,
-      HttpCacheObject cacheObject) async {
+      HttpCacheObject cacheObject,
+      HttpClient httpClient) async {
     await cacheObject.updateIndex(response);
 
     // Negotiate cache with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
-      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse(httpClient);
       if (cachedResponse != null) {
         return cachedResponse;
       }
