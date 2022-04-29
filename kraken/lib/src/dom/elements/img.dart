@@ -161,9 +161,30 @@ class ImageElement extends Element {
     super.didDetachRenderer();
     style.removeStyleChangeListener(_stylePropertyChanged);
 
+    // Stop and remove image stream reference.
     _stopListeningStream(keepStreamAlive: true);
+    _cachedImageStream = null;
 
+    // Dispose [ImageStreamCompleter].
+    _completerHandle?.dispose();
+    _completerHandle = null;
+
+    // Remove cached image info.
     _cachedImageInfo = null;
+
+    // Dispose render object.
+    _dropChild();
+  }
+
+  // Drop the current [RenderImage] off to render replaced.
+  void _dropChild() {
+    if (renderBoxModel != null) {
+      RenderReplaced renderReplaced = renderBoxModel as RenderReplaced;
+      renderReplaced.child = null;
+
+      _renderImage?.dispose();
+      _renderImage = null;
+    }
   }
 
   ImageStreamListener? _imageStreamListener;
@@ -187,7 +208,7 @@ class ImageElement extends Element {
 
     _completerHandle?.dispose();
     _completerHandle = null;
-    _replaceImage(info: null);
+    _cachedImageInfo = null;
     _currentImageProvider?.evict();
     _currentImageProvider = null;
   }
@@ -404,11 +425,6 @@ class ImageElement extends Element {
     naturalHeight = height;
     _resizeImage();
 
-    // If renderer is present, on load trigger after first frame come.
-    if (_isInLazyLoading || renderer == null) {
-      scheduleMicrotask(_dispatchLoadEvent);
-    }
-
     // Decrement load event delay count after decode.
     ownerDocument.decrementLoadEventDelayCount();
   }
@@ -445,7 +461,7 @@ class ImageElement extends Element {
 
     _attachImage();
 
-    // Fire the load event.
+    // Fire the load event at first frame come.
     if (_frameCount == 1 && !_loaded) {
       scheduleMicrotask(_dispatchLoadEvent);
     }
