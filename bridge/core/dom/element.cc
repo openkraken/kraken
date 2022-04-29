@@ -171,9 +171,12 @@ Element& Element::CloneWithoutChildren(Document* document) const {
 }
 
 void Element::CloneAttributesFrom(const Element& other) {
-  if (other.attributes_ == nullptr)
-    return;
-  EnsureElementAttributes().CopyWith(other.attributes_);
+  if (other.attributes_ != nullptr) {
+    EnsureElementAttributes().CopyWith(other.attributes_);
+  }
+  if (other.cssom_wrapper_ != nullptr) {
+    EnsureCSSStyleDeclaration().CopyWith(other.cssom_wrapper_);
+  }
 }
 
 bool Element::HasEquivalentAttributes(const Element& other) const {

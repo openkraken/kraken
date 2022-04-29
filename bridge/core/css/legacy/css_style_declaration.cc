@@ -64,7 +64,8 @@ AtomicString CSSStyleDeclaration::item(const AtomicString& key, ExceptionState& 
 }
 
 bool CSSStyleDeclaration::SetItem(const AtomicString& key, const AtomicString& value, ExceptionState& exception_state) {
-
+  std::string propertyName = key.ToStdString();
+  return InternalSetProperty(propertyName, value);
 }
 
 int64_t CSSStyleDeclaration::length() const {
@@ -78,13 +79,22 @@ AtomicString CSSStyleDeclaration::getPropertyValue(const AtomicString& key, Exce
 
 void CSSStyleDeclaration::setProperty(const AtomicString& key,
                                       const AtomicString& value,
-                                      ExceptionState& exception_state) {}
+                                      ExceptionState& exception_state) {
+  std::string propertyName = key.ToStdString();
+  InternalSetProperty(propertyName, value);
+}
 
 AtomicString CSSStyleDeclaration::removeProperty(const AtomicString& key, ExceptionState& exception_state) {
   std::string propertyName = key.ToStdString();
   return InternalRemoveProperty(propertyName);
 }
 
+
+void CSSStyleDeclaration::CopyWith(CSSStyleDeclaration* inline_style) {
+  for (auto& attr : inline_style->properties_) {
+    properties_[attr.first] = attr.second;
+  }
+}
 AtomicString CSSStyleDeclaration::InternalGetPropertyValue(std::string& name) {
   name = parseJavaScriptCSSPropertyName(name);
 
@@ -115,12 +125,15 @@ AtomicString CSSStyleDeclaration::InternalRemoveProperty(std::string& name) {
     return AtomicString::Empty(ctx());
   }
 
+  AtomicString return_value = properties_[name];
   properties_.erase(name);
 
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx(), JS_NULL);
   GetExecutingContext()->uiCommandBuffer()->addCommand(owner_element_target_id_, UICommand::setStyle, args_01.release(),
                                                        args_02.release(), nullptr);
+
+  return return_value;
 }
 
 }  // namespace kraken

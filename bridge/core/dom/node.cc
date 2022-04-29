@@ -18,6 +18,7 @@ namespace kraken {
 
 Node* Node::Create(ExecutingContext* context, ExceptionState& exception_state) {
   exception_state.ThrowException(context->ctx(), ErrorType::TypeError, "Illegal constructor");
+  return nullptr;
 }
 
 void Node::setNodeValue(const AtomicString& value, ExceptionState& exception_state) {
