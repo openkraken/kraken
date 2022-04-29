@@ -19,7 +19,7 @@ Element::Element(const AtomicString& tag_name, Document* document, Node::Constru
 
 ElementAttributes& Element::EnsureElementAttributes() {
   if (attributes_ == nullptr) {
-    attributes_.Initialize(ElementAttributes::Create(this));
+    attributes_ = ElementAttributes::Create(this);
   }
   return *attributes_;
 }
@@ -144,7 +144,7 @@ CSSStyleDeclaration* Element::style() {
 
 CSSStyleDeclaration& Element::EnsureCSSStyleDeclaration() {
   if (cssom_wrapper_ == nullptr) {
-    cssom_wrapper_.Initialize(MakeGarbageCollected<CSSStyleDeclaration>(GetExecutingContext(), eventTargetId()));
+    cssom_wrapper_ = MakeGarbageCollected<CSSStyleDeclaration>(GetExecutingContext(), eventTargetId());
   }
   return *cssom_wrapper_;
 }
@@ -194,7 +194,7 @@ Node* Element::Clone(Document& factory, CloneChildrenFlag flag) const {
 }
 
 Element& Element::CloneWithoutAttributesAndChildren(Document& factory) const {
-  return *factory.createElement(tagName(), ASSERT_NO_EXCEPTION());
+  return *(factory.createElement(tagName(), ASSERT_NO_EXCEPTION()));
 }
 
 class ElementSnapshotReader {

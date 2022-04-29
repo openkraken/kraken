@@ -20,7 +20,7 @@ ChildNodeList* NodeData::EnsureChildNodeList(ContainerNode& node) {
   if (child_node_list_)
     return To<ChildNodeList>(child_node_list_.Get());
   auto* list = MakeGarbageCollected<ChildNodeList>(&node);
-  child_node_list_.Initialize(list);
+  child_node_list_ = list;
   return list;
 }
 
@@ -28,7 +28,7 @@ EmptyNodeList* NodeData::EnsureEmptyChildNodeList(Node& node) {
   if (child_node_list_)
     return To<EmptyNodeList>(child_node_list_.Get());
   auto* list = MakeGarbageCollected<EmptyNodeList>(&node);
-  child_node_list_.Initialize(list);
+  child_node_list_ = list;
   return list;
 }
 

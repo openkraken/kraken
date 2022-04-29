@@ -12,6 +12,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
       return JS_UNDEFINED;
     }
     ExceptionState exception_state;
+    MemberMutationScope scope{ExecutingContext::From(ctx)};
     <%= generateTypeValue(object.indexedProp.type) %> result = self->item(index, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return exception_state.ToQuickJS();
@@ -23,6 +24,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
   JSValue QJS<%= className %>::StringPropertyGetterCallback(JSContext* ctx, JSValue obj, JSAtom key) {
     auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
+    MemberMutationScope scope{ExecutingContext::From(ctx)};
     ${generateTypeValue(object.indexedProp.type)} result = self->item(AtomicString(ctx, key), exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return exception_state.ToQuickJS();
@@ -90,6 +92,7 @@ static JSValue <%= overloadMethod.name %>_overload_<%= index %>(JSContext* ctx, 
 static JSValue <%= prop.name %>AttributeGetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   auto* <%= blob.filename %> = toScriptWrappable<<%= className %>>(this_val);
   assert(<%= blob.filename %> != nullptr);
+  MemberMutationScope scope{ExecutingContext::From(ctx)};
   return Converter<<%= generateTypeConverter(prop.type) %>>::ToValue(ctx, <%= blob.filename %>-><%= prop.name %>());
 }
 <% if (!prop.readonly) { %>

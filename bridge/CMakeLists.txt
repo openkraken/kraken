@@ -210,7 +210,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/cppgc/mutation_scope.cc
     bindings/qjs/cppgc/mutation_scope.h
     bindings/qjs/cppgc/member.h
-    bindings/qjs/cppgc/member.cc
+    bindings/qjs/cppgc/local_handle.h
     bindings/qjs/script_wrappable.cc
     bindings/qjs/script_wrappable.h
     bindings/qjs/wrapper_type_info.h

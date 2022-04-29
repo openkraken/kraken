@@ -8,7 +8,7 @@ interface Node extends EventTarget {
   /**
    * Returns the children.
    */
-  readonly childNodes: NewObject<NodeList>;
+  readonly childNodes: NodeList;
   /**
    * Returns the first child.
    */
@@ -56,7 +56,7 @@ interface Node extends EventTarget {
   /**
    * Returns a copy of node. If deep is true, the copy also includes the node's descendants.
    */
-  cloneNode(deep?: boolean): NewObject<Node>;
+  cloneNode(deep?: boolean): Node;
   /**
    * Returns true if other is an inclusive descendant of node, and false otherwise.
    */

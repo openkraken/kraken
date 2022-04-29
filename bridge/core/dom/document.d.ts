@@ -12,10 +12,10 @@ interface Document extends Node {
   readonly head: HTMLHeadElement | null;
   readonly documentElement: HTMLHtmlElement;
 
-  createElement(tagName: string): NewObject<Element>;
-  createTextNode(value: string): NewObject<Text>;
-  createDocumentFragment(): NewObject<DocumentFragment>;
-  createComment(): NewObject<Comment>;
+  createElement(tagName: string): Element;
+  createTextNode(value: string): Text;
+  createDocumentFragment(): DocumentFragment;
+  createComment(): Comment;
 
   new(): Document;
 }

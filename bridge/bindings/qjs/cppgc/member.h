@@ -26,7 +26,6 @@ class Member {
  public:
   Member() = default;
   Member(T* ptr) {
-    inited_ = true;
     SetRaw(ptr);
   }
   ~Member() {
@@ -55,15 +54,6 @@ class Member {
       JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     }
     raw_ = nullptr;
-  }
-
-  void Initialize(T* p) {
-    inited_ = true;
-    if (p == nullptr)
-      return;
-    raw_ = p;
-    runtime_ = p->runtime();
-    p->MakeOld();
   }
 
   // Copy assignment.
@@ -96,24 +86,16 @@ class Member {
 
  private:
   void SetRaw(T* p) {
-    assert(inited_);
     if (p != nullptr) {
       auto* wrappable = To<ScriptWrappable>(p);
       runtime_ = wrappable->runtime();
-      // This JSObject was created just now and used at first time.
-      // Because there are already one reference count when JSObject created, so we skip duplicate.
-      if (!p->fresh()) {
-        JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
-      }
-      // This object had been used, no long fresh at all.
-      p->MakeOld();
+      JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     }
     raw_ = p;
   }
 
   T* raw_{nullptr};
   JSRuntime* runtime_{nullptr};
-  bool inited_{false};
 };
 
 }  // namespace kraken

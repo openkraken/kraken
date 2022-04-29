@@ -253,7 +253,7 @@ function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode?: 
   isInstanceMethod: false
 }): string {
   if (type[0] == FunctionArgumentType.void) return 'JS_NULL';
-  let method = (mode && mode.newObject || options.isConstructor) ? 'ToQuickJSUnsafe' : 'ToQuickJS';
+  let method = 'ToQuickJS';
 
   if (options.isConstructor) {
     return `return_value->${method}()`;

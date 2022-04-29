@@ -378,9 +378,10 @@ void ExecutingContext::ClearMutationScope() {
 //}
 
 void ExecutingContext::InstallDocument() {
+  MemberMutationScope scope{this};
   document_ = MakeGarbageCollected<Document>(this);
-  DefineGlobalProperty("document", document_->ToQuickJSUnsafe());
   document_->InitDocumentElement();
+  DefineGlobalProperty("document", document_->ToQuickJS());
 }
 
 // An lock free context validator.

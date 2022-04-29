@@ -191,33 +191,33 @@ TEST(Node, replaceBody) {
  TEST(Node, nestedNode) {
   std::string code = R"(
  const div = document.createElement('div');
-// div.style.width = '100px';
-// div.style.height = '100px';
-// div.style.backgroundColor = 'green';
-// div.setAttribute('id', '123');
+ div.style.width = '100px';
+ div.style.height = '100px';
+ div.style.backgroundColor = 'green';
+ div.setAttribute('id', '123');
  document.body.appendChild(div)
 
  const child = document.createElement('div');
-// child.style.width = '10px';
-// child.style.height = '10px';
-// child.style.backgroundColor = 'blue';
-// child.setAttribute('id', 'child123');
+ child.style.width = '10px';
+ child.style.height = '10px';
+ child.style.backgroundColor = 'blue';
+ child.setAttribute('id', 'child123');
  div.appendChild(child);
 
  const child2 = document.createElement('div');
-// child2.style.width = '10px';
-// child2.style.height = '10px';
-// child2.style.backgroundColor = 'yellow';
-// child2.setAttribute('id', 'child123');
+ child2.style.width = '10px';
+ child2.style.height = '10px';
+ child2.style.backgroundColor = 'yellow';
+ child2.setAttribute('id', 'child123');
  div.appendChild(child2);
 
  const div2 = div.cloneNode(true);
  document.body.appendChild(div2);
 
-// console.log(
-//  div2.firstChild.getAttribute('id') === 'child123', div2.firstChild.style.width === '10px',
-//  div2.firstChild.style.height === '10px'
-//);
+ console.log(
+  div2.firstChild.getAttribute('id') === 'child123', div2.firstChild.style.width === '10px',
+  div2.firstChild.style.height === '10px'
+);
 )";
 
   bool static errorCalled = false;

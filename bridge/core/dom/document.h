@@ -6,6 +6,7 @@
 #ifndef KRAKENBRIDGE_DOCUMENT_H
 #define KRAKENBRIDGE_DOCUMENT_H
 
+#include "bindings/qjs/cppgc/local_handle.h"
 #include "container_node.h"
 #include "core/dom/comment.h"
 #include "core/dom/document_fragment.h"

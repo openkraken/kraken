@@ -12,6 +12,7 @@
 #include "bindings/qjs/qjs_engine_patch.h"
 #include "foundation/casting.h"
 #include "foundation/macros.h"
+#include "local_handle.h"
 
 namespace kraken {
 
@@ -20,6 +21,7 @@ class MakeGarbageCollectedTrait;
 
 class ExecutingContext;
 class GCVisitor;
+class ScriptWrappable;
 
 /**
  * This class are mainly designed as base class for ScriptWrappable. If you wants to implement
@@ -68,10 +70,8 @@ class MakeGarbageCollectedTrait {
 
 template <typename T, typename... Args>
 T* MakeGarbageCollected(Args&&... args) {
-  static_assert(std::is_base_of<typename T::ParentMostGarbageCollectedType, T>::value,
-                "U of GarbageCollected<U> must be a base of T. Check "
-                "GarbageCollected<T> base class inheritance.");
-  return MakeGarbageCollectedTrait<T>::Allocate(std::forward<Args>(args)...);
+  static_assert(std::is_base_of<ScriptWrappable, T>::value, "MakeGarbageCollected T must be Derived from ScriptWrappable.");
+  return MakeLocal<T>(MakeGarbageCollectedTrait<T>::Allocate(std::forward<Args>(args)...)).Get();
 }
 
 }  // namespace kraken

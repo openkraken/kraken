@@ -49,9 +49,6 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   JSValue ToQuickJS();
   JSValue ToQuickJSUnsafe() const;
 
-  bool fresh() const { return fresh_; }
-  void MakeOld() const { fresh_ = false; }
-
   ScriptValue ToValue();
   FORCE_INLINE ExecutingContext* GetExecutingContext() const {
     return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
@@ -62,12 +59,7 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   void InitializeQuickJSObject() override;
 
  private:
-  JSValue GetJSObject() const;
   JSValue jsObject_{JS_NULL};
-  // Indicate this JSObject are created by MakeGarbageCollected traits and no one had used it.
-  // There are extra one reference count when JSObject are created by MakeGarbageCollected and needs to be special
-  // handled by cppgc.
-  mutable bool fresh_{false};
   JSContext* ctx_{nullptr};
   JSRuntime* runtime_{nullptr};
   friend class GCVisitor;
@@ -77,6 +69,19 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
 template <typename ScriptWrappable>
 inline ScriptWrappable* toScriptWrappable(JSValue object) {
   return static_cast<ScriptWrappable*>(JS_GetOpaque(object, JSValueGetClassId(object)));
+}
+
+template <typename T>
+Local<T>::~Local<T>() {
+  if (raw_ == nullptr)
+    return;
+  auto* wrappable = To<ScriptWrappable>(raw_);
+  // Record the free operation to avoid JSObject had been freed immediately.
+  if (LIKELY(wrappable->GetExecutingContext()->HasMutationScope())) {
+    wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
+  } else {
+    JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+  }
 }
 
 }  // namespace kraken

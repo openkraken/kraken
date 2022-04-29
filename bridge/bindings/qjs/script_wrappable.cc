@@ -9,18 +9,18 @@
 
 namespace kraken {
 
-ScriptWrappable::ScriptWrappable(JSContext* ctx) : ctx_(ctx), runtime_(JS_GetRuntime(ctx)), fresh_(true) {}
+ScriptWrappable::ScriptWrappable(JSContext* ctx) : ctx_(ctx), runtime_(JS_GetRuntime(ctx)) {}
 
 JSValue ScriptWrappable::ToQuickJS() {
-  return JS_DupValue(ctx_, GetJSObject());
+  return JS_DupValue(ctx_, jsObject_);
 }
 
 JSValue ScriptWrappable::ToQuickJSUnsafe() const {
-  return GetJSObject();
+  return jsObject_;
 }
 
 ScriptValue ScriptWrappable::ToValue() {
-  return ScriptValue(ctx_, GetJSObject());
+  return ScriptValue(ctx_, jsObject_);
 }
 
 /// This callback will be called when QuickJS GC is running at marking stage.
@@ -143,11 +143,6 @@ void ScriptWrappable::InitializeQuickJSObject() {
   // Let our instance into inherit prototype methods.
   JSValue prototype = GetExecutingContext()->contextData()->prototypeForType(wrapper_type_info);
   JS_SetPrototype(ctx_, jsObject_, prototype);
-}
-
-JSValue ScriptWrappable::GetJSObject() const {
-  MakeOld();
-  return jsObject_;
 }
 
 }  // namespace kraken
