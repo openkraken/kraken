@@ -257,7 +257,7 @@ Node* ContainerNode::AppendChild(Node* new_child, ExceptionState& exception_stat
   return new_child;
 }
 
-Node * ContainerNode::AppendChild(Node* new_child) {
+Node* ContainerNode::AppendChild(Node* new_child) {
   return AppendChild(new_child, ASSERT_NO_EXCEPTION());
 }
 

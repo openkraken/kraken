@@ -89,7 +89,6 @@ AtomicString CSSStyleDeclaration::removeProperty(const AtomicString& key, Except
   return InternalRemoveProperty(propertyName);
 }
 
-
 void CSSStyleDeclaration::CopyWith(CSSStyleDeclaration* inline_style) {
   for (auto& attr : inline_style->properties_) {
     properties_[attr.first] = attr.second;

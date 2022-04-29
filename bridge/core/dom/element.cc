@@ -54,8 +54,8 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value, 
   std::unique_ptr<NativeString> args_01 = name.ToNativeString();
   std::unique_ptr<NativeString> args_02 = value.ToNativeString();
 
-  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::setAttribute,
-                                                       args_01.release(), args_02.release(), nullptr);
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::setAttribute, args_01.release(),
+                                                       args_02.release(), nullptr);
 }
 
 void Element::removeAttribute(const AtomicString& name, ExceptionState& exception_state) {
@@ -160,8 +160,7 @@ Element& Element::CloneWithChildren(CloneChildrenFlag flag, Document* document) 
 }
 
 Element& Element::CloneWithoutChildren(Document* document) const {
-  Element& clone = CloneWithoutAttributesAndChildren(
-      document ? *document : GetDocument());
+  Element& clone = CloneWithoutAttributesAndChildren(document ? *document : GetDocument());
 
   assert(IsHTMLElement() == clone.IsHTMLElement());
 

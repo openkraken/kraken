@@ -10,7 +10,7 @@
 #include <string>
 #include "foundation/macros.h"
 
-#define ASSERT_NO_EXCEPTION()  ExceptionState().ReturnThis()
+#define ASSERT_NO_EXCEPTION() ExceptionState().ReturnThis()
 
 namespace kraken {
 

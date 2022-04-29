@@ -7,11 +7,11 @@
 #define KRAKENBRIDGE_CSS_STYLE_DECLARATION_H
 
 #include <unordered_map>
-#include "bindings/qjs/cppgc/member.h"
-#include "bindings/qjs/script_wrappable.h"
-#include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/atomic_string.h"
+#include "bindings/qjs/cppgc/member.h"
+#include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/script_value.h"
+#include "bindings/qjs/script_wrappable.h"
 
 namespace kraken {
 
@@ -19,6 +19,7 @@ class Element;
 
 class CSSStyleDeclaration : public ScriptWrappable {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = CSSStyleDeclaration*;
   static CSSStyleDeclaration* Create(ExecutingContext* context, ExceptionState& exception_state);
@@ -41,7 +42,6 @@ class CSSStyleDeclaration : public ScriptWrappable {
   std::unordered_map<std::string, AtomicString> properties_;
   int32_t owner_element_target_id_;
 };
-
 
 }  // namespace kraken
 

@@ -152,7 +152,7 @@ TEST(Node, replaceBody) {
   EXPECT_EQ(errorCalled, false);
 }
 
- TEST(Node, cloneNode) {
+TEST(Node, cloneNode) {
   std::string code = R"(
  const div = document.createElement('div');
  div.style.width = '100px';
@@ -188,7 +188,7 @@ TEST(Node, replaceBody) {
   EXPECT_EQ(logCalled, true);
 }
 
- TEST(Node, nestedNode) {
+TEST(Node, nestedNode) {
   std::string code = R"(
  const div = document.createElement('div');
  div.style.width = '100px';

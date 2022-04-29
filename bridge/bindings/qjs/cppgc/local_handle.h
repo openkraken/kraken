@@ -5,24 +5,25 @@
 #ifndef KRAKENBRIDGE_BINDINGS_QJS_CPPGC_LOCAL_HANDLE_H_
 #define KRAKENBRIDGE_BINDINGS_QJS_CPPGC_LOCAL_HANDLE_H_
 
-#include "foundation/macros.h"
-#include "foundation/casting.h"
-#include <type_traits>
 #include <quickjs/quickjs.h>
+#include <type_traits>
+#include "foundation/casting.h"
+#include "foundation/macros.h"
 #include "mutation_scope.h"
 
 namespace kraken {
 
-template<typename T>
+template <typename T>
 class LocalTrait;
 class ScriptWrappable;
 
 /**
  * A stack allocated class which hold object reference temporary.
-*/
-template<typename T>
+ */
+template <typename T>
 class Local {
   KRAKEN_STACK_ALLOCATED();
+
  public:
   static Local<T> Empty() { return Local<T>(nullptr); }
 
@@ -57,6 +58,6 @@ Local<T> MakeLocal(Args&&... args) {
   return LocalTrait<T>::Allocate(std::forward<Args>(args)...);
 }
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_BINDINGS_QJS_CPPGC_LOCAL_HANDLE_H_

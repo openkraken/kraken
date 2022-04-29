@@ -70,7 +70,8 @@ class MakeGarbageCollectedTrait {
 
 template <typename T, typename... Args>
 T* MakeGarbageCollected(Args&&... args) {
-  static_assert(std::is_base_of<ScriptWrappable, T>::value, "MakeGarbageCollected T must be Derived from ScriptWrappable.");
+  static_assert(std::is_base_of<ScriptWrappable, T>::value,
+                "MakeGarbageCollected T must be Derived from ScriptWrappable.");
   return MakeLocal<T>(MakeGarbageCollectedTrait<T>::Allocate(std::forward<Args>(args)...)).Get();
 }
 

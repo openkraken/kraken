@@ -8,9 +8,9 @@
 
 #include "bindings/qjs/cppgc/garbage_collected.h"
 #include "container_node.h"
+#include "core/css/legacy/css_style_declaration.h"
 #include "legacy/bounding_client_rect.h"
 #include "legacy/element_attributes.h"
-#include "core/css/legacy/css_style_declaration.h"
 #include "qjs_scroll_to_options.h"
 
 namespace kraken {
@@ -82,8 +82,7 @@ class Element : public ContainerNode {
   bool HasEquivalentAttributes(const Element& other) const;
 
   // Step 5 of https://dom.spec.whatwg.org/#concept-node-clone
-  virtual void CloneNonAttributePropertiesFrom(const Element&,
-                                               CloneChildrenFlag) {}
+  virtual void CloneNonAttributePropertiesFrom(const Element&, CloneChildrenFlag) {}
 
   void Trace(GCVisitor* visitor) const override;
 

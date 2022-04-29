@@ -40,9 +40,7 @@ EventTarget* EventTarget::Create(ExecutingContext* context, ExceptionState& exce
 }
 
 EventTarget::EventTarget(ExecutingContext* context)
-    : BindingObject(context),
-      ScriptWrappable(context->ctx()),
-      event_target_id_(global_event_target_id++) {}
+    : BindingObject(context), ScriptWrappable(context->ctx()), event_target_id_(global_event_target_id++) {}
 
 bool EventTarget::addEventListener(const AtomicString& event_type,
                                    const std::shared_ptr<EventListener>& event_listener,

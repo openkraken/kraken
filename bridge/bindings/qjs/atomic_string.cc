@@ -61,7 +61,8 @@ AtomicString::AtomicString(JSContext* ctx, JSValue value)
   }
 }
 
-AtomicString::AtomicString(JSContext* ctx, JSAtom atom): runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_DupAtom(ctx, atom)) {
+AtomicString::AtomicString(JSContext* ctx, JSAtom atom)
+    : runtime_(JS_GetRuntime(ctx)), ctx_(ctx), atom_(JS_DupAtom(ctx, atom)) {
   JSValue string = JS_AtomToValue(ctx, atom);
   kind_ = GetStringKind(string);
   length_ = JS_VALUE_GET_STRING(string)->len;
