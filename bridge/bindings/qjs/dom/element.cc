@@ -163,23 +163,37 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertAdjacentElement' on 'Element': 2 argument required.");
   }
-  JSValue position = argv[0];
+  JSValue positionValue  = argv[0];
   JSValue target = argv[1];
 
-  ElementInstance* targetElementInstance = nullptr;
-
-  if (JS_IsObject(target)) {
-    targetElementInstance = static_cast<ElementInstance*>(JS_GetOpaque(target, Element::classId()));
-  } else if (!JS_IsNull(target)) {
+  if (!JS_IsNull(target)) {
     return JS_ThrowTypeError(ctx, "TypeError: Failed to execute 'insertAdjacentElement' on 'Element': parameter 2 is not of type 'Element'");
   }
 
-  auto* element = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  auto* thisElement = static_cast<ElementInstance*>(JS_GetOpaque(this_val, Element::classId()));
+  auto* newChild = static_cast<NodeInstance*>(JS_GetOpaque(target, Node::classId(target)));
 
-  std::string eventTargetId = std::to_string(targetElementInstance->m_eventTargetId);
-  std::unique_ptr<NativeString> args_01 = stringToNativeString(eventTargetId);
-  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, position);
-  element->m_context->uiCommandBuffer()->addCommand(element->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
+  std::string position = jsValueToStdString(ctx, positionValue);
+
+  if (position == "beforebegin") {
+    if (auto *parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
+      parent->internalInsertBefore(newChild, thisElement);
+    }
+  } else if (position == "afterbegin") {
+    thisElement->internalInsertBefore(newChild, thisElement->firstChild());
+  } else if (position == "beforeend") {
+    thisElement->internalAppendChild(newChild);
+  } else if (position == "afterend") {
+    if (auto *parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
+      JSValue nextSiblingValue = JS_GetPropertyUint32(ctx, parent->childNodes, arrayFindIdx(ctx, parent->childNodes, thisElement->jsObject) + 1);
+      auto* nextSibling = static_cast<NodeInstance*>(JS_GetOpaque(nextSiblingValue, Node::classId(nextSiblingValue)));
+      parent->internalInsertBefore(newChild, nextSibling);
+      JS_FreeValue(ctx, nextSiblingValue);
+    }
+  }
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(std::to_string(thisElement->eventTargetId()));
+  std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx, positionValue);
+  thisElement->m_context->uiCommandBuffer()->addCommand(thisElement->m_eventTargetId, UICommand::insertAdjacentNode, *args_01, *args_02, nullptr);
 }
 
 JSValue Element::getBoundingClientRect(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
