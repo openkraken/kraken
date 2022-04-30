@@ -163,7 +163,7 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   if (argc < 2) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'insertAdjacentElement' on 'Element': 2 argument required.");
   }
-  JSValue positionValue  = argv[0];
+  JSValue positionValue = argv[0];
   JSValue target = argv[1];
 
   if (!JS_IsObject(target)) {
@@ -176,7 +176,7 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   std::string position = jsValueToStdString(ctx, positionValue);
 
   if (position == "beforebegin") {
-    if (auto *parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
+    if (auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
       parent->internalInsertBefore(newChild, thisElement);
     }
   } else if (position == "afterbegin") {
@@ -184,7 +184,7 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   } else if (position == "beforeend") {
     thisElement->internalAppendChild(newChild);
   } else if (position == "afterend") {
-    if (auto *parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
+    if (auto* parent = static_cast<NodeInstance*>(JS_GetOpaque(thisElement->parentNode, Node::classId(thisElement->parentNode)))) {
       JSValue nextSiblingValue = JS_GetPropertyUint32(ctx, parent->childNodes, arrayFindIdx(ctx, parent->childNodes, thisElement->jsObject) + 1);
       auto* nextSibling = static_cast<NodeInstance*>(JS_GetOpaque(nextSiblingValue, Node::classId(nextSiblingValue)));
       parent->internalInsertBefore(newChild, nextSibling);
