@@ -166,7 +166,7 @@ JSValue Element::insertAdjacentElement(JSContext* ctx, JSValue this_val, int arg
   JSValue positionValue  = argv[0];
   JSValue target = argv[1];
 
-  if (!JS_IsNull(target)) {
+  if (!JS_IsObject(target)) {
     return JS_ThrowTypeError(ctx, "TypeError: Failed to execute 'insertAdjacentElement' on 'Element': parameter 2 is not of type 'Element'");
   }
 
