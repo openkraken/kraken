@@ -6,8 +6,10 @@
 #include <atomic>
 #include <unordered_map>
 
-#include <core/dart_methods.h>
 #include "bindings/qjs/binding_initializer.h"
+#include "core/dart_methods.h"
+#include "core/dom/document.h"
+#include "core/html/parser/html_parser.h"
 #include "foundation/logging.h"
 #include "page.h"
 #include "polyfill.h"
@@ -32,13 +34,15 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler)
 }
 
 bool KrakenPage::parseHTML(const char* code, size_t length) {
-  //    if (!m_context->isValid())
-  //      return false;
-  //    JSValue bodyValue = JS_GetPropertyStr(m_context->ctx(), m_context->document()->jsObject, "body");
-  //    auto* body = static_cast<Element*>(JS_GetOpaque(bodyValue, Element::classId));
-  //    HTMLParser::parseHTML(code, length, body);
-  //    JS_FreeValue(m_context->ctx(), bodyValue);
-  //    return true;
+  if (!m_context->IsValid())
+    return false;
+
+  // Remove all Nodes including body and head.
+  m_context->document()->documentElement()->RemoveChildren();
+
+  HTMLParser::parseHTML(code, length, m_context->document()->documentElement());
+
+  return true;
 }
 
 void KrakenPage::invokeModuleEvent(const NativeString* moduleName,

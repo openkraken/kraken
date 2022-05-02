@@ -38,7 +38,7 @@
 //      "interfaceName": "HTMLTextareaElement",
 //      "interfaceHeaderDir": "core/html/forms"
 //    },
-//    "template",
+    "template",
 //    {
 //      "name": "img",
 //      "interfaceName": "HTMLImageElement",

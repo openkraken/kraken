@@ -35,6 +35,8 @@ class CSSStyleDeclaration : public ScriptWrappable {
 
   void CopyWith(CSSStyleDeclaration* attributes);
 
+  std::string ToString() const;
+
  private:
   AtomicString InternalGetPropertyValue(std::string& name);
   bool InternalSetProperty(std::string& name, const AtomicString& value);

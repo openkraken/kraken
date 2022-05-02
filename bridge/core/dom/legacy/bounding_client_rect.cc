@@ -12,6 +12,10 @@ BoundingClientRect* BoundingClientRect::Create(ExecutingContext* context,
   return MakeGarbageCollected<BoundingClientRect>(context, native_bounding_client_rect);
 }
 
+BoundingClientRect* BoundingClientRect::Create(ExecutingContext* context, ExceptionState& exceptionState) {
+  return nullptr;
+}
+
 BoundingClientRect::BoundingClientRect(ExecutingContext* context, NativeBoundingClientRect* nativeBoundingClientRect)
     : ScriptWrappable(context->ctx()),
       x_(nativeBoundingClientRect->x),

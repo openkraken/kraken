@@ -301,7 +301,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/node.h
     core/dom/node_traversal.cc
     core/dom/node_traversal.h
-    core/dom/template_content_document_fragment.h
     core/dom/character_data.cc
     core/dom/character_data.h
     core/dom/comment.cc
@@ -329,6 +328,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/container_node.h
     core/events/error_event.cc
     core/events/error_event.h
+    core/html/parser/html_parser.cc
+    core/html/parser/html_parser.h
     core/html/html_collection.cc
     core/html/html_collection.h
     core/html/html_element.cc
@@ -341,6 +342,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/html/html_body_element.cc
     core/html/html_html_element.cc
     core/html/html_html_element.h
+    core/html/html_template_element.cc
+    core/html/html_template_element.h
 #    core/html/html_anchor_element.h
 #    core/html/html_anchor_element.cc
 #    core/html/html_template_element.cc
@@ -443,6 +446,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_html_body_element.h
     out/qjs_html_html_element.cc
     out/qjs_html_html_element.h
+    out/qjs_html_template_element.cc
+    out/qjs_html_template_element.h
     out/html_element_type_helper.h
     out/qjs_html_unknown_element.cc
     out/qjs_html_unknown_element.h

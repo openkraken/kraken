@@ -7,4 +7,6 @@ interface BoundingClientRect {
   readonly right: double;
   readonly bottom: double;
   readonly left: double;
+
+  new(): void;
 }

@@ -12,7 +12,7 @@ interface Element extends Node {
   readonly clientLeft: number;
   readonly clientTop: number;
   readonly clientWidth: number;
-  outerHTML: string;
+  readonly outerHTML: string;
   innerHTML: string;
   readonly ownerDocument: Document;
   scrollLeft: number;

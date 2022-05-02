@@ -9,6 +9,8 @@
 #include "bindings/qjs/script_promise.h"
 #include "bindings/qjs/script_promise_resolver.h"
 #include "core/fileapi/blob.h"
+#include "core/dom/document_fragment.h"
+#include "core/html/parser/html_parser.h"
 #include "core/html/html_template_element.h"
 #include "foundation/native_value_converter.h"
 
@@ -305,64 +307,59 @@ void Element::setScrollLeft(double v, ExceptionState& exception_state) {
                      exception_state);
 }
 
-std::string Element::outerHTML() const {
-  //  std::string s = "<" + tag_name_.ToStdString();
-  //
-  //  // Read attributes
-  //  std::string attributes = attributes_->ToString();
-  //  // Read style
-  //  std::string style = m_style->toString();
-  //
-  //  if (!attributes.empty()) {
-  //    s += " " + attributes;
-  //  }
-  //  if (!style.empty()) {
-  //    s += " style=\"" + style;
-  //  }
-  //
-  //  s += ">";
-  //
-  //  std::string childHTML = innerHTML();
-  //  s += childHTML;
-  //  s += "</" + TagName().ToStdString() + ">";
+std::string Element::outerHTML() {
+  std::string s = "<" + tagName().ToStdString();
 
-  //  return s;
+  // Read attributes
+  if (attributes_ != nullptr) {
+    s += " " + attributes_->ToString();
+  }
+  if (cssom_wrapper_ != nullptr) {
+    s += " style=\"" + cssom_wrapper_->ToString();
+  }
+
+  s += ">";
+
+  std::string childHTML = innerHTML();
+  s += childHTML;
+  s += "</" + tagName().ToStdString() + ">";
+
+  return s;
 }
 
-void Element::setOuterHTML(const AtomicString& value, ExceptionState& exception_state) {}
-
-std::string Element::innerHTML() const {
+std::string Element::innerHTML() {
   std::string s;
 
   // If Element is TemplateElement, the innerHTML content is the content of documentFragment.
-  const Node* parent = To<Node>(this);
+  Node* parent = To<Node>(this);
 
-  //  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
-  //    parent = DynamicTo<Node>(template_element->content());
-  //  }
+  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
+    parent = To<Node>(template_element->content());
+  }
 
-  // TODO: add innerHTML support.
-  //  // Children toString
-  //  int32_t childLen = arrayGetLength(m_ctx, parent->childNodes);
-  //
-  //  if (childLen == 0)
-  //    return s;
-  //
-  //  for (int i = 0; i < childLen; i++) {
-  //    JSValue c = JS_GetPropertyUint32(m_ctx, parent->childNodes, i);
-  //    auto* node = static_cast<NodeInstance*>(JS_GetOpaque(c, Node::classId(c)));
-  //    if (node->nodeType == NodeType::ELEMENT_NODE) {
-  //      s += reinterpret_cast<ElementInstance*>(node)->outerHTML();
-  //    } else if (node->nodeType == NodeType::TEXT_NODE) {
-  //      s += reinterpret_cast<TextNodeInstance*>(node)->toString();
-  //    }
-  //
-  //    JS_FreeValue(m_ctx, c);
-  //  }
-  //  return s;
+  if (parent->firstChild() == nullptr) return s;
+
+  auto* child = parent->firstChild();
+  while (child != nullptr) {
+    if (auto* element = DynamicTo<Element>(child)) {
+      s += element->outerHTML();
+    } else if (auto* text = DynamicTo<Text>(child)) {
+      s += text->data().ToStdString();
+    }
+    child = child->nextSibling();
+  }
+
+  return s;
 }
 
-void Element::setInnerHTML(const AtomicString& value, ExceptionState& exception_state) {}
+void Element::setInnerHTML(const AtomicString& value, ExceptionState& exception_state) {
+  auto html = value.ToStdString();
+  if (auto* template_element = DynamicTo<HTMLTemplateElement>(this)) {
+    HTMLParser::parseHTMLFragment(html.c_str(), html.size(), template_element->content());
+  } else {
+    HTMLParser::parseHTMLFragment(html.c_str(), html.size(), this);
+  }
+}
 
 void Element::_notifyNodeRemoved(Node* node) {}
 

@@ -94,6 +94,21 @@ void CSSStyleDeclaration::CopyWith(CSSStyleDeclaration* inline_style) {
     properties_[attr.first] = attr.second;
   }
 }
+
+std::string CSSStyleDeclaration::ToString() const {
+  if (properties_.empty())
+    return "";
+
+  std::string s;
+
+  for (auto& attr : properties_) {
+    s += attr.first + ": " + attr.second.ToStdString() + ";";
+  }
+
+  s += "\"";
+  return s;
+}
+
 AtomicString CSSStyleDeclaration::InternalGetPropertyValue(std::string& name) {
   name = parseJavaScriptCSSPropertyName(name);
 

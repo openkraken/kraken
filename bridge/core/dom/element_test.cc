@@ -3,10 +3,10 @@
  * Author: Kraken Team.
  */
 
-#include "event_target.h"
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "page.h"
+#include "core/dom/legacy/bounding_client_rect.h"
+using namespace kraken;
 
 TEST(Element, setAttribute) {
   bool static errorCalled = false;
@@ -63,6 +63,7 @@ TEST(Element, setAttributeWithHTML) {
   bool static logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
+    EXPECT_STREQ(message.c_str(), "100%");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     KRAKEN_LOG(VERBOSE) << errmsg;
@@ -72,7 +73,8 @@ TEST(Element, setAttributeWithHTML) {
   const char* code =
       "let div = document.createElement('div');"
       "div.innerHTML = '<img src=\"https://miniapp-nikestore-demo.oss-cn-beijing.aliyuncs.com/white_shoes_v1.png\" "
-      "style=\"width:100%;height:auto;\">';";
+      "style=\"width:100%;height:auto;\">';"
+      "console.log(div.firstChild.style.width);";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
 }
@@ -139,8 +141,11 @@ TEST(Element, stringifyBoundingClientRect) {
       10.0, 20.0, 30.0, 40.0, 10.0, 20.0, 30.0, 40.0,
   };
 
-  auto* clientRect = new BoundingClientRect(context, &nativeRect);
-  context->defineGlobalProperty("boundingClient", clientRect->jsObject);
+  {
+    MemberMutationScope scope{context};
+    auto* clientRect = BoundingClientRect::Create(context, &nativeRect);
+    context->DefineGlobalProperty("boundingClient", clientRect->ToQuickJS());
+  }
 
   const char* code = "console.log(JSON.stringify(boundingClient))";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);

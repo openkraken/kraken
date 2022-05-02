@@ -7,6 +7,7 @@
 #define KRAKENBRIDGE_SCRIPT_WRAPPABLE_H
 
 #include <quickjs/quickjs.h>
+#include "foundation/macros.h"
 #include "bindings/qjs/cppgc/garbage_collected.h"
 #include "wrapper_type_info.h"
 
@@ -80,7 +81,7 @@ Local<T>::~Local<T>() {
   if (LIKELY(wrappable->GetExecutingContext()->HasMutationScope())) {
     wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
   } else {
-    JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
+    assert_m(false, "LocalHandle must be used before MemberMutationScope allcated.");
   }
 }
 

@@ -21,11 +21,13 @@
 #include "qjs_html_head_element.h"
 #include "qjs_html_html_element.h"
 #include "qjs_html_unknown_element.h"
+#include "qjs_html_template_element.h"
 #include "qjs_module_manager.h"
 #include "qjs_node.h"
 #include "qjs_node_list.h"
 #include "qjs_text.h"
 #include "qjs_window.h"
+#include "qjs_bounding_client_rect.h"
 
 namespace kraken {
 
@@ -50,7 +52,9 @@ void InstallBindings(ExecutingContext* context) {
   QJSHTMLBodyElement::Install(context);
   QJSHTMLHtmlElement::Install(context);
   QJSHTMLUnknownElement::Install(context);
+  QJSHTMLTemplateElement::Install(context);
   QJSCSSStyleDeclaration::Install(context);
+  QJSBoundingClientRect::Install(context);
 
   // Legacy bindings, not standard.
   QJSElementAttributes::Install(context);

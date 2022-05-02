@@ -21,6 +21,8 @@ class HTMLTemplateElement : public HTMLElement {
   DocumentFragment* content() const;
 
  private:
+  DocumentFragment* ContentInternal() const;
+  mutable Member<DocumentFragment> content_;
 };
 
 }  // namespace kraken

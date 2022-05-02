@@ -6,6 +6,7 @@
 #define KRAKENBRIDGE_CORE_DOM_LEGACY_BOUNDING_CLIENT_RECT_H_
 
 #include "bindings/qjs/script_wrappable.h"
+#include "bindings/qjs/exception_state.h"
 
 namespace kraken {
 
@@ -28,6 +29,7 @@ class BoundingClientRect : public ScriptWrappable {
  public:
   BoundingClientRect() = delete;
   static BoundingClientRect* Create(ExecutingContext* context, NativeBoundingClientRect* native_bounding_client_rect);
+  static BoundingClientRect* Create(ExecutingContext* context, ExceptionState& exceptionState);
   explicit BoundingClientRect(ExecutingContext* context, NativeBoundingClientRect* nativeBoundingClientRect);
 
   void Trace(GCVisitor* visitor) const override;

@@ -152,9 +152,6 @@ class Node : public EventTarget {
   // dispatch synchronous events.
   virtual void RemovedFrom(ContainerNode& insertion_point);
 
-  // Knows about all kinds of hosts.
-  [[nodiscard]] ContainerNode* ParentOrShadowHostOrTemplateHostNode() const;
-
   // Returns the parent node, but nullptr if the parent node is a ShadowRoot.
   [[nodiscard]] ContainerNode* NonShadowBoundaryParentNode() const;
 

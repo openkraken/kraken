@@ -11,7 +11,6 @@
 #include "empty_node_list.h"
 #include "node_data.h"
 #include "node_traversal.h"
-#include "template_content_document_fragment.h"
 #include "text.h"
 
 namespace kraken {
@@ -314,13 +313,6 @@ void Node::RemovedFrom(ContainerNode& insertion_point) {
   }
 }
 
-ContainerNode* Node::ParentOrShadowHostOrTemplateHostNode() const {
-  auto* this_fragment = DynamicTo<DocumentFragment>(this);
-  if (this_fragment && this_fragment->IsTemplateContent())
-    return static_cast<const TemplateContentDocumentFragment*>(this)->Host();
-  return ParentOrShadowHostNode();
-}
-
 ContainerNode* Node::NonShadowBoundaryParentNode() const {
   return parentNode();
 }
@@ -363,10 +355,7 @@ bool Node::ContainsIncludingHostElements(const Node& node) const {
     if (current == this)
       return true;
     auto* curr_fragment = DynamicTo<DocumentFragment>(current);
-    if (curr_fragment && curr_fragment->IsTemplateContent())
-      current = static_cast<const TemplateContentDocumentFragment*>(current)->Host();
-    else
-      current = current->ParentOrShadowHostNode();
+    current = current->ParentOrShadowHostNode();
   } while (current);
   return false;
 }

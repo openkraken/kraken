@@ -58,9 +58,8 @@ class Element : public ContainerNode {
   double scrollLeft() const;
   void setScrollLeft(double v, ExceptionState& exception_state);
 
-  std::string outerHTML() const;
-  void setOuterHTML(const AtomicString& value, ExceptionState& exception_state);
-  std::string innerHTML() const;
+  std::string outerHTML();
+  std::string innerHTML();
   void setInnerHTML(const AtomicString& value, ExceptionState& exception_state);
 
   bool HasTagName(const AtomicString&) const;
