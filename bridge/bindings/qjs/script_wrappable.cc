@@ -92,9 +92,7 @@ static int HandleJSPropertyCheckerCallback(JSContext* ctx, JSValueConst obj, JSA
   return wrapper_type_info->string_property_checker_handler_(ctx, obj, atom);
 }
 
-static int HandleJSGetOwnPropertyNames(JSContext *ctx, JSPropertyEnum **ptab,
-                              uint32_t *plen,
-                              JSValueConst obj) {
+static int HandleJSGetOwnPropertyNames(JSContext* ctx, JSPropertyEnum** ptab, uint32_t* plen, JSValueConst obj) {
   // All props and methods are finded in prototype object of scriptwrappable.
   JSValue proto = JS_GetPrototype(ctx, obj);
   bool result = JS_GetOwnPropertyNames(ctx, ptab, plen, proto, JS_GPN_ENUM_ONLY | JS_GPN_STRING_MASK);
@@ -102,8 +100,7 @@ static int HandleJSGetOwnPropertyNames(JSContext *ctx, JSPropertyEnum **ptab,
   return result;
 };
 
-static int HandleJSGetOwnProperty(JSContext *ctx, JSPropertyDescriptor *desc,
-                                  JSValueConst obj, JSAtom prop) {
+static int HandleJSGetOwnProperty(JSContext* ctx, JSPropertyDescriptor* desc, JSValueConst obj, JSAtom prop) {
   // Call JSGetOwnPropertyNames will also call HandleJSGetOwnProperty for secondary verify.
   JSValue proto = JS_GetPrototype(ctx, obj);
   bool result = JS_GetOwnProperty(ctx, desc, proto, prop);

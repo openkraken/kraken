@@ -6,8 +6,8 @@
 #ifndef KRAKENBRIDGE_HTML_PARSER_H
 #define KRAKENBRIDGE_HTML_PARSER_H
 
-#include <string>
 #include <third_party/gumbo-parser/src/gumbo.h>
+#include <string>
 #include "foundation/native_string.h"
 
 namespace kraken {

@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include "core/dom/element.h"
 #include "core/dom/document.h"
+#include "core/dom/element.h"
 #include "foundation/logging.h"
 #include "html_parser.h"
 

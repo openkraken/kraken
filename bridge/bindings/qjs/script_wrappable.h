@@ -7,8 +7,8 @@
 #define KRAKENBRIDGE_SCRIPT_WRAPPABLE_H
 
 #include <quickjs/quickjs.h>
-#include "foundation/macros.h"
 #include "bindings/qjs/cppgc/garbage_collected.h"
+#include "foundation/macros.h"
 #include "wrapper_type_info.h"
 
 namespace kraken {

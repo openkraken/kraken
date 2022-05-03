@@ -3,9 +3,9 @@
  * Author: Kraken Team.
  */
 
+#include "core/dom/legacy/bounding_client_rect.h"
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "core/dom/legacy/bounding_client_rect.h"
 using namespace kraken;
 
 TEST(Element, setAttribute) {

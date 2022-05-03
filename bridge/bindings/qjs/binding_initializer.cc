@@ -6,6 +6,7 @@
 #include "binding_initializer.h"
 #include "core/executing_context.h"
 
+#include "qjs_bounding_client_rect.h"
 #include "qjs_character_data.h"
 #include "qjs_comment.h"
 #include "qjs_console.h"
@@ -20,14 +21,13 @@
 #include "qjs_html_element.h"
 #include "qjs_html_head_element.h"
 #include "qjs_html_html_element.h"
-#include "qjs_html_unknown_element.h"
 #include "qjs_html_template_element.h"
+#include "qjs_html_unknown_element.h"
 #include "qjs_module_manager.h"
 #include "qjs_node.h"
 #include "qjs_node_list.h"
 #include "qjs_text.h"
 #include "qjs_window.h"
-#include "qjs_bounding_client_rect.h"
 
 namespace kraken {
 

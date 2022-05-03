@@ -5,8 +5,8 @@
 #ifndef KRAKENBRIDGE_CORE_DOM_LEGACY_BOUNDING_CLIENT_RECT_H_
 #define KRAKENBRIDGE_CORE_DOM_LEGACY_BOUNDING_CLIENT_RECT_H_
 
-#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/exception_state.h"
+#include "bindings/qjs/script_wrappable.h"
 
 namespace kraken {
 

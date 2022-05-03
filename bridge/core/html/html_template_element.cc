@@ -4,8 +4,8 @@
  */
 
 #include "html_template_element.h"
-#include "html_names.h"
 #include "core/dom/document_fragment.h"
+#include "html_names.h"
 
 namespace kraken {
 

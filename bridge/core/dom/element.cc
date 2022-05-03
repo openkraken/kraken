@@ -8,10 +8,10 @@
 #include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/script_promise.h"
 #include "bindings/qjs/script_promise_resolver.h"
-#include "core/fileapi/blob.h"
 #include "core/dom/document_fragment.h"
-#include "core/html/parser/html_parser.h"
+#include "core/fileapi/blob.h"
 #include "core/html/html_template_element.h"
+#include "core/html/parser/html_parser.h"
 #include "foundation/native_value_converter.h"
 
 namespace kraken {
@@ -337,7 +337,8 @@ std::string Element::innerHTML() {
     parent = To<Node>(template_element->content());
   }
 
-  if (parent->firstChild() == nullptr) return s;
+  if (parent->firstChild() == nullptr)
+    return s;
 
   auto* child = parent->firstChild();
   while (child != nullptr) {
