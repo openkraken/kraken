@@ -1475,6 +1475,7 @@ class RenderBoxModel extends RenderBox
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
                 position -= getTotalScrollOffset();
+                trasformPosition -= getTotalScrollOffset();
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
