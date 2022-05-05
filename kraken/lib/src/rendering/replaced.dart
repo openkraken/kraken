@@ -134,6 +134,7 @@ class RenderReplaced extends RenderBoxModel
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
+    // In lazy rendering, only paint intersection observer for triggering intersection change callback.
     if (_isInLazyRendering) {
       paintIntersectionObserver(context, offset, paintNothing);
     } else if (shouldPaint) {
