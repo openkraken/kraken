@@ -51,9 +51,19 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
   void unmount() {
     // The function unmountRenderObject should be called before unmount,otherwise members can't be accessed.
     (widget._krakenNode as dom.Element).unmountRenderObject();
+    dom.Element ele = (widget._krakenNode as dom.Element);
+
+    // The function unmountRenderObject should be called before unmount, otherwise members can't be accessed.
+    ele.unmountRenderObject(needDispose: false, deep: true);
+
     super.unmount();
+
+    ele.renderBoxModel = null;
   }
 
-  @override
-  void insertRenderObjectChild(RenderObject child, Object? slot) {}
+  // @override
+  // void insertRenderObjectChild(RenderObject child, Object? slot) {}
+
+  // @override
+  // void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
 }
