@@ -27,6 +27,7 @@ describe('vw-vh', () => {
 
     div.addEventListener('transitionend', async () => {
       await snapshot();
+      BODY.removeChild(div);
       done();
     });
 

@@ -365,8 +365,8 @@ mixin CSSTransitionMixin on RenderStyle {
 
   void cancelRunningTransition() {
     if (_propertyRunningTransition.isNotEmpty) {
-      for (String property in _propertyRunningTransition.keys) {
-        _propertyRunningTransition[property]!.cancel();
+      for (Animation animation in _propertyRunningTransition.values) {
+        animation.cancel();
       }
       _propertyRunningTransition.clear();
     }

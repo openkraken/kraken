@@ -31,6 +31,30 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
+// Compute the layout offset of renderObject to its ancestor which does not include the paint offset
+// such as scroll or transform.
+Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+  final List<RenderObject> renderers = <RenderObject>[];
+  for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
+    renderers.add(renderer);
+    assert(renderer.parent != null);
+  }
+  renderers.add(ancestor);
+
+  Offset offset = Offset(0, 0);
+  for (int index = renderers.length - 1; index > 0; index -= 1) {
+    final BoxParentData childParentData = renderers[index - 1].parentData! as BoxParentData;
+    final Offset childOffset = childParentData.offset;
+    offset += childOffset;
+    if (excludeScrollOffset) {
+      RenderBoxModel renderer = renderers[index] as RenderBoxModel;
+      offset -= Offset(renderer.scrollLeft, renderer.scrollTop);
+    }
+  }
+
+  return offset;
+}
+
 /// Modified from Flutter rendering/box.dart.
 /// A mixin that provides useful default behaviors for boxes with children
 /// managed by the [ContainerRenderObjectMixin] mixin.
@@ -240,6 +264,31 @@ class RenderLayoutBox extends RenderBoxModel
         });
       }
       return _paintingOrder = children;
+    }
+  }
+
+  @override
+  void performPaint(PaintingContext context, Offset offset) {
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderBox child = paintingOrder[i];
+      if (!isPositionPlaceholder(child)) {
+
+        late DateTime childPaintStart;
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          childPaintStart = DateTime.now();
+        }
+
+        final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
+        if (child.hasSize) {
+          context.paintChild(child, childParentData.offset + offset);
+        }
+
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          DateTime childPaintEnd = DateTime.now();
+          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
+              childPaintStart.microsecondsSinceEpoch);
+        }
+      }
     }
   }
 
@@ -756,13 +805,24 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Mirror debugDoingThisLayout flag in flutter.
+  // [debugDoingThisLayout] indicate whether [performLayout] for this render object is currently running.
+  bool doingThisLayout = false;
+
   // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
   bool needsLayout = false;
 
   @override
   void markNeedsLayout() {
-    super.markNeedsLayout();
-    needsLayout = true;
+    if (doingThisLayout) {
+      // Push delay the [markNeedsLayout] after owner [PipelineOwner] finishing current [flushLayout].
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        markNeedsLayout();
+      });
+    } else {
+      needsLayout = true;
+      super.markNeedsLayout();
+    }
   }
 
   /// Mark children needs layout when drop child as Flutter did
@@ -1029,17 +1089,13 @@ class RenderBoxModel extends RenderBox
 
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
-
   Size get scrollableSize => _maxScrollableSize;
-
   set scrollableSize(Size value) {
     _maxScrollableSize = value;
   }
 
-  late Size _scrollableViewportSize;
-
+  Size _scrollableViewportSize = Size.zero;
   Size get scrollableViewportSize => _scrollableViewportSize;
-
   set scrollableViewportSize(Size value) {
     _scrollableViewportSize = value;
   }
@@ -1220,6 +1276,12 @@ class RenderBoxModel extends RenderBox
     return null;
   }
 
+  // Get the layout offset of renderObject to its ancestor which does not include the paint offset
+  // such as scroll or transform.
+  Offset getOffsetToAncestor(RenderObject ancestor) {
+    return computeOffsetToAncestor(this, ancestor);
+  }
+
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
@@ -1253,7 +1315,6 @@ class RenderBoxModel extends RenderBox
       // If the element's position is 'relative' or 'static',
       // the containing block is formed by the content edge of the nearest block container ancestor box.
       attachRenderBox(containingBlockRenderBox, renderBoxModel, after: after);
-
       if (positionType == CSSPositionType.sticky) {
         // Placeholder of sticky renderBox need to inherit offset from original renderBox,
         // so it needs to layout before original renderBox.
@@ -1402,7 +1463,7 @@ class RenderBoxModel extends RenderBox
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
+      transform: renderStyle.effectiveTransformMatrix,
       position: position,
       hitTest: (BoxHitTestResult result, Offset trasformPosition) {
         return result.addWithPaintOffset(
@@ -1525,7 +1586,7 @@ class RenderBoxModel extends RenderBox
 
   // Detach renderBox from tree.
   static void detachRenderBox(RenderObject renderBox) {
-    if (renderBox.parent == null) return;
+    if (renderBox.parent == null || !renderBox.attached) return;
 
     // Remove reference from parent.
     RenderObject? parentRenderObject = renderBox.parent as RenderObject;

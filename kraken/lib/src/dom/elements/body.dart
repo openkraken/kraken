@@ -22,4 +22,19 @@ class BodyElement extends Element {
 
     super.addEventListener(eventType, eventHandler);
   }
+
+  @override
+  void setRenderStyle(String property, String present) {
+    switch (property) {
+      // The overflow of body should apply to html.
+      // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        ownerDocument.documentElement?.setRenderStyle(property, present);
+        break;
+      default:
+        super.setRenderStyle(property, present);
+    }
+  }
 }

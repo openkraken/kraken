@@ -148,6 +148,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    doingThisLayout = true;
     if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
@@ -204,6 +205,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
           startTime:
               DateTime.now().microsecondsSinceEpoch - childLayoutDuration);
     }
+    doingThisLayout = false;
   }
 
   @override

@@ -503,6 +503,7 @@ class RenderFlexLayout extends RenderLayoutBox {
 
   @override
   void performLayout() {
+    doingThisLayout = true;
     if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
       PerformanceTiming.instance()
@@ -523,6 +524,7 @@ class RenderFlexLayout extends RenderLayoutBox {
       PerformanceTiming.instance().mark(PERF_FLEX_LAYOUT_END,
           uniqueId: hashCode, startTime: amendEndTime);
     }
+    doingThisLayout = false;
   }
 
   void _doPerformLayout() {
@@ -1611,8 +1613,7 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           // Add offset of transform.
-          final Matrix4 transform = child.getEffectiveTransform();
-          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
+          final Offset? transformOffset = child.renderStyle.effectiveTransformOffset;
           if (transformOffset != null) {
             childOffsetX += transformOffset.dx;
             childOffsetY += transformOffset.dy;
@@ -2329,28 +2330,6 @@ class RenderFlexLayout extends RenderLayoutBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, {Offset? position}) {
     return defaultHitTestChildren(result, position: position);
-  }
-
-  @override
-  void performPaint(PaintingContext context, Offset offset) {
-    for (int i = 0; i < paintingOrder.length; i++) {
-      RenderObject child = paintingOrder[i];
-      // Don't paint placeholder of positioned element.
-      if (child is! RenderPositionPlaceholder) {
-        late DateTime childPaintStart;
-        if (kProfileMode && PerformanceTiming.enabled()) {
-          childPaintStart = DateTime.now();
-        }
-        final RenderLayoutParentData childParentData =
-            child.parentData as RenderLayoutParentData;
-        context.paintChild(child, childParentData.offset + offset);
-        if (kProfileMode && PerformanceTiming.enabled()) {
-          DateTime childPaintEnd = DateTime.now();
-          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
-              childPaintStart.microsecondsSinceEpoch);
-        }
-      }
-    }
   }
 
   @override

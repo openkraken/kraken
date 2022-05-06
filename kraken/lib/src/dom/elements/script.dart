@@ -21,40 +21,38 @@ const String _MIME_APPLICATION_JAVASCRIPT = 'application/javascript';
 const String _MIME_X_APPLICATION_JAVASCRIPT = 'application/x-javascript';
 const String _JAVASCRIPT_MODULE = 'module';
 
+typedef ScriptExecution = void Function(bool async);
+
 class ScriptRunner {
   ScriptRunner(Document document, int contextId) : _document = document, _contextId = contextId;
   final Document _document;
   final int _contextId;
 
-  final List<KrakenBundle> _scriptsToExecute = [];
+  final List<ScriptExecution> _syncScriptTasks = [];
+  final List<ScriptExecution> _asyncScriptTasks = [];
 
-  void _executeScripts() async {
-    while (_scriptsToExecute.isNotEmpty) {
-      KrakenBundle bundle = _scriptsToExecute.first;
-
-      // If bundle is not resolved, should wait for it resolve to prevent the next script running.
-      if (!bundle.isResolved) break;
-
-      // Evaluate bundle.
-      if (bundle.isJavascript) {
-        final String contentInString = await resolveStringFromData(bundle.data!);
-        evaluateScripts(_contextId, contentInString, url: bundle.url);
-      } else if (bundle.isBytecode) {
-        evaluateQuickjsByteCode(_contextId, bundle.data!);
-      } else {
-        throw FlutterError('Unknown type for <script> to execute. $url');
-      }
-
-      _scriptsToExecute.remove(bundle);
-
-      bundle.dispose();
-
-      // Decrement load event delay count after eval.
-      _document.decrementLoadEventDelayCount();
+  static void _evaluateScriptBundle(int contextId, KrakenBundle bundle, { bool async = false }) async {
+    // Evaluate bundle.
+    if (bundle.isJavascript) {
+      final String contentInString = await resolveStringFromData(bundle.data!, preferSync: !async);
+      evaluateScripts(contextId, contentInString, url: bundle.url);
+    } else if (bundle.isBytecode) {
+      evaluateQuickjsByteCode(contextId, bundle.data!);
+    } else {
+      throw FlutterError('Unknown type for <script> to execute. $url');
     }
   }
 
-  void queueScriptForExecution(ScriptElement element) async {
+  void _execute(List<ScriptExecution> tasks, { bool async = false }) {
+    List<ScriptExecution> executingTasks = [...tasks];
+    tasks.clear();
+
+    for (ScriptExecution task in executingTasks) {
+      task(async);
+    }
+  }
+
+  void _queueScriptForExecution(ScriptElement element) async {
     // Increment load event delay count before eval.
     _document.incrementLoadEventDelayCount();
 
@@ -63,8 +61,35 @@ class ScriptRunner {
     // Obtain bundle.
     KrakenBundle bundle = KrakenBundle.fromUrl(url);
 
-    _scriptsToExecute.add(bundle);
+    // The bundle execution task.
+    void task(bool async) {
+      // If bundle is not resolved, should wait for it resolve to prevent the next script running.
+      if (!bundle.isResolved) return;
 
+      try {
+        _evaluateScriptBundle(_contextId, bundle, async: async);
+      } catch (err, stack) {
+        debugPrint('$err\n$stack');
+        bundle.dispose();
+        _document.decrementLoadEventDelayCount();
+        rethrow;
+      }
+
+      bundle.dispose();
+
+      // Decrement load event delay count after eval.
+      _document.decrementLoadEventDelayCount();
+    }
+
+    // @TODO: Differ async and defer.
+    final bool shouldAsync = element.async || element.defer;
+    if (shouldAsync) {
+      _asyncScriptTasks.add(task);
+    } else {
+      _syncScriptTasks.add(task);
+    }
+
+    // Script loading phrase.
     try {
       // Increment count when request.
       _document.incrementRequestCount();
@@ -74,19 +99,41 @@ class ScriptRunner {
 
       // Decrement count when response.
       _document.decrementRequestCount();
-
-      _executeScripts();
-
-      // Successful load.
-      Timer.run(() {
-        element.dispatchEvent(Event(EVENT_LOAD));
-      });
     } catch (e, st) {
-      // An error occurred.
+      // A load error occurred.
       debugPrint('Failed to load script: $url, reason: $e\n$st');
       Timer.run(() {
         element.dispatchEvent(Event(EVENT_ERROR));
       });
+      _document.decrementLoadEventDelayCount();
+      return;
+    }
+
+    // Script executing phrase.
+    if (shouldAsync) {
+      // @TODO: Use requestIdleCallback
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        try {
+          _execute(_asyncScriptTasks, async: true);
+        } catch (error, stack) {
+          debugPrint('$error\n$stack');
+        } finally {
+          Timer.run(() {
+            element.dispatchEvent(Event(EVENT_LOAD));
+          });
+        }
+      });
+    } else {
+      try {
+        _execute(_syncScriptTasks, async: false);
+      } catch (error, stack) {
+        debugPrint('$error\n$stack');
+      } finally {
+        // Always emit load event.
+        Timer.run(() {
+          element.dispatchEvent(Event(EVENT_LOAD));
+        });
+      }
     }
   }
 }
@@ -149,7 +196,6 @@ class ScriptElement extends Element {
     // Set src will not reflect to attribute src.
   }
 
-  // @TODO: implement async.
   bool get async => getAttribute('async') != null;
   set async(bool value) {
     if (value) {
@@ -159,7 +205,6 @@ class ScriptElement extends Element {
     }
   }
 
-  // @TODO: implement defer.
   bool get defer => getAttribute('defer') != null;
   set defer(bool value) {
     if (value) {
@@ -205,7 +250,7 @@ class ScriptElement extends Element {
             || _type == _JAVASCRIPT_MODULE
     )) {
       // Add bundle to scripts queue.
-      ownerDocument.scriptRunner.queueScriptForExecution(this);
+      ownerDocument.scriptRunner._queueScriptForExecution(this);
 
       SchedulerBinding.instance!.scheduleFrame();
     }

@@ -3,7 +3,6 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/widget.dart';
@@ -14,6 +13,11 @@ enum NodeType {
   COMMENT_NODE,
   DOCUMENT_NODE,
   DOCUMENT_FRAGMENT_NODE,
+}
+
+enum RenderObjectManagerType {
+  FLUTTER_ELEMENT,
+  KRAKEN_NODE
 }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
@@ -97,18 +101,13 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     return null;
   }
 
-  List<Element> get children {
-    List<Element> _children = [];
-    for (var child in childNodes) {
-      if (child is Element) _children.add(child);
-    }
-    return _children;
-  }
-
   Node(this.nodeType, [BindingContext? context]) : super(context);
 
   // If node is on the tree, the root parent is body.
   bool get isConnected {
+    // If renderer is attached, which means node must been connected.
+    if (isRendererAttached) return true;
+
     Node parent = this;
     while (parent.parentNode != null) {
       parent = parent.parentNode!;
@@ -144,7 +143,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Unmount referenced render object.
-  void unmountRenderObject({ bool deep = false}) {}
+  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {}
 
   /// Release any resources held by this node.
   @override
@@ -161,22 +160,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void willAttachRenderer() {}
 
   @override
-  @mustCallSuper
-  void didAttachRenderer() {
-    // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
-    if (renderer is RenderBoxModel) {
-      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
-    }
-  }
+  void didAttachRenderer() {}
 
   @override
-  @mustCallSuper
-  void willDetachRenderer() {
-    // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
-    if (renderer is RenderBoxModel) {
-      (renderer as RenderBoxModel).markAdjacentRenderParagraphNeedsLayout();
-    }
-  }
+  void willDetachRenderer() {}
 
   @override
   void didDetachRenderer() {}
@@ -223,7 +210,6 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @mustCallSuper
   Node removeChild(Node child) {
-
     // Not remove node type which is not present in RenderObject tree such as Comment
     // Only append node types which is visible in RenderObject tree
     // Only remove childNode when it has parent
@@ -306,6 +292,9 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
 
   @override
   EventTarget? get parentEventTarget => parentNode;
+
+  // Whether Kraken Node need to manage render object.
+  RenderObjectManagerType get renderObjectManagerType => RenderObjectManagerType.KRAKEN_NODE;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

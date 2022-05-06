@@ -143,8 +143,7 @@ describe('block-replaced', () => {
     await snapshot(0.1);
   });
 
-  // @TODO: Inline replaced element not stretch according to intrinsic ratio.
-  xit('height-003', async () => {
+  it('height-003', async () => {
     let p;
     let div;
     p = createElement(
@@ -204,8 +203,9 @@ describe('block-replaced', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
   it('height-004-ref', async () => {
     let p;
     let div;
@@ -920,6 +920,39 @@ describe('block-replaced', () => {
     );
     BODY.appendChild(p);
     BODY.appendChild(div1);
+
+    await snapshot(0.1);
+  });
+
+  it('width and height not work for non replaced element of display inline', async () => {
+    let div;
+
+    div = createElement('div', {
+      style: {
+        display: 'inline',
+        width: '100px',
+        height: '100px',
+        background: 'yellow'
+      },
+    });
+    BODY.appendChild(div);
+
+    await snapshot();
+  });
+
+  it('width and height works for replaced element of display inline', async () => {
+    let div;
+
+    div = createElement('img', {
+      src: 'assets/blue15x15.png',
+      style: {
+        display: 'inline',
+        width: '100px',
+        height: '100px',
+        background: 'yellow'
+      },
+    });
+    BODY.appendChild(div);
 
     await snapshot(0.1);
   });
