@@ -294,10 +294,7 @@ class ImageElement extends Element {
   bool _loaded = false;
 
   void _dispatchLoadEvent() {
-    if (!_loaded) {
-      _loaded = true;
-      dispatchEvent(Event(EVENT_LOAD));
-    }
+    dispatchEvent(Event(EVENT_LOAD));
   }
 
   void _dispatchErrorEvent() {
@@ -464,6 +461,7 @@ class ImageElement extends Element {
 
     // Fire the load event at first frame come.
     if (_frameCount == 1 && !_loaded) {
+      _loaded = true;
       scheduleMicrotask(_dispatchLoadEvent);
     }
   }
