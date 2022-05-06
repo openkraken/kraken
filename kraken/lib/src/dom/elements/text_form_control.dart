@@ -130,6 +130,9 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
   void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
     _textFormControlElement._formatAndSetValue(value, userInteraction: true, cause: cause);
   }
+
+  @override
+  RenderEditable get renderEditable => _textFormControlElement.renderEditable!;
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
