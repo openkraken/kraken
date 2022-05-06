@@ -616,9 +616,6 @@ class RenderBoxModel extends RenderBox
       opacityAlwaysNeedsCompositing();
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   RenderPositionPlaceholder? renderPositionPlaceholder;
 
   bool _debugShouldPaintOverlay = false;
@@ -738,8 +735,6 @@ class RenderBoxModel extends RenderBox
 
       // Copy renderPositionHolder
       ..renderPositionPlaceholder = renderPositionPlaceholder
-
-      ..fixedChildren = fixedChildren
 
       // Copy parentData
       ..parentData = parentData;
@@ -1359,11 +1354,6 @@ class RenderBoxModel extends RenderBox
       // Call dispose method of renderBoxModel when it is detached from tree.
       super.dispose();
     });
-
-    // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.isNotEmpty) {
-      fixedChildren.clear();
-    }
 
     // Dispose scroll behavior
     disposeScrollable();

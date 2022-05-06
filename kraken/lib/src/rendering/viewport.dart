@@ -17,6 +17,9 @@ class RenderViewportBox extends RenderProxyBox
     this.controller = controller;
   }
 
+  // Cache all the fixed children of renderBoxModel of root element
+  List<RenderBoxModel> fixedChildren = [];
+
   @override
   bool get isRepaintBoundary => true;
 
