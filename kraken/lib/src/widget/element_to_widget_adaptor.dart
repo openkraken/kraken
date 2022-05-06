@@ -49,21 +49,18 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
 
   @override
   void unmount() {
-    // The function unmountRenderObject should be called before unmount,otherwise members can't be accessed.
-    (widget._krakenNode as dom.Element).unmountRenderObject();
+    // The member widget will be set to null when Flutter element unmount called, should save it.
     dom.Element ele = (widget._krakenNode as dom.Element);
-
-    // The function unmountRenderObject should be called before unmount, otherwise members can't be accessed.
-    ele.unmountRenderObject(needDispose: false, deep: true);
 
     super.unmount();
 
-    ele.renderBoxModel = null;
+    // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
+    ele.unmountRenderObject(needDispose: false, deep: true);
   }
 
-  // @override
-  // void insertRenderObjectChild(RenderObject child, Object? slot) {}
+  @override
+  void insertRenderObjectChild(RenderObject child, Object? slot) {}
 
-  // @override
-  // void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
 }

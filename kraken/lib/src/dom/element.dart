@@ -785,8 +785,9 @@ abstract class Element
     didDetachRenderer();
     if (needDispose) {
       renderBoxModel?.dispose();
-      renderBoxModel = null;
     }
+
+    renderBoxModel = null;
   }
 
   @override
