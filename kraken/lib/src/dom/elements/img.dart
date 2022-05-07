@@ -439,6 +439,8 @@ class ImageElement extends Element {
 
   // Attach image to renderImage box.
   void _attachImage() {
+    // Creates a disposable handle to this image. Holders of this [ui.Image] must dispose of
+    // the image when they no longer need to access it or draw it.
     ui.Image? clonedImage = _cachedImageInfo?.image.clone();
     if (clonedImage != null) {
       _renderImage?.image = clonedImage;
