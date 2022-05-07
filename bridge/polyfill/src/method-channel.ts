@@ -33,9 +33,11 @@ export const methodChannel = {
 };
 
 export function triggerMethodCallHandler(method: string, args: any) {
-  if (methodCallHandlers.length > 0) {
-    for (let handler of methodCallHandlers) {
-      handler(method, args);
+  setTimeout(() => {
+    if (methodCallHandlers.length > 0) {
+      for (let handler of methodCallHandlers) {
+        handler(method, args);
+      }
     }
-  }
+  }, 0);
 }
