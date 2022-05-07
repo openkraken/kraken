@@ -288,8 +288,6 @@ mixin ElementOverflowMixin on ElementBase {
         _detachScrollingContentBox();
       }
     }
-
-
   }
 
   void updateScrollingContentBox() {
