@@ -1475,7 +1475,7 @@ abstract class Element
     BoundingClientRect boundingClientRect = BoundingClientRect.zero;
     if (isRendererAttached) {
       flushLayout();
-      RenderBoxModel sizedBox = renderBoxModel!;
+      RenderBox sizedBox = renderBoxModel!;
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
@@ -1552,15 +1552,15 @@ abstract class Element
   }
 
   // Get the offset of current element relative to specified ancestor element.
-  Offset _getOffset(RenderBoxModel renderBox, { Element? ancestor }) {
+  Offset _getOffset(RenderBox renderBox, { Element? ancestor }) {
     // Need to flush layout to get correct size.
     flushLayout();
 
     // Returns (0, 0) when ancestor is null.
-    if (ancestor == null || ancestor.renderBoxModel == null) {
+    if (ancestor == null) {
       return Offset.zero;
     }
-    return renderBox.getOffsetToAncestor(ancestor.renderBoxModel!);
+    return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
   }
 
   void click() {
