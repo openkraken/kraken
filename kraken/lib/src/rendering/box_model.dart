@@ -1433,26 +1433,28 @@ class RenderBoxModel extends RenderBox
     bool isHit = result.addWithPaintTransform(
       transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
+      hitTest: (BoxHitTestResult result, Offset transformPosition) {
         return result.addWithPaintOffset(
             offset: (scrollLeft != 0.0 || scrollTop != 0.0)
                 ? Offset(-scrollLeft, -scrollTop)
                 : null,
-            position: trasformPosition,
+            position: transformPosition,
             hitTest: (BoxHitTestResult result, Offset position) {
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
-                position -= getTotalScrollOffset();
+                Offset totalScrollOffset = getTotalScrollOffset();
+                position -= totalScrollOffset;
+                transformPosition -= totalScrollOffset;
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
-              if ((clipX || clipY) && !size.contains(trasformPosition)) {
+              if ((clipX || clipY) && !size.contains(transformPosition)) {
                 return false;
               }
 
               // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
               if (hitTestChildren(result, position: position) ||
-                  hitTestSelf(trasformPosition)) {
+                  hitTestSelf(transformPosition)) {
                 result.add(BoxHitTestEntry(this, position));
                 return true;
               }
