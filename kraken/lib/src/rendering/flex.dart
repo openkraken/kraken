@@ -1785,7 +1785,8 @@ class RenderFlexLayout extends RenderLayoutBox {
           }
 
           // Add offset of transform.
-          final Offset? transformOffset = child.renderStyle.effectiveTransformOffset;
+          final Matrix4 transform = child.getEffectiveTransform();
+          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
           if (transformOffset != null) {
             childOffsetX += transformOffset.dx;
             childOffsetY += transformOffset.dy;

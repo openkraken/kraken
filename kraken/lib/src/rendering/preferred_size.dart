@@ -71,12 +71,6 @@ class RenderPositionPlaceholder extends RenderPreferredSize {
   bool hitTest(BoxHitTestResult result, {Offset? position}) {
     return false;
   }
-
-  // Get the layout offset of renderObject to its ancestor which does not include the paint offset
-  // such as scroll or transform.
-  Offset getOffsetToAncestor(RenderObject ancestor, { bool excludeScrollOffset = false }) {
-    return computeOffsetToAncestor(this, ancestor, excludeScrollOffset: excludeScrollOffset);
-  }
 }
 
 bool isPositionPlaceholder(RenderBox box) {
