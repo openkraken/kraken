@@ -1474,8 +1474,9 @@ class RenderBoxModel extends RenderBox
             hitTest: (BoxHitTestResult result, Offset position) {
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
-                position -= getTotalScrollOffset();
-                transformPosition -= getTotalScrollOffset();
+                Offset totalScrollOffset = getTotalScrollOffset();
+                position -= totalScrollOffset;
+                transformPosition -= totalScrollOffset;
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
