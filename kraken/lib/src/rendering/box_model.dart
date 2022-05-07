@@ -784,13 +784,11 @@ class RenderBoxModel extends RenderBox
     hasOverrideContentLogicalHeight = false;
   }
 
-  // Auto value for min-width which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinWidth = 0;
-
-  // Auto value for min-height which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinHeight = 0;
+  // Nominally, the smallest size a box could take that doesn’t lead to overflow that could be avoided by choosing
+  // a larger size. Formally, the size of the box when sized under a min-content constraint.
+  // https://www.w3.org/TR/css-sizing-3/#min-content
+  double minContentWidth = 0;
+  double minContentHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
   bool needsRelayout = false;
@@ -1551,8 +1549,8 @@ class RenderBoxModel extends RenderBox
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
     properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
     properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
-    if (renderStyle.intrinsicRatio != null)
-      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
+    if (renderStyle.aspectRatio != null)
+      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.aspectRatio));
 
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);

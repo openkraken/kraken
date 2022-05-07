@@ -157,14 +157,16 @@ mixin CSSSizingMixin on RenderStyle {
   }
 
   // Aspect ratio of replaced element.
-  double? _intrinsicRatio;
+  // @TODO: Currently only intrinsic aspect ratio is supported, preferred aspect ratio is not supported.
+  // https://drafts.csswg.org/css-sizing-4/#aspect-ratio
+  double? _aspectRatio;
   @override
-  double? get intrinsicRatio {
-    return _intrinsicRatio;
+  double? get aspectRatio {
+    return _aspectRatio;
   }
-  set intrinsicRatio(double? value) {
-    if (_intrinsicRatio == value) return;
-    _intrinsicRatio = value;
+  set aspectRatio(double? value) {
+    if (_aspectRatio == value) return;
+    _aspectRatio = value;
     _markSelfAndParentNeedsLayout();
   }
 
