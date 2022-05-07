@@ -766,7 +766,7 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false }) {
+  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false, bool dispose = true }) {
     // Ignore the fixed element to unmount render object.
     // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
     if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
@@ -783,7 +783,10 @@ abstract class Element
     }
 
     didDetachRenderer();
-    renderBoxModel?.dispose();
+    if (dispose) {
+      renderBoxModel?.dispose();
+    }
+
     renderBoxModel = null;
   }
 
