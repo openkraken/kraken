@@ -251,6 +251,9 @@ class KrakenViewController
     // FIXME: for break circle reference
     viewport.controller = null;
 
+    // Clear renderObjects in list when disposed to avoid memory leak.
+    viewport.fixedChildren.clear();
+
     debugDOMTreeChanged = null;
 
     _teardownObserver();

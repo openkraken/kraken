@@ -687,9 +687,6 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -1355,11 +1352,6 @@ class RenderBoxModel extends RenderBox
       // Call dispose method of renderBoxModel when it is detached from tree.
       super.dispose();
     });
-
-    // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.isNotEmpty) {
-      fixedChildren.clear();
-    }
 
     // Dispose scroll behavior
     disposeScrollable();
