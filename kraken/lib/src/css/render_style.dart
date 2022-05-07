@@ -118,9 +118,9 @@ abstract class RenderStyle {
   CSSOverflowType get overflowY;
   CSSOverflowType get effectiveOverflowX;
   CSSOverflowType get effectiveOverflowY;
-  double? get intrinsicRatio;
   double get intrinsicWidth;
   double get intrinsicHeight;
+  double? get aspectRatio;
 
   // Flex
   FlexDirection get flexDirection;
@@ -163,8 +163,8 @@ abstract class RenderStyle {
   void addRootFontRelativeProperty(String propertyName);
   void addColorRelativeProperty(String propertyName);
   String? removeAnimationProperty(String propertyName);
-  double getWidthByIntrinsicRatio();
-  double getHeightByIntrinsicRatio();
+  double getWidthByAspectRatio();
+  double getHeightByAspectRatio();
 
   // Following properties used for exposing APIs
   // for class that extends [AbstractRenderStyle].
@@ -684,9 +684,9 @@ class CSSRenderStyle
       }
     }
 
-    // Get width by intrinsic ratio for replaced element if width is auto.
-    if (logicalWidth == null && intrinsicRatio != null) {
-      logicalWidth = renderStyle.getWidthByIntrinsicRatio();
+    // Get width by aspect ratio for replaced element if width is auto.
+    if (logicalWidth == null && aspectRatio != null) {
+      logicalWidth = renderStyle.getWidthByAspectRatio();
     }
 
     // Constrain width by min-width and max-width.
@@ -775,9 +775,9 @@ class CSSRenderStyle
       }
     }
 
-    // Get height by intrinsic ratio for replaced element if height is auto.
-    if (logicalHeight == null && intrinsicRatio != null) {
-      logicalHeight = renderStyle.getHeightByIntrinsicRatio();
+    // Get height by aspect ratio for replaced element if height is auto.
+    if (logicalHeight == null && aspectRatio != null) {
+      logicalHeight = renderStyle.getHeightByAspectRatio();
     }
 
     // Constrain height by min-height and max-height.
@@ -1045,9 +1045,9 @@ class CSSRenderStyle
       - paddingBottom.computedValue;
   }
 
-  // Get height of replaced element by intrinsic ratio if height is not defined.
+  // Get height of replaced element by aspect ratio if height is not defined.
   @override
-  double getHeightByIntrinsicRatio() {
+  double getHeightByAspectRatio() {
     double contentBoxHeight;
     double borderBoxWidth = width.isAuto
       ? wrapPaddingBorderWidth(intrinsicWidth) : width.computedValue;
@@ -1076,9 +1076,9 @@ class CSSRenderStyle
     return borderBoxHeight;
   }
 
-  // Get width of replaced element by intrinsic ratio if width is not defined.
+  // Get width of replaced element by aspect ratio if width is not defined.
   @override
-  double getWidthByIntrinsicRatio() {
+  double getWidthByAspectRatio() {
     double contentBoxWidth;
 
     double borderBoxHeight = height.isAuto

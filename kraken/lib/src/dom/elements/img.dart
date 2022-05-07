@@ -250,7 +250,7 @@ class ImageElement extends Element {
     // Width calc priority: style > attr > intrinsic.
     final double borderBoxWidth = _styleWidth
       ?? _attrWidth
-      ?? renderStyle.getWidthByIntrinsicRatio();
+      ?? renderStyle.getWidthByAspectRatio();
 
     return borderBoxWidth.round();
   }
@@ -259,7 +259,7 @@ class ImageElement extends Element {
     // Height calc priority: style > attr > intrinsic.
     final double borderBoxHeight = _styleHeight
       ?? _attrHeight
-      ?? renderStyle.getHeightByIntrinsicRatio();
+      ?? renderStyle.getHeightByAspectRatio();
 
     return borderBoxHeight.round();
   }
@@ -325,9 +325,9 @@ class ImageElement extends Element {
     _renderImage?.height = height.toDouble();
 
     if (naturalWidth == 0.0 || naturalHeight == 0.0) {
-      renderStyle.intrinsicRatio = null;
+      renderStyle.aspectRatio = null;
     } else {
-      renderStyle.intrinsicRatio = naturalHeight / naturalWidth;
+      renderStyle.aspectRatio = naturalWidth / naturalHeight;
     }
   }
 
