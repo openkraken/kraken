@@ -98,6 +98,9 @@ class RenderViewportBox extends RenderProxyBox
 
   @override
   void dispose() {
+    if (child != null) {
+      dropChild(child!);
+    }
     fixedChildren.clear();
     super.dispose();
   }
