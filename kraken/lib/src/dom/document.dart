@@ -15,7 +15,7 @@ import 'package:kraken/widget.dart';
 class Document extends Node {
   final KrakenController controller;
   final AnimationTimeline animationTimeline = AnimationTimeline();
-  final RenderViewportBox _viewport;
+  RenderViewportBox? _viewport;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
@@ -51,7 +51,7 @@ class Document extends Node {
   String get nodeName => '#document';
 
   @override
-  RenderBox? get renderer => _disposed ? null : _viewport;
+  RenderBox? get renderer => _viewport;
 
   // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L770
   bool parsing = false;
@@ -92,17 +92,19 @@ class Document extends Node {
 
     RenderViewportBox? viewport = _viewport;
     // When document is disposed, viewport is null.
-    if (element != null) {
-      element.attachTo(this);
-      // Should scrollable.
-      element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
-      element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
-      // Init with viewport size.
-      element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
-      element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
-    } else {
-      // Detach document element.
-      viewport.child = null;
+    if (viewport != null) {
+      if (element != null) {
+        element.attachTo(this);
+        // Should scrollable.
+        element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
+        element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
+        // Init with viewport size.
+        element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
+        element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
+      } else {
+        // Detach document element.
+        viewport.child = null;
+      }
     }
 
     _documentElement = element;
@@ -188,13 +190,10 @@ class Document extends Node {
     documentElement?.recalculateNestedStyle();
   }
 
-  bool _disposed = false;
-
   @override
   void dispose() {
-    _disposed = true;
-    // Clear renderObjects in list when disposed to avoid memory leak.
-    _viewport.dispose();
+    _viewport?.dispose();
+    _viewport = null;
     gestureListener = null;
     widgetDelegate = null;
     styleSheets.clear();
