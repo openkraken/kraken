@@ -6,7 +6,7 @@ describe('Document getElementsByName', () => {
   it('basic test', () => {
     const element = document.createElement('div');
     element.setAttribute('name', 'foo');
-    document.appendChild(element);
+    document.body.appendChild(element);
 
     const nodeList = document.getElementsByName('foo');
     expect(nodeList.length).toBe(1);
