@@ -499,8 +499,9 @@ abstract class Element
       renderBoxModel.clearIntersectionChangeListeners();
 
       // Remove fixed children from root when element disposed.
-      _removeFixedChild(renderBoxModel, ownerDocument.viewport!);
-
+      if (ownerDocument.viewport != null) {
+        _removeFixedChild(renderBoxModel, ownerDocument.viewport!);
+      }
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
@@ -556,7 +557,7 @@ abstract class Element
 
   // Calculate sticky status according to scroll offset and scroll direction
   void _applyStickyChildrenOffset() {
-    RenderLayoutBox? scrollContainer = (renderBoxModel as RenderLayoutBox?)!;
+    RenderLayoutBox scrollContainer = renderBoxModel as RenderLayoutBox;
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }

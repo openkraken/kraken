@@ -15,7 +15,7 @@ import 'package:kraken/widget.dart';
 class Document extends Node {
   final KrakenController controller;
   final AnimationTimeline animationTimeline = AnimationTimeline();
-  RenderViewportBox? _viewport;
+  final RenderViewportBox _viewport;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
@@ -92,8 +92,6 @@ class Document extends Node {
 
     RenderViewportBox? viewport = _viewport;
     // When document is disposed, viewport is null.
-    if (viewport == null) return;
-
     if (element != null) {
       element.attachTo(this);
       // Should scrollable.
@@ -192,7 +190,8 @@ class Document extends Node {
 
   @override
   void dispose() {
-    _viewport = null;
+    // Clear renderObjects in list when disposed to avoid memory leak.
+    _viewport.dispose();
     gestureListener = null;
     widgetDelegate = null;
     styleSheets.clear();
