@@ -51,7 +51,7 @@ class Document extends Node {
   String get nodeName => '#document';
 
   @override
-  RenderBox? get renderer => _viewport;
+  RenderBox? get renderer => _disposed ? null : _viewport;
 
   // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L770
   bool parsing = false;
@@ -188,8 +188,11 @@ class Document extends Node {
     documentElement?.recalculateNestedStyle();
   }
 
+  bool _disposed = false;
+
   @override
   void dispose() {
+    _disposed = true;
     // Clear renderObjects in list when disposed to avoid memory leak.
     _viewport.dispose();
     gestureListener = null;
