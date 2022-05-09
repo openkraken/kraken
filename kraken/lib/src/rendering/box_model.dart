@@ -687,9 +687,6 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -760,13 +757,11 @@ class RenderBoxModel extends RenderBox
     hasOverrideContentLogicalHeight = false;
   }
 
-  // Auto value for min-width which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinWidth = 0;
-
-  // Auto value for min-height which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinHeight = 0;
+  // Nominally, the smallest size a box could take that doesn’t lead to overflow that could be avoided by choosing
+  // a larger size. Formally, the size of the box when sized under a min-content constraint.
+  // https://www.w3.org/TR/css-sizing-3/#min-content
+  double minContentWidth = 0;
+  double minContentHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
   bool needsRelayout = false;
@@ -1358,11 +1353,6 @@ class RenderBoxModel extends RenderBox
       super.dispose();
     });
 
-    // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.isNotEmpty) {
-      fixedChildren.clear();
-    }
-
     // Dispose scroll behavior
     disposeScrollable();
 
@@ -1435,26 +1425,28 @@ class RenderBoxModel extends RenderBox
     bool isHit = result.addWithPaintTransform(
       transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
+      hitTest: (BoxHitTestResult result, Offset transformPosition) {
         return result.addWithPaintOffset(
             offset: (scrollLeft != 0.0 || scrollTop != 0.0)
                 ? Offset(-scrollLeft, -scrollTop)
                 : null,
-            position: trasformPosition,
+            position: transformPosition,
             hitTest: (BoxHitTestResult result, Offset position) {
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
-                position -= getTotalScrollOffset();
+                Offset totalScrollOffset = getTotalScrollOffset();
+                position -= totalScrollOffset;
+                transformPosition -= totalScrollOffset;
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
-              if ((clipX || clipY) && !size.contains(trasformPosition)) {
+              if ((clipX || clipY) && !size.contains(transformPosition)) {
                 return false;
               }
 
               // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
               if (hitTestChildren(result, position: position) ||
-                  hitTestSelf(trasformPosition)) {
+                  hitTestSelf(transformPosition)) {
                 result.add(BoxHitTestEntry(this, position));
                 return true;
               }
@@ -1521,8 +1513,8 @@ class RenderBoxModel extends RenderBox
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
     properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
     properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
-    if (renderStyle.intrinsicRatio != null)
-      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
+    if (renderStyle.aspectRatio != null)
+      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.aspectRatio));
 
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);

@@ -49,10 +49,16 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
 
   @override
   void unmount() {
+    // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
+    dom.Element element = (widget._krakenNode as dom.Element);
+    element.unmountRenderObject(dispose: false);
+
     super.unmount();
-    (widget._krakenNode as dom.Element).unmountRenderObject();
   }
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {}
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
 }
