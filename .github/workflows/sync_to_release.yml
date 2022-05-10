@@ -5,18 +5,18 @@ on:
     branches:
       - main
 
-# Sync main code to release/flutter-2.2.x branch.
+# Sync main code to release/flutter-2.8.x branch.
 jobs:
-  flutter_2_5_x:
+  flutter_2_8_x:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
       with:
-        ref: 'release/flutter-2.5.x'
+        ref: 'release/flutter-2.8.x'
     - name: Opening pull request
       uses: tretuna/sync-branches@1.2.0
       with:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         FROM_BRANCH: 'main'
-        TO_BRANCH: 'release/flutter-2.5.x'
+        TO_BRANCH: 'release/flutter-2.8.x'
