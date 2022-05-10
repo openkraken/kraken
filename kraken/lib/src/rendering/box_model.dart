@@ -31,9 +31,9 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-// Compute the layout offset of renderObject to its ancestor which does not include the paint offset
+// Compute the transform of renderObject to its ancestor which does not include the paint offset
 // such as scroll or transform.
-Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+Matrix4 computeTransformToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
   final List<RenderObject> renderers = <RenderObject>[];
   for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
     renderers.add(renderer);
@@ -41,18 +41,16 @@ Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bo
   }
   renderers.add(ancestor);
 
-  Offset offset = Offset(0, 0);
+  final Matrix4 transform = Matrix4.identity();
   for (int index = renderers.length - 1; index > 0; index -= 1) {
-    final BoxParentData childParentData = renderers[index - 1].parentData! as BoxParentData;
-    final Offset childOffset = childParentData.offset;
-    offset += childOffset;
-    if (excludeScrollOffset) {
-      RenderBoxModel renderer = renderers[index] as RenderBoxModel;
-      offset -= Offset(renderer.scrollLeft, renderer.scrollTop);
+    if (renderers[index] is RenderBoxModel) {
+      (renderers[index] as RenderBoxModel).applyLayoutTransform(renderers[index - 1], transform, excludeScrollOffset);
+    } else {
+      renderers[index].applyPaintTransform(renderers[index - 1], transform);
     }
   }
 
-  return offset;
+  return transform;
 }
 
 /// Modified from Flutter rendering/box.dart.
@@ -1087,6 +1085,17 @@ class RenderBoxModel extends RenderBox
     applyEffectiveTransform(child, transform);
   }
 
+  void applyLayoutTransform(RenderObject child, Matrix4 transform, bool excludeScrollOffset) {
+    assert(child.parent == this);
+    assert(child.parentData is BoxParentData);
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    Offset offset = childParentData.offset;
+    if (excludeScrollOffset) {
+      offset -= Offset(scrollLeft, scrollTop);
+    }
+    transform.translate(offset.dx, offset.dy);
+  }
+
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
   Size get scrollableSize => _maxScrollableSize;
@@ -1278,8 +1287,8 @@ class RenderBoxModel extends RenderBox
 
   // Get the layout offset of renderObject to its ancestor which does not include the paint offset
   // such as scroll or transform.
-  Offset getOffsetToAncestor(RenderObject ancestor) {
-    return computeOffsetToAncestor(this, ancestor);
+  Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+    return MatrixUtils.transformPoint(computeTransformToAncestor(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
   }
 
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {

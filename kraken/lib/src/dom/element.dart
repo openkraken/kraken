@@ -1560,7 +1560,7 @@ abstract class Element
     if (ancestor == null || ancestor.renderBoxModel == null) {
       return Offset.zero;
     }
-    return renderBox.getOffsetToAncestor(ancestor.renderBoxModel!);
+    return renderBox.getOffsetToAncestor(Offset.zero, ancestor.renderBoxModel!);
   }
 
   void click() {
