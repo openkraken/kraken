@@ -37,7 +37,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     if( borderRadius != null
       && this is RenderReplaced
-      && renderStyle.intrinsicRatio != null
+      && renderStyle.aspectRatio != null
     ) {
       return true;
     }
@@ -74,7 +74,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     if( borderRadius != null
       && this is RenderReplaced
-      && renderStyle.intrinsicRatio != null
+      && renderStyle.aspectRatio != null
     ) {
       return true;
     }

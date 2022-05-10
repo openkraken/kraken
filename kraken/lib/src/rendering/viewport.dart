@@ -17,6 +17,9 @@ class RenderViewportBox extends RenderProxyBox
     this.controller = controller;
   }
 
+  // Cache all the fixed children of renderBoxModel of root element.
+  List<RenderBoxModel> fixedChildren = [];
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -91,5 +94,14 @@ class RenderViewportBox extends RenderProxyBox
     if (child != null) {
       context.paintChild(child!, offset);
     }
+  }
+
+  @override
+  void dispose() {
+    if (child != null) {
+      dropChild(child!);
+    }
+    fixedChildren.clear();
+    super.dispose();
   }
 }

@@ -499,8 +499,9 @@ abstract class Element
       renderBoxModel.clearIntersectionChangeListeners();
 
       // Remove fixed children from root when element disposed.
-      _removeFixedChild(renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
-
+      if (ownerDocument.viewport != null) {
+        _removeFixedChild(renderBoxModel, ownerDocument.viewport!);
+      }
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
@@ -540,10 +541,10 @@ abstract class Element
   /// Normally element in scroll box will not repaint on scroll because of repaint boundary optimization
   /// So it needs to manually mark element needs paint and add scroll offset in paint stage
   void _applyFixedChildrenOffset(double scrollOffset, AxisDirection axisDirection) {
-    // Only root element has fixed children
-    if (this == ownerDocument.documentElement && renderBoxModel != null) {
-      RenderBoxModel layoutBox = (renderBoxModel as RenderLayoutBox).renderScrollingContent ?? renderBoxModel!;
-      for (RenderBoxModel child in layoutBox.fixedChildren) {
+    RenderViewportBox? viewport = ownerDocument.viewport;
+    // Only root element has fixed children.
+    if (this == ownerDocument.documentElement && viewport != null) {
+      for (RenderBoxModel child in viewport.fixedChildren) {
         // Save scrolling offset for paint
         if (axisDirection == AxisDirection.down) {
           child.scrollingOffsetY = scrollOffset;
@@ -556,7 +557,7 @@ abstract class Element
 
   // Calculate sticky status according to scroll offset and scroll direction
   void _applyStickyChildrenOffset() {
-    RenderLayoutBox? scrollContainer = (renderBoxModel as RenderLayoutBox?)!;
+    RenderLayoutBox scrollContainer = renderBoxModel as RenderLayoutBox;
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }
@@ -646,7 +647,7 @@ abstract class Element
       RenderBoxModel _renderBoxModel = renderBoxModel!;
       // Remove fixed children before convert to non repaint boundary renderObject
       if (currentPosition != CSSPositionType.fixed) {
-        _removeFixedChild(_renderBoxModel, ownerDocument.documentElement!._renderLayoutBox!);
+        _removeFixedChild(_renderBoxModel, ownerDocument.viewport!);
       }
 
       // Find the renderBox of its containing block.
@@ -665,7 +666,7 @@ abstract class Element
 
       // Add fixed children after convert to repaint boundary renderObject.
       if (currentPosition == CSSPositionType.fixed) {
-        _addFixedChild(renderBoxModel!, ownerDocument.documentElement!._renderLayoutBox!);
+        _addFixedChild(renderBoxModel!, ownerDocument.viewport!);
       }
     }
 
@@ -766,7 +767,7 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false }) {
+  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false, bool dispose = true }) {
     // Ignore the fixed element to unmount render object.
     // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
     if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
@@ -783,7 +784,10 @@ abstract class Element
     }
 
     didDetachRenderer();
-    renderBoxModel?.dispose();
+    if (dispose) {
+      renderBoxModel?.dispose();
+    }
+
     renderBoxModel = null;
   }
 
@@ -1656,18 +1660,16 @@ Element? _findContainingBlock(Element child, Element viewportElement) {
 }
 
 // Cache fixed renderObject to root element
-void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
-  List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
+void _addFixedChild(RenderBoxModel childRenderBoxModel, RenderViewportBox viewport) {
+  List<RenderBoxModel> fixedChildren = viewport.fixedChildren;
   if (!fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.add(childRenderBoxModel);
   }
 }
 
 // Remove non fixed renderObject from root element
-void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderLayoutBox rootRenderLayoutBox) {
-  rootRenderLayoutBox = rootRenderLayoutBox.renderScrollingContent ?? rootRenderLayoutBox;
-  List<RenderBoxModel> fixedChildren = rootRenderLayoutBox.fixedChildren;
+void _removeFixedChild(RenderBoxModel childRenderBoxModel, RenderViewportBox viewport) {
+  List<RenderBoxModel> fixedChildren = viewport.fixedChildren;
   if (fixedChildren.contains(childRenderBoxModel)) {
     fixedChildren.remove(childRenderBoxModel);
   }

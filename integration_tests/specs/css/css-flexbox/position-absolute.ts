@@ -289,7 +289,7 @@ describe('flexbox-position-absolute', () => {
     await snapshot();
   });
 
-  it('positioned image of no left and right should reposition when its size changed', async (done) => {  
+  it('positioned image of no left and right should reposition when its size changed', async (done) => {
     const imageURL = 'assets/100x100-green.png';
     const img = document.createElement('img');
     img.style.position = 'absolute';
@@ -302,7 +302,7 @@ describe('flexbox-position-absolute', () => {
       imageURL
     );
     img.addEventListener('load', async () => {
-      await snapshot();
+      await snapshot(0.5);
       done();
     });
 

@@ -131,17 +131,20 @@ mixin ElementOverflowMixin on ElementBase {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
       switch(overflowX) {
-        case CSSOverflowType.hidden:
-          // @TODO: Content of overflow hidden can be scrolled programmatically.
-          _scrollableX = null;
-          break;
         case CSSOverflowType.clip:
           _scrollableX = null;
           break;
+        case CSSOverflowType.hidden:
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
-          _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
-          renderBoxModel.scrollOffsetX = _scrollableX!.position;
+          // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
+          if (_scrollableX == null) {
+            _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+            renderBoxModel.scrollOffsetX = _scrollableX!.position;
+          }
+          // Reset canDrag by overflow because hidden is can't drag.
+          bool canDrag = overflowX != CSSOverflowType.hidden;
+          _scrollableX!.setCanDrag(canDrag);
           break;
         case CSSOverflowType.visible:
         default:
@@ -163,17 +166,20 @@ mixin ElementOverflowMixin on ElementBase {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
       switch(overflowY) {
-        case CSSOverflowType.hidden:
-          // @TODO: Content of overflow hidden can be scrolled programmatically.
-          _scrollableY = null;
-          break;
         case CSSOverflowType.clip:
           _scrollableY = null;
           break;
+        case CSSOverflowType.hidden:
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
-          _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
-          renderBoxModel.scrollOffsetY = _scrollableY!.position;
+          // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
+          if (_scrollableY == null) {
+            _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+            renderBoxModel.scrollOffsetY = _scrollableY!.position;
+          }
+          // Reset canDrag by overflow because hidden is can't drag.
+          bool canDrag = overflowY != CSSOverflowType.hidden;
+          _scrollableY!.setCanDrag(canDrag);
           break;
         case CSSOverflowType.visible:
         default:

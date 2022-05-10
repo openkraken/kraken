@@ -1125,9 +1125,7 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
 
-    if (devToolsService != null) {
-      devToolsService!.dispose();
-    }
+    devToolsService?.dispose();
   }
 
   String get origin => Uri.parse(url).origin;

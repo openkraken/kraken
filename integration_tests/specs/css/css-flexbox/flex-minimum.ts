@@ -927,8 +927,7 @@ describe('flex-minimum', () => {
     await snapshot(0.1);
   })
 
-  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
-  xit("width-flex-items-005", async () => {
+  it("width-flex-items-005", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -989,6 +988,42 @@ describe('flex-minimum', () => {
 
     await snapshot(0.1);
   })
+
+  it("width-flex-items-005-2", async () => {
+    let constrainedFlex;
+
+    constrainedFlex = createElement(
+      'div',
+      {
+        xmlns: 'http://www.w3.org/1999/xhtml',
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          width: '10px',
+        },
+      },
+      [
+        (createElement('img', {
+          id: 'test-flex-item-overlapping-green',
+          src: 'assets/60x60-green.png',
+          style: {
+            width: '100px',
+          },
+        })),
+        (createElement('img', {
+          id: 'test-flex-item-overlapping-green',
+          src: 'assets/100x100-blue-and-orange.png',
+          style: {
+            width: '130px',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(constrainedFlex);
+
+    await snapshot(0.1);
+  });
+
   it("width-flex-items-006", async () => {
     let p;
     let referenceOverlappedRed;
@@ -1175,8 +1210,7 @@ describe('flex-minimum', () => {
     await snapshot(0.1);
   })
 
-  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
-  xit("width-flex-items-009", async () => {
+  it("width-flex-items-009", async () => {
     let p;
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
@@ -1241,6 +1275,140 @@ describe('flex-minimum', () => {
 
     await snapshot(0.1);
   })
+
+  it("width-flex-items-009-2", async () => {
+    let p;
+    let referenceOverlappedRed;
+    let testFlexItemOverlappingGreen;
+    let constrainedFlex;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`.`),
+      ]
+    );
+    referenceOverlappedRed = createElement('div', {
+      id: 'reference-overlapped-red',
+      style: {
+        position: 'absolute',
+        'background-color': 'red',
+        width: '100px',
+        height: '100px',
+        'z-index': '-1',
+        'box-sizing': 'border-box',
+      },
+    });
+    constrainedFlex = createElement(
+      'div',
+      {
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          width: '10px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (testFlexItemOverlappingGreen = createElement('img', {
+          id: 'test-flex-item-overlapping-green',
+          src: 'assets/60x60-green.png',
+          style: {
+            'max-height': '30px',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(referenceOverlappedRed);
+    BODY.appendChild(constrainedFlex);
+
+
+    await snapshot(0.1);
+  })
+
+  it("width-flex-items-009-3", async () => {
+    let p;
+    let referenceOverlappedRed;
+    let testFlexItemOverlappingGreen;
+    let constrainedFlex;
+    p = createElement(
+      'p',
+      {
+        style: {
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createText(`Test passes if there is a filled green square and `),
+        createElement(
+          'strong',
+          {
+            style: {
+              'box-sizing': 'border-box',
+            },
+          },
+          [createText(`no red`)]
+        ),
+        createText(`.`),
+      ]
+    );
+    referenceOverlappedRed = createElement('div', {
+      id: 'reference-overlapped-red',
+      style: {
+        position: 'absolute',
+        'background-color': 'red',
+        width: '100px',
+        height: '100px',
+        'z-index': '-1',
+        'box-sizing': 'border-box',
+      },
+    });
+    constrainedFlex = createElement(
+      'div',
+      {
+        id: 'constrained-flex',
+        style: {
+          display: 'flex',
+          width: '10px',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        (testFlexItemOverlappingGreen = createElement('img', {
+          id: 'test-flex-item-overlapping-green',
+          src: 'assets/60x60-green.png',
+          style: {
+            'min-height': '100px',
+            'max-width': '80px',
+            'box-sizing': 'border-box',
+          },
+        })),
+      ]
+    );
+    BODY.appendChild(p);
+    BODY.appendChild(referenceOverlappedRed);
+    BODY.appendChild(constrainedFlex);
+
+
+    await snapshot(0.1);
+  })
+
   it("width-flex-items-010", async () => {
     let p;
     let referenceOverlappedRed;
@@ -1405,8 +1573,7 @@ describe('flex-minimum', () => {
     await snapshot(0.1);
   })
 
-  // @TODO: Image intrinsic ratio expand rule in flexbox is wrong.
-  xit("width-flex-items-013", async () => {
+  it("width-flex-items-013", async () => {
     let p;
     let referenceOverlappedRed;
     let div;

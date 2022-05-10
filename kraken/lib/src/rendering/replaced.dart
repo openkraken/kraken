@@ -31,7 +31,14 @@ class RenderReplaced extends RenderBoxModel
   // Whether the renderObject of replaced element is in lazy rendering.
   // Set true when the renderObject is not rendered yet and set false after
   // the renderObject is rendered.
-  bool isInLazyRendering = false;
+  bool _isInLazyRendering = false;
+  bool get isInLazyRendering => _isInLazyRendering;
+  set isInLazyRendering(bool value) {
+    if (value != _isInLazyRendering) {
+      _isInLazyRendering = value;
+      markNeedsPaint();
+    }
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -75,8 +82,8 @@ class RenderReplaced extends RenderBoxModel
       setMaxScrollableSize(childSize);
       size = getBoxSize(childSize);
 
-      autoMinWidth = size.width;
-      autoMinHeight = size.height;
+      minContentWidth = renderStyle.intrinsicWidth;
+      minContentHeight = renderStyle.intrinsicHeight;
 
       didLayout();
     } else {
@@ -119,18 +126,18 @@ class RenderReplaced extends RenderBoxModel
     return marginTop + boxSize!.height + marginBottom;
   }
 
+  // Should not paint when renderObject is in lazy loading and not rendered yet.
+  @override
+  bool get shouldPaint => !_isInLazyRendering && super.shouldPaint;
+
   /// This class mixin [RenderProxyBoxMixin], which has its' own paint method,
   /// override it to layout box model paint.
   @override
   void paint(PaintingContext context, Offset offset) {
-    // Should not paint other style such as box decoration when renderObject
-    // is in lazy loading and not rendered yet.
-    if (isInLazyRendering) {
-      paintIntersectionObserver(context, offset, performPaint);
-      return;
-    }
-
-    if (shouldPaint) {
+    // In lazy rendering, only paint intersection observer for triggering intersection change callback.
+    if (_isInLazyRendering) {
+      paintIntersectionObserver(context, offset, paintNothing);
+    } else if (shouldPaint) {
       paintBoxModel(context, offset);
     }
   }
