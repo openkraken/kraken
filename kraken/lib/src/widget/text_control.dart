@@ -56,7 +56,7 @@ class KrakenTextControl extends StatefulWidget {
   _KrakenTextControlState createState() => _KrakenTextControlState();
 }
 
-class _KrakenTextControlState extends State<KrakenTextControl> {
+class _KrakenTextControlState extends State<KrakenTextControl> with _FindElementFromContextMixin {
   @override
   void initState() {
     super.initState();
@@ -109,57 +109,69 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
       NextFocusIntent: CallbackAction<NextFocusIntent>(onInvoke: _handleNextFocus),
       PreviousFocusIntent: CallbackAction<PreviousFocusIntent>(onInvoke: _handlePreviousFocus),
 
-      // Action to delete text.
-      DeleteTextIntent: CallbackAction<DeleteTextIntent>(onInvoke: _handleDeleteText),
-      DeleteByWordTextIntent: CallbackAction<DeleteByWordTextIntent>(onInvoke: _handleDeleteByWordText),
-      DeleteByLineTextIntent: CallbackAction<DeleteByLineTextIntent>(onInvoke: _handleDeleteByLineText),
-      DeleteForwardTextIntent: CallbackAction<DeleteForwardTextIntent>(onInvoke: _handleDeleteForwardText),
-      DeleteForwardByWordTextIntent: CallbackAction<DeleteForwardByWordTextIntent>(onInvoke: _handleDeleteForwardByWordText),
-      DeleteForwardByLineTextIntent: CallbackAction<DeleteForwardByLineTextIntent>(onInvoke: _handleDeleteForwardByLineText),
+      DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
+      ReplaceTextIntent: _replaceTextAction,
+      UpdateSelectionIntent: _updateSelectionAction,
+      DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
 
-      // Action of hot keys control/command + (X, C, V, A).
-      SelectAllTextIntent: CallbackAction<SelectAllTextIntent>(onInvoke: _handleSelectAllText),
-      CopySelectionTextIntent: CallbackAction<CopySelectionTextIntent>(onInvoke: _handleCopySelectionText),
-      CutSelectionTextIntent: CallbackAction<CutSelectionTextIntent>(onInvoke: _handleCutSelectionText),
-      PasteTextIntent: CallbackAction<PasteTextIntent>(onInvoke: _handlePasteText),
-
-      // Action of mouse move hotkeys.
-      MoveSelectionRightByLineTextIntent: CallbackAction<MoveSelectionRightByLineTextIntent>(onInvoke: _handleMoveSelectionRightByLineText),
-      MoveSelectionLeftByLineTextIntent: CallbackAction<MoveSelectionLeftByLineTextIntent>(onInvoke: _handleMoveSelectionLeftByLineText),
-      MoveSelectionRightByWordTextIntent: CallbackAction<MoveSelectionRightByWordTextIntent>(onInvoke: _handleMoveSelectionRightByWordText),
-      MoveSelectionLeftByWordTextIntent: CallbackAction<MoveSelectionLeftByWordTextIntent>(onInvoke: _handleMoveSelectionLeftByWordText),
-      MoveSelectionUpTextIntent: CallbackAction<MoveSelectionUpTextIntent>(onInvoke: _handleMoveSelectionUpText),
-      MoveSelectionDownTextIntent: CallbackAction<MoveSelectionDownTextIntent>(onInvoke: _handleMoveSelectionDownText),
-      MoveSelectionLeftTextIntent: CallbackAction<MoveSelectionLeftTextIntent>(onInvoke: _handleMoveSelectionLeftText),
-      MoveSelectionRightTextIntent: CallbackAction<MoveSelectionRightTextIntent>(onInvoke: _handleMoveSelectionRightText),
-      MoveSelectionToStartTextIntent: CallbackAction<MoveSelectionToStartTextIntent>(onInvoke: _handleMoveSelectionToStartText),
-      MoveSelectionToEndTextIntent: CallbackAction<MoveSelectionToEndTextIntent>(onInvoke: _handleMoveSelectionToEndText),
-
-      // Action of selection hotkeys.
-      ExtendSelectionLeftTextIntent: CallbackAction<ExtendSelectionLeftTextIntent>(onInvoke: _handleExtendSelectionLeftText),
-      ExtendSelectionRightTextIntent: CallbackAction<ExtendSelectionRightTextIntent>(onInvoke: _handleExtendSelectionRightText),
-      ExtendSelectionUpTextIntent: CallbackAction<ExtendSelectionUpTextIntent>(onInvoke: _handleExtendSelectionUpText),
-      ExtendSelectionDownTextIntent: CallbackAction<ExtendSelectionDownTextIntent>(onInvoke: _handleExtendSelectionDownText),
-      ExtendSelectionLeftByWordTextIntent: CallbackAction<ExtendSelectionLeftByWordTextIntent>(onInvoke: _handleExtendSelectionLeftByWordText),
-      ExtendSelectionLeftByLineTextIntent: CallbackAction<ExtendSelectionLeftByLineTextIntent>(onInvoke: _handleExtendSelectionLeftByLineText),
-      ExtendSelectionLeftByWordAndStopAtReversalTextIntent: CallbackAction<ExtendSelectionLeftByWordAndStopAtReversalTextIntent>(onInvoke: _handleExtendSelectionLeftByWordAndStopAtReversalText),
-      ExtendSelectionRightByWordTextIntent: CallbackAction<ExtendSelectionRightByWordTextIntent>(onInvoke: _handleExtendSelectionRightByWordText),
-      ExtendSelectionRightByLineTextIntent: CallbackAction<ExtendSelectionRightByLineTextIntent>(onInvoke: _handleExtendSelectionRightByLineText),
-      ExtendSelectionRightByWordAndStopAtReversalTextIntent: CallbackAction<ExtendSelectionRightByWordAndStopAtReversalTextIntent>(onInvoke: _handleExtendSelectionRightByWordAndStopAtReversalText),
-
-      ExpandSelectionToEndTextIntent: CallbackAction<ExpandSelectionToEndTextIntent>(onInvoke: _handleExtendSelectionToEndText),
-      ExpandSelectionToStartTextIntent: CallbackAction<ExpandSelectionToStartTextIntent>(onInvoke: _handleExtendSelectionToStartText),
-      ExpandSelectionLeftByLineTextIntent: CallbackAction<ExpandSelectionLeftByLineTextIntent>(onInvoke: _handleExpandSelectionLeftByLineText),
-      ExpandSelectionRightByLineTextIntent: CallbackAction<ExpandSelectionRightByLineTextIntent>(onInvoke: _handleExpandSelectionRightByLineText),
+      // Delete
+      DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(context)),
+//      DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(this, _nextWordBoundary)),
+//      DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(this, _linebreak)),
+//
+//      // Extend/Move Selection
+//      ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(this, false, _characterBoundary,)),
+//      ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(this, true, _nextWordBoundary)),
+//      ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(this, true, _linebreak)),
+//      ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
+//      ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(this, true, _documentBoundary)),
+//      ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(this, _nextWordBoundary)),
+//
+      // Copy Paste
+      SelectAllTextIntent: _makeOverridable(_SelectAllAction(context)),
+      CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(context)),
+      PasteTextIntent: _makeOverridable(_PasteAction(context)),
     };
   }
 
+  Action<T> _makeOverridable<T extends Intent>(Action<T> defaultAction) {
+    return Action<T>.overridable(context: context, defaultAction: defaultAction);
+  }
+
+  void _replaceText(ReplaceTextIntent intent) {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement != null) {
+      focusedElement
+        .textSelectionDelegate
+        .userUpdateTextEditingValue(
+          intent.currentTextEditingValue.replaced(intent.replacementRange, intent.replacementText),
+          intent.cause,
+        );
+    }
+  }
+  late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
+
+  void _updateSelection(UpdateSelectionIntent intent) {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement != null) {
+      focusedElement
+        .textSelectionDelegate
+        .userUpdateTextEditingValue(
+          intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
+          intent.cause,
+        );
+    }
+  }
+  late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
+
+//  late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(this);
+
   // Handle focus action usually by pressing the [Tab] hotkey.
   void _handleNextFocus(NextFocusIntent intent) {
-    dom.Element rootElement = _findRootElement();
+    dom.Element rootElement = _findRootElement(context);
     List<dom.Element> focusableElements = _findFocusableElements(rootElement);
     if (focusableElements.isNotEmpty) {
-      dom.Element? focusedElement = _findFocusedElement(focusableElements);
+      dom.Element? focusedElement = _findFocusedElement(context, focusableElements);
       // None focusable element is focused, focus the first focusable element.
       if (focusedElement == null) {
         _focusNode.requestFocus();
@@ -187,10 +199,10 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
 
   // Handle focus action usually by pressing the [Shift]+[Tab] hotkey in the reverse direction.
   void _handlePreviousFocus(PreviousFocusIntent intent) {
-    dom.Element rootElement = _findRootElement();
+    dom.Element rootElement = _findRootElement(context);
     List<dom.TextFormControlElement> focusableElements = _findFocusableElements(rootElement);
     if (focusableElements.isNotEmpty) {
-      dom.TextFormControlElement? focusedElement = _findFocusedElement(focusableElements);
+      dom.TextFormControlElement? focusedElement = _findFocusedElement(context, focusableElements);
       // None editable is focused, focus the last editable.
       if (focusedElement == null) {
         _focusNode.requestFocus();
@@ -215,341 +227,13 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
     }
   }
 
-  void _handleDeleteText(DeleteTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .delete(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleDeleteByWordText(DeleteByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteByWord(SelectionChangedCause.keyboard, false);
-    }
-  }
-
-  void _handleDeleteByLineText(DeleteByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleDeleteForwardText(DeleteForwardTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForward(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleDeleteForwardByWordText(DeleteForwardByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForwardByWord(SelectionChangedCause.keyboard, false);
-    }
-  }
-
-  void _handleDeleteForwardByLineText(DeleteForwardByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForwardByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-
-  void _handleSelectAllText(SelectAllTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .selectAll(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleCopySelectionText(CopySelectionTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .copySelection(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleCutSelectionText(CutSelectionTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .cutSelection(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handlePasteText(PasteTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .pasteText(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRightByLine(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRightByWord(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeftByWord(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionUp(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionDown(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeft(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRight(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionToEnd(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionToStart(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeft(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
-    }
-  }
-
-  void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRight(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionUp(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionDown(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionToEnd(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionToStart(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExpandSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionLeftByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExpandSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionRightByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByWord(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionLeftByLineText(ExtendSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionLeftByWordAndStopAtReversalText(ExtendSelectionLeftByWordAndStopAtReversalTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
-    }
-  }
-
-  void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByWord(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionRightByLineText(ExtendSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByLine(SelectionChangedCause.keyboard);
-    }
-  }
-
-  void _handleExtendSelectionRightByWordAndStopAtReversalText(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
-    if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
-    }
-  }
 
   // Handle focus change of _focusNode.
   void _handleFocusChange(bool focused) {
-    dom.Element rootElement = _findRootElement();
+    dom.Element rootElement = _findRootElement(context);
     List<dom.Element> focusableElements = _findFocusableElements(rootElement);
     if (focusableElements.isNotEmpty) {
-      dom.Element? focusedElement = _findFocusedElement(focusableElements);
+      dom.Element? focusedElement = _findFocusedElement(context, focusableElements);
       // Currently only input element is focusable.
       if (focused) {
         if (rootElement.ownerDocument.focusedElement == null) {
@@ -561,62 +245,6 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
         }
       }
     }
-  }
-
-
-  // Find RenderViewportBox in the renderObject tree.
-  RenderViewportBox? _findRenderViewportBox(RenderObject parent) {
-    RenderViewportBox? result;
-    parent.visitChildren((RenderObject child) {
-      if (child is RenderViewportBox) {
-        result = child;
-      } else {
-        result = _findRenderViewportBox(child);
-      }
-    });
-    return result;
-  }
-
-  // Find root element of dom tree.
-  dom.Element _findRootElement() {
-    RenderObject? _rootRenderObject = context.findRenderObject();
-    RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
-    KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
-    dom.Element documentElement = controller.view.document.documentElement!;
-    return documentElement;
-  }
-
-  // Find all the focusable elements in the element tree.
-  List<dom.TextFormControlElement> _findFocusableElements(dom.Element element) {
-    List<dom.TextFormControlElement> result = [];
-    traverseElement(element, (dom.Element child) {
-      // Currently only input element is focusable.
-      if (child is dom.TextFormControlElement) {
-        result.add(child);
-      }
-    });
-    return result;
-  }
-
-  // Find the focused element in the element tree.
-  dom.TextFormControlElement? _findFocusedElement([List<dom.Element>? focusableElements]) {
-    dom.TextFormControlElement? result;
-    if (focusableElements == null) {
-      dom.Element rootElement = _findRootElement();
-      focusableElements = _findFocusableElements(rootElement);
-    }
-
-    if (focusableElements.isNotEmpty) {
-      // Currently only TextFormControlElement is focusable.
-      for (dom.Element element in focusableElements) {
-        RenderEditable? renderEditable = (element as dom.TextFormControlElement).renderEditable;
-        if (renderEditable != null && renderEditable.hasFocus) {
-          result = element;
-          break;
-        }
-      }
-    }
-    return result;
   }
 
   // Get context of current widget.
@@ -747,5 +375,400 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
     }
 
     return _selectionControls;
+  }
+}
+
+mixin _FindElementFromContextMixin {
+  // Find RenderViewportBox in the renderObject tree.
+  RenderViewportBox? _findRenderViewportBox(RenderObject parent) {
+    RenderViewportBox? result;
+    parent.visitChildren((RenderObject child) {
+      if (child is RenderViewportBox) {
+        result = child;
+      } else {
+        result = _findRenderViewportBox(child);
+      }
+    });
+    return result;
+  }
+
+  // Find root element of dom tree.
+  dom.Element _findRootElement(BuildContext context) {
+    RenderObject? _rootRenderObject = context.findRenderObject();
+    RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
+    KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
+    dom.Element documentElement = controller.view.document.documentElement!;
+    return documentElement;
+  }
+
+  // Find all the focusable elements in the element tree.
+  List<dom.TextFormControlElement> _findFocusableElements(dom.Element element) {
+    List<dom.TextFormControlElement> result = [];
+    traverseElement(element, (dom.Element child) {
+      // Currently only input element is focusable.
+      if (child is dom.TextFormControlElement) {
+        result.add(child);
+      }
+    });
+    return result;
+  }
+
+  // Find the focused element in the element tree.
+  dom.TextFormControlElement? _findFocusedElement(BuildContext context, [List<dom.Element>? focusableElements]) {
+    dom.TextFormControlElement? result;
+    if (focusableElements == null) {
+      dom.Element rootElement = _findRootElement(context);
+      focusableElements = _findFocusableElements(rootElement);
+    }
+
+    if (focusableElements.isNotEmpty) {
+      // Currently only TextFormControlElement is focusable.
+      for (dom.Element element in focusableElements) {
+        RenderEditable? renderEditable = (element as dom.TextFormControlElement).renderEditable;
+        if (renderEditable != null && renderEditable.hasFocus) {
+          result = element;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+}
+
+// -------------------------------  Text Actions -------------------------------
+class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T> with _FindElementFromContextMixin  {
+  _DeleteTextAction(this.context);
+
+  BuildContext context;
+  dom.EditableTextDelegate? delegate;
+
+  TextRange _expandNonCollapsedRange(TextEditingValue value, bool obscureText) {
+    final TextRange selection = value.selection;
+    assert(selection.isValid);
+    assert(!selection.isCollapsed);
+    final dom.TextBoundary atomicBoundary = obscureText
+      ? dom.CodeUnitBoundary(value)
+      : dom.CharacterBoundary(value);
+
+    return TextRange(
+      start: atomicBoundary.getLeadingTextBoundaryAt(TextPosition(offset: selection.start)).offset,
+      end: atomicBoundary.getTrailingTextBoundaryAt(TextPosition(offset: selection.end - 1)).offset,
+    );
+  }
+
+  @override
+  Object? invoke(T intent, [BuildContext? context]) {
+    if (delegate == null) return null;
+
+    dom.EditableTextDelegate _delegate = delegate!;
+    dom.TextBoundary Function(T intent) getTextBoundariesForIntent = _delegate.characterBoundary;
+
+    final TextSelection selection = _delegate.value.selection;
+    assert(selection.isValid);
+
+    if (!selection.isCollapsed) {
+      return Actions.invoke(
+        context!,
+        ReplaceTextIntent(_delegate.value, '', _expandNonCollapsedRange(_delegate.value, _delegate.element.obscureText), SelectionChangedCause.keyboard),
+      );
+    }
+
+    final dom.TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+    if (!textBoundary.textEditingValue.selection.isValid) {
+      return null;
+    }
+    if (!textBoundary.textEditingValue.selection.isCollapsed) {
+      return Actions.invoke(
+        context!,
+        ReplaceTextIntent(_delegate.value, '', _expandNonCollapsedRange(textBoundary.textEditingValue, _delegate.element.obscureText), SelectionChangedCause.keyboard),
+      );
+    }
+
+    return Actions.invoke(
+      context!,
+      ReplaceTextIntent(
+        textBoundary.textEditingValue,
+        '',
+        textBoundary.getTextBoundaryAt(textBoundary.textEditingValue.selection.base),
+        SelectionChangedCause.keyboard,
+      ),
+    );
+  }
+
+  @override
+  bool get isActionEnabled {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement == null) {
+      return false;
+    }
+    delegate = focusedElement.textSelectionDelegate;
+    dom.EditableTextDelegate _delegate = delegate!;
+    return !_delegate.element.readOnly && _delegate.value.selection.isValid;
+  }
+}
+
+//class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
+//  _UpdateTextSelectionAction(this.state, this.ignoreNonCollapsedSelection, this.getTextBoundariesForIntent);
+//
+//  final dom.EditableTextDelegate state;
+//  final bool ignoreNonCollapsedSelection;
+//  final _TextBoundary Function(T intent) getTextBoundariesForIntent;
+//
+//  @override
+//  Object? invoke(T intent, [BuildContext? context]) {
+//    final TextSelection selection = state._value.selection;
+//    assert(selection.isValid);
+//
+//    final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
+//    // Collapse to the logical start/end.
+//    TextSelection _collapse(TextSelection selection) {
+//      assert(selection.isValid);
+//      assert(!selection.isCollapsed);
+//      return selection.copyWith(
+//        baseOffset: intent.forward ? selection.end : selection.start,
+//        extentOffset: intent.forward ? selection.end : selection.start,
+//      );
+//    }
+//
+//    if (!selection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
+//      return Actions.invoke(
+//        context!,
+//        UpdateSelectionIntent(state._value, _collapse(selection), SelectionChangedCause.keyboard),
+//      );
+//    }
+//
+//    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+//    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+//    if (!textBoundarySelection.isValid) {
+//      return null;
+//    }
+//    if (!textBoundarySelection.isCollapsed && !ignoreNonCollapsedSelection && collapseSelection) {
+//      return Actions.invoke(
+//        context!,
+//        UpdateSelectionIntent(state._value, _collapse(textBoundarySelection), SelectionChangedCause.keyboard),
+//      );
+//    }
+//
+//    final TextPosition extent = textBoundarySelection.extent;
+//    final TextPosition newExtent = intent.forward
+//      ? textBoundary.getTrailingTextBoundaryAt(extent)
+//      : textBoundary.getLeadingTextBoundaryAt(extent);
+//
+//    final TextSelection newSelection = collapseSelection
+//      ? TextSelection.fromPosition(newExtent)
+//      : textBoundarySelection.extendTo(newExtent);
+//
+//    // If collapseAtReversal is true and would have an effect, collapse it.
+//    if (!selection.isCollapsed && intent.collapseAtReversal
+//      && (selection.baseOffset < selection.extentOffset !=
+//        newSelection.baseOffset < newSelection.extentOffset)) {
+//      return Actions.invoke(
+//        context!,
+//        UpdateSelectionIntent(
+//          state._value,
+//          TextSelection.fromPosition(selection.base),
+//          SelectionChangedCause.keyboard,
+//        ),
+//      );
+//    }
+//
+//    return Actions.invoke(
+//      context!,
+//      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
+//    );
+//  }
+//
+//  @override
+//  bool get isActionEnabled => state._value.selection.isValid;
+//}
+//
+//class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> {
+//  _ExtendSelectionOrCaretPositionAction(this.state, this.getTextBoundariesForIntent);
+//
+//  final dom.EditableTextDelegate state;
+//  final _TextBoundary Function(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent) getTextBoundariesForIntent;
+//
+//  @override
+//  Object? invoke(ExtendSelectionToNextWordBoundaryOrCaretLocationIntent intent, [BuildContext? context]) {
+//    final TextSelection selection = state._value.selection;
+//    assert(selection.isValid);
+//
+//    final _TextBoundary textBoundary = getTextBoundariesForIntent(intent);
+//    final TextSelection textBoundarySelection = textBoundary.textEditingValue.selection;
+//    if (!textBoundarySelection.isValid) {
+//      return null;
+//    }
+//
+//    final TextPosition extent = textBoundarySelection.extent;
+//    final TextPosition newExtent = intent.forward
+//      ? textBoundary.getTrailingTextBoundaryAt(extent)
+//      : textBoundary.getLeadingTextBoundaryAt(extent);
+//
+//    final TextSelection newSelection = (newExtent.offset - textBoundarySelection.baseOffset) * (textBoundarySelection.extentOffset - textBoundarySelection.baseOffset) < 0
+//      ? textBoundarySelection.copyWith(
+//      extentOffset: textBoundarySelection.baseOffset,
+//      affinity: textBoundarySelection.extentOffset > textBoundarySelection.baseOffset ? TextAffinity.downstream : TextAffinity.upstream,
+//    )
+//      : textBoundarySelection.extendTo(newExtent);
+//
+//    return Actions.invoke(
+//      context!,
+//      UpdateSelectionIntent(textBoundary.textEditingValue, newSelection, SelectionChangedCause.keyboard),
+//    );
+//  }
+//
+//  @override
+//  bool get isActionEnabled => state.element.selectionEnabled && state._value.selection.isValid;
+//}
+//
+//class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> {
+//  _UpdateTextSelectionToAdjacentLineAction(this.state);
+//
+//  final dom.EditableTextDelegate state;
+//
+//  VerticalCaretMovementRun? _verticalMovementRun;
+//  TextSelection? _runSelection;
+//
+//  void stopCurrentVerticalRunIfSelectionChanges() {
+//    final TextSelection? runSelection = _runSelection;
+//    if (runSelection == null) {
+//      assert(_verticalMovementRun == null);
+//      return;
+//    }
+//    _runSelection = state._value.selection;
+//    final TextSelection currentSelection = state._value.selection;
+//    final bool continueCurrentRun = currentSelection.isValid && currentSelection.isCollapsed
+//      && currentSelection.baseOffset == runSelection.baseOffset
+//      && currentSelection.extentOffset == runSelection.extentOffset;
+//    if (!continueCurrentRun) {
+//      _verticalMovementRun = null;
+//      _runSelection = null;
+//    }
+//  }
+//
+//  @override
+//  void invoke(T intent, [BuildContext? context]) {
+//    assert(state._value.selection.isValid);
+//
+//    final bool collapseSelection = intent.collapseSelection || !state.element.selectionEnabled;
+//    final TextEditingValue value = state._textEditingValueforTextLayoutMetrics;
+//    if (!value.selection.isValid) {
+//      return;
+//    }
+//
+//    if (_verticalMovementRun?.isValid == false) {
+//      _verticalMovementRun = null;
+//      _runSelection = null;
+//    }
+//
+//    final VerticalCaretMovementRun currentRun = _verticalMovementRun
+//      ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
+//
+//    final bool shouldMove = intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
+//    final TextPosition newExtent = shouldMove
+//      ? currentRun.current
+//      : (intent.forward ? TextPosition(offset: state._value.text.length) : const TextPosition(offset: 0));
+//    final TextSelection newSelection = collapseSelection
+//      ? TextSelection.fromPosition(newExtent)
+//      : value.selection.extendTo(newExtent);
+//
+//    Actions.invoke(
+//      context!,
+//      UpdateSelectionIntent(value, newSelection, SelectionChangedCause.keyboard),
+//    );
+//    if (state._value.selection == newSelection) {
+//      _verticalMovementRun = currentRun;
+//      _runSelection = newSelection;
+//    }
+//  }
+//
+//  @override
+//  bool get isActionEnabled => state._value.selection.isValid;
+//}
+//
+class _SelectAllAction extends ContextAction<SelectAllTextIntent> with _FindElementFromContextMixin {
+  _SelectAllAction(this.context);
+
+  BuildContext context;
+  dom.EditableTextDelegate? delegate;
+
+  @override
+  Object? invoke(SelectAllTextIntent intent, [BuildContext? context]) {
+    if (delegate == null) return null;
+
+    dom.EditableTextDelegate _delegate = delegate!;
+    return Actions.invoke(
+      context!,
+      UpdateSelectionIntent(
+        _delegate.value,
+        TextSelection(baseOffset: 0, extentOffset: _delegate.value.text.length),
+        intent.cause,
+      ),
+    );
+  }
+
+  @override
+  bool get isActionEnabled {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement == null) {
+      return false;
+    }
+    delegate = focusedElement.textSelectionDelegate;
+    return true;
+  }
+}
+
+class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> with _FindElementFromContextMixin {
+  _CopySelectionAction(this.context);
+
+  BuildContext context;
+  dom.EditableTextDelegate? delegate;
+
+  @override
+  void invoke(CopySelectionTextIntent intent, [BuildContext? context]) {
+    if (delegate == null) return null;
+
+    dom.EditableTextDelegate _delegate = delegate!;
+    if (intent.collapseSelection) {
+      _delegate.cutSelection(intent.cause);
+    } else {
+      _delegate.copySelection(intent.cause);
+    }
+  }
+
+  @override
+  bool get isActionEnabled {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement == null) {
+      return false;
+    }
+    delegate = focusedElement.textSelectionDelegate;
+    dom.EditableTextDelegate _delegate = delegate!;
+    return _delegate.value.selection.isValid && !_delegate.value.selection.isCollapsed;
+  }
+}
+
+class _PasteAction extends ContextAction<PasteTextIntent> with _FindElementFromContextMixin {
+  _PasteAction(this.context);
+
+  BuildContext context;
+  dom.EditableTextDelegate? delegate;
+
+  @override
+  void invoke(PasteTextIntent intent, [BuildContext? context]) {
+    if (delegate == null) return null;
+
+    dom.EditableTextDelegate _delegate = delegate!;
+    _delegate.pasteText(intent.cause);
+  }
+
+  @override
+  bool get isActionEnabled {
+    dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
+    if (focusedElement == null) {
+      return false;
+    }
+    delegate = focusedElement.textSelectionDelegate;
+    return true;
   }
 }

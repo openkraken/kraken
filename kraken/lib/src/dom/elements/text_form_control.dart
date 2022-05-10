@@ -5,13 +5,14 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:characters/characters.dart' show CharacterRange;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier, TextEditingActionTarget;
+import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier, DirectionalTextEditingIntent, ReplaceTextIntent;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
@@ -39,7 +40,7 @@ const Duration _kCursorBlinkWaitForStart = Duration(milliseconds: 150);
 
 const TextSelection blurSelection = TextSelection.collapsed(offset: -1);
 
-class EditableTextDelegate with TextEditingActionTarget implements TextSelectionDelegate {
+class EditableTextDelegate implements TextSelectionDelegate {
   final TextFormControlElement _textFormControlElement;
   EditableTextDelegate(this._textFormControlElement);
 
@@ -53,9 +54,14 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
     // Deprecated, update the lasted value in the userUpdateTextEditingValue.
   }
 
+  // Add alias for use in actions forked from Flutter source.
+  TextEditingValue get value => _textEditingValue;
+  TextFormControlElement get element => _textFormControlElement;
+  RenderEditable get renderEditable => _textFormControlElement.renderEditable!;
+  TextEditingValue get _textEditingValueforTextLayoutMetrics => _textEditingValue;
+
   @override
   void bringIntoView(TextPosition position) {
-    RenderEditable renderEditable = _textFormControlElement.renderEditable!;
     KrakenScrollable _scrollable = _textFormControlElement._scrollable;
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _textFormControlElement._getOffsetToRevealCaret(localRect);
@@ -132,7 +138,12 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
 
   @override
   void copySelection(SelectionChangedCause cause) {
-    super.copySelection(cause);
+    final TextSelection selection = textEditingValue.selection;
+    final String text = textEditingValue.text;
+    if (selection.isCollapsed) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar(false);
@@ -160,7 +171,13 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
 
   @override
   void cutSelection(SelectionChangedCause cause) {
-    super.cutSelection(cause);
+    final TextSelection selection = textEditingValue.selection;
+    final String text = textEditingValue.text;
+    if (selection.isCollapsed) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
@@ -169,7 +186,18 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
 
   @override
   Future<void> pasteText(SelectionChangedCause cause) async {
-    super.pasteText(cause);
+    final TextSelection selection = textEditingValue.selection;
+    if (!selection.isValid) {
+      return;
+    }
+    // Snapshot the input before using `await`.
+    // See https://github.com/flutter/flutter/issues/11427
+    final ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data == null) {
+      return;
+    }
+
+    _replaceText(ReplaceTextIntent(textEditingValue, data.text!, selection, cause));
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
       hideToolbar();
@@ -178,43 +206,77 @@ class EditableTextDelegate with TextEditingActionTarget implements TextSelection
 
   @override
   void selectAll(SelectionChangedCause cause) async {
-    super.selectAll(cause);
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(
+        selection: TextSelection(baseOffset: 0, extentOffset: textEditingValue.text.length),
+      ),
+      cause,
+    );
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
     }
   }
 
-  @override
-  void debugAssertLayoutUpToDate() {
-    RenderEditable? editable = _textFormControlElement.renderEditable;
-    assert(editable != null);
-    editable!.debugAssertLayoutUpToDate();
+  void _replaceText(ReplaceTextIntent intent) {
+    userUpdateTextEditingValue(
+      intent.currentTextEditingValue.replaced(intent.replacementRange, intent.replacementText),
+      intent.cause,
+    );
   }
 
+  // --------------------------- Text Editing Actions ---------------------------
 
-  @override
-  bool get obscureText => _textFormControlElement.obscureText;
-
-  @override
-  bool get readOnly => _textFormControlElement.readOnly;
-
-  @override
-  bool get selectionEnabled => _textFormControlElement.renderEditable?.selectionEnabled ?? false;
-
-  @override
-  void setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
-    if (newValue == textEditingValue) {
-      return;
-    }
-
-    RenderEditable? renderEditable = _textFormControlElement.renderEditable;
-    if (renderEditable != null) {
-      renderEditable.textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
-    }
+  TextBoundary characterBoundary(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary = element.obscureText ? CodeUnitBoundary(value) : CharacterBoundary(value);
+    return CollapsedSelectionBoundary(atomicTextBoundary, intent.forward);
   }
 
-  @override
-  TextLayoutMetrics get textLayoutMetrics => _textFormControlElement.renderEditable!;
+  TextBoundary nextWordBoundary(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary;
+    final TextBoundary boundary;
+
+    if (element.obscureText) {
+      atomicTextBoundary = CodeUnitBoundary(value);
+      boundary = DocumentBoundary(value);
+    } else {
+      final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
+      atomicTextBoundary = CharacterBoundary(textEditingValue);
+      // This isn't enough. Newline characters.
+      boundary = ExpandedTextBoundary(WhitespaceBoundary(textEditingValue), WordBoundary(renderEditable, textEditingValue));
+    }
+
+    final MixedBoundary mixedBoundary = intent.forward
+      ? MixedBoundary(atomicTextBoundary, boundary)
+      : MixedBoundary(boundary, atomicTextBoundary);
+    // Use a MixedBoundary to make sure we don't leave invalid codepoints in
+    // the field after deletion.
+    return CollapsedSelectionBoundary(mixedBoundary, intent.forward);
+  }
+
+  TextBoundary linebreak(DirectionalTextEditingIntent intent) {
+    final TextBoundary atomicTextBoundary;
+    final TextBoundary boundary;
+
+    if (element.obscureText) {
+      atomicTextBoundary = CodeUnitBoundary(value);
+      boundary = DocumentBoundary(value);
+    } else {
+      final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
+      atomicTextBoundary = CharacterBoundary(textEditingValue);
+      boundary = LineBreak(renderEditable, textEditingValue);
+    }
+
+    // The MixedBoundary is to make sure we don't leave invalid code units in
+    // the field after deletion.
+    // `boundary` doesn't need to be wrapped in a CollapsedSelectionBoundary,
+    // since the document boundary is unique and the linebreak boundary is
+    // already caret-location based.
+    return intent.forward
+      ? MixedBoundary(CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
+      : MixedBoundary(boundary, CollapsedSelectionBoundary(atomicTextBoundary, false));
+  }
+
+  TextBoundary documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(value);
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
@@ -1452,10 +1514,282 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
 
+
   @override
   void dispose() {
     textEditingActionTarget = null;
     super.dispose();
   }
+}
+
+/// An interface for retriving the logical text boundary (left-closed-right-open)
+/// at a given location in a document.
+///
+/// Depending on the implementation of the [TextBoundary], the input
+/// [TextPosition] can either point to a code unit, or a position between 2 code
+/// units (which can be visually represented by the caret if the selection were
+/// to collapse to that position).
+///
+/// For example, [LineBreak] interprets the input [TextPosition] as a caret
+/// location, since in Flutter the caret is generally painted between the
+/// character the [TextPosition] points to and its previous character, and
+/// [LineBreak] cares about the affinity of the input [TextPosition]. Most
+/// other text boundaries however, interpret the input [TextPosition] as the
+/// location of a code unit in the document, since it's easier to reason about
+/// the text boundary given a code unit in the text.
+///
+/// To convert a "code-unit-based" [TextBoundary] to "caret-location-based",
+/// use the [CollapsedSelectionBoundary] combinator.
+abstract class TextBoundary {
+  const TextBoundary();
+
+  TextEditingValue get textEditingValue;
+
+  /// Returns the leading text boundary at the given location, inclusive.
+  TextPosition getLeadingTextBoundaryAt(TextPosition position);
+
+  /// Returns the trailing text boundary at the given location, exclusive.
+  TextPosition getTrailingTextBoundaryAt(TextPosition position);
+
+  TextRange getTextBoundaryAt(TextPosition position) {
+    return TextRange(
+      start: getLeadingTextBoundaryAt(position).offset,
+      end: getTrailingTextBoundaryAt(position).offset,
+    );
+  }
+}
+
+// -----------------------------  Text Boundaries -----------------------------
+
+class CodeUnitBoundary extends TextBoundary {
+  const CodeUnitBoundary(this.textEditingValue);
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) => TextPosition(offset: position.offset);
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) => TextPosition(offset: math.min(position.offset + 1, textEditingValue.text.length));
+}
+
+// The word modifier generally removes the word boundaries around white spaces
+// (and newlines), IOW white spaces and some other punctuations are considered
+// a part of the next word in the search direction.
+class WhitespaceBoundary extends TextBoundary {
+  const WhitespaceBoundary(this.textEditingValue);
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    for (int index = position.offset; index >= 0; index -= 1) {
+      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
+        return TextPosition(offset: index);
+      }
+    }
+    return const TextPosition(offset: 0);
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    for (int index = position.offset; index < textEditingValue.text.length; index += 1) {
+      if (!TextLayoutMetrics.isWhitespace(textEditingValue.text.codeUnitAt(index))) {
+        return TextPosition(offset: index + 1);
+      }
+    }
+    return TextPosition(offset: textEditingValue.text.length);
+  }
+}
+
+// Most apps delete the entire grapheme when the backspace key is pressed.
+// Also always put the new caret location to character boundaries to avoid
+// sending malformed UTF-16 code units to the paragraph builder.
+class CharacterBoundary extends TextBoundary {
+  const CharacterBoundary(this.textEditingValue);
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    return TextPosition(
+      offset: CharacterRange.at(textEditingValue.text, position.offset, endOffset).stringBeforeLength,
+    );
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
+    return TextPosition(
+      offset: textEditingValue.text.length - range.stringAfterLength,
+    );
+  }
+
+  @override
+  TextRange getTextBoundaryAt(TextPosition position) {
+    final int endOffset = math.min(position.offset + 1, textEditingValue.text.length);
+    final CharacterRange range = CharacterRange.at(textEditingValue.text, position.offset, endOffset);
+    return TextRange(
+      start: range.stringBeforeLength,
+      end: textEditingValue.text.length - range.stringAfterLength,
+    );
+  }
+}
+
+// [UAX #29](https://unicode.org/reports/tr29/) defined word boundaries.
+class WordBoundary extends TextBoundary {
+  const WordBoundary(this.textLayout, this.textEditingValue);
+
+  final TextLayoutMetrics textLayout;
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: textLayout.getWordBoundary(position).start,
+      // Word boundary seems to always report downstream on many platforms.
+      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
+    );
+  }
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: textLayout.getWordBoundary(position).end,
+      // Word boundary seems to always report downstream on many platforms.
+      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
+    );
+  }
+}
+
+// The linebreaks of the current text layout. The input [TextPosition]s are
+// interpreted as caret locations because [TextPainter.getLineAtOffset] is
+// text-affinity-aware.
+class LineBreak extends TextBoundary {
+  const LineBreak(this.textLayout, this.textEditingValue);
+
+  final TextLayoutMetrics textLayout;
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: textLayout.getLineAtOffset(position).start,
+    );
+  }
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: textLayout.getLineAtOffset(position).end,
+      affinity: TextAffinity.upstream,
+    );
+  }
+}
+
+// The document boundary is unique and is a constant function of the input
+// position.
+class DocumentBoundary extends TextBoundary {
+  const DocumentBoundary(this.textEditingValue);
+
+  @override
+  final TextEditingValue textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) => const TextPosition(offset: 0);
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return TextPosition(
+      offset: textEditingValue.text.length,
+      affinity: TextAffinity.upstream,
+    );
+  }
+}
+
+// ------------------------  Text Boundary Combinators ------------------------
+
+// Expands the innerTextBoundary with outerTextBoundary.
+class ExpandedTextBoundary extends TextBoundary {
+  ExpandedTextBoundary(this.innerTextBoundary, this.outerTextBoundary);
+
+  final TextBoundary innerTextBoundary;
+  final TextBoundary outerTextBoundary;
+
+  @override
+  TextEditingValue get textEditingValue {
+    assert(innerTextBoundary.textEditingValue == outerTextBoundary.textEditingValue);
+    return innerTextBoundary.textEditingValue;
+  }
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    return outerTextBoundary.getLeadingTextBoundaryAt(
+      innerTextBoundary.getLeadingTextBoundaryAt(position),
+    );
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return outerTextBoundary.getTrailingTextBoundaryAt(
+      innerTextBoundary.getTrailingTextBoundaryAt(position),
+    );
+  }
+}
+
+// Force the innerTextBoundary to interpret the input [TextPosition]s as caret
+// locations instead of code unit positions.
+//
+// The innerTextBoundary must be a [TextBoundary] that interprets the input
+// [TextPosition]s as code unit positions.
+class CollapsedSelectionBoundary extends TextBoundary {
+  CollapsedSelectionBoundary(this.innerTextBoundary, this.isForward);
+
+  final TextBoundary innerTextBoundary;
+  final bool isForward;
+
+  @override
+  TextEditingValue get textEditingValue => innerTextBoundary.textEditingValue;
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) {
+    return isForward
+      ? innerTextBoundary.getLeadingTextBoundaryAt(position)
+      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getLeadingTextBoundaryAt(TextPosition(offset: position.offset - 1));
+  }
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) {
+    return isForward
+      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
+      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
+  }
+}
+
+// A TextBoundary that creates a [TextRange] where its start is from the
+// specified leading text boundary and its end is from the specified trailing
+// text boundary.
+class MixedBoundary extends TextBoundary {
+  MixedBoundary(this.leadingTextBoundary, this.trailingTextBoundary);
+
+  final TextBoundary leadingTextBoundary;
+  final TextBoundary trailingTextBoundary;
+
+  @override
+  TextEditingValue get textEditingValue {
+    assert(leadingTextBoundary.textEditingValue == trailingTextBoundary.textEditingValue);
+    return leadingTextBoundary.textEditingValue;
+  }
+
+  @override
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) => leadingTextBoundary.getLeadingTextBoundaryAt(position);
+
+  @override
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) => trailingTextBoundary.getTrailingTextBoundaryAt(position);
 }
 
