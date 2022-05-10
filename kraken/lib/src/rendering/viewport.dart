@@ -95,4 +95,13 @@ class RenderViewportBox extends RenderProxyBox
       context.paintChild(child!, offset);
     }
   }
+
+  @override
+  void dispose() {
+    if (child != null) {
+      dropChild(child!);
+    }
+    fixedChildren.clear();
+    super.dispose();
+  }
 }

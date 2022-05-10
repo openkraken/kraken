@@ -251,9 +251,6 @@ class KrakenViewController
     // FIXME: for break circle reference
     viewport.controller = null;
 
-    // Clear renderObjects in list when disposed to avoid memory leak.
-    viewport.fixedChildren.clear();
-
     debugDOMTreeChanged = null;
 
     _teardownObserver();
@@ -1128,9 +1125,7 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
 
-    if (devToolsService != null) {
-      devToolsService!.dispose();
-    }
+    devToolsService?.dispose();
   }
 
   String get origin => Uri.parse(url).origin;
