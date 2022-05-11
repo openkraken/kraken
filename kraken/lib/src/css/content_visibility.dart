@@ -25,10 +25,12 @@ mixin CSSContentVisibilityMixin on RenderStyle {
   /// If ContentVisibility.auto, the framework will compute the intersection bounds and not to paint when child renderObject
   /// are no longer intersection with this renderObject.
   @override
-  ContentVisibility? get contentVisibility => _contentVisibility;
-  ContentVisibility? _contentVisibility;
+  ContentVisibility get contentVisibility => _contentVisibility;
+  ContentVisibility _contentVisibility = ContentVisibility.visible;
   set contentVisibility(ContentVisibility? value) {
-    if (value == null) return;
+    // The default value to visible.
+    value ??= ContentVisibility.visible;
+
     if (value == _contentVisibility) return;
     _contentVisibility = value;
     renderBoxModel?.markNeedsPaint();

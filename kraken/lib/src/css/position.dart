@@ -86,12 +86,13 @@ mixin CSSPositionMixin on RenderStyle {
     _markParentNeedsPaint();
   }
 
-  CSSPositionType _position = DEFAULT_POSITION_TYPE;
 
   @override
   CSSPositionType get position => _position;
-
-  set position(CSSPositionType value) {
+  CSSPositionType _position = DEFAULT_POSITION_TYPE;
+  set position(CSSPositionType? value) {
+    // The null present the default value.
+    value ??= DEFAULT_POSITION_TYPE;
     if (_position == value) return;
     _position = value;
 
