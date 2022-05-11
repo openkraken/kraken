@@ -138,10 +138,10 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
-          if (_scrollableX == null) {
-            _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
-            renderBoxModel.scrollOffsetX = _scrollableX!.position;
-          }
+
+          _scrollableX ??= KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener, element: this as Element);
+
+          renderBoxModel.scrollOffsetX = _scrollableX!.position;
           // Reset canDrag by overflow because hidden is can't drag.
           bool canDrag = overflowX != CSSOverflowType.hidden;
           _scrollableX!.setCanDrag(canDrag);
