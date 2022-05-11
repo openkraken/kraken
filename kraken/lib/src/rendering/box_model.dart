@@ -45,11 +45,13 @@ Matrix4 getLayoutTransformTo(RenderObject current, RenderObject ancestor, { bool
 
   final Matrix4 transform = Matrix4.identity();
   for (int index = renderers.length - 1; index > 0; index -= 1) {
+    RenderObject parentRenderer = renderers[index];
+    RenderObject childRenderer = renderers[index - 1];
     // Apply the layout transform for renderBoxModel and fallback to paint transform for other renderObject type.
-    if (renderers[index] is RenderBoxModel) {
-      (renderers[index] as RenderBoxModel).applyLayoutTransform(renderers[index - 1], transform, excludeScrollOffset);
+    if (parentRenderer is RenderBoxModel) {
+      parentRenderer.applyLayoutTransform(childRenderer, transform, excludeScrollOffset);
     } else {
-      renderers[index].applyPaintTransform(renderers[index - 1], transform);
+      parentRenderer.applyPaintTransform(childRenderer, transform);
     }
   }
 
@@ -1088,6 +1090,7 @@ class RenderBoxModel extends RenderBox
     applyEffectiveTransform(child, transform);
   }
 
+  // Forked from RenderBox.applyPaintTransform, add scroll offset exclude logic.
   void applyLayoutTransform(RenderObject child, Matrix4 transform, bool excludeScrollOffset) {
     assert(child.parent == this);
     assert(child.parentData is BoxParentData);
