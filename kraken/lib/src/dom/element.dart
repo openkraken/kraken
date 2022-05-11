@@ -137,7 +137,7 @@ abstract class Element
       return;
     }
     _forceToRepaintBoundary = value;
-    _updateRenderBoxModel();
+    updateRenderBoxModel();
   }
 
   Element(
@@ -180,7 +180,7 @@ abstract class Element
     if (renderBoxModel != null) {
       return renderBoxModel!;
     }
-    _updateRenderBoxModel();
+    updateRenderBoxModel();
     return renderBoxModel!;
   }
 
@@ -250,7 +250,7 @@ abstract class Element
     }
   }
 
-  void _updateRenderBoxModel() {
+  void updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
     if (_isReplacedElement) {
       nextRenderBoxModel = _createRenderReplaced(isRepaintBoundary: isRepaintBoundary, previousReplaced: _renderReplaced);
@@ -444,11 +444,11 @@ abstract class Element
         nextRenderLayoutBox = RenderSliverListLayout(
           renderStyle: renderStyle,
           manager: RenderSliverElementChildManager(this),
-          onScroll: _handleScroll,
+          onScroll: handleScroll,
         );
       } else if (previousRenderLayoutBox is RenderFlowLayout || previousRenderLayoutBox is RenderFlexLayout) {
         //  RenderFlow/FlexLayout --> RenderSliverListLayout
-        nextRenderLayoutBox = previousRenderLayoutBox.toSliverLayout(RenderSliverElementChildManager(this), _handleScroll);
+        nextRenderLayoutBox = previousRenderLayoutBox.toSliverLayout(RenderSliverElementChildManager(this), handleScroll);
       } else if (previousRenderLayoutBox is RenderSliverListLayout) {
         nextRenderLayoutBox = previousRenderLayoutBox;
       }
@@ -478,6 +478,7 @@ abstract class Element
     super.didAttachRenderer();
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     renderBoxModel?.markAdjacentRenderParagraphNeedsLayout();
+
     // Ensure that the child is attached.
     ensureChildAttached();
   }
@@ -524,7 +525,7 @@ abstract class Element
     dispatchEvent(Event(EVENT_SCROLL));
   }
 
-  void _handleScroll(double scrollOffset, AxisDirection axisDirection) {
+  void handleScroll(double scrollOffset, AxisDirection axisDirection) {
     if (renderBoxModel == null) return;
     _applyStickyChildrenOffset();
     _applyFixedChildrenOffset(scrollOffset, axisDirection);
@@ -657,7 +658,7 @@ abstract class Element
       _renderBoxModel.detachFromContainingBlock();
       // Change renderBoxModel type in cases such as position changes to fixed which
       // need to create repaintBoundary.
-      _updateRenderBoxModel();
+      updateRenderBoxModel();
       // Original parent renderBox.
       RenderBox parentRenderBox = parentNode!.renderer!;
       // Attach renderBoxModel to its containing block.
@@ -991,7 +992,7 @@ abstract class Element
     }
 
     // Update renderBoxModel.
-    _updateRenderBoxModel();
+    updateRenderBoxModel();
     // Attach renderBoxModel to parent if change from `display: none` to other values.
     if (!isRendererAttached && parentElement != null && parentElement!.isRendererAttached) {
       // If element attach WidgetElement, render object should be attach to render tree when mount.
@@ -1030,28 +1031,19 @@ abstract class Element
         renderStyle.zIndex = value;
         break;
       case OVERFLOW_X:
-        CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
         renderStyle.overflowX = value;
-        _updateRenderBoxModel();
-        updateRenderBoxModelWithOverflowX(_handleScroll);
-        // Change overflowX may affect effectiveOverflowY.
-        // https://drafts.csswg.org/css-overflow/#overflow-properties
-        CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
-        if (effectiveOverflowY != oldEffectiveOverflowY) {
-          updateRenderBoxModelWithOverflowY(_handleScroll);
-        }
-        updateOverflowRenderBox();
+        updateOverflowX();
         break;
       case OVERFLOW_Y:
-        CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
         renderStyle.overflowY = value;
-        _updateRenderBoxModel();
-        updateRenderBoxModelWithOverflowY(_handleScroll);
+        CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
+        updateRenderBoxModel();
+        updateRenderBoxModelWithOverflowY(handleScroll);
         // Change overflowY may affect the effectiveOverflowX.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
         CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
         if (effectiveOverflowX != oldEffectiveOverflowX) {
-          updateRenderBoxModelWithOverflowX(_handleScroll);
+          updateRenderBoxModelWithOverflowX(handleScroll);
         }
         updateOverflowRenderBox();
         break;
@@ -1292,7 +1284,7 @@ abstract class Element
       // Transform
       case TRANSFORM:
         renderStyle.transform = value;
-        _updateRenderBoxModel();
+        updateRenderBoxModel();
         break;
       case TRANSFORM_ORIGIN:
         renderStyle.transformOrigin = value;

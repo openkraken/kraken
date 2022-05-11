@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart';
 
+import '../../css.dart';
+
 /// An implementation of [RenderSliverBoxChildManager] for sliver,
 /// manage element to implement lifecycles for sliver list, generate
 /// renderer from existing element tree.
@@ -58,6 +60,11 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
     if (childNode is Element) {
       childNode.style.flushPendingProperties();
+      
+      RenderStyle renderStyle = childNode.renderStyle;
+      if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
+        childNode.updateOverflowX();
+      }
     }
 
     childNode.didAttachRenderer();
