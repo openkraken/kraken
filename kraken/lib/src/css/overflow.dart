@@ -308,6 +308,20 @@ mixin ElementOverflowMixin on ElementBase {
     updateOverflowRenderBox();
   }
 
+  void updateOverflowY() {
+    Element element = this as Element;
+    CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
+    element.updateRenderBoxModel();
+    updateRenderBoxModelWithOverflowY(element.handleScroll);
+    // Change overflowY may affect the effectiveOverflowX.
+    // https://drafts.csswg.org/css-overflow/#overflow-properties
+    CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
+    if (effectiveOverflowX != oldEffectiveOverflowX) {
+      updateRenderBoxModelWithOverflowX(element.handleScroll);
+    }
+    updateOverflowRenderBox();
+  }
+
   // Create two repaintBoundary for an overflow scroll container.
   // Outer repaintBoundary avoid repaint of parent and sibling renderObjects when scrolling.
   // Inner repaintBoundary avoid repaint of child renderObjects when scrolling.

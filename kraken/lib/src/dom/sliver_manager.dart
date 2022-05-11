@@ -60,10 +60,13 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
     if (childNode is Element) {
       childNode.style.flushPendingProperties();
-      
+
       RenderStyle renderStyle = childNode.renderStyle;
       if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
         childNode.updateOverflowX();
+      }
+      if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
+        childNode.updateOverflowY();
       }
     }
 

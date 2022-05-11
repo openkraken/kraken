@@ -1036,16 +1036,7 @@ abstract class Element
         break;
       case OVERFLOW_Y:
         renderStyle.overflowY = value;
-        CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
-        updateRenderBoxModel();
-        updateRenderBoxModelWithOverflowY(handleScroll);
-        // Change overflowY may affect the effectiveOverflowX.
-        // https://drafts.csswg.org/css-overflow/#overflow-properties
-        CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
-        if (effectiveOverflowX != oldEffectiveOverflowX) {
-          updateRenderBoxModelWithOverflowX(handleScroll);
-        }
-        updateOverflowRenderBox();
+        updateOverflowY();
         break;
       case OPACITY:
         renderStyle.opacity = value;
