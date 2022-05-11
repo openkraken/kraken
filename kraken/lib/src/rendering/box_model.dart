@@ -31,9 +31,11 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-// Compute the transform of renderObject to its ancestor which does not include the paint offset
-// such as scroll or transform.
-Matrix4 computeTransformToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+// Applies the layout transform up the tree to `ancestor`.
+//
+// ReturgetLayoutTransformTolocal layout coordinate system to the
+// coordinate system of `ancestor`.
+Matrix4 getLayoutTransformTo(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
   final List<RenderObject> renderers = <RenderObject>[];
   for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
     renderers.add(renderer);
@@ -43,6 +45,7 @@ Matrix4 computeTransformToAncestor(RenderObject current, RenderObject ancestor, 
 
   final Matrix4 transform = Matrix4.identity();
   for (int index = renderers.length - 1; index > 0; index -= 1) {
+    // Apply the layout transform for renderBoxModel and fallback to paint transform for other renderObject type.
     if (renderers[index] is RenderBoxModel) {
       (renderers[index] as RenderBoxModel).applyLayoutTransform(renderers[index - 1], transform, excludeScrollOffset);
     } else {
@@ -1286,9 +1289,9 @@ class RenderBoxModel extends RenderBox
   }
 
   // Get the layout offset of renderObject to its ancestor which does not include the paint offset
-  // such as scroll or transform.
+  // such as scroll or transform.getLayoutTransformTo
   Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
-    return MatrixUtils.transformPoint(computeTransformToAncestor(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
+    return MatrixUtils.transformPoint(getLayoutTransformTo(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
   }
 
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {

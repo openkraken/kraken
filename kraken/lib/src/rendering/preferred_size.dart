@@ -75,7 +75,7 @@ class RenderPositionPlaceholder extends RenderPreferredSize {
   // Get the layout offset of renderObject to its ancestor which does not include the paint offset
   // such as scroll or transform.
   Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
-    return MatrixUtils.transformPoint(computeTransformToAncestor(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
+    return MatrixUtils.transformPoint(getLayoutTransformTo(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
   }
 }
 
