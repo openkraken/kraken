@@ -25,9 +25,6 @@ mixin RenderContentVisibilityMixin on RenderBoxModelBase {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
-    ContentVisibility? contentVisibility = renderStyle.contentVisibility;
-    if (contentVisibility != null)
-      properties.add(DiagnosticsProperty<ContentVisibility>(
-          'contentVisibility', contentVisibility));
+    properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', renderStyle.contentVisibility));
   }
 }
