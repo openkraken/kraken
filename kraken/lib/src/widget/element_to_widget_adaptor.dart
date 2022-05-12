@@ -24,7 +24,8 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
     // Children of custom element need RenderFlowLayout nesting,
     // otherwise the parent render layout will not be called when setting properties.
     if (_krakenNode is dom.Element) {
-      RenderFlowLayout renderFlowLayout = RenderFlowLayout(renderStyle: CSSRenderStyle(target: _krakenNode as dom.Element));
+      CSSRenderStyle renderStyle = CSSRenderStyle(target: _krakenNode as dom.Element);
+      RenderFlowLayout renderFlowLayout = RenderFlowLayout(renderStyle: renderStyle);
       renderFlowLayout.insert(_krakenNode.renderer!);
       return renderFlowLayout;
     } else {

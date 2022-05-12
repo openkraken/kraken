@@ -638,7 +638,13 @@ class CSSRenderStyle
           RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
           // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
           if (ancestorRenderStyle != null) {
-            logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
+            if (ancestorRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT && renderBoxModel!.parent is RenderBox) {
+              RenderBox renderBox = renderBoxModel!.parent as RenderBox;
+              logicalWidth = renderBox.constraints.maxWidth;
+            } else {
+              logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
+            }
+
             // Should subtract horizontal margin of own from its parent content width.
             if (logicalWidth != null) {
               logicalWidth -= renderStyle.margin.horizontal;
@@ -1126,7 +1132,7 @@ class CSSRenderStyle
     RenderStyle renderStyle = this;
     RenderStyle? parentRenderStyle = renderStyle.parent;
     while(parentRenderStyle != null) {
-      if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline) {
+      if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline || parentRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT) {
         break;
       }
       parentRenderStyle = parentRenderStyle.parent;
