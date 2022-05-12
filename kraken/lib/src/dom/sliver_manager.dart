@@ -59,16 +59,6 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
     if (childNode is Element) {
       childNode.style.flushPendingProperties();
-
-      // FIXME: When rneder object is recreated, should reinitialize renderStyle.
-      // When render object is recreated, it should to reinitialize the scroll container and listeners, etc.
-      RenderStyle renderStyle = childNode.renderStyle;
-      if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
-        childNode.updateOverflowX();
-      }
-      if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
-        childNode.updateOverflowY();
-      }
     }
 
     childNode.didAttachRenderer();

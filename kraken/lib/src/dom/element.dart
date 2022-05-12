@@ -479,6 +479,15 @@ abstract class Element
     // The node attach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
     renderBoxModel?.markAdjacentRenderParagraphNeedsLayout();
 
+    // FIXME: When render object is recreated, should reinitialize renderStyle.
+    // When render object is recreated, it should to reinitialize the scroll container and listeners, etc.
+    if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
+      updateOverflowX();
+    }
+    if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
+      updateOverflowY();
+    }
+
     // Ensure that the child is attached.
     ensureChildAttached();
   }
