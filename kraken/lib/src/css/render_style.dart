@@ -145,7 +145,7 @@ abstract class RenderStyle {
   // Misc
   double get opacity;
   Visibility get visibility;
-  ContentVisibility? get contentVisibility;
+  ContentVisibility get contentVisibility;
   VerticalAlign get verticalAlign;
   BoxFit get objectFit;
   bool get isHeightStretch;
