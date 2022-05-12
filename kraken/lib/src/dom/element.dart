@@ -481,12 +481,7 @@ abstract class Element
 
     // FIXME: When render object is recreated, should reinitialize renderStyle.
     // When render object is recreated, it should to reinitialize the scroll container and listeners, etc.
-    if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
-      updateOverflowX();
-    }
-    if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
-      updateOverflowY();
-    }
+    updateOverflow();
 
     // Ensure that the child is attached.
     ensureChildAttached();

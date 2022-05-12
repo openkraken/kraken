@@ -294,6 +294,15 @@ mixin ElementOverflowMixin on ElementBase {
     _attachScrollingContentBox();
   }
 
+  void updateOverflow() {
+    if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
+      updateOverflowX();
+    }
+    if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
+      updateOverflowY();
+    }
+  }
+
   void updateOverflowX() {
     Element element = this as Element;
     CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
