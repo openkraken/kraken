@@ -2,7 +2,9 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/widgets.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/rendering.dart';
 
 class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
   final dom.Node _krakenNode;
@@ -19,7 +21,13 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _krakenNode.renderer!;
+    if (_krakenNode is dom.Element) {
+      RenderFlowLayout renderFlowLayout = RenderFlowLayout(renderStyle: CSSRenderStyle(target: _krakenNode as dom.Element));
+      renderFlowLayout.insert(_krakenNode.renderer!);
+      return renderFlowLayout;
+    } else {
+      return _krakenNode.renderer!;
+    }
   }
 }
 
