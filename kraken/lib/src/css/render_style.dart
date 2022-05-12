@@ -638,6 +638,7 @@ class CSSRenderStyle
           RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
           // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
           if (ancestorRenderStyle != null) {
+            // If parentElement is WidgetElement, should not search for ancestors and get maxWidth of constraints for logicalWidth.
             if (ancestorRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT && renderBoxModel!.parent is RenderBox) {
               RenderBox renderBox = renderBoxModel!.parent as RenderBox;
               logicalWidth = renderBox.constraints.maxWidth;
@@ -1132,6 +1133,7 @@ class CSSRenderStyle
     RenderStyle renderStyle = this;
     RenderStyle? parentRenderStyle = renderStyle.parent;
     while(parentRenderStyle != null) {
+      // If ancestor element is WidgetElement, should return it because should get maxWidth of constraints for logicalWidth.
       if (parentRenderStyle.effectiveDisplay != CSSDisplay.inline || parentRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT) {
         break;
       }
