@@ -941,8 +941,7 @@ class RenderFlowLayout extends RenderLayoutBox {
           }
 
           // Add offset of transform.
-          final Matrix4 transform = child.getEffectiveTransform();
-          final Offset? transformOffset = MatrixUtils.getAsTranslation(transform);
+          final Offset? transformOffset = child.renderStyle.effectiveTransformOffset;
           if (transformOffset != null) {
             childOffsetX += transformOffset.dx;
             childOffsetY += transformOffset.dy;

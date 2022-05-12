@@ -32,7 +32,10 @@ Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder? placeholder, Ren
     return Offset.zero;
   }
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
-  Offset placeholderOffset = placeholder.localToGlobal(positionHolderScrollOffset, ancestor: parent);
+  // Offset of positioned element should exclude scroll offset to its containing block.
+  Offset toParentOffset = placeholder.getOffsetToAncestor(Offset.zero, parent, excludeScrollOffset: true);
+  Offset placeholderOffset = positionHolderScrollOffset + toParentOffset;
+
   return placeholderOffset;
 }
 
