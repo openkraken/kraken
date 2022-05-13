@@ -1528,7 +1528,9 @@ class RenderBoxModel extends RenderBox
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
     void Function(PointerEvent)? scrollablePointerListener = renderStyle.target.scrollablePointerListener;
-    if (scrollablePointerListener != null) {
+    // Element with overflow scroll/auto will create two repaintBoundary.
+    // The inner repaintBoundary should not trigger pointer listener.
+    if (scrollablePointerListener != null && !isScrollingContentBox) {
       scrollablePointerListener(event);
     }
   }
