@@ -9,14 +9,14 @@ import 'package:kraken/css.dart';
 import 'package:kraken/gesture.dart';
 
 mixin RenderOverflowMixin on RenderBoxModelBase {
-  ScrollListener? scrollListener;
-  void Function(PointerEvent)? scrollablePointerListener;
+//  ScrollListener? scrollListener;
+//  void Function(PointerEvent)? scrollablePointerListener;
 
   void disposeScrollable() {
-    scrollListener = null;
-    scrollablePointerListener = null;
-    _scrollOffsetX = null;
-    _scrollOffsetY = null;
+//    scrollListener = null;
+//    scrollablePointerListener = null;
+//    _scrollOffsetX = null;
+//    _scrollOffsetY = null;
     // Dispose clip layer.
     _clipRRectLayer.layer = null;
     _clipRectLayer.layer = null;
@@ -98,51 +98,57 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   Size? _scrollableSize;
   Size? _viewportSize;
 
-  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
-  ViewportOffset? _scrollOffsetX;
-  set scrollOffsetX(ViewportOffset? value) {
-    if (value == _scrollOffsetX) return;
-    _scrollOffsetX?.removeListener(_scrollXListener);
-    _scrollOffsetX = value;
-    _scrollOffsetX?.addListener(_scrollXListener);
-    markNeedsLayout();
-  }
-
-  ViewportOffset? get scrollOffsetY => _scrollOffsetY;
-  ViewportOffset? _scrollOffsetY;
-  set scrollOffsetY(ViewportOffset? value) {
-    if (value == _scrollOffsetY) return;
-    _scrollOffsetY?.removeListener(_scrollYListener);
-    _scrollOffsetY = value;
-    _scrollOffsetY?.addListener(_scrollYListener);
-    markNeedsLayout();
-  }
-
-  void _scrollXListener() {
-    assert(scrollListener != null);
-    // If scroll is happening, that element has been unmounted, prevent null usage.
-    if (scrollOffsetX != null) {
-      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
-      markNeedsPaint();
-    }
-  }
-
-  void _scrollYListener() {
-    assert(scrollListener != null);
-    if (scrollOffsetY != null) {
-      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
-      markNeedsPaint();
-    }
-  }
+//  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
+//  ViewportOffset? _scrollOffsetX;
+//  set scrollOffsetX(ViewportOffset? value) {
+//    if (value == _scrollOffsetX) return;
+//    _scrollOffsetX?.removeListener(_scrollXListener);
+//    _scrollOffsetX = value;
+//    _scrollOffsetX?.addListener(_scrollXListener);
+//    markNeedsLayout();
+//  }
+//
+//  ViewportOffset? get scrollOffsetY => _scrollOffsetY;
+//  ViewportOffset? _scrollOffsetY;
+//  set scrollOffsetY(ViewportOffset? value) {
+//    if (value == _scrollOffsetY) return;
+//    _scrollOffsetY?.removeListener(_scrollYListener);
+//    _scrollOffsetY = value;
+//    _scrollOffsetY?.addListener(_scrollYListener);
+//    markNeedsLayout();
+//  }
+//
+//  void _scrollXListener() {
+//    assert(scrollListener != null);
+//    // If scroll is happening, that element has been unmounted, prevent null usage.
+//    if (scrollOffsetX != null) {
+//      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+//      markNeedsPaint();
+//    }
+//  }
+//
+//  void _scrollYListener() {
+//    assert(scrollListener != null);
+//    if (scrollOffsetY != null) {
+//      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+//      markNeedsPaint();
+//    }
+//  }
 
   void _setUpScrollX() {
-    _scrollOffsetX!.applyViewportDimension(_viewportSize!.width);
-    _scrollOffsetX!.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
+    ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
+    if (_scrollOffsetX != null) {
+      _scrollOffsetX.applyViewportDimension(_viewportSize!.width);
+      _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
+    }
   }
 
   void _setUpScrollY() {
-    _scrollOffsetY!.applyViewportDimension(_viewportSize!.height);
-    _scrollOffsetY!.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
+    ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
+    if (_scrollOffsetY != null) {
+      _scrollOffsetY.applyViewportDimension(_viewportSize!.height);
+      _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
+    }
   }
 
   void setUpOverflowScroller(Size scrollableSize, Size viewportSize) {
@@ -154,32 +160,32 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
     _scrollableSize = scrollableSize;
     _viewportSize = viewportSize;
-    if (_scrollOffsetX != null) {
-      _setUpScrollX();
-    }
 
-    if (_scrollOffsetY != null) {
-      _setUpScrollY();
-    }
+    _setUpScrollX();
+    _setUpScrollY();
   }
 
   double get _paintOffsetX {
+    ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
     if (_scrollOffsetX == null) return 0.0;
-    return -_scrollOffsetX!.pixels;
+    return -_scrollOffsetX.pixels;
   }
   double get _paintOffsetY {
+    ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
     if (_scrollOffsetY == null) return 0.0;
-    return -_scrollOffsetY!.pixels;
+    return -_scrollOffsetY.pixels;
   }
 
   double get scrollTop {
+    ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
     if (_scrollOffsetY == null) return 0.0;
-    return _scrollOffsetY!.pixels;
+    return _scrollOffsetY.pixels;
   }
 
   double get scrollLeft {
+    ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
     if (_scrollOffsetX == null) return 0.0;
-    return _scrollOffsetX!.pixels;
+    return _scrollOffsetX.pixels;
   }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {

@@ -115,7 +115,54 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
 
+  ScrollListener? scrollListener;
+  void Function(PointerEvent)? scrollablePointerListener;
+
+  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
+  ViewportOffset? _scrollOffsetX;
+  set scrollOffsetX(ViewportOffset? value) {
+    if (value == _scrollOffsetX) return;
+    _scrollOffsetX?.removeListener(_scrollXListener);
+    _scrollOffsetX = value;
+    _scrollOffsetX?.addListener(_scrollXListener);
+    RenderBoxModel renderBoxModel = this.renderBoxModel!;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  ViewportOffset? get scrollOffsetY => _scrollOffsetY;
+  ViewportOffset? _scrollOffsetY;
+  set scrollOffsetY(ViewportOffset? value) {
+    if (value == _scrollOffsetY) return;
+    _scrollOffsetY?.removeListener(_scrollYListener);
+    _scrollOffsetY = value;
+    _scrollOffsetY?.addListener(_scrollYListener);
+    RenderBoxModel renderBoxModel = this.renderBoxModel!;
+    renderBoxModel.markNeedsLayout();
+  }
+
+  void _scrollXListener() {
+    assert(scrollListener != null);
+    // If scroll is happening, that element has been unmounted, prevent null usage.
+    if (scrollOffsetX != null) {
+      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
+      renderBoxModel.markNeedsPaint();
+    }
+  }
+
+  void _scrollYListener() {
+    assert(scrollListener != null);
+    if (scrollOffsetY != null) {
+      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+      RenderBoxModel renderBoxModel = this.renderBoxModel!;
+      renderBoxModel.markNeedsPaint();
+    }
+  }
   void disposeScrollable() {
+    scrollListener = null;
+    scrollablePointerListener = null;
+    _scrollOffsetX = null;
+    _scrollOffsetY = null;
     _scrollableX?.position?.dispose();
     _scrollableY?.position?.dispose();
     _scrollableX = null;
@@ -125,10 +172,9 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
+      scrollOffsetX = renderBoxModel.axis == Axis.horizontal
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
-      RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
       switch(overflowX) {
         case CSSOverflowType.clip:
@@ -140,7 +186,7 @@ mixin ElementOverflowMixin on ElementBase {
           // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
           if (_scrollableX == null) {
             _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
-            renderBoxModel.scrollOffsetX = _scrollableX!.position;
+            scrollOffsetX = _scrollableX!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
           bool canDrag = overflowX != CSSOverflowType.hidden;
@@ -152,15 +198,15 @@ mixin ElementOverflowMixin on ElementBase {
           break;
       }
 
-      renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
+      this.scrollListener = scrollListener;
+      scrollablePointerListener = _scrollablePointerListener;
     }
   }
 
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
+      scrollOffsetY = renderBoxModel.axis == Axis.vertical
           ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
@@ -175,7 +221,7 @@ mixin ElementOverflowMixin on ElementBase {
           // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
           if (_scrollableY == null) {
             _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
-            renderBoxModel.scrollOffsetY = _scrollableY!.position;
+            scrollOffsetY = _scrollableY!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
           bool canDrag = overflowY != CSSOverflowType.hidden;
@@ -187,8 +233,8 @@ mixin ElementOverflowMixin on ElementBase {
           break;
       }
 
-      renderBoxModel.scrollListener = scrollListener;
-      renderBoxModel.scrollablePointerListener = _scrollablePointerListener;
+      this.scrollListener = scrollListener;
+      scrollablePointerListener = _scrollablePointerListener;
     }
   }
 

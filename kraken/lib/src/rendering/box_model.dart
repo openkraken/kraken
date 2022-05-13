@@ -751,12 +751,6 @@ class RenderBoxModel extends RenderBox
       // Copy box decoration
       ..boxPainter = boxPainter
 
-      // Copy overflow
-      ..scrollListener = scrollListener
-      ..scrollablePointerListener = scrollablePointerListener
-      ..scrollOffsetX = scrollOffsetX
-      ..scrollOffsetY = scrollOffsetY
-
       // Copy event hook
       ..getEventTarget = getEventTarget
 
@@ -1533,8 +1527,9 @@ class RenderBoxModel extends RenderBox
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
+    void Function(PointerEvent)? scrollablePointerListener = renderStyle.target.scrollablePointerListener;
     if (scrollablePointerListener != null) {
-      scrollablePointerListener!(event);
+      scrollablePointerListener(event);
     }
   }
 
