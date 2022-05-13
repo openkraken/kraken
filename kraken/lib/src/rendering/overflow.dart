@@ -9,14 +9,7 @@ import 'package:kraken/css.dart';
 import 'package:kraken/gesture.dart';
 
 mixin RenderOverflowMixin on RenderBoxModelBase {
-//  ScrollListener? scrollListener;
-//  void Function(PointerEvent)? scrollablePointerListener;
-
   void disposeScrollable() {
-//    scrollListener = null;
-//    scrollablePointerListener = null;
-//    _scrollOffsetX = null;
-//    _scrollOffsetY = null;
     // Dispose clip layer.
     _clipRRectLayer.layer = null;
     _clipRectLayer.layer = null;
@@ -97,43 +90,6 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   Size? _scrollableSize;
   Size? _viewportSize;
-
-//  ViewportOffset? get scrollOffsetX => _scrollOffsetX;
-//  ViewportOffset? _scrollOffsetX;
-//  set scrollOffsetX(ViewportOffset? value) {
-//    if (value == _scrollOffsetX) return;
-//    _scrollOffsetX?.removeListener(_scrollXListener);
-//    _scrollOffsetX = value;
-//    _scrollOffsetX?.addListener(_scrollXListener);
-//    markNeedsLayout();
-//  }
-//
-//  ViewportOffset? get scrollOffsetY => _scrollOffsetY;
-//  ViewportOffset? _scrollOffsetY;
-//  set scrollOffsetY(ViewportOffset? value) {
-//    if (value == _scrollOffsetY) return;
-//    _scrollOffsetY?.removeListener(_scrollYListener);
-//    _scrollOffsetY = value;
-//    _scrollOffsetY?.addListener(_scrollYListener);
-//    markNeedsLayout();
-//  }
-//
-//  void _scrollXListener() {
-//    assert(scrollListener != null);
-//    // If scroll is happening, that element has been unmounted, prevent null usage.
-//    if (scrollOffsetX != null) {
-//      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
-//      markNeedsPaint();
-//    }
-//  }
-//
-//  void _scrollYListener() {
-//    assert(scrollListener != null);
-//    if (scrollOffsetY != null) {
-//      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
-//      markNeedsPaint();
-//    }
-//  }
 
   void _setUpScrollX() {
     ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;

@@ -115,7 +115,7 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
 
-  ScrollListener? scrollListener;
+  ScrollListener? _scrollListener;
   void Function(PointerEvent)? scrollablePointerListener;
 
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
@@ -141,25 +141,25 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void _scrollXListener() {
-    assert(scrollListener != null);
+    assert(_scrollListener != null);
     // If scroll is happening, that element has been unmounted, prevent null usage.
     if (scrollOffsetX != null) {
-      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+      _scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       renderBoxModel.markNeedsPaint();
     }
   }
 
   void _scrollYListener() {
-    assert(scrollListener != null);
+    assert(_scrollListener != null);
     if (scrollOffsetY != null) {
-      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+      _scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       renderBoxModel.markNeedsPaint();
     }
   }
   void disposeScrollable() {
-    scrollListener = null;
+    _scrollListener = null;
     scrollablePointerListener = null;
     _scrollOffsetX = null;
     _scrollOffsetY = null;
@@ -198,8 +198,13 @@ mixin ElementOverflowMixin on ElementBase {
           break;
       }
 
-      this.scrollListener = scrollListener;
-      scrollablePointerListener = _scrollablePointerListener;
+      if (_scrollableX != null || _scrollableY != null) {
+        _scrollListener = scrollListener;
+        scrollablePointerListener = _scrollablePointerListener;
+      } else {
+        _scrollListener = null;
+        scrollablePointerListener = null;
+      }
     }
   }
 
@@ -233,8 +238,13 @@ mixin ElementOverflowMixin on ElementBase {
           break;
       }
 
-      this.scrollListener = scrollListener;
-      scrollablePointerListener = _scrollablePointerListener;
+      if (_scrollableX != null || _scrollableY != null) {
+        _scrollListener = scrollListener;
+        scrollablePointerListener = _scrollablePointerListener;
+      } else {
+        _scrollListener = null;
+        scrollablePointerListener = null;
+      }
     }
   }
 
