@@ -534,6 +534,7 @@ describe('columns-auto', () => {
     await snapshot();
   });
 
+  // @TODO: max-width/max-height is not considered when calculating remaining space for flex-shrink.
   xit("size 002", async () => {
     let flexbox_7;
     flexbox_7 = createElement(
@@ -609,6 +610,7 @@ describe('columns-auto', () => {
     await snapshot();
   });
 
+  // @TODO: Percentage size of child should not be considered in auto min content width/height.
   xit("size 003", async () => {
     let flexbox_9;
     flexbox_9 = createElement(
@@ -676,6 +678,7 @@ describe('columns-auto', () => {
     await snapshot();
   });
 
+  // @TODO: Percentage size of child should not be considered in auto min content width/height.
   xit("size 004", async () => {
     let flexbox_10;
     let childDiv;
