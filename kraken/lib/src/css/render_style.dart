@@ -640,8 +640,16 @@ class CSSRenderStyle
           if (ancestorRenderStyle != null) {
             // If parentElement is WidgetElement, should not search for ancestors and get maxWidth of constraints for logicalWidth.
             RenderObject? renderObject = renderBoxModel!.parent as RenderObject;
-            if (ancestorRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT && renderObject is RenderBox && renderObject.hasSize) {
-              logicalWidth = renderObject.constraints.maxWidth;
+
+
+            if (ancestorRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT && renderObject is RenderBox) {
+              try {
+                // When renderObject has not layouted, get constraints will trigger assets.
+                // Such as image resize will get _styleWidth and call this function before layout.
+                logicalWidth = renderObject.constraints.maxWidth;
+              } catch(e) {
+                logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
+              }
             } else {
               logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
             }
