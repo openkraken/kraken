@@ -5,8 +5,8 @@ std::shared_ptr<<%= className %>> <%= className %>::Create(JSContext* ctx, JSVal
   return std::make_shared<<%= className %>>(ctx, value, exception_state);
 }
 
-<%= className %>::<%= className %>() {}
-<%= className %>::<%= className %>(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+<%= className %>::<%= className %>() <%= generateDictionaryInit(blob, props) %> {}
+<%= className %>::<%= className %>(JSContext* ctx, JSValue value, ExceptionState& exception_state): <%= className %>() {
   FillMembersWithQJSObject(ctx, value, exception_state);
 }
 

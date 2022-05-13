@@ -6,6 +6,7 @@ import {
   FunctionDeclaration,
   FunctionObject,
   ParameterMode,
+  PropsDeclaration,
 } from "./declaration";
 import {addIndent, getClassName} from "./utils";
 import {ParameterType} from "./analyzer";
@@ -229,6 +230,24 @@ return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv);
 `;
 }
 
+function generateDictionaryInit(blob: IDLBlob, props: PropsDeclaration[]) {
+  let initExpression = props.map(prop => {
+    switch(prop.type[0]) {
+      case FunctionArgumentType.boolean: {
+         return `${prop.name}_(false)`;
+      }
+    }
+    return ''
+  });
+
+  // Remove empty.
+  initExpression = initExpression.filter(i => !!i);
+
+  if (initExpression.length == 0) return '';
+
+  return ': ' + initExpression.join(',');
+}
+
 function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: GenFunctionBodyOptions = {
   isConstructor: false,
   isInstanceMethod: false
@@ -384,7 +403,8 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
           blob: blob,
           props: props,
           object: object,
-          generateTypeConverter
+          generateTypeConverter,
+          generateDictionaryInit
         });
       }
       case TemplateKind.globalFunction: {
