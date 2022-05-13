@@ -644,7 +644,7 @@ class CSSRenderStyle
 
             if (ancestorRenderStyle.target.renderObjectManagerType == RenderObjectManagerType.FLUTTER_ELEMENT && renderObject is RenderBox) {
               try {
-                // When renderObject has not layouted, get constraints will trigger assets.
+                // When renderObject has not layouted, get constraints will trigger assert.
                 // Such as image resize will get _styleWidth and call this function before layout.
                 logicalWidth = renderObject.constraints.maxWidth;
               } catch(e) {
