@@ -22,7 +22,7 @@ kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
 
 KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler)
     : contextId(contextId), ownerThreadId(std::this_thread::get_id()) {
-  m_context = new ExecutingContext(
+  context_ = new ExecutingContext(
       contextId,
       [](ExecutingContext* context, const char* message) {
         if (context->dartMethodPtr()->onJsError != nullptr) {
@@ -34,13 +34,13 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler)
 }
 
 bool KrakenPage::parseHTML(const char* code, size_t length) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return false;
 
   // Remove all Nodes including body and head.
-  m_context->document()->documentElement()->RemoveChildren();
+  context_->document()->documentElement()->RemoveChildren();
 
-  HTMLParser::parseHTML(code, length, m_context->document()->documentElement());
+  HTMLParser::parseHTML(code, length, context_->document()->documentElement());
 
   return true;
 }
@@ -49,90 +49,78 @@ void KrakenPage::invokeModuleEvent(const NativeString* moduleName,
                                    const char* eventType,
                                    void* ptr,
                                    NativeString* extra) {
-  //  if (!m_context->isValid())
-  //    return;
-  //
-  //  JSValue eventObject = JS_NULL;
-  //  if (ptr != nullptr) {
-  //    std::string type = std::string(eventType);
-  //    auto* rawEvent = static_cast<RawEvent*>(ptr)->bytes;
-  //    Event* event = Event::create(m_context->ctx(), reinterpret_cast<NativeEvent*>(rawEvent));
-  //    eventObject = event->toQuickJS();
-  //  }
-  //
-  //  JSValue moduleNameValue = JS_NewUnicodeString(m_context->runtime(), m_context->ctx(), moduleName->string,
-  //  moduleName->length); JSValue extraObject = JS_NULL; if (extra != nullptr) {
-  //    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string), extra->length);
-  //    std::string extraString = toUTF8(u16Extra);
-  //    extraObject = JS_ParseJSON(m_context->ctx(), extraString.c_str(), extraString.size(), "");
-  //  }
-  //
-  //  {
-  //    struct list_head *el, *el1;
-  //    list_for_each_safe(el, el1, &m_context->module_job_list) {
-  //      auto* module = list_entry(el, ModuleContext, link);
-  //      JSValue callback = module->callback;
-  //
-  //      JSValue arguments[] = {moduleNameValue, eventObject, extraObject};
-  //      JSValue returnValue = JS_Call(m_context->ctx(), callback, m_context->global(), 3, arguments);
-  //      m_context->handleException(&returnValue);
-  //      JS_FreeValue(m_context->ctx(), returnValue);
-  //    }
-  //  }
-  //
-  //  JS_FreeValue(m_context->ctx(), moduleNameValue);
-  //
-  //  if (rawEvent != nullptr) {
-  //    JS_FreeValue(m_context->ctx(), eventObject);
-  //  }
-  //  if (extra != nullptr) {
-  //    JS_FreeValue(m_context->ctx(), extraObject);
-  //  }
+  if (!context_->IsValid())
+    return;
+
+  JSContext* ctx = context_->ctx();
+  Event* event = nullptr;
+  if (ptr != nullptr) {
+    std::string type = std::string(eventType);
+    auto* rawEvent = static_cast<RawEvent*>(ptr)->bytes;
+    event = Event::From(context_, reinterpret_cast<NativeEvent*>(rawEvent));
+  }
+
+  ScriptValue extraObject = ScriptValue::Empty(ctx);
+  if (extra != nullptr) {
+    std::u16string u16Extra = std::u16string(reinterpret_cast<const char16_t*>(extra->string()), extra->length());
+    std::string extraString = toUTF8(u16Extra);
+    extraObject = ScriptValue::CreateJsonObject(ctx, extraString.c_str(), extraString.length());
+  }
+
+  auto* listeners = context_->ModuleCallbacks()->listeners();
+  for (auto& listener : *listeners) {
+    ScriptValue arguments[] = {ScriptValue(ctx, moduleName),
+                               event != nullptr ? event->ToValue() : ScriptValue::Empty(ctx), extraObject};
+    ScriptValue result = listener->value()->Invoke(ctx, ScriptValue::Empty(ctx), 3, arguments);
+    if (result.IsException()) {
+      context_->HandleException(&result);
+    }
+  }
 }
 
 void KrakenPage::evaluateScript(const NativeString* script, const char* url, int startLine) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return;
 
 #if ENABLE_PROFILE
-  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
+  auto nativePerformance = Performance::instance(context_)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_PARSE_TIME_START);
   std::u16string patchedCode = std::u16string(u"performance.mark('js_parse_time_end');") +
                                std::u16string(reinterpret_cast<const char16_t*>(script->string), script->length);
-  m_context->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
+  context_->evaluateJavaScript(patchedCode.c_str(), patchedCode.size(), url, startLine);
 #else
-  m_context->EvaluateJavaScript(script->string(), script->length(), url, startLine);
+  context_->EvaluateJavaScript(script->string(), script->length(), url, startLine);
 #endif
 }
 
 void KrakenPage::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return;
-  m_context->EvaluateJavaScript(script, length, url, startLine);
+  context_->EvaluateJavaScript(script, length, url, startLine);
 }
 
 void KrakenPage::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return;
-  m_context->EvaluateJavaScript(script, length, url, startLine);
+  context_->EvaluateJavaScript(script, length, url, startLine);
 }
 
 uint8_t* KrakenPage::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return nullptr;
-  return m_context->DumpByteCode(script, length, url, byteLength);
+  return context_->DumpByteCode(script, length, url, byteLength);
 }
 
 void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
-  if (!m_context->IsValid())
+  if (!context_->IsValid())
     return;
-  m_context->EvaluateByteCode(bytes, byteLength);
+  context_->EvaluateByteCode(bytes, byteLength);
 }
 
 void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
   size_t i = 0;
 
-  auto& dartMethodPointer = m_context->dartMethodPtr();
+  auto& dartMethodPointer = context_->dartMethodPtr();
 
   dartMethodPointer->invokeModule = reinterpret_cast<InvokeModule>(methodBytes[i++]);
   dartMethodPointer->requestBatchUpdate = reinterpret_cast<RequestBatchUpdate>(methodBytes[i++]);
@@ -171,12 +159,12 @@ KrakenPage::~KrakenPage() {
     disposeCallback(this);
   }
 #endif
-  delete m_context;
+  delete context_;
   KrakenPage::pageContextPool[contextId] = nullptr;
 }
 
 void KrakenPage::reportError(const char* errmsg) {
-  m_handler(m_context, errmsg);
+  handler_(context_, errmsg);
 }
 
 }  // namespace kraken

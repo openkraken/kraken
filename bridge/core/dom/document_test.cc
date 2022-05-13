@@ -19,7 +19,7 @@ TEST(Document, createElement) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "console.log(div);";
@@ -39,7 +39,7 @@ TEST(Document, body) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code = "console.log(document.body)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
@@ -53,7 +53,7 @@ TEST(Document, appendParentWillFail) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code = "document.body.appendChild(document.documentElement)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, true);
@@ -71,7 +71,7 @@ TEST(Document, createTextNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.setAttribute('hello', 1234);"
@@ -95,7 +95,7 @@ TEST(Document, createComment) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.setAttribute('hello', 1234);"
@@ -119,7 +119,7 @@ TEST(Document, instanceofNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "console.log(document instanceof Node, document instanceof Document, document instanceof EventTarget)";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
@@ -137,7 +137,7 @@ TEST(Document, FreedByOutOfScope) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code = "(() => { let img = document.createElement('div');  })();";
   bridge->evaluateScript(code, strlen(code), "vm://", 0);
   EXPECT_EQ(errorCalled, false);
@@ -153,14 +153,14 @@ TEST(Document, createElementShouldWorkWithMultipleContext) {
 
   {
     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
-    auto context = bridge->getContext();
+    auto context = bridge->GetExecutingContext();
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
     bridge1 = bridge.release();
   }
 
   {
     auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
-    auto context = bridge->getContext();
+    auto context = bridge->GetExecutingContext();
     const char* code = "(() => { let img = document.createElement('img'); document.body.appendChild(img);  })();";
     bridge->evaluateScript(code, strlen(code), "vm://", 0);
   }

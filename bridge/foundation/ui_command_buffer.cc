@@ -24,7 +24,7 @@ void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr, bo
 void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
-    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
+    context_->dartMethodPtr()->requestBatchUpdate(context_->contextId());
 #endif
     update_batched = true;
   }
@@ -36,7 +36,7 @@ void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr) {
 void UICommandBuffer::addCommand(int32_t id, UICommand type, NativeString* args_01, void* nativePtr) {
   if (!update_batched) {
 #if FLUTTER_BACKEND
-    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
+    context_->dartMethodPtr()->requestBatchUpdate(context_->contextId());
     update_batched = true;
 #endif
   }
@@ -52,7 +52,7 @@ void UICommandBuffer::addCommand(int32_t id,
                                  void* nativePtr) {
 #if FLUTTER_BACKEND
   if (!update_batched) {
-    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
+    context_->dartMethodPtr()->requestBatchUpdate(context_->contextId());
     update_batched = true;
   }
 #endif

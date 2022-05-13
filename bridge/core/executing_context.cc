@@ -29,7 +29,7 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
   auto jsContextStartTime =
       std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch())
           .count();
-  auto nativePerformance = Performance::instance(m_context)->m_nativePerformance;
+  auto nativePerformance = Performance::instance(context_)->m_nativePerformance;
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_START, jsContextStartTime);
   nativePerformance.mark(PERF_JS_CONTEXT_INIT_END);
   nativePerformance.mark(PERF_JS_NATIVE_METHOD_INIT_START);

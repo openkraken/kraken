@@ -4,121 +4,96 @@
  */
 
 #include "kraken_test_context.h"
+#include "bindings/qjs/member_installer.h"
+#include "core/dom/document.h"
+#include "core/fileapi/blob.h"
+#include "core/html/parser/html_parser.h"
+#include "qjs_blob.h"
 #include "testframework.h"
 
 namespace kraken {
 
-KrakenTestContext::KrakenTestContext(ExecutingContext* context) : m_context(context) {
-  //  bridge->owner = this;
-  //  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__kraken_environment__", 0);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
-  //  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
-
-  //  initKrakenTestFramework(bridge);
-  //  init_list_head(&image_link);
-}
-
-bool KrakenTestContext::evaluateTestScripts(const uint16_t* code,
-                                            size_t codeLength,
-                                            const char* sourceURL,
-                                            int startLine) {
-  if (!m_context->IsValid())
-    return false;
-  return m_context->EvaluateJavaScript(code, codeLength, sourceURL, startLine);
-}
-
-bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
-  //  if (!m_page_context->isValid())
-  //    return false;
-  //  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
-  //  return m_page->parseHTML(utf8Code.c_str(), utf8Code.length());
-}
-
 static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  //  JSValue& callback = argv[0];
-  //  auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  //  if (!JS_IsObject(callback)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-  //  }
-  //
-  //  if (!JS_IsFunction(ctx, callback)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
-  //  }
-  //  auto bridge = static_cast<KrakenPage*>(context->getOwner());
-  //  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
-  //  bridgeTest->m_executeTestCallback = ScriptValue(ctx, callback);
-  //  return JS_NULL;
+  JSValue& callback = argv[0];
+  auto context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
+  if (!JS_IsObject(callback)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+  }
+
+  if (!JS_IsFunction(ctx, callback)) {
+    return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
+  }
+  auto bridge = static_cast<KrakenPage*>(context->owner());
+  auto bridgeTest = static_cast<KrakenTestContext*>(bridge->owner);
+  bridgeTest->execute_test_callback_ = QJSFunction::Create(ctx, callback);
+  return JS_NULL;
 }
 
 static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  //  JSValue& blobValue = argv[0];
-  //  JSValue& screenShotValue = argv[1];
-  //  JSValue& callbackValue = argv[2];
-  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  //
-  //  if (!JS_IsObject(blobValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be
-  //    an Blob object.");
-  //  }
-  //  auto blob = static_cast<kraken::BlobInstance*>(JS_GetOpaque(blobValue, kraken::Blob::kBlobClassID));
-  //
-  //  if (blob == nullptr) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be
-  //    an Blob object.");
-  //  }
-  //
-  //  if (!JS_IsString(screenShotValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be
-  //    an string.");
-  //  }
-  //
-  //  if (!JS_IsObject(callbackValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is
-  //    not an function.");
-  //  }
-  //
-  //  if (!JS_IsFunction(ctx, callbackValue)) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is
-  //    not an function.");
-  //  }
-  //
-  //  if (getDartMethod()->matchImageSnapshot == nullptr) {
-  //    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': dart method
-  //    (matchImageSnapshot) is not registered.");
-  //  }
-  //
-  //  std::unique_ptr<NativeString> screenShotNativeString = kraken::jsValueToNativeString(ctx, screenShotValue);
-  //  auto bridge = static_cast<KrakenPageTest*>(static_cast<KrakenPage*>(context->getOwner())->owner);
-  //  auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
-  //  list_add_tail(&callbackContext->link, &bridge->image_link);
-  //
-  //  auto fn = [](void* ptr, int32_t contextId, int8_t result, const char* errmsg) {
-  //    auto* callbackContext = static_cast<ImageSnapShotContext*>(ptr);
-  //    JSContext* ctx = callbackContext->context->ctx();
-  //
-  //    if (errmsg == nullptr) {
-  //      JSValue arguments[] = {JS_NewBool(ctx, result != 0), JS_NULL};
-  //      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 1,
-  //      arguments); callbackContext->context->handleException(&returnValue);
-  //    } else {
-  //      JSValue errmsgValue = JS_NewString(ctx, errmsg);
-  //      JSValue arguments[] = {JS_NewBool(ctx, false), errmsgValue};
-  //      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->global(), 2,
-  //      arguments); callbackContext->context->handleException(&returnValue); JS_FreeValue(ctx, errmsgValue);
-  //    }
-  //
-  //    callbackContext->context->drainPendingPromiseJobs();
-  //    JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
-  //    list_del(&callbackContext->link);
-  //  };
-  //
-  //  getDartMethod()->matchImageSnapshot(callbackContext, context->getContextId(), blob->bytes(), blob->size(),
-  //  screenShotNativeString.get(), fn);
+  JSValue& blobValue = argv[0];
+  JSValue& screenShotValue = argv[1];
+  JSValue& callbackValue = argv[2];
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
+
+  if (!QJSBlob::HasInstance(context, blobValue)) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
+  }
+  auto* blob = toScriptWrappable<Blob>(blobValue);
+
+  if (blob == nullptr) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
+  }
+
+  if (!JS_IsString(screenShotValue)) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.");
+  }
+
+  if (!JS_IsObject(callbackValue)) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
+  }
+
+  if (!JS_IsFunction(ctx, callbackValue)) {
+    return JS_ThrowTypeError(
+        ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
+  }
+
+  if (context->dartMethodPtr()->matchImageSnapshot == nullptr) {
+    return JS_ThrowTypeError(
+        ctx,
+        "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
+  }
+
+  std::unique_ptr<NativeString> screenShotNativeString = kraken::jsValueToNativeString(ctx, screenShotValue);
+  auto bridge = static_cast<KrakenTestContext*>(static_cast<KrakenPage*>(context->owner())->owner);
+  auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
+
+  auto fn = [](void* ptr, int32_t contextId, int8_t result, const char* errmsg) {
+    auto* callbackContext = static_cast<ImageSnapShotContext*>(ptr);
+    JSContext* ctx = callbackContext->context->ctx();
+
+    if (errmsg == nullptr) {
+      JSValue arguments[] = {JS_NewBool(ctx, result != 0), JS_NULL};
+      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->Global(), 1, arguments);
+      callbackContext->context->HandleException(&returnValue);
+    } else {
+      JSValue errmsgValue = JS_NewString(ctx, errmsg);
+      JSValue arguments[] = {JS_NewBool(ctx, false), errmsgValue};
+      JSValue returnValue = JS_Call(ctx, callbackContext->callback, callbackContext->context->Global(), 2, arguments);
+      callbackContext->context->HandleException(&returnValue);
+      JS_FreeValue(ctx, errmsgValue);
+    }
+
+    callbackContext->context->DrainPendingPromiseJobs();
+    JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
+    list_del(&callbackContext->link);
+  };
+
+  context->dartMethodPtr()->matchImageSnapshot(callbackContext, context->contextId(), blob->bytes(), blob->size(),
+                                               screenShotNativeString.get(), fn);
   return JS_NULL;
 }
 
@@ -220,21 +195,15 @@ static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc
 };
 
 static JSValue parseHTML(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-  //
-  //  if (argc == 1) {
-  //    JSValue& html = argv[0];
-  //
-  //    std::string strHTML = jsValueToStdString(ctx, html);
-  //
-  //    JSValue bodyValue = JS_GetPropertyStr(context->ctx(), context->document()->jsObject, "body");
-  //    auto* body = static_cast<ElementInstance*>(JS_GetOpaque(bodyValue, Element::classId()));
-  //    HTMLParser::parseHTML(strHTML, body);
-  //
-  //    JS_FreeValue(ctx, bodyValue);
-  //  }
-  //
-  //  return JS_NULL;
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx));
+
+  if (argc == 1) {
+    std::string strHTML = AtomicString(ctx, argv[0]).ToStdString();
+    auto* body = context->document()->body();
+    HTMLParser::parseHTML(strHTML, body);
+  }
+
+  return JS_NULL;
 }
 
 static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
@@ -261,46 +230,77 @@ struct ExecuteCallbackContext {
 };
 
 void KrakenTestContext::invokeExecuteTest(ExecuteCallback executeCallback) {
-  //  if (JS_IsNull(executeTestCallback)) {
-  //    return;
-  //  }
-  //  if (!JS_IsFunction(m_page_context->ctx(), executeTestCallback)) {
-  //    return;
-  //  }
-  //
-  //  auto done = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* func_data)
-  //  -> JSValue {
-  //    JSValue& statusValue = argv[0];
-  //    JSValue proxyObject = func_data[0];
-  //    auto* callbackContext = static_cast<ExecuteCallbackContext*>(JS_GetOpaque(proxyObject, 1));
-  //
-  //    if (!JS_IsString(statusValue)) {
-  //      return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
-  //    }
-  //
-  //    std::unique_ptr<NativeString> status = kraken::jsValueToNativeString(ctx, statusValue);
-  //    callbackContext->executeCallback(callbackContext->context->getContextId(), status.get());
-  //    return JS_NULL;
-  //  };
-  //  auto* callbackContext = new ExecuteCallbackContext(m_page_context, executeCallback);
-  //  executeTestProxyObject = JS_NewObject(m_page_context->ctx());
-  //  JS_SetOpaque(executeTestProxyObject, callbackContext);
-  //  JSValue callbackData[]{executeTestProxyObject};
-  //  JSValue callback = JS_NewCFunctionData(m_page_context->ctx(), done, 0, 0, 1, callbackData);
-  //
-  //  JSValue arguments[] = {callback};
-  //  JSValue result = JS_Call(m_page_context->ctx(), executeTestCallback, executeTestCallback, 1, arguments);
-  //  m_page_context->handleException(&result);
-  //  m_page_context->drainPendingPromiseJobs();
-  //  JS_FreeValue(m_page_context->ctx(), executeTestCallback);
-  //  JS_FreeValue(m_page_context->ctx(), callback);
-  //  executeTestCallback = JS_NULL;
+  if (execute_test_callback_ == nullptr) {
+    return;
+  }
+
+  auto done = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic,
+                 JSValue* func_data) -> JSValue {
+    JSValue& statusValue = argv[0];
+    JSValue proxyObject = func_data[0];
+    auto* callbackContext = static_cast<ExecuteCallbackContext*>(JS_GetOpaque(proxyObject, 1));
+
+    if (!JS_IsString(statusValue)) {
+      return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
+    }
+
+    std::unique_ptr<NativeString> status = kraken::jsValueToNativeString(ctx, statusValue);
+    callbackContext->executeCallback(callbackContext->context->contextId(), status.get());
+    return JS_NULL;
+  };
+  auto* callbackContext = new ExecuteCallbackContext(context_, executeCallback);
+  execute_test_proxy_object_ = JS_NewObject(context_->ctx());
+  JS_SetOpaque(execute_test_proxy_object_, callbackContext);
+  JSValue callbackData[]{execute_test_proxy_object_};
+  JSValue callback = JS_NewCFunctionData(context_->ctx(), done, 0, 0, 1, callbackData);
+
+  ScriptValue arguments[] = {ScriptValue(context_->ctx(), callback)};
+  ScriptValue result =
+      execute_test_callback_->Invoke(context_->ctx(), ScriptValue::Empty(context_->ctx()), 1, arguments);
+  context_->HandleException(&result);
+  context_->DrainPendingPromiseJobs();
+  JS_FreeValue(context_->ctx(), callback);
+  execute_test_callback_ = nullptr;
+}
+
+KrakenTestContext::KrakenTestContext(ExecutingContext* context) : context_(context), page_(static_cast<KrakenPage*>(context->owner())) {
+  page_->owner = this;
+  page_->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenTestContext*>(bridge->owner); };
+
+  std::initializer_list<MemberInstaller::FunctionConfig> functionConfig{
+      {"__kraken_execute_test__", executeTest, 1},
+      {"__kraken_match_image_snapshot__", matchImageSnapshot, 3},
+      {"__kraken_environment__", environment, 0},
+      {"__kraken_simulate_pointer__", simulatePointer, 1},
+      {"__kraken_simulate_inputtext__", simulateInputText, 1},
+      {"__kraken_trigger_global_error__", triggerGlobalError, 0},
+      {"__kraken_parse_html__", parseHTML, 1},
+  };
+
+  MemberInstaller::InstallFunctions(context, context->Global(), functionConfig);
+  initKrakenTestFramework(context);
+}
+
+bool KrakenTestContext::evaluateTestScripts(const uint16_t* code,
+                                            size_t codeLength,
+                                            const char* sourceURL,
+                                            int startLine) {
+  if (!context_->IsValid())
+    return false;
+  return context_->EvaluateJavaScript(code, codeLength, sourceURL, startLine);
+}
+
+bool KrakenTestContext::parseTestHTML(const uint16_t* code, size_t codeLength) {
+  if (!context_->IsValid())
+    return false;
+  std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
+  return page_->parseHTML(utf8Code.c_str(), utf8Code.length());
 }
 
 void KrakenTestContext::registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
   size_t i = 0;
 
-  auto& dartMethodPtr = m_context->dartMethodPtr();
+  auto& dartMethodPtr = context_->dartMethodPtr();
 
   dartMethodPtr->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
   dartMethodPtr->matchImageSnapshot = reinterpret_cast<MatchImageSnapshot>(methodBytes[i++]);

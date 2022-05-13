@@ -19,7 +19,7 @@ TEST(Element, setAttribute) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.setAttribute('hello', 1234);"
@@ -41,7 +41,7 @@ TEST(Element, getAttribute) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "let string = 'helloworld';"
@@ -69,7 +69,7 @@ TEST(Element, setAttributeWithHTML) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.innerHTML = '<img src=\"https://miniapp-nikestore-demo.oss-cn-beijing.aliyuncs.com/white_shoes_v1.png\" "
@@ -90,7 +90,7 @@ TEST(Element, instanceofNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "console.log(div instanceof Node)";
@@ -111,7 +111,7 @@ TEST(Element, instanceofEventTarget) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "console.log(div instanceof EventTarget)";
@@ -135,7 +135,7 @@ TEST(Element, stringifyBoundingClientRect) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   NativeBoundingClientRect nativeRect{
       10.0, 20.0, 30.0, 40.0, 10.0, 20.0, 30.0, 40.0,

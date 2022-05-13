@@ -121,7 +121,7 @@ bool checkPage(int32_t contextId, void* context) {
   if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
     return false;
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  return page->getContext() == context;
+  return page->GetExecutingContext() == context;
 }
 
 void evaluateScripts(int32_t contextId, kraken::NativeString* code, const char* bundleFilename, int startLine) {
@@ -209,21 +209,21 @@ void* getUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   if (page == nullptr)
     return nullptr;
-  return page->getContext()->uiCommandBuffer()->data();
+  return page->GetExecutingContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   if (page == nullptr)
     return 0;
-  return page->getContext()->uiCommandBuffer()->size();
+  return page->GetExecutingContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   if (page == nullptr)
     return;
-  page->getContext()->uiCommandBuffer()->clear();
+  page->GetExecutingContext()->uiCommandBuffer()->clear();
 }
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) {

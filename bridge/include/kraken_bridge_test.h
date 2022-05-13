@@ -13,7 +13,7 @@ void initTestFramework(int32_t contextId);
 KRAKEN_EXPORT_C
 int8_t evaluateTestScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine);
 
-using ExecuteCallback = void* (*)(int32_t contextId, NativeString* status);
+using ExecuteCallback = void* (*)(int32_t contextId, void* status);
 
 KRAKEN_EXPORT_C
 void executeTest(int32_t contextId, ExecuteCallback executeCallback);

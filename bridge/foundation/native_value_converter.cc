@@ -13,7 +13,7 @@ namespace kraken {
 //                          int32_t argc,
 //                          NativeValue* argv,
 //                          NativeValue* returnValue) {
-//  //  auto* context = functionContext->m_context;
+//  //  auto* context = functionContext->context_;
 //  //  auto* arguments = new JSValue[argc];
 //  //  for (int i = 0; i < argc; i++) {
 //  //    arguments[i] = nativeValueToJSValue(context, argv[i]);

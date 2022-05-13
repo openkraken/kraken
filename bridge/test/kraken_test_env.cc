@@ -141,14 +141,14 @@ uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_
 
 void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
+  auto* context = page->GetExecutingContext();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_frameCallbacks.erase(id);
 }
 
 void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
+  auto* context = page->GetExecutingContext();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_timers.erase(timerId);
 }
@@ -199,7 +199,7 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
   });
   initTestFramework(contextId);
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
+  auto* context = page->GetExecutingContext();
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(ScriptState::runtime(), th);
 

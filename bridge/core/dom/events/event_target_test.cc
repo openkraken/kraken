@@ -20,7 +20,7 @@ TEST(EventTarget, addEventListener) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f); "
       "div.dispatchEvent(new Event('click'));";
@@ -39,7 +39,7 @@ TEST(EventTarget, removeEventListener) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div'); function f(){ console.log(1234); }; div.addEventListener('click', f);"
       "div.removeEventListener('click', f); div.dispatchEvent(new Event('click'));";
@@ -60,7 +60,7 @@ TEST(EventTarget, removeEventListener) {
 //    errorCalled = true;
 //  });
 //
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  const char* code =
 //      "let div = document.createElement('div'); div._a = { name: 1}; console.log(div._a); "
 //      "document.body.appendChild(div);";
@@ -79,7 +79,7 @@ TEST(EventTarget, removeEventListener) {
 //    KRAKEN_LOG(VERBOSE) << errmsg;
 //    errorCalled = true;
 //  });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  const char* code =
 //      "let div = document.createElement('div'); "
 //      "div.onclick = function() { return 1234; };"
@@ -101,7 +101,7 @@ TEST(EventTarget, removeEventListener) {
 //    KRAKEN_LOG(VERBOSE) << errmsg;
 //    errorCalled = true;
 //  });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  const char* code =
 //      "let div = document.createElement('div'); "
 //      "div.onclick = function() { return 1234; };"
@@ -124,7 +124,7 @@ TEST(EventTarget, removeEventListener) {
 //    KRAKEN_LOG(VERBOSE) << errmsg;
 //    errorCalled = true;
 //  });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  const char* code =
 //      "window.onclick = function() { console.log(1234); };"
 //      "window.dispatchEvent(new Event('click'));";
@@ -144,7 +144,7 @@ TEST(EventTarget, removeEventListener) {
 //    KRAKEN_LOG(VERBOSE) << errmsg;
 //    errorCalled = true;
 //  });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  std::string code = R"(
 //    const img = document.createElement('img');
 //    img.style.width = '100px';
@@ -186,7 +186,7 @@ TEST(EventTarget, removeEventListener) {
 //    KRAKEN_LOG(VERBOSE) << errmsg;
 //    errorCalled = true;
 //  });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  std::string code = std::string(R"(
 // class Sample extends EventTarget {
 //  constructor() {
@@ -221,7 +221,7 @@ TEST(EventTarget, removeEventListener) {
 //    EXPECT_STREQ(message.c_str(), "1234");
 //  };
 //  auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-//  auto context = bridge->getContext();
+//  auto context = bridge->GetExecutingContext();
 //  std::string code = std::string(R"(
 //{
 //// Wrap div in a block scope will be freed by GC
@@ -275,12 +275,12 @@ TEST(EventTarget, removeEventListener) {
 //  };
 //  std::string code = "addEventListener('click', () => {console.log(1)});";
 //  bridge->evaluateScript(code.c_str(), code.size(), "internal://", 0);
-//  JS_RunGC(bridge->getContext()->runtime());
+//  JS_RunGC(bridge->GetExecutingContext()->runtime());
 //
 //  std::string code2 = "addEventListener('appear', () => {console.log(2)});";
 //  bridge->evaluateScript(code2.c_str(), code2.size(), "internal://", 0);
 //
-//  JS_RunGC(bridge->getContext()->runtime());
+//  JS_RunGC(bridge->GetExecutingContext()->runtime());
 //
 //  std::string code3 = "(function() { var eeee = new Event('appear'); dispatchEvent(eeee); } )();";
 //  bridge->evaluateScript(code3.c_str(), code3.size(), "internal://", 0);

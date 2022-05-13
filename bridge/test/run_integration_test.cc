@@ -32,7 +32,7 @@ std::string readTestSpec() {
 // Very useful to fix bridge bugs.
 TEST(IntegrationTest, runSpecs) {
   auto bridge = TEST_init();
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);

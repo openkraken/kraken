@@ -13,7 +13,7 @@ TEST(ModuleManager, ShouldReturnCorrectValue) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   std::string code = std::string(R"(
 let object = {
@@ -42,7 +42,7 @@ TEST(ModuleManager, shouldThrowErrorWhenBadJSON) {
   });
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
 
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   std::string code = std::string(R"(
 let object = {
@@ -74,7 +74,7 @@ TEST(ModuleManager, invokeModuleError) {
                  "'}");
   };
 
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   std::string code = std::string(R"(
 function f() {

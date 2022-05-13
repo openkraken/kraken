@@ -37,6 +37,7 @@ class ScriptValue final {
   static ScriptValue Empty(JSContext* ctx);
   // Wrap an Quickjs JSValue to ScriptValue.
   explicit ScriptValue(JSContext* ctx, JSValue value) : ctx_(ctx), value_(JS_DupValue(ctx, value)){};
+  explicit ScriptValue(JSContext* ctx, const NativeString* string): ctx_(ctx), value_(JS_NewUnicodeString(ctx, string->string(), string->length())) {}
   explicit ScriptValue(JSContext* ctx) : ctx_(ctx){};
   ScriptValue() = default;
 

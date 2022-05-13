@@ -16,7 +16,7 @@ TEST(Node, appendChild) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "document.body.appendChild(div);"
@@ -36,7 +36,7 @@ TEST(Node, childNodes) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div1 = document.createElement('div');"
       "let div2 = document.createElement('div');"
@@ -60,7 +60,7 @@ TEST(Node, textNodeHaveEmptyChildNodes) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let text = document.createTextNode('helloworld');"
       "console.log(text.childNodes);";
@@ -78,7 +78,7 @@ TEST(Node, textContent) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let text1 = document.createTextNode('1234');"
       "let text2 = document.createTextNode('helloworld');"
@@ -100,7 +100,7 @@ TEST(Node, setTextContent) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "div.textContent = '1234';"
@@ -119,7 +119,7 @@ TEST(Node, ensureDetached) {
     logCalled = true;
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   const char* code =
       "let div = document.createElement('div');"
       "document.body.appendChild(div);"
@@ -143,7 +143,7 @@ TEST(Node, replaceBody) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   //  const char* code = "let newbody = document.createElement('body'); document.documentElement.replaceChild(newbody,
   //  document.body)";
   const char* code = "document.body = document.createElement('body');";
@@ -181,7 +181,7 @@ TEST(Node, cloneNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
   EXPECT_EQ(errorCalled, false);
@@ -230,7 +230,7 @@ TEST(Node, nestedNode) {
     KRAKEN_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
   EXPECT_EQ(errorCalled, false);

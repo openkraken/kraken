@@ -23,6 +23,8 @@ class ModuleCallbackCoordinator final {
   void AddModuleCallbacks(std::shared_ptr<ModuleCallback>&& callback);
   void RemoveModuleCallbacks(std::shared_ptr<ModuleCallback> callback);
 
+  [[nodiscard]] const std::forward_list<std::shared_ptr<ModuleCallback>>* listeners() const;
+
  private:
   std::forward_list<std::shared_ptr<ModuleCallback>> listeners_;
   friend ModuleListener;

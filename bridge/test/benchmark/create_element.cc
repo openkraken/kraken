@@ -10,7 +10,7 @@
 auto bridge = TEST_init();
 
 static void CreateRawJavaScriptObjects(benchmark::State& state) {
-  auto& context = bridge->getContext();
+  auto& context = bridge->GetExecutingContext();
   std::string code = "var a = {}";
   // Perform setup here
   for (auto _ : state) {
@@ -19,7 +19,7 @@ static void CreateRawJavaScriptObjects(benchmark::State& state) {
 }
 
 static void CreateDivElement(benchmark::State& state) {
-  auto& context = bridge->getContext();
+  auto& context = bridge->GetExecutingContext();
   std::string code = "var a = document.createElement('div');";
   // Perform setup here
   for (auto _ : state) {

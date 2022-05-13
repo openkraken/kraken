@@ -13,7 +13,7 @@ std::unordered_map<int, kraken::KrakenTestContext*> testContextPool =
 
 void initTestFramework(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto testContext = new kraken::KrakenTestContext(page->getContext());
+  auto testContext = new kraken::KrakenTestContext(page->GetExecutingContext());
   testContextPool[contextId] = testContext;
 }
 
