@@ -167,12 +167,6 @@ void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t lengt
   context->registerDartMethods(methodBytes, length);
 }
 
-NativeScreen* createScreen(double width, double height) {
-  //  screen.width = width;
-  //  screen.height = height;
-  //  return &screen;
-}
-
 static KrakenInfo* krakenInfo{nullptr};
 
 KrakenInfo* getKrakenInfo() {

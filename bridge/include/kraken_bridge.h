@@ -57,8 +57,6 @@ void invokeModuleEvent(int32_t contextId,
 KRAKEN_EXPORT_C
 void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length);
 KRAKEN_EXPORT_C
-NativeScreen* createScreen(double width, double height);
-KRAKEN_EXPORT_C
 KrakenInfo* getKrakenInfo();
 KRAKEN_EXPORT_C
 void dispatchUITask(int32_t contextId, void* context, void* callback);

@@ -70,7 +70,7 @@ class UICommandBuffer {
   void clear();
 
  private:
-  ExecutingContext* m_context{nullptr};
+  ExecutingContext* context_{nullptr};
   std::atomic<bool> update_batched{false};
   std::vector<UICommandItem> queue;
 };

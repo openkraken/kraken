@@ -9,11 +9,11 @@
 
 namespace kraken {
 
-UICommandBuffer::UICommandBuffer(ExecutingContext* context) : m_context(context) {}
+UICommandBuffer::UICommandBuffer(ExecutingContext* context) : context_(context) {}
 
 void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr, bool batchedUpdate) {
   if (batchedUpdate) {
-    m_context->dartMethodPtr()->requestBatchUpdate(m_context->contextId());
+    context_->dartMethodPtr()->requestBatchUpdate(context_->contextId());
     update_batched = true;
   }
 
