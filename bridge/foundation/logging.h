@@ -22,6 +22,8 @@
 
 namespace kraken {
 
+class ExecutingContext;
+
 typedef int LogSeverity;
 
 // Default log levels. Negative values can be used for verbose log levels.
@@ -60,7 +62,7 @@ class LogMessage {
   const int line_;
 };
 
-void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx);
+void printLog(ExecutingContext* context, std::stringstream& stream, std::string level, void* ctx);
 
 }  // namespace kraken
 

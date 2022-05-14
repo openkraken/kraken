@@ -131,8 +131,6 @@ void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
   dartMethodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
   dartMethodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
   dartMethodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
-  dartMethodPointer->devicePixelRatio = reinterpret_cast<DevicePixelRatio>(methodBytes[i++]);
-  dartMethodPointer->platformBrightness = reinterpret_cast<PlatformBrightness>(methodBytes[i++]);
   dartMethodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   dartMethodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
   dartMethodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
@@ -145,6 +143,7 @@ void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
 #endif
 
   dartMethodPointer->onJsError = reinterpret_cast<OnJSError>(methodBytes[i++]);
+  dartMethodPointer->onJsLog = reinterpret_cast<OnJSLog>(methodBytes[i++]);
 
   assert_m(i == length, "Dart native methods count is not equal with C++ side method registrations.");
 }

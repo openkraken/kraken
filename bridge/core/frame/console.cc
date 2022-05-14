@@ -17,7 +17,7 @@ void Console::__kraken_print__(ExecutingContext* context,
   std::stringstream stream;
   std::string buffer = log.ToStdString();
   stream << buffer;
-  printLog(context->contextId(), stream, level != built_in_string::kempty_string ? level.ToStdString() : "info",
+  printLog(context, stream, level != built_in_string::kempty_string ? level.ToStdString() : "info",
            nullptr);
 }
 
@@ -25,7 +25,7 @@ void Console::__kraken_print__(ExecutingContext* context, const AtomicString& lo
   std::stringstream stream;
   std::string buffer = log.ToStdString();
   stream << buffer;
-  printLog(context->contextId(), stream, "info", nullptr);
+  printLog(context, stream, "info", nullptr);
 }
 
 }  // namespace kraken
