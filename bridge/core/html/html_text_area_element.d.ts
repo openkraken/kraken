@@ -1,18 +1,17 @@
-interface HostObject {}
-interface Element {}
+import {Element} from "../dom/element";
 
 // https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element
-interface TextareaElement extends Element {
+interface HTMLTextAreaElement extends Element {
   defaultValue: string;
   value: string;
-  cols: long;
-  rows: long;
+  cols: double;
+  rows: double;
   wrap: string;
   autofocus: boolean;
   autocomplete: string;
   disabled: boolean;
-  minLength: long;
-  maxLength: long;
+  minLength: double;
+  maxLength: double;
   name: string;
   placeholder: string;
   readonly: boolean;
