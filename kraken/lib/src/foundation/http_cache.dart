@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:collection';
@@ -9,8 +8,6 @@ import 'dart:io';
 import 'package:async/async.dart';
 import 'package:kraken/foundation.dart';
 import 'package:path/path.dart' as path;
-
-import 'http_cache_object.dart';
 
 enum HttpCacheMode {
 
@@ -116,12 +113,13 @@ class HttpCacheController {
   Future<HttpClientResponse> interceptResponse(
       HttpClientRequest request,
       HttpClientResponse response,
-      HttpCacheObject cacheObject) async {
+      HttpCacheObject cacheObject,
+      HttpClient httpClient) async {
     await cacheObject.updateIndex(response);
 
     // Negotiate cache with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
-      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse();
+      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse(httpClient);
       if (cachedResponse != null) {
         return cachedResponse;
       }

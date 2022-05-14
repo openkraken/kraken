@@ -200,7 +200,7 @@ describe('display sliver', () => {
       done();
     });
   });
-  
+
   it('sliver child is text or comment', async () => {
     var comment = document.createComment('HelloWorld');
     var text = document.createTextNode('HelloWorld');
@@ -208,7 +208,7 @@ describe('display sliver', () => {
     var emptyText = document.createTextNode('');
 
     var container = createSliverBasicCase();
-    
+
     container.insertBefore(emptyText, container.firstChild);
     container.insertBefore(text, container.firstChild);
     container.insertBefore(comment, container.firstChild);
@@ -219,7 +219,7 @@ describe('display sliver', () => {
 
   it('sliver child is display none', async () => {
     var container = createSliverBasicCase();
-    
+
     container.children[2].style.display = 'none';
     await snapshot(); // Not throws error is ok.
   });
@@ -252,12 +252,29 @@ describe('display sliver', () => {
     var container = createSliverBasicCase();
     var firstChild = container.firstChild; // should be element.
     firstChild.style.position = 'relative';
-    
+
     var innerChild = document.createElement('div');
     innerChild.appendChild(document.createTextNode('helloworld'));
     innerChild.style.position = 'relative';
     innerChild.style.top = innerChild.style.left = '15px';
     firstChild?.appendChild(innerChild);
+    await snapshot();
+  });
+
+  it('sliver item absolute', async () => {
+    var container = createSliverBasicCase();
+    document.body.appendChild(container);
+
+    var absoluted = document.createElement('div');
+    Object.assign(absoluted.style, {
+      width: '10px',
+      height: '10px',
+      position: 'absolute',
+      background: 'green',
+      top: 0,
+      right: 0,
+    });
+    container.childNodes[1].appendChild(absoluted);
     await snapshot();
   });
 });

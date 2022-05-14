@@ -6,7 +6,7 @@ describe('Transition property', () => {
       position: 'absolute',
       padding: '30px',
       transition: 'all 1s linear',
-    }); 
+    });
     container1.appendChild(document.createTextNode('DIV'));
     await snapshot();
 

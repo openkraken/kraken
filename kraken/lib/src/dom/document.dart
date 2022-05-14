@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
@@ -15,17 +14,24 @@ import 'package:kraken/widget.dart';
 
 class Document extends Node {
   final KrakenController controller;
+  final AnimationTimeline animationTimeline = AnimationTimeline();
   RenderViewportBox? _viewport;
   GestureListener? gestureListener;
   WidgetDelegate? widgetDelegate;
 
-  Document(context, {
+  Document(BindingContext context, {
     required this.controller,
     required RenderViewportBox viewport,
     this.gestureListener,
     this.widgetDelegate,
   }) : _viewport = viewport,
-        super(NodeType.DOCUMENT_NODE, context);
+        super(NodeType.DOCUMENT_NODE, context) {
+    _scriptRunner = ScriptRunner(this, context.contextId);
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L1898
+  late ScriptRunner _scriptRunner;
+  ScriptRunner get scriptRunner => _scriptRunner;
 
   @override
   EventTarget? get parentEventTarget => defaultView;
@@ -47,6 +53,36 @@ class Document extends Node {
   @override
   RenderBox? get renderer => _viewport;
 
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L770
+  bool parsing = false;
+
+  int _requestCount = 0;
+  bool get hasPendingRequest => _requestCount > 0;
+  void incrementRequestCount() {
+    _requestCount++;
+  }
+  void decrementRequestCount() {
+    assert(_requestCount > 0);
+    _requestCount--;
+  }
+
+  // https://github.com/WebKit/WebKit/blob/main/Source/WebCore/dom/Document.h#L2091
+  // Counters that currently need to delay load event, such as parsing a script.
+  int _loadEventDelayCount = 0;
+  bool get isDelayingLoadEvent => _loadEventDelayCount > 0;
+  void incrementLoadEventDelayCount() {
+    _loadEventDelayCount++;
+  }
+
+  void decrementLoadEventDelayCount() {
+    _loadEventDelayCount--;
+
+    // Try to check when the request is complete.
+    if (_loadEventDelayCount == 0) {
+      controller.checkCompleted();
+    }
+  }
+
   Element? _documentElement;
   Element? get documentElement => _documentElement;
   set documentElement(Element? element) {
@@ -56,19 +92,19 @@ class Document extends Node {
 
     RenderViewportBox? viewport = _viewport;
     // When document is disposed, viewport is null.
-    if (viewport == null) return;
-
-    if (element != null) {
-      element.attachTo(this);
-      // Should scrollable.
-      element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
-      element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
-      // Init with viewport size.
-      element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
-      element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
-    } else {
-      // Detach document element.
-      viewport.child = null;
+    if (viewport != null) {
+      if (element != null) {
+        element.attachTo(this);
+        // Should scrollable.
+        element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
+        element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
+        // Init with viewport size.
+        element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
+        element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
+      } else {
+        // Detach document element.
+        viewport.child = null;
+      }
     }
 
     _documentElement = element;
@@ -156,6 +192,7 @@ class Document extends Node {
 
   @override
   void dispose() {
+    _viewport?.dispose();
     _viewport = null;
     gestureListener = null;
     widgetDelegate = null;

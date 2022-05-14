@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -87,18 +86,17 @@ mixin CSSPositionMixin on RenderStyle {
     _markParentNeedsPaint();
   }
 
-  CSSPositionType _position = DEFAULT_POSITION_TYPE;
 
   @override
-  CSSPositionType get position => _position;
-
-  set position(CSSPositionType value) {
+  CSSPositionType get position => _position ?? DEFAULT_POSITION_TYPE;
+  CSSPositionType? _position;
+  set position(CSSPositionType? value) {
     if (_position == value) return;
     _position = value;
 
     // Position effect the stacking context.
     _markNeedsSort();
-    _markParentNeedsLayout();
+    _markParentNeedsLayout(force: true);
     // Position change may affect transformed display
     // https://www.w3.org/TR/css-display-3/#transformations
 
@@ -115,13 +113,15 @@ mixin CSSPositionMixin on RenderStyle {
     }
   }
 
-  void _markParentNeedsLayout() {
+  // Mark parent render object to layout.
+  // If force to true, ignoring current position type judgement of static, useful for updating position type.
+  void _markParentNeedsLayout({ bool force = false }) {
     // Should mark positioned element's containing block needs layout directly
     // cause RelayoutBoundary of positioned element will prevent the needsLayout flag
     // to bubble up in the RenderObject tree.
     if (renderBoxModel?.parentData is RenderLayoutParentData) {
       RenderStyle renderStyle = renderBoxModel!.renderStyle;
-      if (renderStyle.position != DEFAULT_POSITION_TYPE) {
+      if (force || renderStyle.position != DEFAULT_POSITION_TYPE) {
         AbstractNode? parent = renderBoxModel!.parent;
         if (parent is RenderObject) {
           parent.markNeedsLayout();

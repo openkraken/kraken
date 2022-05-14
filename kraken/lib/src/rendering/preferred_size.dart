@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
@@ -71,6 +70,12 @@ class RenderPositionPlaceholder extends RenderPreferredSize {
   @override
   bool hitTest(BoxHitTestResult result, {Offset? position}) {
     return false;
+  }
+
+  // Get the layout offset of renderObject to its ancestor which does not include the paint offset
+  // such as scroll or transform.
+  Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+    return MatrixUtils.transformPoint(getLayoutTransformTo(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
   }
 }
 

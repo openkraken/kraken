@@ -48,6 +48,14 @@ describe('custom widget element', () => {
     await snapshot();
   });
 
+  it('text node should be child of flutter container and append before container append to body', async () => {
+    const container = document.createElement('flutter-container');
+    const text = document.createTextNode('text');
+    container.appendChild(text);
+    document.body.appendChild(container);
+    await snapshot();
+  });
+
   it('element should be child of flutter container', async () => {
     const container = document.createElement('flutter-container');
     const element = document.createElement('div');
@@ -75,6 +83,7 @@ describe('custom widget element', () => {
 
     const element = document.createElement('div');
     element.style.backgroundColor = 'red';
+    element.style.textAlign = 'center';
     element.appendChild(document.createTextNode('div element'));
     container.appendChild(element);
 
@@ -139,6 +148,31 @@ describe('custom widget element', () => {
     }
 
     await snapshot();
+  });
+
+  it('getBoundingClientRect should work with items in waterfall-flow', async (done) => {
+    const flutterContainer = document.createElement('waterfall-flow');
+    flutterContainer.style.height = '100vh';
+    flutterContainer.style.display = 'block';
+
+    document.body.appendChild(flutterContainer);
+ 
+    const div = document.createElement('div');
+    div.style.width = '100%';
+    div.style.height = '100px';
+    div.style.border = `1px solid red`;
+
+    const img = document.createElement('img');
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    div.appendChild(img);
+
+    flutterContainer.appendChild(div);
+  
+    requestAnimationFrame(async () => {
+       const rect = div.getBoundingClientRect();
+       expect(rect.height).toEqual(100);
+       done();
+    });     
   });
 
   it('flutter widget should spread out the parent node when parent node is line-block', async () => {

@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'package:flutter/widgets.dart';
 import 'package:kraken/dom.dart' as dom;
 
@@ -34,16 +37,28 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
     widget._krakenNode.ensureChildAttached();
 
     if (widget._krakenNode is dom.Element) {
-      (widget._krakenNode as dom.Element).style.flushPendingProperties();
+      dom.Element element = (widget._krakenNode as dom.Element);
+      element.applyStyle(element.style);
+
+      if (element.renderer != null) {
+        // Flush pending style before child attached.
+        element.style.flushPendingProperties();
+      }
     }
   }
 
   @override
   void unmount() {
+    // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
+    dom.Element element = (widget._krakenNode as dom.Element);
+    element.unmountRenderObject(dispose: false);
+
     super.unmount();
-    (widget._krakenNode as dom.Element).unmountRenderObject();
   }
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {}
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
 }

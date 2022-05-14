@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui';
@@ -78,6 +77,18 @@ class CSSLengthValue {
   // which can not be computed to a specific value, eg. percentage height is sometimes parsed
   // to be auto due to parent height not defined.
   double get computedValue {
+    // Use cached value if type is not percentage which may needs 2 layout passes to resolve the
+    // final computed value.
+    if (renderStyle?.renderBoxModel != null
+      && propertyName != null
+      && type != CSSLengthType.PERCENTAGE
+    ) {
+      RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+      double? cachedValue = getCachedComputedValue(renderBoxModel.hashCode, propertyName!);
+      if (cachedValue != null) {
+        return cachedValue;
+      }
+    }
 
     switch (type) {
       case CSSLengthType.PX:
@@ -206,7 +217,7 @@ class CSSLengthValue {
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
             if (isPositioned || isGrandParentFlexLayout) {
-              if (relativeParentHeight  != null) {
+              if (relativeParentHeight != null) {
                 _computedValue = value! * relativeParentHeight;
               } else {
                 // Mark parent to relayout to get renderer height of parent.
@@ -250,12 +261,11 @@ class CSSLengthValue {
             // will ensure parent exists.
             RenderStyle parentRenderStyle = renderStyle!.parent!;
             double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
-              parentRenderStyle.contentBoxLogicalWidth :
-              parentRenderStyle.contentBoxLogicalHeight;
+              parentContentBoxWidth : parentContentBoxHeight;
             if (mainContentSize != null) {
               _computedValue = mainContentSize * value!;
             } else {
-              // @TODO: Not supported when parent has no logical main size.
+              // Resolves as 0 when parent's inner main size is not specified.
               _computedValue = 0;
             }
             // Refer to the flex container's inner main size.
@@ -319,8 +329,18 @@ class CSSLengthValue {
         break;
       default:
         // @FIXME: Type AUTO not always resolves to 0, in cases such as `margin: auto`, `width: auto`.
-        return 0;
+        _computedValue = 0;
     }
+
+    // Cache computed value.
+    if (renderStyle?.renderBoxModel != null
+      && propertyName != null
+      && type != CSSLengthType.PERCENTAGE
+    ) {
+      RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
+      cacheComputedValue(renderBoxModel.hashCode, propertyName!, _computedValue!);
+    }
+
     return _computedValue!;
   }
 
@@ -386,7 +406,29 @@ class CSSLengthValue {
   String toString() => 'CSSLengthValue(value: $value, unit: $type, computedValue: $computedValue)';
 }
 
-final LinkedLruHashMap<String, CSSLengthValue> _cachedParsedLength = LinkedLruHashMap(maximumSize: 500);
+// Cache computed length value during perform layout.
+// format: { hashCode: { renderStyleKey: renderStyleValue } }
+final LinkedLruHashMap<int, Map<String, double>> _cachedComputedValue = LinkedLruHashMap(maximumSize: 500);
+
+// Get computed length value from cache only in perform layout stage.
+double? getCachedComputedValue(int hashCode, String propertyName) {
+  if (renderBoxInLayoutHashCodes.isNotEmpty) {
+    return _cachedComputedValue[hashCode]?[propertyName];
+  }
+}
+
+// Cache computed length value only in perform layout stage.
+void cacheComputedValue(int hashCode, String propertyName, double value) {
+  if (renderBoxInLayoutHashCodes.isNotEmpty) {
+    _cachedComputedValue[hashCode] = _cachedComputedValue[hashCode] ?? {};
+    _cachedComputedValue[hashCode]![propertyName] = value;
+  }
+}
+
+// Clear all the computed length value cache.
+void clearComputedValueCache() {
+  _cachedComputedValue.clear();
+}
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
@@ -444,10 +486,6 @@ class CSSLength {
   }
 
   static CSSLengthValue parseLength(String text, RenderStyle? renderStyle, [String? propertyName, Axis? axisType]) {
-    if (_cachedParsedLength.containsKey(text)) {
-      return _cachedParsedLength[text]!;
-    }
-
     double? value;
     CSSLengthType unit = CSSLengthType.PX;
     if (text == ZERO) {
@@ -534,11 +572,11 @@ class CSSLength {
     }
 
     if (value == 0) {
-      return _cachedParsedLength[text] = CSSLengthValue.zero;
+      return CSSLengthValue.zero;
     } else if (value == null) {
-      return _cachedParsedLength[text] = CSSLengthValue.unknown;
+      return CSSLengthValue.unknown;
     } else if (unit == CSSLengthType.PX){
-      return _cachedParsedLength[text] = CSSLengthValue(value, unit);
+      return CSSLengthValue(value, unit);
     } else {
       return CSSLengthValue(value, unit, renderStyle, propertyName, axisType);
     }

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #include <sys/time.h>
@@ -177,6 +176,8 @@ void TEST_initWindow(int32_t contextId, void* nativePtr) {}
 
 void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
+void TEST_onJsLog(int32_t contextId, int32_t level, const char*) {}
+
 #if ENABLE_PROFILE
 NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
   return nullptr;
@@ -283,8 +284,6 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
       reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
       reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
       reinterpret_cast<uint64_t>(TEST_getScreen),
-      reinterpret_cast<uint64_t>(TEST_devicePixelRatio),
-      reinterpret_cast<uint64_t>(TEST_platformBrightness),
       reinterpret_cast<uint64_t>(TEST_toBlob),
       reinterpret_cast<uint64_t>(TEST_flushUICommand),
       reinterpret_cast<uint64_t>(TEST_initWindow),
@@ -298,6 +297,7 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
 #endif
 
   mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJSError));
+  mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_onJsLog));
   registerDartMethods(contextId, mockMethods.data(), mockMethods.size());
 }
 

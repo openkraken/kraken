@@ -1,12 +1,10 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 // Modified from Flutter gesture/monodrag.dart.
 // Copyright 2014 The Flutter Authors. All rights reserved.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'package:flutter/rendering.dart';
@@ -489,13 +487,13 @@ class ScrollVerticalDragGestureRecognizer extends CompetitiveDragGestureRecogniz
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override
@@ -532,13 +530,13 @@ class ScrollHorizontalDragGestureRecognizer extends CompetitiveDragGestureRecogn
   @override
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
-    final double minDistance = minFlingDistance ?? computeHitSlop(kind);
+    final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
   }
 
   @override
   bool _hasSufficientGlobalDistanceToAccept(PointerDeviceKind pointerDeviceKind) {
-    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind);
+    return _globalDistanceMoved.abs() > computeHitSlop(pointerDeviceKind, gestureSettings);
   }
 
   @override

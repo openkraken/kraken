@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -27,5 +26,23 @@ class HTMLElement extends Element {
       return;
     }
     super.dispatchEvent(event);
+  }
+
+  @override
+  void setRenderStyle(String property, String present) {
+    switch (property) {
+    // Visible should be interpreted as auto and clip should be interpreted as hidden when overflow apply to html.
+    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        if (present == VISIBLE || present == '') {
+          present = AUTO;
+        } else if (present == CLIP) {
+          present = HIDDEN;
+        }
+        break;
+    }
+    super.setRenderStyle(property, present);
   }
 }

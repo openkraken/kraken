@@ -1,14 +1,13 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
-import 'package:meta/meta.dart';
 
 String EMPTY_STRING = '';
 
@@ -103,25 +102,30 @@ class FetchModule extends BaseModule {
       // No host specified in URI.
       _handleError('Failed to parse URL from $uri.', null);
     } else {
+      HttpClientResponse? response;
       getRequest(uri, options['method'], options['headers'], options['body'])
         .then((HttpClientRequest request) {
           if (_disposed) return Future.value(null);
           return request.close();
         })
-        .then((HttpClientResponse? response) {
-          if (response == null) return Future.value(null);
-
-          StringBuffer contentBuffer = StringBuffer();
-
-          response
-            // @TODO: Consider binary format, now callback tunnel only accept strings.
-            .transform(utf8.decoder)
-            .listen(contentBuffer.write)
-            ..onDone(() {
-              // @TODO: response.headers not transmitted.
-              callback(data: [EMPTY_STRING, response.statusCode, contentBuffer.toString()]);
-            })
-            ..onError(_handleError);
+        .then((HttpClientResponse? res) {
+          if (res == null) {
+            return Future.value(null);
+          } else {
+            response = res;
+            return consolidateHttpClientResponseBytes(res);
+          }
+        })
+        .then((Uint8List? bytes) {
+          if (bytes == null) return Future.value(null);
+          else return resolveStringFromData(bytes);
+        })
+        .then((String? content) {
+          if (content != null) {
+            callback(data: [EMPTY_STRING, response?.statusCode, content]);
+          } else {
+            throw FlutterError('Failed to read response.');
+          }
         })
         .catchError(_handleError);
     }

@@ -1,12 +1,10 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
 import 'package:kraken/module.dart';
-import 'package:meta/meta.dart';
 
 typedef EventHandler = void Function(Event event);
 
@@ -67,7 +65,9 @@ abstract class EventTarget extends BindingObject {
     if (existHandler != null) {
       // Modify currentTarget before the handler call, otherwise currentTarget may be modified by the previous handler.
       event.currentTarget = this;
-      for (EventHandler handler in existHandler) {
+      // To avoid concurrent exception while prev handler modify the original handler list, causing list iteration
+      // with error, copy the handlers here.
+      for (EventHandler handler in [...existHandler]) {
         handler(event);
       }
       event.currentTarget = null;

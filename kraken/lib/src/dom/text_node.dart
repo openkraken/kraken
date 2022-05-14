@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -36,6 +35,11 @@ class TextNode extends Node {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
+
+      // To replace data of node node with offset offset, count count, and data data, run step 12 from the spec:
+      // 12. If node’s parent is non-null, then run the children changed steps for node’s parent.
+      // https://dom.spec.whatwg.org/#concept-cd-replace
+      parentNode?.childrenChanged();
     }
   }
 
@@ -76,12 +80,14 @@ class TextNode extends Node {
 
     createRenderer();
 
-    if (parent.renderBoxModel is RenderLayoutBox) {
+    // If element attach WidgetElement, render object should be attach to render tree when mount.
+    if (parent.renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE && parent.renderBoxModel is RenderLayoutBox) {
       RenderLayoutBox parentRenderLayoutBox = parent.renderBoxModel as RenderLayoutBox;
       parentRenderLayoutBox = parentRenderLayoutBox.renderScrollingContent ?? parentRenderLayoutBox;
       parentRenderLayoutBox.insert(_renderTextBox!, after: after);
-      _applyTextStyle();
     }
+
+    _applyTextStyle();
   }
 
   // Detach renderObject of current node from parent
@@ -95,7 +101,7 @@ class TextNode extends Node {
 
   // Detach renderObject of current node from parent
   @override
-  void unmountRenderObject({ bool deep = false }) {
+  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {
     _detachRenderTextBox();
     _renderTextBox = null;
   }

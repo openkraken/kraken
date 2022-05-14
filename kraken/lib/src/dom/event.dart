@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:convert';
 import 'dart:ffi';
@@ -9,6 +8,7 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
+import 'package:kraken/gesture.dart';
 import 'package:kraken/rendering.dart';
 
 enum AppearEventType {
@@ -72,6 +72,7 @@ mixin ElementEventMixin on ElementBase {
 
   void clearEventResponder(RenderEventListenerMixin renderBox) {
     renderBox.getEventTarget = null;
+    renderBox.getGestureDispather = null;
   }
 
   void ensureEventResponderBound() {
@@ -80,6 +81,7 @@ mixin ElementEventMixin on ElementBase {
     if (renderBox != null) {
       // Make sure pointer responder bind.
       renderBox.getEventTarget = getEventTarget;
+      renderBox.getGestureDispather = getGestureDispather;
 
       if (_hasIntersectionObserverEvent()) {
         renderBox.addIntersectionChangeListener(handleIntersectionChange);
@@ -117,6 +119,10 @@ mixin ElementEventMixin on ElementBase {
 
   EventTarget getEventTarget() {
     return this;
+  }
+
+  GestureDispatcher getGestureDispather() {
+    return ownerDocument.controller.gestureDispatcher;
   }
 
   void handleAppear() {

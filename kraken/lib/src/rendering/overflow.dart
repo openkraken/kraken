@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:math' as math;
@@ -38,7 +37,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     if( borderRadius != null
       && this is RenderReplaced
-      && renderStyle.intrinsicRatio != null
+      && renderStyle.aspectRatio != null
     ) {
       return true;
     }
@@ -75,7 +74,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
     if( borderRadius != null
       && this is RenderReplaced
-      && renderStyle.intrinsicRatio != null
+      && renderStyle.aspectRatio != null
     ) {
       return true;
     }
@@ -121,14 +120,19 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   void _scrollXListener() {
     assert(scrollListener != null);
-    scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
-    markNeedsPaint();
+    // If scroll is happening, that element has been unmounted, prevent null usage.
+    if (scrollOffsetX != null) {
+      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+      markNeedsPaint();
+    }
   }
 
   void _scrollYListener() {
     assert(scrollListener != null);
-    scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
-    markNeedsPaint();
+    if (scrollOffsetY != null) {
+      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+      markNeedsPaint();
+    }
   }
 
   void _setUpScrollX() {

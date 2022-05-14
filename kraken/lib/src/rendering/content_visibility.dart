@@ -1,9 +1,7 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
@@ -27,9 +25,6 @@ mixin RenderContentVisibilityMixin on RenderBoxModelBase {
   }
 
   void debugVisibilityProperties(DiagnosticPropertiesBuilder properties) {
-    ContentVisibility? contentVisibility = renderStyle.contentVisibility;
-    if (contentVisibility != null)
-      properties.add(DiagnosticsProperty<ContentVisibility>(
-          'contentVisibility', contentVisibility));
+    properties.add(DiagnosticsProperty<ContentVisibility>('contentVisibility', renderStyle.contentVisibility));
   }
 }

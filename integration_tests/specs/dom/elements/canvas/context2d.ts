@@ -387,4 +387,25 @@ describe('Canvas context 2d', () => {
     };
     img.src = 'assets/rabbit.png';
   });
+
+  it('should work with reset', async (done) => {
+    var canvas = document.createElement('canvas');
+    canvas.style.width = canvas.style.height = '200px';
+    document.body.appendChild(canvas);
+
+    var context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('canvas context is null');
+    }
+    context.fillStyle = 'yellow';
+    context.fillRect(0, 0, 100, 100);
+    context.reset();
+
+    context.fillStyle = 'green';
+    context.fillRect(10, 10, 50, 50);
+
+    await snapshot(canvas);
+    done();
+  });
 });

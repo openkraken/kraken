@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
@@ -157,7 +156,7 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   /// called when Element following properties change
   /// width,height
   /// [dataType] indicate the content type of the resource specified by data.
-  /// [data] indicate the address of the resource as a valid URL.
+  /// [rawBytes] indicate the address of the resource as a valid URL.
   ///
   /// NOTE:
   /// At least one of data and type must be defined.

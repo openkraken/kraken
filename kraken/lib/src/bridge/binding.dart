@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 // Bind the JavaScript side object,
@@ -152,10 +151,32 @@ abstract class BindingBridge {
   }
 
   static void listenEvent(EventTarget target, String type) {
+    assert(_debugShouldNotListenMultiTimes(target, type),
+      'Failed to listen event \'$type\' for $target, for which is already bound.');
     target.addEventListener(type, _dispatchEventToNative);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
+    assert(_debugShouldNotUnlistenEmpty(target, type),
+      'Failed to unlisten event \'$type\' for $target, for which is already unbound.');
     target.removeEventListener(type, _dispatchEventToNative);
+  }
+
+  static bool _debugShouldNotListenMultiTimes(EventTarget target, String type) {
+    Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
+    List<EventHandler>? handlers = eventHandlers[type];
+    if (handlers != null) {
+      return !handlers.contains(_dispatchBindingEvent);
+    }
+    return true;
+  }
+
+  static bool _debugShouldNotUnlistenEmpty(EventTarget target, String type) {
+    Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
+    List<EventHandler>? handlers = eventHandlers[type];
+    if (handlers != null) {
+      return handlers.contains(_dispatchBindingEvent);
+    }
+    return false;
   }
 }

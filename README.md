@@ -42,73 +42,19 @@ Only flutter stable released version are fully tested.
 | ------------- | ------------- |
 | >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
 | >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3 |
-| >= 0.10.0 < 0.12.0 | 2.5.0 ~ 2.5.3 |
+| >= 0.10.0 < 0.11.0 | 2.5.0 ~ 2.5.3 |
+| >= 0.11.0 | 2.8.0 ~ 2.8.1 |
 
 
-## 👏 Contributing
+## 👏 Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 
 By contributing to Kraken, you agree that your contributions will be licensed under its Apache-2.0 License.
 
-0. Prerequisites
-    * [Node.js](https://nodejs.org/) v12.0 or later
-    * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
-    * [CMake](https://cmake.org/) v3.2.0 or later
-    * [Xcode](https://developer.apple.com/xcode/) (10.12) or later (Running on macOS or iOS)
-    * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `21.4.7075529` (Running on Android)
+Read our [contributing guide](https://github.com/openkraken/kraken/blob/main/.github/CONTRIBUTING.md) and let's build a better kraken project together.
 
-1. Install
+Thank you to all the people who already contributed to Kraken!
 
-    ```shell
-    $ npm install
-    ```
+![CONTRIBUTORS](https://kraken.oss-cn-hangzhou.aliyuncs.com/CONTRIBUTORS.svg)
 
-2. Building bridge
-
-    Building bridge for all supported platform (macOS, linux, iOS, Android)
-
-    ```shell
-    $ npm run build:bridge:all
-    ```
-
-    Building bridge for one platform
-
-    **macOS**
-
-    ```shell
-    $ npm run build:bridge:macos
-    ```
-
-    **linux**
-
-    ```shell
-    $ npm run build:bridge:linux
-    ```
-
-    **iOS**
-
-    ```shell
-    $ npm run build:bridge:ios
-    ```
-
-    **Android**
-
-    > For Windows users, make sure that running this command under MINGW64 environment(eg. Git Bash).
-
-    ```shell
-    $ npm run build:bridge:android
-    ```
-
-3. Start example
-    ```shell
-    $ cd kraken/example
-    $ flutter run
-    ```
-
-4. Test (Unit Test and Integration Test)
-    ```shell
-    $ npm test
-    ```
-
-
-
+Copyright (c) 2019-present, The Kraken authors.
 

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -22,5 +21,20 @@ class BodyElement extends Element {
     if (eventType == EVENT_SCROLL) return;
 
     super.addEventListener(eventType, eventHandler);
+  }
+
+  @override
+  void setRenderStyle(String property, String present) {
+    switch (property) {
+      // The overflow of body should apply to html.
+      // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      case OVERFLOW:
+      case OVERFLOW_X:
+      case OVERFLOW_Y:
+        ownerDocument.documentElement?.setRenderStyle(property, present);
+        break;
+      default:
+        super.setRenderStyle(property, present);
+    }
   }
 }

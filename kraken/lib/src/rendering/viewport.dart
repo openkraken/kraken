@@ -1,12 +1,7 @@
 /*
- * Copyright (C) 2020 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
-import 'dart:ui';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/gesture.dart';
 import 'package:kraken/launcher.dart';
 import 'package:kraken/rendering.dart';
 
@@ -21,6 +16,9 @@ class RenderViewportBox extends RenderProxyBox
         super(child) {
     this.controller = controller;
   }
+
+  // Cache all the fixed children of renderBoxModel of root element.
+  List<RenderBoxModel> fixedChildren = [];
 
   @override
   bool get isRepaintBoundary => true;
@@ -70,11 +68,11 @@ class RenderViewportBox extends RenderProxyBox
     super.handleEvent(event, entry as BoxHitTestEntry);
 
     // Add pointer to gesture dispatcher.
-    GestureDispatcher.instance.handlePointerEvent(event);
+    controller?.gestureDispatcher.handlePointerEvent(event);
 
     if (event is PointerDownEvent) {
       // Set event path at begin stage and reset it at end stage on viewport render box.
-      GestureDispatcher.instance.resetEventPath();
+      controller?.gestureDispatcher.resetEventPath();
     }
   }
 
@@ -96,5 +94,14 @@ class RenderViewportBox extends RenderProxyBox
     if (child != null) {
       context.paintChild(child!, offset);
     }
+  }
+
+  @override
+  void dispose() {
+    if (child != null) {
+      dropChild(child!);
+    }
+    fixedChildren.clear();
+    super.dispose();
   }
 }

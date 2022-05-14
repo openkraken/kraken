@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+
+import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/src/scheduler/throttle.dart';
@@ -13,17 +13,14 @@ import 'package:kraken/src/scheduler/throttle.dart';
 const int _MAX_STEP_MS = 16;
 
 class _DragEventInfo extends Drag {
-  static _DragEventInfo? _instance;
-  static _DragEventInfo get instance {
-    return _instance ??= _DragEventInfo._();
-  }
+  _DragEventInfo(this.gestureDispatcher);
 
-  _DragEventInfo._();
+  final GestureDispatcher gestureDispatcher;
 
   /// The pointer has moved.
   @override
   void update(DragUpdateDetails details) {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
   /// The pointer is no longer in contact with the screen.
@@ -32,7 +29,7 @@ class _DragEventInfo extends Drag {
   /// the screen is available in the `details`.
   @override
   void end(DragEndDetails details) {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
   /// The input from the pointer is no longer directed towards this receiver.
@@ -41,7 +38,7 @@ class _DragEventInfo extends Drag {
   /// in the middle of the drag.
   @override
   void cancel() {
-    GestureDispatcher.instance._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_CANCEL);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_CANCEL);
   }
 }
 
@@ -70,42 +67,33 @@ class TouchPoint {
 }
 
 class GestureDispatcher {
-
-  static GestureDispatcher? _instance;
-  static GestureDispatcher get instance {
-    if (_instance == null) {
-      GestureDispatcher instance = _instance = GestureDispatcher._();
-      _addAllGestureRecognizer(instance);
-    }
-    return _instance!;
-  }
-
-  static void _addAllGestureRecognizer(GestureDispatcher instance) {
-    Map<String, GestureRecognizer> gestureRecognizers = instance._gestureRecognizers;
+  GestureDispatcher() {
     // Tap Recognizer
-    gestureRecognizers[EVENT_CLICK] = TapGestureRecognizer()..onTapUp = instance._onClick;
+    _gestureRecognizers[EVENT_CLICK] = TapGestureRecognizer()..onTapUp = _onClick;
     // DoubleTap Recognizer
-    gestureRecognizers[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer()..onDoubleTapDown = instance._onDoubleClick;
+    _gestureRecognizers[EVENT_DOUBLE_CLICK] = DoubleTapGestureRecognizer()..onDoubleTapDown = _onDoubleClick;
     // Swipe Recognizer
-    gestureRecognizers[EVENT_SWIPE] = SwipeGestureRecognizer()..onSwipe = instance._onSwipe;
+    _gestureRecognizers[EVENT_SWIPE] = SwipeGestureRecognizer()..onSwipe = _onSwipe;
     // Pan Recognizer
-    gestureRecognizers[EVENT_PAN] = PanGestureRecognizer()
-      ..onStart = instance._onPanStart
-      ..onUpdate = instance._onPanUpdate
-      ..onEnd = instance._onPanEnd;
+    _gestureRecognizers[EVENT_PAN] = PanGestureRecognizer()
+      ..onStart = _onPanStart
+      ..onUpdate = _onPanUpdate
+      ..onEnd = _onPanEnd;
     // LongPress Recognizer
-    gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPressEnd = instance._onLongPressEnd;
+    _gestureRecognizers[EVENT_LONG_PRESS] = LongPressGestureRecognizer()..onLongPress = _onLongPress;
     // Scale Recognizer
-    gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
-      ..onStart = instance._onScaleStart
-      ..onUpdate = instance._onScaleUpdate
-      ..onEnd = instance._onScaleEnd;
+    _gestureRecognizers[EVENT_SCALE] = ScaleGestureRecognizer()
+      ..onStart = _onScaleStart
+      ..onUpdate = _onScaleUpdate
+      ..onEnd = _onScaleEnd;
     // Drag Recognizer
-    gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
-      ..onStart = instance._onDragStart;
+    _gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
+      ..onStart = _onDragStart;
+
+    _dragEventInfo = _DragEventInfo(this);
   }
 
-  GestureDispatcher._();
+  late _DragEventInfo _dragEventInfo;
 
   final Map<String, GestureRecognizer> _gestureRecognizers = <String, GestureRecognizer>{};
 
@@ -198,33 +186,70 @@ class GestureDispatcher {
 
 
   void handlePointerEvent(PointerEvent event) {
-    if (event is PointerHoverEvent) {
-      // Hover does nothing and returns directly.
+    if (!(event is PointerDownEvent || event is PointerUpEvent || event is PointerMoveEvent || event is PointerCancelEvent)) {
+      // Only basic Point events are handled, other event does nothing and returns directly such as hover and scroll.
       return;
     }
 
     // Stores the current TouchPoint to trigger the corresponding event.
     TouchPoint touchPoint = _toTouchPoint(event);
 
+    _addPoint(touchPoint);
+
     if (event is PointerDownEvent) {
       _gatherEventsInPath();
-      _addPointerDownEventToMatchedRecognizers(event);
+
+      // Clear timer to prevent accidental clear target.
+      _stopClearTargetTimer();
 
       // The current eventTarget state needs to be stored for use in the callback of GestureRecognizer.
       _target = _eventPath.isNotEmpty ? _eventPath.first : null;
       if (_target != null) {
         _bindEventTargetWithTouchPoint(touchPoint, _target!);
       }
-
-      _addPoint(touchPoint);
     }
 
     _handleTouchPoint(touchPoint);
 
+    // Make sure gesture event is dispatched after touchstart event.
+    if (event is PointerDownEvent) {
+      _addPointerDownEventToMatchedRecognizers(event);
+    }
+
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _removePoint(touchPoint);
       _unbindEventTargetWithTouchPoint(touchPoint);
+      // Clear target in the next task or start a timer.
+      _startClearTargetTask();
     }
+  }
+
+  Timer? _clearTargetTimer;
+
+  void _stopClearTargetTimer() {
+    if (_clearTargetTimer != null) {
+      _clearTargetTimer?.cancel();
+      _clearTargetTimer = null;
+    }
+  }
+
+  void _clearTarget() {
+    _target = null;
+  }
+
+  void _startClearTargetTask() {
+    // We should clear the target in the next microTask to dispatch event in callback of recognizer.
+    // Because the recognizer fires at the end of the path of HitTestResult.
+    // When listening on dblclick or longpress, you need to wait for the maximum delay.
+    scheduleMicrotask(() {
+      if (_eventsInPath.containsKey(EVENT_DOUBLE_CLICK)) {
+        _clearTargetTimer = Timer(kDoubleTapTimeout, _clearTarget);
+      } else if (_eventsInPath.containsKey(EVENT_LONG_PRESS)) {
+        _clearTargetTimer = Timer(kLongPressTimeout, _clearTarget);
+      } else {
+        _clearTarget();
+      }
+    });
   }
 
   void resetEventPath() {
@@ -247,8 +272,8 @@ class GestureDispatcher {
     _handleMouseEvent(EVENT_CLICK, localPosition: details.localPosition, globalPosition: details.globalPosition);
   }
 
-  void _onLongPressEnd(LongPressEndDetails details) {
-    _handleMouseEvent(EVENT_LONG_PRESS, localPosition: details.localPosition, globalPosition: details.globalPosition);
+  void _onLongPress() {
+    _handleMouseEvent(EVENT_LONG_PRESS);
   }
 
   void _onSwipe(SwipeDetails details) {
@@ -281,7 +306,7 @@ class GestureDispatcher {
 
   Drag? _onDragStart(Offset position) {
     _handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_START, deltaX: position.dx, deltaY: position.dy);
-    return _DragEventInfo.instance;
+    return _dragEventInfo;
   }
 
   void _handleMouseEvent(String type, {

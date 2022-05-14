@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:io';
@@ -32,21 +31,20 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   @override
   final String reasonPhrase;
 
-  final Map<String, List<String>> _responseHeaders;
-
-  HttpHeaders? _httpHeaders;
+  final HttpHeaders _headers;
 
   HttpClientStreamResponse(this._data, {
     this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
-    Map<String, List<String>> responseHeaders = const {},
-  }) : _responseHeaders = responseHeaders;
+    this.compressionState = HttpClientResponseCompressionState.notCompressed,
+    HttpHeaders? initialHeaders,
+  }) : _headers = initialHeaders ?? createHttpHeaders();
 
   @override
   X509Certificate? get certificate => null;
 
   @override
-  HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
+  HttpClientResponseCompressionState compressionState;
 
   @override
   HttpConnectionInfo? get connectionInfo => _HttpConnectionInfo._localHttpConnectionInfo;
@@ -63,7 +61,7 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   }
 
   @override
-  HttpHeaders get headers => _httpHeaders ?? (_httpHeaders = createHttpHeaders(initialHeaders: _responseHeaders));
+  HttpHeaders get headers => _headers;
 
   @override
   bool get isRedirect => statusCode >= 300 && statusCode < 400;

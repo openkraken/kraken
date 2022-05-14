@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2020-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKEN_FOUNDATION_LOGGING_H_
@@ -33,6 +32,14 @@ constexpr LogSeverity DEBUG = 3;
 constexpr LogSeverity ERROR = 4;
 constexpr LogSeverity NUM_SEVERITIES = 5;
 constexpr LogSeverity FATAL = 6;
+
+enum class MessageLevel : uint8_t {
+  Log = 1,
+  Warning = 2,
+  Error = 3,
+  Debug = 4,
+  Info = 5,
+};
 
 class LogMessageVoidify {
  public:

@@ -50,7 +50,7 @@ describe('flexbox flex-grow', () => {
 
     await snapshot();
   });
-  xit('002', async () => {
+  it('002', async () => {
     let test1;
     let test2;
     let test3;
@@ -277,7 +277,7 @@ describe('flexbox flex-grow', () => {
 
     await snapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let test1;
     let container;
     let container_1;
@@ -337,7 +337,7 @@ describe('flexbox flex-grow', () => {
 
     await snapshot();
   });
-  xit('007', async () => {
+  it('007', async () => {
     let test1;
     let container;
     let container_1;

@@ -1,3 +1,44 @@
+## 0.11.0
+
+**Breaking Changes**
+
++ Update flutter requirement to 2.8.x https://github.com/openkraken/kraken/pull/1298
+
+**Bug Fixed**
+
+- Fix Kraken widget instance memory leak from window. https://github.com/openkraken/kraken/pull/1297
+
+## 0.10.4
+
+**Features**
+
++ Support window.innerWidth & window.innerHeight, and screen.availWidth & screen.availHeight. https://github.com/openkraken/kraken/pull/1256
+
+**Bug Fixed**
+
++ Fix error when using KrakenBundle.fromByteCode(). https://github.com/openkraken/kraken/pull/1245
++ Fix DataBundle string with non latin. https://github.com/openkraken/kraken/pull/1263
+
+** Others **
+
++ Change copyright to `The Kraken authors`.
+
+## 0.10.3
+
+**Bug Fixed**
+
++ Fix Http cache file io error https://github.com/openkraken/kraken/pull/1202.
++ Fix align-self not work for positioned flex item. https://github.com/openkraken/kraken/pull/1207
++ Fix text-align should only work for text node for flex item. https://github.com/openkraken/kraken/pull/1208
++ Fix crash with scrolling.  https://github.com/openkraken/kraken/pull/1209
++ Fix children of inline-block element not stretch. https://github.com/openkraken/kraken/pull/1214
++ Fix style set to empty string. https://github.com/openkraken/kraken/pull/1220
++ Fix flex item not stretch when child size changed. https://github.com/openkraken/kraken/pull/1229
++ Fix html parse error. https://github.com/openkraken/kraken/pull/1231
++ Fix asset protocol error. https://github.com/openkraken/kraken/pull/1232
++ Fix file protocol. https://github.com/openkraken/kraken/pull/1234
+
+
 ## 0.10.2+1
 
 **Bug Fixed**

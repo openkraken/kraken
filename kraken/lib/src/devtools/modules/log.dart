@@ -1,12 +1,44 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:kraken/devtools.dart';
 
-class InspectorLogModule extends IsolateInspectorModule {
-  InspectorLogModule(IsolateInspectorServer server): super(server);
+class InspectLogModule extends UIInspectorModule {
+  InspectLogModule(ChromeDevToolsService server) : super(server) {
+    devtoolsService.controller!.onJSLog = (level, message) {
+      handleMessage(level, message);
+    };
+  }
+
+  void handleMessage(int level, String message) {
+    sendEventToFrontend(LogEntryEvent(
+      text: message,
+      level: getLevelStr(level),
+    ));
+  }
+
+  /// Log = 1,
+  /// Warning = 2,
+  /// Error = 3,
+  /// Debug = 4,
+  /// Info = 5,
+  String getLevelStr(int level) {
+    switch (level) {
+      case 1:
+        return 'verbose';
+      case 2:
+        return 'warning';
+      case 3:
+        return 'error';
+      case 4:
+        return 'verbose';
+      case 5:
+        return 'info';
+      default:
+        return 'verbose';
+    }
+  }
 
   @override
   String get name => 'Log';

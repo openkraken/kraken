@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 
@@ -95,8 +94,8 @@ class AnimationTimeline {
         _ticker.stop();
       }
     } else {
-      for (int i = 0; i < _animations.length; i++) {
-        _animations[i]._tick(_currentTime);
+      for (Animation animation in [..._animations]) {
+        animation._tick(_currentTime);
       }
     }
   }
@@ -104,7 +103,7 @@ class AnimationTimeline {
   List<Animation> _getActiveAnimations() {
     List<Animation> activeAnimations = [];
 
-    for (Animation animation in _animations) {
+    for (Animation animation in [..._animations]) {
       AnimationPlayState playState = animation.playState;
       if (playState != AnimationPlayState.finished && playState != AnimationPlayState.idle) {
         activeAnimations.add(animation);
@@ -122,9 +121,15 @@ class AnimationTimeline {
       _ticker.start();
     }
   }
-}
 
-AnimationTimeline _documentTimeline = AnimationTimeline();
+  void _removeAnimation(Animation animation) {
+    _animations.remove(animation);
+
+    if (_animations.isEmpty) {
+      _ticker.stop();
+    }
+  }
+}
 
 class Animation {
   double? _startTime;
@@ -156,12 +161,7 @@ class Animation {
   // For transitionstart event
   Function? onstart;
 
-  Animation(KeyframeEffect effect, [AnimationTimeline? timeline]) {
-    if (timeline == null) {
-      _timeline = _documentTimeline;
-    }
-    _effect = effect;
-  }
+  Animation(KeyframeEffect effect, AnimationTimeline timeline) : _effect = effect, _timeline = timeline;
 
   void _setInEffect(bool flag) {
     if (_inEffect == false && flag == true && onstart != null) {
@@ -303,6 +303,7 @@ class Animation {
     _currentTime = 0;
     _startTime = null;
     _effect!._calculateTiming(null);
+    timeline?._removeAnimation(this);
 
     if (oncancel != null) {
       var event = AnimationPlaybackEvent(EVENT_CANCEL);
@@ -367,6 +368,15 @@ class Animation {
     timeline!._addAnimation(this);
   }
 
+  void dispose() {
+    onstart = null;
+    onfinish = null;
+    onremove = null;
+    oncancel = null;
+    cancel();
+    timeline?._removeAnimation(this);
+  }
+
   void _rewind() {
     if (_playbackRate >= 0) {
       _currentTime = 0;
@@ -394,6 +404,7 @@ class Animation {
         event.currentTime = currentTime;
         event.timelineTime = timelineTime;
         if (onfinish != null) onfinish!(event);
+        timeline?._removeAnimation(this);
         _finishedFlag = true;
       }
     } else {

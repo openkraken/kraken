@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:ui';
 
@@ -20,6 +19,8 @@ class CanvasPainter extends CustomPainter {
   // Cache the last paint image.
   Image? _snapshot;
   bool _shouldRepaint = false;
+  // Indicate that snapshot is not generated yet, should not to perform next frame now.
+  bool _updatingSnapshot = false;
 
   bool get _shouldPainting => context != null && context!.actionCount > 0;
   bool get _hasSnapshot => context != null && _snapshot != null;
@@ -71,8 +72,9 @@ class CanvasPainter extends CustomPainter {
     }
 
     // Paint new actions
+    List<CanvasAction>? actions;
     if (_shouldPainting) {
-      context!.performActions(recordCanvas, size);
+      actions = context!.performActions(recordCanvas, size);
     }
 
     // Must pair each call to save()/saveLayer() with a later matching call to restore().
@@ -84,9 +86,20 @@ class CanvasPainter extends CustomPainter {
     canvas.drawPicture(picture);
 
     // Must flat picture to image, or raster will accept a growing command buffer.
-    _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
+    await _createSnapshot(picture, size);
+
     // Dispose the used picture.
     picture.dispose();
+    // Clear actions after snapshot was created, or next frame call may empty.
+    if (actions != null) {
+      context!.clearActions(actions);
+    }
+  }
+
+  Future<void> _createSnapshot(Picture picture, Size size) async {
+    _updatingSnapshot = true;
+    _snapshot = await picture.toImage(size.width.toInt(), size.height.toInt());
+    _updatingSnapshot = false;
   }
 
   @override
@@ -95,7 +108,7 @@ class CanvasPainter extends CustomPainter {
       _shouldRepaint = false;
       return true;
     }
-    return false;
+    return !_updatingSnapshot;
   }
 
   void _resetPaintingContext() {

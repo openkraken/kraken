@@ -1,12 +1,10 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 const Offset _DEFAULT_TRANSFORM_OFFSET = Offset.zero;
 const Alignment _DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
@@ -67,6 +65,43 @@ mixin CSSTransformMixin on RenderStyle {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
     renderBoxModel?.markNeedsPaint();
+  }
+
+
+  // Effective transform matrix after renderBoxModel has been layouted.
+  // Copy from flutter [RenderTransform._effectiveTransform]
+  Matrix4 get effectiveTransformMatrix {
+    // Make sure it is used after renderBoxModel been created.
+    assert(renderBoxModel != null);
+    RenderBoxModel boxModel = renderBoxModel!;
+    final Matrix4 result = Matrix4.identity();
+    result.translate(transformOffset.dx, transformOffset.dy);
+    late Offset translation;
+    if (transformAlignment != Alignment.topLeft) {
+      // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
+      translation = boxModel.hasSize
+        ? transformAlignment.alongSize(boxModel.boxSize!) : Offset.zero;
+      result.translate(translation.dx, translation.dy);
+    }
+
+    if (transformMatrix != null) {
+      result.multiply(transformMatrix!);
+    }
+
+    if (transformAlignment != Alignment.topLeft)
+      result.translate(-translation.dx, -translation.dy);
+
+    result.translate(-transformOffset.dx, -transformOffset.dy);
+
+    return result;
+  }
+
+  // Effective transform offset after renderBoxModel has been layouted.
+  Offset? get effectiveTransformOffset {
+    // Make sure it is used after renderBoxModel been created.
+    assert(renderBoxModel != null);
+    Offset? offset = MatrixUtils.getAsTranslation(effectiveTransformMatrix);
+    return offset;
   }
 
   Offset get transformOffset => _transformOffset;

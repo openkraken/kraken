@@ -1,10 +1,8 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:math';
-import 'dart:ui' show Color;
 
 import 'package:quiver/collection.dart';
 import 'package:flutter/material.dart';
@@ -192,7 +190,7 @@ class CSSColor {
   //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
   //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
   // Cache will be terminated after used once.
-  
+
 
   static String convertToHex(Color color) {
     String red = color.red.toRadixString(16).padLeft(2);

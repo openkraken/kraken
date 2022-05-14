@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -9,8 +8,6 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/foundation.dart';
-
-import 'canvas_context_2d.dart';
 
 const String CANVAS = 'CANVAS';
 const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;
@@ -211,12 +208,10 @@ class CanvasElement extends Element {
   void _setDimensions(num? width, num? height) {
     // When the user agent is to set bitmap dimensions to width and height, it must run these steps:
     // 1. Reset the rendering context to its default state.
-    context2d?.dispose();
-    context2d = null;
+    context2d?.reset();
     // 2. Resize the output bitmap to the new width and height and clear it to transparent black.
     resize();
     // 3. Let canvas be the canvas element to which the rendering context's canvas attribute was initialized.
-    context2d = CanvasRenderingContext2D(this);
     // 4. If the numeric value of canvas's width content attribute differs from width,
     // then set canvas's width content attribute to the shortest possible string representing width as
     // a valid non-negative integer.

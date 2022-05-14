@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:convert';
@@ -104,7 +103,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
         Stream.value(data),
         statusCode: response.statusCode,
         reasonPhrase: response.reasonPhrase,
-        responseHeaders: _getHttpHeaders(response.headers));
+        initialHeaders: createHttpHeaders(initialHeaders: _getHttpHeaders(response.headers)));
 
     HttpClientInterceptor? customHttpClientInterceptor = _customHttpClientInterceptor;
     if (customHttpClientInterceptor != null) {

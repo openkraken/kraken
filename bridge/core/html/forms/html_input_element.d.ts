@@ -3,6 +3,7 @@ import {HTMLElement} from "../html_element";
 interface HTMLInputElement extends HTMLElement {
   width: number;
   height: number;
+  defaultValue: string;
   value: string;
   accept: string;
   autocomplete: string;
@@ -11,9 +12,9 @@ interface HTMLInputElement extends HTMLElement {
   disabled: boolean;
   min: string;
   max: string;
-  minLength: number;
-  maxLength: number;
-  size: number;
+  minLength: long;
+  maxLength: long;
+  size: long;
   multiple: boolean;
   name: string;
   step: string;
@@ -22,6 +23,7 @@ interface HTMLInputElement extends HTMLElement {
   readonly: boolean;
   placeholder: string
   type: string;
+  inputMode: string;
   focus(): void;
   blur(): void;
 }

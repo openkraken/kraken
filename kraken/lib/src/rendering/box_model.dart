@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -12,11 +12,12 @@ import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
 import 'package:kraken/gesture.dart';
 import 'package:kraken/kraken.dart';
-import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
-import 'package:kraken/src/dom/sliver_manager.dart';
 
 import 'debug_overlay.dart';
+
+// The hashCode of all the renderBox which is in layout.
+List<int> renderBoxInLayoutHashCodes = [];
 
 class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   bool isPositioned = false;
@@ -28,6 +29,33 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   String toString() {
     return 'isPositioned=$isPositioned; ${super.toString()}; runIndex: $runIndex;';
   }
+}
+
+// Applies the layout transform up the tree to `ancestor`.
+//
+// ReturgetLayoutTransformTolocal layout coordinate system to the
+// coordinate system of `ancestor`.
+Matrix4 getLayoutTransformTo(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+  final List<RenderObject> renderers = <RenderObject>[];
+  for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
+    renderers.add(renderer);
+    assert(renderer.parent != null);
+  }
+  renderers.add(ancestor);
+
+  final Matrix4 transform = Matrix4.identity();
+  for (int index = renderers.length - 1; index > 0; index -= 1) {
+    RenderObject parentRenderer = renderers[index];
+    RenderObject childRenderer = renderers[index - 1];
+    // Apply the layout transform for renderBoxModel and fallback to paint transform for other renderObject type.
+    if (parentRenderer is RenderBoxModel) {
+      parentRenderer.applyLayoutTransform(childRenderer, transform, excludeScrollOffset);
+    } else {
+      parentRenderer.applyPaintTransform(childRenderer, transform);
+    }
+  }
+
+  return transform;
 }
 
 /// Modified from Flutter rendering/box.dart.
@@ -217,8 +245,12 @@ class RenderLayoutBox extends RenderBoxModel
           // this logic after Kraken has implemented stacking context tree.
           if (left is RenderBoxModel && left.renderStyle.position == CSSPositionType.fixed &&
             right is RenderBoxModel && right.renderStyle.position == CSSPositionType.fixed) {
-            // Child element always paint after parent element in the renderObject tree.
-            return right.renderStyle.isAncestorOf(left.renderStyle) ? 1 : -1;
+            // Child element always paint after parent element when their position are both fixed
+            // as W3C stacking context specified.
+            // Kraken will place these two renderObjects as siblings of the children of HTML renderObject
+            // due to lack stacking context support, so it needs to add this patch to handle this case.
+            if (right.renderStyle.isAncestorOf(left.renderStyle)) return 1;
+            if (left.renderStyle.isAncestorOf(right.renderStyle)) return -1;
           }
 
           bool isLeftNeedsStacking = left is RenderBoxModel && left.needsStacking;
@@ -235,6 +267,31 @@ class RenderLayoutBox extends RenderBoxModel
         });
       }
       return _paintingOrder = children;
+    }
+  }
+
+  @override
+  void performPaint(PaintingContext context, Offset offset) {
+    for (int i = 0; i < paintingOrder.length; i++) {
+      RenderBox child = paintingOrder[i];
+      if (!isPositionPlaceholder(child)) {
+
+        late DateTime childPaintStart;
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          childPaintStart = DateTime.now();
+        }
+
+        final RenderLayoutParentData childParentData = child.parentData as RenderLayoutParentData;
+        if (child.hasSize) {
+          context.paintChild(child, childParentData.offset + offset);
+        }
+
+        if (kProfileMode && PerformanceTiming.enabled()) {
+          DateTime childPaintEnd = DateTime.now();
+          childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
+              childPaintStart.microsecondsSinceEpoch);
+        }
+      }
     }
   }
 
@@ -657,9 +714,6 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -730,13 +784,11 @@ class RenderBoxModel extends RenderBox
     hasOverrideContentLogicalHeight = false;
   }
 
-  // Auto value for min-width which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinWidth = 0;
-
-  // Auto value for min-height which equals to the total width of children
-  // which is in flow (excluding position absolute/fixed).
-  double autoMinHeight = 0;
+  // Nominally, the smallest size a box could take that doesn’t lead to overflow that could be avoided by choosing
+  // a larger size. Formally, the size of the box when sized under a min-content constraint.
+  // https://www.w3.org/TR/css-sizing-3/#min-content
+  double minContentWidth = 0;
+  double minContentHeight = 0;
 
   // Whether it needs relayout due to percentage calculation.
   bool needsRelayout = false;
@@ -751,13 +803,24 @@ class RenderBoxModel extends RenderBox
     }
   }
 
+  // Mirror debugDoingThisLayout flag in flutter.
+  // [debugDoingThisLayout] indicate whether [performLayout] for this render object is currently running.
+  bool doingThisLayout = false;
+
   // Mirror debugNeedsLayout flag in Flutter to use in layout performance optimization
   bool needsLayout = false;
 
   @override
   void markNeedsLayout() {
-    super.markNeedsLayout();
-    needsLayout = true;
+    if (doingThisLayout) {
+      // Push delay the [markNeedsLayout] after owner [PipelineOwner] finishing current [flushLayout].
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        markNeedsLayout();
+      });
+    } else {
+      needsLayout = true;
+      super.markNeedsLayout();
+    }
   }
 
   /// Mark children needs layout when drop child as Flutter did
@@ -786,6 +849,8 @@ class RenderBoxModel extends RenderBox
 
   @override
   void layout(Constraints newConstraints, {bool parentUsesSize = false}) {
+    renderBoxInLayoutHashCodes.add(hashCode);
+
     if (hasSize) {
       // Constraints changes between tight and no tight will cause reLayoutBoundary change
       // which will then cause its children to be marked as needsLayout in Flutter
@@ -795,6 +860,12 @@ class RenderBoxModel extends RenderBox
       }
     }
     super.layout(newConstraints, parentUsesSize: parentUsesSize);
+
+    renderBoxInLayoutHashCodes.remove(hashCode);
+    // Clear length cache when no renderBox is in layout.
+    if (renderBoxInLayoutHashCodes.isEmpty) {
+      clearComputedValueCache();
+    }
   }
 
   void markAdjacentRenderParagraphNeedsLayout() {
@@ -951,7 +1022,12 @@ class RenderBoxModel extends RenderBox
 
   // The contentSize of layout box
   Size? _contentSize;
-  Size get contentSize => _contentSize ?? Size.zero;
+  Size get contentSize {
+    if (_contentSize == null) {
+      owner?.flushLayout();
+    }
+    return _contentSize ?? Size.zero;
+  }
 
   int get clientWidth {
     double width = contentSize.width;
@@ -1009,19 +1085,27 @@ class RenderBoxModel extends RenderBox
     applyEffectiveTransform(child, transform);
   }
 
+  // Forked from RenderBox.applyPaintTransform, add scroll offset exclude logic.
+  void applyLayoutTransform(RenderObject child, Matrix4 transform, bool excludeScrollOffset) {
+    assert(child.parent == this);
+    assert(child.parentData is BoxParentData);
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    Offset offset = childParentData.offset;
+    if (excludeScrollOffset) {
+      offset -= Offset(scrollLeft, scrollTop);
+    }
+    transform.translate(offset.dx, offset.dy);
+  }
+
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
-
   Size get scrollableSize => _maxScrollableSize;
-
   set scrollableSize(Size value) {
     _maxScrollableSize = value;
   }
 
-  late Size _scrollableViewportSize;
-
+  Size _scrollableViewportSize = Size.zero;
   Size get scrollableViewportSize => _scrollableViewportSize;
-
   set scrollableViewportSize(Size value) {
     _scrollableViewportSize = value;
   }
@@ -1202,6 +1286,12 @@ class RenderBoxModel extends RenderBox
     return null;
   }
 
+  // Get the layout offset of renderObject to its ancestor which does not include the paint offset
+  // such as scroll or transform.getLayoutTransformTo
+  Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+    return MatrixUtils.transformPoint(getLayoutTransformTo(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
+  }
+
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {
     return renderStyle.backgroundImage != null &&
         renderStyle.backgroundAttachment == CSSBackgroundAttachmentType.local;
@@ -1235,7 +1325,6 @@ class RenderBoxModel extends RenderBox
       // If the element's position is 'relative' or 'static',
       // the containing block is formed by the content edge of the nearest block container ancestor box.
       attachRenderBox(containingBlockRenderBox, renderBoxModel, after: after);
-
       if (positionType == CSSPositionType.sticky) {
         // Placeholder of sticky renderBox need to inherit offset from original renderBox,
         // so it needs to layout before original renderBox.
@@ -1309,11 +1398,6 @@ class RenderBoxModel extends RenderBox
       super.dispose();
     });
 
-    // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.isNotEmpty) {
-      fixedChildren.clear();
-    }
-
     // Dispose scroll behavior
     disposeScrollable();
 
@@ -1384,28 +1468,30 @@ class RenderBoxModel extends RenderBox
     }());
 
     bool isHit = result.addWithPaintTransform(
-      transform: renderStyle.transformMatrix != null ? getEffectiveTransform() : null,
+      transform: renderStyle.effectiveTransformMatrix,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
+      hitTest: (BoxHitTestResult result, Offset transformPosition) {
         return result.addWithPaintOffset(
             offset: (scrollLeft != 0.0 || scrollTop != 0.0)
                 ? Offset(-scrollLeft, -scrollTop)
                 : null,
-            position: trasformPosition,
+            position: transformPosition,
             hitTest: (BoxHitTestResult result, Offset position) {
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
-                position -= getTotalScrollOffset();
+                Offset totalScrollOffset = getTotalScrollOffset();
+                position -= totalScrollOffset;
+                transformPosition -= totalScrollOffset;
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
-              if ((clipX || clipY) && !size.contains(trasformPosition)) {
+              if ((clipX || clipY) && !size.contains(transformPosition)) {
                 return false;
               }
 
               // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
               if (hitTestChildren(result, position: position) ||
-                  hitTestSelf(trasformPosition)) {
+                  hitTestSelf(transformPosition)) {
                 result.add(BoxHitTestEntry(this, position));
                 return true;
               }
@@ -1432,7 +1518,13 @@ class RenderBoxModel extends RenderBox
   }
 
   Future<Image> toImage({double pixelRatio = 1.0}) {
-    assert(layer != null);
+    if (layer == null) {
+      Completer<Image> completer = Completer<Image>();
+      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+        completer.complete(toImage(pixelRatio: pixelRatio));
+      });
+      return completer.future;
+    }
     assert(isRepaintBoundary);
     final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
@@ -1466,8 +1558,8 @@ class RenderBoxModel extends RenderBox
           DiagnosticsProperty('renderPositionHolder', renderPositionPlaceholder));
     properties.add(DiagnosticsProperty('intrinsicWidth', renderStyle.intrinsicWidth));
     properties.add(DiagnosticsProperty('intrinsicHeight', renderStyle.intrinsicHeight));
-    if (renderStyle.intrinsicRatio != null)
-      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.intrinsicRatio));
+    if (renderStyle.aspectRatio != null)
+      properties.add(DiagnosticsProperty('intrinsicRatio', renderStyle.aspectRatio));
 
     debugBoxDecorationProperties(properties);
     debugVisibilityProperties(properties);
@@ -1501,7 +1593,7 @@ class RenderBoxModel extends RenderBox
 
   // Detach renderBox from tree.
   static void detachRenderBox(RenderObject renderBox) {
-    if (renderBox.parent == null) return;
+    if (renderBox.parent == null || !renderBox.attached) return;
 
     // Remove reference from parent.
     RenderObject? parentRenderObject = renderBox.parent as RenderObject;

@@ -1,10 +1,10 @@
 
 
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
+export 'src/css/animation.dart';
 export 'src/css/background.dart';
 export 'src/css/border_radius.dart';
 export 'src/css/box.dart';

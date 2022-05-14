@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:convert';
@@ -151,7 +150,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         HttpCacheController cacheController = HttpCacheController.instance(origin);
         cacheObject = await cacheController.getCacheObject(request.uri);
         if (cacheObject.hitLocalCache(request)) {
-          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse();
+          HttpClientResponse? cacheResponse = await cacheObject.toHttpClientResponse(_nativeHttpClient);
           if (cacheResponse != null) {
             return cacheResponse;
           }
@@ -196,7 +195,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         final HttpClientResponse rawResponse = await _requestQueue.add(request.close);
         response = cacheObject == null
             ? rawResponse
-            : await HttpCacheController.instance(origin).interceptResponse(request, rawResponse, cacheObject);
+            : await HttpCacheController.instance(origin).interceptResponse(request, rawResponse, cacheObject, _nativeHttpClient);
         hitNegotiateCache = rawResponse != response;
       }
 
@@ -217,7 +216,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       if (cacheObject != null) {
         // Step 6: Intercept response by cache controller (handle 304).
         // Note: No need to negotiate cache here, this is final response, hit or not hit.
-        return HttpCacheController.instance(origin).interceptResponse(request, response, cacheObject);
+        return HttpCacheController.instance(origin).interceptResponse(request, response, cacheObject, _nativeHttpClient);
       } else {
         return response;
       }

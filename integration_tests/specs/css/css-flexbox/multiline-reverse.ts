@@ -198,6 +198,7 @@ describe('multiline-reverse', () => {
     await snapshot();
   });
 
+  // @TODO: align-self: start and align-self: baseline combo bug.
   xit('wrap-baseline with more than 2 flex-item', async () => {
     let flexbox_2;
     flexbox_2 = createElement(
@@ -265,7 +266,7 @@ describe('multiline-reverse', () => {
         ),
       ]
     );
-    // BODY.appendChild(flexbox_2);
+    BODY.appendChild(flexbox_2);
 
     await snapshot();
   });

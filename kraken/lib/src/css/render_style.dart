@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'dart:ui';
@@ -119,9 +118,9 @@ abstract class RenderStyle {
   CSSOverflowType get overflowY;
   CSSOverflowType get effectiveOverflowX;
   CSSOverflowType get effectiveOverflowY;
-  double? get intrinsicRatio;
   double get intrinsicWidth;
   double get intrinsicHeight;
+  double? get aspectRatio;
 
   // Flex
   FlexDirection get flexDirection;
@@ -146,7 +145,7 @@ abstract class RenderStyle {
   // Misc
   double get opacity;
   Visibility get visibility;
-  ContentVisibility? get contentVisibility;
+  ContentVisibility get contentVisibility;
   VerticalAlign get verticalAlign;
   BoxFit get objectFit;
   bool get isHeightStretch;
@@ -164,8 +163,8 @@ abstract class RenderStyle {
   void addRootFontRelativeProperty(String propertyName);
   void addColorRelativeProperty(String propertyName);
   String? removeAnimationProperty(String propertyName);
-  double getWidthByIntrinsicRatio();
-  double getHeightByIntrinsicRatio();
+  double getWidthByAspectRatio();
+  double getHeightByAspectRatio();
 
   // Following properties used for exposing APIs
   // for class that extends [AbstractRenderStyle].
@@ -615,75 +614,79 @@ class CSSRenderStyle
     double? logicalWidth;
 
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
-    switch (effectiveDisplay) {
-      case CSSDisplay.block:
-      case CSSDisplay.flex:
-      case CSSDisplay.sliver:
-        //  Use width directly if defined.
-        if (renderStyle.width.isNotAuto) {
-          logicalWidth = renderStyle.width.computedValue;
-        } else if (renderStyle.parent != null) {
-          RenderStyle parentRenderStyle = renderStyle.parent!;
-          RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
 
-          // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
-          // Replaced element also stretch in flex layout if align-items is stretch.
-          if (current is! RenderReplaced || parent is RenderFlexLayout) {
-            RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
-            // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
-            if (ancestorRenderStyle != null) {
-              logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
-              // Should subtract horizontal margin of own from its parent content width.
-              if (logicalWidth != null) {
-                logicalWidth -= renderStyle.margin.horizontal;
-              }
+    // Width applies to all elements except non-replaced inline elements.
+    // https://drafts.csswg.org/css-sizing-3/#propdef-width
+    if (effectiveDisplay == CSSDisplay.inline && current is! RenderReplaced) {
+      _contentBoxLogicalWidth = null;
+      return;
+
+    } else if (effectiveDisplay == CSSDisplay.block
+      || effectiveDisplay == CSSDisplay.flex
+      || effectiveDisplay == CSSDisplay.sliver
+    ) {
+      // Use width directly if defined.
+      if (renderStyle.width.isNotAuto) {
+        logicalWidth = renderStyle.width.computedValue;
+
+      } else if (renderStyle.parent != null) {
+        RenderStyle parentRenderStyle = renderStyle.parent!;
+        RenderBoxModel parent = parentRenderStyle.renderBoxModel!;
+        // Block element (except replaced element) will stretch to the content width of its parent in flow layout.
+        // Replaced element also stretch in flex layout if align-items is stretch.
+        if (current is! RenderReplaced || parent is RenderFlexLayout) {
+          RenderStyle? ancestorRenderStyle = _findAncestorWithNoDisplayInline();
+          // Should ignore renderStyle of display inline when searching for ancestors to stretch width.
+          if (ancestorRenderStyle != null) {
+            logicalWidth = ancestorRenderStyle.contentBoxLogicalWidth;
+            // Should subtract horizontal margin of own from its parent content width.
+            if (logicalWidth != null) {
+              logicalWidth -= renderStyle.margin.horizontal;
             }
           }
         }
-        break;
-      case CSSDisplay.inlineBlock:
-      case CSSDisplay.inlineFlex:
-        if (renderStyle.width.isNotAuto) {
-          logicalWidth = renderStyle.width.computedValue;
+      }
 
+    } else if (effectiveDisplay == CSSDisplay.inlineBlock
+      || effectiveDisplay == CSSDisplay.inlineFlex
+      || effectiveDisplay == CSSDisplay.inline
+    ) {
+      if (renderStyle.width.isNotAuto) {
+        logicalWidth = renderStyle.width.computedValue;
+
+      } else if ((renderStyle.position == CSSPositionType.absolute ||
+        renderStyle.position == CSSPositionType.fixed)
+        && current is! RenderReplaced
+        && renderStyle.width.isAuto
+        && renderStyle.left.isNotAuto
+        && renderStyle.right.isNotAuto
+      ) {
         // The width of positioned, non-replaced element is determined as following algorithm.
         // https://www.w3.org/TR/css-position-3/#abs-non-replaced-width
-        } else if ((renderStyle.position == CSSPositionType.absolute ||
-          renderStyle.position == CSSPositionType.fixed)
-          && current is! RenderReplaced
-          && renderStyle.width.isAuto
-          && renderStyle.left.isNotAuto
-          && renderStyle.right.isNotAuto
-        ) {
-          if (current.parent is! RenderBoxModel) {
-            logicalWidth = null;
-          }
-          // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
-          // cause the element of renderStyle parent may not equal to containing block.
-          RenderBoxModel parent = current.parent as RenderBoxModel;
-          // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
-          // content box is only a fraction of the complete renderStyle.
-          RenderStyle parentRenderStyle = parent.isScrollingContentBox
-            ? (parent.parent as RenderBoxModel).renderStyle
-            : parent.renderStyle;
-          // Width of positioned element should subtract its horizontal margin.
-          logicalWidth = (parentRenderStyle.paddingBoxLogicalWidth ?? 0)
-            - renderStyle.left.computedValue - renderStyle.right.computedValue
-            - renderStyle.marginLeft.computedValue - renderStyle.marginRight.computedValue;
-
-        } else if (current.hasSize && current.constraints.hasTightWidth) {
-          logicalWidth = current.constraints.maxWidth;
+        if (current.parent is! RenderBoxModel) {
+          logicalWidth = null;
         }
-        break;
-      case CSSDisplay.inline:
-        break;
-      case CSSDisplay.none:
-        break;
+        // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
+        // cause the element of renderStyle parent may not equal to containing block.
+        RenderBoxModel parent = current.parent as RenderBoxModel;
+        // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
+        // content box is only a fraction of the complete renderStyle.
+        RenderStyle parentRenderStyle = parent.isScrollingContentBox
+          ? (parent.parent as RenderBoxModel).renderStyle
+          : parent.renderStyle;
+        // Width of positioned element should subtract its horizontal margin.
+        logicalWidth = (parentRenderStyle.paddingBoxLogicalWidth ?? 0)
+          - renderStyle.left.computedValue - renderStyle.right.computedValue
+          - renderStyle.marginLeft.computedValue - renderStyle.marginRight.computedValue;
+
+      } else if (current.hasSize && current.constraints.hasTightWidth) {
+        logicalWidth = current.constraints.maxWidth;
+      }
     }
 
-    // Get width by intrinsic ratio for replaced element if width is auto.
-    if (logicalWidth == null && intrinsicRatio != null) {
-      logicalWidth = renderStyle.getWidthByIntrinsicRatio();
+    // Get width by aspect ratio for replaced element if width is auto.
+    if (logicalWidth == null && aspectRatio != null) {
+      logicalWidth = renderStyle.getWidthByAspectRatio();
     }
 
     // Constrain width by min-width and max-width.
@@ -722,13 +725,16 @@ class CSSRenderStyle
 
     CSSDisplay? effectiveDisplay = renderStyle.effectiveDisplay;
 
-    // Inline element has no height.
-    if (effectiveDisplay != CSSDisplay.inline) {
+    // Height applies to all elements except non-replaced inline elements.
+    // https://drafts.csswg.org/css-sizing-3/#propdef-height
+    if (effectiveDisplay == CSSDisplay.inline && current is! RenderReplaced) {
+      _contentBoxLogicalHeight = null;
+      return;
+
+    } else {
       if (renderStyle.height.isNotAuto) {
         logicalHeight = renderStyle.height.computedValue;
 
-      // The height of positioned, non-replaced element is determined as following algorithm.
-      // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
       } else if ((renderStyle.position == CSSPositionType.absolute ||
         renderStyle.position == CSSPositionType.fixed)
         && current is! RenderReplaced
@@ -736,6 +742,8 @@ class CSSRenderStyle
         && renderStyle.top.isNotAuto
         && renderStyle.bottom.isNotAuto
       ) {
+        // The height of positioned, non-replaced element is determined as following algorithm.
+        // https://www.w3.org/TR/css-position-3/#abs-non-replaced-height
         if (current.parent is! RenderBoxModel) {
           logicalHeight = null;
         }
@@ -767,9 +775,9 @@ class CSSRenderStyle
       }
     }
 
-    // Get height by intrinsic ratio for replaced element if height is auto.
-    if (logicalHeight == null && intrinsicRatio != null) {
-      logicalHeight = renderStyle.getHeightByIntrinsicRatio();
+    // Get height by aspect ratio for replaced element if height is auto.
+    if (logicalHeight == null && aspectRatio != null) {
+      logicalHeight = renderStyle.getHeightByAspectRatio();
     }
 
     // Constrain height by min-height and max-height.
@@ -1037,9 +1045,9 @@ class CSSRenderStyle
       - paddingBottom.computedValue;
   }
 
-  // Get height of replaced element by intrinsic ratio if height is not defined.
+  // Get height of replaced element by aspect ratio if height is not defined.
   @override
-  double getHeightByIntrinsicRatio() {
+  double getHeightByAspectRatio() {
     double contentBoxHeight;
     double borderBoxWidth = width.isAuto
       ? wrapPaddingBorderWidth(intrinsicWidth) : width.computedValue;
@@ -1068,9 +1076,9 @@ class CSSRenderStyle
     return borderBoxHeight;
   }
 
-  // Get width of replaced element by intrinsic ratio if width is not defined.
+  // Get width of replaced element by aspect ratio if width is not defined.
   @override
-  double getWidthByIntrinsicRatio() {
+  double getWidthByAspectRatio() {
     double contentBoxWidth;
 
     double borderBoxHeight = height.isAuto
@@ -1134,11 +1142,14 @@ class CSSRenderStyle
     while(parentRenderStyle != null) {
       RenderStyle? grandParentRenderStyle = parentRenderStyle.parent;
       // Flex item with flex-shrink 0 and no width/max-width will have infinity constraints
-      // even if parents have width.
+      // even if parents have width when flex direction is row.
       if (grandParentRenderStyle != null) {
         bool isGrandParentFlex = grandParentRenderStyle.display == CSSDisplay.flex ||
           grandParentRenderStyle.display == CSSDisplay.inlineFlex;
-        if (isGrandParentFlex && parentRenderStyle.flexShrink == 0) {
+        bool isHorizontalDirection = CSSFlex.isHorizontalFlexDirection(grandParentRenderStyle.flexDirection);
+        if (isGrandParentFlex
+          && isHorizontalDirection
+          && parentRenderStyle.flexShrink == 0) {
           return null;
         }
       }

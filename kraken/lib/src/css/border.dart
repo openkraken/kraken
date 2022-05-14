@@ -1,11 +1,8 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:core';
-import 'dart:ui';
 
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 

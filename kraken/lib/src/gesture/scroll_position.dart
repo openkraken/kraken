@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -11,7 +14,6 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'gesture_detector.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_metrics.dart';

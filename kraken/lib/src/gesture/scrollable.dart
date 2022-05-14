@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/gestures.dart';
@@ -13,7 +12,6 @@ import 'monodrag.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_physics.dart';
-import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
 typedef ScrollListener = void Function(double scrollOffset, AxisDirection axisDirection);

@@ -15,7 +15,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -35,7 +35,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -55,7 +55,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -75,7 +75,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -95,7 +95,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -115,7 +115,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -135,7 +135,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -155,7 +155,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -175,7 +175,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -195,7 +195,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -216,7 +216,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -236,7 +236,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -256,7 +256,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     await snapshot(0.1);
   });
 
@@ -278,7 +278,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -299,7 +299,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -320,7 +320,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -341,7 +341,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -362,7 +362,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -383,7 +383,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -404,7 +404,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -425,7 +425,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -446,7 +446,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -467,7 +467,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -489,7 +489,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -510,7 +510,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
 
@@ -531,7 +531,7 @@ describe('object-fit', () => {
         },
       );
       BODY.appendChild(image);
-  
+
       await snapshot(0.1);
     });
   });
@@ -552,7 +552,7 @@ describe('object-fit', () => {
       },
     );
     BODY.appendChild(image);
- 
+
     requestAnimationFrame(async () => {
       image.style.objectFit = '';
       await snapshot(0.1);
