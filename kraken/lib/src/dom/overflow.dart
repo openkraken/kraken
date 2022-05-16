@@ -253,6 +253,9 @@ mixin ElementOverflowMixin on ElementBase {
 
   // Update renderBox according to overflow value.
   void updateOverflowRenderBox() {
+    // Sliver has no scrolling content box.
+    if (renderBoxModel is RenderSliverListLayout) return;
+
     CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
 
