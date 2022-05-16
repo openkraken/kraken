@@ -42,7 +42,7 @@ mixin ElementOverflowMixin on ElementBase {
   KrakenScrollable? _scrollableX;
   KrakenScrollable? _scrollableY;
 
-  ScrollListener? _scrollListener;
+  ScrollListener? scrollListener;
   void Function(PointerEvent)? scrollablePointerListener;
 
   ViewportOffset? get scrollOffsetX => _scrollOffsetX;
@@ -64,25 +64,25 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void _scrollXListener() {
-    assert(_scrollListener != null);
+    assert(scrollListener != null);
     // If scroll is happening, that element has been unmounted, prevent null usage.
     if (scrollOffsetX != null) {
-      _scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
+      scrollListener!(scrollOffsetX!.pixels, AxisDirection.right);
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       renderBoxModel.markNeedsPaint();
     }
   }
 
   void _scrollYListener() {
-    assert(_scrollListener != null);
+    assert(scrollListener != null);
     if (scrollOffsetY != null) {
-      _scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
+      scrollListener!(scrollOffsetY!.pixels, AxisDirection.down);
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       renderBoxModel.markNeedsPaint();
     }
   }
   void disposeScrollable() {
-    _scrollListener = null;
+    scrollListener = null;
     scrollablePointerListener = null;
     _scrollOffsetX = null;
     _scrollOffsetY = null;
@@ -92,7 +92,7 @@ mixin ElementOverflowMixin on ElementBase {
     _scrollableY = null;
   }
 
-  void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
+  void updateRenderBoxModelWithOverflowX(ScrollListener _scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       scrollOffsetX = renderBoxModel.axis == Axis.horizontal
@@ -108,7 +108,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.scroll:
         // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
           if (_scrollableX == null) {
-            _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+            _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: _scrollListener);
             scrollOffsetX = _scrollableX!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
@@ -122,16 +122,16 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       if (_scrollableX != null || _scrollableY != null) {
-        _scrollListener = scrollListener;
+        scrollListener = _scrollListener;
         scrollablePointerListener = _scrollablePointerListener;
       } else {
-        _scrollListener = null;
+        scrollListener = null;
         scrollablePointerListener = null;
       }
     }
   }
 
-  void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
+  void updateRenderBoxModelWithOverflowY(ScrollListener _scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       scrollOffsetY = renderBoxModel.axis == Axis.vertical
@@ -148,7 +148,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.scroll:
         // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
           if (_scrollableY == null) {
-            _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+            _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: _scrollListener);
             scrollOffsetY = _scrollableY!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
@@ -162,10 +162,10 @@ mixin ElementOverflowMixin on ElementBase {
       }
 
       if (_scrollableX != null || _scrollableY != null) {
-        _scrollListener = scrollListener;
+        scrollListener = _scrollListener;
         scrollablePointerListener = _scrollablePointerListener;
       } else {
-        _scrollListener = null;
+        scrollListener = null;
         scrollablePointerListener = null;
       }
     }
