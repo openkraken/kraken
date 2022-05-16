@@ -279,6 +279,9 @@ abstract class Element
 
       // Ensure that the event responder is bound.
       ensureEventResponderBound();
+
+      // Overflow value change will create and destroy scrolling content box.
+      updateOverflowRenderBox();
     }
   }
 
@@ -1041,7 +1044,6 @@ abstract class Element
         if (effectiveOverflowY != oldEffectiveOverflowY) {
           updateRenderBoxModelWithOverflowY(_handleScroll);
         }
-        updateOverflowRenderBox();
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
@@ -1054,7 +1056,6 @@ abstract class Element
         if (effectiveOverflowX != oldEffectiveOverflowX) {
           updateRenderBoxModelWithOverflowX(_handleScroll);
         }
-        updateOverflowRenderBox();
         break;
       case OPACITY:
         renderStyle.opacity = value;
