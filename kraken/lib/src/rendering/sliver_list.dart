@@ -47,10 +47,12 @@ class RenderSliverListLayout extends RenderLayoutBox {
       case Axis.horizontal:
         renderStyle.target.scrollOffsetX = scrollable.position;
         renderStyle.target.scrollOffsetY = null;
+        markNeedsLayout();
         break;
       case Axis.vertical:
         renderStyle.target.scrollOffsetX = null;
         renderStyle.target.scrollOffsetY = scrollable.position;
+        markNeedsLayout();
         break;
     }
 

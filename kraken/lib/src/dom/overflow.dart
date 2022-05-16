@@ -52,8 +52,6 @@ mixin ElementOverflowMixin on ElementBase {
     _scrollOffsetX?.removeListener(_scrollXListener);
     _scrollOffsetX = value;
     _scrollOffsetX?.addListener(_scrollXListener);
-    RenderBoxModel renderBoxModel = this.renderBoxModel!;
-    renderBoxModel.markNeedsLayout();
   }
 
   ViewportOffset? get scrollOffsetY => _scrollOffsetY;
@@ -63,8 +61,6 @@ mixin ElementOverflowMixin on ElementBase {
     _scrollOffsetY?.removeListener(_scrollYListener);
     _scrollOffsetY = value;
     _scrollOffsetY?.addListener(_scrollYListener);
-    RenderBoxModel renderBoxModel = this.renderBoxModel!;
-    renderBoxModel.markNeedsLayout();
   }
 
   void _scrollXListener() {

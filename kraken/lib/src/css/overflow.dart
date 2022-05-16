@@ -21,6 +21,7 @@ mixin CSSOverflowMixin on RenderStyle {
   set overflowX(CSSOverflowType? value) {
     if (_overflowX == value) return;
     _overflowX = value;
+    renderBoxModel?.markNeedsLayout();
   }
 
   @override
@@ -29,6 +30,7 @@ mixin CSSOverflowMixin on RenderStyle {
   set overflowY(CSSOverflowType? value) {
     if (_overflowY == value) return;
     _overflowY = value;
+    renderBoxModel?.markNeedsLayout();
   }
 
   // As specified, except with visible/clip computing to auto/hidden (respectively)
