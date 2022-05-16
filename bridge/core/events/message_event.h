@@ -17,10 +17,15 @@ class MessageEvent : public Event {
   using ImplType = MessageEvent*;
 
   static MessageEvent* Create(ExecutingContext* context, const AtomicString& type, ExceptionState& exception_state);
-  static MessageEvent* Create(ExecutingContext* context, const AtomicString& type, const std::shared_ptr<MessageEventInit> &init, ExceptionState& exception_state);
+  static MessageEvent* Create(ExecutingContext* context,
+                              const AtomicString& type,
+                              const std::shared_ptr<MessageEventInit>& init,
+                              ExceptionState& exception_state);
 
   explicit MessageEvent(ExecutingContext* context, const AtomicString& type);
-  explicit MessageEvent(ExecutingContext* context, const AtomicString& type, const std::shared_ptr<MessageEventInit> &init);
+  explicit MessageEvent(ExecutingContext* context,
+                        const AtomicString& type,
+                        const std::shared_ptr<MessageEventInit>& init);
 
   ScriptValue data() const;
   AtomicString origin() const;
@@ -34,6 +39,6 @@ class MessageEvent : public Event {
   AtomicString source_;
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_CORE_EVENTS_MESSAGE_EVENT_H_

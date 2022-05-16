@@ -66,23 +66,23 @@ requestAnimationFrame(() => {
   EXPECT_EQ(logCalled, true);
 }
 //
-//TEST(Window, cancelAnimationFrame) {
+// TEST(Window, cancelAnimationFrame) {
 //  auto bridge = TEST_init();
 //
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { abort(); };
 //
 //  std::string code = R"(
-//let id = requestAnimationFrame(() => {
+// let id = requestAnimationFrame(() => {
 //  console.log('456');
 //});
-//cancelAnimationFrame(id);
+// cancelAnimationFrame(id);
 //)";
 //
 //  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 //  TEST_runLoop(bridge->getContext());
 //}
 //
-//TEST(Window, postMessage) {
+// TEST(Window, postMessage) {
 //  {
 //    auto bridge = TEST_init();
 //    static bool logCalled = false;
@@ -92,10 +92,10 @@ requestAnimationFrame(() => {
 //    };
 //
 //    std::string code = std::string(R"(
-//window.onmessage = (message) => {
+// window.onmessage = (message) => {
 //  console.log(JSON.stringify(message.data), message.origin);
 //};
-//window.postMessage({
+// window.postMessage({
 //  data: 1234
 //}, '*');
 //)");
@@ -106,7 +106,7 @@ requestAnimationFrame(() => {
 //  { TEST_init(); }
 //}
 //
-//TEST(Window, location) {
+// TEST(Window, location) {
 //  auto bridge = TEST_init();
 //  static bool logCalled = false;
 //  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

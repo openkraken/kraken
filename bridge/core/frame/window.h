@@ -6,15 +6,16 @@
 #ifndef KRAKENBRIDGE_WINDOW_H
 #define KRAKENBRIDGE_WINDOW_H
 
+#include "bindings/qjs/atomic_string.h"
 #include "bindings/qjs/wrapper_type_info.h"
 #include "core/dom/events/event_target.h"
-#include "bindings/qjs/atomic_string.h"
 #include "qjs_scroll_to_options.h"
 
 namespace kraken {
 
 class Window : public EventTargetWithInlineData {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   Window() = delete;
   Window(ExecutingContext* context);

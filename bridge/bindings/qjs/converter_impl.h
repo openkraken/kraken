@@ -9,13 +9,13 @@
 #include <type_traits>
 #include "atomic_string.h"
 #include "converter.h"
-#include "core/frame/window.h"
 #include "core/dom/document.h"
 #include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
 #include "core/dom/node_list.h"
 #include "core/fileapi/blob_part.h"
 #include "core/fileapi/blob_property_bag.h"
+#include "core/frame/window.h"
 #include "core/html/html_body_element.h"
 #include "core/html/html_div_element.h"
 #include "core/html/html_element.h"
@@ -415,13 +415,17 @@ struct Converter<T, typename std::enable_if_t<std::is_base_of<ScriptWrappable, T
   static JSValue ToValue(JSContext* ctx, const T* value) { return value->ToQuickJS(); }
 };
 
-template<>
+template <>
 struct Converter<Window> : public ConverterBase<Window> {
   static Window* FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
     return toScriptWrappable<Window>(value);
   }
-  static JSValue ToValue(JSContext* ctx, Window* window) { return JS_DupValue(ctx, window->GetExecutingContext()->Global()); }
-  static JSValue ToValue(JSContext* ctx, const Window* window) { return JS_DupValue(ctx, window->GetExecutingContext()->Global()); }
+  static JSValue ToValue(JSContext* ctx, Window* window) {
+    return JS_DupValue(ctx, window->GetExecutingContext()->Global());
+  }
+  static JSValue ToValue(JSContext* ctx, const Window* window) {
+    return JS_DupValue(ctx, window->GetExecutingContext()->Global());
+  }
 };
 
 };  // namespace kraken
