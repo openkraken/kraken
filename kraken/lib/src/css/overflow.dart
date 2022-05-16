@@ -294,13 +294,8 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   void updateOverflow() {
-    if (renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto) {
-      updateOverflowX();
-    }
-
-    if (renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto) {
-      updateOverflowY();
-    }
+    updateOverflowX();
+    updateOverflowY();
   }
 
   void updateOverflowX() {
