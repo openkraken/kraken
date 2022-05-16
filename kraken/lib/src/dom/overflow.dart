@@ -137,7 +137,6 @@ mixin ElementOverflowMixin on ElementBase {
       scrollOffsetY = renderBoxModel.axis == Axis.vertical
         ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
-      RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
       switch(overflowY) {
         case CSSOverflowType.clip:

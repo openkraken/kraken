@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/css.dart';
-import 'package:kraken/gesture.dart';
 
 mixin RenderOverflowMixin on RenderBoxModelBase {
   void disposeScrollable() {
