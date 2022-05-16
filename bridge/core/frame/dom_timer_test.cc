@@ -4,7 +4,8 @@
 
 #include "gtest/gtest.h"
 #include "kraken_test_env.h"
-#include "page.h"
+
+using namespace kraken;
 
 TEST(Timer, setTimeout) {
   auto bridge = TEST_init();
@@ -35,8 +36,7 @@ console.log('1234');
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext());
-  disposePage(0);
+  TEST_runLoop(bridge->GetExecutingContext());
 }
 
 TEST(Timer, clearTimeout) {
@@ -61,6 +61,5 @@ clearTimeout(timer);
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
-  TEST_runLoop(bridge->getContext());
-  disposePage(0);
+  TEST_runLoop(bridge->GetExecutingContext());
 }

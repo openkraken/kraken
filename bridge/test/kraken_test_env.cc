@@ -52,8 +52,8 @@ typedef struct JSThreadState {
   std::unordered_map<int32_t, JSFrameCallback*> os_frameCallbacks;
 } JSThreadState;
 
-static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
-  ts->os_timers.erase(th->timer->timerId());
+static void unlink_timer(JSThreadState* ts, int32_t timerId) {
+  ts->os_timers.erase(timerId);
 }
 
 static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
@@ -243,8 +243,9 @@ static bool jsPool(kraken::ExecutingContext* context) {
           func(th->timer, th->contextId, nullptr);
         } else {
           th->func = nullptr;
+          int32_t timerId = th->timer->timerId();
           func(th->timer, th->contextId, nullptr);
-          unlink_timer(ts, th);
+          unlink_timer(ts, timerId);
         }
 
         return false;
