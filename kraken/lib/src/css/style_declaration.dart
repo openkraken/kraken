@@ -389,6 +389,14 @@ class CSSStyleDeclaration {
     _pendingProperties[propertyName] = normalizedValue;
   }
 
+  void resetPendingProperty(String propertyName) {
+    String? value = _properties[propertyName];
+    if (value != null) {
+      _properties.remove(propertyName);
+      _pendingProperties[propertyName] = value;
+    }
+  }
+
   void flushPendingProperties() {
     Element? _target = target;
     // If style target element not exists, no need to do flush operation.

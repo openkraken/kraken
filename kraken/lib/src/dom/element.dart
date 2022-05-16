@@ -508,6 +508,11 @@ abstract class Element
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
+      // Need to reset pending style related to renderObject tree structure
+      // after renderBox detached from tree.
+      style.resetPendingProperty(POSITION);
+      style.resetPendingProperty(DISPLAY);
+
       // Clear pointer listener
       clearEventResponder(renderBoxModel);
     }
@@ -761,7 +766,7 @@ abstract class Element
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }
 
-      // Flush pending style before child attached.
+      // Flush pending style after child attached.
       style.flushPendingProperties();
 
       didAttachRenderer();
