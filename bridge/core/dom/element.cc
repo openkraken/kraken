@@ -17,7 +17,10 @@
 namespace kraken {
 
 Element::Element(const AtomicString& tag_name, Document* document, Node::ConstructionType construction_type)
-    : ContainerNode(document, construction_type), tag_name_(tag_name) {}
+    : ContainerNode(document, construction_type), tag_name_(tag_name) {
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kCreateElement,
+                                                       tag_name.ToNativeString().release(), (void*)bindingObject());
+}
 
 ElementAttributes& Element::EnsureElementAttributes() {
   if (attributes_ == nullptr) {
@@ -56,7 +59,7 @@ void Element::setAttribute(const AtomicString& name, const AtomicString& value, 
   std::unique_ptr<NativeString> args_01 = name.ToNativeString();
   std::unique_ptr<NativeString> args_02 = value.ToNativeString();
 
-  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::setAttribute, args_01.release(),
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kSetAttribute, args_01.release(),
                                                        args_02.release(), nullptr);
 }
 

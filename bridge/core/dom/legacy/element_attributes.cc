@@ -37,7 +37,7 @@ bool ElementAttributes::setAttribute(const AtomicString& name,
   if (numberIndex) {
     exception_state.ThrowException(
         ctx(), ErrorType::TypeError,
-        "Failed to execute 'setAttribute' on 'Element': '" + name.ToStdString() + "' is not a valid attribute name.");
+        "Failed to execute 'kSetAttribute' on 'Element': '" + name.ToStdString() + "' is not a valid attribute name.");
     return false;
   }
 

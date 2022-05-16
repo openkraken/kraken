@@ -19,7 +19,7 @@ static void CreateRawJavaScriptObjects(benchmark::State& state) {
 
 static void CreateDivElement(benchmark::State& state) {
   auto& context = bridge->GetExecutingContext();
-  std::string code = "var a = document.createElement('div');";
+  std::string code = "var a = document.kCreateElement('div');";
   // Perform setup here
   for (auto _ : state) {
     context->EvaluateJavaScript(code.c_str(), code.size(), "internal://", 0);

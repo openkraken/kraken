@@ -39,6 +39,10 @@ EventTarget* EventTarget::Create(ExecutingContext* context, ExceptionState& exce
   return MakeGarbageCollected<EventTargetWithInlineData>(context);
 }
 
+EventTarget::~EventTarget() {
+//  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kDisposeEventTarget, nullptr);
+}
+
 EventTarget::EventTarget(ExecutingContext* context)
     : BindingObject(context), ScriptWrappable(context->ctx()), event_target_id_(global_event_target_id++) {}
 

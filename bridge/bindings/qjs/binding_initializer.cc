@@ -28,13 +28,14 @@
 #include "qjs_node_list.h"
 #include "qjs_text.h"
 #include "qjs_window.h"
+#include "qjs_window_or_worker_global_scope.h"
 
 namespace kraken {
 
 void InstallBindings(ExecutingContext* context) {
   // Must follow the inheritance order when install.
   // Exp: Node extends EventTarget, EventTarget must be install first.
-  QJSWindow::installGlobalFunctions(context);
+  QJSWindowOrWorkerGlobalScope::Install(context);
   QJSModuleManager::Install(context);
   QJSConsole::Install(context);
   QJSEventTarget::Install(context);

@@ -241,8 +241,6 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/rejected_promises.cc
     bindings/qjs/pending_promises.cc
     bindings/qjs/pending_promises.h
-    bindings/qjs/qjs_window.cc
-    bindings/qjs/qjs_window.h
 
     # Core sources
     core/executing_context.cc
@@ -278,6 +276,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/frame/module_callback.cc
     core/frame/module_callback.h
     core/frame/module_callback_coordinator.cc
+    core/frame/window.h
+    core/frame/window.cc
     core/frame/module_callback_coordinator.h
     core/css/legacy/css_style_declaration.cc
     core/css/legacy/css_style_declaration.h
@@ -388,6 +388,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_console.h
     out/qjs_module_manager.cc
     out/qjs_module_manager.h
+    out/qjs_window_or_worker_global_scope.cc
+    out/qjs_window_or_worker_global_scope.h
     out/qjs_blob.cc
     out/qjs_blob.h
     out/qjs_event.cc

@@ -19,8 +19,10 @@ class Text : public CharacterData {
   static Text* Create(ExecutingContext* context, ExceptionState& executing_context);
   static Text* Create(ExecutingContext* context, const AtomicString& value, ExceptionState& executing_context);
 
-  Text(TreeScope& tree_scope, const AtomicString& data, ConstructionType type)
-      : CharacterData(tree_scope, data, type) {}
+  Text(TreeScope& tree_scope, const AtomicString& data, ConstructionType type) : CharacterData(tree_scope, data, type) {
+    GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kCreateTextNode,
+                                                         data.ToNativeString().release(), (void*)bindingObject());
+  }
 
   NodeType nodeType() const override;
 

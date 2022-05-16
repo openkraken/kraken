@@ -24,9 +24,6 @@ int initBridge() {
     PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
 
-  // Register methods first to share ptrs for bridge polyfill.
-  registerDartMethodsToCpp();
-
   // Setup binding bridge.
   BindingBridge.setup();
 
@@ -58,6 +55,9 @@ int initBridge() {
       throw Exception('Can\' allocate new kraken bridge: bridge count had reach the maximum size.');
     }
   }
+
+  // Register methods first to share ptrs for bridge polyfill.
+  registerDartMethodsToCpp(contextId);
 
   return contextId;
 }

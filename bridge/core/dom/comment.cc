@@ -19,7 +19,9 @@ Comment* Comment::Create(Document& document) {
 }
 
 Comment::Comment(TreeScope& tree_scope, ConstructionType type)
-    : CharacterData(tree_scope, built_in_string::kempty_string, type) {}
+    : CharacterData(tree_scope, built_in_string::kempty_string, type) {
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kCreateComment,(void*)bindingObject());
+}
 
 Node::NodeType Comment::nodeType() const {
   return Node::kCommentNode;

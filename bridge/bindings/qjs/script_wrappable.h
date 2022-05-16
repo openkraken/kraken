@@ -51,9 +51,7 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
   JSValue ToQuickJSUnsafe() const;
 
   ScriptValue ToValue();
-  FORCE_INLINE ExecutingContext* GetExecutingContext() const {
-    return static_cast<ExecutingContext*>(JS_GetContextOpaque(ctx_));
-  };
+  FORCE_INLINE ExecutingContext* GetExecutingContext() const { return context_; };
   FORCE_INLINE JSContext* ctx() const { return ctx_; }
   FORCE_INLINE JSRuntime* runtime() const { return runtime_; }
 
@@ -62,6 +60,7 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
  private:
   JSValue jsObject_{JS_NULL};
   JSContext* ctx_{nullptr};
+  ExecutingContext* context_{nullptr};
   JSRuntime* runtime_{nullptr};
   friend class GCVisitor;
 };

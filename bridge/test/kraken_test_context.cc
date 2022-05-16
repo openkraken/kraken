@@ -263,7 +263,8 @@ void KrakenTestContext::invokeExecuteTest(ExecuteCallback executeCallback) {
   execute_test_callback_ = nullptr;
 }
 
-KrakenTestContext::KrakenTestContext(ExecutingContext* context) : context_(context), page_(static_cast<KrakenPage*>(context->owner())) {
+KrakenTestContext::KrakenTestContext(ExecutingContext* context)
+    : context_(context), page_(static_cast<KrakenPage*>(context->owner())) {
   page_->owner = this;
   page_->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenTestContext*>(bridge->owner); };
 

@@ -198,13 +198,14 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
     initJSPagePool(1024 * 1024);
     inited = true;
   });
+
+  TEST_mockDartMethods(contextId, onJsError);
+
   initTestFramework(contextId);
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   auto* context = page->GetExecutingContext();
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(ScriptState::runtime(), th);
-
-  TEST_mockDartMethods(contextId, onJsError);
 
   return std::unique_ptr<kraken::KrakenPage>(page);
 }

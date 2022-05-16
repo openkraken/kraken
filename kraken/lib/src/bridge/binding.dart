@@ -166,7 +166,7 @@ abstract class BindingBridge {
     Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
     List<EventHandler>? handlers = eventHandlers[type];
     if (handlers != null) {
-      return !handlers.contains(_dispatchBindingEvent);
+      return !handlers.contains(_dispatchEventToNative);
     }
     return true;
   }
@@ -175,7 +175,7 @@ abstract class BindingBridge {
     Map<String, List<EventHandler>> eventHandlers = target.getEventHandlers();
     List<EventHandler>? handlers = eventHandlers[type];
     if (handlers != null) {
-      return handlers.contains(_dispatchBindingEvent);
+      return handlers.contains(_dispatchEventToNative);
     }
     return false;
   }

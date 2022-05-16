@@ -59,6 +59,8 @@ class BindingObject {
   NativeValue GetBindingProperty(const AtomicString& prop, ExceptionState& exception_state) const;
   NativeValue SetBindingProperty(const AtomicString& prop, NativeValue value, ExceptionState& exception_state) const;
 
+  const NativeBindingObject* bindingObject() const { return &binding_object_; }
+
  private:
   ExecutingContext* context_{nullptr};
   NativeBindingObject binding_object_{this};

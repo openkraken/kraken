@@ -51,12 +51,18 @@ static void handlePersistentCallback(void* ptr, int32_t contextId, const char* e
 
 int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context,
                                           std::shared_ptr<QJSFunction> handler,
+                                          ExceptionState& exception) {
+  return setTimeout(context, handler, 0.0, exception);
+}
+
+int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context,
+                                          std::shared_ptr<QJSFunction> handler,
                                           int32_t timeout,
-                                          ExceptionState* exception) {
+                                          ExceptionState& exception) {
 #if FLUTTER_BACKEND
   if (context->dartMethodPtr()->setTimeout == nullptr) {
-    exception->ThrowException(context->ctx(), ErrorType::InternalError,
-                              "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
+    exception.ThrowException(context->ctx(), ErrorType::InternalError,
+                             "Failed to execute 'setTimeout': dart method (setTimeout) is not registered.");
     return -1;
   }
 #endif
@@ -76,11 +82,17 @@ int WindowOrWorkerGlobalScope::setTimeout(ExecutingContext* context,
 
 int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context,
                                            std::shared_ptr<QJSFunction> handler,
+                                           ExceptionState& exception) {
+  return setInterval(context, handler, 0.0, exception);
+}
+
+int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context,
+                                           std::shared_ptr<QJSFunction> handler,
                                            int32_t timeout,
-                                           ExceptionState* exception) {
+                                           ExceptionState& exception) {
   if (context->dartMethodPtr()->setInterval == nullptr) {
-    exception->ThrowException(context->ctx(), ErrorType::InternalError,
-                              "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
+    exception.ThrowException(context->ctx(), ErrorType::InternalError,
+                             "Failed to execute 'setInterval': dart method (setInterval) is not registered.");
     return -1;
   }
 
@@ -97,10 +109,10 @@ int WindowOrWorkerGlobalScope::setInterval(ExecutingContext* context,
   return timerId;
 }
 
-void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState* exception) {
+void WindowOrWorkerGlobalScope::clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState& exception) {
   if (context->dartMethodPtr()->clearTimeout == nullptr) {
-    exception->ThrowException(context->ctx(), ErrorType::InternalError,
-                              "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
+    exception.ThrowException(context->ctx(), ErrorType::InternalError,
+                             "Failed to execute 'clearTimeout': dart method (clearTimeout) is not registered.");
     return;
   }
 

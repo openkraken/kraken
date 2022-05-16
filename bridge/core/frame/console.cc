@@ -17,8 +17,7 @@ void Console::__kraken_print__(ExecutingContext* context,
   std::stringstream stream;
   std::string buffer = log.ToStdString();
   stream << buffer;
-  printLog(context, stream, level != built_in_string::kempty_string ? level.ToStdString() : "info",
-           nullptr);
+  printLog(context, stream, level != built_in_string::kempty_string ? level.ToStdString() : "info", nullptr);
 }
 
 void Console::__kraken_print__(ExecutingContext* context, const AtomicString& log, ExceptionState& exception_state) {

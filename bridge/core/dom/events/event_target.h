@@ -87,7 +87,7 @@ class EventTarget : public ScriptWrappable, public BindingObject {
   static EventTarget* Create(ExecutingContext* context, ExceptionState& exception_state);
 
   EventTarget() = delete;
-  ~EventTarget() = default;
+  ~EventTarget();
   explicit EventTarget(ExecutingContext* context);
 
   bool addEventListener(const AtomicString& event_type,
@@ -258,9 +258,9 @@ class EventTargetWithInlineData : public EventTarget {
 //  // https://html.spec.whatwg.org/C/#event-handler-attributes
 //  EventHandlerMap m_eventHandlerMap{m_ctx};
 //
-//  // When javascript code set a property on EventTarget instance, EventTarget::setAttribute callback will be called
+//  // When javascript code set a property on EventTarget instance, EventTarget::kSetAttribute callback will be called
 //  when
-//  // property are not defined by Object.defineProperty or setAttribute.
+//  // property are not defined by Object.defineProperty or kSetAttribute.
 //  // We store there values in here.
 //  EventTargetProperties m_properties{m_ctx};
 //

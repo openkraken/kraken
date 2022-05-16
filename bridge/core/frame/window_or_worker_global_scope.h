@@ -17,12 +17,14 @@ class WindowOrWorkerGlobalScope {
   static int setTimeout(ExecutingContext* context,
                         std::shared_ptr<QJSFunction> handler,
                         int32_t timeout,
-                        ExceptionState* exception);
+                        ExceptionState& exception);
+  static int setTimeout(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, ExceptionState& exception);
   static int setInterval(ExecutingContext* context,
                          std::shared_ptr<QJSFunction> handler,
                          int32_t timeout,
-                         ExceptionState* exception);
-  static void clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState* exception);
+                         ExceptionState& exception);
+  static int setInterval(ExecutingContext* context, std::shared_ptr<QJSFunction> handler, ExceptionState& exception);
+  static void clearTimeout(ExecutingContext* context, int32_t timerId, ExceptionState& exception);
 };
 
 }  // namespace kraken

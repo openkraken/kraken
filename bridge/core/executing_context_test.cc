@@ -354,7 +354,8 @@ TEST(Context, evaluateByteCode) {
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->GetExecutingContext()->ctx(), "helloworld");
-  std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
+  std::unique_ptr<kraken::NativeString> nativeString =
+      kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
   EXPECT_EQ(nativeString->length(), 10);
   uint8_t expectedString[10] = {104, 101, 108, 108, 111, 119, 111, 114, 108, 100};
   for (int i = 0; i < 10; i++) {
@@ -366,7 +367,8 @@ TEST(jsValueToNativeString, utf8String) {
 TEST(jsValueToNativeString, unicodeChinese) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->GetExecutingContext()->ctx(), "这是你的优乐美");
-  std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
+  std::unique_ptr<kraken::NativeString> nativeString =
+      kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
   EXPECT_EQ(nativeString->length(), expectedString.size());
   for (int i = 0; i < nativeString->length(); i++) {
@@ -378,7 +380,8 @@ TEST(jsValueToNativeString, unicodeChinese) {
 TEST(jsValueToNativeString, emoji) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->GetExecutingContext()->ctx(), "……🤪");
-  std::unique_ptr<kraken::NativeString> nativeString = kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
+  std::unique_ptr<kraken::NativeString> nativeString =
+      kraken::jsValueToNativeString(bridge->GetExecutingContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
   EXPECT_EQ(nativeString->length(), expectedString.length());
   for (int i = 0; i < nativeString->length(); i++) {
