@@ -47,7 +47,7 @@ class ScriptWrappable : public GarbageCollected<ScriptWrappable> {
 
   void Trace(GCVisitor* visitor) const override{};
 
-  JSValue ToQuickJS();
+  JSValue ToQuickJS() const;
   JSValue ToQuickJSUnsafe() const;
 
   ScriptValue ToValue();

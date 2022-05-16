@@ -12,7 +12,7 @@ namespace kraken {
 ScriptWrappable::ScriptWrappable(JSContext* ctx)
     : ctx_(ctx), runtime_(JS_GetRuntime(ctx)), context_(ExecutingContext::From(ctx)) {}
 
-JSValue ScriptWrappable::ToQuickJS() {
+JSValue ScriptWrappable::ToQuickJS() const {
   return JS_DupValue(ctx_, jsObject_);
 }
 

@@ -26,6 +26,7 @@ list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./core/dom/node_test.cc
   ./core/dom/element_test.cc
   ./core/frame/dom_timer_test.cc
+  ./core/frame/window_test.cc
   #  ./bindings/qjs/bom/timer_test.cc
 #  ./bindings/qjs/qjs_patch_test.cc
 #  ./bindings/qjs/garbage_collected_test.cc

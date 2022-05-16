@@ -1,4 +1,5 @@
 import {ErrorEventInit} from "./error_event_init";
+import {Event} from "../dom/events/event";
 
 interface ErrorEvent extends Event {
   readonly message: string;

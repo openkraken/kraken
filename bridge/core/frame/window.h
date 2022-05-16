@@ -8,13 +8,34 @@
 
 #include "bindings/qjs/wrapper_type_info.h"
 #include "core/dom/events/event_target.h"
+#include "bindings/qjs/atomic_string.h"
+#include "qjs_scroll_to_options.h"
 
 namespace kraken {
 
 class Window : public EventTargetWithInlineData {
+  DEFINE_WRAPPERTYPEINFO();
  public:
   Window() = delete;
   Window(ExecutingContext* context);
+
+  Window* open(ExceptionState& exception_state);
+  Window* open(const AtomicString& url, ExceptionState& exception_state);
+
+  const Window* window() const { return this; }
+
+  void scroll(ExceptionState& exception_state);
+  void scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
+  void scroll(double x, double y, ExceptionState& exception_state);
+  void scrollTo(ExceptionState& exception_state);
+  void scrollTo(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
+  void scrollTo(double x, double y, ExceptionState& exception_state);
+  void scrollBy(ExceptionState& exception_state);
+  void scrollBy(double x, double y, ExceptionState& exception_state);
+  void scrollBy(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
+
+  void postMessage(const ScriptValue& message, ExceptionState& exception_state);
+  void postMessage(const ScriptValue& message, const AtomicString& target_origin, ExceptionState& exception_state);
 
   //  DEFINE_FUNCTION(open);
   //  DEFINE_FUNCTION(scrollTo);

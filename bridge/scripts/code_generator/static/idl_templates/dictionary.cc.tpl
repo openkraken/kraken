@@ -20,7 +20,7 @@ bool <%= className %>::FillQJSObjectWithMembers(JSContext* ctx, JSValue qjs_dict
   }
 
   <% _.forEach(props, function(prop, index) { %>
-  JS_SetPropertyStr(ctx, qjs_dictionary, "<%= prop.name %>_", Converter<<%= generateTypeConverter(prop.type) %>>::ToValue(ctx, <%= prop.name %>_));
+  JS_SetPropertyStr(ctx, qjs_dictionary, "<%= prop.name %>_", Converter<<%= generateIDLTypeConverter(prop.type) %>>::ToValue(ctx, <%= prop.name %>_));
   <% }); %>
 
   return true;
@@ -38,7 +38,7 @@ void <%= className %>::FillMembersWithQJSObject(JSContext* ctx, JSValue value, E
   <% _.forEach(props, function(prop, index) { %>
   {
       JSValue v = JS_GetPropertyStr(ctx, value, "<%= prop.name %>");
-      <%= prop.name %>_ = Converter<<%= generateTypeConverter(prop.type) %>>::FromValue(ctx, v, exception_state);
+      <%= prop.name %>_ = Converter<<%= generateIDLTypeConverter(prop.type) %>>::FromValue(ctx, v, exception_state);
       JS_FreeValue(ctx, v);
   }
 

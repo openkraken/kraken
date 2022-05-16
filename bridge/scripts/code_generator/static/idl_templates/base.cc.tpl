@@ -3,6 +3,8 @@
  */
 
 #include "<%= blob.filename %>.h"
+#include "foundation/native_value_converter.h"
+#include "binding_call_methods.h"
 #include "bindings/qjs/member_installer.h"
 #include "bindings/qjs/qjs_function.h"
 #include "bindings/qjs/converter_impl.h"

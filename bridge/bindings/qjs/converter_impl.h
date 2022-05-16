@@ -9,6 +9,7 @@
 #include <type_traits>
 #include "atomic_string.h"
 #include "converter.h"
+#include "core/frame/window.h"
 #include "core/dom/document.h"
 #include "core/dom/events/event.h"
 #include "core/dom/events/event_target.h"
@@ -411,6 +412,16 @@ struct Converter<T, typename std::enable_if_t<std::is_base_of<ScriptWrappable, T
     return nullptr;
   }
   static JSValue ToValue(JSContext* ctx, T* value) { return value->ToQuickJS(); }
+  static JSValue ToValue(JSContext* ctx, const T* value) { return value->ToQuickJS(); }
+};
+
+template<>
+struct Converter<Window> : public ConverterBase<Window> {
+  static Window* FromValue(JSContext* ctx, JSValue value, ExceptionState& exception_state) {
+    return toScriptWrappable<Window>(value);
+  }
+  static JSValue ToValue(JSContext* ctx, Window* window) { return JS_DupValue(ctx, window->GetExecutingContext()->Global()); }
+  static JSValue ToValue(JSContext* ctx, const Window* window) { return JS_DupValue(ctx, window->GetExecutingContext()->Global()); }
 };
 
 };  // namespace kraken

@@ -4,7 +4,7 @@ import {IDLBlob} from "./IDLBlob";
 import {getClassName} from "./utils";
 import fs from 'fs';
 import path from 'path';
-import {generateTypeConverter, generateTypeValue} from "./generateSource";
+import {generateIDLTypeConverter, generateTypeValue} from "./generateSource";
 import {GenerateOptions} from "./generator";
 
 export enum TemplateKind {

@@ -68,12 +68,12 @@ export function generateTypeValue(type: ParameterType[]): string {
   return '';
 }
 
-export function generateTypeConverter(type: ParameterType[]): string {
+export function generateIDLTypeConverter(type: ParameterType[]): string {
   let haveNull = type.some(t => t === FunctionArgumentType.null);
   let returnValue = '';
 
   if (type[0] === FunctionArgumentType.array) {
-    returnValue = `IDLSequence<${generateTypeConverter(type.slice(1))}>`;
+    returnValue = `IDLSequence<${generateIDLTypeConverter(type.slice(1))}>`;
   } else if (typeof type[0] === 'string') {
     returnValue = type[0];
   } else {
@@ -113,8 +113,32 @@ export function generateTypeConverter(type: ParameterType[]): string {
   return returnValue;
 }
 
+function generateNativeValueTypeConverter(type: ParameterType[]): string {
+  let returnValue = '';
+
+  switch (type[0]) {
+    case FunctionArgumentType.int32:
+      returnValue = `NativeTypeInt64`;
+      break;
+    case FunctionArgumentType.int64:
+      returnValue = 'NativeTypeInt64';
+      break;
+    case FunctionArgumentType.double:
+      returnValue = `NativeTypeDouble`;
+      break;
+    case FunctionArgumentType.boolean:
+      returnValue = `NativeTypeBool`;
+      break;
+    case FunctionArgumentType.dom_string:
+      returnValue = `NativeTypeString`;
+      break;
+  }
+
+  return returnValue;
+}
+
 function generateRequiredInitBody(argument: FunctionArguments, argsIndex: number) {
-  let type = generateTypeConverter(argument.type);
+  let type = generateIDLTypeConverter(argument.type);
 
   let hasArgumentCheck = type.indexOf('Element') >= 0 || type.indexOf('Node') >= 0 || type === 'EventTarget';
 
@@ -150,7 +174,7 @@ ${returnValueAssignment} self->${generateCallMethodName(declare.name)}(${[...pre
   }
 
 
-  return `auto&& args_${argument.name} = Converter<IDLOptional<${generateTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
+  return `auto&& args_${argument.name} = Converter<IDLOptional<${generateIDLTypeConverter(argument.type)}>>::FromValue(ctx, argv[${argsIndex}], exception_state);
 if (UNLIKELY(exception_state.HasException())) {
   return exception_state.ToQuickJS();
 }
@@ -232,9 +256,9 @@ return ${overloadMethods[0].name}_overload_${0}(ctx, this_val, argc, argv);
 
 function generateDictionaryInit(blob: IDLBlob, props: PropsDeclaration[]) {
   let initExpression = props.map(prop => {
-    switch(prop.type[0]) {
+    switch (prop.type[0]) {
       case FunctionArgumentType.boolean: {
-         return `${prop.name}_(false)`;
+        return `${prop.name}_(false)`;
       }
     }
     return ''
@@ -264,7 +288,7 @@ function generateReturnValueInit(blob: IDLBlob, type: ParameterType[], options: 
       return `${type[0]}* return_value = nullptr;`;
     }
   }
-  return `Converter<${generateTypeConverter(type)}>::ImplType return_value;`;
+  return `Converter<${generateIDLTypeConverter(type)}>::ImplType return_value;`;
 }
 
 function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode?: ParameterMode, options: GenFunctionBodyOptions = {
@@ -286,7 +310,7 @@ function generateReturnValueResult(blob: IDLBlob, type: ParameterType[], mode?: 
     }
   }
 
-  return `Converter<${generateTypeConverter(type)}>::ToValue(ctx, std::move(return_value))`;
+  return `Converter<${generateIDLTypeConverter(type)}>::ToValue(ctx, std::move(return_value))`;
 }
 
 type GenFunctionBodyOptions = { isConstructor?: boolean, isInstanceMethod?: boolean };
@@ -393,7 +417,8 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
           generateOverLoadSwitchBody,
           overloadMethods,
           filtedMethods,
-          generateTypeConverter
+          generateIDLTypeConverter,
+          generateNativeValueTypeConverter
         });
       }
       case TemplateKind.Dictionary: {
@@ -403,7 +428,7 @@ const WrapperTypeInfo& ${getClassName(blob)}::wrapper_type_info_ = QJS${getClass
           blob: blob,
           props: props,
           object: object,
-          generateTypeConverter,
+          generateIDLTypeConverter,
           generateDictionaryInit
         });
       }

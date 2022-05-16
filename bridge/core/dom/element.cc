@@ -93,10 +93,13 @@ void Element::scroll(double x, double y, ExceptionState& exception_state) {
   InvokeBindingMethod(binding_call_methods::kscroll, 2, args, exception_state);
 }
 
-// TODO: add this support.
 void Element::scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
-  exception_state.ThrowException(ctx(), ErrorType::InternalError,
-                                 "scroll API which accept scrollToOptions not supported.");
+  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
+  };
+  InvokeBindingMethod(binding_call_methods::kscroll, 2, args, exception_state);
 }
 
 void Element::scrollBy(ExceptionState& exception_state) {
@@ -113,8 +116,12 @@ void Element::scrollBy(double x, double y, ExceptionState& exception_state) {
 }
 
 void Element::scrollBy(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
-  exception_state.ThrowException(ctx(), ErrorType::InternalError,
-                                 "scrollBy API which accept scrollToOptions not supported.");
+  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
+  };
+  InvokeBindingMethod(binding_call_methods::kscrollBy, 2, args, exception_state);
 }
 
 void Element::scrollTo(ExceptionState& exception_state) {

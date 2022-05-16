@@ -15,6 +15,8 @@
 #include "qjs_element.h"
 #include "qjs_element_attributes.h"
 #include "qjs_event.h"
+#include "qjs_message_event.h"
+#include "qjs_error_event.h"
 #include "qjs_event_target.h"
 #include "qjs_html_body_element.h"
 #include "qjs_html_div_element.h"
@@ -39,7 +41,11 @@ void InstallBindings(ExecutingContext* context) {
   QJSModuleManager::Install(context);
   QJSConsole::Install(context);
   QJSEventTarget::Install(context);
+  QJSWindow::Install(context);
+  context->InstallGlobal();
   QJSEvent::Install(context);
+  QJSErrorEvent::Install(context);
+  QJSMessageEvent::Install(context);
   QJSNode::Install(context);
   QJSNodeList::Install(context);
   QJSDocument::Install(context);

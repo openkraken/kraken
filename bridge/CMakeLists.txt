@@ -328,6 +328,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/container_node.h
     core/events/error_event.cc
     core/events/error_event.h
+    core/events/message_event.h
+    core/events/message_event.cc
     core/html/parser/html_parser.cc
     core/html/parser/html_parser.h
     core/html/html_collection.cc
@@ -390,6 +392,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_module_manager.h
     out/qjs_window_or_worker_global_scope.cc
     out/qjs_window_or_worker_global_scope.h
+    out/qjs_window.cc
+    out/qjs_window.h
     out/qjs_blob.cc
     out/qjs_blob.h
     out/qjs_event.cc
@@ -400,6 +404,10 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_event_listener_options.h
     out/qjs_error_event.h
     out/qjs_error_event.cc
+    out/qjs_message_event.cc
+    out/qjs_message_event.h
+    out/qjs_message_event_init.h
+    out/qjs_message_event_init.cc
     out/qjs_error_event_init.h
     out/qjs_error_event_init.cc
     out/qjs_event_init.h

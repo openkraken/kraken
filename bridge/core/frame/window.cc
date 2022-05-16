@@ -3,69 +3,98 @@
  */
 
 #include "window.h"
+#include "binding_call_methods.h"
 #include "bindings/qjs/cppgc/garbage_collected.h"
+#include "core/events/message_event.h"
+#include "event_type_names.h"
+#include "foundation/native_value_converter.h"
 
 namespace kraken {
 
 Window::Window(ExecutingContext* context) : EventTargetWithInlineData(context) {}
 
-//
-// JSValue Window::open(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-//  auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-//  NativeValue arguments[] = {jsValueToNativeValue(ctx, argv[0])};
-//  return window->invokeBindingMethod("open", 1, arguments);
-//}
-//
-// IMPL_FUNCTION(Window, scrollTo)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-//#if FLUTTER_BACKEND
-//  getDartMethod()->flushUICommand();
-//  auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-//  double arg0 = 0;
-//  double arg1 = 0;
-//  JS_ToFloat64(ctx, &arg0, argv[0]);
-//  JS_ToFloat64(ctx, &arg1, argv[1]);
-//  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-//  return window->invokeBindingMethod("scroll", 2, arguments);
-//#else
-//  return JS_UNDEFINED;
-//#endif
-//}
-// JSValue Window::scrollBy(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-//  getDartMethod()->flushUICommand();
-//  auto window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, Window::classId()));
-//  double arg0 = 0;
-//  double arg1 = 0;
-//  JS_ToFloat64(ctx, &arg0, argv[0]);
-//  JS_ToFloat64(ctx, &arg1, argv[1]);
-//  NativeValue arguments[] = {Native_NewFloat64(arg0), Native_NewFloat64(arg1)};
-//  return window->invokeBindingMethod("scrollBy", 2, arguments);
-//}
-//
-// IMPL_FUNCTION(Window, postMessage)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-//  JSValue messageValue = argv[0];
-//  JSValue globalObjectValue = JS_GetGlobalObject(ctx);
-//  auto* window = static_cast<Window*>(JS_GetOpaque(globalObjectValue, JSValueGetClassId(this_val)));
-//
-//  JSValue messageEventInitValue = JS_NewObject(ctx);
-//
-//  JS_SetPropertyStr(ctx, messageEventInitValue, "data", JS_DupValue(ctx, messageValue));
-//  // TODO: convert originValue to current src.
-//  JS_SetPropertyStr(ctx, messageEventInitValue, "origin", JS_NewString(ctx, ""));
-//
-//  JSValue messageType = JS_NewString(ctx, "message");
-//  JSValue arguments[] = {messageType, messageEventInitValue};
-//  JSValue messageEventValue =
-//      JS_CallConstructor(ctx, MessageEvent::instance(window->m_context)->jsObject, 2, arguments);
-//  auto* event = static_cast<MessageEventInstance*>(JS_GetOpaque(messageEventValue, Event::kEventClassID));
-//  window->dispatchEvent(event);
-//
-//  JS_FreeValue(ctx, messageType);
-//  JS_FreeValue(ctx, messageEventValue);
-//  JS_FreeValue(ctx, messageEventInitValue);
-//  JS_FreeValue(ctx, globalObjectValue);
-//  return JS_NULL;
-//}
-//
+Window* Window::open(ExceptionState& exception_state) {
+  return this;
+}
+
+Window* Window::open(const AtomicString& url, ExceptionState& exception_state) {
+  const NativeValue args[] = {
+    NativeValueConverter<NativeTypeString>::ToNativeValue(url.ToNativeString().release()),
+  };
+  InvokeBindingMethod(binding_call_methods::kopen, 1, args, exception_state);
+}
+
+void Window::scroll(ExceptionState& exception_state) {
+  return scroll(0, 0, exception_state);
+}
+
+void Window::scroll(double x, double y, ExceptionState& exception_state) {
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(x),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(y),
+  };
+  InvokeBindingMethod(binding_call_methods::kscroll, 2, args, exception_state);
+}
+
+void Window::scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
+  };
+  InvokeBindingMethod(binding_call_methods::kscroll, 2, args, exception_state);
+}
+
+void Window::scrollBy(ExceptionState& exception_state) {
+  return scrollBy(0, 0, exception_state);
+}
+
+void Window::scrollBy(double x, double y, ExceptionState& exception_state) {
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(x),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(y),
+  };
+  InvokeBindingMethod(binding_call_methods::kscrollBy, 2, args, exception_state);
+}
+
+void Window::scrollBy(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
+  const NativeValue args[] = {
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
+      NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
+  };
+  InvokeBindingMethod(binding_call_methods::kscrollBy, 2, args, exception_state);
+}
+
+void Window::scrollTo(ExceptionState& exception_state) {
+  return scroll(exception_state);
+}
+
+void Window::scrollTo(double x, double y, ExceptionState& exception_state) {
+  return scroll(x, y, exception_state);
+}
+
+void Window::scrollTo(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
+  return scroll(options, exception_state);
+}
+
+void Window::postMessage(const ScriptValue& message, ExceptionState& exception_state) {
+  auto event_init = MessageEventInit::Create();
+  event_init->setData(message);
+  auto* message_event =
+      MessageEvent::Create(GetExecutingContext(), event_type_names::kmessage, event_init, exception_state);
+  dispatchEvent(message_event, exception_state);
+}
+
+void Window::postMessage(const ScriptValue& message,
+                         const AtomicString& target_origin,
+                         ExceptionState& exception_state) {
+  auto event_init = MessageEventInit::Create();
+  event_init->setData(message);
+  event_init->setOrigin(target_origin);
+  auto* message_event =
+      MessageEvent::Create(GetExecutingContext(), event_type_names::kmessage, event_init, exception_state);
+  dispatchEvent(message_event, exception_state);
+}
+
 // IMPL_FUNCTION(Window, requestAnimationFrame)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
 //  if (argc <= 0) {
 //    return JS_ThrowTypeError(ctx,

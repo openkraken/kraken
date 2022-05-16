@@ -18,7 +18,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
       return exception_state.ToQuickJS();
     }
 
-    return Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
+    return Converter<<%= generateIDLTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
   };
   <% } else { %>
   JSValue QJS<%= className %>::StringPropertyGetterCallback(JSContext* ctx, JSValue obj, JSAtom key) {
@@ -29,7 +29,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
     if (UNLIKELY(exception_state.HasException())) {
       return exception_state.ToQuickJS();
     }
-    return Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
+    return Converter<<%= generateIDLTypeConverter(object.indexedProp.type) %>>::ToValue(ctx, result);
   };
   <% } %>
   <% if (!object.indexedProp.readonly) { %>
@@ -38,7 +38,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
     auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
     MemberMutationScope scope{ExecutingContext::From(ctx)};
-    auto&& v = Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
+    auto&& v = Converter<<%= generateIDLTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
     }
@@ -53,7 +53,7 @@ JSValue QJS<%= className %>::ConstructorCallback(JSContext* ctx, JSValue func_ob
     auto* self = toScriptWrappable<<%= className %>>(obj);
     ExceptionState exception_state;
     MemberMutationScope scope{ExecutingContext::From(ctx)};
-    auto&& v = Converter<<%= generateTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
+    auto&& v = Converter<<%= generateIDLTypeConverter(object.indexedProp.type) %>>::FromValue(ctx, value, exception_state);
     if (UNLIKELY(exception_state.HasException())) {
       return false;
     }
@@ -93,19 +93,33 @@ static JSValue <%= prop.name %>AttributeGetCallback(JSContext* ctx, JSValueConst
   auto* <%= blob.filename %> = toScriptWrappable<<%= className %>>(this_val);
   assert(<%= blob.filename %> != nullptr);
   MemberMutationScope scope{ExecutingContext::From(ctx)};
-  return Converter<<%= generateTypeConverter(prop.type) %>>::ToValue(ctx, <%= blob.filename %>-><%= prop.name %>());
+
+  <% if (prop.typeMode && prop.typeMode.dartImpl) { %>
+  ExceptionState exception_state;
+  typename NativeTypeDouble::ImplType v = NativeValueConverter<<%= generateNativeValueTypeConverter(prop.type) %>>::FromNativeValue(<%= blob.filename %>->GetBindingProperty(binding_call_methods::k<%= prop.name %>, exception_state));
+  if (UNLIKELY(exception_state.HasException())) {
+    return exception_state.ToQuickJS();
+  }
+  return Converter<IDLDouble>::ToValue(ctx, v);
+  <% } else { %>
+  return Converter<<%= generateIDLTypeConverter(prop.type) %>>::ToValue(ctx, <%= blob.filename %>-><%= prop.name %>());
+  <% } %>
 }
 <% if (!prop.readonly) { %>
 static JSValue <%= prop.name %>AttributeSetCallback(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
  auto* <%= blob.filename %> = toScriptWrappable<<%= className %>>(this_val);
   ExceptionState exception_state;
-  auto&& v = Converter<<%= generateTypeConverter(prop.type) %>>::FromValue(ctx, argv[0], exception_state);
+  auto&& v = Converter<<%= generateIDLTypeConverter(prop.type) %>>::FromValue(ctx, argv[0], exception_state);
   if (exception_state.HasException()) {
     return exception_state.ToQuickJS();
   }
   MemberMutationScope scope{ExecutingContext::From(ctx)};
 
+  <% if (prop.typeMode && prop.typeMode.dartImpl) { %>
+  <%= blob.filename %>->SetBindingProperty(binding_call_methods::k<%= prop.name %>, NativeValueConverter<<%= generateNativeValueTypeConverter(prop.type) %>>::ToNativeValue(v),exception_state);
+  <% } else {%>
   <%= blob.filename %>->set<%= prop.name[0].toUpperCase() + prop.name.slice(1) %>(v, exception_state);
+  <% } %>
   if (exception_state.HasException()) {
     return exception_state.ToQuickJS();
   }

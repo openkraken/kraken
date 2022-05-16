@@ -91,7 +91,7 @@ function getParameterBaseType(type: ts.TypeNode, mode?: ParameterMode): Paramete
       if (mode) mode.dartImpl = true;
       let argument = typeReference.typeArguments![0];
       // @ts-ignore
-      return argument.typeName.text;
+      return getParameterBaseType(argument);
     }
 
     return identifier;
@@ -161,7 +161,9 @@ function walkProgram(statement: ts.Statement) {
 
             let propKind = m.type;
             if (propKind) {
-              prop.type = getParameterType(propKind);
+              let mode = new ParameterMode();
+              prop.type = getParameterType(propKind, mode);
+              prop.typeMode = mode;
               if (prop.type[0] === FunctionArgumentType.function) {
                 let f = (m.type as ts.FunctionTypeNode);
                 let functionProps = prop as FunctionDeclaration;

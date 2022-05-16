@@ -8,6 +8,7 @@
 #include "core/dom/document.h"
 #include "core/html/html_html_element.h"
 #include "polyfill.h"
+#include "qjs_window.h"
 
 #include "foundation/logging.h"
 
@@ -44,16 +45,7 @@ ExecutingContext::ExecutingContext(int32_t contextId, const JSExceptionHandler& 
 
   JSContext* ctx = script_state_.ctx();
   global_object_ = JS_GetGlobalObject(script_state_.ctx());
-  JSValue windowGetter = JS_NewCFunction(
-      ctx,
-      [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
-        return JS_GetGlobalObject(ctx);
-      },
-      "get", 0);
-  JSAtom windowKey = JS_NewAtom(ctx, "window");
-  JS_DefinePropertyGetSet(ctx, global_object_, windowKey, windowGetter, JS_UNDEFINED,
-                          JS_PROP_HAS_GET | JS_PROP_ENUMERABLE);
-  JS_FreeAtom(ctx, windowKey);
+
   JS_SetContextOpaque(ctx, this);
   JS_SetHostPromiseRejectionTracker(script_state_.runtime(), promiseRejectTracker, nullptr);
 
@@ -382,6 +374,13 @@ void ExecutingContext::InstallDocument() {
   document_ = MakeGarbageCollected<Document>(this);
   document_->InitDocumentElement();
   DefineGlobalProperty("document", document_->ToQuickJS());
+}
+
+void ExecutingContext::InstallGlobal() {
+  MemberMutationScope mutation_scope{this};
+  auto* window = MakeGarbageCollected<Window>(this);
+  JS_SetPrototype(ctx(), Global(), window->ToQuickJSUnsafe());
+  JS_SetOpaque(Global(), window);
 }
 
 // An lock free context validator.

@@ -19,6 +19,7 @@
     "scrollTop",
     "getBoundingClientRect",
     ["getPropertyMagic", "%g"],
-    ["setPropertyMagic", "%s"]
+    ["setPropertyMagic", "%s"],
+    "open"
   ]
 }
