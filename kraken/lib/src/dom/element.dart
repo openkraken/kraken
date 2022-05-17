@@ -508,10 +508,9 @@ abstract class Element
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
-      // Need to reset pending style related to renderObject tree structure
-      // after renderBox detached from tree.
-      style.resetPendingProperty(POSITION);
-      style.resetPendingProperty(DISPLAY);
+      // Need to reset pending style properties which will affect renderObject tree structure
+      // after renderBox is reattached to tree.
+      style.resetPendingProperties([POSITION, DISPLAY]);
 
       // Clear pointer listener
       clearEventResponder(renderBoxModel);
