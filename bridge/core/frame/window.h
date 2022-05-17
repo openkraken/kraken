@@ -24,6 +24,8 @@ class Window : public EventTargetWithInlineData {
   Window* open(const AtomicString& url, ExceptionState& exception_state);
 
   [[nodiscard]] const Window* window() const { return this; }
+  [[nodiscard]] const Window* self() const { return this; }
+  [[nodiscard]] const Window* parent() const { return this; }
 
   void scroll(ExceptionState& exception_state);
   void scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
@@ -40,24 +42,6 @@ class Window : public EventTargetWithInlineData {
 
   double requestAnimationFrame(const std::shared_ptr<QJSFunction>& callback, ExceptionState& exceptionState);
   void cancelAnimationFrame(double request_id, ExceptionState& exception_state);
-
-  //  DEFINE_FUNCTION(open);
-  //  DEFINE_FUNCTION(scrollTo);
-  //  DEFINE_FUNCTION(scrollBy);
-  //  DEFINE_FUNCTION(postMessage);
-  //  DEFINE_FUNCTION(requestAnimationFrame);
-  //  DEFINE_FUNCTION(cancelAnimationFrame);
-  //
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(devicePixelRatio);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(colorScheme);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(__location__);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(location);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(window);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(parent);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollX);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(scrollY);
-  //  DEFINE_PROTOTYPE_READONLY_PROPERTY(self);
-  //  DEFINE_PROTOTYPE_PROPERTY(onerror);
 };
 
 }  // namespace kraken

@@ -60,6 +60,8 @@ class Document : public ContainerNode, public TreeScope {
   [[nodiscard]] HTMLHeadElement* head() const;
   void setHead(HTMLHeadElement* head, ExceptionState& exception_state);
 
+  ScriptValue location() const;
+
   void IncrementNodeCount() { node_count_++; }
   void DecrementNodeCount() {
     assert(node_count_ > 0);

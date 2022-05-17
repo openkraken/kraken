@@ -16,5 +16,15 @@ interface Window extends EventTarget {
   cancelAnimationFrame(request_id: double): void;
 
   readonly window: Window;
+  readonly parent: Window;
+  readonly self: Window;
+
+  readonly scrollX: DartImpl<double>;
+  readonly scrollY: DartImpl<double>;
+  readonly devicePixelRatio: DartImpl<double>;
+  readonly colorScheme: DartImpl<string>;
+  readonly innerWidth: DartImpl<double>;
+  readonly innerHeight: DartImpl<double>;
+
   new(): void;
 }

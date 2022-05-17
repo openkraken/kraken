@@ -11,6 +11,8 @@ interface Document extends Node {
   body: HTMLBodyElement | null;
   readonly head: HTMLHeadElement | null;
   readonly documentElement: HTMLHtmlElement;
+  // Legacy impl: get the polyfill implements from global object.
+  readonly location: any;
 
   createElement(tagName: string): Element;
   createTextNode(value: string): Text;

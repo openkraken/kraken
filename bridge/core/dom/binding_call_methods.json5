@@ -20,6 +20,10 @@
     "getBoundingClientRect",
     ["getPropertyMagic", "%g"],
     ["setPropertyMagic", "%s"],
-    "open"
+    "open",
+    "devicePixelRatio",
+    "colorScheme",
+    "scrollX",
+    "scrollY"
   ]
 }

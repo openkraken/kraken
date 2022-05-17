@@ -138,6 +138,14 @@ void Document::InitDocumentElement() {
   AppendChild(document_element_, exception_state);
 }
 
+// Legacy impl: Get the JS polyfill impl from global object.
+ScriptValue Document::location() const {
+  JSValue location = JS_GetPropertyStr(ctx(), GetExecutingContext()->Global(), "location");
+  ScriptValue result = ScriptValue(ctx(), location);
+  JS_FreeValue(ctx(), location);
+  return result;
+}
+
 HTMLBodyElement* Document::body() const {
   if (!IsA<HTMLHtmlElement>(documentElement()))
     return nullptr;
