@@ -24,6 +24,8 @@
     "devicePixelRatio",
     "colorScheme",
     "scrollX",
-    "scrollY"
+    "scrollY",
+    "innerWidth",
+    "innerHeight",
   ]
 }

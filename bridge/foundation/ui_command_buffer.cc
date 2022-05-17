@@ -5,6 +5,7 @@
 #include "ui_command_buffer.h"
 #include "core/dart_methods.h"
 #include "core/executing_context.h"
+#include "foundation/logging.h"
 
 namespace kraken {
 
@@ -17,20 +18,20 @@ void UICommandBuffer::addCommand(int32_t id, UICommand type, void* nativePtr) {
   queue.emplace_back(item);
 }
 
-void UICommandBuffer::addCommand(int32_t id, UICommand type, NativeString* args_01, void* nativePtr) {
+void UICommandBuffer::addCommand(int32_t id, UICommand type, std::unique_ptr<NativeString>&& args_01, void* nativePtr) {
   assert(args_01 != nullptr);
-  UICommandItem item{id, static_cast<int32_t>(type), args_01, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), args_01.release(), nativePtr};
   queue.emplace_back(item);
 }
 
 void UICommandBuffer::addCommand(int32_t id,
                                  UICommand type,
-                                 NativeString* args_01,
-                                 NativeString* args_02,
+                                 std::unique_ptr<NativeString>&& args_01,
+                                 std::unique_ptr<NativeString>&& args_02,
                                  void* nativePtr) {
   assert(args_01 != nullptr);
   assert(args_02 != nullptr);
-  UICommandItem item{id, static_cast<int32_t>(type), args_01, args_02, nativePtr};
+  UICommandItem item{id, static_cast<int32_t>(type), args_01.release(), args_02.release(), nativePtr};
   queue.emplace_back(item);
 }
 

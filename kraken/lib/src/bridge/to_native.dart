@@ -276,19 +276,6 @@ Future<void> reloadJSContext(int contextId) async {
   return completer.future;
 }
 
-typedef NativeFlushUICommandCallback = Void Function();
-typedef DartFlushUICommandCallback = void Function();
-
-final DartFlushUICommandCallback _flushUICommandCallback = KrakenDynamicLibrary
-    .ref
-    .lookup<NativeFunction<NativeFlushUICommandCallback>>(
-        'flushUICommandCallback')
-    .asFunction();
-
-void flushUICommandCallback() {
-  _flushUICommandCallback();
-}
-
 typedef NativeDispatchUITask = Void Function(
     Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartDispatchUITask = void Function(
@@ -307,6 +294,8 @@ enum UICommandType {
   createElement,
   createTextNode,
   createComment,
+  createDocument,
+  createWindow,
   disposeEventTarget,
   addEvent,
   removeNode,
@@ -503,6 +492,12 @@ void flushUICommand() {
           case UICommandType.createElement:
             controller.view.createElement(
                 id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
+            break;
+          case UICommandType.createDocument:
+            controller.view.initDocument(nativePtr.cast<NativeBindingObject>());
+            break;
+          case UICommandType.createWindow:
+            controller.view.initWindow(nativePtr.cast<NativeBindingObject>());
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(

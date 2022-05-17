@@ -134,8 +134,6 @@ void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
   dartMethodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
   dartMethodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   dartMethodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
-  dartMethodPointer->initWindow = reinterpret_cast<InitWindow>(methodBytes[i++]);
-  dartMethodPointer->initDocument = reinterpret_cast<InitDocument>(methodBytes[i++]);
 
 #if ENABLE_PROFILE
   methodPointer->getPerformanceEntries = reinterpret_cast<GetPerformanceEntries>(methodBytes[i++]);

@@ -123,10 +123,10 @@ bool checkPage(int32_t contextId, void* context) {
   return page->GetExecutingContext() == context;
 }
 
-void evaluateScripts(int32_t contextId, kraken::NativeString* code, const char* bundleFilename, int startLine) {
+void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {
   assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  context->evaluateScript(code, bundleFilename, startLine);
+  context->evaluateScript(reinterpret_cast<kraken::NativeString*>(code), bundleFilename, startLine);
 }
 
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t* bytes, int32_t byteLen) {
@@ -151,13 +151,13 @@ void reloadJsContext(int32_t contextId) {
 }
 
 void invokeModuleEvent(int32_t contextId,
-                       kraken::NativeString* moduleName,
+                       NativeString* moduleName,
                        const char* eventType,
                        void* event,
-                       kraken::NativeString* extra) {
+                       NativeString* extra) {
   assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  context->invokeModuleEvent(moduleName, eventType, event, extra);
+  context->invokeModuleEvent(reinterpret_cast<kraken::NativeString*>(moduleName), eventType, event, reinterpret_cast<kraken::NativeString*>(extra));
 }
 
 void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length) {

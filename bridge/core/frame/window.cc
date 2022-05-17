@@ -12,7 +12,10 @@
 
 namespace kraken {
 
-Window::Window(ExecutingContext* context) : EventTargetWithInlineData(context) {}
+Window::Window(ExecutingContext* context) : EventTargetWithInlineData(context) {
+  KRAKEN_LOG(VERBOSE) << "Add Create Window Command";
+  context->uiCommandBuffer()->addCommand(context->contextId(), UICommand::kCreateWindow, (void*)bindingObject());
+}
 
 Window* Window::open(ExceptionState& exception_state) {
   return this;

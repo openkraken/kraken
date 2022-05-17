@@ -328,24 +328,6 @@ void _flushUICommand() {
 
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
 
-typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
-typedef DartInitWindow = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
-
-void _initWindow(int contextId, Pointer<NativeBindingObject> nativePtr) {
-  KrakenViewController.windowNativePtrMap[contextId] = nativePtr;
-}
-
-final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
-
-typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
-typedef DartInitDocument = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
-
-void _initDocument(int contextId, Pointer<NativeBindingObject> nativePtr) {
-  KrakenViewController.documentNativePtrMap[contextId] = nativePtr;
-}
-
-final Pointer<NativeFunction<NativeInitDocument>> _nativeInitDocument = Pointer.fromFunction(_initDocument);
-
 typedef NativePerformanceGetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
 typedef DartPerformanceGetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
 
@@ -399,8 +381,6 @@ final List<int> _dartNativeMethods = [
   _nativeGetScreen.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
-  _nativeInitWindow.address,
-  _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
   _nativeOnJsLog.address,

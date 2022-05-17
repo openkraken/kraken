@@ -127,7 +127,7 @@ bool CSSStyleDeclaration::InternalSetProperty(std::string& name, const AtomicStr
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = value.ToNativeString();
   GetExecutingContext()->uiCommandBuffer()->addCommand(owner_element_target_id_, UICommand::kSetStyle,
-                                                       args_01.release(), args_02.release(), nullptr);
+                                                       std::move(args_01), std::move(args_02), nullptr);
 
   return true;
 }
@@ -145,7 +145,7 @@ AtomicString CSSStyleDeclaration::InternalRemoveProperty(std::string& name) {
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);
   std::unique_ptr<NativeString> args_02 = jsValueToNativeString(ctx(), JS_NULL);
   GetExecutingContext()->uiCommandBuffer()->addCommand(owner_element_target_id_, UICommand::kSetStyle,
-                                                       args_01.release(), args_02.release(), nullptr);
+                                                       std::move(args_01), std::move(args_02), nullptr);
 
   return return_value;
 }

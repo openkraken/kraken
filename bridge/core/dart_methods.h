@@ -43,8 +43,6 @@ typedef void (*ToBlob)(void* callbackContext,
 typedef void (*OnJSError)(int32_t contextId, const char*);
 typedef void (*OnJSLog)(int32_t contextId, int32_t level, const char*);
 typedef void (*FlushUICommand)();
-typedef void (*InitWindow)(int32_t contextId, void* nativePtr);
-typedef void (*InitDocument)(int32_t contextId, void* nativePtr);
 
 using MatchImageSnapshotCallback = void (*)(void* callbackContext, int32_t contextId, int8_t, const char* errmsg);
 using MatchImageSnapshot = void (*)(void* callbackContext,
@@ -94,8 +92,6 @@ struct DartMethodPointer {
 #if ENABLE_PROFILE
   GetPerformanceEntries getPerformanceEntries{nullptr};
 #endif
-  InitWindow initWindow{nullptr};
-  InitDocument initDocument{nullptr};
 };
 
 }  // namespace kraken

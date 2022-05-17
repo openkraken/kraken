@@ -40,7 +40,7 @@ void* getPage(int32_t contextId);
 bool checkPage(int32_t contextId);
 bool checkPage(int32_t contextId, void* context);
 KRAKEN_EXPORT_C
-void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine);
+void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int32_t startLine);
 KRAKEN_EXPORT_C
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t* bytes, int32_t byteLen);
 KRAKEN_EXPORT_C

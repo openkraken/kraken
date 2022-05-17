@@ -44,7 +44,6 @@ void InstallBindings(ExecutingContext* context) {
   QJSConsole::Install(context);
   QJSEventTarget::Install(context);
   QJSWindow::Install(context);
-  context->InstallGlobal();
   QJSEvent::Install(context);
   QJSErrorEvent::Install(context);
   QJSMessageEvent::Install(context);

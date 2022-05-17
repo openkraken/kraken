@@ -172,10 +172,6 @@ void TEST_toBlob(void* callbackContext,
 
 void TEST_flushUICommand() {}
 
-void TEST_initWindow(int32_t contextId, void* nativePtr) {}
-
-void TEST_initDocument(int32_t contextId, void* nativePtr) {}
-
 void TEST_onJsLog(int32_t contextId, int32_t level, const char*) {}
 
 #if ENABLE_PROFILE
@@ -288,8 +284,6 @@ void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
       reinterpret_cast<uint64_t>(TEST_getScreen),
       reinterpret_cast<uint64_t>(TEST_toBlob),
       reinterpret_cast<uint64_t>(TEST_flushUICommand),
-      reinterpret_cast<uint64_t>(TEST_initWindow),
-      reinterpret_cast<uint64_t>(TEST_initDocument),
   };
 
 #if ENABLE_PROFILE
