@@ -100,22 +100,21 @@ mixin ElementOverflowMixin on ElementBase {
     } else if (renderBoxModel != null) {
       CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
       switch(overflowX) {
-        case CSSOverflowType.clip:
-          _scrollableX = null;
-          break;
         case CSSOverflowType.hidden:
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
-        // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
+          // Scrollable state should be maintained when values changes between hidden, auto, scroll.
           if (_scrollableX == null) {
             _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: _scrollListener);
             scrollOffsetX = _scrollableX!.position;
           }
-          // Reset canDrag by overflow because hidden is can't drag.
+          // Content in overflow hidden container can only be scrolled programmatically but not by direct intervention of user.
+          // https://www.w3.org/TR/css-overflow-3/#valdef-overflow-hidden
           bool canDrag = overflowX != CSSOverflowType.hidden;
           _scrollableX!.setCanDrag(canDrag);
           break;
         case CSSOverflowType.visible:
+        case CSSOverflowType.clip:
         default:
           _scrollableX = null;
           break;
@@ -139,21 +138,20 @@ mixin ElementOverflowMixin on ElementBase {
     } else if (renderBoxModel != null) {
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
       switch(overflowY) {
-        case CSSOverflowType.clip:
-          _scrollableY = null;
-          break;
         case CSSOverflowType.hidden:
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
-        // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
+          // Scrollable state should be maintained when values changes between hidden, auto, scroll.
           if (_scrollableY == null) {
             _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: _scrollListener);
             scrollOffsetY = _scrollableY!.position;
           }
-          // Reset canDrag by overflow because hidden is can't drag.
+          // Content in overflow hidden container can only be scrolled programmatically but not by direct intervention of user.
+          // https://www.w3.org/TR/css-overflow-3/#valdef-overflow-hidden
           bool canDrag = overflowY != CSSOverflowType.hidden;
           _scrollableY!.setCanDrag(canDrag);
           break;
+        case CSSOverflowType.clip:
         case CSSOverflowType.visible:
         default:
           _scrollableY = null;
