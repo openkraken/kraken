@@ -1190,6 +1190,7 @@ class RenderBoxModel extends RenderBox
   void paintNothing(PaintingContext context, Offset offset) {}
 
   void paintBoxModel(PaintingContext context, Offset offset) {
+    int alpha = renderStyle.alpha;
     // If opacity to zero, only paint intersection observer.
     if (alpha == 0) {
       paintIntersectionObserver(context, offset, paintNothing);
