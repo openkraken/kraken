@@ -10,7 +10,7 @@
 
 namespace kraken {
 
-class ScriptAnimationController  {
+class ScriptAnimationController {
  public:
   ScriptAnimationController() = delete;
 

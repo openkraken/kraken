@@ -11,7 +11,7 @@
 
 namespace kraken {
 
-//void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+// void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
 //  auto* controller = static_cast<ScriptAnimationController*>(JS_GetOpaque(val, ScriptAnimationController::classId));
 //  controller->frame_request_callback_collection_.trace(rt, JS_UNDEFINED, mark_func);
 //}
@@ -36,7 +36,7 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
 }
 
 uint32_t ScriptAnimationController::RegisterFrameCallback(const std::shared_ptr<FrameCallback>& callback) {
-//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+  //  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
   uint32_t requestId =
       getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);

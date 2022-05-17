@@ -39,7 +39,7 @@ class ScriptValue final {
   explicit ScriptValue(JSContext* ctx, JSValue value) : ctx_(ctx), value_(JS_DupValue(ctx, value)){};
   explicit ScriptValue(JSContext* ctx, const NativeString* string)
       : ctx_(ctx), value_(JS_NewUnicodeString(ctx, string->string(), string->length())) {}
-  explicit ScriptValue(JSContext* ctx, double v): ctx_(ctx), value_(JS_NewFloat64(ctx, v)) {}
+  explicit ScriptValue(JSContext* ctx, double v) : ctx_(ctx), value_(JS_NewFloat64(ctx, v)) {}
   explicit ScriptValue(JSContext* ctx) : ctx_(ctx){};
   ScriptValue() = default;
 

@@ -100,18 +100,18 @@ double Window::requestAnimationFrame(const std::shared_ptr<QJSFunction>& callbac
 
   int32_t request_id = GetExecutingContext()->document();
 
-//  auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))
-//                            ->initialize<FrameCallback>(ctx, &FrameCallback::classId);
+  //  auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))
+  //                            ->initialize<FrameCallback>(ctx, &FrameCallback::classId);
 
-//  int32_t requestId = window->document()->requestAnimationFrame(frameCallback);
+  //  int32_t requestId = window->document()->requestAnimationFrame(frameCallback);
 
   // `-1` represents some error occurred.
-//  if (requestId == -1) {
-//      return JS_ThrowTypeError(ctx,
-//                               "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed
-//                               " "with unexpected error.");
-//  }
-//  return JS_NewUint32(ctx, requestId);
+  //  if (requestId == -1) {
+  //      return JS_ThrowTypeError(ctx,
+  //                               "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame)
+  //                               executed " "with unexpected error.");
+  //  }
+  //  return JS_NewUint32(ctx, requestId);
 }
 
 // IMPL_FUNCTION(Window, requestAnimationFrame)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
