@@ -5,6 +5,7 @@
 #include "window.h"
 #include "binding_call_methods.h"
 #include "bindings/qjs/cppgc/garbage_collected.h"
+#include "core/dom/document.h"
 #include "core/events/message_event.h"
 #include "event_type_names.h"
 #include "foundation/native_value_converter.h"
@@ -96,22 +97,30 @@ void Window::postMessage(const ScriptValue& message,
 }
 
 double Window::requestAnimationFrame(const std::shared_ptr<QJSFunction>& callback, ExceptionState& exceptionState) {
+  if (GetExecutingContext()->dartMethodPtr()->flushUICommand == nullptr) {
+    exceptionState.ThrowException(
+        ctx(), ErrorType::InternalError,
+        "Failed to execute 'flushUICommand': dart method (flushUICommand) executed "
+        "with unexpected error.");
+    return 0;
+  }
+
   GetExecutingContext()->dartMethodPtr()->flushUICommand();
-
-  int32_t request_id = GetExecutingContext()->document();
-
-  //  auto* frameCallback = makeGarbageCollected<FrameCallback>(JS_DupValue(ctx, callbackValue))
-  //                            ->initialize<FrameCallback>(ctx, &FrameCallback::classId);
-
-  //  int32_t requestId = window->document()->requestAnimationFrame(frameCallback);
-
+  auto frame_callback = FrameCallback::Create(GetExecutingContext(), callback);
+  uint32_t request_id = GetExecutingContext()->document()->RequestAnimationFrame(frame_callback, exceptionState);
   // `-1` represents some error occurred.
-  //  if (requestId == -1) {
-  //      return JS_ThrowTypeError(ctx,
-  //                               "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame)
-  //                               executed " "with unexpected error.");
-  //  }
-  //  return JS_NewUint32(ctx, requestId);
+  if (request_id == -1) {
+    exceptionState.ThrowException(
+        ctx(), ErrorType::InternalError,
+        "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) executed "
+        "with unexpected error.");
+    return 0;
+  }
+  return request_id;
+}
+
+void Window::cancelAnimationFrame(double request_id, ExceptionState& exception_state) {
+  GetExecutingContext()->document()->CancelAnimationFrame(static_cast<uint32_t>(request_id), exception_state);
 }
 
 // IMPL_FUNCTION(Window, requestAnimationFrame)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

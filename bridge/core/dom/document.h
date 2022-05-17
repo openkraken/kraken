@@ -67,7 +67,8 @@ class Document : public ContainerNode, public TreeScope {
   }
   int NodeCount() const { return node_count_; }
 
-  uint32_t RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback);
+  uint32_t RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback, ExceptionState& exception_state);
+  void CancelAnimationFrame(uint32_t request_id, ExceptionState& exception_state);
 
   void Trace(GCVisitor* visitor) const override;
 

@@ -19,12 +19,12 @@ MessageEvent* MessageEvent::Create(ExecutingContext* context,
   return MakeGarbageCollected<MessageEvent>(context, type, init);
 }
 
-MessageEvent::MessageEvent(ExecutingContext* context, const AtomicString& type) : Event(context) {}
+MessageEvent::MessageEvent(ExecutingContext* context, const AtomicString& type) : Event(context, type) {}
 
 MessageEvent::MessageEvent(ExecutingContext* context,
                            const AtomicString& type,
                            const std::shared_ptr<MessageEventInit>& init)
-    : Event(context),
+    : Event(context, type),
       data_(init->data()),
       origin_(init->origin()),
       lastEventId_(init->lastEventId()),

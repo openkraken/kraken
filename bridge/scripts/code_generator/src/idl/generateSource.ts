@@ -219,7 +219,7 @@ function generateFunctionCallBody(blob: IDLBlob, declaration: FunctionDeclaratio
     returnValueAssignment = 'return_value =';
   }
   if (options.isInstanceMethod) {
-    call = `auto* self = toScriptWrappable<${getClassName(blob)}>(this_val);
+    call = `auto* self = toScriptWrappable<${getClassName(blob)}>(JS_IsUndefined(this_val) ? context->Global() : this_val);
 ${returnValueAssignment} self->${generateCallMethodName(declaration.name)}(${minimalRequiredArgc > 0 ? `${requiredArguments.join(',')}` : 'exception_state'});`;
   } else {
     call = `${returnValueAssignment} ${getClassName(blob)}::${generateCallMethodName(declaration.name)}(context, ${requiredArguments.join(',')});`;

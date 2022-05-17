@@ -14,29 +14,30 @@ namespace kraken {
 // invoked when a script-based animation needs to be resampled.
 class FrameCallback {
  public:
-  std::shared_ptr<FrameCallback> Create(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
+  static std::shared_ptr<FrameCallback> Create(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
 
-  FrameCallback(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
+  FrameCallback(ExecutingContext* context, std::shared_ptr<QJSFunction> callback);
 
   void Fire(double highResTimeStamp);
 
   ExecutingContext* context() { return context_; };
 
+  void Trace(GCVisitor* visitor) const;
+
  private:
   std::shared_ptr<QJSFunction> callback_;
-  int32_t callbackId_{-1};
   ExecutingContext* context_{nullptr};
 };
 
 class FrameRequestCallbackCollection final {
  public:
-  void Trace(GCVisitor* visitor);
-  void RegisterFrameCallback(uint32_t callbackId, FrameCallback* frameCallback);
-  void CancelFrameCallback(uint32_t callbackId);
+  void RegisterFrameCallback(uint32_t callback_id, const std::shared_ptr<FrameCallback>& frame_callback);
+  void CancelFrameCallback(uint32_t callback_id);
+
+  void Trace(GCVisitor* visitor) const;
 
  private:
-  std::unordered_map<uint32_t, FrameCallback*> frameCallbacks_;
-  std::vector<FrameCallback*> abandonedCallbacks_;
+  std::unordered_map<uint32_t, std::shared_ptr<FrameCallback>> frameCallbacks_;
 };
 
 }  // namespace kraken

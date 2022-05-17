@@ -144,7 +144,7 @@ struct Converter<IDLAny> : public ConverterBase<IDLAny> {
     return ScriptValue(ctx, value);
   }
 
-  static JSValue ToValue(JSContext* ctx, ScriptValue value) { return value.QJSValue(); }
+  static JSValue ToValue(JSContext* ctx, ScriptValue value) { return JS_DupValue(ctx, value.QJSValue()); }
 };
 
 template <>

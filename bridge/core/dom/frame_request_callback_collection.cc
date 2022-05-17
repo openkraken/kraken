@@ -4,6 +4,8 @@
  */
 
 #include "frame_request_callback_collection.h"
+
+#include <utility>
 #include "bindings/qjs/cppgc/gc_visitor.h"
 
 namespace kraken {
@@ -13,8 +15,8 @@ std::shared_ptr<FrameCallback> FrameCallback::Create(ExecutingContext* context,
   return std::make_shared<FrameCallback>(context, callback);
 }
 
-FrameCallback::FrameCallback(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback)
-    : context_(context), callback_(callback) {}
+FrameCallback::FrameCallback(ExecutingContext* context, std::shared_ptr<QJSFunction> callback)
+    : context_(context), callback_(std::move(callback)) {}
 
 void FrameCallback::Fire(double highResTimeStamp) {
   if (callback_ == nullptr)
@@ -32,33 +34,24 @@ void FrameCallback::Fire(double highResTimeStamp) {
   }
 }
 
-void FrameRequestCallbackCollection::RegisterFrameCallback(uint32_t callbackId, FrameCallback* frameCallback) {
-  frameCallbacks_[callbackId] = frameCallback;
+void FrameCallback::Trace(GCVisitor* visitor) const {
+  callback_->Trace(visitor);
+}
+
+void FrameRequestCallbackCollection::RegisterFrameCallback(uint32_t callback_id,
+                                                           const std::shared_ptr<FrameCallback>& frame_callback) {
+  frameCallbacks_[callback_id] = frame_callback;
 }
 
 void FrameRequestCallbackCollection::CancelFrameCallback(uint32_t callbackId) {
   if (frameCallbacks_.count(callbackId) == 0)
     return;
-  FrameCallback* callback = frameCallbacks_[callbackId];
-
-  // Push this timer to abandoned list to mark this timer is deprecated.
-  abandonedCallbacks_.emplace_back(callback);
-
   frameCallbacks_.erase(callbackId);
 }
 
-void FrameRequestCallbackCollection::Trace(GCVisitor* visitor) {
-  for (auto& callback : frameCallbacks_) {
-    callback.second->Trace(visitor);
-  }
-
-  // Recycle all abandoned callbacks.
-  if (!abandonedCallbacks_.empty()) {
-    for (auto& callback : abandonedCallbacks_) {
-      callback->Trace(visitor);
-    }
-    // All abandoned timers should be freed at the sweep stage.
-    abandonedCallbacks_.clear();
+void FrameRequestCallbackCollection::Trace(GCVisitor* visitor) const {
+  for (auto& entry : frameCallbacks_) {
+    entry.second->Trace(visitor);
   }
 }
 

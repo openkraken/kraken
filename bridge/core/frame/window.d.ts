@@ -13,6 +13,7 @@ interface Window extends EventTarget {
   postMessage(message: any): void;
 
   requestAnimationFrame(callback: Function): double;
+  cancelAnimationFrame(request_id: double): void;
 
   readonly window: Window;
   new(): void;

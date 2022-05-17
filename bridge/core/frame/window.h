@@ -39,6 +39,7 @@ class Window : public EventTargetWithInlineData {
   void postMessage(const ScriptValue& message, const AtomicString& target_origin, ExceptionState& exception_state);
 
   double requestAnimationFrame(const std::shared_ptr<QJSFunction>& callback, ExceptionState& exceptionState);
+  void cancelAnimationFrame(double request_id, ExceptionState& exception_state);
 
   //  DEFINE_FUNCTION(open);
   //  DEFINE_FUNCTION(scrollTo);
