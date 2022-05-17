@@ -187,7 +187,7 @@ describe('Append child', () => {
   });
 
   it('should work with removeChild then appendChild of the same node', async (done) => {
-    var div = createElement('div', {
+    let div = createElement('div', {
       style: {
         border: '1px solid green',
         backgroundColor: 'yellow',
@@ -238,11 +238,8 @@ describe('Append child', () => {
 
     await snapshot();
 
-    requestAnimationFrame(() => {
-      BODY.removeChild(div);
-    });
-
     requestAnimationFrame(async () => {
+      BODY.removeChild(div);
       BODY.appendChild(div);
       await snapshot();
       div.scrollTo(1000, 0);
