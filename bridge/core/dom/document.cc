@@ -188,6 +188,10 @@ HTMLHeadElement* Document::head() const {
   return Traversal<HTMLHeadElement>::FirstChild(*de);
 }
 
+uint32_t Document::RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback) {
+  return script_animation_controller_.RegisterFrameCallback(callback);
+}
+
 void Document::Trace(GCVisitor* visitor) const {
   visitor->Trace(document_element_);
   ContainerNode::Trace(visitor);

@@ -10,23 +10,16 @@
 
 namespace kraken {
 
-class ScriptAnimationController : public GarbageCollected<ScriptAnimationController> {
+class ScriptAnimationController  {
  public:
-  static JSClassID classId;
-
-  ScriptAnimationController* initialize(JSContext* ctx, JSClassID* classId) override;
+  ScriptAnimationController() = delete;
 
   // Animation frame callbacks are used for requestAnimationFrame().
-  uint32_t registerFrameCallback(FrameCallback* frameCallback);
-  void cancelFrameCallback(uint32_t callbackId);
-
-  [[nodiscard]] FORCE_INLINE const char* getHumanReadableName() const override { return "ScriptAnimationController"; }
-
-  void trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const override;
-  void dispose() const override;
+  uint32_t RegisterFrameCallback(const std::shared_ptr<FrameCallback>& callback);
+  void CancelFrameCallback(uint32_t callbackId);
 
  private:
-  FrameRequestCallbackCollection m_frameRequestCallbackCollection;
+  FrameRequestCallbackCollection frame_request_callback_collection_;
 };
 
 }  // namespace kraken

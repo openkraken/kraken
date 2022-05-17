@@ -12,6 +12,7 @@
 #include "core/dom/document_fragment.h"
 #include "core/dom/text.h"
 #include "html_element_type_helper.h"
+#include "scripted_animation_controller.h"
 #include "tree_scope.h"
 
 namespace kraken {
@@ -66,11 +67,14 @@ class Document : public ContainerNode, public TreeScope {
   }
   int NodeCount() const { return node_count_; }
 
+  uint32_t RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback);
+
   void Trace(GCVisitor* visitor) const override;
 
  private:
   int node_count_;
   Member<Element> document_element_;
+  ScriptAnimationController script_animation_controller_;
 };
 
 }  // namespace kraken

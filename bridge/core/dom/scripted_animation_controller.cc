@@ -3,7 +3,6 @@
  */
 
 #include "scripted_animation_controller.h"
-#include "dart_methods.h"
 #include "frame_request_callback_collection.h"
 
 #if UNIT_TEST
@@ -12,21 +11,14 @@
 
 namespace kraken {
 
-JSClassID ScriptAnimationController::classId{0};
-
-void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
-  auto* controller = static_cast<ScriptAnimationController*>(JS_GetOpaque(val, ScriptAnimationController::classId));
-  controller->m_frameRequestCallbackCollection.trace(rt, JS_UNDEFINED, mark_func);
-}
-void ScriptAnimationController::dispose() const {}
-
-ScriptAnimationController* ScriptAnimationController::initialize(JSContext* ctx, JSClassID* classId) {
-  return GarbageCollected::initialize(ctx, classId);
-}
+//void ScriptAnimationController::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) const {
+//  auto* controller = static_cast<ScriptAnimationController*>(JS_GetOpaque(val, ScriptAnimationController::classId));
+//  controller->frame_request_callback_collection_.trace(rt, JS_UNDEFINED, mark_func);
+//}
 
 static void handleRAFTransientCallback(void* ptr, int32_t contextId, double highResTimeStamp, const char* errmsg) {
   auto* frameCallback = static_cast<FrameCallback*>(ptr);
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+  auto* context = static_cast<ExecutingContext*>(JS_GetContextOpaque(frameCallback->ctx()));
 
   if (!context->isValid())
     return;
@@ -43,23 +35,25 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
   context->drainPendingPromiseJobs();
 }
 
-uint32_t ScriptAnimationController::registerFrameCallback(FrameCallback* frameCallback) {
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
+uint32_t ScriptAnimationController::RegisterFrameCallback(const std::shared_ptr<FrameCallback>& callback) {
+//  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
   uint32_t requestId =
       getDartMethod()->requestAnimationFrame(frameCallback, context->getContextId(), handleRAFTransientCallback);
 
   // Register frame callback to collection.
-  m_frameRequestCallbackCollection.registerFrameCallback(requestId, frameCallback);
+  frame_request_callback_collection_.registerFrameCallback(requestId, frameCallback);
 
   return requestId;
 }
-void ScriptAnimationController::cancelFrameCallback(uint32_t callbackId) {
+void ScriptAnimationController::CancelFrameCallback(uint32_t callbackId) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(m_ctx));
 
   getDartMethod()->cancelAnimationFrame(context->getContextId(), callbackId);
 
-  m_frameRequestCallbackCollection.cancelFrameCallback(callbackId);
+  frame_request_callback_collection_.cancelFrameCallback(callbackId);
 }
+
+void ScriptAnimationController::Trace(GCVisitor* visitor) const {}
 
 }  // namespace kraken

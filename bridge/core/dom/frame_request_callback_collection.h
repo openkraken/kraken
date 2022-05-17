@@ -14,17 +14,16 @@ namespace kraken {
 // invoked when a script-based animation needs to be resampled.
 class FrameCallback {
  public:
-  FrameCallback(ExecutingContext* context, JSValue callback);
+  std::shared_ptr<FrameCallback> Create(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
+
+  FrameCallback(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
 
   void Fire(double highResTimeStamp);
 
   ExecutingContext* context() { return context_; };
 
-  void Trace(GCVisitor* visitor) const;
-  void Dispose() const;
-
  private:
-  JSValue callback_{JS_NULL};
+  std::shared_ptr<QJSFunction> callback_;
   int32_t callbackId_{-1};
   ExecutingContext* context_{nullptr};
 };

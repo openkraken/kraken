@@ -12,6 +12,8 @@ interface Window extends EventTarget {
   postMessage(message: any, targetOrigin: string): void;
   postMessage(message: any): void;
 
+  requestAnimationFrame(callback: Function): double;
+
   readonly window: Window;
   new(): void;
 }

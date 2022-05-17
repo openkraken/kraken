@@ -314,6 +314,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/dom/element_traversal.h
     core/dom/document.cc
     core/dom/document.h
+    core/dom/scripted_animation_controller.cc
+    core/dom/scripted_animation_controller.h
     core/dom/node_data.cc
     core/dom/node_data.h
     core/dom/document_fragment.h

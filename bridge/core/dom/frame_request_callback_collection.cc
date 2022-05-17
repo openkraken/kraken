@@ -8,36 +8,28 @@
 
 namespace kraken {
 
-FrameCallback::FrameCallback(ExecutingContext* context, JSValue callback) : context_(context), callback_(callback) {}
+std::shared_ptr<FrameCallback> FrameCallback::Create(ExecutingContext* context,
+                                                     const std::shared_ptr<QJSFunction>& callback) {
+  return std::make_shared<FrameCallback>(context, callback);
+}
+
+FrameCallback::FrameCallback(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback)
+    : context_(context), callback_(callback) {}
 
 void FrameCallback::Fire(double highResTimeStamp) {
-  if (!JS_IsFunction(context_->ctx(), callback_))
+  if (callback_ == nullptr)
     return;
 
-  /* 'callback' might be destroyed when calling itself (if it frees the
-    handler), so must take extra care */
-  JS_DupValue(context_->ctx(), callback_);
+  JSContext* ctx = context_->ctx();
 
-  JSValue arguments[] = {JS_NewFloat64(context_->ctx(), highResTimeStamp)};
+  ScriptValue arguments[] = {ScriptValue(ctx, highResTimeStamp)};
 
-  JSValue returnValue = JS_Call(context_->ctx(), callback_, JS_UNDEFINED, 1, arguments);
+  ScriptValue return_value = callback_->Invoke(ctx, ScriptValue::Empty(ctx), 1, arguments);
 
   context_->DrainPendingPromiseJobs();
-  JS_FreeValue(context_->ctx(), callback_);
-
-  if (JS_IsException(returnValue)) {
-    context_->HandleException(&returnValue);
+  if (return_value.IsException()) {
+    context_->HandleException(&return_value);
   }
-
-  JS_FreeValue(context_->ctx(), returnValue);
-}
-
-void FrameCallback::Trace(GCVisitor* visitor) const {
-  visitor->Trace(callback_);
-}
-
-void FrameCallback::Dispose() const {
-  JS_FreeValueRT(JS_GetRuntime(context_->ctx()), callback_);
 }
 
 void FrameRequestCallbackCollection::RegisterFrameCallback(uint32_t callbackId, FrameCallback* frameCallback) {

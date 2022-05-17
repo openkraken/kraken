@@ -23,7 +23,7 @@ class Window : public EventTargetWithInlineData {
   Window* open(ExceptionState& exception_state);
   Window* open(const AtomicString& url, ExceptionState& exception_state);
 
-  const Window* window() const { return this; }
+  [[nodiscard]] const Window* window() const { return this; }
 
   void scroll(ExceptionState& exception_state);
   void scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state);
@@ -37,6 +37,8 @@ class Window : public EventTargetWithInlineData {
 
   void postMessage(const ScriptValue& message, ExceptionState& exception_state);
   void postMessage(const ScriptValue& message, const AtomicString& target_origin, ExceptionState& exception_state);
+
+  double requestAnimationFrame(const std::shared_ptr<QJSFunction>& callback, ExceptionState& exceptionState);
 
   //  DEFINE_FUNCTION(open);
   //  DEFINE_FUNCTION(scrollTo);
