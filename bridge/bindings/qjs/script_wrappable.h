@@ -80,7 +80,7 @@ Local<T>::~Local<T>() {
   if (LIKELY(wrappable->GetExecutingContext()->HasMutationScope())) {
     wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
   } else {
-    assert_m(false, "LocalHandle must be used before MemberMutationScope allcated.");
+    assert_m(false, "LocalHandle must be used after MemberMutationScope allcated.");
   }
 }
 

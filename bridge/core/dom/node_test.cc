@@ -36,6 +36,7 @@ TEST(Node, childNodes) {
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
   auto context = bridge->GetExecutingContext();
+  MemberMutationScope scope{context};
   const char* code =
       "let div1 = document.createElement('div');"
       "let div2 = document.createElement('div');"

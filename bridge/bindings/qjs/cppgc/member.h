@@ -46,11 +46,7 @@ class Member {
       return;
     auto* wrappable = To<ScriptWrappable>(raw_);
     // Record the free operation to avoid JSObject had been freed immediately.
-    if (LIKELY(wrappable->GetExecutingContext()->HasMutationScope())) {
-      wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
-    } else {
-      JS_FreeValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
-    }
+    wrappable->GetExecutingContext()->mutationScope()->RecordFree(wrappable);
     raw_ = nullptr;
   }
 
@@ -86,6 +82,8 @@ class Member {
   void SetRaw(T* p) {
     if (p != nullptr) {
       auto* wrappable = To<ScriptWrappable>(p);
+      assert_m(wrappable->GetExecutingContext()->HasMutationScope(),
+               "Member must be used after MemberMutationScope allcated.");
       runtime_ = wrappable->runtime();
       JS_DupValue(wrappable->ctx(), wrappable->ToQuickJSUnsafe());
     }
