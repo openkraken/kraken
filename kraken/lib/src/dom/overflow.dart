@@ -104,7 +104,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           // Scrollable state should be maintained when values changes between hidden, auto, scroll.
-          if (_scrollableX == null) {
+          if (scrollOffsetX == null) {
             _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: _scrollListener);
             scrollOffsetX = _scrollableX!.position;
           }
@@ -117,10 +117,11 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.clip:
         default:
           _scrollableX = null;
+          scrollOffsetX == null;
           break;
       }
 
-      if (_scrollableX != null || _scrollableY != null) {
+      if (scrollOffsetX != null || scrollOffsetY != null) {
         scrollListener = _scrollListener;
         scrollablePointerListener = _scrollablePointerListener;
       } else {
@@ -142,7 +143,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.auto:
         case CSSOverflowType.scroll:
           // Scrollable state should be maintained when values changes between hidden, auto, scroll.
-          if (_scrollableY == null) {
+          if (scrollOffsetY == null) {
             _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: _scrollListener);
             scrollOffsetY = _scrollableY!.position;
           }
@@ -155,10 +156,11 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.visible:
         default:
           _scrollableY = null;
+          scrollOffsetY == null;
           break;
       }
 
-      if (_scrollableX != null || _scrollableY != null) {
+      if (scrollOffsetX != null || scrollOffsetY != null) {
         scrollListener = _scrollListener;
         scrollablePointerListener = _scrollablePointerListener;
       } else {
