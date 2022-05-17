@@ -25,9 +25,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
-const int WINDOW_ID = -1;
-const int DOCUMENT_ID = -2;
-
 // Error handler when load bundle failed.
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
@@ -169,8 +166,7 @@ class KrakenViewController
   late Document document;
   late Window window;
 
-  void initDocument(Pointer<NativeBindingObject> pointer) {
-    print('init document');
+  void initDocument(int targetId, Pointer<NativeBindingObject> pointer) {
     document = Document(
       BindingContext(_contextId, pointer),
       viewport: viewport,
@@ -178,7 +174,7 @@ class KrakenViewController
       gestureListener: gestureListener,
       widgetDelegate: widgetDelegate,
     );
-    _setEventTarget(DOCUMENT_ID, document);
+    _setEventTarget(targetId, document);
 
     // Listeners need to be registered to window in order to dispatch events on demand.
     if (gestureListener != null) {
@@ -201,12 +197,12 @@ class KrakenViewController
     }
   }
 
-  void initWindow(Pointer<NativeBindingObject> pointer) {
+  void initWindow(int targetId, Pointer<NativeBindingObject> pointer) {
     window = Window(
         BindingContext(_contextId, pointer),
         document);
     _registerPlatformBrightnessChange();
-    _setEventTarget(WINDOW_ID, window);
+    _setEventTarget(targetId, window);
 
     // Blur input element when new input focused.
     window.addEventListener(EVENT_CLICK, (event) {

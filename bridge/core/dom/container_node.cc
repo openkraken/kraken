@@ -353,6 +353,8 @@ void ContainerNode::RemoveBetween(Node* previous_child, Node* next_child, Node& 
   old_child.SetPreviousSibling(nullptr);
   old_child.SetNextSibling(nullptr);
   old_child.SetParentOrShadowHostNode(nullptr);
+
+  GetExecutingContext()->uiCommandBuffer()->addCommand(old_child.eventTargetId(), UICommand::kRemoveNode, nullptr);
 }
 
 template <typename Functor>
@@ -403,6 +405,15 @@ void ContainerNode::AppendChildCommon(Node& child) {
     SetFirstChild(&child);
   }
   SetLastChild(&child);
+
+  std::string target_id = std::to_string(child.eventTargetId());
+  std::string position = "beforeend";
+
+  std::unique_ptr<NativeString> args_01 = stringToNativeString(target_id);
+  std::unique_ptr<NativeString> args_02 = stringToNativeString(position);
+
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kInsertAdjacentNode,
+                                                       std::move(args_01), std::move(args_02), nullptr);
 }
 
 void ContainerNode::NotifyNodeInserted(Node& root) {

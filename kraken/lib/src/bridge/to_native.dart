@@ -494,10 +494,10 @@ void flushUICommand() {
                 id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
             break;
           case UICommandType.createDocument:
-            controller.view.initDocument(nativePtr.cast<NativeBindingObject>());
+            controller.view.initDocument(id, nativePtr.cast<NativeBindingObject>());
             break;
           case UICommandType.createWindow:
-            controller.view.initWindow(nativePtr.cast<NativeBindingObject>());
+            controller.view.initWindow(id, nativePtr.cast<NativeBindingObject>());
             break;
           case UICommandType.createTextNode:
             controller.view.createTextNode(
