@@ -1,8 +1,6 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-import 'dart:ui' as ui;
-
 import 'package:flutter/rendering.dart';
 import 'package:kraken/rendering.dart';
 
