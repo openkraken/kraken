@@ -92,7 +92,8 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   void _setUpScrollX() {
     ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
-    if (_scrollOffsetX != null) {
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    if (_scrollOffsetX != null && !renderBoxModel.isScrollingContentBox) {
       _scrollOffsetX.applyViewportDimension(_viewportSize!.width);
       _scrollOffsetX.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.width - _viewportSize!.width));
     }
@@ -100,7 +101,8 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
   void _setUpScrollY() {
     ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
-    if (_scrollOffsetY != null) {
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    if (_scrollOffsetY != null && !renderBoxModel.isScrollingContentBox) {
       _scrollOffsetY.applyViewportDimension(_viewportSize!.height);
       _scrollOffsetY.applyContentDimensions(0.0, math.max(0.0, _scrollableSize!.height - _viewportSize!.height));
     }
@@ -120,27 +122,30 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     _setUpScrollY();
   }
 
-  double get _paintOffsetX {
-    ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
-    if (_scrollOffsetX == null) return 0.0;
-    return -_scrollOffsetX.pixels;
-  }
-  double get _paintOffsetY {
-    ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
-    if (_scrollOffsetY == null) return 0.0;
-    return -_scrollOffsetY.pixels;
-  }
-
   double get scrollTop {
     ViewportOffset? _scrollOffsetY = renderStyle.target.scrollOffsetY;
-    if (_scrollOffsetY == null) return 0.0;
-    return _scrollOffsetY.pixels;
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    if (_scrollOffsetY != null && !renderBoxModel.isScrollingContentBox) {
+      return _scrollOffsetY.pixels;
+    }
+    return 0.0;
   }
 
   double get scrollLeft {
     ViewportOffset? _scrollOffsetX = renderStyle.target.scrollOffsetX;
-    if (_scrollOffsetX == null) return 0.0;
-    return _scrollOffsetX.pixels;
+    RenderBoxModel renderBoxModel = this as RenderBoxModel;
+    if (_scrollOffsetX != null && !renderBoxModel.isScrollingContentBox) {
+      return _scrollOffsetX.pixels;
+    }
+    return 0.0;
+  }
+
+  double get _paintOffsetX {
+    return -scrollLeft;
+  }
+
+  double get _paintOffsetY {
+    return -scrollTop;
   }
 
   bool _shouldClipAtPaintOffset(Offset paintOffset, Size childSize) {
