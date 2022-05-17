@@ -185,4 +185,69 @@ describe('Append child', () => {
     expect(img.ownerDocument).toBe(document);
     container.appendChild(img);
   });
+
+  it('should work with removeChild then appendChild of the same node', async (done) => {
+    var div = createElement('div', {
+      style: {
+        border: '1px solid green',
+        backgroundColor: 'yellow',
+        color: 'red',
+        opacity: '0.5',
+        width: '200px',
+        height: '200px',
+        overflowX: 'scroll',
+        whiteSpace: 'nowrap',
+        position: 'relative'
+      } 
+    }, [
+      createText('aaaaaa bbbbbb cccccc dddddd eeeeee ffffff gggggg'),
+      createElement('div', {
+        style: {
+          margin: '20px',
+          width: '100px',
+          height: '100px',
+          backgroundColor: 'coral'
+        }
+      }, [
+        createElement('div', {
+          style: {
+            position: 'absolute',
+            left: '30px',
+            top: '20px',
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'green',
+            zIndex: 2
+          }
+        }),
+        createElement('div', {
+          style: {
+            position: 'sticky',
+            left: '50px',
+            width: '50px',
+            height: '50px',
+            backgroundColor: 'blue',
+            zIndex: 1
+          }
+        })
+      ])
+    ]);
+
+    BODY.appendChild(div);
+    div.scrollTo(1000, 0);
+
+    await snapshot();
+
+    requestAnimationFrame(() => {
+      BODY.removeChild(div);
+    });
+
+    requestAnimationFrame(async () => {
+      BODY.appendChild(div);
+      await snapshot();
+      div.scrollTo(1000, 0);
+      await snapshot();
+      done();
+    });
+  });
 });
