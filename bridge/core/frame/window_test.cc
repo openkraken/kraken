@@ -67,7 +67,7 @@ requestAnimationFrame(() => {
   EXPECT_EQ(logCalled, true);
 }
 
- TEST(Window, cancelAnimationFrame) {
+TEST(Window, cancelAnimationFrame) {
   auto bridge = TEST_init();
 
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { abort(); };
@@ -83,7 +83,7 @@ requestAnimationFrame(() => {
   TEST_runLoop(bridge->GetExecutingContext());
 }
 
- TEST(Window, postMessage) {
+TEST(Window, postMessage) {
   {
     auto bridge = TEST_init();
     static bool logCalled = false;
@@ -107,7 +107,7 @@ requestAnimationFrame(() => {
   { TEST_init(); }
 }
 
- TEST(Window, location) {
+TEST(Window, location) {
   auto bridge = TEST_init();
   static bool logCalled = false;
   kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {

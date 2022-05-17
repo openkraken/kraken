@@ -6,12 +6,12 @@
 #ifndef KRAKENBRIDGE_LOCATION_H
 #define KRAKENBRIDGE_LOCATION_H
 
-#include "bindings/qjs/script_wrappable.h"
 #include "bindings/qjs/exception_state.h"
+#include "bindings/qjs/script_wrappable.h"
 
 namespace kraken {
 
-class Location  {
+class Location {
  public:
   static void __kraken_location_reload__(ExecutingContext* context, ExceptionState& exception_state);
 };

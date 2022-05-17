@@ -10,7 +10,8 @@ namespace kraken {
 
 void Location::__kraken_location_reload__(ExecutingContext* context, ExceptionState& exception_state) {
   if (context->dartMethodPtr()->reloadApp == nullptr) {
-    exception_state.ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'reload': dart method (reloadApp) is not registered.");
+    exception_state.ThrowException(context->ctx(), ErrorType::InternalError,
+                                   "Failed to execute 'reload': dart method (reloadApp) is not registered.");
     return;
   }
 

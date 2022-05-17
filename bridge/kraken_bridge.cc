@@ -157,7 +157,8 @@ void invokeModuleEvent(int32_t contextId,
                        NativeString* extra) {
   assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
   auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  context->invokeModuleEvent(reinterpret_cast<kraken::NativeString*>(moduleName), eventType, event, reinterpret_cast<kraken::NativeString*>(extra));
+  context->invokeModuleEvent(reinterpret_cast<kraken::NativeString*>(moduleName), eventType, event,
+                             reinterpret_cast<kraken::NativeString*>(extra));
 }
 
 void registerDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length) {

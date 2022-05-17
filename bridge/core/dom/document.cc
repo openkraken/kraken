@@ -23,7 +23,8 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 
 Document::Document(ExecutingContext* context)
     : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {
-  GetExecutingContext()->uiCommandBuffer()->addCommand(context->contextId(), UICommand::kCreateDocument, (void*)bindingObject());
+  GetExecutingContext()->uiCommandBuffer()->addCommand(context->contextId(), UICommand::kCreateDocument,
+                                                       (void*)bindingObject());
   document_element_ = MakeGarbageCollected<HTMLHtmlElement>(*this);
 }
 
@@ -193,7 +194,8 @@ HTMLHeadElement* Document::head() const {
   return Traversal<HTMLHeadElement>::FirstChild(*de);
 }
 
-uint32_t Document::RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback, ExceptionState& exception_state) {
+uint32_t Document::RequestAnimationFrame(const std::shared_ptr<FrameCallback>& callback,
+                                         ExceptionState& exception_state) {
   return script_animation_controller_.RegisterFrameCallback(callback, exception_state);
 }
 

@@ -41,7 +41,9 @@ class AtomicString {
 
   // Return the undefined string value from atom key.
   JSValue ToQuickJS(JSContext* ctx) const {
-    if (ctx_ == nullptr) { return JS_NULL; }
+    if (ctx_ == nullptr) {
+      return JS_NULL;
+    }
 
     assert(ctx_ != nullptr);
     return JS_AtomToValue(ctx, atom_);

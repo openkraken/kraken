@@ -24,6 +24,7 @@
 #include "qjs_html_html_element.h"
 #include "qjs_html_template_element.h"
 #include "qjs_html_unknown_element.h"
+#include "qjs_location.h"
 #include "qjs_message_event.h"
 #include "qjs_module_manager.h"
 #include "qjs_node.h"
@@ -31,7 +32,6 @@
 #include "qjs_text.h"
 #include "qjs_window.h"
 #include "qjs_window_or_worker_global_scope.h"
-#include "qjs_location.h"
 
 namespace kraken {
 

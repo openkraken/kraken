@@ -24,11 +24,14 @@ static void handleRAFTransientCallback(void* ptr, int32_t contextId, double high
   frame_callback->Fire(highResTimeStamp);
 }
 
-uint32_t ScriptAnimationController::RegisterFrameCallback(const std::shared_ptr<FrameCallback>& frame_callback, ExceptionState& exception_state) {
+uint32_t ScriptAnimationController::RegisterFrameCallback(const std::shared_ptr<FrameCallback>& frame_callback,
+                                                          ExceptionState& exception_state) {
   auto* context = frame_callback->context();
 
   if (context->dartMethodPtr()->requestAnimationFrame == nullptr) {
-    exception_state.ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
+    exception_state.ThrowException(
+        context->ctx(), ErrorType::InternalError,
+        "Failed to execute 'requestAnimationFrame': dart method (requestAnimationFrame) is not registered.");
     return -1;
   }
 
@@ -45,7 +48,9 @@ void ScriptAnimationController::CancelFrameCallback(ExecutingContext* context,
                                                     uint32_t callbackId,
                                                     ExceptionState& exception_state) {
   if (context->dartMethodPtr()->cancelAnimationFrame == nullptr) {
-    exception_state.ThrowException(context->ctx(), ErrorType::InternalError, "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
+    exception_state.ThrowException(
+        context->ctx(), ErrorType::InternalError,
+        "Failed to execute 'cancelAnimationFrame': dart method (cancelAnimationFrame) is not registered.");
     return;
   }
 
