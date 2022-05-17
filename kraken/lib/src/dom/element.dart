@@ -279,10 +279,10 @@ abstract class Element
 
       // Ensure that the event responder is bound.
       ensureEventResponderBound();
-
-      // Overflow value change will create and destroy scrolling content box.
-      updateOverflowRenderBox();
     }
+
+    // Overflow value change will create and destroy scrolling content box.
+    updateOverflowRenderBox();
   }
 
   RenderReplaced _createRenderReplaced({
