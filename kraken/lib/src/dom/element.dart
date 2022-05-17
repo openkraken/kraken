@@ -510,7 +510,7 @@ abstract class Element
 
       // Need to reset pending style properties which will affect renderObject tree structure
       // after renderBox is reattached to tree.
-      style.resetPendingProperties([POSITION, DISPLAY]);
+      style.resetPendingProperties([POSITION]);
 
       // Clear pointer listener
       clearEventResponder(renderBoxModel);
@@ -1041,24 +1041,24 @@ abstract class Element
         CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
         renderStyle.overflowX = value;
         _updateRenderBoxModel();
-        updateRenderBoxModelWithOverflowX(_handleScroll);
+        updateScrollOffsetX(_handleScroll);
         // Change overflowX may affect effectiveOverflowY.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
         CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
         if (effectiveOverflowY != oldEffectiveOverflowY) {
-          updateRenderBoxModelWithOverflowY(_handleScroll);
+          updateScrollOffsetY(_handleScroll);
         }
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
         renderStyle.overflowY = value;
         _updateRenderBoxModel();
-        updateRenderBoxModelWithOverflowY(_handleScroll);
+        updateScrollOffsetY(_handleScroll);
         // Change overflowY may affect the effectiveOverflowX.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
         CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
         if (effectiveOverflowX != oldEffectiveOverflowX) {
-          updateRenderBoxModelWithOverflowX(_handleScroll);
+          updateScrollOffsetX(_handleScroll);
         }
         break;
       case OPACITY:

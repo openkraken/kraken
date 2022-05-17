@@ -92,7 +92,7 @@ mixin ElementOverflowMixin on ElementBase {
     _scrollableY = null;
   }
 
-  void updateRenderBoxModelWithOverflowX(ScrollListener _scrollListener) {
+  void updateScrollOffsetX(ScrollListener _scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       scrollOffsetX = renderBoxModel.axis == Axis.horizontal
@@ -131,7 +131,7 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
-  void updateRenderBoxModelWithOverflowY(ScrollListener _scrollListener) {
+  void updateScrollOffsetY(ScrollListener _scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
       scrollOffsetY = renderBoxModel.axis == Axis.vertical
