@@ -1,2 +1,2 @@
 window.A = 'A';
-window.bundleALoadTime = Date.now();
+window.bundleALoadTime = performance.now();
