@@ -8,7 +8,7 @@ require('./tasks');
 
 // Run tasks
 series(
-  // 'macos-dylib-clean',
+  'macos-dylib-clean',
   'compile-polyfill',
   'build-darwin-kraken-lib',
 )((err) => {

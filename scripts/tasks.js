@@ -149,33 +149,6 @@ task('clean', () => {
   }
 });
 
-const libOutputPath = join(TARGET_PATH, platform, 'lib');
-
-function findDebugJSEngine(platform) {
-  if (platform == 'macos' || platform == 'ios') {
-    let packageConfigFilePath = path.join(paths.kraken, '.dart_tool/package_config.json');
-
-    if (!fs.existsSync(packageConfigFilePath)) {
-      execSync('flutter pub get', {
-        cwd: paths.kraken,
-        stdio: 'inherit'
-      });
-    }
-
-    let packageConfig = require(packageConfigFilePath);
-    let packages = packageConfig.packages;
-
-    let jscPackageInfo = packages.find((i) => i.name === 'jsc');
-    if (!jscPackageInfo) {
-      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs.');
-    }
-
-    let rootUri = jscPackageInfo.rootUri;
-    let jscPackageLocation = path.join(paths.kraken, '.dart_tool', rootUri);
-    return path.join(jscPackageLocation, platform, 'JavaScriptCore.framework');
-  }
-}
-
 task('build-darwin-kraken-lib', done => {
   let externCmakeArgs = [];
   let buildType = 'Debug';
@@ -211,9 +184,9 @@ task('build-darwin-kraken-lib', done => {
   if (targetJSEngine === 'quickjs') {
     krakenTargets.push('kraken_unit_test');
   }
-  // if (buildMode === 'Debug') {
-  //   krakenTargets.push('kraken_test');
-  // }
+  if (buildMode === 'Debug') {
+    krakenTargets.push('kraken_test');
+  }
 
   execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${krakenTargets.join(' ')} -- -j 6`, {
     stdio: 'inherit'
@@ -221,9 +194,6 @@ task('build-darwin-kraken-lib', done => {
 
   const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken.dylib`);
 
-  if (targetJSEngine === 'jsc') {
-    execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
-  }
   if (buildMode == 'Release' || buildMode == 'RelWithDebInfo') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
