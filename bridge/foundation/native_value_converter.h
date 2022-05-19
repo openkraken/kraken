@@ -8,6 +8,7 @@
 
 #include "native_type.h"
 #include "native_value.h"
+#include "core/dom/binding_object.h"
 
 namespace kraken {
 
@@ -55,7 +56,11 @@ template <>
 struct NativeValueConverter<NativeTypeDouble> : public NativeValueConverterBase<NativeTypeDouble> {
   static NativeValue ToNativeValue(ImplType value) { return Native_NewFloat64(value); }
 
-  static ImplType FromNativeValue(NativeValue value) { return value.float64; }
+  static ImplType FromNativeValue(NativeValue value) {
+    double result;
+    memcpy(&result, reinterpret_cast<void*>(&value.u.int64), sizeof(double));
+    return result;
+  }
 };
 
 template <>
@@ -68,7 +73,9 @@ struct NativeValueConverter<NativeTypeJSON> : public NativeValueConverterBase<Na
 };
 
 class NativeBoundingClientRect;
-class NativeEventTarget;
+class BindingObject;
+struct NativeBindingObject;
+class NativeScreen;
 class NativeCanvasRenderingContext2D;
 
 template <>
@@ -81,9 +88,9 @@ struct NativeValueConverter<NativeTypePointer<NativeBoundingClientRect>>
 };
 
 template <>
-struct NativeValueConverter<NativeTypePointer<NativeEventTarget>>
-    : public NativeValueConverterBase<NativeTypePointer<NativeEventTarget>> {
-  static NativeValue ToNativeValue(ImplType value) { return Native_NewPtr(JSPointerType::NativeEventTarget, value); }
+struct NativeValueConverter<NativeTypePointer<NativeBindingObject>>
+    : public NativeValueConverterBase<NativeTypePointer<NativeBindingObject>> {
+  static NativeValue ToNativeValue(ImplType value) { return Native_NewPtr(JSPointerType::BindingObject, value); }
   static ImplType FromNativeValue(NativeValue value) { return static_cast<ImplType>(value.u.ptr); }
 };
 

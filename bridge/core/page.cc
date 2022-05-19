@@ -133,7 +133,6 @@ void KrakenPage::registerDartMethods(uint64_t* methodBytes, int32_t length) {
   dartMethodPointer->clearTimeout = reinterpret_cast<ClearTimeout>(methodBytes[i++]);
   dartMethodPointer->requestAnimationFrame = reinterpret_cast<RequestAnimationFrame>(methodBytes[i++]);
   dartMethodPointer->cancelAnimationFrame = reinterpret_cast<CancelAnimationFrame>(methodBytes[i++]);
-  dartMethodPointer->getScreen = reinterpret_cast<GetScreen>(methodBytes[i++]);
   dartMethodPointer->toBlob = reinterpret_cast<ToBlob>(methodBytes[i++]);
   dartMethodPointer->flushUICommand = reinterpret_cast<FlushUICommand>(methodBytes[i++]);
 

@@ -6,26 +6,23 @@
 #ifndef KRAKENBRIDGE_SCREEN_H
 #define KRAKENBRIDGE_SCREEN_H
 
+#include "core/dom/events/event_target.h"
+
 namespace kraken {
 
-struct NativeScreen {
-  double width;
-  double height;
+class Window;
+
+struct NativeScreen {};
+
+class Screen : public EventTargetWithInlineData {
+  DEFINE_WRAPPERTYPEINFO();
+ public:
+  using ImplType = Screen*;
+  explicit Screen(Window* window, NativeBindingObject* binding_object);
+
+ private:
 };
 
-// class Screen : public HostObject {
-// public:
-//  explicit Screen(ExecutionContext* context) : HostObject(context, "Screen"){};
-//
-// private:
-//  DEFINE_READONLY_PROPERTY(width);
-//  DEFINE_READONLY_PROPERTY(height);
-//};
-
-// void bindScreen(ExecutionContext* context);
-
-}  // namespace kraken
-
-class screen {};
+}
 
 #endif  // KRAKENBRIDGE_SCREEN_H

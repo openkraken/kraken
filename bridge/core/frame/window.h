@@ -9,6 +9,7 @@
 #include "bindings/qjs/atomic_string.h"
 #include "bindings/qjs/wrapper_type_info.h"
 #include "core/dom/events/event_target.h"
+#include "screen.h"
 #include "qjs_scroll_to_options.h"
 
 namespace kraken {
@@ -22,6 +23,8 @@ class Window : public EventTargetWithInlineData {
 
   Window* open(ExceptionState& exception_state);
   Window* open(const AtomicString& url, ExceptionState& exception_state);
+
+  Screen* screen();
 
   [[nodiscard]] const Window* window() const { return this; }
   [[nodiscard]] const Window* self() const { return this; }
@@ -42,6 +45,11 @@ class Window : public EventTargetWithInlineData {
 
   double requestAnimationFrame(const std::shared_ptr<QJSFunction>& callback, ExceptionState& exceptionState);
   void cancelAnimationFrame(double request_id, ExceptionState& exception_state);
+
+  void Trace(GCVisitor *visitor) const override;
+
+ private:
+  Member<Screen> screen_;
 };
 
 }  // namespace kraken

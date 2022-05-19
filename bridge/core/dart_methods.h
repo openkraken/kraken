@@ -11,7 +11,6 @@
 #include <memory>
 #include <thread>
 
-#include "core/frame/screen.h"
 #include "foundation/native_string.h"
 
 namespace kraken {
@@ -34,7 +33,6 @@ typedef int32_t (*SetInterval)(void* callbackContext, int32_t contextId, AsyncCa
 typedef int32_t (*RequestAnimationFrame)(void* callbackContext, int32_t contextId, AsyncRAFCallback callback);
 typedef void (*ClearTimeout)(int32_t contextId, int32_t timerId);
 typedef void (*CancelAnimationFrame)(int32_t contextId, int32_t id);
-typedef NativeScreen* (*GetScreen)(int32_t contextId);
 typedef void (*ToBlob)(void* callbackContext,
                        int32_t contextId,
                        AsyncBlobCallback blobCallback,
@@ -80,7 +78,6 @@ struct DartMethodPointer {
   ClearTimeout clearTimeout{nullptr};
   RequestAnimationFrame requestAnimationFrame{nullptr};
   CancelAnimationFrame cancelAnimationFrame{nullptr};
-  GetScreen getScreen{nullptr};
   ToBlob toBlob{nullptr};
   OnJSError onJsError{nullptr};
   OnJSLog onJsLog{nullptr};

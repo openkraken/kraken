@@ -27,6 +27,14 @@ Window* Window::open(const AtomicString& url, ExceptionState& exception_state) {
   InvokeBindingMethod(binding_call_methods::kopen, 1, args, exception_state);
 }
 
+Screen* Window::screen() {
+  if (screen_ == nullptr) {
+    NativeValue value = GetBindingProperty(binding_call_methods::kscreen, ASSERT_NO_EXCEPTION());
+    screen_ = MakeGarbageCollected<Screen>(this, NativeValueConverter<NativeTypePointer<NativeBindingObject>>::FromNativeValue(value));
+  }
+  return screen_;
+}
+
 void Window::scroll(ExceptionState& exception_state) {
   return scroll(0, 0, exception_state);
 }
@@ -122,6 +130,11 @@ double Window::requestAnimationFrame(const std::shared_ptr<QJSFunction>& callbac
 
 void Window::cancelAnimationFrame(double request_id, ExceptionState& exception_state) {
   GetExecutingContext()->document()->CancelAnimationFrame(static_cast<uint32_t>(request_id), exception_state);
+}
+
+void Window::Trace(GCVisitor* visitor) const {
+  visitor->Trace(screen_);
+  EventTargetWithInlineData::Trace(visitor);
 }
 
 }  // namespace kraken

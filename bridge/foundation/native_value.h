@@ -30,7 +30,7 @@ enum class JSPointerType {
   NativeFunctionContext = 1,
   NativeBoundingClientRect = 2,
   NativeCanvasRenderingContext2D = 3,
-  NativeEventTarget = 4
+  BindingObject = 4
 };
 
 class ExecutingContext;
@@ -38,7 +38,6 @@ class ScriptValue;
 
 // Exchange data struct between dart and C++
 struct NativeValue {
-  double float64;
   union {
     int64_t int64;
     void* ptr;

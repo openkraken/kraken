@@ -45,8 +45,9 @@ struct NativeBindingObject {
 
 class BindingObject {
  public:
+  using ImplType = BindingObject*;
   BindingObject() = delete;
-  ~BindingObject() = default;
+  ~BindingObject();
   explicit BindingObject(ExecutingContext* context);
 
   // Handle call from dart side.
@@ -59,11 +60,15 @@ class BindingObject {
   NativeValue GetBindingProperty(const AtomicString& prop, ExceptionState& exception_state) const;
   NativeValue SetBindingProperty(const AtomicString& prop, NativeValue value, ExceptionState& exception_state) const;
 
-  const NativeBindingObject* bindingObject() const { return &binding_object_; }
+  const NativeBindingObject* bindingObject() const { return binding_object_; }
+
+ protected:
+  // NativeBindingObject may allocated at Dart side. Binding this with Dart allocated NativeBindingObject.
+  void BindDartObject(NativeBindingObject* native_binding_object);
 
  private:
   ExecutingContext* context_{nullptr};
-  NativeBindingObject binding_object_{this};
+  NativeBindingObject* binding_object_{new NativeBindingObject(this)};
 };
 
 }  // namespace kraken

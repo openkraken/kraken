@@ -11,12 +11,11 @@
 namespace kraken {
 
 NativeValue Native_NewNull() {
-  return (NativeValue){0, .u = {.int64 = 0}, NativeTag::TAG_NULL};
+  return (NativeValue){.u = {.int64 = 0}, NativeTag::TAG_NULL};
 }
 
 NativeValue Native_NewString(NativeString* string) {
   return (NativeValue){
-      0,
       .u = {.ptr = static_cast<void*>(string)},
       NativeTag::TAG_STRING,
   };
@@ -29,20 +28,21 @@ NativeValue Native_NewCString(std::string string) {
 }
 
 NativeValue Native_NewFloat64(double value) {
+  int64_t result;
+  memcpy(&result, reinterpret_cast<void*>(&value), sizeof(double));
+
   return (NativeValue){
-      value,
-      .u = {.ptr = nullptr},
+      .u = {.int64 = result},
       NativeTag::TAG_FLOAT64,
   };
 }
 
 NativeValue Native_NewPtr(JSPointerType pointerType, void* ptr) {
-  return (NativeValue){static_cast<double>(pointerType), .u = {.ptr = ptr}, NativeTag::TAG_POINTER};
+  return (NativeValue){.u = {.ptr = ptr}, NativeTag::TAG_POINTER};
 }
 
 NativeValue Native_NewBool(bool value) {
   return (NativeValue){
-      0,
       .u = {.int64 = value ? 1 : 0},
       NativeTag::TAG_BOOL,
   };
@@ -50,7 +50,6 @@ NativeValue Native_NewBool(bool value) {
 
 NativeValue Native_NewInt64(int64_t value) {
   return (NativeValue){
-      0,
       .u = {.int64 = value},
       NativeTag::TAG_INT,
   };
@@ -66,7 +65,6 @@ NativeValue Native_NewJSON(const ScriptValue& value) {
   AtomicString str = json.ToString();
   auto native_string = str.ToNativeString();
   NativeValue result = (NativeValue){
-      0,
       .u = {.ptr = static_cast<void*>(native_string.release())},
       NativeTag::TAG_JSON,
   };

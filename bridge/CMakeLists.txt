@@ -278,6 +278,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     core/frame/module_callback_coordinator.cc
     core/frame/window.h
     core/frame/window.cc
+    core/frame/screen.h
+    core/frame/screen.cc
     core/frame/legacy/location.cc
     core/frame/legacy/location.h
     core/frame/module_callback_coordinator.h
@@ -440,6 +442,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     out/qjs_css_style_declaration.h
     out/qjs_text.cc
     out/qjs_text.h
+    out/qjs_screen.cc
+    out/qjs_screen.h
     out/qjs_node_list.cc
     out/qjs_node_list.h
     out/event_type_names.h

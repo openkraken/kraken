@@ -1,6 +1,7 @@
 import {EventTarget} from "../dom/events/event_target";
 import {ScrollOptions} from "../dom/scroll_options";
 import {ScrollToOptions} from "../dom/scroll_to_options";
+import {Screen} from "./screen";
 
 interface Window extends EventTarget {
   open(url?: string): Window | null;
@@ -18,6 +19,7 @@ interface Window extends EventTarget {
   readonly window: Window;
   readonly parent: Window;
   readonly self: Window;
+  readonly screen: Screen;
 
   readonly scrollX: DartImpl<double>;
   readonly scrollY: DartImpl<double>;

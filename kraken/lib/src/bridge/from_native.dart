@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +44,12 @@ int doubleToUint64(double value) {
   var byteData = ByteData(8);
   byteData.setFloat64(0, value);
   return byteData.getUint64(0);
+}
+
+int doubleToInt64(double value) {
+  var byteData = ByteData(8);
+  byteData.setFloat64(0, value);
+  return byteData.getInt64(0);
 }
 
 double uInt64ToDouble(int value) {
@@ -279,15 +284,6 @@ void _cancelAnimationFrame(int contextId, int timerId) {
 final Pointer<NativeFunction<NativeCancelAnimationFrame>> _nativeCancelAnimationFrame =
     Pointer.fromFunction(_cancelAnimationFrame);
 
-typedef NativeGetScreen = Pointer<Void> Function();
-
-Pointer<Void> _getScreen() {
-  Size size = window.physicalSize;
-  return createScreen(size.width / window.devicePixelRatio, size.height / window.devicePixelRatio);
-}
-
-final Pointer<NativeFunction<NativeGetScreen>> _nativeGetScreen = Pointer.fromFunction(_getScreen);
-
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
@@ -378,7 +374,6 @@ final List<int> _dartNativeMethods = [
   _nativeClearTimeout.address,
   _nativeRequestAnimationFrame.address,
   _nativeCancelAnimationFrame.address,
-  _nativeGetScreen.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
   _nativeGetEntries.address,

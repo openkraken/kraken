@@ -30,6 +30,7 @@
 #include "qjs_node.h"
 #include "qjs_node_list.h"
 #include "qjs_text.h"
+#include "qjs_screen.h"
 #include "qjs_window.h"
 #include "qjs_window_or_worker_global_scope.h"
 
@@ -63,6 +64,7 @@ void InstallBindings(ExecutingContext* context) {
   QJSHTMLTemplateElement::Install(context);
   QJSCSSStyleDeclaration::Install(context);
   QJSBoundingClientRect::Install(context);
+  QJSScreen::Install(context);
 
   // Legacy bindings, not standard.
   QJSElementAttributes::Install(context);

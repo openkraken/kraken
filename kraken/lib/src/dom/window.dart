@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:ui';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
@@ -16,7 +18,7 @@ class Window extends EventTarget {
   final Screen screen;
 
   Window(BindingContext? context, this.document)
-      : screen = Screen(context), super(context);
+      : screen = Screen(BindingContext(context!.contextId, malloc.allocate(sizeOf<NativeBindingObject>()))), super(context);
 
   @override
   EventTarget? get parentEventTarget => null;
