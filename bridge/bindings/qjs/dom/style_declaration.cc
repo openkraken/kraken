@@ -3,9 +3,9 @@
  */
 
 #include "style_declaration.h"
+#include "bindings/qjs/dom/css_property_list.h"
 #include "event_target.h"
 #include "kraken_bridge.h"
-#include "bindings/qjs/dom/css_property_list.h"
 
 namespace kraken::binding::qjs {
 
@@ -221,8 +221,7 @@ JSValue StyleDeclarationInstance::getProperty(JSContext* ctx, JSValue obj, JSAto
 }
 
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
-    nullptr, nullptr, nullptr, nullptr,
-    hasProperty, getProperty, setProperty,
+    nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty,
 };
 
 void StyleDeclarationInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {
