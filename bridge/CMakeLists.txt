@@ -237,6 +237,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/document_fragment.h
     bindings/qjs/dom/style_declaration.cc
     bindings/qjs/dom/style_declaration.h
+    bindings/qjs/dom/css_property_list.h
     bindings/qjs/dom/elements/.gen/canvas_element.cc
     bindings/qjs/dom/elements/.gen/canvas_element.h
     bindings/qjs/dom/elements/image_element.cc
