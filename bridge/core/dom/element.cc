@@ -68,7 +68,7 @@ void Element::removeAttribute(const AtomicString& name, ExceptionState& exceptio
 }
 
 BoundingClientRect* Element::getBoundingClientRect(ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   NativeValue result = InvokeBindingMethod(binding_call_methods::kgetBoundingClientRect, 0, nullptr, exception_state);
   return BoundingClientRect::Create(
       GetExecutingContext(),
@@ -76,7 +76,7 @@ BoundingClientRect* Element::getBoundingClientRect(ExceptionState& exception_sta
 }
 
 void Element::click(ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   InvokeBindingMethod(binding_call_methods::kclick, 0, nullptr, exception_state);
 }
 
@@ -85,7 +85,7 @@ void Element::scroll(ExceptionState& exception_state) {
 }
 
 void Element::scroll(double x, double y, ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   const NativeValue args[] = {
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(x),
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(y),
@@ -94,7 +94,7 @@ void Element::scroll(double x, double y, ExceptionState& exception_state) {
 }
 
 void Element::scroll(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   const NativeValue args[] = {
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
@@ -107,7 +107,7 @@ void Element::scrollBy(ExceptionState& exception_state) {
 }
 
 void Element::scrollBy(double x, double y, ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   const NativeValue args[] = {
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(x),
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(y),
@@ -116,7 +116,7 @@ void Element::scrollBy(double x, double y, ExceptionState& exception_state) {
 }
 
 void Element::scrollBy(const std::shared_ptr<ScrollToOptions>& options, ExceptionState& exception_state) {
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   const NativeValue args[] = {
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->left()),
       NativeValueConverter<NativeTypeDouble>::ToNativeValue(options->top()),
@@ -233,7 +233,7 @@ class ElementSnapshotReader {
 };
 
 void ElementSnapshotReader::Start() {
-  context_->dartMethodPtr()->flushUICommand();
+  context_->FlushUICommand();
 
   auto callback = [](void* ptr, int32_t contextId, const char* error, uint8_t* bytes, int32_t length) -> void {
     auto* reader = static_cast<ElementSnapshotReader*>(ptr);

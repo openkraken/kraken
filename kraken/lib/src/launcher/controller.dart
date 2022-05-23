@@ -116,7 +116,7 @@ class KrakenViewController
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
     BindingBridge.setup();
-    _contextId = contextId ?? initBridge();
+    _contextId = contextId ?? initBridge(this);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
@@ -144,6 +144,8 @@ class KrakenViewController
 
     defineBuiltInElements();
 
+    // Execute UICommand.createDocument and UICommand.createWindow to initialize window and document.
+    flushUICommand(this);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);

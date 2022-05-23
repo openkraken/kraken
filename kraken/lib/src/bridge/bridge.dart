@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 
 import 'binding.dart';
 import 'from_native.dart';
@@ -19,7 +20,7 @@ int kKrakenJSPagePoolSize = 1024;
 bool _firstView = true;
 
 /// Init bridge
-int initBridge() {
+int initBridge(KrakenViewController view) {
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
@@ -39,7 +40,7 @@ int initBridge() {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
-        flushUICommand();
+        flushUICommand(view);
       });
     });
   }

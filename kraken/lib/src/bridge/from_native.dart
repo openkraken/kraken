@@ -309,14 +309,14 @@ void _toBlob(Pointer<Void> callbackContext, int contextId,
 
 final Pointer<NativeFunction<NativeToBlob>> _nativeToBlob = Pointer.fromFunction(_toBlob);
 
-typedef NativeFlushUICommand = Void Function();
-typedef DartFlushUICommand = void Function();
+typedef NativeFlushUICommand = Void Function(Int32 contextId);
+typedef DartFlushUICommand = void Function(int contextId);
 
-void _flushUICommand() {
+void _flushUICommand(int contextId) {
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_START);
   }
-  flushUICommand();
+  flushUICommandWithContextId(contextId);
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_END);
   }

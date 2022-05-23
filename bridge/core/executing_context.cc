@@ -309,6 +309,10 @@ static void dispatchPromiseRejectionEvent(const char* eventType,
   //  }
 }
 
+void ExecutingContext::FlushUICommand() {
+  dartMethodPtr()->flushUICommand(context_id_);
+}
+
 void ExecutingContext::DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
                                                              JSValueConst promise,
                                                              JSValueConst error) {

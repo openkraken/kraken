@@ -15,7 +15,7 @@ void Location::__kraken_location_reload__(ExecutingContext* context, ExceptionSt
     return;
   }
 
-  context->dartMethodPtr()->flushUICommand();
+  context->FlushUICommand();
   context->dartMethodPtr()->reloadApp(context->contextId());
 }
 

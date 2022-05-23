@@ -49,7 +49,7 @@ NativeValue BindingObject::InvokeBindingMethod(const AtomicString& method,
 }
 
 NativeValue BindingObject::GetBindingProperty(const AtomicString& prop, ExceptionState& exception_state) const {
-  context_->dartMethodPtr()->flushUICommand();
+  context_->FlushUICommand();
   const NativeValue argv[] = {Native_NewString(prop.ToNativeString().release())};
   return InvokeBindingMethod(binding_call_methods::kgetPropertyMagic, 1, argv, exception_state);
 }
@@ -57,7 +57,7 @@ NativeValue BindingObject::GetBindingProperty(const AtomicString& prop, Exceptio
 NativeValue BindingObject::SetBindingProperty(const AtomicString& prop,
                                               NativeValue value,
                                               ExceptionState& exception_state) const {
-  context_->dartMethodPtr()->flushUICommand();
+  context_->FlushUICommand();
   const NativeValue argv[] = {Native_NewString(prop.ToNativeString().release()), value};
   return InvokeBindingMethod(binding_call_methods::ksetPropertyMagic, 2, argv, exception_state);
 }

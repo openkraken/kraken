@@ -103,8 +103,8 @@ class Window extends EventTarget {
   @override
   void dispatchEvent(Event event) {
     // Events such as EVENT_DOM_CONTENT_LOADED need to ensure that listeners are flushed and registered.
-    if (event.type == EVENT_DOM_CONTENT_LOADED || event.type == EVENT_LOAD || event.type == EVENT_ERROR) {
-      flushUICommand();
+    if (contextId != null && event.type == EVENT_DOM_CONTENT_LOADED || event.type == EVENT_LOAD || event.type == EVENT_ERROR) {
+      flushUICommandWithContextId(contextId!);
     }
     super.dispatchEvent(event);
   }

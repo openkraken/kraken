@@ -40,7 +40,7 @@ typedef void (*ToBlob)(void* callbackContext,
                        double devicePixelRatio);
 typedef void (*OnJSError)(int32_t contextId, const char*);
 typedef void (*OnJSLog)(int32_t contextId, int32_t level, const char*);
-typedef void (*FlushUICommand)();
+typedef void (*FlushUICommand)(int32_t contextId);
 
 using MatchImageSnapshotCallback = void (*)(void* callbackContext, int32_t contextId, int8_t, const char* errmsg);
 using MatchImageSnapshot = void (*)(void* callbackContext,

@@ -103,9 +103,8 @@ class ExecutingContext {
   FORCE_INLINE UICommandBuffer* uiCommandBuffer() { return &ui_command_buffer_; };
   FORCE_INLINE std::unique_ptr<DartMethodPointer>& dartMethodPtr() { return dart_method_ptr_; }
 
-  std::chrono::time_point<std::chrono::system_clock> time_origin_;
-
-  int32_t unique_id_;
+  // Force dart side to execute the pending ui commands.
+  void FlushUICommand();
 
   static void DispatchGlobalUnhandledRejectionEvent(ExecutingContext* context,
                                                     JSValueConst promise,
@@ -117,6 +116,10 @@ class ExecutingContext {
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
  private:
+
+  std::chrono::time_point<std::chrono::system_clock> time_origin_;
+  int32_t unique_id_;
+
   void InstallDocument();
 
   static void promiseRejectTracker(JSContext* ctx,

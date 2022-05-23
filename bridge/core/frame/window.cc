@@ -114,7 +114,7 @@ double Window::requestAnimationFrame(const std::shared_ptr<QJSFunction>& callbac
     return 0;
   }
 
-  GetExecutingContext()->dartMethodPtr()->flushUICommand();
+  GetExecutingContext()->FlushUICommand();
   auto frame_callback = FrameCallback::Create(GetExecutingContext(), callback);
   uint32_t request_id = GetExecutingContext()->document()->RequestAnimationFrame(frame_callback, exceptionState);
   // `-1` represents some error occurred.
