@@ -140,15 +140,15 @@ final List<int> _dartNativeMethods = [
   _nativeSimulateInputText.address
 ];
 
-typedef Native_RegisterTestEnvDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
-typedef Dart_RegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+typedef Native_RegisterTestEnvDartMethods = Void Function(Int32 contextId, Pointer<Uint64> methodBytes, Int32 length);
+typedef Dart_RegisterTestEnvDartMethods = void Function(int contextId, Pointer<Uint64> methodBytes, int length);
 
 final Dart_RegisterTestEnvDartMethods _registerTestEnvDartMethods =
 KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_RegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
 
-void registerDartTestMethodsToCpp() {
+void registerDartTestMethodsToCpp(int contextId) {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
-  _registerTestEnvDartMethods(bytes, _dartNativeMethods.length);
+  _registerTestEnvDartMethods(contextId, bytes, _dartNativeMethods.length);
 }

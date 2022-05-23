@@ -244,8 +244,11 @@ void KrakenTestContext::invokeExecuteTest(ExecuteCallback executeCallback) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
     }
 
+    KRAKEN_LOG(VERBOSE) << "Done..";
+
     std::unique_ptr<NativeString> status = kraken::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->contextId(), status.get());
+    JS_FreeValue(ctx, proxyObject);
     return JS_NULL;
   };
   auto* callbackContext = new ExecuteCallbackContext(context_, executeCallback);

@@ -96,10 +96,9 @@ void main() async {
   testTextInput = TestTextInput();
 
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
-    registerDartTestMethodsToCpp();
     int contextId = kraken.controller!.view.contextId;
-
     initTestFramework(contextId);
+    registerDartTestMethodsToCpp(contextId);
     addJSErrorListener(contextId, print);
     // Preload load test cases
     String code = spec.readAsStringSync();

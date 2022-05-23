@@ -16,9 +16,9 @@ void initTestFramework(int32_t contextId) {
   testContextPool[contextId] = testContext;
 }
 
-int8_t evaluateTestScripts(int32_t contextId, kraken::NativeString* code, const char* bundleFilename, int startLine) {
+int8_t evaluateTestScripts(int32_t contextId, void* code, const char* bundleFilename, int startLine) {
   auto testContext = testContextPool[contextId];
-  return testContext->evaluateTestScripts(code->string(), code->length(), bundleFilename, startLine);
+  return testContext->evaluateTestScripts(static_cast<kraken::NativeString*>(code)->string(), static_cast<kraken::NativeString*>(code)->length(), bundleFilename, startLine);
 }
 
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
