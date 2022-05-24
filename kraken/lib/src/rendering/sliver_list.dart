@@ -43,14 +43,17 @@ class RenderSliverListLayout extends RenderLayoutBox {
     scrollable = KrakenScrollable(axisDirection: getAxisDirection(axis));
     axis = renderStyle.sliverDirection;
 
+    renderStyle.target.scrollablePointerListener = _scrollablePointerListener;
+    renderStyle.target.scrollListener = _scrollListener;
+
     switch (axis) {
       case Axis.horizontal:
-        scrollOffsetX = scrollable.position;
-        scrollOffsetY = null;
+        renderStyle.target.scrollOffsetX = scrollable.position;
+        renderStyle.target.scrollOffsetY = null;
         break;
       case Axis.vertical:
-        scrollOffsetX = null;
-        scrollOffsetY = scrollable.position;
+        renderStyle.target.scrollOffsetX = null;
+        renderStyle.target.scrollOffsetY = scrollable.position;
         break;
     }
 
@@ -64,13 +67,6 @@ class RenderSliverListLayout extends RenderLayoutBox {
     manager.setupSliverListLayout(this);
     super.insert(_renderViewport);
   }
-
-  // Override the scrollable pointer listener.
-  @override
-  void Function(PointerEvent event) get scrollablePointerListener => _scrollablePointerListener;
-
-  @override
-  ScrollListener? get scrollListener => _scrollListener;
 
   @override
   bool get isRepaintBoundary => true;

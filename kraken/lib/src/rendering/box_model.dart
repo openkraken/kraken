@@ -751,12 +751,6 @@ class RenderBoxModel extends RenderBox
       // Copy box decoration
       ..boxPainter = boxPainter
 
-      // Copy overflow
-      ..scrollListener = scrollListener
-      ..scrollablePointerListener = scrollablePointerListener
-      ..scrollOffsetX = scrollOffsetX
-      ..scrollOffsetY = scrollOffsetY
-
       // Copy event hook
       ..getEventTarget = getEventTarget
 
@@ -1196,6 +1190,7 @@ class RenderBoxModel extends RenderBox
   void paintNothing(PaintingContext context, Offset offset) {}
 
   void paintBoxModel(PaintingContext context, Offset offset) {
+    int alpha = renderStyle.alpha;
     // If opacity to zero, only paint intersection observer.
     if (alpha == 0) {
       paintIntersectionObserver(context, offset, paintNothing);
@@ -1533,8 +1528,11 @@ class RenderBoxModel extends RenderBox
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
-    if (scrollablePointerListener != null) {
-      scrollablePointerListener!(event);
+    void Function(PointerEvent)? scrollablePointerListener = renderStyle.target.scrollablePointerListener;
+    // Element with overflow scroll/auto will create two repaintBoundary.
+    // The inner repaintBoundary should not trigger pointer listener.
+    if (scrollablePointerListener != null && !isScrollingContentBox) {
+      scrollablePointerListener(event);
     }
   }
 
