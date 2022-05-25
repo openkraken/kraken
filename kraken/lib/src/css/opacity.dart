@@ -26,7 +26,8 @@ mixin CSSOpacityMixin on RenderStyle {
     if (_opacity == value) return;
 
     _opacity = value;
-    alpha = ui.Color.getAlphaFromOpacity(opacity);
+    int alpha = ui.Color.getAlphaFromOpacity(opacity);
+    renderBoxModel!.alpha = alpha;
 
     // Mark the compositing state for this render object as dirty
     // cause it will create new layer when opacity is valid.
@@ -40,14 +41,6 @@ mixin CSSOpacityMixin on RenderStyle {
     }
 
     renderBoxModel?.markNeedsPaint();
-  }
-
-  int get alpha => _alpha ?? ui.Color.getAlphaFromOpacity(1.0);
-  int? _alpha;
-  set alpha(int? value) {
-    if (_alpha == value) return;
-
-    _alpha = value;
   }
 
   static double? resolveOpacity(String value) {
