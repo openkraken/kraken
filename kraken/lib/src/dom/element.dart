@@ -734,7 +734,7 @@ abstract class Element
   }
 
   bool _obtainSliverChild() {
-    if (_isSliverChild) {
+    if (parentElement?.renderStyle.display == CSSDisplay.sliver) {
       // Sliver should not create renderer here, but need to trigger
       // render sliver list dynamical rebuild child by element tree.
       parentElement?._renderLayoutBox?.markNeedsLayout();
@@ -742,8 +742,6 @@ abstract class Element
     }
     return false;
   }
-
-  bool get _isSliverChild => parentElement?.renderStyle.display == CSSDisplay.sliver;
 
   // Attach renderObject of current node to parent
   @override
