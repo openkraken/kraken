@@ -505,16 +505,6 @@ abstract class Element
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
-      // Need to reset some pending style properties which need to flush style when renderer is reattached
-      // to renderObject tree in the future in cases suche as appendChild or Sliver case.
-      style.resetPendingProperties([
-        // Renderer need to reposition to its containing block.
-        POSITION,
-        // Overflow listener need to be recreated when element is removed and appended to dom tree.
-        OVERFLOW_X,
-        OVERFLOW_Y
-      ]);
-
       // Clear pointer listener
       clearEventResponder(renderBoxModel);
     }
@@ -768,7 +758,7 @@ abstract class Element
         RenderBoxModel.attachRenderBox(parent.renderer!, renderer!, after: after);
       }
 
-      // Flush pending style after child attached.
+      // Flush pending style before child attached.
       style.flushPendingProperties();
 
       didAttachRenderer();
@@ -857,12 +847,6 @@ abstract class Element
     // Update renderStyle tree.
     if (child is Element) {
       child.renderStyle.detach();
-
-      // Scrollable offset should be reset when element is removed from dom tree.
-      child.scrollOffsetX = null;
-      child.scrollOffsetY = null;
-      child.scrollListener = null;
-      child.scrollablePointerListener = null;
     }
 
     return child;
@@ -1050,31 +1034,27 @@ abstract class Element
         CSSOverflowType oldEffectiveOverflowY = renderStyle.effectiveOverflowY;
         renderStyle.overflowX = value;
         _updateRenderBoxModel();
-        // Overflow value change will create and destroy scrolling content box.
-        updateOverflowRenderBox();
-
-        updateScrollOffsetX(_handleScroll);
+        updateRenderBoxModelWithOverflowX(_handleScroll);
         // Change overflowX may affect effectiveOverflowY.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
         CSSOverflowType effectiveOverflowY = renderStyle.effectiveOverflowY;
         if (effectiveOverflowY != oldEffectiveOverflowY) {
-          updateScrollOffsetY(_handleScroll);
+          updateRenderBoxModelWithOverflowY(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OVERFLOW_Y:
         CSSOverflowType oldEffectiveOverflowX = renderStyle.effectiveOverflowX;
         renderStyle.overflowY = value;
         _updateRenderBoxModel();
-        // Overflow value change will create and destroy scrolling content box.
-        updateOverflowRenderBox();
-
-        updateScrollOffsetY(_handleScroll);
+        updateRenderBoxModelWithOverflowY(_handleScroll);
         // Change overflowY may affect the effectiveOverflowX.
         // https://drafts.csswg.org/css-overflow/#overflow-properties
         CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
         if (effectiveOverflowX != oldEffectiveOverflowX) {
-          updateScrollOffsetX(_handleScroll);
+          updateRenderBoxModelWithOverflowX(_handleScroll);
         }
+        updateOverflowRenderBox();
         break;
       case OPACITY:
         renderStyle.opacity = value;
