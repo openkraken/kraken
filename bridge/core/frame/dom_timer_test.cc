@@ -41,8 +41,11 @@ console.log('1234');
 
 TEST(Timer, clearTimeout) {
   auto bridge = TEST_init();
+  static bool log_called = false;
 
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+    log_called = true;
+  };
 
   std::string code = R"(
 function getCachedData() {
@@ -58,6 +61,23 @@ let timer = setTimeout(async () => {
   console.log(data);
 }, 10);
 clearTimeout(timer);
+)";
+
+  bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
+  TEST_runLoop(bridge->GetExecutingContext());
+
+  EXPECT_EQ(log_called, false);
+}
+
+TEST(Timer, clearTimeoutWhenSetTimeout) {
+  auto bridge = TEST_init();
+
+  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {};
+
+  std::string code = R"(
+let timer = setTimeout(() => {
+  clearTimeout(timer);
+}, 10);
 )";
 
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);

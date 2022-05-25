@@ -68,6 +68,7 @@ interface Node extends EventTarget {
   isEqualNode(otherNode: Node | null): boolean;
   isSameNode(otherNode: Node | null): boolean;
   removeChild(oldChild: Node): Node;
+  remove(): void;
   replaceChild(newChild: Node, oldChild: Node): Node;
 
   new(): void;

@@ -62,7 +62,9 @@ mixin TimerMixin {
   int setTimeout(int timeout, void Function() callback) {
     Duration timeoutDurationMS = Duration(milliseconds: timeout);
     int id = _timerId++;
+    print('set timer: $id');
     _timerMap[id] = Timer(timeoutDurationMS, () {
+      print('trigger timer: $id');
       callback();
       _timerMap.remove(id);
     });
@@ -72,6 +74,7 @@ mixin TimerMixin {
   void clearTimeout(int timerId) {
     // If timer already executed, which will be removed.
     if (_timerMap[timerId] != null) {
+      print('clear timer $timerId');
       _timerMap[timerId]!.cancel();
       _timerMap.remove(timerId);
     }

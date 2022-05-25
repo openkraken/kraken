@@ -20,7 +20,7 @@ ScriptPromise::ScriptPromise(JSContext* ctx, JSValue promise) : ctx_(ctx) {
 }
 
 JSValue ScriptPromise::ToQuickJS() {
-  return JS_NULL;
+  return JS_DupValue(ctx_, promise_.QJSValue());
 }
 
 void ScriptPromise::Trace(GCVisitor* visitor) {}

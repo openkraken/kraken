@@ -15,8 +15,8 @@ class BlobReaderClient {
  public:
   enum ReadType { kReadAsText, kReadAsArrayBuffer };
 
-  BlobReaderClient(ExecutingContext* context, Blob* blob, ScriptPromiseResolver* resolver, ReadType read_type)
-      : context_(context), blob_(blob), resolver_(resolver), read_type_(read_type) {
+  BlobReaderClient(ExecutingContext* context, Blob* blob, std::shared_ptr<ScriptPromiseResolver> resolver, ReadType read_type)
+      : context_(context), blob_(blob), resolver_(std::move(resolver)), read_type_(read_type) {
     Start();
   };
 
@@ -26,7 +26,7 @@ class BlobReaderClient {
  private:
   ExecutingContext* context_;
   Blob* blob_;
-  ScriptPromiseResolver* resolver_;
+  std::shared_ptr<ScriptPromiseResolver> resolver_;
   ReadType read_type_;
 };
 
@@ -113,13 +113,13 @@ std::string Blob::type() {
 }
 
 ScriptPromise Blob::arrayBuffer(ExceptionState& exception_state) {
-  auto* resolver = ScriptPromiseResolver::Create(GetExecutingContext());
+  auto resolver = ScriptPromiseResolver::Create(GetExecutingContext());
   new BlobReaderClient(GetExecutingContext(), this, resolver, BlobReaderClient::ReadType::kReadAsArrayBuffer);
   return resolver->Promise();
 }
 
 ScriptPromise Blob::text(ExceptionState& exception_state) {
-  auto* resolver = ScriptPromiseResolver::Create(GetExecutingContext());
+  auto resolver = ScriptPromiseResolver::Create(GetExecutingContext());
   new BlobReaderClient(GetExecutingContext(), this, resolver, BlobReaderClient::ReadType::kReadAsText);
   return resolver->Promise();
 }

@@ -4,6 +4,8 @@
  */
 
 #include "dom_timer.h"
+
+#include <utility>
 #include "bindings/qjs/cppgc/garbage_collected.h"
 #include "bindings/qjs/qjs_engine_patch.h"
 #include "core/executing_context.h"
@@ -14,12 +16,12 @@
 
 namespace kraken {
 
-std::shared_ptr<DOMTimer> DOMTimer::create(ExecutingContext* context, std::shared_ptr<QJSFunction> callback) {
+std::shared_ptr<DOMTimer> DOMTimer::create(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback) {
   return std::make_shared<DOMTimer>(context, callback);
 }
 
 DOMTimer::DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback)
-    : context_(context), callback_(callback) {}
+    : context_(context), callback_(std::move(callback)), status_(TimerStatus::kPending) {}
 
 void DOMTimer::Fire() {
   if (!callback_->IsFunction(context_->ctx()))

@@ -9,8 +9,8 @@
 
 namespace kraken {
 
-ScriptPromiseResolver* ScriptPromiseResolver::Create(ExecutingContext* context) {
-  return new ScriptPromiseResolver(context);
+std::shared_ptr<ScriptPromiseResolver> ScriptPromiseResolver::Create(ExecutingContext* context) {
+  return std::make_shared<ScriptPromiseResolver>(context);
 }
 
 ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context) : context_(context) {
@@ -20,6 +20,12 @@ ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context) : contex
   reject_func_ = resolving_funcs[1];
 
   context->GetPendingPromises()->TrackPendingPromises(ScriptPromise(context_->ctx(), promise_));
+}
+
+ScriptPromiseResolver::~ScriptPromiseResolver() {
+  JS_FreeValue(context_->ctx(), promise_);
+  JS_FreeValue(context_->ctx(), resolve_func_);
+  JS_FreeValue(context_->ctx(), reject_func_);
 }
 
 ScriptPromise ScriptPromiseResolver::Promise() {

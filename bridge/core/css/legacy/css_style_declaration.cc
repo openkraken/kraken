@@ -122,6 +122,10 @@ AtomicString CSSStyleDeclaration::InternalGetPropertyValue(std::string& name) {
 bool CSSStyleDeclaration::InternalSetProperty(std::string& name, const AtomicString& value) {
   name = parseJavaScriptCSSPropertyName(name);
 
+  if (properties_[name] == value) {
+    return true;
+  }
+
   properties_[name] = value;
 
   std::unique_ptr<NativeString> args_01 = stringToNativeString(name);

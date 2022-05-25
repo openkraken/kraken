@@ -4,6 +4,8 @@
  */
 
 #include "element.h"
+
+#include <utility>
 #include "binding_call_methods.h"
 #include "bindings/qjs/exception_state.h"
 #include "bindings/qjs/script_promise.h"
@@ -215,9 +217,9 @@ class ElementSnapshotReader {
  public:
   ElementSnapshotReader(ExecutingContext* context,
                         Element* element,
-                        ScriptPromiseResolver* resolver,
+                        std::shared_ptr<ScriptPromiseResolver> resolver,
                         double device_pixel_ratio)
-      : context_(context), element_(element), resolver_(resolver), device_pixel_ratio_(device_pixel_ratio) {
+      : context_(context), element_(element), resolver_(std::move(resolver)), device_pixel_ratio_(device_pixel_ratio) {
     Start();
   };
 
@@ -228,7 +230,7 @@ class ElementSnapshotReader {
  private:
   ExecutingContext* context_;
   Element* element_;
-  ScriptPromiseResolver* resolver_;
+  std::shared_ptr<ScriptPromiseResolver> resolver_;
   double device_pixel_ratio_;
 };
 
@@ -250,12 +252,14 @@ void ElementSnapshotReader::Start() {
 }
 
 void ElementSnapshotReader::HandleSnapshot(uint8_t* bytes, int32_t length) {
+  MemberMutationScope mutation_scope{context_};
   Blob* blob = Blob::Create(context_);
   blob->AppendBytes(bytes, length);
   resolver_->Resolve<Blob*>(blob);
 }
 
 void ElementSnapshotReader::HandleFailed(const char* error) {
+  MemberMutationScope mutation_scope{context_};
   ExceptionState exception_state;
   exception_state.ThrowException(context_->ctx(), ErrorType::InternalError, error);
   resolver_->Reject(exception_state);
@@ -266,7 +270,7 @@ ScriptPromise Element::toBlob(ExceptionState& exception_state) {
 }
 
 ScriptPromise Element::toBlob(double device_pixel_ratio, ExceptionState& exception_state) {
-  auto* resolver = ScriptPromiseResolver::Create(GetExecutingContext());
+  auto resolver = ScriptPromiseResolver::Create(GetExecutingContext());
   new ElementSnapshotReader(GetExecutingContext(), this, resolver, device_pixel_ratio);
   return resolver->Promise();
 }

@@ -14,9 +14,10 @@ namespace kraken {
 
 class ScriptPromiseResolver {
  public:
-  static ScriptPromiseResolver* Create(ExecutingContext* context);
+  static std::shared_ptr<ScriptPromiseResolver> Create(ExecutingContext* context);
   ScriptPromiseResolver() = delete;
   ScriptPromiseResolver(ExecutingContext* context);
+  ~ScriptPromiseResolver();
 
   // Return a promise object and wait to be resolve or reject.
   // Note that an empty ScriptPromise will be returned after resolve or
@@ -51,7 +52,9 @@ class ScriptPromiseResolver {
       return;
     assert(new_state == kResolving || new_state == kRejecting);
     state_ = new_state;
-    ResolveOrRejectImmediately(toQuickJS(context_->ctx(), value));
+    JSValue qjs_value = toQuickJS(context_->ctx(), value);
+    ResolveOrRejectImmediately(qjs_value);
+    JS_FreeValue(context_->ctx(), qjs_value);
   }
 
   void ResolveOrRejectImmediately(JSValue value);

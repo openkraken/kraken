@@ -34,7 +34,9 @@ static void handleTransientCallback(void* ptr, int32_t contextId, const char* er
   if (!context->IsValid())
     return;
 
+  timer->SetStatus(DOMTimer::TimerStatus::kExecuting);
   handleTimerCallback(timer, errmsg);
+  timer->SetStatus(DOMTimer::TimerStatus::kFinished);
 
   context->Timers()->removeTimeoutById(timer->timerId());
 }

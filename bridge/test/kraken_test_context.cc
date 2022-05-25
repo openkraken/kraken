@@ -68,7 +68,6 @@ static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int arg
   }
 
   std::unique_ptr<NativeString> screenShotNativeString = kraken::jsValueToNativeString(ctx, screenShotValue);
-  auto bridge = static_cast<KrakenTestContext*>(static_cast<KrakenPage*>(context->owner())->owner);
   auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
 
   auto fn = [](void* ptr, int32_t contextId, int8_t result, const char* errmsg) {
@@ -89,7 +88,6 @@ static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int arg
 
     callbackContext->context->DrainPendingPromiseJobs();
     JS_FreeValue(callbackContext->context->ctx(), callbackContext->callback);
-    list_del(&callbackContext->link);
   };
 
   context->dartMethodPtr()->matchImageSnapshot(callbackContext, context->contextId(), blob->bytes(), blob->size(),

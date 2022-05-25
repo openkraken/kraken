@@ -51,7 +51,10 @@ void* DOMTimerCoordinator::removeTimeoutById(int32_t timerId) {
     return nullptr;
   auto timer = m_activeTimers[timerId];
 
-  m_activeTimers.erase(timerId);
+  if (timer->status() == DOMTimer::kPending) {
+    m_activeTimers.erase(timerId);
+  }
+
   return nullptr;
 }
 

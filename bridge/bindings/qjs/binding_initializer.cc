@@ -32,6 +32,7 @@
 #include "qjs_text.h"
 #include "qjs_screen.h"
 #include "qjs_window.h"
+#include "qjs_blob.h"
 #include "qjs_window_or_worker_global_scope.h"
 
 namespace kraken {
@@ -65,6 +66,7 @@ void InstallBindings(ExecutingContext* context) {
   QJSCSSStyleDeclaration::Install(context);
   QJSBoundingClientRect::Install(context);
   QJSScreen::Install(context);
+  QJSBlob::Install(context);
 
   // Legacy bindings, not standard.
   QJSElementAttributes::Install(context);
