@@ -6,11 +6,11 @@ The openkraken TSC will continue existence and try to governance project ensure 
 If you are willing, you can contact the TSC members' mail listed at [Openkraken TSC](https://github.com/openkraken/TSC).
 
 ## ⭐️ 招募贡献者
-由于一些不可抗拒的因素，我们目前的贡献者团队将被迫在未来 3 个月内退出，[Openkraken TSC (OpenKraken 项目技术指导委员会)](https://github.com/openkraken/TSC) 已经安排了一个会议讨论这个问题。 现在我们希望招募社区开发者来持续维护项目。 贡献者团队会确保当前待定的 PR 会完成，ROADMAP 中的功能将暂停，直到我们找到新的贡献者（或团队）。
+由于一些不可抗拒的因素，我们目前的贡献者团队将被迫在未来 3 个月内退出，[Openkraken TSC (OpenKraken 项目技术指导委员会)](https://github.com/openkraken/TSC) 已经安排了一个会议讨论这个问题。 现在我们希望招募社区开发者来持续维护项目。 贡献者团队会确保当前待定的 PR 完成，但是 ROADMAP 中的新功能将暂停，直到我们找到新的贡献者（或团队）。
 
-Openkraken TSC 团队将继续存在并以确保本项目持续发展。
+Openkraken TSC 团队将继续存在并确保本项目持续发展。
 
-如果您有意愿维护，可以联系 [TSC](https://github.com/openkraken/TSC) 中列出的 TSC 成员的邮件。
+如果您有意愿维护，可以发送邮件联系 [Openkraken TSC](https://github.com/openkraken/TSC) 中列出的成员。
 
 --- 
 
