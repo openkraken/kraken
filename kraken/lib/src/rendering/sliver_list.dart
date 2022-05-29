@@ -255,6 +255,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
     return false;
   }
 
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    transform.translate(scrollLeft, scrollTop);
+  }
+
   Offset getChildScrollOffset(RenderObject child, Offset offset) {
     final RenderLayoutParentData? childParentData =
         child.parentData as RenderLayoutParentData?;
