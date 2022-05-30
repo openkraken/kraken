@@ -13,7 +13,7 @@ std::shared_ptr<ScriptPromiseResolver> ScriptPromiseResolver::Create(ExecutingCo
   return std::make_shared<ScriptPromiseResolver>(context);
 }
 
-ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context) : context_(context) {
+ScriptPromiseResolver::ScriptPromiseResolver(ExecutingContext* context) : context_(context), state_(ResolutionState::kPending) {
   JSValue resolving_funcs[2];
   promise_ = JS_NewPromiseCapability(context->ctx(), resolving_funcs);
   resolve_func_ = resolving_funcs[0];
