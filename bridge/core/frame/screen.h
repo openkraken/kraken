@@ -16,6 +16,7 @@ struct NativeScreen {};
 
 class Screen : public EventTargetWithInlineData {
   DEFINE_WRAPPERTYPEINFO();
+
  public:
   using ImplType = Screen*;
   explicit Screen(Window* window, NativeBindingObject* binding_object);
@@ -23,6 +24,6 @@ class Screen : public EventTargetWithInlineData {
  private:
 };
 
-}
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_SCREEN_H

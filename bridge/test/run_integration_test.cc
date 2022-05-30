@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 #include "kraken_bridge_test.h"
 #include "kraken_test_env.h"
-#include "kraken_bridge_test.h"
 
 using namespace kraken;
 

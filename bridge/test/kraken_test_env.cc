@@ -164,19 +164,12 @@ NativeString* TEST_platformBrightness(int32_t contextId) {
   return nullptr;
 }
 
-
 void TEST_toBlob(void* ptr,
                  int32_t contextId,
                  AsyncBlobCallback blobCallback,
                  int32_t elementId,
                  double devicePixelRatio) {
-  uint8_t bytes[5] = {
-      0x01,
-      0x02,
-      0x03,
-      0x04,
-      0x05
-  };
+  uint8_t bytes[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
   blobCallback(ptr, contextId, nullptr, bytes, 5);
 }
 

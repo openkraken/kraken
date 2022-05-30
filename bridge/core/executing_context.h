@@ -116,7 +116,6 @@ class ExecutingContext {
   static std::unordered_map<std::string, NativeByteCode> pluginByteCode;
 
  private:
-
   std::chrono::time_point<std::chrono::system_clock> time_origin_;
   int32_t unique_id_;
 

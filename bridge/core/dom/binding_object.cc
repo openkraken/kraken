@@ -44,7 +44,7 @@ NativeValue BindingObject::InvokeBindingMethod(const AtomicString& method,
   KRAKEN_LOG(VERBOSE) << " binding object_ " << &binding_object_;
   NativeValue return_value = Native_NewNull();
   binding_object_->invoke_bindings_methods_from_native(binding_object_, &return_value,
-                                                      method.ToNativeString().release(), argc, argv);
+                                                       method.ToNativeString().release(), argc, argv);
   return return_value;
 }
 

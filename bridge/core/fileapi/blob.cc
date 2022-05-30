@@ -15,7 +15,10 @@ class BlobReaderClient {
  public:
   enum ReadType { kReadAsText, kReadAsArrayBuffer };
 
-  BlobReaderClient(ExecutingContext* context, Blob* blob, std::shared_ptr<ScriptPromiseResolver> resolver, ReadType read_type)
+  BlobReaderClient(ExecutingContext* context,
+                   Blob* blob,
+                   std::shared_ptr<ScriptPromiseResolver> resolver,
+                   ReadType read_type)
       : context_(context), blob_(blob), resolver_(std::move(resolver)), read_type_(read_type) {
     Start();
   };

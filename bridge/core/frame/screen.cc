@@ -8,7 +8,8 @@
 
 namespace kraken {
 
-Screen::Screen(Window* window, NativeBindingObject* native_binding_object) : EventTargetWithInlineData(window->GetExecutingContext()) {
+Screen::Screen(Window* window, NativeBindingObject* native_binding_object)
+    : EventTargetWithInlineData(window->GetExecutingContext()) {
   BindDartObject(native_binding_object);
 }
 

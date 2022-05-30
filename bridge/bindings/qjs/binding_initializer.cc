@@ -6,6 +6,7 @@
 #include "binding_initializer.h"
 #include "core/executing_context.h"
 
+#include "qjs_blob.h"
 #include "qjs_bounding_client_rect.h"
 #include "qjs_character_data.h"
 #include "qjs_comment.h"
@@ -29,10 +30,9 @@
 #include "qjs_module_manager.h"
 #include "qjs_node.h"
 #include "qjs_node_list.h"
-#include "qjs_text.h"
 #include "qjs_screen.h"
+#include "qjs_text.h"
 #include "qjs_window.h"
-#include "qjs_blob.h"
 #include "qjs_window_or_worker_global_scope.h"
 
 namespace kraken {

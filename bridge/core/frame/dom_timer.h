@@ -14,11 +14,7 @@ namespace kraken {
 
 class DOMTimer {
  public:
-  enum TimerStatus {
-    kPending,
-    kExecuting,
-    kFinished
-  };
+  enum TimerStatus { kPending, kExecuting, kFinished };
 
   static std::shared_ptr<DOMTimer> create(ExecutingContext* context, const std::shared_ptr<QJSFunction>& callback);
   DOMTimer(ExecutingContext* context, std::shared_ptr<QJSFunction> callback);
@@ -29,9 +25,7 @@ class DOMTimer {
   [[nodiscard]] int32_t timerId() const { return timerId_; };
   void setTimerId(int32_t timerId);
 
-  void SetStatus(TimerStatus status) {
-    status_ = status;
-  }
+  void SetStatus(TimerStatus status) { status_ = status; }
   [[nodiscard]] TimerStatus status() const { return status_; }
 
   ExecutingContext* context() { return context_; }

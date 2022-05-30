@@ -6,9 +6,9 @@
 #ifndef KRAKENBRIDGE_FOUNDATION_NATIVE_VALUE_CONVERTER_H_
 #define KRAKENBRIDGE_FOUNDATION_NATIVE_VALUE_CONVERTER_H_
 
+#include "core/dom/binding_object.h"
 #include "native_type.h"
 #include "native_value.h"
-#include "core/dom/binding_object.h"
 
 namespace kraken {
 

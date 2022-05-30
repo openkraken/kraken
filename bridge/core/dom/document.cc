@@ -23,7 +23,8 @@ Document* Document::Create(ExecutingContext* context, ExceptionState& exception_
 
 Document::Document(ExecutingContext* context)
     : ContainerNode(context, this, ConstructionType::kCreateDocument), TreeScope(*this) {
-  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kCreateDocument, (void*)bindingObject());
+  GetExecutingContext()->uiCommandBuffer()->addCommand(eventTargetId(), UICommand::kCreateDocument,
+                                                       (void*)bindingObject());
   document_element_ = MakeGarbageCollected<HTMLHtmlElement>(*this);
 }
 

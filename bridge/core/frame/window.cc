@@ -30,7 +30,8 @@ Window* Window::open(const AtomicString& url, ExceptionState& exception_state) {
 Screen* Window::screen() {
   if (screen_ == nullptr) {
     NativeValue value = GetBindingProperty(binding_call_methods::kscreen, ASSERT_NO_EXCEPTION());
-    screen_ = MakeGarbageCollected<Screen>(this, NativeValueConverter<NativeTypePointer<NativeBindingObject>>::FromNativeValue(value));
+    screen_ = MakeGarbageCollected<Screen>(
+        this, NativeValueConverter<NativeTypePointer<NativeBindingObject>>::FromNativeValue(value));
   }
   return screen_;
 }
