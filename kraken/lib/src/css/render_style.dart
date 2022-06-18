@@ -437,7 +437,6 @@ class CSSRenderStyle
       case MARGIN_TOP:
       case MARGIN_RIGHT:
       case MARGIN_BOTTOM:
-      case FONT_SIZE:
         value = CSSLength.resolveLength(propertyValue, renderStyle, propertyName);
         break;
       case FLEX_DIRECTION:
@@ -556,6 +555,9 @@ class CSSRenderStyle
         break;
       case FONT_WEIGHT:
         value = CSSText.resolveFontWeight(propertyValue);
+        break;
+      case FONT_SIZE:
+        value = CSSText.resolveFontSize(propertyValue, renderStyle, propertyName);
         break;
       case FONT_STYLE:
         value = CSSText.resolveFontStyle(propertyValue);

@@ -164,4 +164,44 @@ describe('FontSize', () => {
       done();
     });
   });
+
+  it('should works with absolute-size keyword', async () => {
+    for (const fontSize of ['xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large']) {
+      const div = createElement('div', {
+        style: {
+          fontSize: fontSize
+        }
+      }, [
+        createText(fontSize)
+      ]);
+      BODY.appendChild(div);
+    }
+
+    await snapshot();
+  });
+
+  it('should works with relative-size keyword', async () => {
+    for (const parentSize of ['16px', '32px', '48px']) {
+      const div = createElement('div', {
+        style: {
+          fontSize: parentSize
+        }
+      }, [
+        createElement('div', {
+          style: {
+            fontSize: 'smaller'
+          }
+        }, [createText(`${parentSize} smaller`)]),
+        createElement('div', {}, [createText(`${parentSize}`)]),
+        createElement('div', {
+          style: {
+            fontSize: 'larger'
+          }
+        }, [createText(`${parentSize} larger`)])
+      ]);
+      BODY.appendChild(div);
+    }
+
+    await snapshot();
+  });
 });
