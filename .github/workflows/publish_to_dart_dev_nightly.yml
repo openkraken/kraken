@@ -40,6 +40,8 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: "16"
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
