@@ -12,7 +12,7 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r23c
     - name: npm install
       run: npm install
     - name: compile for android
@@ -27,7 +27,7 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r23c
     - name: npm install
       run: npm install
     - name: compile for ios
@@ -40,7 +40,7 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r23c
     - name: npm install
       run: npm install
     - name: compile for macos

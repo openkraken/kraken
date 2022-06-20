@@ -45,7 +45,7 @@ jobs:
     - uses: nttld/setup-ndk@v1
       id: setup-ndk
       with:
-        ndk-version: r21e
+        ndk-version: r23c
     - uses: jwlawson/actions-setup-cmake@v1.11
       with:
         cmake-version: ${{ env.cmakeVersion }}
