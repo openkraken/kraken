@@ -99,6 +99,8 @@ jobs:
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
+    - name: NPM INSTALL
+      run: npm install
     - name: Set up nightly version
       run: node scripts/set_up_nightly_release.js
     - uses: actions/download-artifact@v2
@@ -118,11 +120,12 @@ jobs:
         name: android_binary
         path: bridge/build/android/
     - name: Prepare distribute binaries
-      run: node scripts/pre_publish_binaries.js
+      run: node scripts/pre_publish_kraken.js
     - name: Publish
       uses: sakebook/actions-flutter-pub-publisher@v1.4.0
       with:
         credential: ${{ secrets.CREDENTIAL_JSON }}
         flutter_package: true
         skip_test: true
+        dry_run: false
         package_directory: ./kraken
