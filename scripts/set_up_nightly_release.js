@@ -42,5 +42,7 @@ function getDate() {
   return mm + "-" + dd + "-" + yyyy;
 }
 
-setPubVersion(getDate());
-setChangeLog(getDate());
+let nightlyVersion = getDate() + '-' + getCurrentGitRev();
+
+setPubVersion(nightlyVersion);
+setChangeLog(nightlyVersion);
