@@ -117,6 +117,8 @@ jobs:
       with:
         name: android_binary
         path: bridge/build/android/
+    - name: Prepare distribute binaries
+      run: node scripts/pre_publish_binaries.js
     - name: Publish
       uses: sakebook/actions-flutter-pub-publisher@v1.4.0
       with:
