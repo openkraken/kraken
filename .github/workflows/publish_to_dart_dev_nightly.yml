@@ -122,10 +122,10 @@ jobs:
     - name: Prepare distribute binaries
       run: node scripts/pre_publish_kraken.js
     - name: Publish
-      uses: sakebook/actions-flutter-pub-publisher@v1.4.0
+      uses: k-paxian/dart-package-publisher@master
       with:
-        credential: ${{ secrets.CREDENTIAL_JSON }}
-        flutter_package: true
-        skip_test: true
-        dry_run: false
-        package_directory: ./kraken
+        credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+        force: true
+        flutter: true
+        skipTests: true
+        relativePath: ./kraken
