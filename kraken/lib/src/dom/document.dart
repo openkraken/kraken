@@ -192,7 +192,6 @@ class Document extends Node {
 
   @override
   void dispose() {
-    _viewport?.dispose();
     _viewport = null;
     gestureListener = null;
     widgetDelegate = null;
