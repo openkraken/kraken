@@ -516,6 +516,20 @@ class CSSText {
     }
   }
 
+  static bool isValidFontSizeValue(String value) {
+    return CSSLength.isNonNegativeLength(value) ||
+        value == 'xx-small' ||
+        value == 'x-small' ||
+        value == 'small' ||
+        value == 'medium' ||
+        value == 'large' ||
+        value == 'x-large' ||
+        value == 'xx-large' ||
+        value == 'xxx-large' ||
+        value == 'larger' ||
+        value == 'smaller';
+  }
+
   static bool isValidLineHeightValue(String value) {
     return CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value) ||
       value == 'normal' || double.tryParse(value) != null;
@@ -655,6 +669,37 @@ class CSSText {
         } else {
           return FontWeight.w100;
         }
+    }
+  }
+
+  // https://drafts.csswg.org/css-fonts/#absolute-size-mapping
+  static CSSLengthValue resolveFontSize(
+      String fontSize, RenderStyle renderStyle, String propertyName) {
+    switch (fontSize) {
+      case 'xx-small':
+        return CSSLengthValue(3 / 5 * 16, CSSLengthType.PX);
+      case 'x-small':
+        return CSSLengthValue(3 / 4 * 16, CSSLengthType.PX);
+      case 'small':
+        return CSSLengthValue(8 / 9 * 16, CSSLengthType.PX);
+      case 'medium':
+        return CSSLengthValue(16, CSSLengthType.PX);
+      case 'large':
+        return CSSLengthValue(6 / 5 * 16, CSSLengthType.PX);
+      case 'x-large':
+        return CSSLengthValue(3 / 2 * 16, CSSLengthType.PX);
+      case 'xx-large':
+        return CSSLengthValue(2 / 1 * 16, CSSLengthType.PX);
+      case 'xxx-large':
+        return CSSLengthValue(3 / 1 * 16, CSSLengthType.PX);
+      case 'smaller':
+        return CSSLengthValue(
+            5 / 6, CSSLengthType.EM, renderStyle, propertyName);
+      case 'larger':
+        return CSSLengthValue(
+            6 / 5, CSSLengthType.EM, renderStyle, propertyName);
+      default:
+        return CSSLength.parseLength(fontSize, renderStyle, propertyName);
     }
   }
 
