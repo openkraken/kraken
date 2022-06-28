@@ -397,7 +397,7 @@ describe('Response', function() {
 
   describe('json', () => {
     it('parses json response', function() {
-      return fetch('https://kraken.oss-cn-hangzhou.aliyuncs.com/data/data.json')
+      return fetch('https://https://andycall.oss-cn-beijing.aliyuncs.com/data/data.json')
         .then(function(response) {
           return response.json();
         })
@@ -427,7 +427,7 @@ describe('Response', function() {
 
   describe('text', function() {
     it('resolves text promise', function() {
-      return fetch('https://kraken.oss-cn-hangzhou.aliyuncs.com/data/data.json')
+      return fetch('https://https://andycall.oss-cn-beijing.aliyuncs.com/data/data.json')
         .then(function(response) {
           return response.text();
         })

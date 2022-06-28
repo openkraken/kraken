@@ -35,4 +35,29 @@ jobs:
     - name: Check on failures
       if: steps.test.outcome != 'success'
       run: exit 1
-
+  plugin_test:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
+    - name: Run Plugin Test
+      run: npm run pretest && npm run plugin_test
+      id: test
+      continue-on-error: true
+    - uses: actions/upload-artifact@v2
+      with:
+        name: snapshots
+        path: integration_tests/snapshots
+    - name: Check on failures
+      if: steps.test.outcome != 'success'
+      run: exit 1

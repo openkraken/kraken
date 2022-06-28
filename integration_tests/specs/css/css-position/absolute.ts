@@ -345,16 +345,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.height = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.height = '400px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.height = '400px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -367,16 +367,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.top = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.top = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.top = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -389,16 +389,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.left = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.left = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.left = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -411,16 +411,15 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.right = '100px';
       await snapshot();
-    }, 200);
-
-    setTimeout(async () => {
-      div.style.right = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.right = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -739,7 +738,7 @@ describe('Position absolute', () => {
           backgroundColor: 'green'
        },
       });
-    
+
     BODY.appendChild(div1);
     await snapshot();
   });
@@ -919,17 +918,17 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
+          right: 0,
+          bottom: 0,
+          top: 0,
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             height: '100px',
           }
         })
@@ -951,19 +950,19 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
-          display: 'flex', 
-          flexDirection: 'column', 
+          right: 0,
+          bottom: 0,
+          top: 0,
+          display: 'flex',
+          flexDirection: 'column',
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             height: '100px',
           }
         })
@@ -985,18 +984,18 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
-          display: 'flex', 
+          right: 0,
+          bottom: 0,
+          top: 0,
+          display: 'flex',
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             width: '100px',
           }
         })
@@ -1023,7 +1022,7 @@ describe('Position absolute', () => {
           transform: 'translateX(64px)',
         },
       },
-      [ 
+      [
         createElement(
           'div',
           {
@@ -1038,7 +1037,7 @@ describe('Position absolute', () => {
               transform: 'translateX(64px)',
             },
           },
-          [  
+          [
               (child = createElement('div', {
               style: {
                 "display": "flex",
@@ -1063,9 +1062,9 @@ describe('Position absolute', () => {
                 "borderLeftColor": "rgba(0, 0, 0, 0.000)",
                 transform: 'translateX(14px)',
               },
-            }))   
+            }))
           ]
-        )    
+        )
       ]
     );
 
@@ -1100,14 +1099,14 @@ describe('Position absolute', () => {
               overflow: 'scroll'
             },
           },
-          [ 
-            createElement('div', { 
+          [
+            createElement('div', {
               style: {
                 "width": "300px",
                 "height": "300px",
                 "background-color": "green",
               },
-            }), 
+            }),
             (child = createElement('div', {
               style: {
                 "position": "absolute",
@@ -1115,7 +1114,7 @@ describe('Position absolute', () => {
                 "height": "50px",
                 "background-color": "yellow",
               },
-            }))   
+            }))
           ]
         ))
       ]
