@@ -31,7 +31,7 @@ describe('XMLHttpRequest', () => {
         done();
       }
     };
-    xhr.open('GET', 'https://https://andycall.oss-cn-beijing.aliyuncs.com/data/foo.json', true);
+    xhr.open('GET', 'https://andycall.oss-cn-beijing.aliyuncs.com/data/foo.json', true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send();
@@ -66,7 +66,7 @@ describe('XMLHttpRequest', () => {
         done();
       }
     };
-    xhr.open('POST', 'https://https://andycall.oss-cn-beijing.aliyuncs.com/data/data.json', true);
+    xhr.open('POST', 'https://andycall.oss-cn-beijing.aliyuncs.com/data/data.json', true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send('foobar');
