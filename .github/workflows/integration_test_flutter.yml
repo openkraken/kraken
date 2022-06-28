@@ -10,19 +10,28 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   integration_test:
-    runs-on: [self-hosted]
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
     - name: Run Test
       run: npm test
       id: test
       continue-on-error: true
-    - name: Upload Snapshots
-      run: node scripts/upload_snapshots.js
-      continue-on-error: true
+    - uses: actions/upload-artifact@v2
+      with:
+        name: snapshots
+        path: integration_tests/snapshots
     - name: Check on failures
       if: steps.test.outcome != 'success'
       run: exit 1

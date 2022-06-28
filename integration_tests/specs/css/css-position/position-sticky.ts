@@ -79,7 +79,7 @@ describe('position-sticky', () => {
     spacer = createElementWithStyle('div', {
       height: '200vh',
       'background-image':
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/ruler-v-50px.png)',
+        'url(assets/ruler-v-50px.png)',
       'background-repeat': 'repeat',
       'box-sizing': 'border-box',
     });
