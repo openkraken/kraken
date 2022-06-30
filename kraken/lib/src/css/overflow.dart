@@ -3,6 +3,7 @@
  */
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -344,6 +345,8 @@ mixin ElementOverflowMixin on ElementBase {
       if (_scrollableY != null) {
         _scrollableY!.handlePointerDown(event);
       }
+    } else if(event is PointerSignalEvent) {
+      _scrollableY!.handlePinterSignal(event);
     }
   }
 

@@ -3,6 +3,7 @@
  */
 
 import 'package:flutter/gestures.dart';
+import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -75,6 +76,10 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     for (GestureRecognizer? recognizer in _recognizers.values) {
       recognizer!.addPointer(event);
     }
+  }
+
+  void handlePinterSignal(PointerSignalEvent event) {
+    _receivedPointerSignal(event);
   }
 
   @override
@@ -203,6 +208,46 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.update(details);
+  }
+
+  void _receivedPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent && position != null) {
+      if (_physics != null && !_physics.shouldAcceptUserOffset(position!)) {
+        return;
+      }
+      final double delta = _pointerSignalEventDelta(event);
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+      // Only express interest in the event if it would actually result in a scroll.
+      if (delta != 0.0 && targetScrollOffset != position?.pixels) {
+        GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
+      }
+    }
+  }
+  double _pointerSignalEventDelta(PointerScrollEvent event) {
+    double delta = axisDirection == Axis.horizontal
+      ? event.scrollDelta.dx
+      : event.scrollDelta.dy;
+
+    if (axisDirectionIsReversed(axisDirection)) {
+      delta *= -1;
+    }
+    return delta;
+  }
+  
+  double _targetScrollOffsetForPointerScroll(double delta) {
+    return math.min(
+      math.max(position!.pixels + delta, position!.minScrollExtent),
+      position!.maxScrollExtent,
+    );
+  }
+
+  void _handlePointerScroll(PointerEvent event) {
+    assert(event is PointerScrollEvent);
+    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+    if (delta != 0.0 && targetScrollOffset != position!.pixels) {
+      position!.pointerScroll(delta);
+    }
   }
 
   void _handleDragEnd(DragEndDetails details) {
