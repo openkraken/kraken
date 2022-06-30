@@ -157,7 +157,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (userScrollDirection == value)
       return;
     _userScrollDirection = value;
-    // didUpdateScrollDirection(value);
   }
 
   @override
@@ -208,9 +207,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       final double oldPixels = pixels;
       forcePixels(targetPixels);
       isScrollingNotifier.value = true;
-      // didStartScroll();
-      // didUpdateScrollPositionBy(pixels - oldPixels);
-      // didEndScroll();
+      notifyListeners();
       goBallistic(0.0);
     }
   }
