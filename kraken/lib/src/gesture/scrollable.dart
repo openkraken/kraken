@@ -224,7 +224,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     }
   }
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = axisDirection == Axis.horizontal
+    double delta = axis == Axis.horizontal
       ? event.scrollDelta.dx
       : event.scrollDelta.dy;
 

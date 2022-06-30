@@ -3,6 +3,7 @@
  */
 
 import 'dart:math' as math;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -26,6 +27,8 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
+    } else if(event is PointerSignalEvent) {
+      scrollable.handlePinterSignal(event);
     }
   }
 
