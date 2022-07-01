@@ -301,16 +301,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.bottom = '100px';
       await snapshot();
-    }, 200);
+      requestAnimationFrame(async () => {
+        div.style.bottom = '-200px';
+        await snapshot();
+        done();
+      });
+    });
 
-    setTimeout(async () => {
-      div.style.bottom = '-200px';
-      await snapshot();
-      done();
-    }, 300);
 
     document.body.appendChild(div);
     await snapshot();
@@ -323,16 +323,15 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.width = '100px';
       await snapshot();
-    }, 200);
-
-    setTimeout(async () => {
-      div.style.width = '400px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.width = '400px';
+        await snapshot();
+        done();
+      })
+    })
 
     document.body.appendChild(div);
     await snapshot();

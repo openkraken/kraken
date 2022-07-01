@@ -725,7 +725,7 @@ describe('border-bottom', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await snapshot(0.1);
+    await snapshot(1);
   });
   it('color-004', async () => {
     let p;
