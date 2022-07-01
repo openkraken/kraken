@@ -162,6 +162,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
