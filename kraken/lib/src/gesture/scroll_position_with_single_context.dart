@@ -6,6 +6,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
@@ -148,6 +149,16 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDirection get userScrollDirection => _userScrollDirection;
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
 
+  /// Set [userScrollDirection] to the given value.
+  ///
+  /// If this changes the value, then a [UserScrollNotification] is dispatched.
+  void updateUserScrollDirection(ScrollDirection value) {
+    assert(value != null);
+    if (userScrollDirection == value)
+      return;
+    _userScrollDirection = value;
+  }
+
   @override
   Future<void> animateTo(
     double? to, {
@@ -180,6 +191,25 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       notifyListeners();
     }
     goBallistic(0.0);
+  }
+
+  @override
+  void pointerScroll(double delta) {
+    assert(delta != 0.0);
+
+    final double targetPixels =
+        math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
+    if (targetPixels != pixels) {
+      goIdle();
+      updateUserScrollDirection(
+          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+      );
+      final double oldPixels = pixels;
+      forcePixels(targetPixels);
+      isScrollingNotifier.value = true;
+      notifyListeners();
+      goBallistic(0.0);
+    }
   }
 
   @Deprecated(
