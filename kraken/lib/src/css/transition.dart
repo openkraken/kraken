@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart' show Curve;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -107,12 +108,23 @@ void _updateTransform(Matrix4 begin, Matrix4 end, double t, String property, CSS
   renderStyle.transformMatrix = newMatrix4;
 }
 
+CSSOrigin? _parseTransformOrigin(String value, RenderStyle renderStyle, String property) {
+  return CSSOrigin.parseOrigin(value, renderStyle, property);
+}
+
+void _updateTransformOrigin(CSSOrigin begin, CSSOrigin end, double progress, String property, CSSRenderStyle renderStyle) {
+  Offset offset = begin.offset + (end.offset - begin.offset) * progress;
+  Alignment alignment = begin.alignment + (end.alignment - begin.alignment) * progress;
+  renderStyle.transformOrigin = CSSOrigin(offset, alignment);
+}
+
 const List<Function> _colorHandler = [_parseColor, _updateColor];
 const List<Function> _lengthHandler = [_parseLength, _updateLength];
 const List<Function> _fontWeightHandler = [_parseFontWeight, _updateFontWeight];
 const List<Function> _numberHandler = [_parseNumber, _updateNumber];
 const List<Function> _lineHeightHandler = [_parseLineHeight, _updateLineHeight];
 const List<Function> _transformHandler = [_parseTransform, _updateTransform];
+const List<Function> _transformOriginHandler = [_parseTransformOrigin, _updateTransformOrigin];
 
 Map<String, List<Function>> CSSTransitionHandlers = {
   COLOR: _colorHandler,
@@ -130,6 +142,7 @@ Map<String, List<Function>> CSSTransitionHandlers = {
   FONT_WEIGHT: _fontWeightHandler,
   LINE_HEIGHT: _lineHeightHandler,
   TRANSFORM: _transformHandler,
+  TRANSFORM_ORIGIN: _transformOriginHandler,
   BORDER_BOTTOM_LEFT_RADIUS: _lengthHandler,
   BORDER_BOTTOM_RIGHT_RADIUS: _lengthHandler,
   BORDER_TOP_LEFT_RADIUS: _lengthHandler,
@@ -279,7 +292,7 @@ mixin CSSTransitionMixin on RenderStyle {
     }
 
     // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTransitionHandlers[property] != null &&
+    if (renderBoxModel != null && CSSTransitionHandlers[property] != null &&
       (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.

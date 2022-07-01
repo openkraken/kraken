@@ -27,9 +27,7 @@ describe('Transition transform origin', () => {
       });
     });
   });
-});
 
-describe('Transition transform origin', () => {
   it('percent', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
