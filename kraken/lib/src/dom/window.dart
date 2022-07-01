@@ -2,6 +2,8 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:ui';
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
 
 import 'package:kraken/bridge.dart';
 import 'package:kraken/dom.dart';
@@ -16,7 +18,7 @@ class Window extends EventTarget {
   final Screen screen;
 
   Window(BindingContext? context, this.document)
-      : screen = Screen(context), super(context);
+      : screen = Screen(BindingContext(context!.contextId, malloc.allocate(sizeOf<NativeBindingObject>()))), super(context);
 
   @override
   EventTarget? get parentEventTarget => null;
@@ -101,8 +103,8 @@ class Window extends EventTarget {
   @override
   void dispatchEvent(Event event) {
     // Events such as EVENT_DOM_CONTENT_LOADED need to ensure that listeners are flushed and registered.
-    if (event.type == EVENT_DOM_CONTENT_LOADED || event.type == EVENT_LOAD || event.type == EVENT_ERROR) {
-      flushUICommand();
+    if (contextId != null && event.type == EVENT_DOM_CONTENT_LOADED || event.type == EVENT_LOAD || event.type == EVENT_ERROR) {
+      flushUICommandWithContextId(contextId!);
     }
     super.dispatchEvent(event);
   }

@@ -3,10 +3,12 @@
  */
 
 #include <fstream>
+#include "foundation/logging.h"
 #include "gtest/gtest.h"
 #include "kraken_bridge_test.h"
 #include "kraken_test_env.h"
-#include "page.h"
+
+using namespace kraken;
 
 std::string readTestSpec() {
   std::string filepath = std::string(SPEC_FILE_PATH) + "/../integration_tests/.specs/core.build.js";
@@ -30,12 +32,15 @@ std::string readTestSpec() {
 // Very useful to fix bridge bugs.
 TEST(IntegrationTest, runSpecs) {
   auto bridge = TEST_init();
-  auto context = bridge->getContext();
+  auto context = bridge->GetExecutingContext();
 
   std::string code = readTestSpec();
   bridge->evaluateScript(code.c_str(), code.size(), "vm://", 0);
 
-  executeTest(context->getContextId(), [](int32_t contextId, NativeString* status) -> void* { KRAKEN_LOG(VERBOSE) << "done"; });
+  executeTest(context->contextId(), [](int32_t contextId, void* status) -> void* {
+    KRAKEN_LOG(VERBOSE) << "done";
+    return nullptr;
+  });
 
   TEST_runLoop(context);
 }

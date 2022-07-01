@@ -5,10 +5,9 @@
 #ifndef KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
 #define KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
 
-#include "kraken_foundation.h"
 #include "task_queue.h"
 
-namespace foundation {
+namespace kraken {
 
 class InspectorTaskQueue;
 using Task = void (*)(void*);
@@ -25,7 +24,6 @@ class InspectorTaskQueue : public TaskQueue {
   };
   int32_t registerTask(const Task& task, void* data) override {
     int32_t taskId = TaskQueue::registerTask(task, data);
-    assert(std::this_thread::get_id() == getUIThreadId());
     return taskId;
   }
 
@@ -35,6 +33,6 @@ class InspectorTaskQueue : public TaskQueue {
   static fml::RefPtr<InspectorTaskQueue> instance_;
 };
 
-}  // namespace foundation
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H

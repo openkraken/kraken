@@ -14,21 +14,20 @@ describe('Transition transform origin', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
-        transform: 'rotateZ(0.6turn)',
         transformOrigin: '10px 10px',
+        transform: 'rotateZ(0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
-});
 
-describe('Transition transform origin', () => {
   it('percent', done => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
@@ -44,16 +43,17 @@ describe('Transition transform origin', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
-        transform: 'rotateZ(0.6turn)',
         transformOrigin: '80% 80%',
+        transform: 'rotateZ(0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -74,16 +74,17 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'rotateZ(0.1turn)',
         transformOrigin: 'top left',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });

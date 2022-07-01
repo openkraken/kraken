@@ -94,12 +94,14 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
 
   diff /= height * width;
 
-  if (diff > 0) {
+  bool isMatch = (diff * 10e5) < 1;
+
+  if (!isMatch) {
     final newSnap = File('$filename.diff.png');
     newSnap.writeAsBytesSync(encodePng(diffImg));
   }
 
-  return (diff * 10e5) < 300; // < 0.03%
+  return isMatch; // < 0.001%
 }
 
 bool matchFile(List<int> left, List<int> right) {

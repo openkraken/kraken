@@ -149,33 +149,6 @@ task('clean', () => {
   }
 });
 
-const libOutputPath = join(TARGET_PATH, platform, 'lib');
-
-function findDebugJSEngine(platform) {
-  if (platform == 'macos' || platform == 'ios') {
-    let packageConfigFilePath = path.join(paths.kraken, '.dart_tool/package_config.json');
-
-    if (!fs.existsSync(packageConfigFilePath)) {
-      execSync('flutter pub get', {
-        cwd: paths.kraken,
-        stdio: 'inherit'
-      });
-    }
-
-    let packageConfig = require(packageConfigFilePath);
-    let packages = packageConfig.packages;
-
-    let jscPackageInfo = packages.find((i) => i.name === 'jsc');
-    if (!jscPackageInfo) {
-      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs.');
-    }
-
-    let rootUri = jscPackageInfo.rootUri;
-    let jscPackageLocation = path.join(paths.kraken, '.dart_tool', rootUri);
-    return path.join(jscPackageLocation, platform, 'JavaScriptCore.framework');
-  }
-}
-
 task('build-darwin-kraken-lib', done => {
   let externCmakeArgs = [];
   let buildType = 'Debug';
@@ -221,9 +194,6 @@ task('build-darwin-kraken-lib', done => {
 
   const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken.dylib`);
 
-  if (targetJSEngine === 'jsc') {
-    execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
-  }
   if (buildMode == 'Release' || buildMode == 'RelWithDebInfo') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
@@ -809,7 +779,7 @@ task('run-benchmark', async (done) => {
     const err = new Error('The IP address was not found.');
     done(err);
   }
-  
+
   let androidDevices = getDevicesInfo();
 
   let performanceInfos = execSync(
@@ -829,7 +799,7 @@ task('run-benchmark', async (done) => {
         let performanceDatas = JSON.parse(match[0]);
         // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
         performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
-        
+
         // Save performance list to file and upload to OSS.
         const listFile = path.join(__dirname, `${viewType}-load-time-list.js`);
         fs.writeFileSync(listFile, `performanceCallback('${viewType}LoadtimeList', [${performanceDatas.toString()}]);`);
@@ -849,8 +819,8 @@ task('run-benchmark', async (done) => {
       }
     }
   }
-  
+
   execSync('adb uninstall com.example.performance_tests');
-  
+
   done();
 });

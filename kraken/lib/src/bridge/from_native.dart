@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +44,12 @@ int doubleToUint64(double value) {
   var byteData = ByteData(8);
   byteData.setFloat64(0, value);
   return byteData.getUint64(0);
+}
+
+int doubleToInt64(double value) {
+  var byteData = ByteData(8);
+  byteData.setFloat64(0, value);
+  return byteData.getInt64(0);
 }
 
 double uInt64ToDouble(int value) {
@@ -279,15 +284,6 @@ void _cancelAnimationFrame(int contextId, int timerId) {
 final Pointer<NativeFunction<NativeCancelAnimationFrame>> _nativeCancelAnimationFrame =
     Pointer.fromFunction(_cancelAnimationFrame);
 
-typedef NativeGetScreen = Pointer<Void> Function();
-
-Pointer<Void> _getScreen() {
-  Size size = window.physicalSize;
-  return createScreen(size.width / window.devicePixelRatio, size.height / window.devicePixelRatio);
-}
-
-final Pointer<NativeFunction<NativeGetScreen>> _nativeGetScreen = Pointer.fromFunction(_getScreen);
-
 typedef NativeAsyncBlobCallback = Void Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
@@ -313,38 +309,20 @@ void _toBlob(Pointer<Void> callbackContext, int contextId,
 
 final Pointer<NativeFunction<NativeToBlob>> _nativeToBlob = Pointer.fromFunction(_toBlob);
 
-typedef NativeFlushUICommand = Void Function();
-typedef DartFlushUICommand = void Function();
+typedef NativeFlushUICommand = Void Function(Int32 contextId);
+typedef DartFlushUICommand = void Function(int contextId);
 
-void _flushUICommand() {
+void _flushUICommand(int contextId) {
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_START);
   }
-  flushUICommand();
+  flushUICommandWithContextId(contextId);
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_DOM_FLUSH_UI_COMMAND_END);
   }
 }
 
 final Pointer<NativeFunction<NativeFlushUICommand>> _nativeFlushUICommand = Pointer.fromFunction(_flushUICommand);
-
-typedef NativeInitWindow = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
-typedef DartInitWindow = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
-
-void _initWindow(int contextId, Pointer<NativeBindingObject> nativePtr) {
-  KrakenViewController.windowNativePtrMap[contextId] = nativePtr;
-}
-
-final Pointer<NativeFunction<NativeInitWindow>> _nativeInitWindow = Pointer.fromFunction(_initWindow);
-
-typedef NativeInitDocument = Void Function(Int32 contextId, Pointer<NativeBindingObject> nativePtr);
-typedef DartInitDocument = void Function(int contextId, Pointer<NativeBindingObject> nativePtr);
-
-void _initDocument(int contextId, Pointer<NativeBindingObject> nativePtr) {
-  KrakenViewController.documentNativePtrMap[contextId] = nativePtr;
-}
-
-final Pointer<NativeFunction<NativeInitDocument>> _nativeInitDocument = Pointer.fromFunction(_initDocument);
 
 typedef NativePerformanceGetEntries = Pointer<NativePerformanceEntryList> Function(Int32 contextId);
 typedef DartPerformanceGetEntries = Pointer<NativePerformanceEntryList> Function(int contextId);
@@ -396,27 +374,24 @@ final List<int> _dartNativeMethods = [
   _nativeClearTimeout.address,
   _nativeRequestAnimationFrame.address,
   _nativeCancelAnimationFrame.address,
-  _nativeGetScreen.address,
   _nativeToBlob.address,
   _nativeFlushUICommand.address,
-  _nativeInitWindow.address,
-  _nativeInitDocument.address,
   _nativeGetEntries.address,
   _nativeOnJsError.address,
   _nativeOnJsLog.address,
 ];
 
-typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
-typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
+typedef NativeRegisterDartMethods = Void Function(Int32 contextId, Pointer<Uint64> methodBytes, Int32 length);
+typedef DartRegisterDartMethods = void Function(int contextId, Pointer<Uint64> methodBytes, int length);
 
 final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary
     .ref
     .lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods')
     .asFunction();
 
-void registerDartMethodsToCpp() {
+void registerDartMethodsToCpp(int contextId) {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
-  _registerDartMethods(bytes, _dartNativeMethods.length);
+  _registerDartMethods(contextId, bytes, _dartNativeMethods.length);
 }

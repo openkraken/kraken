@@ -19,6 +19,8 @@ function startIntegrationTest() {
     env: {
       ...process.env,
       KRAKEN_ENABLE_TEST: 'true',
+      'enable-software-rendering': true,
+      'skia-deterministic-rendering': true,
       KRAKEN_TEST_DIR: path.join(__dirname, '../')
     },
     cwd: process.cwd(),

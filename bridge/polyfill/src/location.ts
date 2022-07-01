@@ -1,15 +1,13 @@
 import { URL } from './url';
+import { krakenLocationReload } from './bridge';
 import { kraken } from './kraken';
 
-// @ts-ignore
-const krakenLocation = window.__location__;
 // Lazy parse url.
 let _url: URL;
 export function getUrl() : URL {
   return _url ? _url : (_url = new URL(location.href));
 }
 
-const bindReload = krakenLocation.reload.bind(krakenLocation);
 export const location = {
   get href() {
     return kraken.invokeModule('Location', 'getHref');
@@ -48,7 +46,7 @@ export const location = {
     };
   },
   get reload() {
-    return bindReload;
+    return krakenLocationReload.bind(this);
   },
   get replace() {
     return (replaceURL: string) => {

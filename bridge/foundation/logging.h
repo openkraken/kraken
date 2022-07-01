@@ -6,11 +6,23 @@
 #define KRAKEN_FOUNDATION_LOGGING_H_
 
 #include <sstream>
-
 #include <string>
-#include "include/kraken_bridge.h"
 
-namespace foundation {
+#define KRAKEN_LOG_STREAM(severity) ::kraken::LogMessage(::kraken::severity, __FILE__, __LINE__, nullptr).stream()
+
+#define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : ::kraken::LogMessageVoidify() & (stream)
+
+#define KRAKEN_EAT_STREAM_PARAMETERS(ignored) \
+  true || (ignored) ? (void)0 : ::LogMessageVoidify() & ::LogMessage(::LOG_FATAL, 0, 0, nullptr).stream()
+
+#define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
+
+#define KRAKEN_CHECK(condition) \
+  KRAKEN_LAZY_STREAM(::kraken::LogMessage(::kraken::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
+
+namespace kraken {
+
+class ExecutingContext;
 
 typedef int LogSeverity;
 
@@ -20,7 +32,8 @@ constexpr LogSeverity INFO = 1;
 constexpr LogSeverity WARN = 2;
 constexpr LogSeverity DEBUG = 3;
 constexpr LogSeverity ERROR = 4;
-constexpr LogSeverity FATAL = 5;
+constexpr LogSeverity NUM_SEVERITIES = 5;
+constexpr LogSeverity FATAL = 6;
 
 enum class MessageLevel : uint8_t {
   Log = 1,
@@ -47,20 +60,10 @@ class LogMessage {
   const LogSeverity severity_;
   const char* file_;
   const int line_;
-
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(LogMessage);
 };
 
-void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx);
+void printLog(ExecutingContext* context, std::stringstream& stream, std::string level, void* ctx);
 
-#define KRAKEN_LOG_STREAM(severity) ::foundation::LogMessage(::foundation::severity, __FILE__, __LINE__, nullptr).stream()
-
-#define KRAKEN_LAZY_STREAM(stream, condition) !(condition) ? (void)0 : foundation::LogMessageVoidify() & (stream)
-
-#define KRAKEN_LOG(severity) KRAKEN_LAZY_STREAM(KRAKEN_LOG_STREAM(severity), true)
-
-#define KRAKEN_CHECK(condition) KRAKEN_LAZY_STREAM(::foundation::LogMessage(::foundation::FATAL, __FILE__, __LINE__, #condition).stream(), !(condition))
-
-}  // namespace foundation
+}  // namespace kraken
 
 #endif  // KRAKEN_FOUNDATION_LOGGING_H_

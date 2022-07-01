@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.0)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 project(KrakenBridge)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -34,14 +34,9 @@ execute_process(
 ) # g
 
 execute_process(
-  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/elements -d ../../bindings/qjs/dom/elements/.gen"
+  COMMAND bash "-c" "node bin/code_generator -s ../../core -d ../../out"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
 ) # generate elements code
-
-execute_process(
-  COMMAND bash "-c" "node bin/code_generator -s ../../bindings/qjs/dom/events -d ../../bindings/qjs/dom/events/.gen"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/scripts/code_generator
-) # generate events code
 
 execute_process(
   COMMAND bash "-c" "read dart_sdk < <(type -p dart) && echo $\{dart_sdk%/*\}/cache/dart-sdk/include | xargs"
@@ -83,11 +78,12 @@ endif()
 list(APPEND BRIDGE_SOURCE
   kraken_bridge.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
+  foundation/macros.h
   foundation/logging.cc
   foundation/logging.h
   foundation/colors.h
+  foundation/native_string.cc
+  foundation/native_string.h
   foundation/ref_counted_internal.h
   foundation/ref_counter.h
   foundation/ref_ptr.h
@@ -98,11 +94,16 @@ list(APPEND BRIDGE_SOURCE
   foundation/inspector_task_queue.cc
   foundation/task_queue.cc
   foundation/task_queue.h
+  foundation/string_view.cc
+  foundation/string_view.h
+  foundation/native_value.cc
+  foundation/native_value.h
+  foundation/native_type.h
+  foundation/native_value_converter.h
+  foundation/native_value_converter.cc
+  foundation/casting.h
   foundation/ui_command_buffer.cc
   foundation/ui_command_buffer.h
-  foundation/ui_command_callback_queue.cc
-  foundation/closure.h
-  dart_methods.cc
   polyfill/dist/polyfill.cc
   )
 
@@ -142,6 +143,7 @@ list(APPEND GUMBO_PARSER
 
 list(APPEND BRIDGE_INCLUDE
   ${CMAKE_CURRENT_LIST_DIR}/foundation
+  ${CMAKE_CURRENT_LIST_DIR}/out
   ${CMAKE_CURRENT_LIST_DIR}
   ${CMAKE_CURRENT_LIST_DIR}/include
   ${CMAKE_CURRENT_LIST_DIR}/polyfill/dist
@@ -186,106 +188,295 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   list(APPEND BRIDGE_LINK_LIBS quickjs)
 
   list(APPEND BRIDGE_SOURCE
-    page.cc
-    page.h
-    bindings/qjs/garbage_collected.h
-    bindings/qjs/executing_context.cc
-    bindings/qjs/executing_context.h
+    # Binding files
+    bindings/qjs/idl_type.h
+    bindings/qjs/converter.h
+    bindings/qjs/converter_impl.h
+    bindings/qjs/dictionary_base.cc
+    bindings/qjs/dictionary_base.h
+    bindings/qjs/js_based_event_listener.cc
+    bindings/qjs/js_based_event_listener.h
+    bindings/qjs/js_event_handler.cc
+    bindings/qjs/js_event_handler.h
+    bindings/qjs/js_event_listener.cc
+    bindings/qjs/js_event_listener.h
+    bindings/qjs/binding_initializer.cc
+    bindings/qjs/binding_initializer.h
+    bindings/qjs/member_installer.cc
+    bindings/qjs/member_installer.h
+    bindings/qjs/source_location.cc
+    bindings/qjs/source_location.h
+    bindings/qjs/cppgc/garbage_collected.h
+    bindings/qjs/cppgc/gc_visitor.cc
+    bindings/qjs/cppgc/gc_visitor.h
+    bindings/qjs/cppgc/mutation_scope.cc
+    bindings/qjs/cppgc/mutation_scope.h
+    bindings/qjs/cppgc/member.h
+    bindings/qjs/cppgc/local_handle.h
+    bindings/qjs/script_wrappable.cc
+    bindings/qjs/script_wrappable.h
+    bindings/qjs/wrapper_type_info.h
     bindings/qjs/heap_hashmap.h
-    bindings/qjs/native_value.cc
-    bindings/qjs/native_value.h
-    bindings/qjs/host_object.h
-    bindings/qjs/host_object.cc
-    bindings/qjs/host_class.h
-    bindings/qjs/qjs_patch.cc
-    bindings/qjs/qjs_patch.h
-    bindings/qjs/rejected_promises.cc
+    bindings/qjs/native_string_utils.cc
+    bindings/qjs/native_string_utils.h
+    bindings/qjs/qjs_engine_patch.cc
+    bindings/qjs/qjs_engine_patch.h
+    bindings/qjs/qjs_function.cc
+    bindings/qjs/qjs_function.h
+    bindings/qjs/script_value.cc
+    bindings/qjs/script_value.h
+    bindings/qjs/script_promise.cc
+    bindings/qjs/script_promise.h
+    bindings/qjs/to_quickjs.h
+    bindings/qjs/qjs_interface_bridge.cc
+    bindings/qjs/qjs_interface_bridge.h
+    bindings/qjs/script_promise_resolver.cc
+    bindings/qjs/script_promise_resolver.h
+    bindings/qjs/atomic_string.cc
+    bindings/qjs/atomic_string.h
+    bindings/qjs/generated_code_helper.h
+    bindings/qjs/exception_state.cc
+    bindings/qjs/exception_state.h
+    bindings/qjs/exception_message.cc
+    bindings/qjs/exception_message.h
     bindings/qjs/rejected_promises.h
-    bindings/qjs/module_manager.cc
-    bindings/qjs/module_manager.h
-    bindings/qjs/html_parser.cc
-    bindings/qjs/html_parser.h
-    bindings/qjs/bom/console.cc
-    bindings/qjs/bom/console.h
-    bindings/qjs/bom/screen.cc
-    bindings/qjs/bom/screen.h
-    bindings/qjs/bom/timer.cc
-    bindings/qjs/bom/timer.h
-    bindings/qjs/bom/dom_timer_coordinator.cc
-    bindings/qjs/bom/dom_timer_coordinator.h
-    bindings/qjs/dom/frame_request_callback_collection.cc
-    bindings/qjs/dom/frame_request_callback_collection.h
-    bindings/qjs/dom/event_listener_map.cc
-    bindings/qjs/dom/event_listener_map.h
-    bindings/qjs/dom/script_animation_controller.cc
-    bindings/qjs/dom/script_animation_controller.h
-    bindings/qjs/dom/event_target.cc
-    bindings/qjs/dom/event_target.h
-    bindings/qjs/dom/event.cc
-    bindings/qjs/dom/event.h
-    bindings/qjs/dom/node.h
-    bindings/qjs/dom/node.cc
-    bindings/qjs/dom/element.cc
-    bindings/qjs/dom/element.h
-    bindings/qjs/dom/document.cc
-    bindings/qjs/dom/document.h
-    bindings/qjs/dom/text_node.cc
-    bindings/qjs/dom/text_node.h
-    bindings/qjs/dom/event_type_names.h
-    bindings/qjs/dom/event_type_names.cc
-    bindings/qjs/dom/comment_node.cc
-    bindings/qjs/dom/comment_node.h
-    bindings/qjs/dom/document_fragment.cc
-    bindings/qjs/dom/document_fragment.h
-    bindings/qjs/dom/style_declaration.cc
-    bindings/qjs/dom/style_declaration.h
-    bindings/qjs/dom/css_property_list.h
-    bindings/qjs/dom/elements/.gen/canvas_element.cc
-    bindings/qjs/dom/elements/.gen/canvas_element.h
-    bindings/qjs/dom/elements/image_element.cc
-    bindings/qjs/dom/elements/image_element.h
-    bindings/qjs/dom/elements/.gen/input_element.cc
-    bindings/qjs/dom/elements/.gen/input_element.h
-    bindings/qjs/dom/elements/.gen/textarea_element.cc
-    bindings/qjs/dom/elements/.gen/textarea_element.h
-    bindings/qjs/dom/elements/.gen/anchor_element.cc
-    bindings/qjs/dom/elements/.gen/anchor_element.h
-    bindings/qjs/dom/elements/.gen/object_element.cc
-    bindings/qjs/dom/elements/.gen/object_element.h
-    bindings/qjs/dom/elements/.gen/script_element.cc
-    bindings/qjs/dom/elements/.gen/script_element.h
-    bindings/qjs/dom/elements/template_element.cc
-    bindings/qjs/dom/elements/template_element.h
-    bindings/qjs/dom/events/.gen/close_event.h
-    bindings/qjs/dom/events/.gen/close_event.cc
-    bindings/qjs/dom/events/.gen/gesture_event.cc
-    bindings/qjs/dom/events/.gen/gesture_event.h
-    bindings/qjs/dom/events/.gen/input_event.cc
-    bindings/qjs/dom/events/.gen/input_event.h
-    bindings/qjs/dom/events/.gen/popstate_event.cc
-    bindings/qjs/dom/events/.gen/popstate_event.h
-    bindings/qjs/dom/events/.gen/intersection_change.cc
-    bindings/qjs/dom/events/.gen/intersection_change.h
-    bindings/qjs/dom/events/.gen/media_error_event.cc
-    bindings/qjs/dom/events/.gen/media_error_event.h
-    bindings/qjs/dom/events/.gen/mouse_event.cc
-    bindings/qjs/dom/events/.gen/mouse_event.h
-    bindings/qjs/dom/events/.gen/message_event.h
-    bindings/qjs/dom/events/.gen/message_event.cc
-    bindings/qjs/dom/events/touch_event.cc
-    bindings/qjs/dom/events/touch_event.h
-    bindings/qjs/bom/blob.cc
-    bindings/qjs/bom/blob.h
-    bindings/qjs/bom/location.h
-    bindings/qjs/bom/location.cc
-    bindings/qjs/bom/window.cc
-    bindings/qjs/bom/window.h
-    bindings/qjs/bom/performance.cc
-    bindings/qjs/bom/performance.h
-    bindings/qjs/dom/custom_event.cc
-    bindings/qjs/dom/custom_event.h
-    bindings/qjs/dom/all_collection.cc
-    bindings/qjs/dom/all_collection.h
+    bindings/qjs/rejected_promises.cc
+    bindings/qjs/pending_promises.cc
+    bindings/qjs/pending_promises.h
+
+    # Core sources
+    core/executing_context.cc
+    core/executing_context.h
+    core/script_state.cc
+    core/script_state.h
+    core/page.h
+    core/page.cc
+    core/executing_context_data.cc
+    core/executing_context_data.h
+    core/dart_methods.h
+    core/dart_methods.h
+    core/fileapi/blob.h
+    core/fileapi/blob.cc
+    core/fileapi/blob_part.cc
+    core/fileapi/blob_part.h
+    core/fileapi/blob_property_bag.cc
+    core/fileapi/blob_property_bag.h
+    core/frame/console.cc
+    core/frame/console.h
+    core/frame/dom_timer.cc
+    core/frame/dom_timer.h
+    core/frame/dom_timer_coordinator.cc
+    core/frame/dom_timer_coordinator.h
+    core/frame/window_or_worker_global_scope.cc
+    core/frame/window_or_worker_global_scope.h
+    core/frame/module_listener.cc
+    core/frame/module_listener.h
+    core/frame/module_listener_container.cc
+    core/frame/module_listener_container.h
+    core/frame/module_manager.cc
+    core/frame/module_manager.h
+    core/frame/module_callback.cc
+    core/frame/module_callback.h
+    core/frame/module_callback_coordinator.cc
+    core/frame/window.h
+    core/frame/window.cc
+    core/frame/screen.h
+    core/frame/screen.cc
+    core/frame/legacy/location.cc
+    core/frame/legacy/location.h
+    core/frame/module_callback_coordinator.h
+    core/css/legacy/css_style_declaration.cc
+    core/css/legacy/css_style_declaration.h
+    core/dom/frame_request_callback_collection.cc
+    core/dom/frame_request_callback_collection.h
+    core/dom/events/event_listener.h
+    core/dom/events/registered_eventListener.cc
+    core/dom/events/registered_eventListener.h
+    core/dom/events/event_listener_map.cc
+    core/dom/events/event_listener_map.h
+    core/dom/events/event.h
+    core/dom/events/event.cc
+    core/dom/events/event_target.h
+    core/dom/events/event_target.cc
+    core/dom/events/event_listener_map.cc
+    core/dom/events/event_target_impl.cc
+    core/dom/events/event_target_impl.h
+    core/dom/binding_object.h
+    core/dom/binding_object.cc
+    core/dom/node.cc
+    core/dom/node.h
+    core/dom/node_traversal.cc
+    core/dom/node_traversal.h
+    core/dom/character_data.cc
+    core/dom/character_data.h
+    core/dom/comment.cc
+    core/dom/comment.h
+    core/dom/text.cc
+    core/dom/text.h
+    core/dom/tree_scope.cc
+    core/dom/tree_scope.h
+    core/dom/element.cc
+    core/dom/element.h
+    core/dom/element_traversal.h
+    core/dom/document.cc
+    core/dom/document.h
+    core/dom/scripted_animation_controller.cc
+    core/dom/scripted_animation_controller.h
+    core/dom/node_data.cc
+    core/dom/node_data.h
+    core/dom/document_fragment.h
+    core/dom/document_fragment.cc
+    core/dom/collection_index_cache.h
+    core/dom/child_node_list.cc
+    core/dom/child_node_list.h
+    core/dom/empty_node_list.cc
+    core/dom/empty_node_list.h
+    core/dom/node_list.h
+    core/dom/container_node.cc
+    core/dom/container_node.h
+    core/events/error_event.cc
+    core/events/error_event.h
+    core/events/message_event.h
+    core/events/message_event.cc
+    core/html/parser/html_parser.cc
+    core/html/parser/html_parser.h
+    core/html/html_collection.cc
+    core/html/html_collection.h
+    core/html/html_element.cc
+    core/html/html_element.h
+    core/html/html_div_element.cc
+    core/html/html_div_element.h
+    core/html/html_head_element.cc
+    core/html/html_head_element.h
+    core/html/html_body_element.h
+    core/html/html_body_element.cc
+    core/html/html_html_element.cc
+    core/html/html_html_element.h
+    core/html/html_template_element.cc
+    core/html/html_template_element.h
+#    core/html/html_anchor_element.h
+#    core/html/html_anchor_element.cc
+#    core/html/html_template_element.cc
+#    core/html/html_template_element.h
+#    core/html/forms/html_input_element.cc
+#    core/html/forms/html_input_element.h
+#    core/html/forms/html_textarea_element.cc
+#    core/html/forms/html_textarea_element.h
+#    core/html/html_image_element.cc
+#    core/html/html_image_element.h
+#    core/html/html_script_element.cc
+#    core/html/html_script_element.h
+    core/html/html_unknown_element.cc
+    core/html/html_unknown_element.h
+    # Legacy implements, should remove them in the future.
+    core/dom/legacy/space_split_string.cc
+    core/dom/legacy/space_split_string.h
+    core/dom/legacy/element_attributes.cc
+    core/dom/legacy/element_attributes.h
+    core/dom/legacy/bounding_client_rect.cc
+    core/dom/legacy/bounding_client_rect.h
+
+#    core/dom/character_data.cc
+#    core/dom/character_data.h
+#    core/dom/comment.cc
+#    core/dom/comment.h
+#    core/dom/node.cc
+#    core/dom/node.h
+#    core/dom/events/custom_event.cc
+#    core/dom/events/custom_event.h
+#    core/dom/events/event.h
+#    core/dom/events/event.cc
+#    core/dom/events/event_listener_map.cc
+#    core/dom/events/event_listener_map.h
+#    core/dom/events/event_target.cc
+#    core/dom/events/event_target.h
+    )
+
+  # Gen sources.
+  list(APPEND BRIDGE_SOURCE
+    out/qjs_console.cc
+    out/qjs_console.h
+    out/qjs_module_manager.cc
+    out/qjs_module_manager.h
+    out/qjs_window_or_worker_global_scope.cc
+    out/qjs_window_or_worker_global_scope.h
+    out/qjs_window.cc
+    out/qjs_window.h
+    out/qjs_location.cc
+    out/qjs_location.h
+    out/qjs_blob.cc
+    out/qjs_blob.h
+    out/qjs_event.cc
+    out/qjs_event.h
+    out/qjs_add_event_listener_options.cc
+    out/qjs_add_event_listener_options.h
+    out/qjs_event_listener_options.cc
+    out/qjs_event_listener_options.h
+    out/qjs_error_event.h
+    out/qjs_error_event.cc
+    out/qjs_message_event.cc
+    out/qjs_message_event.h
+    out/qjs_message_event_init.h
+    out/qjs_message_event_init.cc
+    out/qjs_error_event_init.h
+    out/qjs_error_event_init.cc
+    out/qjs_event_init.h
+    out/qjs_event_init.cc
+    out/qjs_event_target.cc
+    out/qjs_event_target.h
+    out/qjs_node.h
+    out/qjs_node.cc
+    out/qjs_document.cc
+    out/qjs_document.h
+    out/qjs_element.cc
+    out/qjs_element.h
+    out/qjs_element_attributes.cc
+    out/qjs_element_attributes.h
+    out/qjs_character_data.cc
+    out/qjs_character_data.h
+    out/qjs_comment.cc
+    out/qjs_comment.h
+    out/qjs_document_fragment.cc
+    out/qjs_document_fragment.h
+    out/qjs_bounding_client_rect.cc
+    out/qjs_bounding_client_rect.h
+    out/qjs_css_style_declaration.cc
+    out/qjs_css_style_declaration.h
+    out/qjs_text.cc
+    out/qjs_text.h
+    out/qjs_screen.cc
+    out/qjs_screen.h
+    out/qjs_node_list.cc
+    out/qjs_node_list.h
+    out/event_type_names.h
+    out/event_type_names.cc
+    out/built_in_string.cc
+    out/built_in_string.h
+    out/binding_call_methods.cc
+    out/binding_call_methods.h
+    out/qjs_scroll_options.cc
+    out/qjs_scroll_options.h
+    out/qjs_scroll_to_options.cc
+    out/qjs_scroll_to_options.h
+    out/qjs_html_element.cc
+    out/qjs_html_element.h
+    out/qjs_html_div_element.cc
+    out/qjs_html_div_element.h
+    out/qjs_html_head_element.cc
+    out/qjs_html_head_element.h
+    out/qjs_html_body_element.cc
+    out/qjs_html_body_element.h
+    out/qjs_html_html_element.cc
+    out/qjs_html_html_element.h
+    out/qjs_html_template_element.cc
+    out/qjs_html_template_element.h
+    out/html_element_type_helper.h
+    out/qjs_html_unknown_element.cc
+    out/qjs_html_unknown_element.h
+    out/html_element_factory.cc
+    out/html_element_factory.h
+    out/html_names.cc
+    out/html_names.h
     )
 
   # Quickjs use __builtin_frame_address() to get stack pointer, we should add follow options to get it work with -O2
@@ -297,7 +488,7 @@ endif ()
 
 list(APPEND PUBLIC_HEADER
   include/kraken_bridge.h
-  )
+)
 
 add_library(kraken SHARED ${BRIDGE_SOURCE})
 add_library(kraken_static STATIC ${BRIDGE_SOURCE})

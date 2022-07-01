@@ -153,7 +153,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value)
       return;
     _userScrollDirection = value;
@@ -204,7 +203,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       updateUserScrollDirection(
           -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
-      final double oldPixels = pixels;
       forcePixels(targetPixels);
       isScrollingNotifier.value = true;
       notifyListeners();

@@ -1,0 +1,10 @@
+//
+// Created by yhtree on 2022/4/15.
+//
+
+#ifndef KRAKENBRIDGE_CORE_HTML_FORMS_HTML_BUTTON_ELEMENT_H_
+#define KRAKENBRIDGE_CORE_HTML_FORMS_HTML_BUTTON_ELEMENT_H_
+
+class html_button_element {};
+
+#endif  // KRAKENBRIDGE_CORE_HTML_FORMS_HTML_BUTTON_ELEMENT_H_

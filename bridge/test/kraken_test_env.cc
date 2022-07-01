@@ -2,14 +2,16 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-#include "kraken_test_env.h"
 #include <sys/time.h>
 #include <vector>
-#include "bindings/qjs/dom/event_target.h"
-#include "dart_methods.h"
-#include "include/kraken_bridge.h"
+
+#include "bindings/qjs/native_string_utils.h"
+#include "core/dom/frame_request_callback_collection.h"
+#include "core/frame/dom_timer.h"
+#include "core/page.h"
+#include "foundation/native_string.h"
 #include "kraken_bridge_test.h"
-#include "page.h"
+#include "kraken_test_env.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void) {
@@ -26,10 +28,12 @@ static int64_t get_time_ms(void) {
 }
 #endif
 
+namespace kraken {
+
 typedef struct {
   struct list_head link;
   int64_t timeout;
-  DOMTimer* timer;
+  kraken::DOMTimer* timer;
   int32_t contextId;
   bool isInterval;
   AsyncCallback func;
@@ -37,7 +41,7 @@ typedef struct {
 
 typedef struct {
   struct list_head link;
-  FrameCallback* callback;
+  kraken::FrameCallback* callback;
   int32_t contextId;
   AsyncRAFCallback handler;
   int32_t callbackId;
@@ -48,22 +52,31 @@ typedef struct JSThreadState {
   std::unordered_map<int32_t, JSFrameCallback*> os_frameCallbacks;
 } JSThreadState;
 
-static void unlink_timer(JSThreadState* ts, JSOSTimer* th) {
-  ts->os_timers.erase(th->timer->timerId());
+static void unlink_timer(JSThreadState* ts, int32_t timerId) {
+  ts->os_timers.erase(timerId);
 }
 
 static void unlink_callback(JSThreadState* ts, JSFrameCallback* th) {
   ts->os_frameCallbacks.erase(th->callbackId);
 }
 
-NativeString* TEST_invokeModule(void* callbackContext, int32_t contextId, NativeString* moduleName, NativeString* method, NativeString* params, AsyncModuleCallback callback) {
+NativeString* TEST_invokeModule(void* callbackContext,
+                                int32_t contextId,
+                                NativeString* moduleName,
+                                NativeString* method,
+                                NativeString* params,
+                                AsyncModuleCallback callback) {
   std::string module = nativeStringToStdString(moduleName);
 
   if (module == "throwError") {
     callback(callbackContext, contextId, nativeStringToStdString(method).c_str(), nullptr);
   }
 
-  return nullptr;
+  if (module == "MethodChannel") {
+    callback(callbackContext, contextId, nullptr, stringToNativeString("{\"result\": 1234}").release());
+  }
+
+  return stringToNativeString(module).release();
 };
 
 void TEST_requestBatchUpdate(int32_t contextId){};
@@ -72,9 +85,9 @@ void TEST_reloadApp(int32_t contextId) {}
 
 int32_t timerId = 0;
 
-int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+int32_t TEST_setTimeout(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+  JSRuntime* rt = ScriptState::runtime();
+  auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -89,9 +102,9 @@ int32_t TEST_setTimeout(DOMTimer* timer, int32_t contextId, AsyncCallback callba
   return id;
 }
 
-int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
-  JSRuntime* rt = JS_GetRuntime(timer->ctx());
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
+int32_t TEST_setInterval(kraken::DOMTimer* timer, int32_t contextId, AsyncCallback callback, int32_t timeout) {
+  JSRuntime* rt = ScriptState::runtime();
+  auto* context = timer->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSOSTimer* th = static_cast<JSOSTimer*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->timeout = get_time_ms() + timeout;
@@ -108,14 +121,14 @@ int32_t TEST_setInterval(DOMTimer* timer, int32_t contextId, AsyncCallback callb
 
 int32_t callbackId = 0;
 
-uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
-  JSRuntime* rt = JS_GetRuntime(frameCallback->ctx());
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(frameCallback->ctx()));
+uint32_t TEST_requestAnimationFrame(kraken::FrameCallback* frameCallback, int32_t contextId, AsyncRAFCallback handler) {
+  JSRuntime* rt = ScriptState::runtime();
+  auto* context = frameCallback->context();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   JSFrameCallback* th = static_cast<JSFrameCallback*>(js_mallocz(context->ctx(), sizeof(*th)));
   th->handler = handler;
   th->callback = frameCallback;
-  th->contextId = context->getContextId();
+  th->contextId = context->contextId();
   int32_t id = callbackId++;
 
   th->callbackId = id;
@@ -127,15 +140,15 @@ uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contex
 
 void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
+  auto* context = page->GetExecutingContext();
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_frameCallbacks.erase(id);
 }
 
 void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
-  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
+  auto* context = page->GetExecutingContext();
+  JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(ScriptState::runtime()));
   ts->os_timers.erase(timerId);
 }
 
@@ -151,13 +164,16 @@ NativeString* TEST_platformBrightness(int32_t contextId) {
   return nullptr;
 }
 
-void TEST_toBlob(void* callbackContext, int32_t contextId, AsyncBlobCallback blobCallback, int32_t elementId, double devicePixelRatio) {}
+void TEST_toBlob(void* ptr,
+                 int32_t contextId,
+                 AsyncBlobCallback blobCallback,
+                 int32_t elementId,
+                 double devicePixelRatio) {
+  uint8_t bytes[5] = {0x01, 0x02, 0x03, 0x04, 0x05};
+  blobCallback(ptr, contextId, nullptr, bytes, 5);
+}
 
 void TEST_flushUICommand() {}
-
-void TEST_initWindow(int32_t contextId, void* nativePtr) {}
-
-void TEST_initDocument(int32_t contextId, void* nativePtr) {}
 
 void TEST_onJsLog(int32_t contextId, int32_t level, const char*) {}
 
@@ -181,13 +197,14 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
     initJSPagePool(1024 * 1024);
     inited = true;
   });
+
+  TEST_mockDartMethods(contextId, onJsError);
+
   initTestFramework(contextId);
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto* context = page->getContext();
+  auto* context = page->GetExecutingContext();
   JSThreadState* th = new JSThreadState();
-  JS_SetRuntimeOpaque(context->runtime(), th);
-
-  TEST_mockDartMethods(onJsError);
+  JS_SetRuntimeOpaque(ScriptState::runtime(), th);
 
   return std::unique_ptr<kraken::KrakenPage>(page);
 }
@@ -202,8 +219,8 @@ std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
   return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
 }
 
-static bool jsPool(ExecutionContext* context) {
-  JSRuntime* rt = context->runtime();
+static bool jsPool(kraken::ExecutingContext* context) {
+  JSRuntime* rt = ScriptState::runtime();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(rt));
   int64_t cur_time, delay;
   struct list_head* el;
@@ -225,8 +242,9 @@ static bool jsPool(ExecutionContext* context) {
           func(th->timer, th->contextId, nullptr);
         } else {
           th->func = nullptr;
+          int32_t timerId = th->timer->timerId();
           func(th->timer, th->contextId, nullptr);
-          unlink_timer(ts, th);
+          unlink_timer(ts, timerId);
         }
 
         return false;
@@ -248,50 +266,15 @@ static bool jsPool(ExecutionContext* context) {
   return false;
 }
 
-void TEST_runLoop(ExecutionContext* context) {
+void TEST_runLoop(kraken::ExecutingContext* context) {
   for (;;) {
-    context->drainPendingPromiseJobs();
+    context->DrainPendingPromiseJobs();
     if (jsPool(context))
       break;
   }
 }
 
-void TEST_dispatchEvent(int32_t contextId, EventTargetInstance* eventTarget, const std::string type) {
-  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
-  auto nativeEventType = stringToNativeString(type);
-  NativeString* rawEventType = nativeEventType.release();
-
-#if ANDROID_32_BIT
-  NativeEvent* nativeEvent = new NativeEvent{reinterpret_cast<int64_t>(rawEventType)};
-#else
-  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
-#endif
-
-  RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
-
-  NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
-}
-
-void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
-
-std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
-std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
-  if (unitTestEnvMap.count(contextUniqueId) == 0) {
-    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
-  }
-
-  return unitTestEnvMap[contextUniqueId];
-}
-
-void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
-  if (unitTestEnvMap.count(contextUniqueId) == 0) {
-    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
-  }
-
-  unitTestEnvMap[contextUniqueId]->onEventTargetDisposed = callback;
-}
-
-void TEST_mockDartMethods(OnJSError onJSError) {
+void TEST_mockDartMethods(int32_t contextId, OnJSError onJSError) {
   std::vector<uint64_t> mockMethods{
       reinterpret_cast<uint64_t>(TEST_invokeModule),
       reinterpret_cast<uint64_t>(TEST_requestBatchUpdate),
@@ -301,11 +284,8 @@ void TEST_mockDartMethods(OnJSError onJSError) {
       reinterpret_cast<uint64_t>(TEST_clearTimeout),
       reinterpret_cast<uint64_t>(TEST_requestAnimationFrame),
       reinterpret_cast<uint64_t>(TEST_cancelAnimationFrame),
-      reinterpret_cast<uint64_t>(TEST_getScreen),
       reinterpret_cast<uint64_t>(TEST_toBlob),
       reinterpret_cast<uint64_t>(TEST_flushUICommand),
-      reinterpret_cast<uint64_t>(TEST_initWindow),
-      reinterpret_cast<uint64_t>(TEST_initDocument),
   };
 
 #if ENABLE_PROFILE
@@ -316,5 +296,38 @@ void TEST_mockDartMethods(OnJSError onJSError) {
 
   mockMethods.emplace_back(reinterpret_cast<uint64_t>(onJSError));
   mockMethods.emplace_back(reinterpret_cast<uint64_t>(TEST_onJsLog));
-  registerDartMethods(mockMethods.data(), mockMethods.size());
+  registerDartMethods(contextId, mockMethods.data(), mockMethods.size());
 }
+
+}  // namespace kraken
+
+// void TEST_dispatchEvent(int32_t contextId, EventTarget* eventTarget, const std::string type) {
+//  NativeEventTarget* nativeEventTarget = new NativeEventTarget(eventTarget);
+//  auto nativeEventType = stringToNativeString(type);
+//  NativeString* rawEventType = nativeEventType.release();
+//
+//  NativeEvent* nativeEvent = new NativeEvent{rawEventType};
+//
+//  RawEvent* rawEvent = new RawEvent{reinterpret_cast<uint64_t*>(nativeEvent)};
+//
+//  NativeEventTarget::dispatchEventImpl(contextId, nativeEventTarget, rawEventType, rawEvent, false);
+//}
+//
+// void TEST_callNativeMethod(void* nativePtr, void* returnValue, void* method, int32_t argc, void* argv) {}
+//
+// std::unordered_map<int32_t, std::shared_ptr<UnitTestEnv>> unitTestEnvMap;
+// std::shared_ptr<UnitTestEnv> TEST_getEnv(int32_t contextUniqueId) {
+//  if (unitTestEnvMap.count(contextUniqueId) == 0) {
+//    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
+//  }
+//
+//  return unitTestEnvMap[contextUniqueId];
+//}
+//
+// void TEST_registerEventTargetDisposedCallback(int32_t contextUniqueId, TEST_OnEventTargetDisposed callback) {
+//  if (unitTestEnvMap.count(contextUniqueId) == 0) {
+//    unitTestEnvMap[contextUniqueId] = std::make_shared<UnitTestEnv>();
+//  }
+//
+//  unitTestEnvMap[contextUniqueId]->onEventTargetDisposed = callback;
+//}

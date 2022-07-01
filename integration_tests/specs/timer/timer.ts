@@ -4,7 +4,7 @@ describe('setTimeout', () => {
     setTimeout(() => {
       const duration = Date.now() - startTime;
       // 20ms delay accepted
-      expect(duration - 100).toBeLessThanOrEqual(40);
+      expect(duration - 100).toBeLessThanOrEqual(100);
       done();
     }, 100);
   });

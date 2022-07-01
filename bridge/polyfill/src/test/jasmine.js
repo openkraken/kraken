@@ -2764,9 +2764,9 @@ getJasmineRequireObj().clearStack = function (j$) {
 getJasmineRequireObj().Clock = function () {
   /* global process */
   var NODE_JS =
-    typeof process !== 'undefined' &&
-    process.versions &&
-    typeof process.versions.node === 'string';
+    typeof Process !== 'undefined' &&
+    Process.versions &&
+    typeof Process.versions.node === 'string';
 
   /**
    * _Note:_ Do not construct this directly, Jasmine will make one during booting. You can get the current clock with {@link jasmine.clock}.
@@ -3727,22 +3727,22 @@ getJasmineRequireObj().GlobalErrors = function (j$) {
         }
       }
 
-      this.originalHandlers[errorType] = global.process.listeners(errorType);
+      this.originalHandlers[errorType] = global.Process.listeners(errorType);
       this.jasmineHandlers[errorType] = taggedOnError;
 
-      global.process.removeAllListeners(errorType);
-      global.process.on(errorType, taggedOnError);
+      global.Process.removeAllListeners(errorType);
+      global.Process.on(errorType, taggedOnError);
 
       this.uninstall = function uninstall() {
         var errorTypes = Object.keys(this.originalHandlers);
         for (var iType = 0; iType < errorTypes.length; iType++) {
           var errorType = errorTypes[iType];
-          global.process.removeListener(
+          global.Process.removeListener(
             errorType,
             this.jasmineHandlers[errorType]
           );
           for (var i = 0; i < this.originalHandlers[errorType].length; i++) {
-            global.process.on(errorType, this.originalHandlers[errorType][i]);
+            global.Process.on(errorType, this.originalHandlers[errorType][i]);
           }
           delete this.originalHandlers[errorType];
           delete this.jasmineHandlers[errorType];
@@ -3752,9 +3752,9 @@ getJasmineRequireObj().GlobalErrors = function (j$) {
 
     this.install = function install() {
       if (
-        global.process &&
-        global.process.listeners &&
-        j$.isFunction_(global.process.on)
+        global.Process &&
+        global.Process.listeners &&
+        j$.isFunction_(global.Process.on)
       ) {
         this.installOne_('uncaughtException', 'Uncaught exception');
         this.installOne_('unhandledRejection', 'Unhandled promise rejection');

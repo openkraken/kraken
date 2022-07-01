@@ -2,12 +2,14 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
+import 'package:kraken/bridge.dart';
+import 'dart:ffi';
 
 typedef BindingObjectOperation = void Function(BindingObject bindingObject);
 
 class BindingContext {
   final int contextId;
-  final pointer;
+  final Pointer<NativeBindingObject> pointer;
   const BindingContext(this.contextId, this.pointer);
 }
 

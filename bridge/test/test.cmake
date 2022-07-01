@@ -10,28 +10,37 @@ add_subdirectory(./third_party/googletest)
 add_subdirectory(./third_party/benchmark)
 
 list(APPEND KRAKEN_TEST_SOURCE
-  page_test.cc
-  page_test.h
+  test/kraken_test_context.cc
+  test/kraken_test_context.h
 )
 list(APPEND KRAKEN_UNIT_TEST_SOURCE
   ./test/kraken_test_env.cc
   ./test/kraken_test_env.h
-  ./bindings/qjs/js_context_test.cc
-  ./bindings/qjs/bom/timer_test.cc
-  ./bindings/qjs/bom/console_test.cc
-  ./bindings/qjs/qjs_patch_test.cc
-  ./bindings/qjs/host_object_test.cc
-  ./bindings/qjs/host_class_test.cc
-  ./bindings/qjs/dom/event_target_test.cc
-  ./bindings/qjs/module_manager_test.cc
-  ./bindings/qjs/dom/node_test.cc
-  ./bindings/qjs/dom/event_test.cc
-  ./bindings/qjs/dom/element_test.cc
-  ./bindings/qjs/dom/document_test.cc
-  ./bindings/qjs/dom/text_node_test.cc
-  ./bindings/qjs/bom/window_test.cc
-  ./bindings/qjs/dom/custom_event_test.cc
-  ./bindings/qjs/module_manager_test.cc
+  ./bindings/qjs/atomic_string_test.cc
+  ./bindings/qjs/script_value_test.cc
+  ./core/executing_context_test.cc
+  ./core/frame/console_test.cc
+  ./core/frame/module_manager_test.cc
+  ./core/dom/events/event_target_test.cc
+  ./core/dom/document_test.cc
+  ./core/dom/node_test.cc
+  ./core/dom/element_test.cc
+  ./core/frame/dom_timer_test.cc
+  ./core/frame/window_test.cc
+  ./core/css/legacy/css_style_declaration_test.cc
+  #  ./bindings/qjs/bom/timer_test.cc
+#  ./bindings/qjs/qjs_patch_test.cc
+#  ./bindings/qjs/garbage_collected_test.cc
+#  ./bindings/qjs/dom/event_target_test.cc
+#  ./bindings/qjs/module_manager_test.cc
+#  ./bindings/qjs/dom/node_test.cc
+#  ./bindings/qjs/dom/event_test.cc
+#  ./bindings/qjs/dom/element_test.cc
+#  ./bindings/qjs/dom/document_test.cc
+#  ./bindings/qjs/dom/text_node_test.cc
+#  ./bindings/qjs/bom/window_test.cc
+#  ./bindings/qjs/dom/custom_event_test.cc
+#  ./bindings/qjs/module_manager_test.cc
 )
 
 ### kraken_unit_test executable
@@ -95,6 +104,7 @@ add_library(kraken_test SHARED ${KRAKEN_TEST_SOURCE})
 target_link_libraries(kraken_test PRIVATE ${BRIDGE_LINK_LIBS} kraken)
 target_include_directories(kraken_test PRIVATE
   ${BRIDGE_INCLUDE}
+  ./test
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})

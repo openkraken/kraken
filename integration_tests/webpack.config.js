@@ -9,10 +9,11 @@ const resetRuntimePath = path.join(context, 'runtime/reset');
 const buildPath = path.join(context, '.specs');
 const testPath = path.join(context, 'specs');
 const snapshotPath = path.join(context, 'snapshots');
-const coreSpecFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx,html}', {
-  cwd: context,
-  ignore: ['node_modules/**'],
-}).map((file) => './' + file).filter(name => name.indexOf('plugins') < 0);
+// const coreSpecFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx,html}', {
+//   cwd: context,
+//   ignore: ['node_modules/**'],
+// }).map((file) => './' + file).filter(name => name.indexOf('plugins') < 0);
+const coreSpecFiles = [];
 
 const pluginSpecFiles =  glob.sync('specs/plugins/**/*.{js,jsx,ts,tsx}', {
   cwd: context,

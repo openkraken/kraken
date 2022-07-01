@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:kraken/module.dart';
+import 'package:kraken/launcher.dart';
 
 import 'binding.dart';
 import 'from_native.dart';
@@ -19,13 +20,10 @@ int kKrakenJSPagePoolSize = 1024;
 bool _firstView = true;
 
 /// Init bridge
-int initBridge() {
+int initBridge(KrakenViewController view) {
   if (kProfileMode) {
     PerformanceTiming.instance().mark(PERF_BRIDGE_REGISTER_DART_METHOD_START);
   }
-
-  // Register methods first to share ptrs for bridge polyfill.
-  registerDartMethodsToCpp();
 
   // Setup binding bridge.
   BindingBridge.setup();
@@ -42,8 +40,7 @@ int initBridge() {
     Future.microtask(() {
       // Port flutter's frame callback into bridge.
       SchedulerBinding.instance!.addPersistentFrameCallback((_) {
-        flushUICommand();
-        flushUICommandCallback();
+        flushUICommand(view);
       });
     });
   }
@@ -58,6 +55,9 @@ int initBridge() {
       throw Exception('Can\' allocate new kraken bridge: bridge count had reach the maximum size.');
     }
   }
+
+  // Register methods first to share ptrs for bridge polyfill.
+  registerDartMethodsToCpp(contextId);
 
   return contextId;
 }

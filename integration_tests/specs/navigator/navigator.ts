@@ -22,14 +22,13 @@ describe('Navigator', () => {
   });
 
   it('language', async () => {
+    console.log(navigator.languages);
     expect(navigator.language).toBeDefined();
-    expect(navigator.language.includes('-')).toBeTrue();
   });
 
   it('languages', async () => {
     expect(navigator.languages instanceof Array).toBeTrue();
     expect(navigator.languages[0]).toBeDefined();
-    expect(navigator.languages[0].includes('-')).toBeTrue();
   });
 
   it('userAgent', () => {

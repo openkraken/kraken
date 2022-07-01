@@ -3,7 +3,6 @@ const ConsoleReporter = require('./console-reporter');
 const jasmine = jasmineCore.core(jasmineCore);
 const env = jasmine.getEnv({ suppressLoadErrors: true });
 const jasmineInterface = jasmineCore.interface(jasmine, env);
-const environment = __kraken_environment__();
 const global = globalThis;
 
 let timers = [];
@@ -83,31 +82,9 @@ function createPrinter(logger) {
   }
 }
 
-function HtmlSpecFilter(options) {
-  var filterString =
-    options &&
-    options.filterString() &&
-    options.filterString().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-  var filterPattern = new RegExp(filterString);
-
-  this.matches = function (specName) {
-    return filterPattern.test(specName);
-  };
-}
-
-var specFilter = new HtmlSpecFilter({
-  filterString() {
-    return environment.KRAKEN_TEST_FILTER;
-  }
-});
-
 let config = {
   oneFailurePerSpec: true,
-  failFast: environment.KRAKEN_STOP_ON_FAIL === 'true',
-  random: false,
-  specFilter: function (spec) {
-    return specFilter.matches(spec.getFullName());
-  }
+  random: false
 };
 
 env.configure(config);
@@ -158,9 +135,10 @@ global.simulateInputText = __kraken_simulate_inputtext__;
 
 function resetDocumentElement() {
   window.scrollTo(0, 0);
-  document.removeChild(document.documentElement);
-  let html = document.createElement('html');
-  document.appendChild(html);
+
+  while(document.documentElement.firstChild) {
+    document.documentElement.firstChild.remove();
+  }
 
   let head = document.createElement('head');
   document.documentElement.appendChild(head);

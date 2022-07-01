@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "colors.h"
 
-#include "page.h"
+#include "core/page.h"
 
 #if defined(IS_ANDROID)
 #include <android/log.h>
@@ -23,7 +23,7 @@
 #include "inspector/impl/jsc_console_client_impl.h"
 #endif
 
-namespace foundation {
+namespace kraken {
 namespace {
 
 const char* StripDots(const char* path) {
@@ -42,7 +42,8 @@ const char* StripPath(const char* path) {
 
 }  // namespace
 
-LogMessage::LogMessage(LogSeverity severity, const char* file, int line, const char* condition) : severity_(severity), file_(file), line_(line) {
+LogMessage::LogMessage(LogSeverity severity, const char* file, int line, const char* condition)
+    : severity_(severity), file_(file), line_(line) {
   if (condition)
     stream_ << "Check failed: " << condition << ". ";
 }
@@ -93,7 +94,7 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
 };
 #endif
 
-void printLog(int32_t contextId, std::stringstream& stream, std::string level, void* ctx) {
+void printLog(ExecutingContext* context, std::stringstream& stream, std::string level, void* ctx) {
   MessageLevel _log_level = MessageLevel::Info;
   switch (level[0]) {
     case 'l':
@@ -124,9 +125,9 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
     kraken::KrakenPage::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
   }
 
-  if (kraken::getDartMethod()->onJsLog != nullptr) {
-    kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(_log_level), stream.str().c_str());
+  if (context->dartMethodPtr()->onJsLog != nullptr) {
+    context->dartMethodPtr()->onJsLog(context->contextId(), static_cast<int>(_log_level), stream.str().c_str());
   }
 }
 
-}  // namespace foundation
+}  // namespace kraken

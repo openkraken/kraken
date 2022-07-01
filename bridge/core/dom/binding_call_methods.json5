@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "templates": [
+      {
+        "template": "make_names",
+        "filename": "binding_call_methods"
+      }
+    ]
+  },
+  "data": [
+    "click",
+    "scroll",
+    "scrollBy",
+    "clientTop",
+    "clientLeft",
+    "clientWidth",
+    "clientHeight",
+    "scrollLeft",
+    "scrollTop",
+    "getBoundingClientRect",
+    ["getPropertyMagic", "%g"],
+    ["setPropertyMagic", "%s"],
+    "open",
+    "devicePixelRatio",
+    "colorScheme",
+    "scrollX",
+    "scrollY",
+    "innerWidth",
+    "innerHeight",
+    "availWidth",
+    "availHeight",
+    "width",
+    "height",
+    "screen"
+  ]
+}

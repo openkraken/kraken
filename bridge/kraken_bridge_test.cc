@@ -3,33 +3,32 @@
  */
 
 #include "kraken_bridge_test.h"
-#include "dart_methods.h"
-
-#if KRAKEN_JSC_ENGINE
-#include "bridge_test_jsc.h"
-#elif KRAKEN_QUICK_JS_ENGINE
-#include "page_test.h"
-#endif
 #include <atomic>
+#include "bindings/qjs/native_string_utils.h"
+#include "kraken_test_context.h"
 
-std::unordered_map<int, kraken::KrakenPageTest*> bridgeTestPool = std::unordered_map<int, kraken::KrakenPageTest*>();
+std::unordered_map<int, kraken::KrakenTestContext*> testContextPool =
+    std::unordered_map<int, kraken::KrakenTestContext*>();
 
 void initTestFramework(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto bridgeTest = new kraken::KrakenPageTest(page);
-  bridgeTestPool[contextId] = bridgeTest;
+  auto testContext = new kraken::KrakenTestContext(page->GetExecutingContext());
+  testContextPool[contextId] = testContext;
 }
 
-int8_t evaluateTestScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {
-  auto bridgeTest = bridgeTestPool[contextId];
-  return bridgeTest->evaluateTestScripts(code->string, code->length, bundleFilename, startLine);
+int8_t evaluateTestScripts(int32_t contextId, void* code, const char* bundleFilename, int startLine) {
+  auto testContext = testContextPool[contextId];
+  return testContext->evaluateTestScripts(static_cast<kraken::NativeString*>(code)->string(),
+                                          static_cast<kraken::NativeString*>(code)->length(), bundleFilename,
+                                          startLine);
 }
 
 void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
-  auto bridgeTest = bridgeTestPool[contextId];
-  bridgeTest->invokeExecuteTest(executeCallback);
+  auto testContext = testContextPool[contextId];
+  testContext->invokeExecuteTest(executeCallback);
 }
 
-void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
-  kraken::registerTestEnvDartMethods(methodBytes, length);
+void registerTestEnvDartMethods(int32_t contextId, uint64_t* methodBytes, int32_t length) {
+  auto testContext = testContextPool[contextId];
+  testContext->registerTestEnvDartMethods(methodBytes, length);
 }

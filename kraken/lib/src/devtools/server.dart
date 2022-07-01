@@ -96,7 +96,7 @@ void initInspectorServerNativeBinding(int contextId) {
   Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
   nativeMethodList.setAll(0, _dartNativeMethods);
 
-  _registerInspectorServerDartMethods(bytes, _dartNativeMethods.length);
+  _registerInspectorServerDartMethods(contextId, bytes, _dartNativeMethods.length);
 }
 
 void serverIsolateEntryPoint(SendPort isolateToMainStream) {

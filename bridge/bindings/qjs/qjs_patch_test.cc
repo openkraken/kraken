@@ -2,9 +2,9 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-#include "qjs_patch.h"
 #include <codecvt>
 #include "gtest/gtest.h"
+#include "qjs_engine_patch.h"
 
 TEST(JS_ToUnicode, asciiWords) {
   JSRuntime* runtime = JS_NewRuntime();
@@ -59,7 +59,8 @@ TEST(JS_NewUnicodeString, fromAscii) {
   JSRuntime* runtime = JS_NewRuntime();
   JSContext* ctx = JS_NewContext(runtime);
   std::u16string source = u"helloworld";
-  JSValue result = JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t*>(source.c_str()), source.length());
+  JSValue result =
+      JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t*>(source.c_str()), source.length());
   const char* str = JS_ToCString(ctx, result);
   EXPECT_STREQ(str, "helloworld");
 
@@ -73,7 +74,8 @@ TEST(JS_NewUnicodeString, fromChieseCode) {
   JSRuntime* runtime = JS_NewRuntime();
   JSContext* ctx = JS_NewContext(runtime);
   std::u16string source = u"a你的名字12345";
-  JSValue result = JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t*>(source.c_str()), source.length());
+  JSValue result =
+      JS_NewUnicodeString(runtime, ctx, reinterpret_cast<const uint16_t*>(source.c_str()), source.length());
   uint32_t length;
   uint16_t* buffer = JS_ToUnicode(ctx, result, &length);
   std::u16string bufferString = std::u16string(reinterpret_cast<const char16_t*>(buffer), length);

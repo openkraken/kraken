@@ -79,8 +79,7 @@ final DartInvokeEventListener _invokeModuleEvent = KrakenDynamicLibrary
     .lookup<NativeFunction<NativeInvokeEventListener>>('invokeModuleEvent')
     .asFunction();
 
-void invokeModuleEvent(
-    int contextId, String moduleName, Event? event, String extra) {
+void invokeModuleEvent(int contextId, String moduleName, Event? event, String extra) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
   }
@@ -96,30 +95,14 @@ void invokeModuleEvent(
 }
 
 typedef DartDispatchEvent = int Function(
-  int contextId,
-  Pointer<NativeBindingObject> nativeBindingObject,
-  Pointer<NativeString> eventType,
-  Pointer<Void> nativeEvent,
-  int isCustomEvent
-);
+    int contextId,
+    Pointer<NativeBindingObject> nativeBindingObject,
+    Pointer<NativeString> eventType,
+    Pointer<Void> nativeEvent,
+    int isCustomEvent
+    );
 
-void emitUIEvent(
-    int contextId, Pointer<NativeBindingObject> nativeBindingObject, Event event) {
-  if (KrakenController.getControllerOfJSContextId(contextId) == null) {
-    return;
-  }
-  DartDispatchEvent dispatchEvent = nativeBindingObject.ref.dispatchEvent.asFunction();
-  Pointer<Void> rawEvent = event.toRaw().cast<Void>();
-  bool isCustomEvent = event is CustomEvent;
-  Pointer<NativeString> eventTypeString = stringToNativeString(event.type);
-  // @TODO: Make Event inherit BindingObject to pass value from bridge to dart.
-  int propagationStopped = dispatchEvent(contextId, nativeBindingObject, eventTypeString, rawEvent, isCustomEvent ? 1 : 0);
-  event.propagationStopped = propagationStopped == 1 ? true : false;
-  freeNativeString(eventTypeString);
-}
-
-void emitModuleEvent(
-    int contextId, String moduleName, Event? event, String extra) {
+void emitModuleEvent(int contextId, String moduleName, Event? event, String extra) {
   invokeModuleEvent(contextId, moduleName, event, extra);
 }
 
@@ -156,6 +139,7 @@ final DartParseHTML _parseHTML = KrakenDynamicLibrary.ref
     .asFunction();
 
 int _anonymousScriptEvaluationId = 0;
+
 void evaluateScripts(int contextId, String code, {String? url, int line = 0}) {
   if (KrakenController.getControllerOfJSContextId(contextId) == null) {
     return;
@@ -251,7 +235,7 @@ typedef DartRegisterPluginByteCode = void Function(
 final DartRegisterPluginByteCode _registerPluginByteCode = KrakenDynamicLibrary
     .ref
     .lookup<NativeFunction<NativeRegisterPluginByteCode>>(
-        'registerPluginByteCode')
+    'registerPluginByteCode')
     .asFunction();
 
 void registerPluginByteCode(Uint8List bytecode, String name) {
@@ -291,19 +275,6 @@ Future<void> reloadJSContext(int contextId) async {
   return completer.future;
 }
 
-typedef NativeFlushUICommandCallback = Void Function();
-typedef DartFlushUICommandCallback = void Function();
-
-final DartFlushUICommandCallback _flushUICommandCallback = KrakenDynamicLibrary
-    .ref
-    .lookup<NativeFunction<NativeFlushUICommandCallback>>(
-        'flushUICommandCallback')
-    .asFunction();
-
-void flushUICommandCallback() {
-  _flushUICommandCallback();
-}
-
 typedef NativeDispatchUITask = Void Function(
     Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartDispatchUITask = void Function(
@@ -313,8 +284,7 @@ final DartDispatchUITask _dispatchUITask = KrakenDynamicLibrary.ref
     .lookup<NativeFunction<NativeDispatchUITask>>('dispatchUITask')
     .asFunction();
 
-void dispatchUITask(
-    int contextId, Pointer<Void> context, Pointer<Void> callback) {
+void dispatchUITask(int contextId, Pointer<Void> context, Pointer<Void> callback) {
   _dispatchUITask(contextId, context, callback);
 }
 
@@ -322,6 +292,8 @@ enum UICommandType {
   createElement,
   createTextNode,
   createComment,
+  createDocument,
+  createWindow,
   disposeEventTarget,
   addEvent,
   removeNode,
@@ -407,8 +379,7 @@ final bool isEnabledLog =
 // We found there are performance bottleneck of reading native memory with Dart FFI API.
 // So we align all UI instructions to a whole block of memory, and then convert them into a dart array at one time,
 // To ensure the fastest subsequent random access.
-List<UICommand> readNativeUICommandToDart(
-    Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
+List<UICommand> readNativeUICommandToDart(Pointer<Uint64> nativeCommandItems, int commandLength, int contextId) {
   List<int> rawMemory = nativeCommandItems
       .cast<Int64>()
       .asTypedList(commandLength * nativeCommandSize)
@@ -478,111 +449,119 @@ void clearUICommand(int contextId) {
   _clearUICommandItems(contextId);
 }
 
-void flushUICommand() {
-  Map<int, KrakenController?> controllerMap =
-      KrakenController.getControllerMap();
-  for (KrakenController? controller in controllerMap.values) {
-    if (controller == null) continue;
-    Pointer<Uint64> nativeCommandItems =
-        _getUICommandItems(controller.view.contextId);
-    int commandLength = _getUICommandItemSize(controller.view.contextId);
-
-    if (commandLength == 0 || nativeCommandItems == nullptr) {
-      continue;
-    }
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_START);
-    }
-
-    List<UICommand> commands = readNativeUICommandToDart(
-        nativeCommandItems, commandLength, controller.view.contextId);
-
-    SchedulerBinding.instance!.scheduleFrame();
-
-    if (kProfileMode) {
-      PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
-    }
-
-    Map<int, bool> pendingStylePropertiesTargets = {};
-
-    // For new ui commands, we needs to tell engine to update frames.
-    for (int i = 0; i < commandLength; i++) {
-      UICommand command = commands[i];
-      UICommandType commandType = command.type;
-      int id = command.id;
-      Pointer nativePtr = command.nativePtr;
-
-      try {
-        switch (commandType) {
-          case UICommandType.createElement:
-            controller.view.createElement(
-                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
-            break;
-          case UICommandType.createTextNode:
-            controller.view.createTextNode(
-                id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
-            break;
-          case UICommandType.createComment:
-            controller.view
-                .createComment(id, nativePtr.cast<NativeBindingObject>());
-            break;
-          case UICommandType.disposeEventTarget:
-            controller.view.disposeEventTarget(id);
-            break;
-          case UICommandType.addEvent:
-            controller.view.addEvent(id, command.args[0]);
-            break;
-          case UICommandType.removeEvent:
-            controller.view.removeEvent(id, command.args[0]);
-            break;
-          case UICommandType.insertAdjacentNode:
-            int childId = int.parse(command.args[0]);
-            String position = command.args[1];
-            controller.view.insertAdjacentNode(id, position, childId);
-            break;
-          case UICommandType.removeNode:
-            controller.view.removeNode(id);
-            break;
-          case UICommandType.cloneNode:
-            int newId = int.parse(command.args[0]);
-            controller.view.cloneNode(id, newId);
-            break;
-          case UICommandType.setStyle:
-            String key = command.args[0];
-            String value = command.args[1];
-            controller.view.setInlineStyle(id, key, value);
-            pendingStylePropertiesTargets[id] = true;
-            break;
-          case UICommandType.setAttribute:
-            String key = command.args[0];
-            String value = command.args[1];
-            controller.view.setAttribute(id, key, value);
-            break;
-          case UICommandType.removeAttribute:
-            String key = command.args[0];
-            controller.view.removeAttribute(id, key);
-            break;
-          case UICommandType.createDocumentFragment:
-            controller.view.createDocumentFragment(
-                id, nativePtr.cast<NativeBindingObject>());
-            break;
-          default:
-            break;
-        }
-      } catch (e, stack) {
-        print('$e\n$stack');
-      }
-    }
-
-    // For pending style properties, we needs to flush to render style.
-    for (int id in pendingStylePropertiesTargets.keys) {
-      try {
-        controller.view.flushPendingStyleProperties(id);
-      } catch (e, stack) {
-        print('$e\n$stack');
-      }
-    }
-    pendingStylePropertiesTargets.clear();
+void flushUICommandWithContextId(int contextId) {
+  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  if (controller != null) {
+    flushUICommand(controller.view);
   }
+}
+
+void flushUICommand(KrakenViewController view) {
+  Pointer<Uint64> nativeCommandItems =
+  _getUICommandItems(view.contextId);
+  int commandLength = _getUICommandItemSize(view.contextId);
+
+  if (commandLength == 0 || nativeCommandItems == nullptr) {
+    return;
+  }
+
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_START);
+  }
+
+  List<UICommand> commands = readNativeUICommandToDart(
+      nativeCommandItems, commandLength, view.contextId);
+
+  SchedulerBinding.instance!.scheduleFrame();
+
+  if (kProfileMode) {
+    PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);
+  }
+
+  Map<int, bool> pendingStylePropertiesTargets = {};
+
+  // For new ui commands, we needs to tell engine to update frames.
+  for (int i = 0; i < commandLength; i++) {
+    UICommand command = commands[i];
+    UICommandType commandType = command.type;
+    int id = command.id;
+    Pointer nativePtr = command.nativePtr;
+
+    try {
+      switch (commandType) {
+        case UICommandType.createElement:
+          view.createElement(
+              id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
+          break;
+        case UICommandType.createDocument:
+          view.initDocument(id, nativePtr.cast<NativeBindingObject>());
+          break;
+        case UICommandType.createWindow:
+          view.initWindow(id, nativePtr.cast<NativeBindingObject>());
+          break;
+        case UICommandType.createTextNode:
+          view.createTextNode(
+              id, nativePtr.cast<NativeBindingObject>(), command.args[0]);
+          break;
+        case UICommandType.createComment:
+          view
+              .createComment(id, nativePtr.cast<NativeBindingObject>());
+          break;
+        case UICommandType.disposeEventTarget:
+          view.disposeEventTarget(id);
+          break;
+        case UICommandType.addEvent:
+          view.addEvent(id, command.args[0]);
+          break;
+        case UICommandType.removeEvent:
+          view.removeEvent(id, command.args[0]);
+          break;
+        case UICommandType.insertAdjacentNode:
+          int childId = int.parse(command.args[0]);
+          String position = command.args[1];
+          view.insertAdjacentNode(id, position, childId);
+          break;
+        case UICommandType.removeNode:
+          view.removeNode(id);
+          break;
+        case UICommandType.cloneNode:
+          int newId = int.parse(command.args[0]);
+          view.cloneNode(id, newId);
+          break;
+        case UICommandType.setStyle:
+          String key = command.args[0];
+          String value = command.args[1];
+          view.setInlineStyle(id, key, value);
+          pendingStylePropertiesTargets[id] = true;
+          break;
+        case UICommandType.setAttribute:
+          String key = command.args[0];
+          String value = command.args[1];
+          view.setAttribute(id, key, value);
+          break;
+        case UICommandType.removeAttribute:
+          String key = command.args[0];
+          view.removeAttribute(id, key);
+          break;
+        case UICommandType.createDocumentFragment:
+          view.createDocumentFragment(
+              id, nativePtr.cast<NativeBindingObject>());
+          break;
+        default:
+          break;
+      }
+    } catch (e, stack) {
+      print('$e\n$stack');
+    }
+  }
+
+  // For pending style properties, we needs to flush to render style.
+  for (int id in pendingStylePropertiesTargets.keys) {
+    try {
+      view.flushPendingStyleProperties(id);
+    } catch (e, stack) {
+      print('$e\n$stack');
+    }
+  }
+  pendingStylePropertiesTargets.clear();
 }

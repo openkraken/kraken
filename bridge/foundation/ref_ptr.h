@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "logging.h"
+#include "macros.h"
 #include "ref_ptr_internal.h"
 
 namespace fml {

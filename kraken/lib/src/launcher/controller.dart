@@ -25,9 +25,6 @@ import 'package:kraken/module.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/widget.dart';
 
-const int WINDOW_ID = -1;
-const int DOCUMENT_ID = -2;
-
 // Error handler when load bundle failed.
 typedef LoadHandler = void Function(KrakenController controller);
 typedef LoadErrorHandler = void Function(FlutterError error, StackTrace stack);
@@ -66,8 +63,6 @@ abstract class DevToolsService {
 // An kraken View Controller designed for multiple kraken view control.
 class KrakenViewController
     implements WidgetsBindingObserver, ElementsBindingObserver {
-  static Map<int, Pointer<NativeBindingObject>> documentNativePtrMap = {};
-  static Map<int, Pointer<NativeBindingObject>> windowNativePtrMap = {};
 
   KrakenController rootController;
 
@@ -121,7 +116,7 @@ class KrakenViewController
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_START);
     }
     BindingBridge.setup();
-    _contextId = contextId ?? initBridge();
+    _contextId = contextId ?? initBridge(this);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_BRIDGE_INIT_END);
@@ -149,51 +144,8 @@ class KrakenViewController
 
     defineBuiltInElements();
 
-    document = Document(
-      BindingContext(_contextId, documentNativePtrMap[_contextId]!),
-      viewport: viewport,
-      controller: rootController,
-      gestureListener: gestureListener,
-      widgetDelegate: widgetDelegate,
-    );
-    _setEventTarget(DOCUMENT_ID, document);
-
-    window = Window(
-        BindingContext(_contextId, windowNativePtrMap[_contextId]!),
-        document);
-    _registerPlatformBrightnessChange();
-    _setEventTarget(WINDOW_ID, window);
-
-    // Listeners need to be registered to window in order to dispatch events on demand.
-    if (gestureListener != null) {
-      GestureListener listener = gestureListener!;
-      if (listener.onTouchStart != null) {
-        document.addEventListener(EVENT_TOUCH_START, (Event event) => listener.onTouchStart!(event as TouchEvent));
-      }
-
-      if (listener.onTouchMove != null) {
-        document.addEventListener(EVENT_TOUCH_MOVE, (Event event) => listener.onTouchMove!(event as TouchEvent));
-      }
-
-      if (listener.onTouchEnd != null) {
-        document.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
-      }
-
-      if (listener.onDrag != null) {
-        document.addEventListener(EVENT_DRAG, (Event event) => listener.onDrag!(event as GestureEvent));
-      }
-    }
-
-    // Blur input element when new input focused.
-    window.addEventListener(EVENT_CLICK, (event) {
-      if (event.target is Element) {
-        Element? focusedElement = document.focusedElement;
-        if (focusedElement != null && focusedElement != event.target) {
-          document.focusedElement!.blur();
-        }
-        (event.target as Element).focus();
-      }
-    });
+    // Execute UICommand.createDocument and UICommand.createWindow to initialize window and document.
+    flushUICommand(this);
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_ELEMENT_MANAGER_INIT_END);
@@ -215,6 +167,56 @@ class KrakenViewController
   late RenderViewportBox viewport;
   late Document document;
   late Window window;
+
+  void initDocument(int targetId, Pointer<NativeBindingObject> pointer) {
+    document = Document(
+      BindingContext(_contextId, pointer),
+      viewport: viewport,
+      controller: rootController,
+      gestureListener: gestureListener,
+      widgetDelegate: widgetDelegate,
+    );
+    _setEventTarget(targetId, document);
+
+    // Listeners need to be registered to window in order to dispatch events on demand.
+    if (gestureListener != null) {
+      GestureListener listener = gestureListener!;
+      if (listener.onTouchStart != null) {
+        document.addEventListener(EVENT_TOUCH_START, (Event event) => listener.onTouchStart!(event as TouchEvent));
+      }
+
+      if (listener.onTouchMove != null) {
+        document.addEventListener(EVENT_TOUCH_MOVE, (Event event) => listener.onTouchMove!(event as TouchEvent));
+      }
+
+      if (listener.onTouchEnd != null) {
+        document.addEventListener(EVENT_TOUCH_END, (Event event) => listener.onTouchEnd!(event as TouchEvent));
+      }
+
+      if (listener.onDrag != null) {
+        document.addEventListener(EVENT_DRAG, (Event event) => listener.onDrag!(event as GestureEvent));
+      }
+    }
+  }
+
+  void initWindow(int targetId, Pointer<NativeBindingObject> pointer) {
+    window = Window(
+        BindingContext(_contextId, pointer),
+        document);
+    _registerPlatformBrightnessChange();
+    _setEventTarget(targetId, window);
+
+    // Blur input element when new input focused.
+    window.addEventListener(EVENT_CLICK, (event) {
+      if (event.target is Element) {
+        Element? focusedElement = document.focusedElement;
+        if (focusedElement != null && focusedElement != event.target) {
+          document.focusedElement!.blur();
+        }
+        (event.target as Element).focus();
+      }
+    });
+  }
 
   void evaluateJavaScripts(String code) {
     assert(!_disposed, 'Kraken have already disposed');

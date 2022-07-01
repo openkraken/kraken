@@ -9,7 +9,6 @@
 #define FLUTTER_FML_MEMORY_REF_PTR_INTERNAL_H_
 
 #include <utility>
-#include "include/kraken_bridge.h"
 
 namespace fml {
 

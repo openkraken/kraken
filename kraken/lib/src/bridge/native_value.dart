@@ -7,11 +7,9 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:kraken/bridge.dart';
+import 'package:kraken/foundation.dart';
 
 class NativeValue extends Struct {
-  @Double()
-  external double float64;
-
   @Int64()
   external int u;
 
@@ -36,7 +34,7 @@ enum JSPointerType {
   NativeFunctionContext,
   NativeBoundingClientRect,
   NativeCanvasRenderingContext2D,
-  NativeBindingObject
+  BindingObject
 }
 
 typedef AnonymousNativeFunction = dynamic Function(List<dynamic> args);
@@ -77,19 +75,9 @@ dynamic fromNativeValue(Pointer<NativeValue> nativeValue) {
     case JSValueType.TAG_NULL:
       return null;
     case JSValueType.TAG_FLOAT64:
-      return nativeValue.ref.float64;
+      return uInt64ToDouble(nativeValue.ref.u);
     case JSValueType.TAG_POINTER:
-      JSPointerType pointerType = JSPointerType.values[nativeValue.ref.float64.toInt()];
-      switch (pointerType) {
-        case JSPointerType.NativeBoundingClientRect:
-          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBoundingClientRect>();
-        case JSPointerType.NativeCanvasRenderingContext2D:
-          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeCanvasRenderingContext2D>();
-        case JSPointerType.NativeBindingObject:
-          return Pointer.fromAddress(nativeValue.ref.u).cast<NativeBindingObject>();
-        default:
-          return Pointer.fromAddress(nativeValue.ref.u);
-      }
+      return Pointer.fromAddress(nativeValue.ref.u);
     case JSValueType.TAG_FUNCTION:
     case JSValueType.TAG_ASYNC_FUNCTION:
       break;
@@ -112,20 +100,16 @@ void toNativeValue(Pointer<NativeValue> target, value) {
     target.ref.u = value ? 1 : 0;
   } else if (value is double) {
     target.ref.tag = JSValueType.TAG_FLOAT64.index;
-    target.ref.float64 = value;
+    target.ref.u = doubleToInt64(value);
   } else if (value is String) {
     target.ref.tag = JSValueType.TAG_STRING.index;
     target.ref.u = stringToNativeString(value).address;
   } else if (value is Pointer) {
     target.ref.tag = JSValueType.TAG_POINTER.index;
     target.ref.u = value.address;
-    if (value is Pointer<NativeBoundingClientRect>) {
-      target.ref.float64 = JSPointerType.NativeBoundingClientRect.index.toDouble();
-    } else if (value is Pointer<NativeCanvasRenderingContext2D>) {
-      target.ref.float64 = JSPointerType.NativeCanvasRenderingContext2D.index.toDouble();
-    } else if (value is Pointer<NativeBindingObject>) {
-      target.ref.float64 = JSPointerType.NativeBindingObject.index.toDouble();
-    }
+  } else if (value is BindingObject) {
+    target.ref.tag = JSValueType.TAG_POINTER.index;
+    target.ref.u = (value.pointer as Pointer?)!.address;
   } else if (value is AsyncAnonymousNativeFunction) {
     int id = _functionId++;
     _asyncFunctionMap[id] = value;
@@ -141,4 +125,15 @@ void toNativeValue(Pointer<NativeValue> target, value) {
     target.ref.tag = JSValueType.TAG_JSON.index;
     target.ref.u = str.toNativeUtf8().address;
   }
+}
+
+Pointer<NativeValue> makeNativeValueArguments(List<dynamic> args) {
+  Pointer<Pointer<NativeValue>> buffer = malloc.allocate(sizeOf<NativeValue>() * args.length).cast<Pointer<NativeValue>>();
+
+  for(int i = 0; i < args.length; i ++) {
+    buffer[i] = malloc.allocate(sizeOf<NativeValue>());
+    toNativeValue(buffer[i], args[i]);
+  }
+
+  return buffer.cast<NativeValue>();
 }

@@ -67,12 +67,6 @@
 #define CONFIG_PRINTF_RNDN
 #endif
 
-/* define to include Atomics.* operations which depend on the OS
-   threads */
-#if !defined(EMSCRIPTEN)
-#define CONFIG_ATOMICS
-#endif
-
 #if !defined(EMSCRIPTEN)
 /* enable stack limitation */
 #define CONFIG_STACK_CHECK
@@ -949,21 +943,7 @@ struct JSObject {
     } u;
     /* byte sizes: 40/48/72 */
 };
-enum {
-    __JS_ATOM_NULL = JS_ATOM_NULL,
-#define DEF(name, str) JS_ATOM_ ## name,
-#include "quickjs-atom.h"
-#undef DEF
-    JS_ATOM_END,
-};
-#define JS_ATOM_LAST_KEYWORD JS_ATOM_super
-#define JS_ATOM_LAST_STRICT_KEYWORD JS_ATOM_yield
 
-static const char js_atom_init[] =
-#define DEF(name, str) str "\0"
-#include "quickjs-atom.h"
-#undef DEF
-;
 
 typedef enum OPCodeFormat {
 #define FMT(f) OP_FMT_ ## f,
@@ -2377,12 +2357,6 @@ static inline BOOL is_math_mode(JSContext *ctx)
 }
 #endif
 
-/* JSAtom support */
-
-#define JS_ATOM_TAG_INT (1U << 31)
-#define JS_ATOM_MAX_INT (JS_ATOM_TAG_INT - 1)
-#define JS_ATOM_MAX     ((1U << 30) - 1)
-
 /* return the max count from the hash size */
 #define JS_ATOM_COUNT_RESIZE(n) ((n) * 2)
 
@@ -2592,14 +2566,15 @@ static int JS_InitAtoms(JSRuntime *rt)
     rt->atom_count = 0;
     rt->atom_size = 0;
     rt->atom_free_index = 0;
-    if (JS_ResizeAtomHash(rt, 256))     /* there are at least 195 predefined atoms */
+    if (JS_ResizeAtomHash(rt, 1024))     /* there are at least 195 predefined atoms */
         return -1;
 
     p = js_atom_init;
+
     for(i = 1; i < JS_ATOM_END; i++) {
         if (i == JS_ATOM_Private_brand)
             atom_type = JS_ATOM_TYPE_PRIVATE;
-        else if (i >= JS_ATOM_Symbol_toPrimitive)
+        else if (i >= JS_ATOM_Symbol_toPrimitive && i <= JS_ATOM_Symbol_asyncIterator)
             atom_type = JS_ATOM_TYPE_SYMBOL;
         else
             atom_type = JS_ATOM_TYPE_STRING;
@@ -2708,7 +2683,8 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
         }
         /* try and locate an already registered atom */
         len = str->len;
-        h = hash_string(str, atom_type);
+        /* only in extreme case will str has zero hash, we accept extra hash calc in that case. */
+        h = str->hash != 0 ? str->hash : hash_string(str, atom_type);
         h &= JS_ATOM_HASH_MASK;
         h1 = h & (rt->atom_hash_size - 1);
         i = rt->atom_hash[h1];
@@ -2743,7 +2719,7 @@ static JSAtom __JS_NewAtom(JSRuntime *rt, JSString *str, int atom_type)
            4 6 9 13 19 28 42 63 94 141 211 316 474 711 1066 1599 2398 3597 5395 8092
            preallocating space for predefined atoms (at least 195).
          */
-        new_size = max_int(211, rt->atom_size * 3 / 2);
+        new_size = max_int(1066, rt->atom_size * 3 / 2);
         if (new_size > JS_ATOM_MAX)
             goto fail;
         /* XXX: should use realloc2 to use slack space */
@@ -35971,7 +35947,7 @@ static JSAtom find_atom(JSContext *ctx, const char *name)
         len = strlen(name) - 1;
         /* We assume 8 bit non null strings, which is the case for these
            symbols */
-        for(atom = JS_ATOM_Symbol_toPrimitive; atom < JS_ATOM_END; atom++) {
+        for(atom = JS_ATOM_Symbol_toPrimitive; atom <= JS_ATOM_Symbol_asyncIterator; atom++) {
             JSAtomStruct *p = ctx->rt->atom_array[atom];
             JSString *str = p;
             if (str->len == len && !memcmp(str->u.str8, name, len))
@@ -51044,7 +51020,7 @@ void JS_AddIntrinsicBaseObjects(JSContext *ctx)
                                    ctx->class_proto[JS_CLASS_SYMBOL]);
     JS_SetPropertyFunctionList(ctx, obj, js_symbol_funcs,
                                countof(js_symbol_funcs));
-    for(i = JS_ATOM_Symbol_toPrimitive; i < JS_ATOM_END; i++) {
+    for(i = JS_ATOM_Symbol_toPrimitive; i <= JS_ATOM_Symbol_asyncIterator; i++) {
         char buf[ATOM_GET_STR_BUF_SIZE];
         const char *str, *p;
         str = JS_AtomGetStr(ctx, buf, sizeof(buf), i);

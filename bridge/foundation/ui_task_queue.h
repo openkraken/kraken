@@ -7,9 +7,7 @@
 
 #include "task_queue.h"
 
-namespace foundation {
-
-using Task = void (*)(void*);
+namespace kraken {
 
 class UITaskQueue : public TaskQueue {
  public:
@@ -29,6 +27,6 @@ class UITaskQueue : public TaskQueue {
   int m_contextId;
 };
 
-}  // namespace foundation
+}  // namespace kraken
 
 #endif  // KRAKENBRIDGE_UI_TASK_QUEUE_H

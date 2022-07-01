@@ -95,8 +95,6 @@ void main() async {
   ));
 
   WidgetsBinding.instance!.addPostFrameCallback((_) async {
-    registerDartTestMethodsToCpp();
-
     List<Future<String>> testResults = [];
 
     for (int i = 0; i < widgets.length; i++) {
@@ -105,6 +103,7 @@ void main() async {
       addJSErrorListener(contextId, (String err) {
         print(err);
       });
+      registerDartTestMethodsToCpp(contextId);
 
       Map<String, String> payload = allSpecsPayload[i];
 
