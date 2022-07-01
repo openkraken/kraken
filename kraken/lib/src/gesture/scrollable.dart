@@ -212,7 +212,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
 
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && position != null) {
-      if (_physics != null && !_physics.shouldAcceptUserOffset(position!)) {
+      if (!_physics.shouldAcceptUserOffset(position!)) {
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
@@ -233,7 +233,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     }
     return delta;
   }
-  
+
   double _targetScrollOffsetForPointerScroll(double delta) {
     return math.min(
       math.max(position!.pixels + delta, position!.minScrollExtent),
