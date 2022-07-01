@@ -2,13 +2,10 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart' show Curve;
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
 const String _0s = '0s';
