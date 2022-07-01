@@ -345,7 +345,7 @@ mixin ElementOverflowMixin on ElementBase {
       if (_scrollableY != null) {
         _scrollableY!.handlePointerDown(event);
       }
-    } else if(event is PointerSignalEvent) {
+    } else if (event is PointerSignalEvent) {
       _scrollableX?.handlePinterSignal(event);
       _scrollableY?.handlePinterSignal(event);
     }

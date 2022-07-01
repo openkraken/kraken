@@ -27,7 +27,7 @@ class RenderTextControlLeaderLayer extends RenderLeaderLayer {
   void _pointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
-    } else if(event is PointerSignalEvent) {
+    } else if (event is PointerSignalEvent) {
       scrollable.handlePinterSignal(event);
     }
   }

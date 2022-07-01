@@ -241,7 +241,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     );
   }
 
-  void _handlePointerScroll(PointerEvent event) {
+  void _handlePointerScroll(PointerSignalEvent event) {
     assert(event is PointerScrollEvent);
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);

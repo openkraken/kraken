@@ -125,7 +125,7 @@ class RenderSliverListLayout extends RenderLayoutBox {
   void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
-    } else if(event is PointerSignalEvent) {
+    } else if (event is PointerSignalEvent) {
       scrollable.handlePinterSignal(event);
     }
   }
