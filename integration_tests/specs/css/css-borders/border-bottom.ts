@@ -1325,42 +1325,6 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  it('color-014-ref', async () => {
-    let p;
-    let div;
-    let div_1;
-    p = createElement(
-      'p',
-      {
-        xmlns: 'http://www.w3.org/1999/xhtml',
-        style: {},
-      },
-      [createText(`Test passes if the boxes below are the same color.`)]
-    );
-    div = createElement('div', {
-      xmlns: 'http://www.w3.org/1999/xhtml',
-      style: {
-        background: 'url("assets/000100_color.png")',
-        height: '100px',
-        'margin-top': '10px',
-        width: '100px',
-      },
-    });
-    div_1 = createElement('div', {
-      xmlns: 'http://www.w3.org/1999/xhtml',
-      style: {
-        background: 'url("assets/000100_color.png")',
-        height: '100px',
-        'margin-top': '10px',
-        width: '100px',
-      },
-    });
-    BODY.appendChild(p);
-    BODY.appendChild(div);
-    BODY.appendChild(div_1);
-
-    await snapshot(0.1);
-  });
   it('color-014', async () => {
     let p;
     let test;
