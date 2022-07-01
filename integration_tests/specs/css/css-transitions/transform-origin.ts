@@ -22,8 +22,8 @@ describe('Transition transform origin', () => {
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
-        transform: 'rotateZ(0.6turn)',
         transformOrigin: '10px 10px',
+        transform: 'rotateZ(0.6turn)',
       });
     });
   });
@@ -51,8 +51,8 @@ describe('Transition transform origin', () => {
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
-        transform: 'rotateZ(0.6turn)',
         transformOrigin: '80% 80%',
+        transform: 'rotateZ(0.6turn)',
       });
     });
   });

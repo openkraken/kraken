@@ -292,7 +292,7 @@ mixin CSSTransitionMixin on RenderStyle {
     }
 
     // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && CSSTransitionHandlers[property] != null &&
+    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTransitionHandlers[property] != null &&
       (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.
