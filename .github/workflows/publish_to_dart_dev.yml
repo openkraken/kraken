@@ -29,19 +29,102 @@ jobs:
         with:
           name: linux_binary
           path: bridge/build/linux/
-
-  publishToPubDev:
-    needs: build_linux_binary
-    runs-on: [self-hosted, flutter_2.2.0]
+  build_macos_binary:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "16"
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
     - name: NPM INSTALL
       run: npm install
     - name: Build bridge binary
-      run: npm run build:bridge:all:release
+      run: npm run build:bridge:macos:release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos_binary
+        path: bridge/build/macos/
+  build_ios_binary:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "16"
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
+    - name: NPM INSTALL
+      run: npm install
+    - name: Build bridge binary
+      run: npm run build:bridge:ios:release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ios_binary
+        path: bridge/build/ios/
+  build_android_binary:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "16"
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r23c
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
+    - name: NPM INSTALL
+      run: npm install
+    - name: Build bridge binary
+      run: npm run build:bridge:android:release
+    - uses: actions/upload-artifact@v2
+      with:
+        name: android_binary
+        path: bridge/build/android/
+  publish:
+    needs: [build_linux_binary, build_android_binary, build_ios_binary, build_macos_binary]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.flutterVersion }}
+    - name: NPM INSTALL
+      run: npm install
+    - name: Set up nightly version
+      run: node scripts/set_up_nightly_release.js
     - uses: actions/download-artifact@v2
       with:
         name: linux_binary
         path: bridge/build/linux/
-    - name: Publish to dart.dev
-      run: cd kraken && flutter pub publish --force
+    - uses: actions/download-artifact@v2
+      with:
+        name: ios_binary
+        path: bridge/build/ios/
+    - uses: actions/download-artifact@v2
+      with:
+        name: macos_binary
+        path: bridge/build/macos/
+    - uses: actions/download-artifact@v2
+      with:
+        name: android_binary
+        path: bridge/build/android/
+    - name: Prepare distribute binaries
+      run: node scripts/pre_publish_kraken.js
+    - name: Publish
+      uses: k-paxian/dart-package-publisher@master
+      with:
+        credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+        force: true
+        flutter: true
+        skipTests: true
+        relativePath: ./kraken
+

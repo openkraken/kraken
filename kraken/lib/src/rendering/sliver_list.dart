@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/gesture.dart';
@@ -124,6 +125,8 @@ class RenderSliverListLayout extends RenderLayoutBox {
   void _scrollablePointerListener(PointerEvent event) {
     if (event is PointerDownEvent) {
       scrollable.handlePointerDown(event);
+    } else if (event is PointerSignalEvent) {
+      scrollable.handlePinterSignal(event);
     }
   }
 
@@ -253,6 +256,13 @@ class RenderSliverListLayout extends RenderLayoutBox {
     }
 
     return false;
+  }
+
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    transform.translate(scrollLeft, scrollTop);
   }
 
   Offset getChildScrollOffset(RenderObject child, Offset offset) {

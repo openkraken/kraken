@@ -577,7 +577,7 @@ class CSSStyleProperty {
       ) {
         weight = value;
       } else if (size == null
-        && (isValueVariableFunction || CSSLength.isNonNegativeLength(value))
+        && (isValueVariableFunction || CSSText.isValidFontSizeValue(value))
       ) {
         size = value;
       } else if (value == '/') {
