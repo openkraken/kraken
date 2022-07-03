@@ -415,6 +415,7 @@ double? getCachedComputedValue(int hashCode, String propertyName) {
   if (renderBoxInLayoutHashCodes.isNotEmpty) {
     return _cachedComputedValue[hashCode]?[propertyName];
   }
+  return null;
 }
 
 // Cache computed length value only in perform layout stage.

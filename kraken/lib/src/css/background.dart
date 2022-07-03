@@ -197,6 +197,7 @@ class CSSBackgroundImage {
         }
       }
     }
+    return null;
   }
   Gradient? get gradient {
     List<Color> colors = [];
@@ -362,6 +363,7 @@ class CSSBackgroundImage {
           break;
       }
     }
+    return null;
   }
 }
 

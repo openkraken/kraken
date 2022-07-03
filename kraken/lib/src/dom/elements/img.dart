@@ -220,6 +220,7 @@ class ImageElement extends Element {
       CSSLengthValue len = CSSLength.parseLength(width, renderStyle, WIDTH);
       return len.computedValue;
     }
+    return null;
   }
 
   double? get _styleHeight {
@@ -228,6 +229,7 @@ class ImageElement extends Element {
       CSSLengthValue len = CSSLength.parseLength(height, renderStyle, HEIGHT);
       return len.computedValue;
     }
+    return null;
   }
 
   // Width and height set through attributes.
@@ -235,12 +237,14 @@ class ImageElement extends Element {
     if (hasAttribute(WIDTH)) {
       return CSSLength.toDouble(getAttribute(WIDTH));
     }
+    return null;
   }
 
   double? get _attrHeight {
     if (hasAttribute(HEIGHT)) {
       return CSSLength.toDouble(getAttribute(HEIGHT));
     }
+    return null;
   }
 
   int get width {

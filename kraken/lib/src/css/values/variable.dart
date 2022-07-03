@@ -32,6 +32,7 @@ class CSSVariable {
         }
       }
     }
+    return null;
   }
 
   final String identifier;

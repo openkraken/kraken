@@ -175,5 +175,6 @@ class CSSStyleRuleParser {
     if (selectorText.isNotEmpty) {
       return CSSStyleRule(selectorText, style);
     }
+    return null;
   }
 }

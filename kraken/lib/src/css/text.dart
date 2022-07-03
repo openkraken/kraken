@@ -561,6 +561,7 @@ class CSSText {
         }
       }
     }
+    return null;
   }
 
   /// In CSS2.1, text-decoration determin the type of text decoration,

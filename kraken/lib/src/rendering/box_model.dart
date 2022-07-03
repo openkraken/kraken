@@ -194,6 +194,7 @@ class RenderLayoutBox extends RenderBoxModel
         return _firstChild;
       }
     }
+    return null;
   }
 
   // No need to override [all] and [addAll] method cause they invoke [insert] method eventually.

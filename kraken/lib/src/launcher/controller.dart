@@ -1087,6 +1087,7 @@ class KrakenController {
     if (url == this.url && entrypoint != null && entrypoint.isResolved) {
       return utf8.decode(entrypoint.data!);
     }
+    return null;
   }
 
   bool _paused = false;
