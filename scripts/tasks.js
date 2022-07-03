@@ -623,8 +623,10 @@ task('build-android-kraken-lib', (done) => {
   } else {
     if (platform == 'win32') {
       androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
-    } else {
+    } else if (platform == 'darwin') {
       androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    } else if (platform == 'linux') {
+      androidHome = path.join(process.env.HOME, 'Android/Sdk');
     }
     const ndkVersion = '23.2.8568313';
     ndkDir = path.join(androidHome, 'ndk', ndkVersion);
