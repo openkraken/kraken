@@ -10,16 +10,15 @@ describe('Transition property', () => {
     container1.appendChild(document.createTextNode('DIV'));
     await snapshot();
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(() => {
       setElementStyle(container1, {
         backgroundColor: 'red',
       });
-
-      // Wait for animation finished.
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 

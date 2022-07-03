@@ -54,7 +54,7 @@ Read our [contributing guide](https://github.com/openkraken/kraken/blob/main/.gi
 
 Thank you to all the people who already contributed to Kraken!
 
-![CONTRIBUTORS](https://kraken.oss-cn-hangzhou.aliyuncs.com/CONTRIBUTORS.svg)
+![CONTRIBUTORS](https://andycall.oss-cn-beijing.aliyuncs.com/CONTRIBUTORS.svg)
 
 Copyright (c) 2019-present, The Kraken authors.
 

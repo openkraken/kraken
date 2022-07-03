@@ -9,21 +9,90 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  integration_test:
-    runs-on: [self-hosted]
+  setup:
+    runs-on: macos-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: matrix
+        run: |
+          JSON=$(node -e "console.log(JSON.stringify(require('./integration_tests/spec_group.json').map(j=>j.name)))")
+          echo "::set-output name=value::$(echo $JSON)"
+  build_bridge:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
+    - run: npm i
+    - run: ENABLE_ASAN=true npm run build:bridge:macos
+    - uses: actions/upload-artifact@v2
+      with:
+        name: macos_bridge_binary
+        path: bridge/build/macos/
+  integration_test:
+    runs-on: macos-latest
+    needs: [ setup, build_bridge ]
+    strategy:
+      fail-fast: false
+      matrix:
+        value: ${{fromJson(needs.setup.outputs.matrix)}}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
+    - uses: actions/download-artifact@v2
+      with:
+        name: macos_bridge_binary
+        path: bridge/build/macos/
+    - run: cd integration_tests && npm i
     - name: Run Test
-      run: npm test
+      run: cd integration_tests && SPEC_SCOPE="${{ matrix.value }}" npm run integration
       id: test
       continue-on-error: true
-    - name: Upload Snapshots
-      run: node scripts/upload_snapshots.js
-      continue-on-error: true
+    - uses: actions/upload-artifact@v2
+      with:
+        name: integration_${{ matrix.value }}_snapshots
+        path: integration_tests/snapshots
     - name: Check on failures
       if: steps.test.outcome != 'success'
       run: exit 1
-
+  plugin_test:
+    runs-on: macos-latest
+    needs: [ build_bridge ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - uses: actions/download-artifact@v2
+      with:
+        name: macos_bridge_binary
+        path: bridge/build/macos/
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
+    - name: Run Plugin Test
+      run: cd integration_tests && npm run plugin_test
+      id: test
+      continue-on-error: true
+    - uses: actions/upload-artifact@v2
+      with:
+        name: plugin_snapshots
+        path: integration_tests/snapshots/plugins
+    - name: Check on failures
+      if: steps.test.outcome != 'success'
+      run: exit 1
