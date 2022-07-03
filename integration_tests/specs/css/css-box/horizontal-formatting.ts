@@ -12,7 +12,7 @@ describe('Horizontal formatting', () => {
 
     ruleImg.setAttribute(
       'src',
-      'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/scaleplate.png'
+      'assets/scaleplate.png'
     );
 
     setElementStyle(ruleImg, {
@@ -58,7 +58,7 @@ describe('Horizontal formatting', () => {
 
     ruleImg2.setAttribute(
       'src',
-      'https://kraken.oss-cn-hangzhou.aliyuncs.com/images/content-area.png'
+      'assets/content-area.png'
     );
     setElementStyle(ruleImg2, {
       width: '640px',

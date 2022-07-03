@@ -43,5 +43,8 @@
     "uuid": "^8.3.2",
     "ws": "^7.3.0",
     "http-server": "^14.1.0"
+  },
+  "dependencies": {
+    "prepend-file": "^2.0.1"
   }
 }

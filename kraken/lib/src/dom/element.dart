@@ -499,8 +499,9 @@ abstract class Element
       renderBoxModel.clearIntersectionChangeListeners();
 
       // Remove fixed children from root when element disposed.
-      _removeFixedChild(renderBoxModel, ownerDocument.viewport!);
-
+      if (ownerDocument.viewport != null) {
+        _removeFixedChild(renderBoxModel, ownerDocument.viewport!);
+      }
       // Remove renderBox.
       renderBoxModel.detachFromContainingBlock();
 
@@ -556,7 +557,7 @@ abstract class Element
 
   // Calculate sticky status according to scroll offset and scroll direction
   void _applyStickyChildrenOffset() {
-    RenderLayoutBox? scrollContainer = (renderBoxModel as RenderLayoutBox?)!;
+    RenderLayoutBox scrollContainer = renderBoxModel as RenderLayoutBox;
     for (RenderBoxModel stickyChild in scrollContainer.stickyChildren) {
       CSSPositionedLayout.applyStickyChildOffset(scrollContainer, stickyChild);
     }
@@ -1478,7 +1479,7 @@ abstract class Element
     BoundingClientRect boundingClientRect = BoundingClientRect.zero;
     if (isRendererAttached) {
       flushLayout();
-      RenderBox sizedBox = renderBoxModel!;
+      RenderBoxModel sizedBox = renderBoxModel!;
       // Force flush layout.
       if (!sizedBox.hasSize) {
         sizedBox.markNeedsLayout();
@@ -1555,15 +1556,15 @@ abstract class Element
   }
 
   // Get the offset of current element relative to specified ancestor element.
-  Offset _getOffset(RenderBox renderBox, { Element? ancestor }) {
+  Offset _getOffset(RenderBoxModel renderBox, { Element? ancestor }) {
     // Need to flush layout to get correct size.
     flushLayout();
 
     // Returns (0, 0) when ancestor is null.
-    if (ancestor == null) {
+    if (ancestor == null || ancestor.renderBoxModel == null) {
       return Offset.zero;
     }
-    return renderBox.localToGlobal(Offset.zero, ancestor: ancestor.renderBoxModel);
+    return renderBox.getOffsetToAncestor(Offset.zero, ancestor.renderBoxModel!);
   }
 
   void click() {

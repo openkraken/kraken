@@ -626,11 +626,11 @@ task('build-android-kraken-lib', (done) => {
     } else {
       androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
     }
-    const ndkVersion = '21.4.7075529';
+    const ndkVersion = '23.2.8568313';
     ndkDir = path.join(androidHome, 'ndk', ndkVersion);
 
     if (!fs.existsSync(ndkDir)) {
-      throw new Error('Android NDK version (21.4.7075529) not installed.');
+      throw new Error('Android NDK version (23.2.8568313) not installed.');
     }
   }
 
@@ -699,8 +699,8 @@ task('build-android-kraken-lib', (done) => {
 
     // Strip release binary in release mode.
     if (buildMode === 'Release' || buildMode === 'RelWithDebInfo') {
-      const strip = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/strip`);
-      const objcopy = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/${toolChainMap[arch]}/bin/objcopy`);
+      const strip = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/bin/llvm-strip`);
+      const objcopy = path.join(ndkDir, `./toolchains/llvm/prebuilt/${os.platform()}-x86_64/bin/llvm-objcopy`);
 
       for (let soFileName of soFileNames) {
         const soBinaryFile = path.join(soBinaryDirectory, soFileName + '.so');

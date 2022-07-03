@@ -150,6 +150,31 @@ describe('custom widget element', () => {
     await snapshot();
   });
 
+  it('getBoundingClientRect should work with items in waterfall-flow', async (done) => {
+    const flutterContainer = document.createElement('waterfall-flow');
+    flutterContainer.style.height = '100vh';
+    flutterContainer.style.display = 'block';
+
+    document.body.appendChild(flutterContainer);
+ 
+    const div = document.createElement('div');
+    div.style.width = '100%';
+    div.style.height = '100px';
+    div.style.border = `1px solid red`;
+
+    const img = document.createElement('img');
+    img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
+    div.appendChild(img);
+
+    flutterContainer.appendChild(div);
+  
+    requestAnimationFrame(async () => {
+       const rect = div.getBoundingClientRect();
+       expect(rect.height).toEqual(100);
+       done();
+    });     
+  });
+
   it('flutter widget should spread out the parent node when parent node is line-block', async () => {
     const fluttetText = document.createElement('flutter-text');
     fluttetText.setAttribute('value', 'flutter text');

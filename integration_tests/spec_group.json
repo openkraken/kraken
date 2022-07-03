@@ -1,0 +1,85 @@
+[
+  {
+    "name": "BOM",
+    "specs": [
+      "specs/async-storage/**/*.{js,jsx,ts,tsx,html}",
+      "specs/blob/**/*.{js,jsx,ts,tsx,html}",
+      "specs/cookie/**/*.{js,jsx,ts,tsx,html}",
+      "specs/fetch/**/*.{js,jsx,ts,tsx,html}",
+      "specs/method-channel/**/*.{js,jsx,ts,tsx,html}",
+      "specs/navigator/**/*.{js,jsx,ts,tsx,html}",
+      "specs/performance/**/*.{js,jsx,ts,tsx,html}",
+      "specs/timer/**/*.{js,jsx,ts,tsx,html}",
+      "specs/window/**/*.{js,jsx,ts,tsx,html}",
+      "specs/xhr/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "DOM",
+    "specs": [
+      "specs/dom/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "BoxModelAndSizing",
+    "specs": [
+      "specs/css/css-align/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-display/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-box/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-flow/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-inline/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-sizing/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "BackgroundsAndBordersAndOverflow",
+    "specs": [
+      "specs/css/css-backgrounds/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-borders/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-overflow/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "FlexBoxLayoutAndPositionedLayout",
+    "specs": [
+      "specs/css/css-flexbox/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-position/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "FontsAndImages",
+    "specs": [
+      "specs/css/css-fonts/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-images/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "TextAndColorAndFilterEffect",
+    "specs": [
+      "specs/css/css-text/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-text-decor/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-color/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/filter-effects/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "TransformsAndAnimations",
+    "specs": [
+      "specs/css/css-transforms/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-transitions/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "ValuesAndUnitAndVaraiables",
+    "specs": [
+      "specs/css/css-values/**/*.{js,jsx,ts,tsx,html}",
+      "specs/css/css-variables/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  },
+  {
+    "name": "Selectors",
+    "specs": [
+      "specs/css/css-selectors/**/*.{js,jsx,ts,tsx,html}"
+    ]
+  }
+]

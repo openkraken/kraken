@@ -14,15 +14,16 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'rotateZ(0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -43,15 +44,16 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'rotate3d(10, 10, 10, 0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -71,16 +73,16 @@ describe('Transition transform', () => {
       transitionTimingFunction: 'ease',
     });
     container1.appendChild(document.createTextNode('DIV 1'));
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
 
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'rotateX(0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -101,15 +103,15 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'rotateY(0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });

@@ -12,6 +12,8 @@
  */
 
 // Should by getter because body will reset before each spec
+declare const BODY: HTMLBodyElement
+
 Object.defineProperty(global, 'BODY', {
   get() {
     return document.body;

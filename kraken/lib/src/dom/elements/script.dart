@@ -29,7 +29,8 @@ class ScriptRunner {
   final int _contextId;
 
   final List<ScriptExecution> _syncScriptTasks = [];
-  final List<ScriptExecution> _asyncScriptTasks = [];
+  // Indicate the sync pending scripts.
+  int _resolvingCount = 0;
 
   static void _evaluateScriptBundle(int contextId, KrakenBundle bundle, { bool async = false }) async {
     // Evaluate bundle.
@@ -64,18 +65,22 @@ class ScriptRunner {
     // The bundle execution task.
     void task(bool async) {
       // If bundle is not resolved, should wait for it resolve to prevent the next script running.
-      if (!bundle.isResolved) return;
+      assert(bundle.isResolved, '${bundle.url} is not resolved');
 
       try {
         _evaluateScriptBundle(_contextId, bundle, async: async);
       } catch (err, stack) {
         debugPrint('$err\n$stack');
-        bundle.dispose();
         _document.decrementLoadEventDelayCount();
-        rethrow;
+        return;
+      } finally {
+        bundle.dispose();
       }
 
-      bundle.dispose();
+      // Dispatch the load event.
+      Timer.run(() {
+        element.dispatchEvent(Event(EVENT_LOAD));
+      });
 
       // Decrement load event delay count after eval.
       _document.decrementLoadEventDelayCount();
@@ -83,66 +88,59 @@ class ScriptRunner {
 
     // @TODO: Differ async and defer.
     final bool shouldAsync = element.async || element.defer;
-    if (shouldAsync) {
-      _asyncScriptTasks.add(task);
-    } else {
+    if (!shouldAsync) {
       _syncScriptTasks.add(task);
+      _resolvingCount++;
     }
 
     // Script loading phrase.
+    // Increment count when request.
+    _document.incrementRequestCount();
     try {
-      // Increment count when request.
-      _document.incrementRequestCount();
-
       await bundle.resolve(_contextId);
-      assert(bundle.isResolved, 'Failed to obtain ${bundle.url}');
 
-      // Decrement count when response.
-      _document.decrementRequestCount();
+      if (!bundle.isResolved) {
+        throw FlutterError('Network error.');
+      }
     } catch (e, st) {
       // A load error occurred.
-      debugPrint('Failed to load script: $url, reason: $e\n$st');
+      debugPrint('Failed to load: $url, reason: $e\n$st');
       Timer.run(() {
         element.dispatchEvent(Event(EVENT_ERROR));
       });
       _document.decrementLoadEventDelayCount();
+      // Cancel failed task.
+      _syncScriptTasks.remove(task);
       return;
+    } finally {
+      // Decrease the resolving count.
+      if (!shouldAsync) {
+        _resolvingCount--;
+      }
+
+      // Decrement count when response.
+      _document.decrementRequestCount();
     }
 
     // Script executing phrase.
     if (shouldAsync) {
       // @TODO: Use requestIdleCallback
       SchedulerBinding.instance!.scheduleFrameCallback((_) {
-        try {
-          _execute(_asyncScriptTasks, async: true);
-        } catch (error, stack) {
-          debugPrint('$error\n$stack');
-        } finally {
-          Timer.run(() {
-            element.dispatchEvent(Event(EVENT_LOAD));
-          });
-        }
+        task(shouldAsync);
       });
     } else {
-      try {
-        _execute(_syncScriptTasks, async: false);
-      } catch (error, stack) {
-        debugPrint('$error\n$stack');
-      } finally {
-        // Always emit load event.
-        Timer.run(() {
-          element.dispatchEvent(Event(EVENT_LOAD));
-        });
-      }
+      scheduleMicrotask(() {
+        if (_resolvingCount == 0) {
+          _execute(_syncScriptTasks, async: false);
+        }
+      });
     }
   }
 }
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-link-element.html
 class ScriptElement extends Element {
-  ScriptElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle) {
-  }
+  ScriptElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 
   final String _type = _MIME_TEXT_JAVASCRIPT;
 
