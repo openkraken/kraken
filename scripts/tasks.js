@@ -588,6 +588,7 @@ task('build-linux-kraken-lib', (done) => {
   // generate project
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
   ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+  ${buildMode != 'Release' ? '-DENABLE_TEST=true \\' : '\\'}
   -G "${cmakeGeneratorTemplate}" \
   -B ${paths.bridge}/cmake-build-linux -S ${paths.bridge}`,
     {
@@ -601,13 +602,23 @@ task('build-linux-kraken-lib', (done) => {
     });
 
   // build
-  execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
+  execSync(`cmake --build ${bridgeCmakeDir} --target kraken ${buildMode != 'Release' ? 'kraken_test' : ''} -- -j 12`, {
     stdio: 'inherit'
   });
 
-  const libkrakenPath = path.join(paths.bridge, 'build/linux/lib/libkraken.so');
-  // Patch libkraken.so's runtime path.
-  execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });
+  const libs = [
+    'libkraken.so'
+  ];
+
+  if (buildMode != 'Release') {
+    libs.push('libkraken_test.so');
+  }
+
+  libs.forEach(lib => {
+    const libkrakenPath = path.join(paths.bridge, `build/linux/lib/${lib}`);
+    // Patch libkraken.so's runtime path.
+    execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });  
+  });
 
   done();
 });
