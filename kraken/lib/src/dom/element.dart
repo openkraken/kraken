@@ -748,7 +748,11 @@ abstract class Element
   void attachTo(Node parent, {RenderBox? after}) {
     applyStyle(style);
 
-    if (!_obtainSliverChild()) {
+    if (_obtainSliverChild()) {
+      // Rebuild all the sliver children.
+      RenderLayoutBox? parentRenderBoxModel = parentElement!.renderBoxModel as RenderLayoutBox?;
+      parentRenderBoxModel?.removeAll();
+    } else {
       willAttachRenderer();
     }
 
