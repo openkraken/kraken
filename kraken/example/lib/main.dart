@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kraken Browser',
       // theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
       home: MyBrowser(),
     );
   }
@@ -90,12 +91,14 @@ class _MyHomePageState extends State<MyBrowser> {
         body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: _kraken = Kraken(
-          devToolsService: ChromeDevToolsService(),
-          viewportWidth: viewportSize.width - queryData.padding.horizontal,
-          viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
-          bundle: KrakenBundle.fromUrl('assets:assets/bundle.html'),
-        ),
+        child: Column(children: [
+          _kraken = Kraken(
+            devToolsService: ChromeDevToolsService(),
+            viewportWidth: viewportSize.width - queryData.padding.horizontal,
+            viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+            bundle: KrakenBundle.fromUrl('assets:assets/bundle.js'),
+          ),
+        ],),
     ));
   }
 }

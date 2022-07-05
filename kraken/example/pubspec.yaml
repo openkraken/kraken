@@ -25,5 +25,47 @@ dependency_overrides:
 
 # The following section is specific to Flutter.
 flutter:
+  fonts:
+    - family: AlibabaPuHuiTi
+      fonts:
+        - asset: fonts/Alibaba-PuHuiTi-Regular.ttf
+        - asset: fonts/Alibaba-PuHuiTi-Light.ttf
+          weight: 300
+        - asset: fonts/Alibaba-PuHuiTi-Medium.ttf
+          weight: 500
+        - asset: fonts/Alibaba-PuHuiTi-Bold.ttf
+          weight: 700
+        - asset: fonts/Alibaba-PuHuiTi-Heavy.ttf
+          weight: 900
+    - family: AlibabaSans
+      fonts:
+        - asset: fonts/AlibabaSans-Regular.otf
+        - asset: fonts/AlibabaSans-Italic.otf
+          style: italic
+        - asset: fonts/AlibabaSans-Light.otf
+          weight: 300
+        - asset: fonts/AlibabaSans-LightItalic.otf
+          weight: 300
+          style: italic
+        - asset: fonts/AlibabaSans-Medium.otf
+          weight: 500
+        - asset: fonts/AlibabaSans-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: fonts/AlibabaSans-Bold.otf
+          weight: 700
+        - asset: fonts/AlibabaSans-BoldItalic.otf
+          weight: 700
+          style: italic
+        - asset: fonts/AlibabaSans-Heavy.otf
+          weight: 900
+        - asset: fonts/AlibabaSans-HeavyItalic.otf
+          weight: 900
+          style: italic
+    - family: AlibabaSans-Black
+      fonts:
+        - asset: fonts/AlibabaSans-Black.otf
+
+
   assets:
     - assets/
