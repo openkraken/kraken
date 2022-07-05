@@ -81,7 +81,10 @@ class LinkElement extends Element {
   set href(String value) {
     internalSetAttribute('href', value);
     _resolveHyperlink();
-    _fetchAndApplyCSSStyle();
+    // Should waiting for all properties had set up.
+    Future.microtask(() {
+      _fetchAndApplyCSSStyle();
+    });
   }
 
   String get rel => getAttribute('rel') ?? '';
