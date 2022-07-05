@@ -32,7 +32,7 @@ class LinkElement extends Element {
   LinkElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 
   Uri? _resolvedHyperlink;
-
+  Map<String, bool> _stylesheetLoaded = {};
 
   // Bindings.
   @override
@@ -111,9 +111,10 @@ class LinkElement extends Element {
   }
 
   void _fetchAndApplyCSSStyle() async {
-    if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected) {
+    if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected && !_stylesheetLoaded.containsKey(_resolvedHyperlink.toString())) {
       String url = _resolvedHyperlink.toString();
       KrakenBundle bundle = KrakenBundle.fromUrl(url);
+      _stylesheetLoaded[url] = true;
       try {
         // Increment count when request.
         ownerDocument.incrementRequestCount();
