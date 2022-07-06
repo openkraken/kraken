@@ -10,8 +10,8 @@ void main() {
     test('createScrollPhysics', () {
       ScrollPhysics scrollPhysics = ScrollPhysics.createScrollPhysics();
       // In test env, that should be macos env.
-      expect(Platform.operatingSystem, 'macos');
-      expect(scrollPhysics.runtimeType.toString(), 'BouncingScrollPhysics');
+      expect(Platform.operatingSystem, 'linux');
+      expect(scrollPhysics.runtimeType.toString(), 'ClampingScrollPhysics');
     });
 
     test('ScrollPhysics Factory', () {
