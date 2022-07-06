@@ -262,8 +262,8 @@ class InspectPageModule extends UIInspectorModule {
 
   void startScreenCast() {
     _isFramingScreenCast = true;
-    SchedulerBinding.instance!.addPostFrameCallback(_frameScreenCast);
-    SchedulerBinding.instance!.scheduleFrame();
+    SchedulerBinding.instance.addPostFrameCallback(_frameScreenCast);
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   void stopScreenCast() {
@@ -275,7 +275,7 @@ class InspectPageModule extends UIInspectorModule {
   void handleScreencastFrameAck(Map<String, dynamic> params) {
     int? ackSessionID = params['sessionId'];
     if (ackSessionID == _lastSentSessionID && _isFramingScreenCast) {
-      SchedulerBinding.instance!.addPostFrameCallback(_frameScreenCast);
+      SchedulerBinding.instance.addPostFrameCallback(_frameScreenCast);
     }
   }
 }

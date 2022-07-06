@@ -498,7 +498,7 @@ void flushUICommand() {
     List<UICommand> commands = readNativeUICommandToDart(
         nativeCommandItems, commandLength, controller.view.contextId);
 
-    SchedulerBinding.instance!.scheduleFrame();
+    SchedulerBinding.instance.scheduleFrame();
 
     if (kProfileMode) {
       PerformanceTiming.instance().mark(PERF_FLUSH_UI_COMMAND_END);

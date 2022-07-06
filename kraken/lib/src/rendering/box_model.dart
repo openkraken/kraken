@@ -815,7 +815,7 @@ class RenderBoxModel extends RenderBox
   void markNeedsLayout() {
     if (doingThisLayout) {
       // Push delay the [markNeedsLayout] after owner [PipelineOwner] finishing current [flushLayout].
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         markNeedsLayout();
       });
     } else {
@@ -1394,7 +1394,7 @@ class RenderBoxModel extends RenderBox
   @mustCallSuper
   void dispose() {
     // Ensure pending layout/compositeBitsUpdate/paint render object to be finished.
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       // Call dispose method of renderBoxModel when it is detached from tree.
       super.dispose();
     });
@@ -1521,7 +1521,7 @@ class RenderBoxModel extends RenderBox
   Future<Image> toImage({double pixelRatio = 1.0}) {
     if (layer == null) {
       Completer<Image> completer = Completer<Image>();
-      SchedulerBinding.instance!.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
         completer.complete(toImage(pixelRatio: pixelRatio));
       });
       return completer.future;

@@ -24,7 +24,7 @@ class RenderPreferredSize extends RenderProxyBox {
     if (_preferredSize == value) return;
 
     _preferredSize = value;
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       markNeedsLayout();
     });
   }

@@ -125,18 +125,18 @@ class LinkElement extends Element {
         _addCSSStyleSheet(cssString);
 
         // Successful load.
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_LOAD));
         });
       } catch (e) {
         // An error occurred.
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           dispatchEvent(Event(EVENT_ERROR));
         });
       } finally {
         bundle.dispose();
       }
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 

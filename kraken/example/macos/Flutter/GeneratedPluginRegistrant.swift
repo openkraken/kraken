@@ -5,7 +5,7 @@
 import FlutterMacOS
 import Foundation
 
-import connectivity_macos
+import connectivity_plus_macos
 import kraken
 import shared_preferences_macos
 

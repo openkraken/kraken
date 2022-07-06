@@ -59,7 +59,7 @@ void launch({
       autoExecuteEntrypoint: false,
     );
 
-    controller.view.attachTo(RendererBinding.instance!.renderView);
+    controller.view.attachTo(RendererBinding.instance.renderView);
 
     await controller.executeEntrypoint();
   }

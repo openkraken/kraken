@@ -2,9 +2,9 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'dart:core';
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:ffi' as ffi;
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
@@ -44,9 +44,9 @@ typedef CanvasAction = void Function(Canvas, Size);
 
 class CanvasRenderingContext2D extends BindingObject {
   CanvasRenderingContext2D(this.canvas) : _pointer = malloc.allocate<NativeCanvasRenderingContext2D>(
-      sizeOf<NativeCanvasRenderingContext2D>()), super();
+      ffi.sizeOf<NativeCanvasRenderingContext2D>()), super();
 
-  final Pointer<NativeCanvasRenderingContext2D> _pointer;
+  final ffi.Pointer<NativeCanvasRenderingContext2D> _pointer;
 
   @override
   get pointer => _pointer;
@@ -54,7 +54,7 @@ class CanvasRenderingContext2D extends BindingObject {
   @override
   get contextId => canvas.contextId;
 
-  Pointer<NativeCanvasRenderingContext2D> toNative() {
+  ffi.Pointer<NativeCanvasRenderingContext2D> toNative() {
     return pointer;
   }
 

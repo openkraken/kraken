@@ -585,7 +585,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     addChild(createRenderBox());
 
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       if (autofocus) {
         focus();
       }
@@ -1323,7 +1323,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     }
 
     _showCaretOnScreenScheduled = true;
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
       Rect? currentCaretRect = _currentCaretRect;
       if (currentCaretRect == null || renderEditable == null) {
@@ -1367,7 +1367,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   // Make input box scroll to the offset that the caret shown.
   void scrollToCaret() {
-    SchedulerBinding.instance!.addPostFrameCallback((Duration _) {
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
       _scrollable.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
     });
@@ -1519,6 +1519,21 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void dispose() {
     textEditingActionTarget = null;
     super.dispose();
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    // TODO: implement insertTextPlaceholder
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    // TODO: implement removeTextPlaceholder
+  }
+
+  @override
+  void showToolbar() {
+    // TODO: implement showToolbar
   }
 }
 

@@ -532,8 +532,8 @@ abstract class Element
 
     if (!_shouldConsumeScrollTicker) {
       // Make sure scroll listener trigger most to 1 time each frame.
-      SchedulerBinding.instance!.addPostFrameCallback(_consumeScrollTicker);
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.addPostFrameCallback(_consumeScrollTicker);
+      SchedulerBinding.instance.scheduleFrame();
     }
     _shouldConsumeScrollTicker = true;
   }
@@ -1592,7 +1592,7 @@ abstract class Element
     forceToRepaintBoundary = true;
 
     Completer<Uint8List> completer = Completer();
-    SchedulerBinding.instance!.addPostFrameCallback((_) async {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
       Uint8List captured;
       RenderBoxModel _renderBoxModel = renderBoxModel!;
 
@@ -1610,7 +1610,7 @@ abstract class Element
       // May be disposed before this callback.
       flushLayout();
     });
-    SchedulerBinding.instance!.scheduleFrame();
+    SchedulerBinding.instance.scheduleFrame();
 
     return completer.future;
   }

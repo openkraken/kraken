@@ -82,7 +82,7 @@ class KrakenViewController
   set viewportWidth(double value) {
     if (value != _viewportWidth) {
       _viewportWidth = value;
-      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
+      viewport.viewportSize = ui.Size(_viewportWidth, _viewportHeight);
     }
   }
 
@@ -91,7 +91,7 @@ class KrakenViewController
   set viewportHeight(double value) {
     if (value != _viewportHeight) {
       _viewportHeight = value;
-      viewport.viewportSize = Size(_viewportWidth, _viewportHeight);
+      viewport.viewportSize = ui.Size(_viewportWidth, _viewportHeight);
     }
   }
 
@@ -135,7 +135,7 @@ class KrakenViewController
     } else {
       viewport = RenderViewportBox(
         background: background,
-        viewportSize: Size(viewportWidth, viewportHeight),
+        viewportSize: ui.Size(viewportWidth, viewportHeight),
         controller: rootController
       );
     }
@@ -225,7 +225,7 @@ class KrakenViewController
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.addObserver(this);
     } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.addObserver(this);
+      WidgetsBinding.instance.addObserver(this);
     }
   }
 
@@ -233,7 +233,7 @@ class KrakenViewController
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.removeObserver(this);
     } else if (WidgetsBinding.instance != null) {
-      WidgetsBinding.instance!.removeObserver(this);
+      WidgetsBinding.instance.removeObserver(this);
     }
   }
 
@@ -773,7 +773,7 @@ class KrakenViewController
       // Show keyboard
       viewport.bottomInset = bottomInset;
       if (shouldScrollByToCenter) {
-        SchedulerBinding.instance!.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
           window.scrollBy(0, bottomInset);
         });
       }
@@ -1230,12 +1230,12 @@ class KrakenController {
       _view.document.parsing = false;
 
       // Should check completed when parse end.
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         // UICommand list is read in the next frame, so we need to determine whether there are labels
         // such as images and scripts after it to check is completed.
         checkCompleted();
       });
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
 
       if (kProfileMode) {
         PerformanceTiming.instance().mark(PERF_JS_BUNDLE_EVAL_END);
@@ -1245,12 +1245,12 @@ class KrakenController {
       entrypoint.dispose();
 
       // trigger DOMContentLoaded event
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
         Event event = Event(EVENT_DOM_CONTENT_LOADED);
         EventTarget window = view.window;
         window.dispatchEvent(event);
       });
-      SchedulerBinding.instance!.scheduleFrame();
+      SchedulerBinding.instance.scheduleFrame();
     }
   }
 
@@ -1280,7 +1280,7 @@ class KrakenController {
   }
 
   void _dispatchWindowLoadEvent() {
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       // DOM element are created at next frame, so we should trigger onload callback in the next frame.
       Event event = Event(EVENT_LOAD);
       _view.window.dispatchEvent(event);
@@ -1289,7 +1289,7 @@ class KrakenController {
         onLoad!(this);
       }
     });
-    SchedulerBinding.instance!.scheduleFrame();
+    SchedulerBinding.instance.scheduleFrame();
   }
 }
 

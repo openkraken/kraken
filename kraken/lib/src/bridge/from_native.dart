@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:ui' as ui;
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -282,8 +282,8 @@ final Pointer<NativeFunction<NativeCancelAnimationFrame>> _nativeCancelAnimation
 typedef NativeGetScreen = Pointer<Void> Function();
 
 Pointer<Void> _getScreen() {
-  Size size = window.physicalSize;
-  return createScreen(size.width / window.devicePixelRatio, size.height / window.devicePixelRatio);
+  ui.Size size = ui.window.physicalSize;
+  return createScreen(size.width / ui.window.devicePixelRatio, size.height / ui.window.devicePixelRatio);
 }
 
 final Pointer<NativeFunction<NativeGetScreen>> _nativeGetScreen = Pointer.fromFunction(_getScreen);

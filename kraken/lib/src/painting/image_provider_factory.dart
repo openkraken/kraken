@@ -213,7 +213,7 @@ class KrakenResizeImage extends ResizeImage {
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
       final ImageStreamCompleter? completer =
-          PaintingBinding.instance!.imageCache!.putIfAbsent(
+          PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -222,7 +222,7 @@ class KrakenResizeImage extends ResizeImage {
       return;
     }
     final ImageStreamCompleter? completer =
-        PaintingBinding.instance!.imageCache!.putIfAbsent(
+        PaintingBinding.instance.imageCache.putIfAbsent(
       key,
       () => load(key, instantiateImageCodec),
       onError: handleError,

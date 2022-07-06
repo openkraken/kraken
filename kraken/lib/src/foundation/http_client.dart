@@ -168,6 +168,16 @@ class ProxyHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> deleteUrl(Uri url) => _openUrl('delete', url);
+
+  @override
+  set connectionFactory(Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? f) {
+    // TODO: implement connectionFactory
+  }
+
+  @override
+  set keyLog(Function(String line)? callback) {
+    // TODO: implement keyLog
+  }
 }
 
 HttpHeaders createHttpHeaders({ Map<String, List<String>>? initialHeaders }) {

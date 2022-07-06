@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:ui';
+
 import 'package:kraken/foundation.dart';
 import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart';
@@ -165,6 +167,21 @@ class InputElement extends TextFormControlElement {
     if (_styleWidth == null) {
       renderStyle.width = CSSLengthValue(_defaultWidth, CSSLengthType.PX);
     }
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    // TODO: implement insertTextPlaceholder
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    // TODO: implement removeTextPlaceholder
+  }
+
+  @override
+  void showToolbar() {
+    // TODO: implement showToolbar
   }
 }
 

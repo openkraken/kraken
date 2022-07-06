@@ -98,7 +98,7 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
   @override
   void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, BoxFitImageKey key, ImageErrorListener handleError) {
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -106,9 +106,9 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer = PaintingBinding.instance!.imageCache!.putIfAbsent(
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
-      () => load(key, PaintingBinding.instance!.instantiateImageCodec),
+      () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
     if (_imageStreamCompleter == null && completer is DimensionedMultiFrameImageStreamCompleter && onImageLoad != null) {

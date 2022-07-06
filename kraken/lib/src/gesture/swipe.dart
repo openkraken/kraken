@@ -41,6 +41,7 @@ class SwipeDetails {
 double computeSwipeSlop(PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
+    case PointerDeviceKind.trackpad:
       return kPrecisePointerSwipeSlop;
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:

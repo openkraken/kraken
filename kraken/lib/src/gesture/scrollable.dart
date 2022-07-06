@@ -219,7 +219,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
       if (delta != 0.0 && targetScrollOffset != position?.pixels) {
-        GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
+        GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
       }
     }
   }
