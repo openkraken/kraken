@@ -41,11 +41,15 @@ jobs:
     needs: [ build_bridge ]
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - run: npm i
     - uses: actions/download-artifact@v2
       with:
         name: macos_bridge_binary
         path: bridge/build/macos/
-    - run: ./bridge/build/macos/lib/x86_64/kraken_unit_test
+    - run: node scripts/run_bridge_unit_test.js
 
   kraken_unit_test:
     runs-on: ubuntu-latest

@@ -233,8 +233,14 @@ task('build-darwin-kraken-lib', done => {
 });
 
 task('run-bridge-unit-test', done => {
-  execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/kraken_unit_test')}`, {stdio: 'inherit'});
-  done();
+  if (platform === 'darwin') {
+    execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/kraken_unit_test')}`, {stdio: 'inherit'});
+  } else if (platform === 'linux') {
+    execSync(`${path.join(paths.bridge, 'build/linux/lib/kraken_unit_test')}`, {stdio: 'inherit'});
+  } else {
+    throw new Error('Platform not supported.');
+  }
+   done();
 });
 
 task('compile-polyfill', (done) => {
