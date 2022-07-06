@@ -35,6 +35,29 @@ jobs:
       with:
         name: macos_bridge_binary
         path: bridge/build/macos/
+
+  bridge_unit_test:
+    runs-on: macos-latest
+    needs: [ build_bridge ]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: macos_bridge_binary
+        path: bridge/build/macos/
+    - run: ./bridge/build/macos/lib/x86_64/kraken_unit_test
+
+  kraken_unit_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
+    - run: cd kraken && flutter test
+
   integration_test:
     runs-on: macos-latest
     needs: [ setup, build_bridge ]

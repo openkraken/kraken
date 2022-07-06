@@ -602,7 +602,7 @@ task('build-linux-kraken-lib', (done) => {
     });
 
   // build
-  execSync(`cmake --build ${bridgeCmakeDir} --target kraken ${buildMode != 'Release' ? 'kraken_test' : ''} -- -j 12`, {
+  execSync(`cmake --build ${bridgeCmakeDir} --target kraken ${buildMode != 'Release' ? 'kraken_test kraken_unit_test' : ''} -- -j 12`, {
     stdio: 'inherit'
   });
 
