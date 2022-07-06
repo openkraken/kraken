@@ -95,7 +95,7 @@ void main() async {
 
   testTextInput = TestTextInput();
 
-  WidgetsBinding.instance!.addPostFrameCallback((_) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
     int contextId = kraken.controller!.view.contextId;
 

@@ -17,22 +17,22 @@ import 'package:kraken/bridge.dart';
 // 6. Call the C function.
 
 // Init Test Framework
-typedef Native_InitTestFramework = Void Function(Int32 contextId);
-typedef Dart_InitTestFramework = void Function(int contextId);
+typedef NativeInitTestFramework = Void Function(Int32 contextId);
+typedef DartInitTestFramework = void Function(int contextId);
 
-final Dart_InitTestFramework _initTestFramework =
-    KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_InitTestFramework>>('initTestFramework').asFunction();
+final DartInitTestFramework _initTestFramework =
+    KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeInitTestFramework>>('initTestFramework').asFunction();
 
 void initTestFramework(int contextId) {
   _initTestFramework(contextId);
 }
 
 // Register evaluteTestScripts
-typedef Native_EvaluateTestScripts = Int8 Function(Int32 contextId, Pointer<NativeString>, Pointer<Utf8>, Int32);
-typedef Dart_EvaluateTestScripts = int Function(int contextId, Pointer<NativeString>, Pointer<Utf8>, int);
+typedef NativeEvaluateTestScripts = Int8 Function(Int32 contextId, Pointer<NativeString>, Pointer<Utf8>, Int32);
+typedef DartEvaluateTestScripts = int Function(int contextId, Pointer<NativeString>, Pointer<Utf8>, int);
 
-final Dart_EvaluateTestScripts _evaluateTestScripts =
-KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_EvaluateTestScripts>>('evaluateTestScripts').asFunction();
+final DartEvaluateTestScripts _evaluateTestScripts =
+KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeEvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
 void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _url = (url).toNativeUtf8();
@@ -41,11 +41,11 @@ void evaluateTestScripts(int contextId, String code, {String url = 'test://', in
 
 typedef NativeExecuteCallback = Void Function(Int32 contextId, Pointer<NativeString> status);
 typedef DartExecuteCallback = void Function(int);
-typedef Native_ExecuteTest = Void Function(Int32 contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
-typedef Dart_ExecuteTest = void Function(int contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
+typedef NativeExecuteTest = Void Function(Int32 contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
+typedef DartExecuteTest = void Function(int contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
 
-final Dart_ExecuteTest _executeTest =
-KrakenDynamicLibrary.ref.lookup<NativeFunction<Native_ExecuteTest>>('executeTest').asFunction();
+final DartExecuteTest _executeTest =
+KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeExecuteTest>>('executeTest').asFunction();
 
 List<Completer<String>?> completerList = List.filled(10, null);
 

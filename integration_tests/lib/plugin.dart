@@ -94,7 +94,7 @@ void main() async {
     ),
   ));
 
-  WidgetsBinding.instance!.addPostFrameCallback((_) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
 
     List<Future<String>> testResults = [];
