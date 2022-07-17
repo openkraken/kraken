@@ -32,7 +32,7 @@ class LinkElement extends Element {
   LinkElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 
   Uri? _resolvedHyperlink;
-  Map<String, bool> _stylesheetLoaded = {};
+  final Map<String, bool> _stylesheetLoaded = {};
 
   // Bindings.
   @override
