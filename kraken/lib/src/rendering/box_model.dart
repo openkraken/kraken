@@ -1092,6 +1092,8 @@ class RenderBoxModel extends RenderBox
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     Offset offset = childParentData.offset;
     if (excludeScrollOffset) {
+      offset += Offset(scrollLeft, scrollTop);
+    }else{
       offset -= Offset(scrollLeft, scrollTop);
     }
     transform.translate(offset.dx, offset.dy);
