@@ -104,6 +104,7 @@ jobs:
 
       - run: npm i
       - run: npm run build:bridge:linux:release
+      - run: npm run test
 
       - uses: subosito/flutter-action@v2
         with:
