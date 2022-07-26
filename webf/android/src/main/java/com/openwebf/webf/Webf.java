@@ -1,4 +1,4 @@
-package com.openkraken.kraken;
+package com.openwebf.webf;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -11,7 +11,7 @@ import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
-public class Kraken {
+public class WebF {
 
   private String url;
   private String dynamicLibraryPath;

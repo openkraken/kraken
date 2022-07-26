@@ -22,7 +22,8 @@ mixin CSSObjectPositionMixin on RenderStyle {
 
     if (position != null) {
       List<String?> values = CSSStyleProperty.getPositionValues(position);
-      return Alignment(_getAlignmentValueFromString(values[0]!), _getAlignmentValueFromString(values[1]!));
+      return Alignment(_getAlignmentValueFromString(values[0]!),
+          _getAlignmentValueFromString(values[1]!));
     }
 
     // The default value for object-position is 50% 50%
@@ -30,7 +31,6 @@ mixin CSSObjectPositionMixin on RenderStyle {
   }
 
   static double _getAlignmentValueFromString(String value) {
-
     // Support percentage
     if (value.endsWith('%')) {
       // 0% equal to -1.0

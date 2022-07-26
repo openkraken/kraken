@@ -1,6 +1,6 @@
-name: kraken
-description: A high-performance, web standards-compliant rendering engine.
-version: 0.11.0
+name: webf
+description: A W3C compact Web rendering engine based on Flutter.
+version: 0.1.0
 homepage: https://openkraken.com
 
 environment:
@@ -37,7 +37,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.openkraken.kraken
+        package: com.openwebf.webf
         pluginClass: KrakenPlugin
       ios:
         pluginClass: KrakenPlugin

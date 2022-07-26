@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  kraken: ^0.10.0
+  webf: ^0.10.0
   kraken_websocket: ^2.0.0
 
 # When depending on this package from a real application,
@@ -20,7 +20,7 @@ dependencies:
 # The example app is bundled with the plugin so we use a path dependency on
 # the parent directory to use the current plugin's version.
 dependency_overrides:
-  kraken:
+  webf:
     path: ../
 
 # The following section is specific to Flutter.

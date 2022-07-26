@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
