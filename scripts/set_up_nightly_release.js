@@ -8,7 +8,7 @@ function getCurrentGitRev() {
 }
 
 function setPubVersion(version) {
-  const pubSepcPath = path.join(__dirname, "../kraken/pubspec.yaml");
+  const pubSepcPath = path.join(__dirname, "../webf/pubspec.yaml");
   const pubSpec = fs.readFileSync(pubSepcPath, { encoding: "utf-8" });
   const replaced = pubSpec.replace(
     /version: ([\d\w.+]+)/,
@@ -21,13 +21,13 @@ function setPubVersion(version) {
 }
 
 function setChangeLog(version) {
-  const pubSepcPath = path.join(__dirname, "../kraken/pubspec.yaml");
+  const pubSepcPath = path.join(__dirname, "../webf/pubspec.yaml");
   const pubSpec = fs.readFileSync(pubSepcPath, { encoding: "utf-8" });
   const baseVersion = pubSpec.match(
     /version: ([\d\w.+]+)/,
   );
 
-  const changeLogpath = path.join(__dirname, '../kraken/CHANGELOG.md');
+  const changeLogpath = path.join(__dirname, '../webf/CHANGELOG.md');
   prependFile(changeLogpath, `## ${baseVersion[1]}-nightly.${version}
 nightly version.
 `);

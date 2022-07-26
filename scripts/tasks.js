@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
+
 const { src, dest, series, parallel, task } = require('gulp');
 const mkdirp = require('mkdirp');
 const path = require('path');
@@ -12,35 +17,35 @@ const os = require('os');
 const uploader = require('./utils/uploader');
 
 program
-.option('--static-quickjs', 'Build quickjs as static library and bundled into kraken library.', false)
+.option('--static-quickjs', 'Build quickjs as static library and bundled into webf library.', false)
 .parse(process.argv);
 
 const SUPPORTED_JS_ENGINES = ['jsc', 'quickjs'];
-const targetJSEngine = process.env.KRAKEN_JS_ENGINE || 'quickjs';
+const targetJSEngine = process.env.WEBF_JS_ENGINE || 'quickjs';
 
 if (SUPPORTED_JS_ENGINES.indexOf(targetJSEngine) < 0) {
   throw new Error('Unsupported js engine:' + targetJSEngine);
 }
 
-const KRAKEN_ROOT = join(__dirname, '..');
-const TARGET_PATH = join(KRAKEN_ROOT, 'targets');
+const WEBF_ROOT = join(__dirname, '..');
+const TARGET_PATH = join(WEBF_ROOT, 'targets');
 const platform = os.platform();
-const buildMode = process.env.KRAKEN_BUILD || 'Debug';
+const buildMode = process.env.WEBF_BUILD || 'Debug';
 const paths = {
-  targets: resolveKraken('targets'),
-  scripts: resolveKraken('scripts'),
-  example: resolveKraken('kraken/example'),
-  kraken: resolveKraken('kraken'),
-  bridge: resolveKraken('bridge'),
-  polyfill: resolveKraken('bridge/polyfill'),
-  thirdParty: resolveKraken('third_party'),
-  tests: resolveKraken('integration_tests'),
-  sdk: resolveKraken('sdk'),
-  templates: resolveKraken('scripts/templates'),
-  performanceTests: resolveKraken('performance_tests')
+  targets: resolveWebF('targets'),
+  scripts: resolveWebF('scripts'),
+  example: resolveWebF('webf/example'),
+  webf: resolveWebF('webf'),
+  bridge: resolveWebF('bridge'),
+  polyfill: resolveWebF('bridge/polyfill'),
+  thirdParty: resolveWebF('third_party'),
+  tests: resolveWebF('integration_tests'),
+  sdk: resolveWebF('sdk'),
+  templates: resolveWebF('scripts/templates'),
+  performanceTests: resolveWebF('performance_tests')
 };
 
-const pkgVersion = readFileSync(path.join(paths.kraken, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
+const pkgVersion = readFileSync(path.join(paths.webf, 'pubspec.yaml'), 'utf-8').match(/version: (.*)/)[1].trim();
 const isProfile = process.env.ENABLE_PROFILE === 'true';
 
 exports.paths = paths;
@@ -55,85 +60,9 @@ if (platform == 'win32') {
   }
 }
 
-function resolveKraken(submodule) {
-  return resolve(KRAKEN_ROOT, submodule);
+function resolveWebF(submodule) {
+  return resolve(WEBF_ROOT, submodule);
 }
-
-function buildKraken(platform, mode) {
-  let runtimeMode = '--debug';
-  if (mode === 'Release' && platform === 'darwin') runtimeMode = '--release';
-  let main = path.join(paths.kraken, 'lib/cli.dart');
-  const args = [
-    'build',
-    platform === 'darwin' ? 'macos' : platform,
-    `--target=${main}`,
-    runtimeMode,
-  ];
-
-  console.log(`${chalk.green('[BUILD]')} flutter ${args.join(' ')}`);
-  const handle = spawnSync('flutter', args, {
-    cwd: paths.example,
-    env: process.env,
-    stdio: 'inherit',
-  });
-  // Exit code.
-  return handle.status;
-}
-
-task('build-kraken-debug', (done) => {
-  const exitCode = buildKraken(platform, 'Debug', 'host_debug');
-  if (exitCode === 0) {
-    done();
-  } else {
-    done(chalk.red('BUILD KRAKEN DEBUG WITH ERROR.'));
-  }
-});
-
-task('build-kraken-release', (done) => {
-  const exitCode = buildKraken(platform, 'Release', 'host_release');
-  if (exitCode === 0) {
-    done();
-  } else {
-    done(chalk.red('BUILD KRAKEN RELEASE WITH ERROR.'));
-  }
-});
-
-task('copy-kraken-debug', (done) => {
-  const targetDist = join(TARGET_PATH, platform, 'debug');
-  execSync(`mkdir -p ${targetDist}`);
-  if (platform === 'darwin') {
-    // There is a problem that `cp -r` will drop symbolic, which will make app fails.
-    execSync(`mv ${path.join(paths.example, 'build/macos/Build/Products/Debug/kraken_example.app')} ${targetDist}`);
-    return done();
-  }
-
-  if (platform === 'linux') {
-    execSync(`cp -r ${path.join(paths.example, 'build/linux/debug/*')} ${targetDist}`);
-    return done();
-  }
-
-  throw new Error('Kraken debug is not supported in your platform.');
-});
-
-
-task('copy-kraken-release', (done) => {
-  const targetDist = join(TARGET_PATH, platform, 'release');
-  execSync(`mkdir -p ${targetDist}`);
-
-  if (platform === 'darwin') {
-    execSync(`mv ${path.join(paths.example, 'build/macos/Build/Products/Release/kraken_example.app')} ${targetDist}`);
-    // Add a empty file to keep flutter_assets folder, or flutter crashed.
-    writeFileSync(join(targetDist, 'kraken_example.app/Contents/Frameworks/App.framework/Resources/flutter_assets/.keep'), '# Just keep it.');
-    return done();
-  }
-
-  if (platform === 'linux') {
-    execSync(`mv ${path.join(paths.example, 'build/linux/release/')} ${targetDist}`);
-    return done();
-  }
-
-  throw new Error('Kraken release is not supported in your platform.');
-});
 
 task('clean', () => {
   execSync('git clean -xfd', {
@@ -151,35 +80,10 @@ task('clean', () => {
 
 const libOutputPath = join(TARGET_PATH, platform, 'lib');
 
-function findDebugJSEngine(platform) {
-  if (platform == 'macos' || platform == 'ios') {
-    let packageConfigFilePath = path.join(paths.kraken, '.dart_tool/package_config.json');
-
-    if (!fs.existsSync(packageConfigFilePath)) {
-      execSync('flutter pub get', {
-        cwd: paths.kraken,
-        stdio: 'inherit'
-      });
-    }
-
-    let packageConfig = require(packageConfigFilePath);
-    let packages = packageConfig.packages;
-
-    let jscPackageInfo = packages.find((i) => i.name === 'jsc');
-    if (!jscPackageInfo) {
-      throw new Error('Can not locate `jsc` dart package, please add jsc deps before build kraken libs.');
-    }
-
-    let rootUri = jscPackageInfo.rootUri;
-    let jscPackageLocation = path.join(paths.kraken, '.dart_tool', rootUri);
-    return path.join(jscPackageLocation, platform, 'JavaScriptCore.framework');
-  }
-}
-
-task('build-darwin-kraken-lib', done => {
+task('build-darwin-webf-lib', done => {
   let externCmakeArgs = [];
   let buildType = 'Debug';
-  if (process.env.KRAKEN_BUILD === 'Release') {
+  if (process.env.WEBF_BUILD === 'Release') {
     buildType = 'RelWithDebInfo';
   }
 
@@ -191,7 +95,7 @@ task('build-darwin-kraken-lib', done => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
-  // Bundle quickjs into kraken.
+  // Bundle quickjs into webf.
   if (program.staticQuickjs) {
     externCmakeArgs.push('-DSTATIC_QUICKJS=true');
   }
@@ -202,28 +106,25 @@ task('build-darwin-kraken-lib', done => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine,
+      WEBF_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/macos/lib/x86_64')
     }
   });
 
-  let krakenTargets = ['kraken'];
+  let webfTargets = ['webf'];
   if (targetJSEngine === 'quickjs') {
-    krakenTargets.push('kraken_unit_test');
+    webfTargets.push('webf_unit_test');
   }
   if (buildMode === 'Debug') {
-    krakenTargets.push('kraken_test');
+    webfTargets.push('webf_test');
   }
 
-  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${krakenTargets.join(' ')} -- -j 6`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-macos-x86_64 --target ${webfTargets.join(' ')} -- -j 6`, {
     stdio: 'inherit'
   });
 
-  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libkraken.dylib`);
+  const binaryPath = path.join(paths.bridge, `build/macos/lib/x86_64/libwebf.dylib`);
 
-  if (targetJSEngine === 'jsc') {
-    execSync(`install_name_tool -change /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/JavaScriptCore @rpath/JavaScriptCore.framework/Versions/A/JavaScriptCore ${binaryPath}`);
-  }
   if (buildMode == 'Release' || buildMode == 'RelWithDebInfo') {
     execSync(`dsymutil ${binaryPath}`, { stdio: 'inherit' });
     execSync(`strip -S -X -x ${binaryPath}`, { stdio: 'inherit' });
@@ -234,9 +135,9 @@ task('build-darwin-kraken-lib', done => {
 
 task('run-bridge-unit-test', done => {
   if (platform === 'darwin') {
-    execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/kraken_unit_test')}`, {stdio: 'inherit'});
+    execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/webf_unit_test')}`, {stdio: 'inherit'});
   } else if (platform === 'linux') {
-    execSync(`${path.join(paths.bridge, 'build/linux/lib/kraken_unit_test')}`, {stdio: 'inherit'});
+    execSync(`${path.join(paths.bridge, 'build/linux/lib/webf_unit_test')}`, {stdio: 'inherit'});
   } else {
     throw new Error('Platform not supported.');
   }
@@ -255,7 +156,7 @@ task('compile-polyfill', (done) => {
     cwd: paths.polyfill,
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine
+      WEBF_JS_ENGINE: targetJSEngine
     },
     stdio: 'inherit'
   });
@@ -357,7 +258,7 @@ task('plugin-test', (done) => {
 task('unit-test', (done) => {
   const childProcess = spawn('flutter', ['test', '--coverage'], {
     stdio: 'pipe',
-    cwd: paths.kraken
+    cwd: paths.webf
   });
 
   let stdout = '';
@@ -396,7 +297,7 @@ task('unit-test', (done) => {
 task('unit-test-coverage-reporter', (done) => {
   const childProcess = spawn('npm', ['run', 'test:unit:report'], {
     stdio: 'inherit',
-    cwd: KRAKEN_ROOT,
+    cwd: WEBF_ROOT,
   });
   childProcess.on('exit', () => {
     done();
@@ -429,7 +330,7 @@ function patchiOSFrameworkPList(frameworkPath) {
   }
 }
 
-task(`build-ios-kraken-lib`, (done) => {
+task(`build-ios-webf-lib`, (done) => {
   const buildType = (buildMode == 'Release' || buildMode === 'RelWithDebInfo')  ? 'RelWithDebInfo' : 'Debug';
   let externCmakeArgs = [];
 
@@ -437,7 +338,7 @@ task(`build-ios-kraken-lib`, (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
-  // Bundle quickjs into kraken.
+  // Bundle quickjs into webf.
   if (program.staticQuickjs) {
     externCmakeArgs.push('-DSTATIC_QUICKJS=true');
   }
@@ -455,13 +356,13 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine,
+      WEBF_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/x86_64')
     }
   });
 
   // build for simulator
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target kraken kraken_static -- -j 12`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-x64 --target webf webf_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -479,13 +380,13 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine,
+      WEBF_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm')
     }
   });
 
   // Build for ARMv7, ARMv7s
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target kraken kraken_static -- -j 12`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm --target webf webf_static -- -j 12`, {
     stdio: 'inherit'
   });
 
@@ -502,17 +403,17 @@ task(`build-ios-kraken-lib`, (done) => {
     stdio: 'inherit',
     env: {
       ...process.env,
-      KRAKEN_JS_ENGINE: targetJSEngine,
+      WEBF_JS_ENGINE: targetJSEngine,
       LIBRARY_OUTPUT_DIR: path.join(paths.bridge, 'build/ios/lib/arm64')
     }
   });
 
   // Build for ARM64
-  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target kraken kraken_static -- -j 12`, {
+  execSync(`cmake --build ${paths.bridge}/cmake-build-ios-arm64 --target webf webf_static -- -j 12`, {
     stdio: 'inherit'
   });
 
-  const targetSourceFrameworks = ['kraken_bridge'];
+  const targetSourceFrameworks = ['webf_bridge'];
 
   // If quickjs is not static, there will be another framework called quickjs.framework.
   if (!program.staticQuickjs) {
@@ -537,13 +438,13 @@ task(`build-ios-kraken-lib`, (done) => {
     const frameworkPath = `${targetDynamicSDKPath}/${target}.xcframework`;
     mkdirp.sync(targetDynamicSDKPath);
 
-    // dSYM file are located at /path/to/kraken/build/ios/lib/${arch}/target.dSYM.
+    // dSYM file are located at /path/to/webf/build/ios/lib/${arch}/target.dSYM.
     // Create dSYM for x86_64.
     execSync(`dsymutil ${x64DynamicSDKPath}/${target} --out ${x64DynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
     // Create dSYM for arm64,armv7.
     execSync(`dsymutil ${armDynamicSDKPath}/${target} --out ${armDynamicSDKPath}/../${target}.dSYM`, { stdio: 'inherit' });
 
-    // Generated xcframework at located at /path/to/kraken/build/ios/framework/${target}.xcframework.
+    // Generated xcframework at located at /path/to/webf/build/ios/framework/${target}.xcframework.
     // Generate xcframework with dSYM.
     if (buildMode === 'RelWithDebInfo') {
       execSync(`xcodebuild -create-xcframework \
@@ -562,14 +463,6 @@ task(`build-ios-kraken-lib`, (done) => {
   done();
 });
 
-
-task(`build-ios-kraken-lib-profile`, done => {
-  let frameworkSource = `${paths.sdk}/build/ios/framework/Release/kraken.framework`;
-  let frameworkDest = `${paths.sdk}/build/ios/framework/Profile/kraken.framework`;
-  execSync(`cp -r ${frameworkSource} ${frameworkDest}`);
-  done();
-});
-
 task('build-ios-frameworks', (done) => {
   let cmd = `flutter build ios-framework --cocoapods`;
   execSync(cmd, {
@@ -578,14 +471,14 @@ task('build-ios-frameworks', (done) => {
     stdio: 'inherit'
   });
 
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Debug`);
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Profile`);
-  execSync(`cp -r ${paths.bridge}/build/ios/framework/kraken_bridge.xcframework ${paths.sdk}/build/ios/framework/Release`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/webf_bridge.xcframework ${paths.sdk}/build/ios/framework/Debug`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/webf_bridge.xcframework ${paths.sdk}/build/ios/framework/Profile`);
+  execSync(`cp -r ${paths.bridge}/build/ios/framework/webf_bridge.xcframework ${paths.sdk}/build/ios/framework/Release`);
 
   done();
 });
 
-task('build-linux-kraken-lib', (done) => {
+task('build-linux-webf-lib', (done) => {
   const buildType = buildMode == 'Release' ? 'Release' : 'Relwithdebinfo';
   const cmakeGeneratorTemplate = platform == 'win32' ? 'Ninja' : 'Unix Makefiles';
 
@@ -602,34 +495,34 @@ task('build-linux-kraken-lib', (done) => {
       stdio: 'inherit',
       env: {
         ...process.env,
-        KRAKEN_JS_ENGINE: targetJSEngine,
+        WEBF_JS_ENGINE: targetJSEngine,
         LIBRARY_OUTPUT_DIR: soBinaryDirectory
       }
     });
 
   // build
-  execSync(`cmake --build ${bridgeCmakeDir} --target kraken ${buildMode != 'Release' ? 'kraken_test kraken_unit_test' : ''} -- -j 12`, {
+  execSync(`cmake --build ${bridgeCmakeDir} --target webf ${buildMode != 'Release' ? 'webf_test webf_unit_test' : ''} -- -j 12`, {
     stdio: 'inherit'
   });
 
   const libs = [
-    'libkraken.so'
+    'libwebf.so'
   ];
 
   if (buildMode != 'Release') {
-    libs.push('libkraken_test.so');
+    libs.push('libwebf_test.so');
   }
 
   libs.forEach(lib => {
     const libkrakenPath = path.join(paths.bridge, `build/linux/lib/${lib}`);
     // Patch libkraken.so's runtime path.
-    execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });  
+    execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });
   });
 
   done();
 });
 
-task('build-android-kraken-lib', (done) => {
+task('build-android-webf-lib', (done) => {
   let androidHome;
 
   let ndkDir = '';
@@ -666,13 +559,13 @@ task('build-android-kraken-lib', (done) => {
     externCmakeArgs.push('-DENABLE_ASAN=true');
   }
 
-  // Bundle quickjs into kraken.
+  // Bundle quickjs into webf.
   if (program.staticQuickjs) {
     externCmakeArgs.push('-DSTATIC_QUICKJS=true');
   }
 
   const soFileNames = [
-    'libkraken',
+    'libwebf',
     'libc++_shared'
   ];
 
@@ -702,13 +595,13 @@ task('build-android-kraken-lib', (done) => {
         stdio: 'inherit',
         env: {
           ...process.env,
-          KRAKEN_JS_ENGINE: targetJSEngine,
+          WEBF_JS_ENGINE: targetJSEngine,
           LIBRARY_OUTPUT_DIR: soBinaryDirectory
         }
       });
 
     // build
-    execSync(`cmake --build ${bridgeCmakeDir} --target kraken -- -j 12`, {
+    execSync(`cmake --build ${bridgeCmakeDir} --target webf -- -j 12`, {
       stdio: 'inherit'
     });
 
@@ -757,41 +650,10 @@ task('macos-dylib-clean', (done) => {
   done();
 });
 
-// TODO: support patch windows symbol of quickjs engine.
-task('patch-windows-symbol-link-for-android', done => {
-  const jniLibsDir = path.join(paths.kraken, 'android/jniLibs');
-  const archs = ['arm64-v8a', 'armeabi-v7a'];
-
-  for(let arch of archs) {
-    const libPath = path.join(jniLibsDir, arch);
-    execSync('rm -f ./*', {
-      cwd: libPath,
-      shell: winShell,
-      stdio: 'inherit'
-    });
-    fs.copyFileSync(path.join(paths.thirdParty, `JavaScriptCore\\lib\\android\\${arch}\\libjsc.so`), path.join(libPath, 'libjsc.so'));
-    fs.copyFileSync(path.join(paths.thirdParty, `JavaScriptCore\\lib\\android\\${arch}\\libc++_shared.so`), path.join(libPath, 'libc++_shared.so'));
-    fs.copyFileSync(path.join(paths.bridge, `build/android/lib/${arch}/libkraken_jsc.so`), path.join(libPath, 'libkraken_jsc.so'));
-  }
-
-  done();
-});
-
 task('android-so-clean', (done) => {
   execSync(`rm -rf ${paths.bridge}/build/android`, { stdio: 'inherit', shell: winShell });
   done();
 });
-
-function getDevicesInfo() {
-  let output = JSON.parse(execSync('flutter devices --machine', {stdio: 'pipe', encoding: 'utf-8'}));
-  let androidDevices = output.filter(device => {
-    return device.sdk.indexOf('Android') >= 0;
-  });
-  if (androidDevices.length == 0) {
-    throw new Error('Can not find android benchmark devices.');
-  }
-  return androidDevices;
-}
 
 task('build-benchmark-app', async (done) => {
   execSync('npm install', { cwd: path.join(paths.performanceTests, '/benchmark') });
@@ -805,71 +667,3 @@ task('build-benchmark-app', async (done) => {
 
   done();
 })
-
-task('run-benchmark', async (done) => {
-  const serverPort = '8892';
-
-  const childProcess = spawn('http-server', ['./', `-p ${serverPort}`], {
-    stdio: 'pipe',
-    cwd: path.join(paths.performanceTests, '/benchmark/build')
-  })
-
-  let serverIpAddress;
-  let interfaces = os.networkInterfaces();
-  for (let devName in interfaces) {
-    interfaces[devName].forEach((item) => {
-      if (item.family === 'IPv4' && !item.internal && item.address !== '127.0.0.1') {
-        serverIpAddress = item.address;
-      }
-    })
-  }
-
-  if (!serverIpAddress) {
-    const err = new Error('The IP address was not found.');
-    done(err);
-  }
-  
-  let androidDevices = getDevicesInfo();
-
-  let performanceInfos = execSync(
-    `flutter run -d ${androidDevices[0].id} --profile --dart-define="SERVER=${serverIpAddress}:${serverPort}" | grep Performance`,
-    {
-      cwd: paths.performanceTests
-    }
-  ).toString().split(/\n/);
-
-  const KrakenPerformancePath = 'kraken-performance';
-  for (let item in performanceInfos) {
-    let info = performanceInfos[item];
-    const match = /\[(\s?\d,?)+\]/.exec(info);
-    if (match) {
-      const viewType = item == 0 ? 'kraken' : 'web';
-      try {
-        let performanceDatas = JSON.parse(match[0]);
-        // Remove the top and the bottom five from the final numbers to eliminate fluctuations, and calculate the average.
-        performanceDatas = performanceDatas.sort().slice(5, performanceDatas.length - 5);
-        
-        // Save performance list to file and upload to OSS.
-        const listFile = path.join(__dirname, `${viewType}-load-time-list.js`);
-        fs.writeFileSync(listFile, `performanceCallback('${viewType}LoadtimeList', [${performanceDatas.toString()}]);`);
-
-        let WebviewPerformanceOSSPath = `${KrakenPerformancePath}/${viewType}-loadtimeList.js`;
-        await uploader(WebviewPerformanceOSSPath, listFile).then(() => {
-          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceOSSPath}`);
-        }).catch(err => done(err));
-        // Save performance data of Webview with kraken version.
-        let WebviewPerformanceWithVersionOSSPath = `${KrakenPerformancePath}/${viewType}-${pkgVersion}-loadtimeList.js`;
-        await uploader(WebviewPerformanceWithVersionOSSPath, listFile).then(() => {
-          console.log(`Performance Upload Success: https://kraken.oss-cn-hangzhou.aliyuncs.com/${WebviewPerformanceWithVersionOSSPath}`);
-        }).catch(err => done(err));
-      } catch {
-        const err = new Error('The performance info parse exception.');
-        done(err);
-      }
-    }
-  }
-  
-  execSync('adb uninstall com.example.performance_tests');
-  
-  done();
-});

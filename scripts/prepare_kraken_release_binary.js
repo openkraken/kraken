@@ -6,23 +6,24 @@ const os = require('os');
 let buildTasks = [
   'sdk-clean',
   'compile-polyfill',
-  'build-android-kraken-lib',
+  'build-android-webf-lib',
 ];
 
 if (os.platform() == 'win32') {
+  // TODO: add windows support
   buildTasks.push(
-    'patch-windows-symbol-link-for-android'
+
   );
 } else if (os.platform() == 'darwin') {
   buildTasks.push(
     'macos-dylib-clean',
-    'build-darwin-kraken-lib',
+    'build-darwin-webf-lib',
     'ios-framework-clean',
-    'build-ios-kraken-lib',
+    'build-ios-webf-lib',
   );
 } else if (os.platform() == 'linux') {
   buildTasks.push(
-    'build-linux-kraken-lib'
+    'build-linux-webf-lib'
   )
 }
 

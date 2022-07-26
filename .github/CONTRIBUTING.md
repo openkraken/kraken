@@ -1,8 +1,8 @@
-# Kraken Contributing Guide
+# OpenWebf Contributing Guide
 
 0. Prerequisites
     * [Node.js](https://nodejs.org/) v12.0 or later
-    * [Flutter](https://flutter.dev/docs/get-started/install) version in the `kraken/pubspec.yaml`
+    * [Flutter](https://flutter.dev/docs/get-started/install) version in the `webf/pubspec.yaml`
     * [CMake](https://cmake.org/) v3.10.0 or later
     * [Xcode](https://developer.apple.com/xcode/) (10.12) or later (Running on macOS or iOS)
     * [Android NDK](https://developer.android.com/studio/projects/install-ndk) version `23.2.8568313` (Running on Android)
@@ -51,7 +51,7 @@
 
 3. Start example
     ```shell
-    $ cd kraken/example
+    $ cd webf/example
     $ flutter run
     ```
 

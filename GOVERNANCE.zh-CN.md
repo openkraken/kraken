@@ -1,4 +1,4 @@
-# OpenKraken 项目协同
+# OpenWebF 项目协同
 
 <!-- 目录 -->
 
@@ -15,14 +15,14 @@
 
 ## 协作者
 
-OpenKraken 的协作者将共同维护 [openkraken/kraken] 仓库，协作者在 GitHub 上的小组名称为 @openkraken/collaborators。
+OpenWebF 的协作者将共同维护 [openwebf/webf] 仓库，协作者在 GitHub 上的小组名称为 @openwebf/collaborators。
 
 协作者拥有以下权限：
 
-* [openkraken/kraken] 仓库的 Commit 权限
-* OpenKraken 持续集成（CI）任务的权限
+* [openwebf/webf] 仓库的 Commit 权限
+* OpenWebF 持续集成（CI）任务的权限
 
-无论协作者还是非协作者都可以提交 OpenKraken 的更改，提交更改的机制是通过 Pull Request (PR)。
+无论协作者还是非协作者都可以提交 OpenWebF 的更改，提交更改的机制是通过 Pull Request (PR)。
 
 PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打开超过 7 天，则获得一个协作者的 Review 通过就可以 Merge。
 
@@ -34,7 +34,7 @@ PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打�
 
 * 帮助新手贡献者
 * 贡献代码和更新文档
-* 审查和评论 Issue 并提交 Pull Request 
+* 审查和评论 Issue 并提交 Pull Request
 * 参加工作组
 * 合并 Pull Request
 
@@ -42,30 +42,30 @@ PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打�
 
 ### 协作者提名
 
-现有的协作者可以提名某人成为协作者，被提名人应当是在整个 OpenKraken 生态上做出贡献的组织或个人。
+现有的协作者可以提名某人成为协作者，被提名人应当是在整个 OpenWebF 生态上做出贡献的组织或个人。
 
-要提名新的协作者，需要到 [openkraken/kraken][] 仓库中提出一个 Issue，并提供被提名人相关贡献的概述。例如：
+要提名新的协作者，需要到 [openwebf/webf][] 仓库中提出一个 Issue，并提供被提名人相关贡献的概述。例如：
 
-* 在 [openkraken/kraken][] 仓库中的 Commits
-  * 链接格式 `https://github.com/openkraken/kraken/commits?author=GITHUB_ID`
-* 在 [openkraken/kraken][] 仓库中提交的 Pull requests 和 Issues
-  * 链接格式 `https://github.com/openkraken/kraken/issues?q=author:GITHUB_ID`
-* 在 [openkraken/kraken][] 仓库中对 Pull requests 和 Issues 的评论
-  * 链接格式 `https://github.com/openkraken/kraken/issues?q=commenter:GITHUB_ID`
-* 在 [openkraken/kraken][] 仓库中的 Reviews
-  * 链接格式 `https://github.com/openkraken/kraken/pulls?q=reviewed-by:GITHUB_ID`
-* 在整个 OpenKraken 组织下提交的 Pull requests 和 Issues
-  * 链接格式 `https://github.com/search?q=author:GITHUB_ID + org:openkraken`
-* 在整个 OpenKraken 组织下对 Pull requests 和 Issues 的评论
-  * 链接格式 `https:////github.com/search?q=commenter:GITHUB_ID + org:openkraken`
-* 向 OpenKraken 用户和新手贡献者提供的帮助
-* 参加 OpenKraken 的其他项目，团队、工作组或组织
+* 在 [openwebf/webf][] 仓库中的 Commits
+  * 链接格式 `https://github.com/openwebf/webf/commits?author=GITHUB_ID`
+* 在 [openwebf/webf][] 仓库中提交的 Pull requests 和 Issues
+  * 链接格式 `https://github.com/openwebf/webf/issues?q=author:GITHUB_ID`
+* 在 [openwebf/webf][] 仓库中对 Pull requests 和 Issues 的评论
+  * 链接格式 `https://github.com/openwebf/webf/issues?q=commenter:GITHUB_ID`
+* 在 [openwebf/webf][] 仓库中的 Reviews
+  * 链接格式 `https://github.com/openwebf/webf/pulls?q=reviewed-by:GITHUB_ID`
+* 在整个 OpenWebF 组织下提交的 Pull requests 和 Issues
+  * 链接格式 `https://github.com/search?q=author:GITHUB_ID + org:openwebf`
+* 在整个 OpenWebF 组织下对 Pull requests 和 Issues 的评论
+  * 链接格式 `https:////github.com/search?q=commenter:GITHUB_ID + org:openwebf`
+* 向 OpenWebF 用户和新手贡献者提供的帮助
+* 参加 OpenWebF 的其他项目，团队、工作组或组织
 
-在 Issue 中 `@openkraken/collaborators` 以通知其他协作者。如果一周后没有任何协作者反对，则提名通过，否则提名失败。
+在 Issue 中 `@openwebf/collaborators` 以通知其他协作者。如果一周后没有任何协作者反对，则提名通过，否则提名失败。
 
 ## 技术委员会
 
-一部分协作者组成了技术委员会（TSC），以下简称委员会。委员会为 OpenKraken 项目内的所有技术开发行为负责，其职责包括：
+一部分协作者组成了技术委员会（TSC），以下简称委员会。委员会为 OpenWebF 项目内的所有技术开发行为负责，其职责包括：
 
 * 设置发布日期
 * 发布质量标准
@@ -76,7 +76,7 @@ PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打�
 * 维护协作者列表
 * 维护开发过程和任何编码标准
 * 协调技术冲突
-* 委员会将提供 OpenKraken 项目的发布工具
+* 委员会将提供 OpenWebF 项目的发布工具
 
 ### 组建委员会
 
@@ -110,10 +110,10 @@ PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打�
 
 在会议期间，委员会主席需要确保有人在记录会议纪要。在会议结束后，委员会主席需要保证会议纪要被上传。
 
-委员会可以使用[委员会问题跟踪区](https://github.com/openkraken/TSC/issues) 在会议之外解决尽可能多的问题。 问题跟踪区的运行机制是：
+委员会可以使用[委员会问题跟踪区](https://github.com/openwebf/TSC/issues) 在会议之外解决尽可能多的问题。 问题跟踪区的运行机制是：
 
 * 委员会成员打开一个问题，解释提案/问题和 @提及
-  @openkraken/tsc
+  @openwebf/tsc
 * 如果 72 小时后获得两个或更多委员会成员批准，且没有委员会成员的反对，则提案通过
 * 如果不能够达成共识，委员会成员可以提出发起投票
 
@@ -127,6 +127,6 @@ PR 至少两个协作者 Review 通过后才能 Merge，但如果 PR 已经打�
 
 对于所有投票，绝大多数委员会成员同意则该提议通过，委员会成员也可以选择放弃投票。
 
-[openkraken/kraken]: https://github.com/openkraken/kraken
+[openwebf/webf]: https://github.com/openwebf/webf
 [Lazy Consensus]: https://community.apache.org/committers/lazyConsensus.html
 [Consensus Seeking]: https://en.wikipedia.org/wiki/Consensus-seeking_decision-making
