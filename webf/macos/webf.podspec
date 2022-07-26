@@ -1,22 +1,22 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint kraken_sdk.podspec' to validate before publishing.
+# Run `pod lib lint webf.podspec' to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'kraken'
-  s.version          = '0.10.0'
-  s.summary          = 'A high-performance, web standards-compliant rendering engine.'
+  s.name             = 'webf'
+  s.version          = '0.1.0'
+  s.summary          = 'A W3C standard compliant Web rendering engine based on Flutter.'
   s.description      = <<-DESC
-A high-performance, web standards-compliant rendering engine.
+A W3C standard compliant Web rendering engine based on Flutter..
                        DESC
-  s.homepage         = 'https://openkraken.com'
+  s.homepage         = 'https://openwebf.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'KrakenTeam' => 'openkraken@alibaba-inc.com' }
+  s.author           = { 'WebF' => 'dongtiangche@outlook.com' }
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'FlutterMacOS'
-  s.vendored_libraries = 'libkraken.dylib', 'libquickjs.dylib'
+  s.vendored_libraries = 'libwebf.dylib', 'libquickjs.dylib'
   s.prepare_command = 'bash prepare.sh'
 
   s.platform = :osx, '10.11'

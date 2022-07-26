@@ -10,7 +10,7 @@ const { copyFileSync } = require('fs');
 const buildTasks = [
   'android-so-clean',
   'compile-polyfill',
-  'build-android-kraken-lib'
+  'build-android-webf-lib'
 ];
 
 if (os.platform() == 'win32') {

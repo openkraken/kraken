@@ -10,7 +10,7 @@ require('./tasks');
 series(
   'macos-dylib-clean',
   'compile-polyfill',
-  'build-darwin-kraken-lib',
+  'build-darwin-webf-lib',
 )((err) => {
   if (err) {
     console.log(err);

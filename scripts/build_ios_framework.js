@@ -16,7 +16,7 @@ process.env.PATCH_PROMISE_POLYFILL = 'true';
 series(
   'ios-framework-clean',
   'compile-polyfill',
-  'build-ios-kraken-lib'
+  'build-ios-webf-lib'
 )((err) => {
   if (err) {
     console.log(err);

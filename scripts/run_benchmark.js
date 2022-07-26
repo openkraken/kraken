@@ -11,7 +11,7 @@ process.env.ENABLE_PROFILE = 'true';
 series(
   'android-so-clean',
   'compile-polyfill',
-  'build-android-kraken-lib',
+  'build-android-webf-lib',
   'build-benchmark-app',
   'run-benchmark'
 )(() => {

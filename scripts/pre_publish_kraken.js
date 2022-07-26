@@ -15,23 +15,23 @@ function symbolicToRealFile(path) {
   }
 }
 
-const krakenDir = PATH.join(__dirname, "../kraken");
+const krakenDir = PATH.join(__dirname, "../webf");
 
 const files = [
   "android/jniLibs/arm64-v8a/libc++_shared.so",
-  "android/jniLibs/arm64-v8a/libkraken.so",
+  "android/jniLibs/arm64-v8a/libwebf.so",
   "android/jniLibs/arm64-v8a/libquickjs.so",
   "android/jniLibs/armeabi-v7a/libc++_shared.so",
-  "android/jniLibs/armeabi-v7a/libkraken.so",
+  "android/jniLibs/armeabi-v7a/libwebf.so",
   "android/jniLibs/armeabi-v7a/libquickjs.so",
   "android/jniLibs/x86/libc++_shared.so",
-  "android/jniLibs/x86/libkraken.so",
+  "android/jniLibs/x86/libwebf.so",
   "android/jniLibs/x86/libquickjs.so",
-  "ios/kraken_bridge.xcframework",
+  "ios/webf_bridge.xcframework",
   "ios/quickjs.xcframework",
-  "linux/libkraken.so",
+  "linux/libwebf.so",
   "linux/libquickjs.so",
-  "macos/libkraken.dylib",
+  "macos/libwebf.dylib",
   "macos/libquickjs.dylib",
 ];
 

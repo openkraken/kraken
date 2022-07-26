@@ -1,7 +1,7 @@
 name: webf
-description: A W3C compact Web rendering engine based on Flutter.
+description: A W3C standard compliant Web rendering engine based on Flutter.
 version: 0.1.0
-homepage: https://openkraken.com
+homepage: https://openwebf.com
 
 environment:
   sdk: ">=2.15.0 <3.0.0"

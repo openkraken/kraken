@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
-set(PROJECT_NAME "kraken")
+set(PROJECT_NAME "webf")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "kraken_plugin")
+set(PLUGIN_NAME "webf")
 
 add_library(${PLUGIN_NAME} SHARED
-    "kraken_plugin.cc"
+    "webf.cc"
     )
 
-add_library(kraken SHARED IMPORTED)
-set_target_properties(kraken PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libkraken.so")
+add_library(webf SHARED IMPORTED)
+set_target_properties(webf PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libwebf.so")
 add_library(quickjs SHARED IMPORTED)
 set_target_properties(quickjs PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/libquickjs.so")
 
@@ -25,10 +25,10 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter)
 target_link_libraries(${PLUGIN_NAME} PRIVATE PkgConfig::GTK)
 
 execute_process(
-    COMMAND bash "-c" "readlink -f ${CMAKE_CURRENT_SOURCE_DIR}/libkraken.so"
-    OUTPUT_VARIABLE KRAKEN_LIB_PATH
+    COMMAND bash "-c" "readlink -f ${CMAKE_CURRENT_SOURCE_DIR}/libwebf.so"
+    OUTPUT_VARIABLE WEBF_LIB_PATH
 )
-string(REGEX REPLACE "\n$" "" KRAKEN_LIB_PATH "${KRAKEN_LIB_PATH}")
+string(REGEX REPLACE "\n$" "" WEBF_LIB_PATH "${WEBF_LIB_PATH}")
 
 execute_process(
     COMMAND bash "-c" "readlink -f ${CMAKE_CURRENT_SOURCE_DIR}/libquickjs.so"
@@ -37,8 +37,8 @@ execute_process(
 string(REGEX REPLACE "\n$" "" QUICKJS_LIB_PATH "${QUICKJS_LIB_PATH}")
 
 # List of absolute paths to libraries that should be bundled with the plugin
-set(kraken_bundled_libraries
+set(webf_bundled_libraries
     ${QUICKJS_LIB_PATH}
-    ${KRAKEN_LIB_PATH}
+    ${WEBF_LIB_PATH}
     PARENT_SCOPE
   )
