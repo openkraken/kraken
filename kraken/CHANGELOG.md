@@ -1,3 +1,7 @@
+## 0.11.1
+
++ Add deprecation notice.
+
 ## 0.11.0
 
 **Breaking Changes**
