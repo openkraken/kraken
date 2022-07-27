@@ -1,7 +1,7 @@
 /*
-* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
-* Copyright (C) 2022-present The WebF authors. All rights reserved.
-*/
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
 
 #ifndef BRIDGE_BINDINGS_QJS_DOM_EVENT_TYPE_NAMES_H_
 #define BRIDGE_BINDINGS_QJS_DOM_EVENT_TYPE_NAMES_H_

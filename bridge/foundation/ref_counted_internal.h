@@ -30,8 +30,7 @@ class RefCountedThreadSafeBase {
 
   bool HasOneRef() const { return ref_count_.load(std::memory_order_acquire) == 1u; }
 
-  void AssertHasOneRef() const {
-    WEBF_CHECK(HasOneRef()); }
+  void AssertHasOneRef() const { WEBF_CHECK(HasOneRef()); }
 
  protected:
   RefCountedThreadSafeBase();
