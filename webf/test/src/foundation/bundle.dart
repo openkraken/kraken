@@ -59,7 +59,7 @@ void main() {
       Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
       var bundle = WebFBundle.fromBytecode(bytecode);
       await bundle.resolve(1);
-      expect(bundle.contentType.mimeType, 'application/vnd.WebF.bc1');
+      expect(bundle.contentType.mimeType, 'application/vnd.webf.bc1');
     });
   });
 }
