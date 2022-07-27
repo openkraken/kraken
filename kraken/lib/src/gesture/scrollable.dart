@@ -3,6 +3,7 @@
  */
 
 import 'package:flutter/gestures.dart';
+import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -34,6 +35,12 @@ mixin _CustomTickerProviderStateMixin implements TickerProvider {
   }
 }
 
+const Set<PointerDeviceKind> _kTouchLikeDeviceTypes = <PointerDeviceKind>{
+  PointerDeviceKind.touch,
+  PointerDeviceKind.stylus,
+  PointerDeviceKind.invertedStylus,
+};
+
 // This class should really be called _DisposingTicker or some such, but this
 // class name leaks into stack traces and error messages and that name would be
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
@@ -56,11 +63,13 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   final ScrollPhysics _physics = ScrollPhysics.createScrollPhysics();
   DragStartBehavior dragStartBehavior;
   ScrollListener? scrollListener;
+  final Set<PointerDeviceKind> dragDevices;
 
   KrakenScrollable({
     AxisDirection axisDirection = AxisDirection.down,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrollListener,
+    this.dragDevices = _kTouchLikeDeviceTypes
   }) {
     _axisDirection = axisDirection;
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
@@ -75,6 +84,10 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     for (GestureRecognizer? recognizer in _recognizers.values) {
       recognizer!.addPointer(event);
     }
+  }
+
+  void handlePinterSignal(PointerSignalEvent event) {
+    _receivedPointerSignal(event);
   }
 
   @override
@@ -97,7 +110,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
           // Vertical drag gesture recognizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
-              () => ScrollVerticalDragGestureRecognizer(),
+              () => ScrollVerticalDragGestureRecognizer(supportedDevices: dragDevices),
               (ScrollVerticalDragGestureRecognizer instance) {
                 instance
                   ..isAcceptedDrag = _isAcceptedVerticalDrag
@@ -118,7 +131,7 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
           // Horizontal drag gesture recognizer to horizontal vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
-              () => ScrollHorizontalDragGestureRecognizer(),
+              () => ScrollHorizontalDragGestureRecognizer(supportedDevices: dragDevices),
               (ScrollHorizontalDragGestureRecognizer instance) {
                 instance
                   ..isAcceptedDrag = _isAcceptedHorizontalDrag
@@ -203,6 +216,46 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.update(details);
+  }
+
+  void _receivedPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent && position != null) {
+      if (!_physics.shouldAcceptUserOffset(position!)) {
+        return;
+      }
+      final double delta = _pointerSignalEventDelta(event);
+      final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+      // Only express interest in the event if it would actually result in a scroll.
+      if (delta != 0.0 && targetScrollOffset != position?.pixels) {
+        GestureBinding.instance!.pointerSignalResolver.register(event, _handlePointerScroll);
+      }
+    }
+  }
+  double _pointerSignalEventDelta(PointerScrollEvent event) {
+    double delta = axis == Axis.horizontal
+      ? event.scrollDelta.dx
+      : event.scrollDelta.dy;
+
+    if (axisDirectionIsReversed(axisDirection)) {
+      delta *= -1;
+    }
+    return delta;
+  }
+
+  double _targetScrollOffsetForPointerScroll(double delta) {
+    return math.min(
+      math.max(position!.pixels + delta, position!.minScrollExtent),
+      position!.maxScrollExtent,
+    );
+  }
+
+  void _handlePointerScroll(PointerSignalEvent event) {
+    assert(event is PointerScrollEvent);
+    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
+    if (delta != 0.0 && targetScrollOffset != position!.pixels) {
+      position!.pointerScroll(delta);
+    }
   }
 
   void _handleDragEnd(DragEndDetails details) {

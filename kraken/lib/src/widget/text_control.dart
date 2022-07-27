@@ -31,23 +31,23 @@ typedef OnControllerCreated = void Function(KrakenController controller);
 
 /// Delegate methods of widget
 class WidgetDelegate {
-  GetContext getContext;
-  RequestFocus requestFocus;
-  GetTargetPlatform getTargetPlatform;
-  GetCursorColor getCursorColor;
-  GetSelectionColor getSelectionColor;
-  GetCursorRadius getCursorRadius;
-  GetTextSelectionControls getTextSelectionControls;
+  final GetContext getContext;
+  final RequestFocus requestFocus;
+  final GetTargetPlatform getTargetPlatform;
+  final GetCursorColor getCursorColor;
+  final GetSelectionColor getSelectionColor;
+  final GetCursorRadius getCursorRadius;
+  final GetTextSelectionControls getTextSelectionControls;
 
-  WidgetDelegate(
-      this.getContext,
-      this.requestFocus,
-      this.getTargetPlatform,
-      this.getCursorColor,
-      this.getSelectionColor,
-      this.getCursorRadius,
-      this.getTextSelectionControls,
-      );
+  const WidgetDelegate(
+    this.getContext,
+    this.requestFocus,
+    this.getTargetPlatform,
+    this.getCursorColor,
+    this.getSelectionColor,
+    this.getCursorRadius,
+    this.getTextSelectionControls,
+  );
 }
 
 // Widget involves actions of text control elements(input, textarea).

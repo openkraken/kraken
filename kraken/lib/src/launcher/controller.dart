@@ -1034,12 +1034,12 @@ class KrakenController {
     return completer.future;
   }
 
-  Uri? get _uri {
+  String? get _url {
     HistoryModule historyModule = module.moduleManager.getModule<HistoryModule>('History')!;
-    return historyModule.stackTop?.resolvedUri;
+    return historyModule.stackTop?.url;
   }
 
-  String get url => _uri?.toString() ?? '';
+  String get url => _url ?? '';
 
   _addHistory(KrakenBundle bundle) {
     HistoryModule historyModule =
@@ -1125,9 +1125,7 @@ class KrakenController {
     _controllerMap.remove(_view.contextId);
     _nameIdMap.remove(name);
 
-    if (devToolsService != null) {
-      devToolsService!.dispose();
-    }
+    devToolsService?.dispose();
   }
 
   String get origin => Uri.parse(url).origin;

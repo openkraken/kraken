@@ -160,6 +160,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
@@ -237,6 +239,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/document_fragment.h
     bindings/qjs/dom/style_declaration.cc
     bindings/qjs/dom/style_declaration.h
+    bindings/qjs/dom/css_property_list.h
     bindings/qjs/dom/elements/.gen/canvas_element.cc
     bindings/qjs/dom/elements/.gen/canvas_element.h
     bindings/qjs/dom/elements/image_element.cc

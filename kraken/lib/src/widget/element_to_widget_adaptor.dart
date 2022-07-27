@@ -2,7 +2,9 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/widgets.dart';
+import 'package:kraken/css.dart';
 import 'package:kraken/dom.dart' as dom;
+import 'package:kraken/rendering.dart';
 
 class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
   final dom.Node _krakenNode;
@@ -19,7 +21,16 @@ class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _krakenNode.renderer!;
+    // Children of custom element need RenderFlowLayout nesting,
+    // otherwise the parent render layout will not be called when setting properties.
+    if (_krakenNode is dom.Element) {
+      CSSRenderStyle renderStyle = CSSRenderStyle(target: _krakenNode as dom.Element);
+      RenderFlowLayout renderFlowLayout = RenderFlowLayout(renderStyle: renderStyle);
+      renderFlowLayout.insert(_krakenNode.renderer!);
+      return renderFlowLayout;
+    } else {
+      return _krakenNode.renderer!;
+    }
   }
 }
 
@@ -49,10 +60,16 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
 
   @override
   void unmount() {
+    // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
+    dom.Element element = (widget._krakenNode as dom.Element);
+    element.unmountRenderObject(dispose: false);
+
     super.unmount();
-    (widget._krakenNode as dom.Element).unmountRenderObject();
   }
 
   @override
   void insertRenderObjectChild(RenderObject child, Object? slot) {}
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) {}
 }

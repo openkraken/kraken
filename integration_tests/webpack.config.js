@@ -9,12 +9,32 @@ const resetRuntimePath = path.join(context, 'runtime/reset');
 const buildPath = path.join(context, '.specs');
 const testPath = path.join(context, 'specs');
 const snapshotPath = path.join(context, 'snapshots');
-const coreSpecFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx,html}', {
-  cwd: context,
-  ignore: ['node_modules/**'],
-}).map((file) => './' + file).filter(name => name.indexOf('plugins') < 0);
+const specGroup = require('./spec_group.json');
 
-const pluginSpecFiles =  glob.sync('specs/plugins/**/*.{js,jsx,ts,tsx}', {
+let coreSpecFiles = [];
+
+if (process.env.SPEC_SCOPE) {
+  let targetSpec = specGroup.find((item) => item.name === process.env.SPEC_SCOPE.trim());
+  if (targetSpec) {
+    let targetSpecCollection = targetSpec.specs;
+    targetSpecCollection.forEach(spec => {
+      let files = glob.sync(spec, {
+        cwd: context,
+        ignore: ['node_modules/**'],
+      }).map((file) => './' + file);
+      coreSpecFiles = coreSpecFiles.concat(files);
+    });
+  } else {
+    throw new Error('Unknown target spec scope: ' + process.env.SPEC_SCOPE);
+  }
+} else {
+  coreSpecFiles = glob.sync('specs/**/*.{js,jsx,ts,tsx,html}', {
+    cwd: context,
+    ignore: ['node_modules/**'],
+  }).map((file) => './' + file).filter(name => name.indexOf('plugins') < 0)
+}
+
+const pluginSpecFiles = glob.sync('specs/plugins/**/*.{js,jsx,ts,tsx}', {
   cwd: context,
   ignore: 'node_modules/**',
 }).map((file) => './' + file);

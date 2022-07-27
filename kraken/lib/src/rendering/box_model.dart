@@ -31,9 +31,11 @@ class RenderLayoutParentData extends ContainerBoxParentData<RenderBox> {
   }
 }
 
-// Compute the layout offset of renderObject to its ancestor which does not include the paint offset
-// such as scroll or transform.
-Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+// Applies the layout transform up the tree to `ancestor`.
+//
+// ReturgetLayoutTransformTolocal layout coordinate system to the
+// coordinate system of `ancestor`.
+Matrix4 getLayoutTransformTo(RenderObject current, RenderObject ancestor, { bool excludeScrollOffset = false }) {
   final List<RenderObject> renderers = <RenderObject>[];
   for (RenderObject renderer = current; renderer != ancestor; renderer = renderer.parent! as RenderObject) {
     renderers.add(renderer);
@@ -41,18 +43,19 @@ Offset computeOffsetToAncestor(RenderObject current, RenderObject ancestor, { bo
   }
   renderers.add(ancestor);
 
-  Offset offset = Offset(0, 0);
+  final Matrix4 transform = Matrix4.identity();
   for (int index = renderers.length - 1; index > 0; index -= 1) {
-    final BoxParentData childParentData = renderers[index - 1].parentData! as BoxParentData;
-    final Offset childOffset = childParentData.offset;
-    offset += childOffset;
-    if (excludeScrollOffset) {
-      RenderBoxModel renderer = renderers[index] as RenderBoxModel;
-      offset -= Offset(renderer.scrollLeft, renderer.scrollTop);
+    RenderObject parentRenderer = renderers[index];
+    RenderObject childRenderer = renderers[index - 1];
+    // Apply the layout transform for renderBoxModel and fallback to paint transform for other renderObject type.
+    if (parentRenderer is RenderBoxModel) {
+      parentRenderer.applyLayoutTransform(childRenderer, transform, excludeScrollOffset);
+    } else {
+      parentRenderer.applyPaintTransform(childRenderer, transform);
     }
   }
 
-  return offset;
+  return transform;
 }
 
 /// Modified from Flutter rendering/box.dart.
@@ -711,9 +714,6 @@ class RenderBoxModel extends RenderBox
     }
   }
 
-  // Cache all the fixed children of renderBoxModel of root element
-  List<RenderBoxModel> fixedChildren = [];
-
   // Position of sticky element changes between relative and fixed of scroll container
   StickyPositionType stickyStatus = StickyPositionType.relative;
 
@@ -1085,6 +1085,18 @@ class RenderBoxModel extends RenderBox
     applyEffectiveTransform(child, transform);
   }
 
+  // Forked from RenderBox.applyPaintTransform, add scroll offset exclude logic.
+  void applyLayoutTransform(RenderObject child, Matrix4 transform, bool excludeScrollOffset) {
+    assert(child.parent == this);
+    assert(child.parentData is BoxParentData);
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    Offset offset = childParentData.offset;
+    if (excludeScrollOffset) {
+      offset -= Offset(scrollLeft, scrollTop);
+    }
+    transform.translate(offset.dx, offset.dy);
+  }
+
   // The max scrollable size.
   Size _maxScrollableSize = Size.zero;
   Size get scrollableSize => _maxScrollableSize;
@@ -1275,9 +1287,9 @@ class RenderBoxModel extends RenderBox
   }
 
   // Get the layout offset of renderObject to its ancestor which does not include the paint offset
-  // such as scroll or transform.
-  Offset getOffsetToAncestor(RenderObject ancestor) {
-    return computeOffsetToAncestor(this, ancestor);
+  // such as scroll or transform.getLayoutTransformTo
+  Offset getOffsetToAncestor(Offset point, RenderObject ancestor, { bool excludeScrollOffset = false }) {
+    return MatrixUtils.transformPoint(getLayoutTransformTo(this, ancestor, excludeScrollOffset: excludeScrollOffset), point);
   }
 
   bool _hasLocalBackgroundImage(CSSRenderStyle renderStyle) {
@@ -1386,11 +1398,6 @@ class RenderBoxModel extends RenderBox
       super.dispose();
     });
 
-    // Clear renderObjects in list when disposed to avoid memory leak
-    if (fixedChildren.isNotEmpty) {
-      fixedChildren.clear();
-    }
-
     // Dispose scroll behavior
     disposeScrollable();
 
@@ -1463,26 +1470,28 @@ class RenderBoxModel extends RenderBox
     bool isHit = result.addWithPaintTransform(
       transform: renderStyle.effectiveTransformMatrix,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset trasformPosition) {
+      hitTest: (BoxHitTestResult result, Offset transformPosition) {
         return result.addWithPaintOffset(
             offset: (scrollLeft != 0.0 || scrollTop != 0.0)
                 ? Offset(-scrollLeft, -scrollTop)
                 : null,
-            position: trasformPosition,
+            position: transformPosition,
             hitTest: (BoxHitTestResult result, Offset position) {
               CSSPositionType positionType = renderStyle.position;
               if (positionType == CSSPositionType.fixed) {
-                position -= getTotalScrollOffset();
+                Offset totalScrollOffset = getTotalScrollOffset();
+                position -= totalScrollOffset;
+                transformPosition -= totalScrollOffset;
               }
 
               // Determine whether the hittest position is within the visible area of the node in scroll.
-              if ((clipX || clipY) && !size.contains(trasformPosition)) {
+              if ((clipX || clipY) && !size.contains(transformPosition)) {
                 return false;
               }
 
               // addWithPaintOffset is to add an offset to the child node, the calculation itself does not need to bring an offset.
               if (hitTestChildren(result, position: position) ||
-                  hitTestSelf(trasformPosition)) {
+                  hitTestSelf(transformPosition)) {
                 result.add(BoxHitTestEntry(this, position));
                 return true;
               }

@@ -27,13 +27,13 @@ Offset? _getRenderPositionHolderScrollOffset(RenderPositionPlaceholder holder, R
 }
 
 // Get the offset of the RenderPlaceholder of positioned element to its parent RenderBoxModel.
-Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder placeholder, RenderBoxModel parent) {
-  if (!placeholder.attached) {
+Offset _getPlaceholderToParentOffset(RenderPositionPlaceholder? placeholder, RenderBoxModel parent) {
+  if (placeholder == null || !placeholder.attached) {
     return Offset.zero;
   }
   Offset positionHolderScrollOffset = _getRenderPositionHolderScrollOffset(placeholder, parent) ?? Offset.zero;
   // Offset of positioned element should exclude scroll offset to its containing block.
-  Offset toParentOffset = placeholder.getOffsetToAncestor(parent, excludeScrollOffset: true);
+  Offset toParentOffset = placeholder.getOffsetToAncestor(Offset.zero, parent, excludeScrollOffset: true);
   Offset placeholderOffset = positionHolderScrollOffset + toParentOffset;
 
   return placeholderOffset;
@@ -363,7 +363,7 @@ class CSSPositionedLayout {
     // The static position of positioned element is its offset when its position property had been static
     // which equals to the position of its placeholder renderBox.
     // https://www.w3.org/TR/CSS2/visudet.html#static-position
-    Offset staticPositionOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder!, parent);
+    Offset staticPositionOffset = _getPlaceholderToParentOffset(child.renderPositionPlaceholder, parent);
 
     double x = _computePositionedOffset(
       Axis.horizontal,

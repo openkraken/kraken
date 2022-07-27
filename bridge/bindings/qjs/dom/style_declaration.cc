@@ -3,6 +3,7 @@
  */
 
 #include "style_declaration.h"
+#include "bindings/qjs/dom/css_property_list.h"
 #include "event_target.h"
 #include "kraken_bridge.h"
 
@@ -181,7 +182,13 @@ int StyleDeclarationInstance::hasProperty(JSContext* ctx, JSValue obj, JSAtom at
   auto* style = static_cast<StyleDeclarationInstance*>(JS_GetOpaque(obj, CSSStyleDeclaration::kCSSStyleDeclarationClassId));
   const char* cname = JS_AtomToCString(ctx, atom);
   std::string name = std::string(cname);
-  bool match = style->properties.count(name) >= 0;
+
+  if (cssPropertyList.count(name) > 0) {
+    JS_FreeCString(ctx, cname);
+    return true;
+  }
+
+  bool match = style->properties.count(name) > 0;
   JS_FreeCString(ctx, cname);
   return match;
 }
@@ -214,7 +221,7 @@ JSValue StyleDeclarationInstance::getProperty(JSContext* ctx, JSValue obj, JSAto
 }
 
 JSClassExoticMethods StyleDeclarationInstance::m_exoticMethods{
-    nullptr, nullptr, nullptr, nullptr, nullptr, getProperty, setProperty,
+    nullptr, nullptr, nullptr, nullptr, hasProperty, getProperty, setProperty,
 };
 
 void StyleDeclarationInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) {

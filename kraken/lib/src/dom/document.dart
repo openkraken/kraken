@@ -92,19 +92,19 @@ class Document extends Node {
 
     RenderViewportBox? viewport = _viewport;
     // When document is disposed, viewport is null.
-    if (viewport == null) return;
-
-    if (element != null) {
-      element.attachTo(this);
-      // Should scrollable.
-      element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
-      element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
-      // Init with viewport size.
-      element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
-      element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
-    } else {
-      // Detach document element.
-      viewport.child = null;
+    if (viewport != null) {
+      if (element != null) {
+        element.attachTo(this);
+        // Should scrollable.
+        element.setRenderStyleProperty(OVERFLOW_X, CSSOverflowType.scroll);
+        element.setRenderStyleProperty(OVERFLOW_Y, CSSOverflowType.scroll);
+        // Init with viewport size.
+        element.renderStyle.width = CSSLengthValue(viewport.viewportSize.width, CSSLengthType.PX);
+        element.renderStyle.height = CSSLengthValue(viewport.viewportSize.height, CSSLengthType.PX);
+      } else {
+        // Detach document element.
+        viewport.child = null;
+      }
     }
 
     _documentElement = element;

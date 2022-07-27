@@ -134,4 +134,26 @@ describe('Content Visibility', () => {
     await snapshot(container1);
   });
 
+  it('should work with null', async () => {
+    var container1 = document.createElement('div');
+
+    setElementStyle(container1, {
+      contentVisibility: 'hidden',
+      backgroundColor: 'red',
+      width: '200px',
+      height: '200px',
+    });
+
+    document.body.appendChild(container1);
+
+    setElementStyle(container1, {
+      position: 'absolute',
+      top: '-1000px',
+      contentVisibility: null
+    });
+
+
+    // Should be visible.
+    await snapshot(container1);
+  });
 });
