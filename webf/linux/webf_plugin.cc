@@ -1,4 +1,4 @@
-#include "include/kraken/kraken_plugin.h"
+#include "include/webf/webf_plugin.h"
 
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
@@ -6,19 +6,19 @@
 
 #include <cstring>
 
-#define KRAKEN_PLUGIN(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj), kraken_plugin_get_type(), \
-                              KrakenPlugin))
+#define WEBF_PLUGIN(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), webf_plugin_get_type(), \
+                              WebfPlugin))
 
-struct _KrakenPlugin {
+struct _WebfPlugin {
   GObject parent_instance;
 };
 
-G_DEFINE_TYPE(KrakenPlugin, kraken_plugin, g_object_get_type())
+G_DEFINE_TYPE(WebfPlugin, webf_plugin, g_object_get_type())
 
 // Called when a method call is received from Flutter.
-static void kraken_plugin_handle_method_call(
-    KrakenPlugin* self,
+static void webf_plugin_handle_method_call(
+    WebfPlugin* self,
     FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = nullptr;
 
@@ -37,30 +37,30 @@ static void kraken_plugin_handle_method_call(
   fl_method_call_respond(method_call, response, nullptr);
 }
 
-static void kraken_plugin_dispose(GObject* object) {
-  G_OBJECT_CLASS(kraken_plugin_parent_class)->dispose(object);
+static void webf_plugin_dispose(GObject* object) {
+  G_OBJECT_CLASS(webf_plugin_parent_class)->dispose(object);
 }
 
-static void kraken_plugin_class_init(KrakenPluginClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = kraken_plugin_dispose;
+static void webf_plugin_class_init(WebfPluginClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = webf_plugin_dispose;
 }
 
-static void kraken_plugin_init(KrakenPlugin* self) {}
+static void webf_plugin_init(WebfPlugin* self) {}
 
 static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
                            gpointer user_data) {
-  KrakenPlugin* plugin = KRAKEN_PLUGIN(user_data);
-  kraken_plugin_handle_method_call(plugin, method_call);
+  WebfPlugin* plugin = WEBF_PLUGIN(user_data);
+  webf_plugin_handle_method_call(plugin, method_call);
 }
 
-void kraken_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
-  KrakenPlugin* plugin = KRAKEN_PLUGIN(
-      g_object_new(kraken_plugin_get_type(), nullptr));
+void webf_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
+  WebfPlugin* plugin = WEBF_PLUGIN(
+      g_object_new(webf_plugin_get_type(), nullptr));
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel =
       fl_method_channel_new(fl_plugin_registrar_get_messenger(registrar),
-                            "kraken",
+                            "webf",
                             FL_METHOD_CODEC(codec));
   fl_method_channel_set_method_call_handler(channel, method_call_cb,
                                             g_object_ref(plugin),
