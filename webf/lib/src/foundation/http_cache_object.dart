@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:async';
@@ -56,7 +57,9 @@ class HttpCacheObject {
   bool _valid = false;
   bool get valid => _valid;
 
-  HttpCacheObject(this.url, this.cacheDirectory, {
+  HttpCacheObject(
+    this.url,
+    this.cacheDirectory, {
     this.headers,
     this.expiredTime,
     this.eTag,
@@ -65,7 +68,7 @@ class HttpCacheObject {
     this.lastModified,
     this.origin,
     required this.hash,
-  }) : _file = File(path.join(cacheDirectory, '$hash')),
+  })  : _file = File(path.join(cacheDirectory, '$hash')),
         _blob = HttpCacheObjectBlob(path.join(cacheDirectory, '$hash-blob'));
 
   factory HttpCacheObject.fromResponse(String url, HttpClientResponse response, String cacheDirectory) {
@@ -73,11 +76,11 @@ class HttpCacheObject {
     String? eTag = response.headers.value(HttpHeaders.etagHeader);
     int contentLength = response.headers.contentLength;
     String? lastModifiedValue = response.headers.value(HttpHeaders.lastModifiedHeader);
-    DateTime? lastModified = lastModifiedValue != null
-        ? tryParseHttpDate(lastModifiedValue)
-        : null;
+    DateTime? lastModified = lastModifiedValue != null ? tryParseHttpDate(lastModifiedValue) : null;
 
-    return HttpCacheObject(url, cacheDirectory,
+    return HttpCacheObject(
+      url,
+      cacheDirectory,
       headers: response.headers.toString(),
       eTag: eTag,
       expiredTime: expiredTime,
@@ -253,7 +256,10 @@ class HttpCacheObject {
     // Index bytes format:
     // | Type x 1B | Reserved x 3B |
     bytesBuilder.add([
-      NetworkType, Reserved, Reserved, Reserved,
+      NetworkType,
+      Reserved,
+      Reserved,
+      Reserved,
     ]);
 
     // | ExpiredTimeStamp x 8B |
@@ -385,7 +391,6 @@ class HttpCacheObject {
     )..compressionState = _getCompressionState(httpClient, responseHeaders);
   }
 
-
   static HttpClientResponseCompressionState _getCompressionState(HttpClient? httpClient, HttpHeaders responseHeaders) {
     if (httpClient != null && responseHeaders.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
       return httpClient.autoUncompress
@@ -406,13 +411,8 @@ class HttpCacheObject {
 
     // Consume stream.
     Completer<Uint8List> completer = Completer<Uint8List>();
-    ByteConversionSink sink = ByteConversionSink.withCallback(
-            (bytes) => completer.complete(Uint8List.fromList(bytes)));
-    blobStream.listen(
-        sink.add,
-        onError: completer.completeError,
-        onDone: sink.close,
-        cancelOnError: true);
+    ByteConversionSink sink = ByteConversionSink.withCallback((bytes) => completer.complete(Uint8List.fromList(bytes)));
+    blobStream.listen(sink.add, onError: completer.completeError, onDone: sink.close, cancelOnError: true);
 
     return completer.future;
   }
@@ -431,8 +431,7 @@ class HttpCacheObject {
     String? remoteLastModifiedString = response.headers.value(HttpHeaders.lastModifiedHeader);
     if (remoteLastModifiedString != null) {
       DateTime? remoteLastModified = tryParseHttpDate(remoteLastModifiedString);
-      if (remoteLastModified != null
-          && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
+      if (remoteLastModified != null && (lastModified == null || !remoteLastModified.isAtSameMomentAs(lastModified!))) {
         lastModified = remoteLastModified;
         indexChanged = true;
       }

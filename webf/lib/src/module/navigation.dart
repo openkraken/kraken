@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'module_manager.dart';
 
-typedef KrakenNavigationDecisionHandler = Future<KrakenNavigationActionPolicy> Function(KrakenNavigationAction action);
-typedef KrakenNavigationErrorHandler = void Function(Object error, Object stack);
+typedef WebFNavigationDecisionHandler = Future<WebFNavigationActionPolicy> Function(WebFNavigationAction action);
+typedef WebFNavigationErrorHandler = void Function(Object error, Object stack);
 
-enum KrakenNavigationActionPolicy {
+enum WebFNavigationActionPolicy {
   // allow kraken to perform navigate.
   allow,
 
@@ -15,7 +16,7 @@ enum KrakenNavigationActionPolicy {
 }
 
 // https://www.w3.org/TR/navigation-timing-2/#sec-performance-navigation-types
-enum KrakenNavigationType {
+enum WebFNavigationType {
   // Navigation where the history handling behavior is set to "default"
   // or "replace" and the navigation was not initiated by a prerender hint.
   navigate,
@@ -46,7 +47,8 @@ class NavigationModule extends BaseModule {
     Uri targetUri = Uri.parse(targetUrl);
     Uri sourceUri = Uri.parse(sourceUrl);
 
-    await moduleManager!.controller.view.handleNavigationAction(sourceUrl, targetUrl, targetUri == sourceUri ? KrakenNavigationType.reload : KrakenNavigationType.navigate);
+    await moduleManager!.controller.view.handleNavigationAction(
+        sourceUrl, targetUrl, targetUri == sourceUri ? WebFNavigationType.reload : WebFNavigationType.navigate);
   }
 
   @override
@@ -60,8 +62,8 @@ class NavigationModule extends BaseModule {
   }
 }
 
-class KrakenNavigationAction {
-  KrakenNavigationAction(this.source, this.target, this.navigationType);
+class WebFNavigationAction {
+  WebFNavigationAction(this.source, this.target, this.navigationType);
 
   // The current source url.
   String? source;
@@ -70,27 +72,27 @@ class KrakenNavigationAction {
   String target;
 
   // The navigation type.
-  KrakenNavigationType navigationType;
+  WebFNavigationType navigationType;
 
   @override
-  String toString() => 'KrakenNavigationType(source:$source, target:$target, navigationType:$navigationType)';
+  String toString() => 'WebFNavigationType(source:$source, target:$target, navigationType:$navigationType)';
 }
 
-Future<KrakenNavigationActionPolicy> defaultDecisionHandler(KrakenNavigationAction action) async {
-  return KrakenNavigationActionPolicy.allow;
+Future<WebFNavigationActionPolicy> defaultDecisionHandler(WebFNavigationAction action) async {
+  return WebFNavigationActionPolicy.allow;
 }
 
-class KrakenNavigationDelegate {
+class WebFNavigationDelegate {
   // Called when an error occurs during navigation.
-  KrakenNavigationErrorHandler? errorHandler;
+  WebFNavigationErrorHandler? errorHandler;
 
-  KrakenNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
+  WebFNavigationDecisionHandler _decisionHandler = defaultDecisionHandler;
 
-  void setDecisionHandler(KrakenNavigationDecisionHandler handler) {
+  void setDecisionHandler(WebFNavigationDecisionHandler handler) {
     _decisionHandler = handler;
   }
 
-  Future<KrakenNavigationActionPolicy> dispatchDecisionHandler(KrakenNavigationAction action) async {
+  Future<WebFNavigationActionPolicy> dispatchDecisionHandler(WebFNavigationAction action) async {
     return await _decisionHandler(action);
   }
 }

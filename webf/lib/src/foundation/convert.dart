@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-FutureOr<String> resolveStringFromData(final List<int> data, { Codec codec = utf8, bool preferSync = false }) async {
+FutureOr<String> resolveStringFromData(final List<int> data, {Codec codec = utf8, bool preferSync = false}) async {
   if (codec == utf8) {
     return _resolveUtf8StringFromData(data, preferSync);
   } else {

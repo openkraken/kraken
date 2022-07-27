@@ -1,20 +1,21 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 double? _determinant(m) {
   return m[0][0] * m[1][1] * m[2][2] +
-    m[1][0] * m[2][1] * m[0][2] +
-    m[2][0] * m[0][1] * m[1][2] -
-    m[0][2] * m[1][1] * m[2][0] -
-    m[1][2] * m[2][1] * m[0][0] -
-    m[2][2] * m[0][1] * m[1][0];
+      m[1][0] * m[2][1] * m[0][2] +
+      m[2][0] * m[0][1] * m[1][2] -
+      m[0][2] * m[1][1] * m[2][0] -
+      m[1][2] * m[2][1] * m[0][0] -
+      m[2][2] * m[0][1] * m[1][0];
 }
 
 // from Wikipedia:
@@ -50,10 +51,12 @@ List _inverse(m) {
 }
 
 List _transposeMatrix4(m) {
-  return [[m[0][0], m[1][0], m[2][0], m[3][0]],
-          [m[0][1], m[1][1], m[2][1], m[3][1]],
-          [m[0][2], m[1][2], m[2][2], m[3][2]],
-          [m[0][3], m[1][3], m[2][3], m[3][3]]];
+  return [
+    [m[0][0], m[1][0], m[2][0], m[3][0]],
+    [m[0][1], m[1][1], m[2][1], m[3][1]],
+    [m[0][2], m[1][2], m[2][2], m[3][2]],
+    [m[0][3], m[1][3], m[2][3], m[3][3]]
+  ];
 }
 
 List<double> _multVecMatrix(v, m) {
@@ -78,14 +81,11 @@ List<double> _normalize(List<double> v) {
 }
 
 List<double> _combine(v1, v2, v1s, v2s) {
-  return [v1s * v1[0] + v2s * v2[0], v1s * v1[1] + v2s * v2[1],
-          v1s * v1[2] + v2s * v2[2]];
+  return [v1s * v1[0] + v2s * v2[0], v1s * v1[1] + v2s * v2[1], v1s * v1[2] + v2s * v2[2]];
 }
 
 List<double> _cross(v1, v2) {
-  return [v1[1] * v2[2] - v1[2] * v2[1],
-          v1[2] * v2[0] - v1[0] * v2[2],
-          v1[0] * v2[1] - v1[1] * v2[0]];
+  return [v1[1] * v2[2] - v1[2] * v2[1], v1[2] * v2[0] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0]];
 }
 
 double _dot(v1, v2) {
@@ -110,7 +110,12 @@ double? _deg2rad(deg) {
 }
 
 List<List<double>> _multiply(a, b) {
-  List<List<double>> result = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+  List<List<double>> result = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
+  ];
   for (var i = 0; i < 4; i++) {
     for (var j = 0; j < 4; j++) {
       for (var k = 0; k < 4; k++) {
@@ -136,7 +141,12 @@ List<double> _lerpFloat64List(List<double> begin, List<double>? end, t) {
 class CSSMatrix {
   // https://drafts.csswg.org/css-transforms-2/#recomposing-to-a-3d-matrix
   static Matrix4 compose3DMatrix(translate, scale, skew, perspective, List<double> quaternion) {
-    List<List<double>> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List<double>> matrix = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
 
     // apply perspective
     for (var i = 0; i < 4; i++) {
@@ -156,7 +166,12 @@ class CSSMatrix {
     var z = quaternion[2];
     var w = quaternion[3];
 
-    List<List<double>> rotationMatrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List<double>> rotationMatrix = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
 
     // Construct a composite rotation matrix from the quaternion values
     // rotationMatrix is a identity 4x4 matrix initially
@@ -174,7 +189,12 @@ class CSSMatrix {
 
     // apply skew
     // temp is a identity 4x4 matrix initially
-    List<List<double>> temp = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List<double>> temp = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
     if (skew[2] != 0) {
       temp[2][1] = skew[2];
       matrix = _multiply(matrix, temp);
@@ -200,11 +220,7 @@ class CSSMatrix {
     }
 
     return Matrix4.columns(
-      Vector4.array(matrix[0]),
-      Vector4.array(matrix[1]),
-      Vector4.array(matrix[2]),
-      Vector4.array(matrix[3])
-    );
+        Vector4.array(matrix[0]), Vector4.array(matrix[1]), Vector4.array(matrix[2]), Vector4.array(matrix[3]));
   }
 
   // https://github.com/WebKit/webkit/blob/950143da027e80924b4bb86defa8a3f21fd3fb1e/Source/WebCore/platform/graphics/transforms/TransformationMatrix.cpp#L530
@@ -346,12 +362,9 @@ class CSSMatrix {
     quaternion[2] = 0.5 * sqrt(max<double>(1 - row[0][0] - row[1][1] + row[2][2], 0));
     quaternion[3] = 0.5 * sqrt(max<double>(1 + row[0][0] + row[1][1] + row[2][2], 0));
 
-    if (row[2][1] > row[1][2])
-      quaternion[0] = -quaternion[0];
-    if (row[0][2] > row[2][0])
-      quaternion[1] = -quaternion[1];
-    if (row[1][0] > row[0][1])
-      quaternion[2] = -quaternion[2];
+    if (row[2][1] > row[1][2]) quaternion[0] = -quaternion[0];
+    if (row[0][2] > row[2][0]) quaternion[1] = -quaternion[1];
+    if (row[1][0] > row[0][1]) quaternion[2] = -quaternion[2];
 
     return [translate, scale, skew, perspective, quaternion];
   }
@@ -360,23 +373,26 @@ class CSSMatrix {
   static bool isAffine(Matrix4 matrix4) {
     Float64List m = matrix4.storage;
     // is 2D
-    return (
-      m[2] == 0 &&
-      m[3] == 0 &&
-      m[6] == 0 &&
-      m[7] == 0 &&
-      m[8] == 0 &&
-      m[9] == 0 &&
-      m[10] == 1 &&
-      m[11] == 0 &&
-      m[14] == 0 &&
-      m[15] == 1
-    );
+    return (m[2] == 0 &&
+        m[3] == 0 &&
+        m[6] == 0 &&
+        m[7] == 0 &&
+        m[8] == 0 &&
+        m[9] == 0 &&
+        m[10] == 1 &&
+        m[11] == 0 &&
+        m[14] == 0 &&
+        m[15] == 1);
   }
 
   static Matrix4 compose2DMatrix(List decomposed) {
     // a 4x4 matrix initialized to identity matrix
-    List<List<double>> matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List<double>> matrix = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
 
     List<double> translate = decomposed[0];
     List<double> scale = decomposed[1];
@@ -401,7 +417,12 @@ class CSSMatrix {
     double sinAngle = sin(angle);
 
     // New temporary, identity initialized, 4x4 matrix rotateMatrix
-    List<List<double>> rotateMatrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    List<List<double>> rotateMatrix = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1]
+    ];
 
     rotateMatrix[0][0] = cosAngle;
     rotateMatrix[0][1] = sinAngle;
@@ -417,13 +438,8 @@ class CSSMatrix {
     matrix[1][1] *= scale[1];
 
     return Matrix4.columns(
-      Vector4.array(matrix[0]),
-      Vector4.array(matrix[1]),
-      Vector4.array(matrix[2]),
-      Vector4.array(matrix[3])
-    );
+        Vector4.array(matrix[0]), Vector4.array(matrix[1]), Vector4.array(matrix[2]), Vector4.array(matrix[3]));
   }
-
 
   // https://drafts.csswg.org/css-transforms-1/#interpolation-of-decomposed-2d-matrix-values
   // translationA ; a 2 component vector
@@ -457,10 +473,8 @@ class CSSMatrix {
     }
 
     // Don’t rotate the long way around.
-    if (angleA == 0)
-      angleA = 360;
-    if (angleB == 0)
-      angleB = 360;
+    if (angleA == 0) angleA = 360;
+    if (angleB == 0) angleB = 360;
 
     if ((angleA - angleB).abs() > 180) {
       if (angleA > angleB)
@@ -485,7 +499,7 @@ class CSSMatrix {
     if (CSSMatrix.isAffine(begin)) {
       List matrixA = CSSMatrix.decompose2DMatrix(begin);
       List matrixB = CSSMatrix.decompose2DMatrix(end);
-      List lerp2D  = CSSMatrix.lerp2DMatrix(matrixA, matrixB, t);
+      List lerp2D = CSSMatrix.lerp2DMatrix(matrixA, matrixB, t);
       newMatrix4 = CSSMatrix.compose2DMatrix(lerp2D);
     } else {
       List beginMatrix = CSSMatrix.decompose3DMatrix(begin)!;
@@ -494,19 +508,17 @@ class CSSMatrix {
       List endQuaternion = endMatrix[4];
       List<double> quaternion = CSSMatrix.lerpQuaternion(beginQuaternion, endQuaternion, t);
       newMatrix4 = CSSMatrix.compose3DMatrix(
-        _lerpFloat64List(beginMatrix[0], endMatrix[0], t),
-        _lerpFloat64List(beginMatrix[1], endMatrix[1], t),
-        _lerpFloat64List(beginMatrix[2], endMatrix[2], t),
-        _lerpFloat64List(beginMatrix[3], endMatrix[3], t),
-        quaternion
-      );
+          _lerpFloat64List(beginMatrix[0], endMatrix[0], t),
+          _lerpFloat64List(beginMatrix[1], endMatrix[1], t),
+          _lerpFloat64List(beginMatrix[2], endMatrix[2], t),
+          _lerpFloat64List(beginMatrix[3], endMatrix[3], t),
+          quaternion);
     }
     return newMatrix4;
   }
 
   // https://drafts.csswg.org/css-transforms-1/#decomposing-a-2d-matrix
   static List decompose2DMatrix(Matrix4 matrix4) {
-
     List<double> m4storage = matrix4.storage;
     List<List<double>> matrix = [
       m4storage.sublist(0, 4),
@@ -612,8 +624,8 @@ class CSSMatrix {
           for (int i = 0; i < 16; i++) {
             args[i] = double.tryParse(method.args[i].trim()) ?? 1.0;
           }
-          return Matrix4(args[0]!, args[1]!, args[2]!, args[3]!, args[4]!, args[5]!, args[6]!, args[7]!, args[8]!, args[9]!,
-              args[10]!, args[11]!, args[12]!, args[13]!, args[14]!, args[15]!);
+          return Matrix4(args[0]!, args[1]!, args[2]!, args[3]!, args[4]!, args[5]!, args[6]!, args[7]!, args[8]!,
+              args[9]!, args[10]!, args[11]!, args[12]!, args[13]!, args[14]!, args[15]!);
         }
         break;
       // https://drafts.csswg.org/css-transforms-2/#individual-transforms

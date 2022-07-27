@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kraken/kraken.dart';
+import 'package:kraken/webf.dart';
 
 import 'local_http_server.dart';
 
@@ -22,7 +22,6 @@ import 'src/css/style_sheet_parser.dart' as style_sheet_parser;
 import 'src/css/values.dart' as css_values;
 
 import 'src/gesture/scroll_physics.dart' as scroll_physics;
-
 
 // The main entry for kraken unit test.
 // Setup all common logic.

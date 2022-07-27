@@ -30,7 +30,8 @@ void main() {
     });
 
     test('4', () {
-      List<CSSRule> rules = CSSStyleSheetParser.parse('.foo {color: red} .bar {background: url(data:image/png;base64...)}');
+      List<CSSRule> rules =
+          CSSStyleSheetParser.parse('.foo {color: red} .bar {background: url(data:image/png;base64...)}');
       expect(rules.length, 2);
       expect((rules[0] as CSSStyleRule).selectorText, '.foo');
       expect((rules[0] as CSSStyleRule).style['color'], 'red');

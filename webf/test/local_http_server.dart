@@ -58,7 +58,7 @@ class LocalHttpServer {
               for (int byte in data) {
                 // space
                 if (byte == 32) {
-                  state ++;
+                  state++;
                   continue;
                 }
 
@@ -83,13 +83,14 @@ class LocalHttpServer {
                 throw FlutterError('Reading local http data, but file not exists: \n${file.absolute.path}');
               }
 
-              file.readAsBytes()
-                .then((Uint8List bytes) => utf8.decode(bytes))
-                .then((String input) => _format(input))
-                .then((String content) => utf8.encode(content))
-                .catchError((Object err, StackTrace? stack) => file.readAsBytes())
-                .then(socket.add)
-                .then((_) => socket.close());
+              file
+                  .readAsBytes()
+                  .then((Uint8List bytes) => utf8.decode(bytes))
+                  .then((String input) => _format(input))
+                  .then((String content) => utf8.encode(content))
+                  .catchError((Object err, StackTrace? stack) => file.readAsBytes())
+                  .then(socket.add)
+                  .then((_) => socket.close());
             }
           }
         }, onError: (Object error, [StackTrace? stackTrace]) {
@@ -105,9 +106,6 @@ class LocalHttpServer {
   }
 
   String _format(String input) {
-    return input
-        .replaceAll(RegExp(r'CURRENT_TIME', multiLine: true), HttpDate.format(DateTime.now()));
+    return input.replaceAll(RegExp(r'CURRENT_TIME', multiLine: true), HttpDate.format(DateTime.now()));
   }
 }
-
-

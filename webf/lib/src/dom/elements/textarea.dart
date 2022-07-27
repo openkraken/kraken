@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/foundation.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
 
 const String TEXTAREA = 'TEXTAREA';
 const String ROWS = 'rows';
@@ -15,62 +16,114 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class TextareaElement extends TextFormControlElement {
-  TextareaElement(context)
-    : super(context, isMultiline: true, defaultStyle: _defaultStyle, isReplacedElement: true);
+  TextareaElement(context) : super(context, isMultiline: true, defaultStyle: _defaultStyle, isReplacedElement: true);
 
   // Bindings.
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'width': return width;
-      case 'height': return height;
-      case 'rows': return rows;
-      case 'cols': return cols;
-      case 'value': return value;
-      case 'defaultValue': return defaultValue;
-      case 'autocomplete': return autocomplete;
-      case 'autofocus': return autofocus;
-      case 'required': return required;
-      case 'readonly': return readOnly;
-      case 'name': return name;
-      case 'disabled': return disabled;
-      case 'minLength': return minLength;
-      case 'maxLength': return maxLength;
-      case 'placeholder': return placeholder;
-      case 'inputMode': return inputMode;
-      default: return super.getBindingProperty(key);
+      case 'width':
+        return width;
+      case 'height':
+        return height;
+      case 'rows':
+        return rows;
+      case 'cols':
+        return cols;
+      case 'value':
+        return value;
+      case 'defaultValue':
+        return defaultValue;
+      case 'autocomplete':
+        return autocomplete;
+      case 'autofocus':
+        return autofocus;
+      case 'required':
+        return required;
+      case 'readonly':
+        return readOnly;
+      case 'name':
+        return name;
+      case 'disabled':
+        return disabled;
+      case 'minLength':
+        return minLength;
+      case 'maxLength':
+        return maxLength;
+      case 'placeholder':
+        return placeholder;
+      case 'inputMode':
+        return inputMode;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, val) {
     switch (key) {
-      case 'width': width = castToType<num>(val).toInt(); break;
-      case 'height': height = castToType<num>(val).toInt(); break;
-      case 'rows': rows = castToType<num>(val).toInt(); break;
-      case 'cols': cols = castToType<num>(val).toInt(); break;
-      case 'value': value = castToType<String?>(val); break;
-      case 'defaultValue': defaultValue = castToType<String?>(val); break;
-      case 'autocomplete': autocomplete = castToType<String>(val); break;
-      case 'autofocus': autofocus = castToType<bool>(val); break;
-      case 'required': required = castToType<bool>(val); break;
-      case 'readonly': readOnly = castToType<bool>(val); break;
-      case 'name': name = castToType<String>(val); break;
-      case 'disabled': disabled = castToType<bool>(val); break;
-      case 'minLength': minLength = castToType<num>(val).toInt(); break;
-      case 'maxLength': maxLength = castToType<num>(val).toInt(); break;
-      case 'placeholder': placeholder = castToType<String>(val); break;
-      case 'inputMode': inputMode = castToType<String>(val); break;
-      default: super.setBindingProperty(key, value);
+      case 'width':
+        width = castToType<num>(val).toInt();
+        break;
+      case 'height':
+        height = castToType<num>(val).toInt();
+        break;
+      case 'rows':
+        rows = castToType<num>(val).toInt();
+        break;
+      case 'cols':
+        cols = castToType<num>(val).toInt();
+        break;
+      case 'value':
+        value = castToType<String?>(val);
+        break;
+      case 'defaultValue':
+        defaultValue = castToType<String?>(val);
+        break;
+      case 'autocomplete':
+        autocomplete = castToType<String>(val);
+        break;
+      case 'autofocus':
+        autofocus = castToType<bool>(val);
+        break;
+      case 'required':
+        required = castToType<bool>(val);
+        break;
+      case 'readonly':
+        readOnly = castToType<bool>(val);
+        break;
+      case 'name':
+        name = castToType<String>(val);
+        break;
+      case 'disabled':
+        disabled = castToType<bool>(val);
+        break;
+      case 'minLength':
+        minLength = castToType<num>(val).toInt();
+        break;
+      case 'maxLength':
+        maxLength = castToType<num>(val).toInt();
+        break;
+      case 'placeholder':
+        placeholder = castToType<String>(val);
+        break;
+      case 'inputMode':
+        inputMode = castToType<String>(val);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
   @override
   invokeBindingMethod(String method, List args) {
     switch (method) {
-      case 'focus': return focus();
-      case 'blur': return blur();
-      default: return super.invokeBindingMethod(method, args);
+      case 'focus':
+        return focus();
+      case 'blur':
+        return blur();
+      default:
+        return super.invokeBindingMethod(method, args);
     }
   }
 
@@ -78,21 +131,51 @@ class TextareaElement extends TextFormControlElement {
   void setAttribute(String qualifiedName, String val) {
     super.setAttribute(qualifiedName, val);
     switch (qualifiedName) {
-      case 'width': width = attributeToProperty<int>(val); break;
-      case 'height': height = attributeToProperty<int>(val); break;
-      case 'rows': rows = attributeToProperty<int>(val); break;
-      case 'cols': cols = attributeToProperty<int>(val); break;
-      case 'value': defaultValue = attributeToProperty<String>(val); break;
-      case 'autocomplete': autocomplete = attributeToProperty<String>(val); break;
-      case 'autofocus': autofocus = attributeToProperty<bool>(val); break;
-      case 'required': required = attributeToProperty<bool>(val); break;
-      case 'readonly': readOnly = attributeToProperty<bool>(val); break;
-      case 'name': name = attributeToProperty<String>(val); break;
-      case 'disabled': disabled = attributeToProperty<bool>(val); break;
-      case 'minlength': minLength = attributeToProperty<int>(val); break;
-      case 'maxlength': maxLength = attributeToProperty<int>(val); break;
-      case 'placeholder': placeholder = attributeToProperty<String>(val); break;
-      case 'inputmode': inputMode = attributeToProperty<String>(val); break;
+      case 'width':
+        width = attributeToProperty<int>(val);
+        break;
+      case 'height':
+        height = attributeToProperty<int>(val);
+        break;
+      case 'rows':
+        rows = attributeToProperty<int>(val);
+        break;
+      case 'cols':
+        cols = attributeToProperty<int>(val);
+        break;
+      case 'value':
+        defaultValue = attributeToProperty<String>(val);
+        break;
+      case 'autocomplete':
+        autocomplete = attributeToProperty<String>(val);
+        break;
+      case 'autofocus':
+        autofocus = attributeToProperty<bool>(val);
+        break;
+      case 'required':
+        required = attributeToProperty<bool>(val);
+        break;
+      case 'readonly':
+        readOnly = attributeToProperty<bool>(val);
+        break;
+      case 'name':
+        name = attributeToProperty<String>(val);
+        break;
+      case 'disabled':
+        disabled = attributeToProperty<bool>(val);
+        break;
+      case 'minlength':
+        minLength = attributeToProperty<int>(val);
+        break;
+      case 'maxlength':
+        maxLength = attributeToProperty<int>(val);
+        break;
+      case 'placeholder':
+        placeholder = attributeToProperty<String>(val);
+        break;
+      case 'inputmode':
+        inputMode = attributeToProperty<String>(val);
+        break;
     }
   }
 
@@ -127,9 +210,8 @@ class TextareaElement extends TextFormControlElement {
   double? get _defaultHeight {
     // rows defaults to 2.
     // https://html.spec.whatwg.org/multipage/form-elements.html#attr-textarea-rows
-    double computedLineHeight = renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue
-      : avgCharHeight;
+    double computedLineHeight =
+        renderStyle.lineHeight != CSSLengthValue.normal ? renderStyle.lineHeight.computedValue : avgCharHeight;
 
     return computedLineHeight * double.parse(attributes[ROWS] ?? '2');
   }
@@ -193,4 +275,3 @@ class TextareaElement extends TextFormControlElement {
     }
   }
 }
-

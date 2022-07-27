@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math' as math;
@@ -23,7 +24,7 @@ class CSSLinearGradient extends LinearGradient with BorderGradientMixin {
     List<double>? stops,
     TileMode tileMode = TileMode.clamp,
     GradientTransform? transform,
-  }) : _angle = angle,
+  })  : _angle = angle,
         super(begin: begin, end: end, colors: colors, stops: stops, tileMode: tileMode, transform: transform);
 
   final double? _angle;

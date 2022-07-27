@@ -1,24 +1,19 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/rendering.dart';
 
 // CSS Overflow: https://drafts.csswg.org/css-overflow-3/
 
-enum CSSOverflowType {
-  auto,
-  visible,
-  hidden,
-  scroll,
-  clip
-}
+enum CSSOverflowType { auto, visible, hidden, scroll, clip }
 
 // Styles which need to copy from outer scrolling box to inner scrolling content box.
 List<String> _scrollingContentBoxCopyStyles = [
@@ -113,8 +108,8 @@ mixin ElementOverflowMixin on ElementBase {
   // The duration time for element scrolling to a significant place.
   static const SCROLL_DURATION = Duration(milliseconds: 250);
 
-  KrakenScrollable? _scrollableX;
-  KrakenScrollable? _scrollableY;
+  WebFScrollable? _scrollableX;
+  WebFScrollable? _scrollableY;
 
   void disposeScrollable() {
     _scrollableX?.position?.dispose();
@@ -126,12 +121,11 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowX(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal
-          ? renderBoxModel.scrollable.position : null;
+      renderBoxModel.scrollOffsetX = renderBoxModel.axis == Axis.horizontal ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowX = renderStyle.effectiveOverflowX;
-      switch(overflowX) {
+      switch (overflowX) {
         case CSSOverflowType.clip:
           _scrollableX = null;
           break;
@@ -140,7 +134,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.scroll:
           // If the render has been offset when previous overflow is auto or scroll, _scrollableX should not reset.
           if (_scrollableX == null) {
-            _scrollableX = KrakenScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
+            _scrollableX = WebFScrollable(axisDirection: AxisDirection.right, scrollListener: scrollListener);
             renderBoxModel.scrollOffsetX = _scrollableX!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
@@ -161,12 +155,11 @@ mixin ElementOverflowMixin on ElementBase {
   void updateRenderBoxModelWithOverflowY(ScrollListener scrollListener) {
     if (renderBoxModel is RenderSliverListLayout) {
       RenderSliverListLayout renderBoxModel = this.renderBoxModel as RenderSliverListLayout;
-      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical
-          ? renderBoxModel.scrollable.position : null;
+      renderBoxModel.scrollOffsetY = renderBoxModel.axis == Axis.vertical ? renderBoxModel.scrollable.position : null;
     } else if (renderBoxModel != null) {
       RenderBoxModel renderBoxModel = this.renderBoxModel!;
       CSSOverflowType overflowY = renderStyle.effectiveOverflowY;
-      switch(overflowY) {
+      switch (overflowY) {
         case CSSOverflowType.clip:
           _scrollableY = null;
           break;
@@ -175,7 +168,7 @@ mixin ElementOverflowMixin on ElementBase {
         case CSSOverflowType.scroll:
           // If the render has been offset when previous overflow is auto or scroll, _scrollableY should not reset.
           if (_scrollableY == null) {
-            _scrollableY = KrakenScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
+            _scrollableY = WebFScrollable(axisDirection: AxisDirection.down, scrollListener: scrollListener);
             renderBoxModel.scrollOffsetY = _scrollableY!.position;
           }
           // Reset canDrag by overflow because hidden is can't drag.
@@ -280,8 +273,9 @@ mixin ElementOverflowMixin on ElementBase {
 
     if (renderBoxModel is RenderLayoutBox) {
       // Create two repaintBoundary for scroll container if any direction is scrollable.
-      bool shouldScrolling = (effectiveOverflowX == CSSOverflowType.auto || effectiveOverflowX == CSSOverflowType.scroll)
-        || (effectiveOverflowY == CSSOverflowType.auto || effectiveOverflowY == CSSOverflowType.scroll);
+      bool shouldScrolling =
+          (effectiveOverflowX == CSSOverflowType.auto || effectiveOverflowX == CSSOverflowType.scroll) ||
+              (effectiveOverflowY == CSSOverflowType.auto || effectiveOverflowY == CSSOverflowType.scroll);
 
       if (shouldScrolling) {
         _attachScrollingContentBox();
@@ -348,12 +342,13 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   double get scrollTop {
-    KrakenScrollable? scrollableY = _getScrollable(Axis.vertical);
+    WebFScrollable? scrollableY = _getScrollable(Axis.vertical);
     if (scrollableY != null) {
       return scrollableY.position?.pixels ?? 0;
     }
     return 0.0;
   }
+
   set scrollTop(double value) {
     _scrollTo(y: value);
   }
@@ -371,18 +366,19 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   double get scrollLeft {
-    KrakenScrollable? scrollableX = _getScrollable(Axis.horizontal);
+    WebFScrollable? scrollableX = _getScrollable(Axis.horizontal);
     if (scrollableX != null) {
       return scrollableX.position?.pixels ?? 0;
     }
     return 0.0;
   }
+
   set scrollLeft(double value) {
     _scrollTo(x: value);
   }
 
   int get scrollHeight {
-    KrakenScrollable? scrollable = _getScrollable(Axis.vertical);
+    WebFScrollable? scrollable = _getScrollable(Axis.vertical);
     if (scrollable?.position?.maxScrollExtent != null) {
       // Viewport height + maxScrollExtent
       return renderBoxModel!.clientHeight + scrollable!.position!.maxScrollExtent.toInt();
@@ -393,7 +389,7 @@ mixin ElementOverflowMixin on ElementBase {
   }
 
   int get scrollWidth {
-    KrakenScrollable? scrollable = _getScrollable(Axis.horizontal);
+    WebFScrollable? scrollable = _getScrollable(Axis.horizontal);
     if (scrollable?.position?.maxScrollExtent != null) {
       return renderBoxModel!.clientWidth + scrollable!.position!.maxScrollExtent.toInt();
     }
@@ -425,7 +421,7 @@ mixin ElementOverflowMixin on ElementBase {
     return renderBox.hasSize ? renderBox.size.height.toInt() : 0;
   }
 
-  void _scrollBy({ double dx = 0.0, double dy = 0.0, bool? withAnimation }) {
+  void _scrollBy({double dx = 0.0, double dy = 0.0, bool? withAnimation}) {
     if (dx != 0) {
       _scroll(scrollLeft + dx, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -434,8 +430,7 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
-
-  void _scrollTo({ double? x, double? y, bool? withAnimation }) {
+  void _scrollTo({double? x, double? y, bool? withAnimation}) {
     if (x != null) {
       _scroll(x, Axis.horizontal, withAnimation: withAnimation);
     }
@@ -445,8 +440,8 @@ mixin ElementOverflowMixin on ElementBase {
     }
   }
 
-  KrakenScrollable? _getScrollable(Axis direction) {
-    KrakenScrollable? scrollable;
+  WebFScrollable? _getScrollable(Axis direction) {
+    WebFScrollable? scrollable;
     if (renderer is RenderSliverListLayout) {
       RenderSliverListLayout recyclerLayout = renderer as RenderSliverListLayout;
       scrollable = direction == recyclerLayout.axis ? recyclerLayout.scrollable : null;
@@ -460,8 +455,8 @@ mixin ElementOverflowMixin on ElementBase {
     return scrollable;
   }
 
-  void _scroll(num aim, Axis direction, { bool? withAnimation = false }) {
-    KrakenScrollable? scrollable = _getScrollable(direction);
+  void _scroll(num aim, Axis direction, {bool? withAnimation = false}) {
+    WebFScrollable? scrollable = _getScrollable(direction);
     if (scrollable != null) {
       double distance = aim.toDouble();
 
@@ -469,7 +464,8 @@ mixin ElementOverflowMixin on ElementBase {
       assert(isRendererAttached, 'Overflow can only be added to a RenderBox.');
       renderer!.owner!.flushLayout();
 
-      scrollable.position!.moveTo(distance,
+      scrollable.position!.moveTo(
+        distance,
         duration: withAnimation == true ? SCROLL_DURATION : null,
         curve: withAnimation == true ? Curves.easeOut : null,
       );

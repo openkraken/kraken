@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math' as math;
@@ -176,7 +177,8 @@ class Path2D {
   /// _points(every 0.5Pi), and end angle.
   /// NOTE: Before ellipse() calls this function, adjustEndAngle() is called, so
   /// endAngle - startAngle must be equal to or less than 2Pi.
-  void _addDegenerateEllipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, bool anticlockwise) {
+  void _addDegenerateEllipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
+      double endAngle, bool anticlockwise) {
     assert((endAngle - startAngle).abs() <= _2pi);
     assert(startAngle >= 0);
     assert(startAngle < _2pi);
@@ -215,7 +217,8 @@ class Path2D {
 
   // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/ellipse
   // https://github.com/chromium/chromium/blob/99314be8152e688bafbbf9a615536bdbb289ea87/third_party/blink/renderer/modules/canvas/canvas2d/canvas_path.cc#L378
-  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
+  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle,
+      {bool anticlockwise = false}) {
     if (radiusX < 0 || radiusY < 0) {
       return;
     }
@@ -237,7 +240,8 @@ class Path2D {
   }
 
   // https://source.chromium.org/chromium/chromium/src/+/master:third_party/blink/renderer/platform/graphics/path.cc;l=403;drc=f6baa54c02fce19a1aeafbfeeebef9676fd9408b
-  void _addRotateEllipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle) {
+  void _addRotateEllipse(
+      double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle) {
     assert((endAngle - startAngle).abs() <= _2pi);
     assert(startAngle >= 0);
     assert(startAngle < _2pi);

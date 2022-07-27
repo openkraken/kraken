@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 mixin CSSBoxShadowMixin on RenderStyle {
   List<CSSBoxShadow>? _boxShadow;
@@ -10,14 +11,15 @@ mixin CSSBoxShadowMixin on RenderStyle {
     _boxShadow = value;
     renderBoxModel?.markNeedsPaint();
   }
+
   List<CSSBoxShadow>? get boxShadow => _boxShadow;
 
   @override
-  List<KrakenBoxShadow>? get shadows {
+  List<WebFBoxShadow>? get shadows {
     if (boxShadow == null) {
       return null;
     }
-    List<KrakenBoxShadow> result = [];
+    List<WebFBoxShadow> result = [];
     for (CSSBoxShadow shadow in boxShadow!) {
       result.add(shadow.computedBoxShadow);
     }

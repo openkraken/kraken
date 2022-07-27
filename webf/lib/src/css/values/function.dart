@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#functional-notations
@@ -19,8 +20,7 @@ final LinkedLruHashMap<String, List<CSSFunctionalNotation>> _cachedParsedFunctio
 
 // ignore: public_member_api_docs
 class CSSFunction {
-
-  static bool isFunction(String value, { String? functionName }) {
+  static bool isFunction(String value, {String? functionName}) {
     if (functionName != null) {
       bool isMatch;
       final int functionNameLength = functionName.length;
@@ -90,7 +90,11 @@ class CSSFunction {
         // Only add the right function.
         fn = fn.trim();
         if (fn.startsWith(FUNCTION_SPLIT)) {
-          fn = fn.substring(1, ).trim();
+          fn = fn
+              .substring(
+                1,
+              )
+              .trim();
         }
         notations.add(CSSFunctionalNotation(fn, argList));
       }

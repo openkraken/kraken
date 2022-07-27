@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:io';
@@ -8,9 +9,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/painting.dart';
-import 'package:kraken/src/module/navigator.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/painting.dart';
+import 'package:webf/src/module/navigator.dart';
 
 /// This class allows user to customize Kraken's image loading.
 
@@ -33,22 +34,19 @@ class CachedNetworkImageProviderParams extends ImageProviderParams {
 class FileImageProviderParams extends ImageProviderParams {
   File file;
 
-  FileImageProviderParams(this.file,
-      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
+  FileImageProviderParams(this.file, {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
 class DataUrlImageProviderParams extends ImageProviderParams {
   Uint8List bytes;
 
-  DataUrlImageProviderParams(this.bytes,
-      {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
+  DataUrlImageProviderParams(this.bytes, {int? cachedWidth, int? cachedHeight, BoxFit objectFit = BoxFit.fill})
       : super(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit);
 }
 
 /// A factory function allow user to build an customized ImageProvider class.
-typedef ImageProviderFactory = ImageProvider? Function(
-    Uri uri, ImageProviderParams params);
+typedef ImageProviderFactory = ImageProvider? Function(Uri uri, ImageProviderParams params);
 
 /// defines the types of supported image source.
 enum ImageType {
@@ -109,9 +107,7 @@ ImageProviderFactory _assetsProviderFactory = defaultAssetsProvider;
 
 ImageType parseImageUrl(Uri resolvedUri, {String cache = 'auto'}) {
   if (resolvedUri.isScheme('HTTP') || resolvedUri.isScheme('HTTPS')) {
-    return (cache == 'store' || cache == 'auto')
-        ? ImageType.cached
-        : ImageType.network;
+    return (cache == 'store' || cache == 'auto') ? ImageType.cached : ImageType.network;
   } else if (resolvedUri.isScheme('FILE')) {
     return ImageType.file;
   } else if (resolvedUri.isScheme('DATA')) {
@@ -143,10 +139,8 @@ ImageProvider? getImageProvider(Uri resolvedUri,
               cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
     case ImageType.file:
       File file = File.fromUri(resolvedUri);
-      return factory(
-          resolvedUri,
-          FileImageProviderParams(file,
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
+      return factory(resolvedUri,
+          FileImageProviderParams(file, cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
     case ImageType.dataUrl:
       // Data URL:  https://tools.ietf.org/html/rfc2397
       // dataurl    := "data:" [ mediatype ] [ ";base64" ] "," data
@@ -163,9 +157,7 @@ ImageProvider? getImageProvider(Uri resolvedUri,
       return null;
     case ImageType.assets:
       return factory(
-          resolvedUri,
-          ImageProviderParams(
-              cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
+          resolvedUri, ImageProviderParams(cachedWidth: cachedWidth, cachedHeight: cachedHeight, objectFit: objectFit));
   }
 }
 
@@ -187,8 +179,8 @@ ImageProviderFactory _getImageProviderFactory(ImageType imageType) {
   }
 }
 
-class KrakenResizeImage extends ResizeImage {
-  KrakenResizeImage(
+class WebFResizeImage extends ResizeImage {
+  WebFResizeImage(
     ImageProvider<Object> imageProvider, {
     int? width,
     int? height,
@@ -200,8 +192,7 @@ class KrakenResizeImage extends ResizeImage {
   static ImageProvider<Object> resizeIfNeeded(
       int? cacheWidth, int? cacheHeight, BoxFit? objectFit, ImageProvider provider) {
     if (cacheWidth != null || cacheHeight != null) {
-      return KrakenResizeImage(provider,
-          width: cacheWidth, height: cacheHeight, objectFit: objectFit);
+      return WebFResizeImage(provider, width: cacheWidth, height: cacheHeight, objectFit: objectFit);
     }
     return provider;
   }
@@ -212,8 +203,7 @@ class KrakenResizeImage extends ResizeImage {
     // the image we want before getting to this method. We should avoid calling
     // load again, but still update the image cache with LRU information.
     if (stream.completer != null) {
-      final ImageStreamCompleter? completer =
-          PaintingBinding.instance.imageCache.putIfAbsent(
+      final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
         () => stream.completer!,
         onError: handleError,
@@ -221,8 +211,7 @@ class KrakenResizeImage extends ResizeImage {
       assert(identical(completer, stream.completer));
       return;
     }
-    final ImageStreamCompleter? completer =
-        PaintingBinding.instance.imageCache.putIfAbsent(
+    final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
       key,
       () => load(key, instantiateImageCodec),
       onError: handleError,
@@ -263,9 +252,9 @@ class KrakenResizeImage extends ResizeImage {
           targetWidth = cacheWidth;
         }
 
-      // Resized image should maintain its intrinsic aspect radio event if object-fit is fill
-      // which behaves just like object-fit cover otherwise the cached resized image with
-      // distorted aspect ratio will not work when object-fit changes to not fill.
+        // Resized image should maintain its intrinsic aspect radio event if object-fit is fill
+        // which behaves just like object-fit cover otherwise the cached resized image with
+        // distorted aspect ratio will not work when object-fit changes to not fill.
       } else if (objectFit == BoxFit.fill || objectFit == BoxFit.cover) {
         if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
           targetWidth = cacheWidth;
@@ -273,13 +262,13 @@ class KrakenResizeImage extends ResizeImage {
           targetHeight = cacheHeight;
         }
 
-      // Image should maintain its aspect radio and not resized if object-fit is none.
+        // Image should maintain its aspect radio and not resized if object-fit is none.
       } else if (objectFit == BoxFit.none) {
         targetWidth = descriptor.width;
         targetHeight = descriptor.height;
 
-      // If image size is smaller than its natural size when object-fit is contain,
-      // scale-down is parsed as none, otherwise parsed as contain.
+        // If image size is smaller than its natural size when object-fit is contain,
+        // scale-down is parsed as none, otherwise parsed as contain.
       } else if (objectFit == BoxFit.scaleDown) {
         if (cacheWidth / cacheHeight > naturalWidth / naturalHeight) {
           if (cacheHeight > descriptor.height * window.devicePixelRatio) {
@@ -320,52 +309,30 @@ class KrakenResizeImage extends ResizeImage {
 }
 
 /// default ImageProviderFactory implementation of [ImageType.cached]
-ImageProvider defaultCachedProviderFactory(
-    Uri uri, ImageProviderParams params) {
-  return KrakenResizeImage.resizeIfNeeded(
-    params.cachedWidth,
-    params.cachedHeight,
-    params.objectFit,
-    CachedNetworkImage(uri.toString(),
-        contextId: (params as CachedNetworkImageProviderParams).contextId)
-  );
+ImageProvider defaultCachedProviderFactory(Uri uri, ImageProviderParams params) {
+  return WebFResizeImage.resizeIfNeeded(params.cachedWidth, params.cachedHeight, params.objectFit,
+      CachedNetworkImage(uri.toString(), contextId: (params as CachedNetworkImageProviderParams).contextId));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.network]
-ImageProvider defaultNetworkProviderFactory(
-    Uri uri, ImageProviderParams params) {
+ImageProvider defaultNetworkProviderFactory(Uri uri, ImageProviderParams params) {
   NetworkImage networkImage = NetworkImage(uri.toString(), headers: {
     HttpHeaders.userAgentHeader: NavigatorModule.getUserAgent(),
-    HttpHeaderContext:
-        (params as CachedNetworkImageProviderParams).contextId.toString(),
+    HttpHeaderContext: (params as CachedNetworkImageProviderParams).contextId.toString(),
   });
-  return KrakenResizeImage.resizeIfNeeded(
-    params.cachedWidth,
-    params.cachedHeight,
-    params.objectFit,
-    networkImage
-  );
+  return WebFResizeImage.resizeIfNeeded(params.cachedWidth, params.cachedHeight, params.objectFit, networkImage);
 }
 
 /// default ImageProviderFactory implementation of [ImageType.file]
 ImageProvider? defaultFileProviderFactory(Uri uri, ImageProviderParams params) {
-  return KrakenResizeImage.resizeIfNeeded(
-    params.cachedWidth,
-    params.cachedHeight,
-    params.objectFit,
-    FileImage((params as FileImageProviderParams).file)
-  );
+  return WebFResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, params.objectFit, FileImage((params as FileImageProviderParams).file));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.dataUrl].
-ImageProvider? defaultDataUrlProviderFactory(
-    Uri uri, ImageProviderParams params) {
-  return KrakenResizeImage.resizeIfNeeded(
-    params.cachedWidth,
-    params.cachedHeight,
-    params.objectFit,
-    MemoryImage((params as DataUrlImageProviderParams).bytes)
-  );
+ImageProvider? defaultDataUrlProviderFactory(Uri uri, ImageProviderParams params) {
+  return WebFResizeImage.resizeIfNeeded(params.cachedWidth, params.cachedHeight, params.objectFit,
+      MemoryImage((params as DataUrlImageProviderParams).bytes));
 }
 
 /// default ImageProviderFactory implementation of [ImageType.blob].
@@ -377,10 +344,6 @@ ImageProvider? defaultBlobProviderFactory(Uri uri, ImageProviderParams params) {
 /// default ImageProviderFactory implementation of [ImageType.assets].
 ImageProvider defaultAssetsProvider(Uri uri, ImageProviderParams params) {
   final String assetName = AssetsBundle.getAssetName(uri);
-  return KrakenResizeImage.resizeIfNeeded(
-    params.cachedWidth,
-    params.cachedHeight,
-    params.objectFit,
-    AssetImage(assetName)
-  );
+  return WebFResizeImage.resizeIfNeeded(
+      params.cachedWidth, params.cachedHeight, params.objectFit, AssetImage(assetName));
 }

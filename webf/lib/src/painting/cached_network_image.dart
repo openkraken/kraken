@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-
 
 import 'dart:async';
 import 'dart:io';
@@ -10,13 +10,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 class CachedNetworkImageKey {
-  const CachedNetworkImageKey({
-    required this.url,
-    required this.scale
-  });
+  const CachedNetworkImageKey({required this.url, required this.scale});
 
   final String url;
 
@@ -24,11 +21,8 @@ class CachedNetworkImageKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is CachedNetworkImageKey
-        && other.url == url
-        && other.scale == scale;
+    if (other.runtimeType != runtimeType) return false;
+    return other is CachedNetworkImageKey && other.url == url && other.scale == scale;
   }
 
   @override
@@ -62,8 +56,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
   }
 
   Future<Uint8List> _getRawImageBytes(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents) async {
-    HttpCacheController cacheController = HttpCacheController.instance(
-        getOrigin(getEntrypointUri(contextId)));
+    HttpCacheController cacheController = HttpCacheController.instance(getOrigin(getEntrypointUri(contextId)));
 
     Uri uri = Uri.parse(url);
     Uint8List? bytes;
@@ -89,8 +82,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
     return decode(bytes);
   }
 
-  Future<Uint8List> _fetchImageBytes(CachedNetworkImageKey key,
-      StreamController<ImageChunkEvent> chunkEvents,
+  Future<Uint8List> _fetchImageBytes(CachedNetworkImageKey key, StreamController<ImageChunkEvent> chunkEvents,
       HttpCacheController cacheController) async {
     try {
       final Uri resolved = Uri.base.resolve(key.url);
@@ -102,10 +94,8 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
       if (response.statusCode != HttpStatus.ok)
         throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
 
-      HttpCacheObject cacheObject = HttpCacheObject.fromResponse(
-          key.url,
-          response,
-          (await HttpCacheController.getCacheDirectory()).path);
+      HttpCacheObject cacheObject =
+          HttpCacheObject.fromResponse(key.url, response, (await HttpCacheController.getCacheDirectory()).path);
       cacheController.putObject(resolved, cacheObject);
 
       HttpClientResponse _response = HttpClientCachedResponse(response, cacheObject);
@@ -129,10 +119,7 @@ class CachedNetworkImage extends ImageProvider<CachedNetworkImageKey> {
 
   @override
   Future<CachedNetworkImageKey> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<CachedNetworkImageKey>(CachedNetworkImageKey(
-      url: url,
-      scale: scale
-    ));
+    return SynchronousFuture<CachedNetworkImageKey>(CachedNetworkImageKey(url: url, scale: scale));
   }
 
   @override

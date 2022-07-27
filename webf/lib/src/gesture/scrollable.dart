@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/gestures.dart';
@@ -57,7 +58,7 @@ class _CustomTicker extends Ticker {
   }
 }
 
-class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
+class WebFScrollable with _CustomTickerProviderStateMixin implements ScrollContext {
   late AxisDirection _axisDirection;
   ScrollPositionWithSingleContext? position;
   final ScrollPhysics _physics = ScrollPhysics.createScrollPhysics();
@@ -65,12 +66,11 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
   ScrollListener? scrollListener;
   final Set<PointerDeviceKind> dragDevices;
 
-  KrakenScrollable({
-    AxisDirection axisDirection = AxisDirection.down,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.scrollListener,
-    this.dragDevices = _kTouchLikeDeviceTypes
-  }) {
+  WebFScrollable(
+      {AxisDirection axisDirection = AxisDirection.down,
+      this.dragStartBehavior = DragStartBehavior.start,
+      this.scrollListener,
+      this.dragDevices = _kTouchLikeDeviceTypes}) {
     _axisDirection = axisDirection;
     position = ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: null);
   }
@@ -109,7 +109,8 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
         case Axis.vertical:
           // Vertical drag gesture recognizer to trigger vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            ScrollVerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
+            ScrollVerticalDragGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<ScrollVerticalDragGestureRecognizer>(
               () => ScrollVerticalDragGestureRecognizer(supportedDevices: dragDevices),
               (ScrollVerticalDragGestureRecognizer instance) {
                 instance
@@ -130,7 +131,8 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
         case Axis.horizontal:
           // Horizontal drag gesture recognizer to horizontal vertical scroll.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            ScrollHorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
+            ScrollHorizontalDragGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<ScrollHorizontalDragGestureRecognizer>(
               () => ScrollHorizontalDragGestureRecognizer(supportedDevices: dragDevices),
               (ScrollHorizontalDragGestureRecognizer instance) {
                 instance
@@ -162,8 +164,10 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     double maxScrollExtent = drag.maxScrollExtent!;
     double minScrollExtent = drag.minScrollExtent!;
 
-    return !((direction == AxisDirection.down && (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance)))
-        || direction == AxisDirection.up && (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
+    return !((direction == AxisDirection.down &&
+            (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance))) ||
+        direction == AxisDirection.up &&
+            (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
   }
 
   // Used in the Arena to judge whether the horizontal drag gesture can trigger the current container to scroll.
@@ -172,8 +176,10 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
     double pixels = drag.pixels!;
     double maxScrollExtent = drag.maxScrollExtent!;
     double minScrollExtent = drag.minScrollExtent!;
-    return !((direction == AxisDirection.right && (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance)))
-        || direction == AxisDirection.left && (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
+    return !((direction == AxisDirection.right &&
+            (pixels <= minScrollExtent || nearEqual(pixels, minScrollExtent, Tolerance.defaultTolerance.distance))) ||
+        direction == AxisDirection.left &&
+            (pixels >= maxScrollExtent || nearEqual(pixels, maxScrollExtent, Tolerance.defaultTolerance.distance)));
   }
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
@@ -231,10 +237,9 @@ class KrakenScrollable with _CustomTickerProviderStateMixin implements ScrollCon
       }
     }
   }
+
   double _pointerSignalEventDelta(PointerScrollEvent event) {
-    double delta = axis == Axis.horizontal
-      ? event.scrollDelta.dx
-      : event.scrollDelta.dy;
+    double delta = axis == Axis.horizontal ? event.scrollDelta.dx : event.scrollDelta.dy;
 
     if (axisDirectionIsReversed(axisDirection)) {
       delta *= -1;

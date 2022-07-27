@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
 
 const String OBJECT = 'OBJECT';
 const String PARAM = 'PARAM';
@@ -21,8 +22,7 @@ const Map<String, dynamic> _paramStyle = {
 
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/param
 class ParamElement extends Element {
-  ParamElement([BindingContext? context])
-      : super(context, defaultStyle: _paramStyle);
+  ParamElement([BindingContext? context]) : super(context, defaultStyle: _paramStyle);
 }
 
 _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost objectElementHost) {
@@ -31,12 +31,10 @@ _DefaultObjectElementClient _DefaultObjectElementClientFactory(ObjectElementHost
 
 ///https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
 class ObjectElement extends Element implements ObjectElementHost {
-
   late ObjectElementClientFactory _objectElementClientFactory;
   late ObjectElementClient _objectElementClient;
 
-  ObjectElement([BindingContext? context])
-      : super(context, defaultStyle: _objectStyle, isReplacedElement: true) {
+  ObjectElement([BindingContext? context]) : super(context, defaultStyle: _objectStyle, isReplacedElement: true) {
     initObjectClient();
     initElementClient();
   }
@@ -63,8 +61,12 @@ class ObjectElement extends Element implements ObjectElementHost {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'type': type = attributeToProperty<String>(value); break;
-      case 'data': data = attributeToProperty(value); break;
+      case 'type':
+        type = attributeToProperty<String>(value);
+        break;
+      case 'data':
+        data = attributeToProperty(value);
+        break;
     }
   }
 
@@ -145,8 +147,7 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   /// [name] method name
   /// [args] method params
   @override
-  dynamic handleJSCall(String method, List argv) {
-  }
+  dynamic handleJSCall(String method, List argv) {}
 
   @override
   void removeProperty(String key) {
@@ -177,18 +178,14 @@ class _DefaultObjectElementClient implements ObjectElementClient {
   }
 
   @override
-  void didAttachRenderer() {
-  }
+  void didAttachRenderer() {}
 
   @override
-  void didDetachRenderer() {
-  }
+  void didDetachRenderer() {}
 
   @override
-  void willAttachRenderer() {
-  }
+  void willAttachRenderer() {}
 
   @override
-  void willDetachRenderer() {
-  }
+  void willDetachRenderer() {}
 }

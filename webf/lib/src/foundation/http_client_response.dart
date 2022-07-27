@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:io';
@@ -33,7 +34,8 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
 
   final HttpHeaders _headers;
 
-  HttpClientStreamResponse(this._data, {
+  HttpClientStreamResponse(
+    this._data, {
     this.statusCode = HttpStatus.ok,
     this.reasonPhrase = '',
     this.compressionState = HttpClientResponseCompressionState.notCompressed,
@@ -78,7 +80,8 @@ class HttpClientStreamResponse extends Stream<List<int>> implements HttpClientRe
   List<RedirectInfo> get redirects => const [];
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, { Function? onError, void Function()? onDone, bool? cancelOnError }) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     return _data.listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 }

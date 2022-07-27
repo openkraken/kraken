@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:isolate';
@@ -7,8 +8,8 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/devtools.dart';
+import 'package:webf/webf.dart';
+import 'package:webf/devtools.dart';
 
 typedef NativePostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartPostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
@@ -20,13 +21,13 @@ void _postTaskToInspectorThread(int contextId, Pointer<Void> context, Pointer<Vo
   }
 }
 
-final Pointer<NativeFunction<NativePostTaskToInspectorThread>> _nativePostTaskToInspectorThread = Pointer.fromFunction(_postTaskToInspectorThread);
+final Pointer<NativeFunction<NativePostTaskToInspectorThread>> _nativePostTaskToInspectorThread =
+    Pointer.fromFunction(_postTaskToInspectorThread);
 
-final List<int> _dartNativeMethods = [
-  _nativePostTaskToInspectorThread.address
-];
+final List<int> _dartNativeMethods = [_nativePostTaskToInspectorThread.address];
 
-void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController controller, { int port = INSPECTOR_DEFAULT_PORT, String? address }) {
+void spawnIsolateInspectorServer(ChromeDevToolsService devTool, WebFController controller,
+    {int port = INSPECTOR_DEFAULT_PORT, String? address}) {
   ReceivePort serverIsolateReceivePort = ReceivePort();
 
   serverIsolateReceivePort.listen((data) {
@@ -71,8 +72,8 @@ class ChromeDevToolsService extends DevToolsService {
   UIInspector? _uiInspector;
   UIInspector? get uiInspector => _uiInspector;
 
-  KrakenController? _controller;
-  KrakenController? get controller => _controller;
+  WebFController? _controller;
+  WebFController? get controller => _controller;
 
   bool get isReloading => _reloading;
   bool _reloading = false;
@@ -87,7 +88,7 @@ class ChromeDevToolsService extends DevToolsService {
   }
 
   @override
-  void init(KrakenController controller) {
+  void init(WebFController controller) {
     _contextDevToolMap[controller.view.contextId] = this;
     _controller = controller;
     // @TODO: Add JS debug support for QuickJS.
@@ -116,7 +117,8 @@ class ChromeDevToolsService extends DevToolsService {
   // @TODO: Implement and remove.
   // ignore: unused_element
   static bool _registerUIDartMethodsToCpp() {
-    final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
+    final DartRegisterDartMethods _registerDartMethods =
+        WebFDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
     Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
     Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
     nativeMethodList.setAll(0, _dartNativeMethods);

@@ -1,24 +1,27 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
-abstract class StyleSheet { }
+abstract class StyleSheet {}
 
 const String _CSSStyleSheetType = 'text/css';
 
 // https://drafts.csswg.org/cssom-1/#cssstylesheet
 class CSSStyleSheet implements StyleSheet {
   String type = _CSSStyleSheetType;
+
   /// A Boolean indicating whether the stylesheet is disabled. False by default.
   bool disabled = false;
+
   /// A string containing the baseURL used to resolve relative URLs in the stylesheet.
   String? herf;
 
   List<CSSRule> cssRules = [];
 
-  CSSStyleSheet(String text, { this.disabled = false, this.herf }) {
+  CSSStyleSheet(String text, {this.disabled = false, this.herf}) {
     List<CSSRule> rules = CSSParser.parseRules(text, parentStyleSheet: this);
     cssRules.addAll(rules);
   }
@@ -48,4 +51,3 @@ class CSSStyleSheet implements StyleSheet {
     replaceSync(text);
   }
 }
-

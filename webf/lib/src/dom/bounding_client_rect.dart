@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/bridge.dart';
+import 'package:webf/bridge.dart';
 
 class BoundingClientRect {
   static const BoundingClientRect zero = BoundingClientRect(0, 0, 0, 0, 0, 0, 0, 0);
@@ -21,7 +22,8 @@ class BoundingClientRect {
   const BoundingClientRect(this.x, this.y, this.width, this.height, this.top, this.right, this.bottom, this.left);
 
   Pointer<NativeBoundingClientRect> toNative() {
-    Pointer<NativeBoundingClientRect> nativeBoundingClientRect = malloc.allocate<NativeBoundingClientRect>(sizeOf<NativeBoundingClientRect>());
+    Pointer<NativeBoundingClientRect> nativeBoundingClientRect =
+        malloc.allocate<NativeBoundingClientRect>(sizeOf<NativeBoundingClientRect>());
     nativeBoundingClientRect.ref.width = width;
     nativeBoundingClientRect.ref.height = height;
     nativeBoundingClientRect.ref.x = x;

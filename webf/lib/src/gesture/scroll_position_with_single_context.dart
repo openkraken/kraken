@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -153,8 +154,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
   void updateUserScrollDirection(ScrollDirection value) {
-    if (userScrollDirection == value)
-      return;
+    if (userScrollDirection == value) return;
     _userScrollDirection = value;
   }
 
@@ -196,12 +196,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void pointerScroll(double delta) {
     assert(delta != 0.0);
 
-    final double targetPixels =
-        math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
+    final double targetPixels = math.min(math.max(pixels + delta, minScrollExtent), maxScrollExtent);
     if (targetPixels != pixels) {
       goIdle();
       updateUserScrollDirection(
-          -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
+        -delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse,
       );
       forcePixels(targetPixels);
       isScrollingNotifier.value = true;

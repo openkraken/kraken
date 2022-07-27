@@ -9,12 +9,8 @@ void main() {
     var server = LocalHttpServer.getInstance();
 
     test('Custom Headers', () async {
-      var request = await fetchModule.getRequest(
-          server.getUri('plain_text'),
-          'POST',
-          <String, dynamic>{ 'foo': 'bar' },
-          null
-      );
+      var request =
+          await fetchModule.getRequest(server.getUri('plain_text'), 'POST', <String, dynamic>{'foo': 'bar'}, null);
       expect(request.uri.path, '/plain_text');
       expect(request.method, 'POST');
       expect(request.headers.value('foo'), 'bar');

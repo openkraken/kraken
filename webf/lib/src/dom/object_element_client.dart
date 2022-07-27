@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/dom.dart';
 
 typedef ObjectElementClientFactory = ObjectElementClient Function(ObjectElementHost objectElementHost);
 

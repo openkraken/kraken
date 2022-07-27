@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/module.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/module.dart';
 
 typedef EventHandler = void Function(Event event);
 

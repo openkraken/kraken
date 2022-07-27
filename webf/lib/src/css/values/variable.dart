@@ -1,14 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 const int _HYPHEN_CODE = 45; // -
 
 // https://www.w3.org/TR/css-variables-1/#defining-variables
 class CSSVariable {
-
   static bool isVariable(String? value) {
     if (value == null) {
       return false;
@@ -25,8 +25,7 @@ class CSSVariable {
       if (fns.first.args.isNotEmpty) {
         if (fns.first.args.length > 1) {
           // Has default value for CSS Variable.
-          return CSSVariable(fns.first.args.first, renderStyle,
-              defaultValue: fns.first.args.last);
+          return CSSVariable(fns.first.args.first, renderStyle, defaultValue: fns.first.args.last);
         } else {
           return CSSVariable(fns.first.args.first, renderStyle);
         }
@@ -39,7 +38,7 @@ class CSSVariable {
   final String? defaultValue;
   final RenderStyle _renderStyle;
 
-  CSSVariable(this.identifier, this._renderStyle, { this.defaultValue });
+  CSSVariable(this.identifier, this._renderStyle, {this.defaultValue});
 
   // Get the lazy calculated CSS resolved value.
   dynamic computedValue(String propertyName) {
@@ -58,6 +57,6 @@ class CSSVariable {
 
   @override
   String toString() {
-    return 'var($identifier${defaultValue != null ? ', $defaultValue': ''})';
+    return 'var($identifier${defaultValue != null ? ', $defaultValue' : ''})';
   }
 }

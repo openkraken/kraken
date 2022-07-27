@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/widget.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/widget.dart';
 
 enum NodeType {
   ELEMENT_NODE,
@@ -15,10 +16,7 @@ enum NodeType {
   DOCUMENT_FRAGMENT_NODE,
 }
 
-enum RenderObjectManagerType {
-  FLUTTER_ELEMENT,
-  KRAKEN_NODE
-}
+enum RenderObjectManagerType { FLUTTER_ELEMENT, WEBF_NODE }
 
 /// [RenderObjectNode] provide the renderObject related abstract life cycle for
 /// [Node] or [Element]s, which wrap [RenderObject]s, which provide the actual
@@ -76,9 +74,10 @@ abstract class LifecycleCallbacks {
 }
 
 abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCallbacks {
-  KrakenElementToFlutterElementAdaptor? flutterElement;
-  KrakenElementToWidgetAdaptor? flutterWidget;
+  WebFElementToFlutterElementAdaptor? flutterElement;
+  WebFElementToWidgetAdaptor? flutterWidget;
   List<Node> childNodes = [];
+
   /// The Node.parentNode read-only property returns the parent of the specified node in the DOM tree.
   Node? parentNode;
   NodeType nodeType;
@@ -132,6 +131,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     if (index + 1 > parentNode!.childNodes.length - 1) return null;
     return parentNode!.childNodes[index + 1];
   }
+
   // Is child renderObject attached.
   bool get isRendererAttached => renderer != null && renderer!.attached;
 
@@ -143,7 +143,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   void attachTo(Element parent, {RenderBox? after}) {}
 
   /// Unmount referenced render object.
-  void unmountRenderObject({ bool deep = false, bool keepFixedAlive = false }) {}
+  void unmountRenderObject({bool deep = false, bool keepFixedAlive = false}) {}
 
   /// Release any resources held by this node.
   @override
@@ -268,7 +268,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   }
 
   /// Ensure child and child's child render object is attached.
-  void ensureChildAttached() { }
+  void ensureChildAttached() {}
 
   @override
   void connectedCallback() {
@@ -294,7 +294,7 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   EventTarget? get parentEventTarget => parentNode;
 
   // Whether Kraken Node need to manage render object.
-  RenderObjectManagerType get renderObjectManagerType => RenderObjectManagerType.KRAKEN_NODE;
+  RenderObjectManagerType get renderObjectManagerType => RenderObjectManagerType.WEBF_NODE;
 }
 
 /// https://dom.spec.whatwg.org/#dom-node-nodetype

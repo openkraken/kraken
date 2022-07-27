@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:math' as math;
@@ -12,12 +13,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show TextSelectionOverlay, TextSelectionControls, ClipboardStatusNotifier, DirectionalTextEditingIntent, ReplaceTextIntent;
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/widget.dart';
+import 'package:flutter/widgets.dart'
+    show
+        TextSelectionOverlay,
+        TextSelectionControls,
+        ClipboardStatusNotifier,
+        DirectionalTextEditingIntent,
+        ReplaceTextIntent;
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/rendering.dart';
+import 'package:webf/widget.dart';
 
 const String VALUE = 'value';
 const String DEFAULT_VALUE = 'defaultValue';
@@ -62,7 +69,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
 
   @override
   void bringIntoView(TextPosition position) {
-    KrakenScrollable _scrollable = _textFormControlElement._scrollable;
+    WebFScrollable _scrollable = _textFormControlElement._scrollable;
     final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _textFormControlElement._getOffsetToRevealCaret(localRect);
     _scrollable.position!.jumpTo(targetOffset.offset);
@@ -156,7 +163,7 @@ class EditableTextDelegate implements TextSelectionDelegate {
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
-        // Collapse the selection and hide the toolbar and handles.
+          // Collapse the selection and hide the toolbar and handles.
           userUpdateTextEditingValue(
             TextEditingValue(
               text: textEditingValue.text,
@@ -242,12 +249,12 @@ class EditableTextDelegate implements TextSelectionDelegate {
       final TextEditingValue textEditingValue = _textEditingValueforTextLayoutMetrics;
       atomicTextBoundary = CharacterBoundary(textEditingValue);
       // This isn't enough. Newline characters.
-      boundary = ExpandedTextBoundary(WhitespaceBoundary(textEditingValue), WordBoundary(renderEditable, textEditingValue));
+      boundary =
+          ExpandedTextBoundary(WhitespaceBoundary(textEditingValue), WordBoundary(renderEditable, textEditingValue));
     }
 
-    final MixedBoundary mixedBoundary = intent.forward
-      ? MixedBoundary(atomicTextBoundary, boundary)
-      : MixedBoundary(boundary, atomicTextBoundary);
+    final MixedBoundary mixedBoundary =
+        intent.forward ? MixedBoundary(atomicTextBoundary, boundary) : MixedBoundary(boundary, atomicTextBoundary);
     // Use a MixedBoundary to make sure we don't leave invalid codepoints in
     // the field after deletion.
     return CollapsedSelectionBoundary(mixedBoundary, intent.forward);
@@ -272,25 +279,23 @@ class EditableTextDelegate implements TextSelectionDelegate {
     // since the document boundary is unique and the linebreak boundary is
     // already caret-location based.
     return intent.forward
-      ? MixedBoundary(CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
-      : MixedBoundary(boundary, CollapsedSelectionBoundary(atomicTextBoundary, false));
+        ? MixedBoundary(CollapsedSelectionBoundary(atomicTextBoundary, true), boundary)
+        : MixedBoundary(boundary, CollapsedSelectionBoundary(atomicTextBoundary, false));
   }
 
   TextBoundary documentBoundary(DirectionalTextEditingIntent intent) => DocumentBoundary(value);
 }
 
 class TextFormControlElement extends Element implements TextInputClient, TickerProvider {
-
-  TextFormControlElement(context, {
+  TextFormControlElement(
+    context, {
     this.isMultiline = false,
     this.defaultStyle,
     this.isReplacedElement,
   }) : super(context, defaultStyle: _defaultStyle, isReplacedElement: true) {
     textSelectionDelegate = EditableTextDelegate(this);
     _textInputType = isMultiline ? TextInputType.multiline : TextInputType.text;
-    _scrollable = KrakenScrollable(
-      axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right
-    );
+    _scrollable = WebFScrollable(axisDirection: isMultiline ? AxisDirection.down : AxisDirection.right);
     scrollOffset = _scrollable.position;
   }
 
@@ -306,13 +311,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       return 1;
     }
   }
+
   Timer? _cursorTimer;
   bool _targetCursorVisibility = false;
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(false);
   AnimationController? _cursorBlinkOpacityController;
   int _obscureShowCharTicksPending = 0;
 
-  late KrakenScrollable _scrollable;
+  late WebFScrollable _scrollable;
 
   ViewportOffset get scrollOffset => _scrollOffset;
   late ViewportOffset _scrollOffset = ViewportOffset.zero();
@@ -348,10 +354,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextSpan get placeholderTextSpan {
     // TODO: support ::placeholder pseudo element
     return _buildTextSpan(
-      text: placeholderText,
-      // The color of placeholder.
-      color: Color.fromARGB(255, 169, 169, 169)
-    );
+        text: placeholderText,
+        // The color of placeholder.
+        color: Color.fromARGB(255, 169, 169, 169));
   }
 
   TextInputConfiguration? _textInputConfiguration;
@@ -580,7 +585,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     addEventListener(EVENT_DOUBLE_CLICK, _handleEditable);
     addEventListener(EVENT_LONG_PRESS, _handleEditable);
 
-    AnimationController animationController = _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
+    AnimationController animationController =
+        _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     animationController.addListener(_onCursorColorTick);
 
     addChild(createRenderBox());
@@ -626,20 +632,19 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   void _onStyleChanged(String property, String? original, String present) {
     // Need to rebuild text span when text related style changed.
-    if (property == COLOR
-      || property == FONT_WEIGHT
-      || property == FONT_STYLE
-      || property == FONT_FAMILY
-      || property == FONT_SIZE
-      || property == LINE_HEIGHT
-      || property == LETTER_SPACING
-      || property == WORD_SPACING
-      || property == WHITE_SPACE
-      || property == TEXT_DECORATION_LINE
-      || property == TEXT_DECORATION_COLOR
-      || property == TEXT_DECORATION_STYLE
-      || property == TEXT_SHADOW
-    ) {
+    if (property == COLOR ||
+        property == FONT_WEIGHT ||
+        property == FONT_STYLE ||
+        property == FONT_FAMILY ||
+        property == FONT_SIZE ||
+        property == LINE_HEIGHT ||
+        property == LETTER_SPACING ||
+        property == WORD_SPACING ||
+        property == WHITE_SPACE ||
+        property == TEXT_DECORATION_LINE ||
+        property == TEXT_DECORATION_COLOR ||
+        property == TEXT_DECORATION_STYLE ||
+        property == TEXT_SHADOW) {
       _rebuildTextSpan();
     }
 
@@ -655,21 +660,18 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     textSelectionDelegate.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
     TextSpan? text = obscureText ? _buildPasswordTextSpan(_actualText!.text!) : _actualText;
     if (renderEditable != null) {
-      renderEditable!.text = _actualText!.text!.isEmpty
-          ? placeholderTextSpan
-          : text;
+      renderEditable!.text = _actualText!.text!.isEmpty ? placeholderTextSpan : text;
     }
   }
 
-  TextSpan _buildTextSpan({ String? text, Color? color }) {
+  TextSpan _buildTextSpan({String? text, Color? color}) {
     return CSSTextMixin.createTextSpan(text ?? '', renderStyle,
-      color: color,
-      // For multiline editing, lineHeight works for inner text in the element,
-      // so it needs to set line-height of textSpan for RenderEditable to use.
-      height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
-      ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
-      : null
-    );
+        color: color,
+        // For multiline editing, lineHeight works for inner text in the element,
+        // so it needs to set line-height of textSpan for RenderEditable to use.
+        height: isMultiline && renderStyle.lineHeight != CSSLengthValue.normal
+            ? renderStyle.lineHeight.computedValue / renderStyle.fontSize.computedValue
+            : null);
   }
 
   TextSpan _buildPasswordTextSpan(String text) {
@@ -687,15 +689,10 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   // Get the text size of text control form element by manually layout
   // cause RenderEditable does not expose textPainter.
   Size getTextSize() {
-    TextPainter textPainter = TextPainter(
-      text: renderEditable!.text,
-      maxLines: _maxLines,
-      textDirection: TextDirection.ltr
-    );
+    TextPainter textPainter =
+        TextPainter(text: renderEditable!.text, maxLines: _maxLines, textDirection: TextDirection.ltr);
 
-    double maxWidth = isMultiline
-      ? renderEditable!.size.width
-      : double.infinity;
+    double maxWidth = isMultiline ? renderEditable!.size.width : double.infinity;
 
     textPainter.layout(maxWidth: maxWidth);
 
@@ -711,12 +708,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       locale: CSSText.getLocale(),
     );
     TextPainter painter = TextPainter(
-      text: TextSpan(
-        text: '0',
-        style: textStyle,
-      ),
-      textDirection: TextDirection.ltr
-    );
+        text: TextSpan(
+          text: '0',
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr);
     painter.layout();
 
     List<LineMetrics> lineMetrics = painter.computeLineMetrics();
@@ -766,9 +762,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       }
       // Cache text size on touch start to be used in touch move and touch end.
       _textSize = getTextSize();
-    } else if (event.type == EVENT_TOUCH_MOVE ||
-      event.type == EVENT_TOUCH_END
-    ) {
+    } else if (event.type == EVENT_TOUCH_MOVE || event.type == EVENT_TOUCH_END) {
       TouchList touches = (event as TouchEvent).touches;
       if (touches.length > 1) return;
 
@@ -777,8 +771,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
       // Disable text selection and enable scrolling when text size is larger than
       // text form control element size.
-      if ((!isMultiline && (_textSize!.width > renderEditable!.size.width))
-       || (isMultiline && (_textSize!.height > renderEditable!.size.height))) {
+      if ((!isMultiline && (_textSize!.width > renderEditable!.size.width)) ||
+          (isMultiline && (_textSize!.height > renderEditable!.size.height))) {
         return;
       }
 
@@ -834,9 +828,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       inputType: _textInputType,
       obscureText: obscureText,
       autocorrect: autoCorrect,
-      inputAction: _textInputType == TextInputType.multiline
-        ? TextInputAction.newline
-        : _textInputAction,
+      inputAction: _textInputType == TextInputType.multiline ? TextInputAction.newline : _textInputAction,
       textCapitalization: TextCapitalization.none,
       keyboardAppearance: Brightness.light,
     );
@@ -943,8 +935,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         // If this is a multiline EditableText, do nothing for a "newline"
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
-        if (!isMultiline)
-          blur();
+        if (!isMultiline) blur();
         break;
       case TextInputAction.done:
         blur();
@@ -995,11 +986,9 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
   void _updateRemoteEditingValueIfNeeded() {
-    if (_batchEditDepth > 0 || !_hasInputConnection)
-      return;
+    if (_batchEditDepth > 0 || !_hasInputConnection) return;
     final TextEditingValue localValue = _value;
-    if (localValue == _lastKnownRemoteTextEditingValue)
-      return;
+    if (localValue == _lastKnownRemoteTextEditingValue) return;
     _textInputConnection!.setEditingState(localValue);
     _lastKnownRemoteTextEditingValue = localValue;
   }
@@ -1009,8 +998,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     textSelectionDelegate._textEditingValue = value;
   }
 
-
   int _batchEditDepth = 0;
+
   /// Begins a new batch edit, within which new updates made to the text editing
   /// value will not be sent to the platform text input plugin.
   ///
@@ -1029,22 +1018,22 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void endBatchEdit() {
     _batchEditDepth -= 1;
     assert(
-    _batchEditDepth >= 0,
-    'Unbalanced call to endBatchEdit: beginBatchEdit must be called first.',
+      _batchEditDepth >= 0,
+      'Unbalanced call to endBatchEdit: beginBatchEdit must be called first.',
     );
     _updateRemoteEditingValueIfNeeded();
   }
 
-  void _formatAndSetValue(TextEditingValue value, {
+  void _formatAndSetValue(
+    TextEditingValue value, {
     bool userInteraction = false,
     SelectionChangedCause? cause,
   }) {
     if (userInteraction && value.text.length > _maxLength) return;
 
-    final bool textChanged = _value.text != value.text
-        || (!_value.composing.isCollapsed && value.composing.isCollapsed);
+    final bool textChanged =
+        _value.text != value.text || (!_value.composing.isCollapsed && value.composing.isCollapsed);
     final bool selectionChanged = _value.selection != value.selection;
-
 
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
@@ -1056,9 +1045,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // changed. Also, the user long pressing should always send a selection change
     // as well.
     if (selectionChanged ||
-      (userInteraction &&
-      (cause == SelectionChangedCause.longPress ||
-        cause == SelectionChangedCause.keyboard))) {
+        (userInteraction && (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(value.selection, cause);
     }
 
@@ -1175,18 +1162,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
         // Do nothing.
       }
     }
-
   }
 
   bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
-    if (cause == SelectionChangedCause.keyboard)
-      return false;
+    if (cause == SelectionChangedCause.keyboard) return false;
 
-    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag)
-      return true;
+    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.drag) return true;
 
-    if (_value.text.isNotEmpty)
-      return true;
+    if (_value.text.isNotEmpty) return true;
 
     return false;
   }
@@ -1206,7 +1189,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
   @override
   void updateEditingValue(TextEditingValue value) {
-     _lastKnownRemoteTextEditingValue = value;
+    _lastKnownRemoteTextEditingValue = value;
 
     if (value == _value) {
       // This is possible, for example, when the numeric keyboard is input,
@@ -1369,7 +1352,8 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
   void scrollToCaret() {
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       final RevealedOffset targetOffset = _getOffsetToRevealCaret(_currentCaretRect!);
-      _scrollable.position!.animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
+      _scrollable.position!
+          .animateTo(targetOffset.offset, duration: _caretAnimationDuration, curve: _caretAnimationCurve);
     });
   }
 
@@ -1389,11 +1373,11 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
 
     if (!isMultiline) {
       additionalOffset = rect.width >= editableSize.width
-      // Center `rect` if it's oversized.
-        ? editableSize.width / 2 - rect.center.dx
-      // Valid additional offsets range from (rect.right - size.width)
-      // to (rect.left). Pick the closest one if out of range.
-        : 0.0.clamp(rect.right - editableSize.width, rect.left);
+          // Center `rect` if it's oversized.
+          ? editableSize.width / 2 - rect.center.dx
+          // Valid additional offsets range from (rect.right - size.width)
+          // to (rect.left). Pick the closest one if out of range.
+          : 0.0.clamp(rect.right - editableSize.width, rect.left);
       unitOffset = const Offset(1, 0);
     } else {
       // The caret is vertically centered within the line. Expand the caret's
@@ -1406,15 +1390,14 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
-        ? editableSize.height / 2 - expandedRect.center.dy
-        : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
+          ? editableSize.height / 2 - expandedRect.center.dy
+          : 0.0.clamp(expandedRect.bottom - editableSize.height, expandedRect.top);
       unitOffset = const Offset(0, 1);
     }
 
     // No over scrolling when encountering tall fonts/scripts that extend past
     // the ascent.
-    final double targetOffset = (additionalOffset + _scrollable.position!.pixels)
-      .clamp(
+    final double targetOffset = (additionalOffset + _scrollable.position!.pixels).clamp(
       _scrollable.position!.minScrollExtent,
       _scrollable.position!.maxScrollExtent,
     );
@@ -1514,7 +1497,6 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     print('ShowAutocorrectionPromptRect start: $start, end: $end');
   }
 
-
   @override
   void dispose() {
     textEditingActionTarget = null;
@@ -1585,7 +1567,8 @@ class CodeUnitBoundary extends TextBoundary {
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) => TextPosition(offset: position.offset);
   @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) => TextPosition(offset: math.min(position.offset + 1, textEditingValue.text.length));
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) =>
+      TextPosition(offset: math.min(position.offset + 1, textEditingValue.text.length));
 }
 
 // The word modifier generally removes the word boundaries around white spaces
@@ -1669,15 +1652,16 @@ class WordBoundary extends TextBoundary {
     return TextPosition(
       offset: textLayout.getWordBoundary(position).start,
       // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
+      affinity: TextAffinity.downstream, // ignore: avoid_redundant_argument_values
     );
   }
+
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
       offset: textLayout.getWordBoundary(position).end,
       // Word boundary seems to always report downstream on many platforms.
-      affinity: TextAffinity.downstream,  // ignore: avoid_redundant_argument_values
+      affinity: TextAffinity.downstream, // ignore: avoid_redundant_argument_values
     );
   }
 }
@@ -1699,6 +1683,7 @@ class LineBreak extends TextBoundary {
       offset: textLayout.getLineAtOffset(position).start,
     );
   }
+
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return TextPosition(
@@ -1774,15 +1759,19 @@ class CollapsedSelectionBoundary extends TextBoundary {
   @override
   TextPosition getLeadingTextBoundaryAt(TextPosition position) {
     return isForward
-      ? innerTextBoundary.getLeadingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getLeadingTextBoundaryAt(TextPosition(offset: position.offset - 1));
+        ? innerTextBoundary.getLeadingTextBoundaryAt(position)
+        : position.offset <= 0
+            ? const TextPosition(offset: 0)
+            : innerTextBoundary.getLeadingTextBoundaryAt(TextPosition(offset: position.offset - 1));
   }
 
   @override
   TextPosition getTrailingTextBoundaryAt(TextPosition position) {
     return isForward
-      ? innerTextBoundary.getTrailingTextBoundaryAt(position)
-      : position.offset <= 0 ? const TextPosition(offset: 0) : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
+        ? innerTextBoundary.getTrailingTextBoundaryAt(position)
+        : position.offset <= 0
+            ? const TextPosition(offset: 0)
+            : innerTextBoundary.getTrailingTextBoundaryAt(TextPosition(offset: position.offset - 1));
   }
 }
 
@@ -1802,9 +1791,10 @@ class MixedBoundary extends TextBoundary {
   }
 
   @override
-  TextPosition getLeadingTextBoundaryAt(TextPosition position) => leadingTextBoundary.getLeadingTextBoundaryAt(position);
+  TextPosition getLeadingTextBoundaryAt(TextPosition position) =>
+      leadingTextBoundary.getLeadingTextBoundaryAt(position);
 
   @override
-  TextPosition getTrailingTextBoundaryAt(TextPosition position) => trailingTextBoundary.getTrailingTextBoundaryAt(position);
+  TextPosition getTrailingTextBoundaryAt(TextPosition position) =>
+      trailingTextBoundary.getTrailingTextBoundaryAt(position);
 }
-

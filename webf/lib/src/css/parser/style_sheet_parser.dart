@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 const int _BEFORE_SELECTOR = 0;
 const int _SELECTOR = 1;
@@ -18,12 +19,13 @@ class CSSStyleSheetParser {
     int state = _BEFORE_SELECTOR;
     for (int pos = 0, length = sheetText.length; pos < length; pos++) {
       int c = sheetText.codeUnitAt(pos);
-      switch(c) {
+      switch (c) {
         case DOT_CODE:
           // Current only support single class selector: `.red`.
           int code = sheetText.codeUnitAt(pos + 1);
           // `.` must followed by `-`, `_`, `a-z`, `A-Z`.
-          if (state == _BEFORE_SELECTOR && (code == 45 || code == 95 || (code < 123 && code > 96) || (code < 91 && code > 64))) {
+          if (state == _BEFORE_SELECTOR &&
+              (code == 45 || code == 95 || (code < 123 && code > 96) || (code < 91 && code > 64))) {
             state = _SELECTOR;
             buffer.writeCharCode(c);
           } else if (state != _BEFORE_SELECTOR) {
@@ -71,7 +73,7 @@ class CSSStyleSheetParser {
             buffer.writeCharCode(c);
           }
           break;
-         case COLON_CODE:
+        case COLON_CODE:
           if (state == _NAME) {
             state = _VALUE;
           }
@@ -88,7 +90,7 @@ class CSSStyleSheetParser {
             if (styleRule != null) {
               rules.add(styleRule);
             }
-          } else if (state == _NAME){
+          } else if (state == _NAME) {
             // `.foo { .x {}; color: red }`
             buffer.writeCharCode(c);
           }

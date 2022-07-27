@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 // CSS Box Sizing: https://drafts.csswg.org/css-sizing-3/
 
@@ -15,7 +16,6 @@ import 'package:kraken/rendering.dart';
 /// - min-height
 
 mixin CSSSizingMixin on RenderStyle {
-
   // https://drafts.csswg.org/css-sizing-3/#preferred-size-properties
   // Name: width, height
   // Value: auto | <length-percentage> | min-content | max-content | fit-content(<length-percentage>)
@@ -29,7 +29,7 @@ mixin CSSSizingMixin on RenderStyle {
   CSSLengthValue? _width;
 
   @override
-  CSSLengthValue get width =>  _width ?? CSSLengthValue.auto;
+  CSSLengthValue get width => _width ?? CSSLengthValue.auto;
 
   set width(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
@@ -67,7 +67,7 @@ mixin CSSSizingMixin on RenderStyle {
   CSSLengthValue? _minWidth;
 
   @override
-  CSSLengthValue get minWidth =>  _minWidth ?? CSSLengthValue.auto;
+  CSSLengthValue get minWidth => _minWidth ?? CSSLengthValue.auto;
 
   set minWidth(CSSLengthValue? value) {
     // Negative value is invalid, auto value is parsed at layout stage.
@@ -138,6 +138,7 @@ mixin CSSSizingMixin on RenderStyle {
   double get intrinsicWidth {
     return _intrinsicWidth;
   }
+
   set intrinsicWidth(double value) {
     if (_intrinsicWidth == value) return;
     _intrinsicWidth = value;
@@ -150,6 +151,7 @@ mixin CSSSizingMixin on RenderStyle {
   double get intrinsicHeight {
     return _intrinsicHeight;
   }
+
   set intrinsicHeight(double value) {
     if (_intrinsicHeight == value) return;
     _intrinsicHeight = value;
@@ -164,6 +166,7 @@ mixin CSSSizingMixin on RenderStyle {
   double? get aspectRatio {
     return _aspectRatio;
   }
+
   set aspectRatio(double? value) {
     if (_aspectRatio == value) return;
     _aspectRatio = value;
@@ -196,12 +199,11 @@ mixin CSSSizingMixin on RenderStyle {
       RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
 
       RenderPositionPlaceholder? renderPositionPlaceholder = boxModel.renderPositionPlaceholder;
-      if (renderPositionPlaceholder != null
-        && renderPositionPlaceholder.parent is RenderFlexLayout
-        && childParentData.isPositioned
-        && ((renderStyle.left.isAuto && renderStyle.right.isAuto)
-          || (renderStyle.top.isAuto && renderStyle.bottom.isAuto))
-      ) {
+      if (renderPositionPlaceholder != null &&
+          renderPositionPlaceholder.parent is RenderFlexLayout &&
+          childParentData.isPositioned &&
+          ((renderStyle.left.isAuto && renderStyle.right.isAuto) ||
+              (renderStyle.top.isAuto && renderStyle.bottom.isAuto))) {
         RenderLayoutBox? placeholderParent = renderPositionPlaceholder.parent as RenderLayoutBox;
         // Mark parent as _needsLayout directly as RenderPositionHolder has tight constraints which will
         // prevent the _needsLayout flag to bubble up the renderObject tree.
@@ -209,5 +211,4 @@ mixin CSSSizingMixin on RenderStyle {
       }
     }
   }
-
 }

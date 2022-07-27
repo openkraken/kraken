@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 const String INSPECTOR_URL = 'devtools://devtools/bundled/inspector.html';
 const int INSPECTOR_DEFAULT_PORT = 9222;
@@ -29,7 +30,7 @@ class InspectorServerInit {
   InspectorServerInit(this.contextId, this.port, this.address, this.bundleURL);
 }
 
-class InspectorServerStart { }
+class InspectorServerStart {}
 
 class InspectorFrontEndMessage {
   InspectorFrontEndMessage(this.id, this.module, this.method, this.params);
@@ -77,7 +78,7 @@ class UIInspector {
     String remoteAddress = await UIInspector.getConnectedLocalNetworkAddress();
     String inspectorURL = '$INSPECTOR_URL?ws=$remoteAddress:$port';
 
-    print('Kraken DevTool listening at ws://$remoteAddress:$port');
+    print('WebF DevTool listening at ws://$remoteAddress:$port');
     print('Open Chrome/Edge and enter following url to your navigator:');
     print('    $inspectorURL');
   }
@@ -97,8 +98,8 @@ class UIInspector {
   }
 
   static Future<String> getConnectedLocalNetworkAddress() async {
-    List<NetworkInterface> interfaces = await NetworkInterface.list(
-        includeLoopback: false, type: InternetAddressType.IPv4);
+    List<NetworkInterface> interfaces =
+        await NetworkInterface.list(includeLoopback: false, type: InternetAddressType.IPv4);
 
     String result = INSPECTOR_DEFAULT_ADDRESS;
     for (NetworkInterface interface in interfaces) {

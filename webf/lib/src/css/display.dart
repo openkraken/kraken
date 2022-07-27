@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 enum CSSDisplay {
   inline,
@@ -19,7 +20,6 @@ enum CSSDisplay {
 }
 
 mixin CSSDisplayMixin on RenderStyle {
-
   CSSDisplay? _display;
 
   @override
@@ -88,8 +88,8 @@ mixin CSSDisplayMixin on RenderStyle {
         // Flex item will not stretch in stretch alignment when flex wrap is set to wrap or wrap-reverse
         bool isFlexNoWrap = parentRenderStyle.flexWrap == FlexWrap.nowrap;
         bool isStretchSelf = alignSelf != AlignSelf.auto
-          ? alignSelf == AlignSelf.stretch
-          : parentRenderStyle.alignItems == AlignItems.stretch;
+            ? alignSelf == AlignSelf.stretch
+            : parentRenderStyle.alignItems == AlignItems.stretch;
 
         // Display as block if flex vertical layout children and stretch children
         if (!marginLeft.isAuto && !marginRight.isAuto && isVerticalDirection && isFlexNoWrap && isStretchSelf) {
@@ -97,7 +97,6 @@ mixin CSSDisplayMixin on RenderStyle {
         }
       }
     }
-
 
     return transformedDisplay;
   }

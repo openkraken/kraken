@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math' as math;
@@ -12,9 +13,8 @@ const String _RAD = 'rad';
 const String _TURN = 'turn';
 
 final LinkedLruHashMap<String, double?> _cachedParsedAngle = LinkedLruHashMap(maximumSize: 100);
+
 class CSSAngle {
-
-
   /// Judge a string is an angle.
   static bool isAngle(String angle) {
     return (angle.endsWith(_DEG) || angle.endsWith(_GRAD) || angle.endsWith(_RAD) || angle.endsWith(_TURN));
@@ -35,6 +35,6 @@ class CSSAngle {
       angleValue = double.tryParse(rawAngleValue.split(_TURN)[0])! * 2 * math.pi;
     }
 
-    return  _cachedParsedAngle[rawAngleValue] = angleValue;
+    return _cachedParsedAngle[rawAngleValue] = angleValue;
   }
 }

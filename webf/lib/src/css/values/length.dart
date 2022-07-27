@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 import 'package:quiver/collection.dart';
 
 // https://drafts.csswg.org/css-values-3/#absolute-lengths
@@ -79,10 +80,7 @@ class CSSLengthValue {
   double get computedValue {
     // Use cached value if type is not percentage which may needs 2 layout passes to resolve the
     // final computed value.
-    if (renderStyle?.renderBoxModel != null
-      && propertyName != null
-      && type != CSSLengthType.PERCENTAGE
-    ) {
+    if (renderStyle?.renderBoxModel != null && propertyName != null && type != CSSLengthType.PERCENTAGE) {
       RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
       double? cachedValue = getCachedComputedValue(renderBoxModel.hashCode, propertyName!);
       if (cachedValue != null) {
@@ -134,8 +132,7 @@ class CSSLengthValue {
         break;
       case CSSLengthType.PERCENTAGE:
         CSSPositionType positionType = renderStyle!.position;
-        bool isPositioned = positionType == CSSPositionType.absolute ||
-          positionType == CSSPositionType.fixed;
+        bool isPositioned = positionType == CSSPositionType.absolute || positionType == CSSPositionType.fixed;
 
         RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
         // Should access the renderStyle of renderBoxModel parent but not renderStyle parent
@@ -146,33 +143,23 @@ class CSSLengthValue {
           // Get the renderStyle of outer scrolling box cause the renderStyle of scrolling
           // content box is only a fraction of the complete renderStyle.
           parentRenderStyle = parentRenderBoxModel.isScrollingContentBox
-            ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
-            : parentRenderBoxModel.renderStyle;
+              ? (parentRenderBoxModel.parent as RenderBoxModel).renderStyle
+              : parentRenderBoxModel.renderStyle;
         }
 
         // Percentage relative width priority: logical width > renderer width
-        double? parentPaddingBoxWidth =
-          parentRenderStyle?.paddingBoxLogicalWidth
-          ?? parentRenderStyle?.paddingBoxWidth;
-        double? parentContentBoxWidth =
-          parentRenderStyle?.contentBoxLogicalWidth
-          ?? parentRenderStyle?.contentBoxWidth;
+        double? parentPaddingBoxWidth = parentRenderStyle?.paddingBoxLogicalWidth ?? parentRenderStyle?.paddingBoxWidth;
+        double? parentContentBoxWidth = parentRenderStyle?.contentBoxLogicalWidth ?? parentRenderStyle?.contentBoxWidth;
         // Percentage relative height priority: logical height > renderer height
         double? parentPaddingBoxHeight =
-          parentRenderStyle?.paddingBoxLogicalHeight
-          ?? parentRenderStyle?.paddingBoxHeight;
+            parentRenderStyle?.paddingBoxLogicalHeight ?? parentRenderStyle?.paddingBoxHeight;
         double? parentContentBoxHeight =
-          parentRenderStyle?.contentBoxLogicalHeight
-          ?? parentRenderStyle?.contentBoxHeight;
+            parentRenderStyle?.contentBoxLogicalHeight ?? parentRenderStyle?.contentBoxHeight;
 
         // Positioned element is positioned relative to the padding box of its containing block
         // while the others relative to the content box.
-        double? relativeParentWidth = isPositioned
-          ? parentPaddingBoxWidth
-          : parentContentBoxWidth;
-        double? relativeParentHeight = isPositioned
-          ? parentPaddingBoxHeight
-          : parentContentBoxHeight;
+        double? relativeParentWidth = isPositioned ? parentPaddingBoxWidth : parentContentBoxWidth;
+        double? relativeParentHeight = isPositioned ? parentPaddingBoxHeight : parentContentBoxHeight;
 
         switch (propertyName) {
           case FONT_SIZE:
@@ -212,7 +199,7 @@ class CSSLengthValue {
             // 2. parent is flex item
             RenderStyle? grandParentRenderStyle = parentRenderStyle?.parent;
             bool isGrandParentFlexLayout = grandParentRenderStyle?.display == CSSDisplay.flex ||
-              grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
+                grandParentRenderStyle?.display == CSSDisplay.inlineFlex;
 
             // The percentage height of positioned element and flex item resolves against the rendered height
             // of parent, mark parent as needs relayout if rendered height is not ready yet.
@@ -260,8 +247,8 @@ class CSSLengthValue {
             // Flex-basis computation is called in RenderFlexLayout which
             // will ensure parent exists.
             RenderStyle parentRenderStyle = renderStyle!.parent!;
-            double? mainContentSize = parentRenderStyle.flexDirection == FlexDirection.row ?
-              parentContentBoxWidth : parentContentBoxHeight;
+            double? mainContentSize =
+                parentRenderStyle.flexDirection == FlexDirection.row ? parentContentBoxWidth : parentContentBoxHeight;
             if (mainContentSize != null) {
               _computedValue = mainContentSize * value!;
             } else {
@@ -319,12 +306,12 @@ class CSSLengthValue {
               _computedValue = value! * borderBoxDimension;
             } else {
               _computedValue = propertyName == TRANSLATE
-              // Transform will be cached once resolved, so avoid resolve if width not defined.
-              // Use double.infinity to indicate percentage not resolved.
-                ? double.infinity
-                : 0;
+                  // Transform will be cached once resolved, so avoid resolve if width not defined.
+                  // Use double.infinity to indicate percentage not resolved.
+                  ? double.infinity
+                  : 0;
             }
-          break;
+            break;
         }
         break;
       default:
@@ -333,10 +320,7 @@ class CSSLengthValue {
     }
 
     // Cache computed value.
-    if (renderStyle?.renderBoxModel != null
-      && propertyName != null
-      && type != CSSLengthType.PERCENTAGE
-    ) {
+    if (renderStyle?.renderBoxModel != null && propertyName != null && type != CSSLengthType.PERCENTAGE) {
       RenderBoxModel? renderBoxModel = renderStyle!.renderBoxModel;
       cacheComputedValue(renderBoxModel.hashCode, propertyName!, _computedValue!);
     }
@@ -394,9 +378,7 @@ class CSSLengthValue {
   @override
   bool operator ==(Object? other) {
     return (other == null && (type == CSSLengthType.UNKNOWN || type == CSSLengthType.INITIAL)) ||
-        (other is CSSLengthValue
-        && other.value == value
-        && (isZero || other.type == type));
+        (other is CSSLengthValue && other.value == value && (isZero || other.type == type));
   }
 
   @override
@@ -433,7 +415,6 @@ void clearComputedValueCache() {
 
 // CSS Values and Units: https://drafts.csswg.org/css-values-3/#lengths
 class CSSLength {
-
   static double? toDouble(value) {
     if (value is double) {
       return value;
@@ -463,18 +444,15 @@ class CSSLength {
   }
 
   static bool isLength(String? value) {
-    return value != null && (
-      value == ZERO
-      || _lengthRegExp.hasMatch(value)
-    );
+    return value != null && (value == ZERO || _lengthRegExp.hasMatch(value));
   }
 
   static bool isNonNegativeLength(String? value) {
-    return value != null && (
-      value == ZERO
-      || _negativeZeroRegExp.hasMatch(value) // Negative zero is considered to be equal to zero.
-      || _nonNegativeLengthRegExp.hasMatch(value)
-    );
+    return value != null &&
+        (value == ZERO ||
+            _negativeZeroRegExp.hasMatch(value) // Negative zero is considered to be equal to zero.
+            ||
+            _nonNegativeLengthRegExp.hasMatch(value));
   }
 
   static CSSLengthValue? resolveLength(String text, RenderStyle? renderStyle, String propertyName) {
@@ -533,7 +511,7 @@ class CSSLength {
       value = double.tryParse(text.split(VMIN)[0]);
       if (value != null) value = value / 100;
       unit = CSSLengthType.VMIN;
-    }  else if (text.endsWith(VMAX)) {
+    } else if (text.endsWith(VMAX)) {
       value = double.tryParse(text.split(VMAX)[0]);
       if (value != null) value = value / 100;
       unit = CSSLengthType.VMAX;
@@ -576,7 +554,7 @@ class CSSLength {
       return CSSLengthValue.zero;
     } else if (value == null) {
       return CSSLengthValue.unknown;
-    } else if (unit == CSSLengthType.PX){
+    } else if (unit == CSSLengthType.PX) {
       return CSSLengthValue(value, unit);
     } else {
       return CSSLengthValue(value, unit, renderStyle, propertyName, axisType);

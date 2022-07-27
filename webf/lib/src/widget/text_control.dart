@@ -1,29 +1,36 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart' as dom;
-import 'package:kraken/css.dart';
+import 'package:webf/webf.dart';
+import 'package:webf/rendering.dart';
+import 'package:webf/dom.dart' as dom;
+import 'package:webf/css.dart';
 
 /// Get context of current widget.
 typedef GetContext = BuildContext Function();
+
 /// Request focus of current widget.
 typedef RequestFocus = void Function();
+
 /// Get the target platform.
 typedef GetTargetPlatform = TargetPlatform Function();
+
 /// Get the cursor color according to the widget theme and platform theme.
 typedef GetCursorColor = Color Function();
+
 /// Get the selection color according to the widget theme and platform theme.
 typedef GetSelectionColor = Color Function();
+
 /// Get the cursor radius according to the target platform.
 typedef GetCursorRadius = Radius Function();
+
 /// Get the text selection controls according to the target platform.
 typedef GetTextSelectionControls = TextSelectionControls Function();
-typedef OnControllerCreated = void Function(KrakenController controller);
+typedef OnControllerCreated = void Function(WebFController controller);
 
 /// Delegate methods of widget
 class WidgetDelegate {
@@ -47,16 +54,16 @@ class WidgetDelegate {
 }
 
 // Widget involves actions of text control elements(input, textarea).
-class KrakenTextControl extends StatefulWidget {
-  KrakenTextControl(this.parentContext);
+class WebFTextControl extends StatefulWidget {
+  WebFTextControl(this.parentContext);
 
   final BuildContext parentContext;
 
   @override
-  _KrakenTextControlState createState() => _KrakenTextControlState();
+  _WebFTextControlState createState() => _WebFTextControlState();
 }
 
-class _KrakenTextControlState extends State<KrakenTextControl> with _FindElementFromContextMixin {
+class _WebFTextControlState extends State<WebFTextControl> with _FindElementFromContextMixin {
   @override
   void initState() {
     super.initState();
@@ -70,12 +77,10 @@ class _KrakenTextControlState extends State<KrakenTextControl> with _FindElement
             actions: _actionMap,
             focusNode: _focusNode,
             onFocusChange: _handleFocusChange,
-            child: KrakenRenderObjectWidget(
-              widget.parentContext.widget as Kraken,
+            child: WebFRenderObjectWidget(
+              widget.parentContext.widget as WebF,
               widgetDelegate,
-            )
-        )
-    );
+            )));
   }
 
   final FocusNode _focusNode = FocusNode();
@@ -94,13 +99,9 @@ class _KrakenTextControlState extends State<KrakenTextControl> with _FindElement
     );
   }
 
-  FocusableActionDetector createTextControlDetector(KrakenRenderObjectWidget child) {
+  FocusableActionDetector createTextControlDetector(WebFRenderObjectWidget child) {
     return FocusableActionDetector(
-        actions: _actionMap,
-        focusNode: _focusNode,
-        onFocusChange: _handleFocusChange,
-        child: child
-    );
+        actions: _actionMap, focusNode: _focusNode, onFocusChange: _handleFocusChange, child: child);
   }
 
   void _initActionMap() {
@@ -115,17 +116,27 @@ class _KrakenTextControlState extends State<KrakenTextControl> with _FindElement
       DirectionalFocusIntent: DirectionalFocusAction.forTextField(),
 
       // Delete
-      DeleteCharacterIntent: _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(context, TextBoundaryType.characterBoundary)),
-      DeleteToNextWordBoundaryIntent: _makeOverridable(_DeleteTextAction<DeleteToNextWordBoundaryIntent>(context, TextBoundaryType.nextWordBoundary)),
-      DeleteToLineBreakIntent: _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(context, TextBoundaryType.lineBreak)),
+      DeleteCharacterIntent:
+          _makeOverridable(_DeleteTextAction<DeleteCharacterIntent>(context, TextBoundaryType.characterBoundary)),
+      DeleteToNextWordBoundaryIntent: _makeOverridable(
+          _DeleteTextAction<DeleteToNextWordBoundaryIntent>(context, TextBoundaryType.nextWordBoundary)),
+      DeleteToLineBreakIntent:
+          _makeOverridable(_DeleteTextAction<DeleteToLineBreakIntent>(context, TextBoundaryType.lineBreak)),
 
       // Extend/Move Selection
-      ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(context, TextBoundaryType.characterBoundary, false)),
-      ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(context, TextBoundaryType.nextWordBoundary, true)),
-      ExtendSelectionToLineBreakIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(context, TextBoundaryType.lineBreak, true)),
+      ExtendSelectionByCharacterIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionByCharacterIntent>(
+          context, TextBoundaryType.characterBoundary, false)),
+      ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
+          _UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(
+              context, TextBoundaryType.nextWordBoundary, true)),
+      ExtendSelectionToLineBreakIntent: _makeOverridable(
+          _UpdateTextSelectionAction<ExtendSelectionToLineBreakIntent>(context, TextBoundaryType.lineBreak, true)),
       ExtendSelectionVerticallyToAdjacentLineIntent: _makeOverridable(_adjacentLineAction),
-      ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(_UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(context, TextBoundaryType.documentBoundary, true)),
-      ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(_ExtendSelectionOrCaretPositionAction(context, TextBoundaryType.nextWordBoundary)),
+      ExtendSelectionToDocumentBoundaryIntent: _makeOverridable(
+          _UpdateTextSelectionAction<ExtendSelectionToDocumentBoundaryIntent>(
+              context, TextBoundaryType.documentBoundary, true)),
+      ExtendSelectionToNextWordBoundaryOrCaretLocationIntent:
+          _makeOverridable(_ExtendSelectionOrCaretPositionAction(context, TextBoundaryType.nextWordBoundary)),
 
       // Copy Paste
       SelectAllTextIntent: _makeOverridable(_SelectAllAction(context)),
@@ -141,30 +152,31 @@ class _KrakenTextControlState extends State<KrakenTextControl> with _FindElement
   void _replaceText(ReplaceTextIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .userUpdateTextEditingValue(
-          intent.currentTextEditingValue.replaced(intent.replacementRange, intent.replacementText),
-          intent.cause,
-        );
+      focusedElement.textSelectionDelegate.userUpdateTextEditingValue(
+        intent.currentTextEditingValue.replaced(intent.replacementRange, intent.replacementText),
+        intent.cause,
+      );
     }
   }
+
   late final Action<ReplaceTextIntent> _replaceTextAction = CallbackAction<ReplaceTextIntent>(onInvoke: _replaceText);
 
   void _updateSelection(UpdateSelectionIntent intent) {
     dom.TextFormControlElement? focusedElement = _findFocusedElement(context);
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .userUpdateTextEditingValue(
-          intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
-          intent.cause,
-        );
+      focusedElement.textSelectionDelegate.userUpdateTextEditingValue(
+        intent.currentTextEditingValue.copyWith(selection: intent.newSelection),
+        intent.cause,
+      );
     }
   }
-  late final Action<UpdateSelectionIntent> _updateSelectionAction = CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
 
-  late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent> _adjacentLineAction = _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(context);
+  late final Action<UpdateSelectionIntent> _updateSelectionAction =
+      CallbackAction<UpdateSelectionIntent>(onInvoke: _updateSelection);
+
+  late final _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>
+      _adjacentLineAction =
+      _UpdateTextSelectionToAdjacentLineAction<ExtendSelectionVerticallyToAdjacentLineIntent>(context);
 
   // Handle focus action usually by pressing the [Tab] hotkey.
   void _handleNextFocus(NextFocusIntent intent) {
@@ -226,7 +238,6 @@ class _KrakenTextControlState extends State<KrakenTextControl> with _FindElement
       _focusNode.previousFocus();
     }
   }
-
 
   // Handle focus change of _focusNode.
   void _handleFocusChange(bool focused) {
@@ -403,7 +414,7 @@ mixin _FindElementFromContextMixin {
   dom.Element _findRootElement(BuildContext context) {
     RenderObject? _rootRenderObject = context.findRenderObject();
     RenderViewportBox? renderViewportBox = _findRenderViewportBox(_rootRenderObject!);
-    KrakenController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
+    WebFController controller = (renderViewportBox as RenderObjectWithControllerMixin).controller!;
     dom.Element documentElement = controller.view.document.documentElement!;
     return documentElement;
   }
@@ -443,7 +454,8 @@ mixin _FindElementFromContextMixin {
 }
 
 // -------------------------------  Text Actions -------------------------------
-class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T> with _FindElementFromContextMixin  {
+class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextAction<T>
+    with _FindElementFromContextMixin {
   _DeleteTextAction(this.context, this.textBoundaryType);
 
   BuildContext context;
@@ -454,9 +466,7 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     final TextRange selection = value.selection;
     assert(selection.isValid);
     assert(!selection.isCollapsed);
-    final dom.TextBoundary atomicBoundary = obscureText
-      ? dom.CodeUnitBoundary(value)
-      : dom.CharacterBoundary(value);
+    final dom.TextBoundary atomicBoundary = obscureText ? dom.CodeUnitBoundary(value) : dom.CharacterBoundary(value);
 
     return TextRange(
       start: atomicBoundary.getLeadingTextBoundaryAt(TextPosition(offset: selection.start)).offset,
@@ -492,7 +502,8 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     if (!selection.isCollapsed) {
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(_delegate.value, '', _expandNonCollapsedRange(_delegate.value, _delegate.element.obscureText), SelectionChangedCause.keyboard),
+        ReplaceTextIntent(_delegate.value, '', _expandNonCollapsedRange(_delegate.value, _delegate.element.obscureText),
+            SelectionChangedCause.keyboard),
       );
     }
 
@@ -503,7 +514,11 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     if (!textBoundary.textEditingValue.selection.isCollapsed) {
       return Actions.invoke(
         context!,
-        ReplaceTextIntent(_delegate.value, '', _expandNonCollapsedRange(textBoundary.textEditingValue, _delegate.element.obscureText), SelectionChangedCause.keyboard),
+        ReplaceTextIntent(
+            _delegate.value,
+            '',
+            _expandNonCollapsedRange(textBoundary.textEditingValue, _delegate.element.obscureText),
+            SelectionChangedCause.keyboard),
       );
     }
 
@@ -530,7 +545,8 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
   }
 }
 
-class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> with _FindElementFromContextMixin {
+class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T>
+    with _FindElementFromContextMixin {
   _UpdateTextSelectionAction(this.context, this.textBoundaryType, this.ignoreNonCollapsedSelection);
 
   BuildContext context;
@@ -594,18 +610,16 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
     }
 
     final TextPosition extent = textBoundarySelection.extent;
-    final TextPosition newExtent = intent.forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent)
-      : textBoundary.getLeadingTextBoundaryAt(extent);
+    final TextPosition newExtent =
+        intent.forward ? textBoundary.getTrailingTextBoundaryAt(extent) : textBoundary.getLeadingTextBoundaryAt(extent);
 
-    final TextSelection newSelection = collapseSelection
-      ? TextSelection.fromPosition(newExtent)
-      : textBoundarySelection.extendTo(newExtent);
+    final TextSelection newSelection =
+        collapseSelection ? TextSelection.fromPosition(newExtent) : textBoundarySelection.extendTo(newExtent);
 
     // If collapseAtReversal is true and would have an effect, collapse it.
-    if (!selection.isCollapsed && intent.collapseAtReversal
-      && (selection.baseOffset < selection.extentOffset !=
-        newSelection.baseOffset < newSelection.extentOffset)) {
+    if (!selection.isCollapsed &&
+        intent.collapseAtReversal &&
+        (selection.baseOffset < selection.extentOffset != newSelection.baseOffset < newSelection.extentOffset)) {
       return Actions.invoke(
         context!,
         UpdateSelectionIntent(
@@ -634,7 +648,8 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
   }
 }
 
-class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> with _FindElementFromContextMixin {
+class _ExtendSelectionOrCaretPositionAction
+    extends ContextAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent> with _FindElementFromContextMixin {
   _ExtendSelectionOrCaretPositionAction(this.context, this.textBoundaryType);
 
   BuildContext context;
@@ -673,16 +688,19 @@ class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectio
     }
 
     final TextPosition extent = textBoundarySelection.extent;
-    final TextPosition newExtent = intent.forward
-      ? textBoundary.getTrailingTextBoundaryAt(extent)
-      : textBoundary.getLeadingTextBoundaryAt(extent);
+    final TextPosition newExtent =
+        intent.forward ? textBoundary.getTrailingTextBoundaryAt(extent) : textBoundary.getLeadingTextBoundaryAt(extent);
 
-    final TextSelection newSelection = (newExtent.offset - textBoundarySelection.baseOffset) * (textBoundarySelection.extentOffset - textBoundarySelection.baseOffset) < 0
-      ? textBoundarySelection.copyWith(
-      extentOffset: textBoundarySelection.baseOffset,
-      affinity: textBoundarySelection.extentOffset > textBoundarySelection.baseOffset ? TextAffinity.downstream : TextAffinity.upstream,
-    )
-      : textBoundarySelection.extendTo(newExtent);
+    final TextSelection newSelection = (newExtent.offset - textBoundarySelection.baseOffset) *
+                (textBoundarySelection.extentOffset - textBoundarySelection.baseOffset) <
+            0
+        ? textBoundarySelection.copyWith(
+            extentOffset: textBoundarySelection.baseOffset,
+            affinity: textBoundarySelection.extentOffset > textBoundarySelection.baseOffset
+                ? TextAffinity.downstream
+                : TextAffinity.upstream,
+          )
+        : textBoundarySelection.extendTo(newExtent);
 
     return Actions.invoke(
       context!,
@@ -702,7 +720,8 @@ class _ExtendSelectionOrCaretPositionAction extends ContextAction<ExtendSelectio
   }
 }
 
-class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T> with _FindElementFromContextMixin {
+class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovementIntent> extends ContextAction<T>
+    with _FindElementFromContextMixin {
   _UpdateTextSelectionToAdjacentLineAction(this.context);
 
   BuildContext context;
@@ -723,9 +742,10 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
     }
     _runSelection = _delegate.value.selection;
     final TextSelection currentSelection = _delegate.value.selection;
-    final bool continueCurrentRun = currentSelection.isValid && currentSelection.isCollapsed
-      && currentSelection.baseOffset == runSelection.baseOffset
-      && currentSelection.extentOffset == runSelection.extentOffset;
+    final bool continueCurrentRun = currentSelection.isValid &&
+        currentSelection.isCollapsed &&
+        currentSelection.baseOffset == runSelection.baseOffset &&
+        currentSelection.extentOffset == runSelection.extentOffset;
     if (!continueCurrentRun) {
       _verticalMovementRun = null;
       _runSelection = null;
@@ -751,16 +771,15 @@ class _UpdateTextSelectionToAdjacentLineAction<T extends DirectionalCaretMovemen
       _runSelection = null;
     }
 
-    final VerticalCaretMovementRun currentRun = _verticalMovementRun
-      ?? _delegate.renderEditable.startVerticalCaretMovement(_delegate.renderEditable.selection!.extent);
+    final VerticalCaretMovementRun currentRun = _verticalMovementRun ??
+        _delegate.renderEditable.startVerticalCaretMovement(_delegate.renderEditable.selection!.extent);
 
     final bool shouldMove = intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
     final TextPosition newExtent = shouldMove
-      ? currentRun.current
-      : (intent.forward ? TextPosition(offset: _delegate.value.text.length) : const TextPosition(offset: 0));
-    final TextSelection newSelection = collapseSelection
-      ? TextSelection.fromPosition(newExtent)
-      : value.selection.extendTo(newExtent);
+        ? currentRun.current
+        : (intent.forward ? TextPosition(offset: _delegate.value.text.length) : const TextPosition(offset: 0));
+    final TextSelection newSelection =
+        collapseSelection ? TextSelection.fromPosition(newExtent) : value.selection.extendTo(newExtent);
 
     Actions.invoke(
       context!,

@@ -1,19 +1,20 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ui' as ui show Image;
 import 'package:flutter/rendering.dart';
 
-class KrakenRenderImage extends RenderImage {
-  KrakenRenderImage({
+class WebFRenderImage extends RenderImage {
+  WebFRenderImage({
     ui.Image? image,
     BoxFit? fit,
     AlignmentGeometry alignment = Alignment.center,
   }) : super(
-    image: image,
-    fit: fit,
-    alignment: alignment,
-  );
+          image: image,
+          fit: fit,
+          alignment: alignment,
+        );
 
   @override
   void performLayout() {
@@ -21,5 +22,3 @@ class KrakenRenderImage extends RenderImage {
     size = trySize.isInfinite ? constraints.smallest : trySize;
   }
 }
-
-

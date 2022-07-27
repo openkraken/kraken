@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/bridge.dart';
+import 'package:webf/bridge.dart';
 
 final String PERF_CONTROLLER_INIT_START = 'controller_init_start';
 final String PERF_CONTROLLER_INIT_END = 'controller_init_end';
@@ -103,7 +104,8 @@ class PerformanceTiming {
   }
 
   Pointer<NativePerformanceEntryList> toNative() {
-    Pointer<NativePerformanceEntryList> list = malloc.allocate<NativePerformanceEntryList>(sizeOf<NativePerformanceEntryList>());
+    Pointer<NativePerformanceEntryList> list =
+        malloc.allocate<NativePerformanceEntryList>(sizeOf<NativePerformanceEntryList>());
     int byteLength = entries.length * 3;
 
     Uint64List data = Uint64List(byteLength);
@@ -117,7 +119,7 @@ class PerformanceTiming {
       dataIndex++;
     }
 
-    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() *  byteLength);
+    final Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * byteLength);
     final Uint64List buffer = bytes.asTypedList(byteLength);
     buffer.setAll(0, data);
 

@@ -51,7 +51,7 @@ jobs:
         path: bridge/build/macos/
     - run: node scripts/run_bridge_unit_test.js
 
-  kraken_unit_test:
+  webf_unit_test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -60,7 +60,7 @@ jobs:
         flutter-version: ${{ env.flutterVersion }}
     - run: flutter config --enable-macos-desktop
     - run: flutter doctor -v
-    - run: cd kraken && flutter test
+    - run: cd webf && flutter test
 
   integration_test:
     runs-on: macos-latest

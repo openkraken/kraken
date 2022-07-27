@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:convert';
@@ -18,7 +19,7 @@ import 'queue.dart';
 final _requestQueue = Queue(parallel: 10);
 
 class ProxyHttpClientRequest extends HttpClientRequest {
-  final KrakenHttpOverrides _httpOverrides;
+  final WebFHttpOverrides _httpOverrides;
   final HttpClient _nativeHttpClient;
   final String _method;
   final Uri _uri;
@@ -32,11 +33,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   // Saving request headers.
   final HttpHeaders _httpHeaders = createHttpHeaders();
 
-  ProxyHttpClientRequest(String method, Uri uri, KrakenHttpOverrides httpOverrides, HttpClient nativeHttpClient) :
-    _method = method.toUpperCase(),
-    _uri = uri,
-    _httpOverrides = httpOverrides,
-    _nativeHttpClient = nativeHttpClient;
+  ProxyHttpClientRequest(String method, Uri uri, WebFHttpOverrides httpOverrides, HttpClient nativeHttpClient)
+      : _method = method.toUpperCase(),
+        _uri = uri,
+        _httpOverrides = httpOverrides,
+        _nativeHttpClient = nativeHttpClient;
 
   @override
   Encoding get encoding => _backendRequest?.encoding ?? utf8;
@@ -55,12 +56,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
   Future<void> addStream(Stream<List<int>> stream) {
     // Consume stream.
     Completer<void> completer = Completer();
-    stream.listen(
-        _data.addAll,
-        onError: completer.completeError,
-        onDone: completer.complete,
-        cancelOnError: true
-    );
+    stream.listen(_data.addAll, onError: completer.completeError, onDone: completer.complete, cancelOnError: true);
     return completer.future;
   }
 
@@ -74,7 +70,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     _backendRequest?.addError(error, stackTrace);
   }
 
-  Future<HttpClientRequest?> _beforeRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+  Future<HttpClientRequest?> _beforeRequest(
+      HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
     try {
       return await _clientInterceptor.beforeRequest(_clientRequest);
     } catch (err, stack) {
@@ -83,9 +80,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  Future<HttpClientResponse?> _afterResponse(
-      HttpClientInterceptor _clientInterceptor,
-      HttpClientRequest _clientRequest,
+  Future<HttpClientResponse?> _afterResponse(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest,
       HttpClientResponse _clientResponse) async {
     try {
       return await _clientInterceptor.afterResponse(_clientRequest, _clientResponse);
@@ -95,7 +90,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
     return null;
   }
 
-  Future<HttpClientResponse?> _shouldInterceptRequest(HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
+  Future<HttpClientResponse?> _shouldInterceptRequest(
+      HttpClientInterceptor _clientInterceptor, HttpClientRequest _clientRequest) async {
     try {
       return await _clientInterceptor.shouldInterceptRequest(_clientRequest);
     } catch (err, stack) {
@@ -108,7 +104,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> close() async {
-    int? contextId = KrakenHttpOverrides.getContextHeader(headers);
+    int? contextId = WebFHttpOverrides.getContextHeader(headers);
     HttpClientRequest request = this;
 
     if (contextId != null) {
@@ -157,7 +153,9 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         }
 
         // Step 3: Handle negotiate cache request header.
-        if (cacheObject.valid && headers.ifModifiedSince == null && headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
+        if (cacheObject.valid &&
+            headers.ifModifiedSince == null &&
+            headers.value(HttpHeaders.ifNoneMatchHeader) == null) {
           // ETag has higher priority of lastModified.
           if (cacheObject.eTag != null) {
             headers.set(HttpHeaders.ifNoneMatchHeader, cacheObject.eTag!);
@@ -184,8 +182,7 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       bool hitNegotiateCache = false;
 
       // If cache only, but no cache hit, throw error directly.
-      if (HttpCacheController.mode == HttpCacheMode.CACHE_ONLY
-          && response == null) {
+      if (HttpCacheController.mode == HttpCacheMode.CACHE_ONLY && response == null) {
         throw FlutterError('HttpCacheMode is CACHE_ONLY, but no cache hit for $uri');
       }
 
@@ -195,7 +192,8 @@ class ProxyHttpClientRequest extends HttpClientRequest {
         final HttpClientResponse rawResponse = await _requestQueue.add(request.close);
         response = cacheObject == null
             ? rawResponse
-            : await HttpCacheController.instance(origin).interceptResponse(request, rawResponse, cacheObject, _nativeHttpClient);
+            : await HttpCacheController.instance(origin)
+                .interceptResponse(request, rawResponse, cacheObject, _nativeHttpClient);
         hitNegotiateCache = rawResponse != response;
       }
 
@@ -216,11 +214,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
       if (cacheObject != null) {
         // Step 6: Intercept response by cache controller (handle 304).
         // Note: No need to negotiate cache here, this is final response, hit or not hit.
-        return HttpCacheController.instance(origin).interceptResponse(request, response, cacheObject, _nativeHttpClient);
+        return HttpCacheController.instance(origin)
+            .interceptResponse(request, response, cacheObject, _nativeHttpClient);
       } else {
         return response;
       }
-
     } else {
       request = await _createBackendClientRequest();
       // Not using request.add, because large data will cause core exception.
@@ -246,11 +244,11 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
     // Assign configs for backend request.
     backendRequest
-        ..bufferOutput = bufferOutput
-        ..contentLength = contentLength
-        ..followRedirects = followRedirects
-        ..persistentConnection = persistentConnection
-        ..maxRedirects = maxRedirects;
+      ..bufferOutput = bufferOutput
+      ..contentLength = contentLength
+      ..followRedirects = followRedirects
+      ..persistentConnection = persistentConnection
+      ..maxRedirects = maxRedirects;
 
     _backendRequest = backendRequest;
     return backendRequest;
@@ -264,10 +262,10 @@ class ProxyHttpClientRequest extends HttpClientRequest {
 
   @override
   Future<HttpClientResponse> get done async {
-   if (_backendRequest == null) {
-     await _createBackendClientRequest();
-   }
-   return _backendRequest!.done;
+    if (_backendRequest == null) {
+      await _createBackendClientRequest();
+    }
+    return _backendRequest!.done;
   }
 
   @override

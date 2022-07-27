@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:core';
 import 'dart:typed_data';
@@ -8,10 +9,10 @@ import 'dart:ffi' as ffi;
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'canvas_context.dart';
@@ -43,8 +44,9 @@ class CanvasRenderingContext2DSettings {
 typedef CanvasAction = void Function(Canvas, Size);
 
 class CanvasRenderingContext2D extends BindingObject {
-  CanvasRenderingContext2D(this.canvas) : _pointer = malloc.allocate<NativeCanvasRenderingContext2D>(
-      ffi.sizeOf<NativeCanvasRenderingContext2D>()), super();
+  CanvasRenderingContext2D(this.canvas)
+      : _pointer = malloc.allocate<NativeCanvasRenderingContext2D>(ffi.sizeOf<NativeCanvasRenderingContext2D>()),
+        super();
 
   final ffi.Pointer<NativeCanvasRenderingContext2D> _pointer;
 
@@ -62,86 +64,73 @@ class CanvasRenderingContext2D extends BindingObject {
   invokeBindingMethod(String method, List args) {
     // @NOTE: Bridge not guarantee that input type number is double.
     switch (method) {
-      case 'arc': return arc(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble(),
-          castToType<num>(args[4]).toDouble(),
-          anticlockwise : args[5] == 1 ? true : false);
-      case 'arcTo':  return arcTo(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble(),
-          castToType<num>(args[4]).toDouble()
-      );
-      case 'fillRect': return fillRect(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble()
-      );
-      case 'clearRect': return clearRect(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble());
-      case 'strokeRect': return strokeRect(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble());
+      case 'arc':
+        return arc(
+            castToType<num>(args[0]).toDouble(),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble(),
+            anticlockwise: args[5] == 1 ? true : false);
+      case 'arcTo':
+        return arcTo(
+            castToType<num>(args[0]).toDouble(),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble());
+      case 'fillRect':
+        return fillRect(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(), castToType<num>(args[3]).toDouble());
+      case 'clearRect':
+        return clearRect(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(), castToType<num>(args[3]).toDouble());
+      case 'strokeRect':
+        return strokeRect(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(), castToType<num>(args[3]).toDouble());
       case 'fillText':
         double maxWidth = castToType<num>(args[3]).toDouble();
         if (!maxWidth.isNaN) {
           return fillText(
-              castToType<String>(args[0]),
-              castToType<num>(args[1]).toDouble(),
-              castToType<num>(args[2]).toDouble(),
+              castToType<String>(args[0]), castToType<num>(args[1]).toDouble(), castToType<num>(args[2]).toDouble(),
               maxWidth: maxWidth);
         } else {
-          return fillText(castToType<String>(args[0]),
-            castToType<num>(args[1]).toDouble(),
-            castToType<num>(args[2]).toDouble());
+          return fillText(
+              castToType<String>(args[0]), castToType<num>(args[1]).toDouble(), castToType<num>(args[2]).toDouble());
         }
       case 'strokeText':
         double maxWidth = castToType<num>(args[3]).toDouble();
-      if (!maxWidth.isNaN) {
-        return strokeText(castToType<String>(args[0]),
+        if (!maxWidth.isNaN) {
+          return strokeText(
+              castToType<String>(args[0]), castToType<num>(args[1]).toDouble(), castToType<num>(args[2]).toDouble(),
+              maxWidth: maxWidth);
+        } else {
+          return strokeText(
+              castToType<String>(args[0]), castToType<num>(args[1]).toDouble(), castToType<num>(args[2]).toDouble());
+        }
+      case 'save':
+        return save();
+      case 'restore':
+        return restore();
+      case 'beginPath':
+        return beginPath();
+      case 'bezierCurveTo':
+        return bezierCurveTo(
+            castToType<num>(args[0]).toDouble(),
             castToType<num>(args[1]).toDouble(),
             castToType<num>(args[2]).toDouble(),
-            maxWidth: maxWidth);
-      } else {
-        return strokeText(castToType<String>(args[0]),
-            castToType<num>(args[1]).toDouble(),
-            castToType<num>(args[2]).toDouble());
-      }
-      case 'save': return save();
-      case 'restore': return restore();
-      case 'beginPath': return beginPath();
-      case 'bezierCurveTo': return bezierCurveTo(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble(),
-          castToType<num>(args[4]).toDouble(),
-          castToType<num>(args[5]).toDouble());
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble(),
+            castToType<num>(args[5]).toDouble());
       case 'clip':
         PathFillType fillType = castToType<String>(args[0]) == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
         return clip(fillType);
-      case 'closePath': return closePath();
+      case 'closePath':
+        return closePath();
       case 'drawImage':
         BindingObject imageElement = BindingBridge.getBindingObject(args[0]);
         if (imageElement is ImageElement) {
-          double sx = 0.0,
-              sy = 0.0,
-              sWidth = 0.0,
-              sHeight = 0.0,
-              dx = 0.0,
-              dy = 0.0,
-              dWidth = 0.0,
-              dHeight = 0.0;
+          double sx = 0.0, sy = 0.0, sWidth = 0.0, sHeight = 0.0, dx = 0.0, dy = 0.0, dWidth = 0.0, dHeight = 0.0;
 
           if (args.length == 3) {
             dx = castToType<num>(args[1]).toDouble();
@@ -162,17 +151,7 @@ class CanvasRenderingContext2D extends BindingObject {
             dHeight = castToType<num>(args[8]).toDouble();
           }
 
-          return drawImage(
-              args.length,
-              imageElement.image,
-              sx,
-              sy,
-              sWidth,
-              sHeight,
-              dx,
-              dy,
-              dWidth,
-              dHeight);
+          return drawImage(args.length, imageElement.image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
         }
         break;
       case 'ellipse':
@@ -184,54 +163,50 @@ class CanvasRenderingContext2D extends BindingObject {
             castToType<num>(args[4]).toDouble(),
             castToType<num>(args[5]).toDouble(),
             castToType<num>(args[6]).toDouble(),
-            anticlockwise : args[7] == 1 ? true : false);
+            anticlockwise: args[7] == 1 ? true : false);
       case 'fill':
-         PathFillType fillType = args[0] == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
-         return fill(fillType);
-      case 'lineTo': return lineTo(
-        castToType<num>(args[0]).toDouble(),
-        castToType<num>(args[1]).toDouble());
-      case 'moveTo': return moveTo(
-        castToType<num>(args[0]).toDouble(),
-        castToType<num>(args[1]).toDouble());
-      case 'quadraticCurveTo': return quadraticCurveTo(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble());
-      case 'rect': return rect(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble());
-      case 'rotate': return rotate(castToType<num>(args[0]).toDouble());
-      case 'resetTransform': return resetTransform();
-      case 'scale': return scale(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble()
-      );
-      case 'stroke': return stroke();
-      case 'setTransform': return setTransform(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble(),
-          castToType<num>(args[4]).toDouble(),
-          castToType<num>(args[5]).toDouble()
-      );
-      case 'transform': return transform(
-          castToType<num>(args[0]).toDouble(),
-          castToType<num>(args[1]).toDouble(),
-          castToType<num>(args[2]).toDouble(),
-          castToType<num>(args[3]).toDouble(),
-          castToType<num>(args[4]).toDouble(),
-          castToType<num>(args[5]).toDouble()
-      );
-      case 'translate': return translate(
-        castToType<num>(args[0]).toDouble(),
-        castToType<num>(args[1]).toDouble());
-      case 'reset': return reset();
-      default: return super.invokeBindingMethod(method, args);
+        PathFillType fillType = args[0] == EVENODD ? PathFillType.evenOdd : PathFillType.nonZero;
+        return fill(fillType);
+      case 'lineTo':
+        return lineTo(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble());
+      case 'moveTo':
+        return moveTo(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble());
+      case 'quadraticCurveTo':
+        return quadraticCurveTo(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(), castToType<num>(args[3]).toDouble());
+      case 'rect':
+        return rect(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(), castToType<num>(args[3]).toDouble());
+      case 'rotate':
+        return rotate(castToType<num>(args[0]).toDouble());
+      case 'resetTransform':
+        return resetTransform();
+      case 'scale':
+        return scale(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble());
+      case 'stroke':
+        return stroke();
+      case 'setTransform':
+        return setTransform(
+            castToType<num>(args[0]).toDouble(),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble(),
+            castToType<num>(args[5]).toDouble());
+      case 'transform':
+        return transform(
+            castToType<num>(args[0]).toDouble(),
+            castToType<num>(args[1]).toDouble(),
+            castToType<num>(args[2]).toDouble(),
+            castToType<num>(args[3]).toDouble(),
+            castToType<num>(args[4]).toDouble(),
+            castToType<num>(args[5]).toDouble());
+      case 'translate':
+        return translate(castToType<num>(args[0]).toDouble(), castToType<num>(args[1]).toDouble());
+      case 'reset':
+        return reset();
+      default:
+        return super.invokeBindingMethod(method, args);
     }
   }
 
@@ -242,39 +217,70 @@ class CanvasRenderingContext2D extends BindingObject {
         Color? color = CSSColor.parseColor(castToType<String>(value));
         if (color != null) fillStyle = color;
         break;
-      case 'direction': direction = parseDirection(castToType<String>(value)); break;
-      case 'font': font = castToType<String>(value); break;
+      case 'direction':
+        direction = parseDirection(castToType<String>(value));
+        break;
+      case 'font':
+        font = castToType<String>(value);
+        break;
       case 'strokeStyle':
         Color? color = CSSColor.parseColor(castToType<String>(value));
         if (color != null) strokeStyle = color;
         break;
-      case 'lineCap': lineCap = parseLineCap(castToType<String>(value)); break;
+      case 'lineCap':
+        lineCap = parseLineCap(castToType<String>(value));
+        break;
       // @TODO: Binding should guarantee that input value is determined type, like double or int.
-      case 'lineDashOffset': lineDashOffset = castToType<num>(value).toDouble(); break;
-      case 'lineJoin': lineJoin = parseLineJoin(castToType<String>(value)); break;
-      case 'lineWidth': lineWidth = castToType<num>(value).toDouble(); break;
-      case 'miterLimit': miterLimit = castToType<num>(value).toDouble(); break;
-      case 'textAlign': textAlign = parseTextAlign(castToType<String>(value)); break;
-      case 'textBaseline': textBaseline = parseTextBaseline(castToType<String>(value)); break;
-      default: super.setBindingProperty(key, value);
+      case 'lineDashOffset':
+        lineDashOffset = castToType<num>(value).toDouble();
+        break;
+      case 'lineJoin':
+        lineJoin = parseLineJoin(castToType<String>(value));
+        break;
+      case 'lineWidth':
+        lineWidth = castToType<num>(value).toDouble();
+        break;
+      case 'miterLimit':
+        miterLimit = castToType<num>(value).toDouble();
+        break;
+      case 'textAlign':
+        textAlign = parseTextAlign(castToType<String>(value));
+        break;
+      case 'textBaseline':
+        textBaseline = parseTextBaseline(castToType<String>(value));
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'fillStyle': return CSSColor.convertToHex(fillStyle);
-      case 'direction': return _textDirectionInString;
-      case 'font': return font;
-      case 'strokeStyle': return CSSColor.convertToHex(strokeStyle);
-      case 'lineCap': return lineCap;
-      case 'lineDashOffset': return lineDashOffset;
-      case 'lineJoin': return lineJoin;
-      case 'lineWidth': return lineWidth;
-      case 'miterLimit': return miterLimit;
-      case 'textAlign': return textAlign.toString();
-      case 'textBaseline': return textBaseline.toString();
-      default: return super.getBindingProperty(key);
+      case 'fillStyle':
+        return CSSColor.convertToHex(fillStyle);
+      case 'direction':
+        return _textDirectionInString;
+      case 'font':
+        return font;
+      case 'strokeStyle':
+        return CSSColor.convertToHex(strokeStyle);
+      case 'lineCap':
+        return lineCap;
+      case 'lineDashOffset':
+        return lineDashOffset;
+      case 'lineJoin':
+        return lineJoin;
+      case 'lineWidth':
+        return lineWidth;
+      case 'miterLimit':
+        return miterLimit;
+      case 'textAlign':
+        return textAlign.toString();
+      case 'textBaseline':
+        return textBaseline.toString();
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
@@ -303,7 +309,8 @@ class CanvasRenderingContext2D extends BindingObject {
   void addAction(CanvasAction action) {
     _actions.add(action);
     // Must trigger repaint after action
-    canvas.repaintNotifier.notifyListeners(); // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+    canvas.repaintNotifier
+        .notifyListeners(); // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
   }
 
   // Perform canvas drawing.
@@ -351,10 +358,11 @@ class CanvasRenderingContext2D extends BindingObject {
       _textAlign = value;
     });
   }
+
   TextAlign get textAlign => _textAlign;
 
   static CanvasTextBaseline? parseTextBaseline(String value) {
-    switch(value) {
+    switch (value) {
       case TOP:
         return CanvasTextBaseline.top;
       case HANGING:
@@ -391,6 +399,7 @@ class CanvasRenderingContext2D extends BindingObject {
     }
     return null;
   }
+
   // FIXME: The text direction is inherited from the <canvas> element or the Document as appropriate.
   TextDirection _direction = TextDirection.ltr; // (default: "inherit")
   set direction(TextDirection? value) {
@@ -399,11 +408,14 @@ class CanvasRenderingContext2D extends BindingObject {
       _direction = value;
     });
   }
+
   TextDirection get direction => _direction;
   String get _textDirectionInString {
     switch (_direction) {
-      case TextDirection.ltr: return 'ltr';
-      case TextDirection.rtl: return 'rtl';
+      case TextDirection.ltr:
+        return 'ltr';
+      case TextDirection.rtl:
+        return 'rtl';
     }
   }
 
@@ -430,6 +442,7 @@ class CanvasRenderingContext2D extends BindingObject {
     }
     return true;
   }
+
   String _font = _DEFAULT_FONT; // (default 10px sans-serif)
   set font(String value) {
     addAction((Canvas canvas, Size size) {
@@ -439,6 +452,7 @@ class CanvasRenderingContext2D extends BindingObject {
       }
     });
   }
+
   String get font => _font;
 
   final List _states = [];
@@ -465,7 +479,18 @@ class CanvasRenderingContext2D extends BindingObject {
   // pop state stack and restore state
   void save() {
     addAction((Canvas canvas, Size size) {
-      _states.add([strokeStyle, fillStyle, lineWidth, lineCap, lineJoin, lineDashOffset, miterLimit, font, textAlign, direction]);
+      _states.add([
+        strokeStyle,
+        fillStyle,
+        lineWidth,
+        lineCap,
+        lineJoin,
+        lineDashOffset,
+        miterLimit,
+        font,
+        textAlign,
+        direction
+      ]);
       canvas.save();
     });
   }
@@ -540,7 +565,8 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
+  void drawImage(int argumentCount, Image? img, double sx, double sy, double sWidth, double sHeight, double dx,
+      double dy, double dWidth, double dHeight) {
     if (img == null) return;
 
     addAction((Canvas canvas, Size size) {
@@ -556,15 +582,14 @@ class CanvasRenderingContext2D extends BindingObject {
           sHeight = img.height.toDouble();
         }
 
-        canvas.drawImageRect(img,
-            Rect.fromLTWH(sx, sy, sWidth, sHeight),
-            Rect.fromLTWH(dx, dy, dWidth, dHeight),
-            Paint());
+        canvas.drawImageRect(
+            img, Rect.fromLTWH(sx, sy, sWidth, sHeight), Rect.fromLTWH(dx, dy, dWidth, dHeight), Paint());
       }
     });
   }
 
-  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle, {bool anticlockwise = false}) {
+  void ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle, double endAngle,
+      {bool anticlockwise = false}) {
     addAction((Canvas canvas, Size size) {
       path2d.ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise: anticlockwise);
     });
@@ -596,7 +621,7 @@ class CanvasRenderingContext2D extends BindingObject {
 
   // butt, round, square
   static StrokeCap? parseLineCap(String value) {
-    switch(value) {
+    switch (value) {
       case BUTT:
         return StrokeCap.butt;
       case ROUND:
@@ -614,6 +639,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _lineCap = value;
     });
   }
+
   StrokeCap get lineCap => _lineCap;
 
   double _lineDashOffset = 0.0;
@@ -623,6 +649,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _lineDashOffset = value;
     });
   }
+
   double get lineDashOffset => _lineDashOffset;
 
   static StrokeJoin? parseLineJoin(String value) {
@@ -637,6 +664,7 @@ class CanvasRenderingContext2D extends BindingObject {
     }
     return null;
   }
+
   // The lineJoin can effect the stroke(), strokeRect(), and strokeText() methods.
   StrokeJoin _lineJoin = StrokeJoin.miter;
   set lineJoin(StrokeJoin? value) {
@@ -645,6 +673,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _lineJoin = value;
     });
   }
+
   StrokeJoin get lineJoin => _lineJoin;
 
   double _lineWidth = 1.0; // (default 1)
@@ -654,6 +683,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _lineWidth = value;
     });
   }
+
   double get lineWidth => _lineWidth;
 
   double _miterLimit = 10.0; // (default 10)
@@ -663,6 +693,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _miterLimit = value;
     });
   }
+
   double get miterLimit => _miterLimit;
 
   String _lineDash = 'empty'; // default empty
@@ -751,7 +782,6 @@ class CanvasRenderingContext2D extends BindingObject {
     });
   }
 
-
   Color _strokeStyle = CSSColor.initial; // default black
   set strokeStyle(Color? newValue) {
     if (newValue == null) return;
@@ -759,6 +789,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _strokeStyle = newValue;
     });
   }
+
   Color get strokeStyle => _strokeStyle;
 
   Color _fillStyle = CSSColor.initial; // default black
@@ -768,6 +799,7 @@ class CanvasRenderingContext2D extends BindingObject {
       _fillStyle = newValue;
     });
   }
+
   Color get fillStyle => _fillStyle;
 
   CanvasGradient createLinearGradient(double x0, double y0, double x1, double y1) {
@@ -834,9 +866,7 @@ class CanvasRenderingContext2D extends BindingObject {
             ..strokeWidth = lineWidth
             ..strokeMiterLimit = miterLimit
             ..style = PaintingStyle.stroke
-            ..color = color
-      );
-
+            ..color = color);
     } else {
       return TextStyle(
         color: color,
@@ -847,7 +877,7 @@ class CanvasRenderingContext2D extends BindingObject {
     }
   }
 
-  TextPainter _getTextPainter(String text, Color color, { bool shouldStrokeText = false }) {
+  TextPainter _getTextPainter(String text, Color color, {bool shouldStrokeText = false}) {
     TextStyle textStyle = _getTextStyle(color, shouldStrokeText);
     TextSpan span = TextSpan(text: text, style: textStyle);
     TextPainter textPainter = TextPainter(
@@ -868,13 +898,13 @@ class CanvasRenderingContext2D extends BindingObject {
         return Offset(width, 0.0);
       case TextAlign.justify:
       case TextAlign.center:
-      // The alignment is relative to the x value of the fillText() method.
-      // For example, if textAlign is "center", then the text's left edge will be at x - (textWidth / 2).
+        // The alignment is relative to the x value of the fillText() method.
+        // For example, if textAlign is "center", then the text's left edge will be at x - (textWidth / 2).
         return Offset(width / 2.0, 0.0);
       case TextAlign.start:
-        return direction == TextDirection.rtl ? Offset(width, 0.0): Offset.zero;
+        return direction == TextDirection.rtl ? Offset(width, 0.0) : Offset.zero;
       case TextAlign.end:
-        return direction == TextDirection.rtl ? Offset.zero: Offset(width, 0.0);
+        return direction == TextDirection.rtl ? Offset.zero : Offset(width, 0.0);
     }
   }
 

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ui';
 
@@ -11,14 +12,12 @@ const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 1
 
 class InspectorOverlayLayer extends Layer {
   /// Creates a layer that displays the inspector overlay.
-  InspectorOverlayLayer({ required this.overlayRect }) {
+  InspectorOverlayLayer({required this.overlayRect}) {
     bool inDebugMode = kDebugMode || kProfileMode;
     if (inDebugMode == false) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary(
-            'The inspector should never be used in production mode due to the '
-                'negative performance impact.'
-        ),
+        ErrorSummary('The inspector should never be used in production mode due to the '
+            'negative performance impact.'),
       ]);
     }
   }

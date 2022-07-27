@@ -35,7 +35,7 @@ jobs:
 
       - name: android app build
         run: |
-          cd kraken/
+          cd webf/
           flutter pub get
           cd example/
           flutter build apk --release
@@ -60,7 +60,7 @@ jobs:
 
       - name: ios app build
         run: |
-          cd kraken/
+          cd webf/
           flutter pub get
           cd example/
           flutter build ios --release --no-codesign
@@ -86,7 +86,7 @@ jobs:
 
       - name: macos app build
         run: |
-          cd kraken/
+          cd webf/
           flutter pub get
           cd example/
           flutter build macos --release
@@ -115,7 +115,7 @@ jobs:
       - run: flutter doctor -v
       - name: linux app build
         run: |
-          cd kraken/
+          cd webf/
           flutter pub get
           cd example/
           flutter build linux --release

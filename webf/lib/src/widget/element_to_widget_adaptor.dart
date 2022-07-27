@@ -1,54 +1,55 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/widgets.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart' as dom;
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart' as dom;
+import 'package:webf/rendering.dart';
 
-class KrakenElementToWidgetAdaptor extends RenderObjectWidget {
-  final dom.Node _krakenNode;
+class WebFElementToWidgetAdaptor extends RenderObjectWidget {
+  final dom.Node _webFNode;
 
-  KrakenElementToWidgetAdaptor(this._krakenNode, { Key? key }): super(key: key) {
-    _krakenNode.flutterWidget = this;
+  WebFElementToWidgetAdaptor(this._webFNode, {Key? key}) : super(key: key) {
+    _webFNode.flutterWidget = this;
   }
 
   @override
   RenderObjectElement createElement() {
-    _krakenNode.flutterElement = KrakenElementToFlutterElementAdaptor(this);
-    return _krakenNode.flutterElement as RenderObjectElement;
+    _webFNode.flutterElement = WebFElementToFlutterElementAdaptor(this);
+    return _webFNode.flutterElement as RenderObjectElement;
   }
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     // Children of custom element need RenderFlowLayout nesting,
     // otherwise the parent render layout will not be called when setting properties.
-    if (_krakenNode is dom.Element) {
-      CSSRenderStyle renderStyle = CSSRenderStyle(target: _krakenNode as dom.Element);
+    if (_webFNode is dom.Element) {
+      CSSRenderStyle renderStyle = CSSRenderStyle(target: _webFNode as dom.Element);
       RenderFlowLayout renderFlowLayout = RenderFlowLayout(renderStyle: renderStyle);
-      renderFlowLayout.insert(_krakenNode.renderer!);
+      renderFlowLayout.insert(_webFNode.renderer!);
       return renderFlowLayout;
     } else {
-      return _krakenNode.renderer!;
+      return _webFNode.renderer!;
     }
   }
 }
 
-class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
-  KrakenElementToFlutterElementAdaptor(RenderObjectWidget widget) : super(widget);
+class WebFElementToFlutterElementAdaptor extends RenderObjectElement {
+  WebFElementToFlutterElementAdaptor(RenderObjectWidget widget) : super(widget);
 
   @override
-  KrakenElementToWidgetAdaptor get widget => super.widget as KrakenElementToWidgetAdaptor;
+  WebFElementToWidgetAdaptor get widget => super.widget as WebFElementToWidgetAdaptor;
 
   @override
   void mount(Element? parent, Object? newSlot) {
-    widget._krakenNode.createRenderer();
+    widget._webFNode.createRenderer();
     super.mount(parent, newSlot);
 
-    widget._krakenNode.ensureChildAttached();
+    widget._webFNode.ensureChildAttached();
 
-    if (widget._krakenNode is dom.Element) {
-      dom.Element element = (widget._krakenNode as dom.Element);
+    if (widget._webFNode is dom.Element) {
+      dom.Element element = (widget._webFNode as dom.Element);
       element.applyStyle(element.style);
 
       if (element.renderer != null) {
@@ -61,7 +62,7 @@ class KrakenElementToFlutterElementAdaptor extends RenderObjectElement {
   @override
   void unmount() {
     // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
-    dom.Element element = (widget._krakenNode as dom.Element);
+    dom.Element element = (widget._webFNode as dom.Element);
     element.unmountRenderObject(dispose: false);
 
     super.unmount();

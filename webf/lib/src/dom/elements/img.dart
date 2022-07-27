@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/painting.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/painting.dart';
+import 'package:webf/rendering.dart';
 
 const String IMAGE = 'IMG';
 const String NATURAL_WIDTH = 'naturalWidth';
@@ -28,7 +29,7 @@ const Map<String, dynamic> _defaultStyle = {
 // The HTMLImageElement.
 class ImageElement extends Element {
   // The render box to draw image.
-  KrakenRenderImage? _renderImage;
+  WebFRenderImage? _renderImage;
 
   ImageProvider? _currentImageProvider;
 
@@ -67,7 +68,8 @@ class ImageElement extends Element {
     // @TODO: Implement the srcset.
     if (src.isEmpty) return true;
     if (_currentRequest != null && _currentRequest!.available && _pendingRequest == null) return true;
-    if (_currentRequest != null && _currentRequest!.state == _ImageRequestState.broken && _pendingRequest == null) return true;
+    if (_currentRequest != null && _currentRequest!.state == _ImageRequestState.broken && _pendingRequest == null)
+      return true;
     return true;
   }
 
@@ -89,38 +91,53 @@ class ImageElement extends Element {
 
   ImageStreamCompleterHandle? _completerHandle;
 
-  ImageElement([BindingContext? context])
-      : super(
-      context,
-      isReplacedElement: true,
-      defaultStyle: _defaultStyle) {
-  }
+  ImageElement([BindingContext? context]) : super(context, isReplacedElement: true, defaultStyle: _defaultStyle) {}
 
   // Bindings.
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'src': return src;
-      case 'loading': return loading;
-      case 'width': return width;
-      case 'height': return height;
-      case 'scaling': return scaling;
-      case 'naturalWidth': return naturalWidth;
-      case 'naturalHeight': return naturalHeight;
-      case 'complete': return complete;
-      default: return super.getBindingProperty(key);
+      case 'src':
+        return src;
+      case 'loading':
+        return loading;
+      case 'width':
+        return width;
+      case 'height':
+        return height;
+      case 'scaling':
+        return scaling;
+      case 'naturalWidth':
+        return naturalWidth;
+      case 'naturalHeight':
+        return naturalHeight;
+      case 'complete':
+        return complete;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'src': src = castToType<String>(value); break;
-      case 'loading': loading = castToType<String>(value); break;
-      case 'width': width = castToType<int>(value); break;
-      case 'height': height = castToType<int>(value); break;
-      case 'scaling': scaling = castToType<String>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'src':
+        src = castToType<String>(value);
+        break;
+      case 'loading':
+        loading = castToType<String>(value);
+        break;
+      case 'width':
+        width = castToType<int>(value);
+        break;
+      case 'height':
+        height = castToType<int>(value);
+        break;
+      case 'scaling':
+        scaling = castToType<String>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
@@ -128,11 +145,21 @@ class ImageElement extends Element {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'src': src = attributeToProperty<String>(value); break;
-      case 'loading': loading = attributeToProperty<String>(value); break;
-      case 'width': width = attributeToProperty<int>(value); break;
-      case 'height': height = attributeToProperty<int>(value); break;
-      case 'scaling': scaling = attributeToProperty<String>(value); break;
+      case 'src':
+        src = attributeToProperty<String>(value);
+        break;
+      case 'loading':
+        loading = attributeToProperty<String>(value);
+        break;
+      case 'width':
+        width = attributeToProperty<int>(value);
+        break;
+      case 'height':
+        height = attributeToProperty<int>(value);
+        break;
+      case 'scaling':
+        scaling = attributeToProperty<String>(value);
+        break;
     }
   }
 
@@ -188,11 +215,11 @@ class ImageElement extends Element {
   }
 
   ImageStreamListener? _imageStreamListener;
-  ImageStreamListener get _listener => _imageStreamListener ??= ImageStreamListener(_handleImageFrame, onError: _onImageError);
+  ImageStreamListener get _listener =>
+      _imageStreamListener ??= ImageStreamListener(_handleImageFrame, onError: _onImageError);
 
   void _listenToStream() {
-    if (_isListeningStream)
-      return;
+    if (_isListeningStream) return;
 
     _cachedImageStream?.addListener(_listener);
     _completerHandle?.dispose();
@@ -249,18 +276,14 @@ class ImageElement extends Element {
 
   int get width {
     // Width calc priority: style > attr > intrinsic.
-    final double borderBoxWidth = _styleWidth
-      ?? _attrWidth
-      ?? renderStyle.getWidthByAspectRatio();
+    final double borderBoxWidth = _styleWidth ?? _attrWidth ?? renderStyle.getWidthByAspectRatio();
 
     return borderBoxWidth.round();
   }
 
   int get height {
     // Height calc priority: style > attr > intrinsic.
-    final double borderBoxHeight = _styleHeight
-      ?? _attrHeight
-      ?? renderStyle.getHeightByAspectRatio();
+    final double borderBoxHeight = _styleHeight ?? _attrHeight ?? renderStyle.getHeightByAspectRatio();
 
     return borderBoxHeight.round();
   }
@@ -336,8 +359,8 @@ class ImageElement extends Element {
     }
   }
 
-  KrakenRenderImage _createRenderImageBox() {
-    return KrakenRenderImage(
+  WebFRenderImage _createRenderImageBox() {
+    return WebFRenderImage(
       image: _cachedImageInfo?.image,
       fit: renderStyle.objectFit,
       alignment: renderStyle.objectPosition,
@@ -363,8 +386,7 @@ class ImageElement extends Element {
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
   /// alive.
   void _stopListeningStream({bool keepStreamAlive = false}) {
-    if (!_isListeningStream)
-      return;
+    if (!_isListeningStream) return;
 
     if (keepStreamAlive && _completerHandle == null && _cachedImageStream?.completer != null) {
       _completerHandle = _cachedImageStream!.completer!.keepAlive();
@@ -394,7 +416,7 @@ class ImageElement extends Element {
   // Create an ImageStream that decodes the obtained image.
   // If imageElement has property size or width/height property on [renderStyle],
   // The image will be encoded into a small size for better rasterization performance.
-  void _decode({ bool updateImageProvider = false }) {
+  void _decode({bool updateImageProvider = false}) {
     ImageProvider? provider = _currentImageProvider;
     if (updateImageProvider || provider == null) {
       // Image should be resized based on different ratio according to object-fit value.
@@ -497,7 +519,8 @@ class ImageElement extends Element {
       // Image dimensions (width or height) should specified for performance when lazy-load.
       if (_shouldLazyLoading) {
         RenderReplaced? renderReplaced = renderBoxModel as RenderReplaced?;
-        renderReplaced?..isInLazyRendering = true
+        renderReplaced
+          ?..isInLazyRendering = true
           // When detach renderer, all listeners will be cleared.
           ..addIntersectionChangeListener(_handleIntersectionChange);
       } else {
@@ -600,7 +623,8 @@ enum _ImageRequestState {
 
 // https://html.spec.whatwg.org/multipage/images.html#image-request
 class ImageRequest {
-  ImageRequest.fromUri(this.currentUri, {
+  ImageRequest.fromUri(
+    this.currentUri, {
     this.state = _ImageRequestState.unavailable,
   });
 
@@ -612,11 +636,11 @@ class ImageRequest {
 
   /// When an image request's state is either partially available or completely available,
   /// the image request is said to be available.
-  bool get available => state == _ImageRequestState.completelyAvailable
-      || state == _ImageRequestState.partiallyAvailable;
+  bool get available =>
+      state == _ImageRequestState.completelyAvailable || state == _ImageRequestState.partiallyAvailable;
 
   Future<Uint8List> _obtainImage(int? contextId) async {
-    final KrakenBundle bundle = KrakenBundle.fromUrl(currentUri.toString());
+    final WebFBundle bundle = WebFBundle.fromUrl(currentUri.toString());
 
     await bundle.resolve(contextId);
 

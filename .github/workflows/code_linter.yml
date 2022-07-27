@@ -46,8 +46,8 @@ jobs:
         inplace: True
     - uses: EndBug/add-and-commit@v4
       with:
-        author_name: openkraken-bot
-        author_email: openkraken@list.alibaba-inc.com
+        author_name: openwebf-bot
+        author_email: openwebf@openwebf.com
         message: 'Committing clang-format changes'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

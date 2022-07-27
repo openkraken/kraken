@@ -1,14 +1,9 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'dart:ui' as ui
-  show
-    LineMetrics,
-    Gradient,
-    Shader,
-    TextBox,
-    TextHeightBehavior;
+import 'dart:ui' as ui show LineMetrics, Gradient, Shader, TextBox, TextHeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -20,7 +15,7 @@ const String _kEllipsis = '\u2026';
 /// Use multiple line text painters to controll the leading of font in paint stage
 /// A render object that displays a paragraph of text.
 /// W3C line-height spec: https://www.w3.org/TR/css-inline-3/#inline-height
-class KrakenRenderParagraph extends RenderBox
+class WebFRenderParagraph extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, TextParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, TextParentData>,
@@ -32,7 +27,7 @@ class KrakenRenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  KrakenRenderParagraph(
+  WebFRenderParagraph(
     InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
@@ -63,8 +58,7 @@ class KrakenRenderParagraph extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData)
-      child.parentData = TextParentData();
+    if (child.parentData is! TextParentData) child.parentData = TextParentData();
   }
 
   final TextPainter _textPainter;
@@ -222,8 +216,7 @@ class KrakenRenderParagraph extends RenderBox
   }
 
   /// {@macro flutter.dart:ui.textHeightBehavior}
-  ui.TextHeightBehavior? get textHeightBehavior =>
-      _textPainter.textHeightBehavior;
+  ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
 
   set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value) return;
@@ -231,6 +224,7 @@ class KrakenRenderParagraph extends RenderBox
     _overflowShader = null;
     markNeedsLayout();
   }
+
   /// Compute distance to baseline of first text line
   double computeDistanceToFirstLineBaseline() {
     double firstLineOffset = _lineOffset[0];
@@ -271,12 +265,9 @@ class KrakenRenderParagraph extends RenderBox
         position: position!,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
-            final Offset manualPosition =
-                (position - textParentData.offset) / textParentData.scale!;
-            return (transformed.dx - manualPosition.dx).abs() <
-                    precisionErrorTolerance &&
-                (transformed.dy - manualPosition.dy).abs() <
-                    precisionErrorTolerance;
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance &&
+                (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
           return child!.hitTest(result, position: transformed);
         },
@@ -336,8 +327,7 @@ class KrakenRenderParagraph extends RenderBox
 
   // Get text of each line in the paragraph.
   List<String> _getLineTexts(TextPainter textPainter, TextSpan textSpan) {
-    TextSelection selection =
-        TextSelection(baseOffset: 0, extentOffset: textSpan.text!.length);
+    TextSelection selection = TextSelection(baseOffset: 0, extentOffset: textSpan.text!.length);
     List<TextBox> boxes = textPainter.getBoxesForSelection(selection);
     List<String> lineTexts = [];
     int start = 0;
@@ -356,9 +346,7 @@ class KrakenRenderParagraph extends RenderBox
       if (index == 0) continue;
       // Go one logical pixel within the box and get the position
       // of the character in the string.
-      end = textPainter
-          .getPositionForOffset(Offset(box.left + 1, box.top + 1))
-          .offset;
+      end = textPainter.getPositionForOffset(Offset(box.left + 1, box.top + 1)).offset;
       // add the substring to the list of lines
       final line = textSpan.text!.substring(start, end);
       lineTexts.add(line);
@@ -383,14 +371,10 @@ class KrakenRenderParagraph extends RenderBox
       ui.LineMetrics lineMetric = _lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
-      double leading = lineHeight != null && lineMetric.height != 0
-        ? lineHeight! - lineMetric.height
-        : 0;
+      double leading = lineHeight != null && lineMetric.height != 0 ? lineHeight! - lineMetric.height : 0;
       _lineLeading.add(leading);
       // Offset of previous line
-      double preLineBottom = i > 0
-        ? _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2
-        : 0;
+      double preLineBottom = i > 0 ? _lineOffset[i - 1] + _lineMetrics[i - 1].height + _lineLeading[i - 1] / 2 : 0;
       double offset = preLineBottom + leading / 2;
       _lineOffset.add(offset);
     }
@@ -404,8 +388,7 @@ class KrakenRenderParagraph extends RenderBox
       ui.LineMetrics lineMetric = _lineMetrics[i];
       // Do not add line height in the case of textOverflow ellipsis
       // cause height of line metric equals to 0.
-      double height = lineHeight != null && lineMetric.height != 0 ?
-      lineHeight! : lineMetric.height;
+      double height = lineHeight != null && lineMetric.height != 0 ? lineHeight! : lineMetric.height;
       paragraphHeight += height;
     }
 
@@ -480,8 +463,7 @@ class KrakenRenderParagraph extends RenderBox
 
     size = constraints.constrain(paragraphSize);
 
-    final bool didOverflowHeight =
-        size.height < textSize.height || textDidExceedMaxLines;
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If*
     // the glyphs draw outside the line boxes, we might think that there isn't
@@ -662,8 +644,7 @@ class KrakenRenderParagraph extends RenderBox
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = text.getSemanticsInformation();
 
-    if (_semanticsInfo!.any(
-        (InlineSpanSemanticsInformation info) => info.recognizer != null)) {
+    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null)) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {

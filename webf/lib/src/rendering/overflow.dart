@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/gesture.dart';
+import 'package:webf/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/gesture.dart';
 
 mixin RenderOverflowMixin on RenderBoxModelBase {
   ScrollListener? scrollListener;
@@ -35,10 +36,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
     // The content of replaced elements is always trimmed to the content edge curve.
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    if( borderRadius != null
-      && this is RenderReplaced
-      && renderStyle.aspectRatio != null
-    ) {
+    if (borderRadius != null && this is RenderReplaced && renderStyle.aspectRatio != null) {
       return true;
     }
 
@@ -49,9 +47,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
       // Border-radius always to clip inner content when overflow is not visible.
-      if (scrollableSize.width > scrollableViewportSize.width
-        || borderRadius != null
-      ) {
+      if (scrollableSize.width > scrollableViewportSize.width || borderRadius != null) {
         return true;
       }
     }
@@ -72,10 +68,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
 
     // The content of replaced elements is always trimmed to the content edge curve.
     // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-    if( borderRadius != null
-      && this is RenderReplaced
-      && renderStyle.aspectRatio != null
-    ) {
+    if (borderRadius != null && this is RenderReplaced && renderStyle.aspectRatio != null) {
       return true;
     }
 
@@ -86,9 +79,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
       Size scrollableSize = renderBoxModel.scrollableSize;
       Size scrollableViewportSize = renderBoxModel.scrollableViewportSize;
       // Border-radius always to clip inner content when overflow is not visible.
-      if (scrollableSize.height > scrollableViewportSize.height
-        || borderRadius != null
-      ) {
+      if (scrollableSize.height > scrollableViewportSize.height || borderRadius != null) {
         return true;
       }
     }
@@ -167,6 +158,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     if (_scrollOffsetX == null) return 0.0;
     return -_scrollOffsetX!.pixels;
   }
+
   double get _paintOffsetY {
     if (_scrollOffsetY == null) return 0.0;
     return -_scrollOffsetY!.pixels;
@@ -189,23 +181,19 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
   final LayerHandle<ClipRRectLayer> _clipRRectLayer = LayerHandle<ClipRRectLayer>();
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
-  void paintOverflow(
-    PaintingContext context,
-    Offset offset,
-    EdgeInsets borderEdge,
-    CSSBoxDecoration? decoration,
-    PaintingContextCallback callback
-  ) {
+  void paintOverflow(PaintingContext context, Offset offset, EdgeInsets borderEdge, CSSBoxDecoration? decoration,
+      PaintingContextCallback callback) {
     if (clipX == false && clipY == false) return callback(context, offset);
 
     final double paintOffsetX = _paintOffsetX;
     final double paintOffsetY = _paintOffsetY;
     final Offset paintOffset = Offset(paintOffsetX, paintOffsetY);
     // Overflow should not cover border.
-    Rect clipRect = Offset(borderEdge.left, borderEdge.top) & Size(
-      size.width - borderEdge.right - borderEdge.left,
-      size.height - borderEdge.bottom - borderEdge.top,
-    );
+    Rect clipRect = Offset(borderEdge.left, borderEdge.top) &
+        Size(
+          size.width - borderEdge.right - borderEdge.left,
+          size.height - borderEdge.bottom - borderEdge.top,
+        );
     if (_shouldClipAtPaintOffset(paintOffset, size)) {
       // ignore: prefer_function_declarations_over_variables
       PaintingContextCallback painter = (PaintingContext context, Offset offset) {
@@ -226,9 +214,7 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
         double? borderTop = renderStyle.borderTopWidth?.computedValue;
         // The content of overflow is trimmed to the padding edge curve.
         // https://www.w3.org/TR/css-backgrounds-3/#corner-clipping
-        RRect clipRRect = borderTop != null
-          ? borderRRect.deflate(borderTop)
-          : borderRRect;
+        RRect clipRRect = borderTop != null ? borderRRect.deflate(borderTop) : borderRRect;
 
         // The content of replaced elements is trimmed to the content edge curve.
         if (this is RenderReplaced) {
@@ -236,9 +222,11 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
           double paddingTop = renderStyle.paddingTop.computedValue;
           clipRRect = clipRRect.deflate(paddingTop);
         }
-        _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter, oldLayer: _clipRRectLayer.layer);
+        _clipRRectLayer.layer = context.pushClipRRect(_needsCompositing, offset, clipRect, clipRRect, painter,
+            oldLayer: _clipRRectLayer.layer);
       } else {
-        _clipRectLayer.layer = context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);
+        _clipRectLayer.layer =
+            context.pushClipRect(_needsCompositing, offset, clipRect, painter, oldLayer: _clipRectLayer.layer);
       }
     } else {
       _clipRectLayer.layer = null;
@@ -281,4 +269,3 @@ mixin RenderOverflowMixin on RenderBoxModelBase {
     properties.add(DiagnosticsProperty('clipY', clipY));
   }
 }
-

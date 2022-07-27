@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 const String ANCHOR = 'A';
 const String _TARGET_SELF = 'self';
 
 class AnchorElement extends Element {
-  AnchorElement([BindingContext? context])
-      : super(context) {
-        addEventListener(EVENT_CLICK, _handleClick);
-      }
+  AnchorElement([BindingContext? context]) : super(context) {
+    addEventListener(EVENT_CLICK, _handleClick);
+  }
 
   void _handleClick(Event event) {
     String? href = attributes['href'];
@@ -19,58 +19,93 @@ class AnchorElement extends Element {
       String baseUrl = ownerDocument.controller.url;
       Uri baseUri = Uri.parse(baseUrl);
       Uri resolvedUri = ownerDocument.controller.uriParser!.resolve(baseUri, Uri.parse(href));
-      ownerDocument.controller.view.handleNavigationAction(
-          baseUrl, resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
+      ownerDocument.controller.view
+          .handleNavigationAction(baseUrl, resolvedUri.toString(), _getNavigationType(resolvedUri.scheme));
     }
   }
 
-  KrakenNavigationType _getNavigationType(String scheme) {
+  WebFNavigationType _getNavigationType(String scheme) {
     switch (scheme.toLowerCase()) {
       case 'http':
       case 'https':
       case 'file':
         if (target.isEmpty || target == _TARGET_SELF) {
-          return KrakenNavigationType.reload;
+          return WebFNavigationType.reload;
         }
     }
 
-    return KrakenNavigationType.navigate;
+    return WebFNavigationType.navigate;
   }
 
   // Bindings.
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'href': return href;
-      case 'target': return target;
-      case 'rel': return rel;
-      case 'type': return type;
-      case 'protocol': return protocol;
-      case 'host': return host;
-      case 'hostname': return hostname;
-      case 'port': return port;
-      case 'pathname': return pathname;
-      case 'search': return search;
-      case 'hash': return hash;
-      default: return super.getBindingProperty(key);
+      case 'href':
+        return href;
+      case 'target':
+        return target;
+      case 'rel':
+        return rel;
+      case 'type':
+        return type;
+      case 'protocol':
+        return protocol;
+      case 'host':
+        return host;
+      case 'hostname':
+        return hostname;
+      case 'port':
+        return port;
+      case 'pathname':
+        return pathname;
+      case 'search':
+        return search;
+      case 'hash':
+        return hash;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'href': href = castToType<String>(value); break;
-      case 'target': target = castToType<String>(value); break;
-      case 'rel': rel = castToType<String>(value); break;
-      case 'type': type = castToType<String>(value); break;
-      case 'protocol': protocol = castToType<String>(value); break;
-      case 'host': host = castToType<String>(value); break;
-      case 'hostname': hostname = castToType<String>(value); break;
-      case 'port': port = castToType<String>(value); break;
-      case 'pathname': pathname = castToType<String>(value); break;
-      case 'search': search = castToType<String>(value); break;
-      case 'hash': hash = castToType<String>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'href':
+        href = castToType<String>(value);
+        break;
+      case 'target':
+        target = castToType<String>(value);
+        break;
+      case 'rel':
+        rel = castToType<String>(value);
+        break;
+      case 'type':
+        type = castToType<String>(value);
+        break;
+      case 'protocol':
+        protocol = castToType<String>(value);
+        break;
+      case 'host':
+        host = castToType<String>(value);
+        break;
+      case 'hostname':
+        hostname = castToType<String>(value);
+        break;
+      case 'port':
+        port = castToType<String>(value);
+        break;
+      case 'pathname':
+        pathname = castToType<String>(value);
+        break;
+      case 'search':
+        search = castToType<String>(value);
+        break;
+      case 'hash':
+        hash = castToType<String>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
@@ -79,17 +114,39 @@ class AnchorElement extends Element {
     super.setAttribute(qualifiedName, value);
     // Reflect setAttribute to properties.
     switch (qualifiedName) {
-      case 'href': href = attributeToProperty<String>(value); break;
-      case 'target': target = attributeToProperty<String>(value); break;
-      case 'rel': rel = attributeToProperty<String>(value); break;
-      case 'type': type = attributeToProperty<String>(value); break;
-      case 'protocol': protocol = attributeToProperty<String>(value); break;
-      case 'host': host = attributeToProperty<String>(value); break;
-      case 'hostname': hostname = attributeToProperty<String>(value); break;
-      case 'port': port = attributeToProperty<String>(value); break;
-      case 'pathname': pathname = attributeToProperty<String>(value); break;
-      case 'search': search = attributeToProperty<String>(value); break;
-      case 'hash': hash = attributeToProperty<String>(value); break;
+      case 'href':
+        href = attributeToProperty<String>(value);
+        break;
+      case 'target':
+        target = attributeToProperty<String>(value);
+        break;
+      case 'rel':
+        rel = attributeToProperty<String>(value);
+        break;
+      case 'type':
+        type = attributeToProperty<String>(value);
+        break;
+      case 'protocol':
+        protocol = attributeToProperty<String>(value);
+        break;
+      case 'host':
+        host = attributeToProperty<String>(value);
+        break;
+      case 'hostname':
+        hostname = attributeToProperty<String>(value);
+        break;
+      case 'port':
+        port = attributeToProperty<String>(value);
+        break;
+      case 'pathname':
+        pathname = attributeToProperty<String>(value);
+        break;
+      case 'search':
+        search = attributeToProperty<String>(value);
+        break;
+      case 'hash':
+        hash = attributeToProperty<String>(value);
+        break;
     }
   }
 
@@ -205,6 +262,7 @@ class AnchorElement extends Element {
     }
     return _DOMString(search);
   }
+
   set search(String value) {
     if (_resolvedHyperlink == null) return;
     // Remove starting `?`.

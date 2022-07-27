@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:convert';
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 abstract class _InspectorModule {
   String get name;

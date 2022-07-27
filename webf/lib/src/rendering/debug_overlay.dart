@@ -1,15 +1,14 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-const Color _kHighlightedRenderObjectFillColor =
-    Color.fromARGB(128, 128, 128, 255);
-const Color _kHighlightedRenderObjectBorderColor =
-    Color.fromARGB(128, 64, 64, 128);
+const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
+const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
 
 class InspectorOverlayLayer extends Layer {
   /// Creates a layer that displays the inspector overlay.
@@ -17,8 +16,7 @@ class InspectorOverlayLayer extends Layer {
     bool inDebugMode = kDebugMode || kProfileMode;
     if (inDebugMode == false) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary(
-            'The inspector should never be used in production mode due to the '
+        ErrorSummary('The inspector should never be used in production mode due to the '
             'negative performance impact.'),
       ]);
     }

@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, Object? arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';
-const String CONTROLLER_NOT_INITIALIZED = 'Kraken controller not initialized.';
+const String CONTROLLER_NOT_INITIALIZED = 'WebF controller not initialized.';
 const String METHOD_CHANNEL_NAME = 'MethodChannel';
 
 class MethodChannelModule extends BaseModule {
@@ -33,7 +34,7 @@ class MethodChannelModule extends BaseModule {
   }
 }
 
-void setJSMethodCallCallback(KrakenController controller) {
+void setJSMethodCallCallback(WebFController controller) {
   if (controller.methodChannel == null) return;
 
   controller.methodChannel!._onJSMethodCall = (String method, arguments) async {
@@ -45,7 +46,7 @@ void setJSMethodCallCallback(KrakenController controller) {
   };
 }
 
-abstract class KrakenMethodChannel {
+abstract class WebFMethodChannel {
   MethodCallCallback? _onJSMethodCallCallback;
 
   set _onJSMethodCall(MethodCallCallback? value) {
@@ -55,14 +56,14 @@ abstract class KrakenMethodChannel {
 
   Future<dynamic> invokeMethodFromJavaScript(String method, List arguments);
 
-  static void setJSMethodCallCallback(KrakenController controller) {
+  static void setJSMethodCallCallback(WebFController controller) {
     controller.methodChannel?._onJSMethodCall = (String method, arguments) async {
       controller.module.moduleManager.emitModuleEvent(METHOD_CHANNEL_NAME, data: [method, arguments]);
     };
   }
 }
 
-class KrakenJavaScriptChannel extends KrakenMethodChannel {
+class WebFJavaScriptChannel extends WebFMethodChannel {
   Future<dynamic> invokeMethod(String method, arguments) async {
     MethodCallCallback? jsMethodCallCallback = _onJSMethodCallCallback;
     if (jsMethodCallCallback != null) {
@@ -92,14 +93,14 @@ class KrakenJavaScriptChannel extends KrakenMethodChannel {
   }
 }
 
-class KrakenNativeChannel extends KrakenMethodChannel {
+class WebFNativeChannel extends WebFMethodChannel {
   // Flutter method channel used to communicate with public SDK API
   // Only works when integration wieh public SDK API
 
-  static final MethodChannel _nativeChannel = getKrakenMethodChannel()
+  static final MethodChannel _nativeChannel = getWebFMethodChannel()
     ..setMethodCallHandler((call) async {
       String method = call.method;
-      KrakenController? controller = KrakenController.getControllerOfJSContextId(0);
+      WebFController? controller = WebFController.getControllerOfJSContextId(0);
 
       if (controller == null) return;
 
@@ -135,15 +136,15 @@ class KrakenNativeChannel extends KrakenMethodChannel {
   static Future<void> syncDynamicLibraryPath() async {
     String? path = await _nativeChannel.invokeMethod('getDynamicLibraryPath');
     if (path != null) {
-      KrakenDynamicLibrary.dynamicLibraryPath = path;
+      WebFDynamicLibrary.dynamicLibraryPath = path;
     }
   }
 }
 
-Future<dynamic> _invokeMethodFromJavaScript(KrakenController? controller, String method, List args) {
-  KrakenMethodChannel? krakenMethodChannel = controller?.methodChannel;
-  if (krakenMethodChannel != null) {
-    return krakenMethodChannel.invokeMethodFromJavaScript(method, args);
+Future<dynamic> _invokeMethodFromJavaScript(WebFController? controller, String method, List args) {
+  WebFMethodChannel? webFMethodChannel = controller?.methodChannel;
+  if (webFMethodChannel != null) {
+    return webFMethodChannel.invokeMethodFromJavaScript(method, args);
   } else {
     return Future.error(FlutterError(METHOD_CHANNEL_NOT_INITIALIZED));
   }

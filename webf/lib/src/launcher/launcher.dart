@@ -1,20 +1,21 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 typedef ConnectedCallback = void Function();
 
-const String BUNDLE_URL = 'KRAKEN_BUNDLE_URL';
-const String BUNDLE_PATH = 'KRAKEN_BUNDLE_PATH';
-const String ENABLE_DEBUG = 'KRAKEN_ENABLE_DEBUG';
-const String ENABLE_PERFORMANCE_OVERLAY = 'KRAKEN_ENABLE_PERFORMANCE_OVERLAY';
+const String BUNDLE_URL = 'WEBF_BUNDLE_URL';
+const String BUNDLE_PATH = 'WEBF_BUNDLE_PATH';
+const String ENABLE_DEBUG = 'WEBF_ENABLE_DEBUG';
+const String ENABLE_PERFORMANCE_OVERLAY = 'WEBF_ENABLE_PERFORMANCE_OVERLAY';
 const _white = Color(0xFFFFFFFF);
 
 String? getBundleURLFromEnv() {
@@ -25,31 +26,33 @@ String? getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
-void launch({
-  KrakenBundle? bundle,
-  bool? debugEnableInspector,
-  Color background = _white,
-  DevToolsService? devToolsService,
-  HttpClientInterceptor? httpClientInterceptor,
-  bool? showPerformanceOverlay = false
-}) async {
+void launch(
+    {WebFBundle? bundle,
+    bool? debugEnableInspector,
+    Color background = _white,
+    DevToolsService? devToolsService,
+    HttpClientInterceptor? httpClientInterceptor,
+    bool? showPerformanceOverlay = false}) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
   VoidCallback? _ordinaryOnMetricsChanged = window.onMetricsChanged;
 
-  Future<void> _initKrakenApp() async {
-    KrakenNativeChannel channel = KrakenNativeChannel();
+  Future<void> _initWebFApp() async {
+    WebFNativeChannel channel = WebFNativeChannel();
 
     if (bundle == null) {
       String? backendEntrypointUrl = getBundleURLFromEnv() ?? getBundlePathFromEnv();
       backendEntrypointUrl ??= await channel.getUrl();
       if (backendEntrypointUrl != null) {
-        bundle = KrakenBundle.fromUrl(backendEntrypointUrl);
+        bundle = WebFBundle.fromUrl(backendEntrypointUrl);
       }
     }
 
-    KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+    WebFController controller = WebFController(
+      null,
+      window.physicalSize.width / window.devicePixelRatio,
+      window.physicalSize.height / window.devicePixelRatio,
       background: background,
       showPerformanceOverlay: showPerformanceOverlay ?? Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       methodChannel: channel,
@@ -72,7 +75,7 @@ void launch({
         return;
       }
 
-      await _initKrakenApp();
+      await _initWebFApp();
 
       // Should proxy to ordinary window.onMetricsChanged callbacks.
       if (_ordinaryOnMetricsChanged != null) {
@@ -82,6 +85,6 @@ void launch({
       }
     };
   } else {
-    await _initKrakenApp();
+    await _initWebFApp();
   }
 }

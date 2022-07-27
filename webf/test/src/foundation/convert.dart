@@ -1,7 +1,6 @@
 import 'package:kraken/foundation.dart';
 import 'package:test/test.dart';
 
-
 void main() {
   group('Convert', () {
     test('utf8 decode basic', () async {

@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 const int SLASH_CODE = 47; // /
 const int NEWLINE_CODE = 10; // \n

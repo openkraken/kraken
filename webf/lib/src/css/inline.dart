@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-
 
 // https://www.w3.org/TR/css-inline-3/
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 /// Sets vertical alignment of an inline, inline-block
 enum VerticalAlign {

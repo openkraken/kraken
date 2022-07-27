@@ -1,6 +1,6 @@
 name: webf
 description: A W3C standard compliant Web rendering engine based on Flutter.
-version: 0.1.0
+version: 0.12.0
 homepage: https://openwebf.com
 
 environment:
@@ -38,7 +38,7 @@ flutter:
     platforms:
       android:
         package: com.openwebf.webf
-        pluginClass: KrakenPlugin
+        pluginClass: WebfPlugin
       ios:
         pluginClass: KrakenPlugin
       macos:

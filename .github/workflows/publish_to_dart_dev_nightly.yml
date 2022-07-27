@@ -1,4 +1,4 @@
-name: Publish Kraken To pub.dev Nightly
+name: Publish WebF To pub.dev Nightly
 
 on:
   schedule:

@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/rendering.dart';
 
 // White space processing in CSS affects only the document white space characters:
 // spaces (U+0020), tabs (U+0009), and segment breaks.
@@ -20,13 +21,13 @@ class TextParentData extends ContainerBoxParentData<RenderBox> {}
 
 enum WhiteSpace { normal, nowrap, pre, preWrap, preLine, breakSpaces }
 
-class RenderTextBox extends RenderBox
-    with RenderObjectWithChildMixin<RenderBox> {
-  RenderTextBox(data, {
+class RenderTextBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  RenderTextBox(
+    data, {
     required this.renderStyle,
   }) : _data = data {
     TextSpan text = CSSTextMixin.createTextSpan(_data, renderStyle);
-    _renderParagraph = child = KrakenRenderParagraph(
+    _renderParagraph = child = WebFRenderParagraph(
       text,
       textDirection: TextDirection.ltr,
     );
@@ -41,7 +42,10 @@ class RenderTextBox extends RenderBox
   String get data => _data;
 
   bool isEndWithSpace(String str) {
-    return str.endsWith(WHITE_SPACE_CHAR) || str.endsWith(NEW_LINE_CHAR) || str.endsWith(RETURN_CHAR) || str.endsWith(TAB_CHAR);
+    return str.endsWith(WHITE_SPACE_CHAR) ||
+        str.endsWith(NEW_LINE_CHAR) ||
+        str.endsWith(RETURN_CHAR) ||
+        str.endsWith(TAB_CHAR);
   }
 
   String get _trimmedData {
@@ -74,7 +78,9 @@ class RenderTextBox extends RenderBox
 
         if (previousSibling == null) {
           collapsedData = _trimLeftWhitespace(collapsedData);
-        } else if (previousSibling is RenderBoxModel &&(previousSibling.renderStyle.display == CSSDisplay.block || previousSibling.renderStyle.display == CSSDisplay.flex)) {
+        } else if (previousSibling is RenderBoxModel &&
+            (previousSibling.renderStyle.display == CSSDisplay.block ||
+                previousSibling.renderStyle.display == CSSDisplay.flex)) {
           // If previousSibling is block,should trimLeft slef.
           CSSDisplay? display = previousSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
@@ -87,7 +93,9 @@ class RenderTextBox extends RenderBox
         RenderObject? nextSibling = (parentData as RenderLayoutParentData).nextSibling;
         if (nextSibling == null) {
           collapsedData = _trimRightWhitespace(collapsedData);
-        } else if (nextSibling is RenderBoxModel && (nextSibling.renderStyle.display == CSSDisplay.block || nextSibling.renderStyle.display == CSSDisplay.flex)) {
+        } else if (nextSibling is RenderBoxModel &&
+            (nextSibling.renderStyle.display == CSSDisplay.block ||
+                nextSibling.renderStyle.display == CSSDisplay.flex)) {
           // If nextSibling is block,should trimRight slef.
           CSSDisplay? display = nextSibling.renderStyle.display;
           if (display == CSSDisplay.block || display == CSSDisplay.sliver || display == CSSDisplay.flex) {
@@ -102,7 +110,7 @@ class RenderTextBox extends RenderBox
     return _data;
   }
 
-  late KrakenRenderParagraph _renderParagraph;
+  late WebFRenderParagraph _renderParagraph;
   CSSRenderStyle renderStyle;
 
   BoxSizeType? widthSizeType;
@@ -181,8 +189,7 @@ class RenderTextBox extends RenderBox
   }
 
   BoxConstraints getConstraints() {
-    if (renderStyle.whiteSpace == WhiteSpace.nowrap &&
-        renderStyle.effectiveTextOverflow != TextOverflow.ellipsis) {
+    if (renderStyle.whiteSpace == WhiteSpace.nowrap && renderStyle.effectiveTextOverflow != TextOverflow.ellipsis) {
       return BoxConstraints();
     }
 
@@ -221,11 +228,7 @@ class RenderTextBox extends RenderBox
 
     // Text will not overflow from container, so it can inherit
     // constraints from parents
-    return BoxConstraints(
-        minWidth: 0,
-        maxWidth: maxConstraintWidth,
-        minHeight: 0,
-        maxHeight: double.infinity);
+    return BoxConstraints(minWidth: 0, maxWidth: maxConstraintWidth, minHeight: 0, maxHeight: double.infinity);
   }
 
   // Empty string is the minimum size character, use it as the base size
@@ -239,12 +242,11 @@ class RenderTextBox extends RenderBox
       locale: CSSText.getLocale(),
     );
     TextPainter painter = TextPainter(
-      text: TextSpan(
-        text: ' ',
-        style: textStyle,
-      ),
-      textDirection: TextDirection.ltr
-    );
+        text: TextSpan(
+          text: ' ',
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr);
     painter.layout();
     return painter.size;
   }
@@ -264,10 +266,8 @@ class RenderTextBox extends RenderBox
     // white-space is nowrap and overflow is hidden/clip.
     CSSOverflowType effectiveOverflowX = renderStyle.effectiveOverflowX;
 
-    if (parentContentConstraints != null
-      && (effectiveOverflowX == CSSOverflowType.hidden
-      || effectiveOverflowX == CSSOverflowType.clip)
-    ) {
+    if (parentContentConstraints != null &&
+        (effectiveOverflowX == CSSOverflowType.hidden || effectiveOverflowX == CSSOverflowType.clip)) {
       // Max character to display in one line.
       int? maxCharsOfLine;
       // Max lines in parent.
@@ -316,7 +316,7 @@ class RenderTextBox extends RenderBox
 
   @override
   void performLayout() {
-    KrakenRenderParagraph? paragraph = child as KrakenRenderParagraph?;
+    WebFRenderParagraph? paragraph = child as WebFRenderParagraph?;
     if (paragraph != null) {
       paragraph.overflow = renderStyle.effectiveTextOverflow;
       paragraph.textAlign = renderStyle.textAlign;

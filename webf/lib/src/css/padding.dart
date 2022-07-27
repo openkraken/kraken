@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 mixin CSSPaddingMixin on RenderStyle {
   /// The amount to pad the child in each dimension.
@@ -13,11 +14,10 @@ mixin CSSPaddingMixin on RenderStyle {
   @override
   EdgeInsets get padding {
     EdgeInsets insets = EdgeInsets.only(
-      left: paddingLeft.computedValue,
-      right: paddingRight.computedValue,
-      bottom: paddingBottom.computedValue,
-      top: paddingTop.computedValue
-    );
+        left: paddingLeft.computedValue,
+        right: paddingRight.computedValue,
+        bottom: paddingBottom.computedValue,
+        top: paddingTop.computedValue);
     assert(insets.isNonNegative);
     return insets;
   }
@@ -33,7 +33,7 @@ mixin CSSPaddingMixin on RenderStyle {
   CSSLengthValue get paddingLeft => _paddingLeft ?? CSSLengthValue.zero;
 
   CSSLengthValue? _paddingRight;
-    set paddingRight(CSSLengthValue? value) {
+  set paddingRight(CSSLengthValue? value) {
     if (_paddingRight == value) return;
     _paddingRight = value;
     _markSelfAndParentNeedsLayout();
@@ -77,10 +77,8 @@ mixin CSSPaddingMixin on RenderStyle {
   }
 
   Size wrapPaddingSize(Size innerSize) {
-    return Size(
-      paddingLeft.computedValue + innerSize.width + paddingRight.computedValue,
-      paddingTop.computedValue + innerSize.height + paddingBottom.computedValue
-    );
+    return Size(paddingLeft.computedValue + innerSize.width + paddingRight.computedValue,
+        paddingTop.computedValue + innerSize.height + paddingBottom.computedValue);
   }
 
   void debugPaddingProperties(DiagnosticPropertiesBuilder properties) {
