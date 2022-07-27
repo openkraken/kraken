@@ -42,6 +42,6 @@ flutter:
       ios:
         pluginClass: KrakenPlugin
       macos:
-        pluginClass: KrakenPlugin
+        pluginClass: WebFPlugin
       linux:
         pluginClass: KrakenPlugin
