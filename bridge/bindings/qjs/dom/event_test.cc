@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "event_target.h"
 #include "gtest/gtest.h"
-#include "kraken_test_env.h"
 #include "page.h"
+#include "webf_test_env.h"
 
 TEST(MouseEvent, init) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     EXPECT_STREQ(message.c_str(), "10");
     logCalled = true;
   };

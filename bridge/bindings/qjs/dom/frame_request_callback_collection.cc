@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "frame_request_callback_collection.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 JSClassID FrameCallback::classId{0};
 FrameCallback::FrameCallback(JSValue callback) : m_callback(callback) {}
@@ -70,4 +71,4 @@ void FrameRequestCallbackCollection::trace(JSRuntime* rt, JSValue val, JS_MarkFu
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

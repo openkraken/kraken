@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "timer.h"
 #include "bindings/qjs/garbage_collected.h"
@@ -8,10 +9,10 @@
 #include "dart_methods.h"
 
 #if UNIT_TEST
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 DOMTimer::DOMTimer(JSValue callback) : m_callback(callback) {}
 
@@ -224,4 +225,4 @@ void bindTimer(ExecutionContext* context) {
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearTimeout", 1);
   QJS_GLOBAL_BINDING_FUNCTION(context, clearTimeout, "clearInterval", 1);
 }
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

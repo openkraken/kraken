@@ -2,15 +2,15 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-#ifndef KRAKEN_DART_METHODS_H_
-#define KRAKEN_DART_METHODS_H_
+#ifndef WEBF_DART_METHODS_H_
+#define WEBF_DART_METHODS_H_
 
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
 #include <memory>
 #include <thread>
 
-#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
+#define WEBF_EXPORT __attribute__((__visibility__("default")))
 
 struct NativeString;
 struct NativeScreen;
@@ -56,7 +56,7 @@ struct MousePointer {
 using SimulatePointer = void (*)(MousePointer**, int32_t length, int32_t pointer);
 using SimulateInputText = void (*)(NativeString* nativeString);
 
-namespace kraken {
+namespace webf {
 struct DartMethodPointer {
   DartMethodPointer() = default;
   InvokeModule invokeModule{nullptr};
@@ -86,13 +86,13 @@ struct DartMethodPointer {
 void registerDartMethods(uint64_t* methodBytes, int32_t length);
 
 #ifdef IS_TEST
-KRAKEN_EXPORT
+WEBF_EXPORT
 void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length);
 #endif
 
-KRAKEN_EXPORT
+WEBF_EXPORT
 std::shared_ptr<DartMethodPointer> getDartMethod();
 
-}  // namespace kraken
+}  // namespace webf
 
 #endif

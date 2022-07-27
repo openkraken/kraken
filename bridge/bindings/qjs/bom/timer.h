@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_TIMER_H
-#define KRAKENBRIDGE_TIMER_H
+#ifndef BRIDGE_TIMER_H
+#define BRIDGE_TIMER_H
 
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/garbage_collected.h"
 #include "dom_timer_coordinator.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class DOMTimer : public GarbageCollected<DOMTimer> {
  public:
@@ -35,6 +36,6 @@ class DOMTimer : public GarbageCollected<DOMTimer> {
 
 void bindTimer(ExecutionContext* context);
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_TIMER_H
+#endif  // BRIDGE_TIMER_H

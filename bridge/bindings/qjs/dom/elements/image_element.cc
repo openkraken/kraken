@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "image_element.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "page.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 ImageElement::ImageElement(ExecutionContext* context) : Element(context) {
   JS_SetPrototype(m_ctx, m_prototypeObject, Element::instance(m_context)->prototype());
@@ -117,4 +118,4 @@ bool ImageElementInstance::dispatchEvent(EventInstance* event) {
   return result;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "window.h"
 #include "bindings/qjs/dom/document.h"
@@ -9,7 +10,7 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 std::once_flag kWindowInitOnceFlag;
 
@@ -118,7 +119,7 @@ JSValue Window::requestAnimationFrame(JSContext* ctx, JSValue this_val, int argc
   // Flutter backend implements check
 #if FLUTTER_BACKEND
   if (getDartMethod()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_flush_ui_command__': dart method (flushUICommand) is not registered.");
   }
   // Flush all pending ui messages.
   getDartMethod()->flushUICommand();
@@ -258,4 +259,4 @@ DocumentInstance* WindowInstance::document() {
   return m_context->m_document;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

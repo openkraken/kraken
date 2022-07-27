@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
-#define KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
+#ifndef BRIDGE_INSPECTOR_TASK_QUEUE_H
+#define BRIDGE_INSPECTOR_TASK_QUEUE_H
 
-#include "kraken_foundation.h"
 #include "task_queue.h"
+#include "webf_foundation.h"
 
 namespace foundation {
 
@@ -37,4 +38,4 @@ class InspectorTaskQueue : public TaskQueue {
 
 }  // namespace foundation
 
-#endif  // KRAKENBRIDGE_INSPECTOR_TASK_QUEUE_H
+#endif  // BRIDGE_INSPECTOR_TASK_QUEUE_H

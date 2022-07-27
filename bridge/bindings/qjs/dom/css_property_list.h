@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_
-#define KRAKENBRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_
+#ifndef BRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_
+#define BRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_
 
 #include <string>
 #include <unordered_map>
 
-namespace kraken {
+namespace webf {
 
 std::unordered_map<std::string, bool> cssPropertyList{{"accentColor", true},
                                                       {"additiveSymbols", true},
@@ -430,6 +431,6 @@ std::unordered_map<std::string, bool> cssPropertyList{{"accentColor", true},
                                                       {"zIndex", true},
                                                       {"zoom", true}};
 
-}  // namespace kraken
+}  // namespace webf
 
-#endif  // KRAKENBRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_
+#endif  // BRIDGE_BINDINGS_QJS_DOM_CSS_PROPERTY_LIST_H_

@@ -6,15 +6,15 @@
 #include "bindings/qjs/bom/blob.h"
 #include "testframework.h"
 
-namespace kraken {
+namespace webf {
 
-bool KrakenPageTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
+bool WebFPageTest::evaluateTestScripts(const uint16_t* code, size_t codeLength, const char* sourceURL, int startLine) {
   if (!m_page_context->isValid())
     return false;
   return m_page_context->evaluateJavaScript(code, codeLength, sourceURL, startLine);
 }
 
-bool KrakenPageTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
+bool WebFPageTest::parseTestHTML(const uint16_t* code, size_t codeLength) {
   if (!m_page_context->isValid())
     return false;
   std::string utf8Code = toUTF8(std::u16string(reinterpret_cast<const char16_t*>(code), codeLength));
@@ -31,8 +31,8 @@ static JSValue executeTest(JSContext* ctx, JSValueConst this_val, int argc, JSVa
   if (!JS_IsFunction(ctx, callback)) {
     return JS_ThrowTypeError(ctx, "Failed to execute 'executeTest': parameter 1 (callback) is not an function.");
   }
-  auto bridge = static_cast<KrakenPage*>(context->getOwner());
-  auto bridgeTest = static_cast<KrakenPageTest*>(bridge->owner);
+  auto bridge = static_cast<WebFPage*>(context->getOwner());
+  auto bridgeTest = static_cast<WebFPageTest*>(bridge->owner);
   JS_DupValue(ctx, callback);
   bridgeTest->executeTestCallback = callback;
   return JS_NULL;
@@ -45,32 +45,32 @@ static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int arg
   auto* context = static_cast<binding::qjs::ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   if (!JS_IsObject(blobValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
   }
-  auto blob = static_cast<kraken::binding::qjs::BlobInstance*>(JS_GetOpaque(blobValue, kraken::binding::qjs::Blob::kBlobClassID));
+  auto blob = static_cast<webf::binding::qjs::BlobInstance*>(JS_GetOpaque(blobValue, webf::binding::qjs::Blob::kBlobClassID));
 
   if (blob == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': parameter 1 (blob) must be an Blob object.");
   }
 
   if (!JS_IsString(screenShotValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 2 (match) must be an string.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': parameter 2 (match) must be an string.");
   }
 
   if (!JS_IsObject(callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': parameter 3 (callback) is not an function.");
   }
 
   if (!JS_IsFunction(ctx, callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': parameter 3 (callback) is not an function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': parameter 3 (callback) is not an function.");
   }
 
   if (getDartMethod()->matchImageSnapshot == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_match_image_snapshot__': dart method (matchImageSnapshot) is not registered.");
   }
 
-  std::unique_ptr<NativeString> screenShotNativeString = kraken::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
-  auto bridge = static_cast<KrakenPageTest*>(static_cast<KrakenPage*>(context->getOwner())->owner);
+  std::unique_ptr<NativeString> screenShotNativeString = webf::binding::qjs::jsValueToNativeString(ctx, screenShotValue);
+  auto bridge = static_cast<WebFPageTest*>(static_cast<WebFPage*>(context->getOwner())->owner);
   auto* callbackContext = new ImageSnapShotContext{JS_DupValue(ctx, callbackValue), context};
   list_add_tail(&callbackContext->link, &bridge->image_link);
 
@@ -102,7 +102,7 @@ static JSValue matchImageSnapshot(JSContext* ctx, JSValueConst this_val, int arg
 static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
 #if FLUTTER_BACKEND
   if (getDartMethod()->environment == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_environment__': dart method (environment) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_environment__': dart method (environment) is not registered.");
   }
   const char* env = getDartMethod()->environment();
   return JS_ParseJSON(ctx, env, strlen(env), "");
@@ -113,19 +113,19 @@ static JSValue environment(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 
 static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->simulatePointer == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': dart method(simulatePointer) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_simulate_pointer__': dart method(simulatePointer) is not registered.");
   }
 
   auto* context = static_cast<binding::qjs::ExecutionContext*>(JS_GetContextOpaque(ctx));
 
   JSValue inputArrayValue = argv[0];
   if (!JS_IsObject(inputArrayValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': first arguments should be an array.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_simulate_pointer__': first arguments should be an array.");
   }
 
   JSValue pointerValue = argv[1];
   if (!JS_IsNumber(pointerValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_pointer__': second arguments should be an number.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_simulate_pointer__': second arguments should be an number.");
   }
 
   uint32_t length;
@@ -174,16 +174,16 @@ static JSValue simulatePointer(JSContext* ctx, JSValueConst this_val, int argc, 
 
 static JSValue simulateInputText(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->simulateInputText == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': dart method(simulateInputText) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_simulate_keypress__': dart method(simulateInputText) is not registered.");
   }
 
   JSValue& charStringValue = argv[0];
 
   if (!JS_IsString(charStringValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_simulate_keypress__': first arguments should be a string");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_simulate_keypress__': first arguments should be a string");
   }
 
-  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(ctx, charStringValue);
+  std::unique_ptr<NativeString> nativeString = webf::binding::qjs::jsValueToNativeString(ctx, charStringValue);
   getDartMethod()->simulateInputText(nativeString.get());
   nativeString->free();
   return JS_NULL;
@@ -221,18 +221,18 @@ static JSValue triggerGlobalError(JSContext* ctx, JSValueConst this_val, int arg
   return JS_NULL;
 }
 
-KrakenPageTest::KrakenPageTest(KrakenPage* bridge) : m_page(bridge), m_page_context(bridge->getContext()) {
+WebFPageTest::WebFPageTest(WebFPage* bridge) : m_page(bridge), m_page_context(bridge->getContext()) {
   bridge->owner = this;
-  bridge->disposeCallback = [](KrakenPage* bridge) { delete static_cast<KrakenPageTest*>(bridge->owner); };
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__kraken_execute_test__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__kraken_match_image_snapshot__", 3);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__kraken_environment__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__kraken_simulate_pointer__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__kraken_simulate_inputtext__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__kraken_trigger_global_error__", 0);
-  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__kraken_parse_html__", 1);
+  bridge->disposeCallback = [](WebFPage* bridge) { delete static_cast<WebFPageTest*>(bridge->owner); };
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, executeTest, "__webf_execute_test__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, matchImageSnapshot, "__webf_match_image_snapshot__", 3);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, environment, "__webf_environment__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulatePointer, "__webf_simulate_pointer__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, simulateInputText, "__webf_simulate_inputtext__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, triggerGlobalError, "__webf_trigger_global_error__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(m_page_context, parseHTML, "__webf_parse_html__", 1);
 
-  initKrakenTestFramework(bridge);
+  initWebFTestFramework(bridge);
   init_list_head(&image_link);
 }
 
@@ -244,7 +244,7 @@ struct ExecuteCallbackContext {
   binding::qjs::ExecutionContext* context;
 };
 
-void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
+void WebFPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   if (JS_IsNull(executeTestCallback)) {
     return;
   }
@@ -261,7 +261,7 @@ void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
       return JS_ThrowTypeError(ctx, "failed to execute 'done': parameter 1 (status) is not a string");
     }
 
-    std::unique_ptr<NativeString> status = kraken::binding::qjs::jsValueToNativeString(ctx, statusValue);
+    std::unique_ptr<NativeString> status = webf::binding::qjs::jsValueToNativeString(ctx, statusValue);
     callbackContext->executeCallback(callbackContext->context->getContextId(), status.get());
     return JS_NULL;
   };
@@ -280,4 +280,4 @@ void KrakenPageTest::invokeExecuteTest(ExecuteCallback executeCallback) {
   executeTestCallback = JS_NULL;
 }
 
-}  // namespace kraken
+}  // namespace webf

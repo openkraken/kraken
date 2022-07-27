@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "performance.h"
 #include <chrono>
@@ -8,7 +9,7 @@
 
 #define PERFORMANCE_ENTRY_NONE_UNIQUE_ID -1024
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindPerformance(ExecutionContext* context) {
   auto* performance = Performance::instance(context);
@@ -410,7 +411,7 @@ double getMeasureTotalDuration(const std::vector<NativePerformanceEntry*>& measu
   return duration / 1000;
 }
 
-JSValue Performance::__kraken_navigation_summary__(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+JSValue Performance::__webf_navigation_summary__(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* performance = static_cast<Performance*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
   JSValue exception = JS_NULL;
   performance->measureSummary(&exception);
@@ -579,4 +580,4 @@ Rendering: %.*fms
 
 #endif
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

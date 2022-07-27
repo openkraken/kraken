@@ -3,8 +3,8 @@
  * Author: Kraken Team.
  */
 
-#ifndef KRAKENBRIDGE_FOUNDATION_H
-#define KRAKENBRIDGE_FOUNDATION_H
+#ifndef BRIDGE_FOUNDATION_H
+#define BRIDGE_FOUNDATION_H
 
 #include <atomic>
 #include <cassert>
@@ -21,7 +21,7 @@
 
 #define assert_m(exp, msg) assert(((void)msg, exp))
 
-#define KRAKEN_EXPORT __attribute__((__visibility__("default")))
+#define WEBF_EXPORT __attribute__((__visibility__("default")))
 
 #if defined(__GNUC__) || defined(__clang__)
 #define LIKELY(x) __builtin_expect(!!(x), 1)
@@ -33,27 +33,27 @@
 #define FORCE_INLINE inline
 #endif
 
-#define KRAKEN_DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
+#define DISALLOW_COPY(TypeName) TypeName(const TypeName&) = delete
 
-#define KRAKEN_DISALLOW_ASSIGN(TypeName) TypeName& operator=(const TypeName&) = delete
+#define DISALLOW_ASSIGN(TypeName) TypeName& operator=(const TypeName&) = delete
 
-#define KRAKEN_DISALLOW_MOVE(TypeName) \
+#define DISALLOW_MOVE(TypeName) \
   TypeName(TypeName&&) = delete;       \
   TypeName& operator=(TypeName&&) = delete
 
-#define KRAKEN_DISALLOW_COPY_AND_ASSIGN(TypeName) \
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&) = delete;             \
   TypeName& operator=(const TypeName&) = delete
 
-#define KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName) \
+#define DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName) \
   TypeName(const TypeName&) = delete;                  \
   TypeName(TypeName&&) = delete;                       \
   TypeName& operator=(const TypeName&) = delete;       \
   TypeName& operator=(TypeName&&) = delete
 
-#define KRAKEN_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
+#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
   TypeName() = delete;                                  \
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
+  DISALLOW_COPY_ASSIGN_AND_MOVE(TypeName)
 
 struct NativeString;
 struct UICommandItem;
@@ -65,9 +65,9 @@ class UICommandCallbackQueue {
  public:
   using Callback = void (*)(void*);
   UICommandCallbackQueue() = default;
-  static KRAKEN_EXPORT UICommandCallbackQueue* instance();
-  KRAKEN_EXPORT void registerCallback(const Callback& callback, void* data);
-  KRAKEN_EXPORT void flushCallbacks();
+  static WEBF_EXPORT UICommandCallbackQueue* instance();
+  WEBF_EXPORT void registerCallback(const Callback& callback, void* data);
+  WEBF_EXPORT void flushCallbacks();
 
  private:
   struct CallbackItem {

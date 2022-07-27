@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_ELEMENT_H
-#define KRAKENBRIDGE_ELEMENT_H
+#ifndef BRIDGE_ELEMENT_H
+#define BRIDGE_ELEMENT_H
 
 #include <unordered_map>
 #include "bindings/qjs/garbage_collected.h"
@@ -11,7 +12,7 @@
 #include "node.h"
 #include "style_declaration.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindElement(ExecutionContext* context);
 
@@ -195,6 +196,6 @@ class BoundingClientRect : public HostObject {
   NativeBoundingClientRect* m_nativeBoundingClientRect{nullptr};
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_ELEMENT_H
+#endif  // BRIDGE_ELEMENT_H

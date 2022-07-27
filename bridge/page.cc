@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "polyfill.h"
 
@@ -43,16 +44,16 @@
 #include "bindings/qjs/dom/text_node.h"
 #include "bindings/qjs/module_manager.h"
 
-namespace kraken {
+namespace webf {
 
 using namespace binding::qjs;
 
-std::unordered_map<std::string, NativeByteCode> KrakenPage::pluginByteCode{};
-ConsoleMessageHandler KrakenPage::consoleMessageHandler{nullptr};
+std::unordered_map<std::string, NativeByteCode> WebFPage::pluginByteCode{};
+ConsoleMessageHandler WebFPage::consoleMessageHandler{nullptr};
 
-kraken::KrakenPage** KrakenPage::pageContextPool{nullptr};
+webf::WebFPage** WebFPage::pageContextPool{nullptr};
 
-KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
+WebFPage::WebFPage(int32_t contextId, const JSExceptionHandler& handler) : contextId(contextId) {
 #if ENABLE_PROFILE
   auto jsContextStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 #endif
@@ -105,7 +106,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
   nativePerformance.mark(PERF_JS_POLYFILL_INIT_START);
 #endif
 
-  initKrakenPolyFill(this);
+  initWebFPolyFill(this);
 
   for (auto& p : pluginByteCode) {
     evaluateByteCode(p.second.bytes, p.second.length);
@@ -116,7 +117,7 @@ KrakenPage::KrakenPage(int32_t contextId, const JSExceptionHandler& handler) : c
 #endif
 }
 
-bool KrakenPage::parseHTML(const char* code, size_t length) {
+bool WebFPage::parseHTML(const char* code, size_t length) {
   if (!m_context->isValid())
     return false;
 
@@ -143,7 +144,7 @@ bool KrakenPage::parseHTML(const char* code, size_t length) {
   return true;
 }
 
-void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
+void WebFPage::invokeModuleEvent(NativeString* moduleName, const char* eventType, void* rawEvent, NativeString* extra) {
   if (!m_context->isValid())
     return;
 
@@ -186,7 +187,7 @@ void KrakenPage::invokeModuleEvent(NativeString* moduleName, const char* eventTy
   }
 }
 
-void KrakenPage::evaluateScript(const NativeString* script, const char* url, int startLine) {
+void WebFPage::evaluateScript(const NativeString* script, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
 
@@ -200,42 +201,42 @@ void KrakenPage::evaluateScript(const NativeString* script, const char* url, int
 #endif
 }
 
-void KrakenPage::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
+void WebFPage::evaluateScript(const uint16_t* script, size_t length, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-void KrakenPage::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
+void WebFPage::evaluateScript(const char* script, size_t length, const char* url, int startLine) {
   if (!m_context->isValid())
     return;
   m_context->evaluateJavaScript(script, length, url, startLine);
 }
 
-uint8_t* KrakenPage::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
+uint8_t* WebFPage::dumpByteCode(const char* script, size_t length, const char* url, size_t* byteLength) {
   if (!m_context->isValid())
     return nullptr;
   return m_context->dumpByteCode(script, length, url, byteLength);
 }
 
-void KrakenPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
+void WebFPage::evaluateByteCode(uint8_t* bytes, size_t byteLength) {
   if (!m_context->isValid())
     return;
   m_context->evaluateByteCode(bytes, byteLength);
 }
 
-KrakenPage::~KrakenPage() {
+WebFPage::~WebFPage() {
 #if IS_TEST
   if (disposeCallback != nullptr) {
     disposeCallback(this);
   }
 #endif
   delete m_context;
-  KrakenPage::pageContextPool[contextId] = nullptr;
+  WebFPage::pageContextPool[contextId] = nullptr;
 }
 
-void KrakenPage::reportError(const char* errmsg) {
+void WebFPage::reportError(const char* errmsg) {
   m_handler(m_context->getContextId(), errmsg);
 }
 
-}  // namespace kraken
+}  // namespace webf

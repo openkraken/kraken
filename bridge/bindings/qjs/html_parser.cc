@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "html_parser.h"
 #include "dom/document.h"
@@ -10,7 +11,7 @@
 
 #include <utility>
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 inline std::string trim(std::string& str) {
   str.erase(0, str.find_first_not_of(' '));  // prefixing spaces
@@ -114,7 +115,7 @@ bool HTMLParser::parseHTML(std::string html, NodeInstance* rootNode, bool isHTML
       gumbo_destroy_output(&kGumboDefaultOptions, htmlTree);
     }
   } else {
-    KRAKEN_LOG(ERROR) << "Root node is null.";
+    WEBF_LOG(ERROR) << "Root node is null.";
   }
 
   return true;
@@ -191,4 +192,4 @@ void HTMLParser::parseProperty(ElementInstance* element, GumboElement* gumboElem
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

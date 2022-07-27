@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "gtest/gtest.h"
-#include "kraken_test_env.h"
 #include "page.h"
+#include "webf_test_env.h"
 
 TEST(Context, isValid) {
   auto bridge = TEST_init();
@@ -66,7 +67,7 @@ TEST(Context, globalErrorHandlerTargetReturnToWindow) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) {};
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
 
     EXPECT_STREQ(message.c_str(), "true");
@@ -78,7 +79,7 @@ throw new Error('1234');
 )";
   bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
   EXPECT_EQ(logCalled, true);
-  kraken::KrakenPage::consoleMessageHandler = nullptr;
+  webf::WebFPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
@@ -95,7 +96,7 @@ TEST(Context, unrejectPromiseWillTriggerUnhandledRejectionEvent) {
   auto bridge = TEST_init(errorHandler);
   static int logIndex = 0;
   static std::string logs[] = {"error event cannot read property 'forceNullError' of null", "unhandled event {promise: Promise {...}, reason: Error {...}} true"};
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(logs[logIndex++].c_str(), message.c_str());
   };
@@ -119,7 +120,7 @@ var p = new Promise(function (resolve, reject) {
   EXPECT_EQ(errorHandlerExecuted, true);
   EXPECT_EQ(logCalled, true);
   EXPECT_EQ(logIndex, 2);
-  kraken::KrakenPage::consoleMessageHandler = nullptr;
+  webf::WebFPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, handledRejectionWillNotTriggerUnHandledRejectionEvent) {
@@ -127,7 +128,7 @@ TEST(Context, handledRejectionWillNotTriggerUnHandledRejectionEvent) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "rejected");
   };
@@ -155,7 +156,7 @@ generateRejectedPromise(true);
   bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-  kraken::KrakenPage::consoleMessageHandler = nullptr;
+  webf::WebFPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, unhandledRejectionEventWillTriggerWhenNotHandled) {
@@ -163,7 +164,7 @@ TEST(Context, unhandledRejectionEventWillTriggerWhenNotHandled) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {
@@ -184,7 +185,7 @@ generateRejectedPromise(true);
   bridge->evaluateScript(code.c_str(), code.size(), "file://", 0);
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-  kraken::KrakenPage::consoleMessageHandler = nullptr;
+  webf::WebFPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, handledRejectionEventWillTriggerWhenUnHandledRejectHandled) {
@@ -192,7 +193,7 @@ TEST(Context, handledRejectionEventWillTriggerWhenUnHandledRejectHandled) {
   static bool logCalled = false;
   auto errorHandler = [](int32_t contextId, const char* errmsg) { errorHandlerExecuted = true; };
   auto bridge = TEST_init(errorHandler);
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   std::string code = R"(
 window.addEventListener('unhandledrejection', event => {
@@ -225,7 +226,7 @@ generateRejectedPromise();
   TEST_runLoop(bridge->getContext());
   EXPECT_EQ(errorHandlerExecuted, false);
   EXPECT_EQ(logCalled, true);
-  kraken::KrakenPage::consoleMessageHandler = nullptr;
+  webf::WebFPage::consoleMessageHandler = nullptr;
 }
 
 TEST(Context, unrejectPromiseErrorWithMultipleContext) {
@@ -271,9 +272,9 @@ TEST(Context, disposeContext) {
   initJSPagePool(1024 * 1024);
   TEST_mockDartMethods(nullptr);
   uint32_t contextId = 0;
-  auto bridge = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto bridge = static_cast<webf::WebFPage*>(getPage(contextId));
   static bool disposed = false;
-  bridge->disposeCallback = [](kraken::KrakenPage* bridge) { disposed = true; };
+  bridge->disposeCallback = [](webf::WebFPage* bridge) { disposed = true; };
   disposePage(bridge->getContext()->getContextId());
   EXPECT_EQ(disposed, true);
 }
@@ -281,14 +282,14 @@ TEST(Context, disposeContext) {
 TEST(Context, window) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
 
   auto errorHandler = [](int32_t contextId, const char* errmsg) {
     errorHandlerExecuted = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   };
   auto bridge = TEST_init(errorHandler);
   const char* code = "console.log(window == globalThis)";
@@ -300,14 +301,14 @@ TEST(Context, window) {
 TEST(Context, windowInheritEventTarget) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ () ƒ () ƒ () true");
   };
 
   auto errorHandler = [](int32_t contextId, const char* errmsg) {
     errorHandlerExecuted = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   };
   auto bridge = TEST_init(errorHandler);
   const char* code = "console.log(window.addEventListener, addEventListener, globalThis.addEventListener, window.addEventListener === addEventListener)";
@@ -319,7 +320,7 @@ TEST(Context, windowInheritEventTarget) {
 TEST(Context, evaluateByteCode) {
   static bool errorHandlerExecuted = false;
   static bool logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "Arguments {0: 1, 1: 2, 2: 3, 3: 4, callee: ƒ (), length: 4}");
   };
@@ -338,7 +339,7 @@ TEST(Context, evaluateByteCode) {
 TEST(jsValueToNativeString, utf8String) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "helloworld");
-  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = webf::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   EXPECT_EQ(nativeString->length, 10);
   uint8_t expectedString[10] = {104, 101, 108, 108, 111, 119, 111, 114, 108, 100};
   for (int i = 0; i < 10; i++) {
@@ -350,7 +351,7 @@ TEST(jsValueToNativeString, utf8String) {
 TEST(jsValueToNativeString, unicodeChinese) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "这是你的优乐美");
-  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = webf::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"这是你的优乐美";
   EXPECT_EQ(nativeString->length, expectedString.size());
   for (int i = 0; i < nativeString->length; i++) {
@@ -362,7 +363,7 @@ TEST(jsValueToNativeString, unicodeChinese) {
 TEST(jsValueToNativeString, emoji) {
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {});
   JSValue str = JS_NewString(bridge->getContext()->ctx(), "……🤪");
-  std::unique_ptr<NativeString> nativeString = kraken::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
+  std::unique_ptr<NativeString> nativeString = webf::binding::qjs::jsValueToNativeString(bridge->getContext()->ctx(), str);
   std::u16string expectedString = u"……🤪";
   EXPECT_EQ(nativeString->length, expectedString.length());
   for (int i = 0; i < nativeString->length; i++) {

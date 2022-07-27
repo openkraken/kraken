@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
-#define KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
+#ifndef BRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
+#define BRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
 
 #include <quickjs/quickjs.h>
 #include <vector>
-#include "include/kraken_foundation.h"
+#include "include/webf_foundation.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 using EventListenerVector = std::vector<JSValue>;
 
@@ -38,6 +39,6 @@ class EventListenerMap final {
   JSRuntime* m_runtime;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_
+#endif  // BRIDGE_BINDINGS_QJS_DOM_EVENT_LISTENER_MAP_H_

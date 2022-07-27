@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_COMMENT_NODE_H
-#define KRAKENBRIDGE_COMMENT_NODE_H
+#ifndef BRIDGE_COMMENT_NODE_H
+#define BRIDGE_COMMENT_NODE_H
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindCommentNode(ExecutionContext* context);
 
@@ -41,6 +42,6 @@ class CommentInstance : public NodeInstance {
   friend Comment;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_COMMENT_NODE_H
+#endif  // BRIDGE_COMMENT_NODE_H

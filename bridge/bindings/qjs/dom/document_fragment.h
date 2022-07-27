@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_DOCUMENT_FRAGMENT_H
-#define KRAKENBRIDGE_DOCUMENT_FRAGMENT_H
+#ifndef BRIDGE_DOCUMENT_FRAGMENT_H
+#define BRIDGE_DOCUMENT_FRAGMENT_H
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindDocumentFragment(ExecutionContext* context);
 
@@ -30,6 +31,6 @@ class DocumentFragmentInstance : public NodeInstance {
   DocumentFragmentInstance(DocumentFragment* fragment);
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_DOCUMENT_FRAGMENT_H
+#endif  // BRIDGE_DOCUMENT_FRAGMENT_H

@@ -4140,7 +4140,7 @@ getJasmineRequireObj().toMatchSnapshot = function (j$) {
         return actualPromise.then(blob => {
           return new Promise((resolve, reject) => {
             // @TODO: the C++ HostingObject of Blob, need to removed when jsa support constructor operation.
-            __kraken_match_image_snapshot__(blob, filename, (status, errmsg) => {
+            __webf_match_image_snapshot__(blob, filename, (status, errmsg) => {
               // @NOTE: toMatchSnapshot should resolve before spec done.
               const _currentSpec = j$.getEnv().currentRunnable();
               if (_currentSpec.id !== specId) {

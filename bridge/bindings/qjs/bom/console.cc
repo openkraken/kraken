@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "console.h"
 #include "foundation/logging.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   std::stringstream stream;
@@ -31,7 +32,7 @@ JSValue print(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* arg
 }
 
 void bindConsole(ExecutionContext* context) {
-  QJS_GLOBAL_BINDING_FUNCTION(context, print, "__kraken_print__", 2);
+  QJS_GLOBAL_BINDING_FUNCTION(context, print, "__webf_print__", 2);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

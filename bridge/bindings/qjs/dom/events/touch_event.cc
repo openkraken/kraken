@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "touch_event.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "page.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindTouchEvent(ExecutionContext* context) {
   auto* constructor = TouchEvent::instance(context);
@@ -255,4 +256,4 @@ IMPL_PROPERTY_GETTER(TouchEvent, shiftKey)(JSContext* ctx, JSValue this_val, int
 
 TouchEventInstance::TouchEventInstance(TouchEvent* event, NativeEvent* nativeEvent) : EventInstance(event, nativeEvent) {}
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

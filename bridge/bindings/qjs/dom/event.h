@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_EVENT_H
-#define KRAKENBRIDGE_EVENT_H
+#ifndef BRIDGE_EVENT_H
+#define BRIDGE_EVENT_H
 
 #include "bindings/qjs/host_class.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 #define EVENT_CLICK "click"
 #define EVENT_INPUT "input"
@@ -167,6 +168,6 @@ class EventInstance : public Instance {
   friend Event;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_EVENT_H
+#endif  // BRIDGE_EVENT_H

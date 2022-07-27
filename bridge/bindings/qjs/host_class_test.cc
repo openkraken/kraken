@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "host_class.h"
 #include <unordered_map>
 #include "gtest/gtest.h"
-#include "kraken_test_env.h"
 #include "page.h"
+#include "webf_test_env.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class ParentClass : public HostClass {
  public:
@@ -63,12 +64,12 @@ class SampleClass : public ParentClass {
 TEST(HostClass, newInstance) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "10");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto context = bridge->getContext();
@@ -86,13 +87,13 @@ TEST(HostClass, newInstance) {
 TEST(HostClass, instanceOf) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "true");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   });
   auto context = bridge->getContext();
   auto* sampleObject = new SampleClass(context);
@@ -117,13 +118,13 @@ TEST(HostClass, instanceOf) {
 TEST(HostClass, inheritance) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   });
   auto context = bridge->getContext();
   auto* sampleObject = new SampleClass(context);
@@ -145,13 +146,13 @@ TEST(HostClass, inheritance) {
 TEST(HostClass, inherintanceInJavaScript) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "TEST 10 20");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   });
   auto context = bridge->getContext();
   auto* sampleObject = new SampleClass(context);
@@ -184,13 +185,13 @@ console.log(demo.getName(), demo.f(), demo.foo());
 TEST(HostClass, haveFunctionProtoMethods) {
   bool static errorCalled = false;
   bool static logCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "ƒ ()");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   });
   auto context = bridge->getContext();
   auto* parentObject = ParentClass::instance(context);
@@ -219,7 +220,7 @@ TEST(HostClass, multipleInstance) {
   bool static errorCalled = false;
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
     errorCalled = true;
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
   });
   auto context = bridge->getContext();
 
@@ -358,10 +359,10 @@ TEST(HostClass, exoticClass) {
   bool static errorCalled = false;
   bool static logCalled = false;
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "10");
   };
@@ -386,10 +387,10 @@ TEST(HostClass, setExoticClassProperty) {
   bool static errorCalled = false;
   bool static logCalled = false;
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "200");
   };
@@ -413,7 +414,7 @@ TEST(HostClass, finalizeShouldNotFree) {
   bool static errorCalled = false;
   bool static logCalled = false;
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) { errorCalled = true; });
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) { logCalled = true; };
 
   auto context = bridge->getContext();
   auto* constructor = new ExoticClass(context);
@@ -423,7 +424,7 @@ TEST(HostClass, finalizeShouldNotFree) {
     JS_RunGC(JS_GetRuntime(ctx));
     return JS_NULL;
   };
-  QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__kraken_run_gc__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(context, runGC, "__webf_run_gc__", 1);
 
   std::string code = R"(
 function throttle(func, wait) {
@@ -508,4 +509,4 @@ var handleScroll = function (e) {
   triggerScrollEventAndLoopTimer();
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

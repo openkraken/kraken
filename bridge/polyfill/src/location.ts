@@ -1,21 +1,26 @@
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
 import { URL } from './url';
-import { kraken } from './kraken';
+import { webf } from './webf';
 
 // @ts-ignore
-const krakenLocation = window.__location__;
+const webfLocation = window.__location__;
 // Lazy parse url.
 let _url: URL;
 export function getUrl() : URL {
   return _url ? _url : (_url = new URL(location.href));
 }
 
-const bindReload = krakenLocation.reload.bind(krakenLocation);
+const bindReload = webfLocation.reload.bind(webfLocation);
 export const location = {
   get href() {
-    return kraken.invokeModule('Location', 'getHref');
+    return webf.invokeModule('Location', 'getHref');
   },
   set href(url: string) {
-    kraken.invokeModule('Navigation', 'goTo', url);
+    webf.invokeModule('Navigation', 'goTo', url);
   },
   get origin() {
     return getUrl().origin;
@@ -44,7 +49,7 @@ export const location = {
 
   get assign() {
     return (assignURL: string) => {
-      kraken.invokeModule('Navigation', 'goTo', assignURL);
+      webf.invokeModule('Navigation', 'goTo', assignURL);
     };
   },
   get reload() {
@@ -52,7 +57,7 @@ export const location = {
   },
   get replace() {
     return (replaceURL: string) => {
-      kraken.invokeModule('Navigation', 'goTo', replaceURL);
+      webf.invokeModule('Navigation', 'goTo', replaceURL);
     };
   },
   get toString() {

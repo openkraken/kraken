@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_TEXT_NODE_H
-#define KRAKENBRIDGE_TEXT_NODE_H
+#ifndef BRIDGE_TEXT_NODE_H
+#define BRIDGE_TEXT_NODE_H
 
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class TextNodeInstance;
 
@@ -49,6 +50,6 @@ class TextNodeInstance : public NodeInstance {
   std::string m_data;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_TEXT_NODE_H
+#endif  // BRIDGE_TEXT_NODE_H

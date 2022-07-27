@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "script_animation_controller.h"
 #include "dart_methods.h"
 #include "frame_request_callback_collection.h"
 
 #if UNIT_TEST
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 JSClassID ScriptAnimationController::classId{0};
 
@@ -61,4 +62,4 @@ void ScriptAnimationController::cancelFrameCallback(uint32_t callbackId) {
   m_frameRequestCallbackCollection.cancelFrameCallback(callbackId);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

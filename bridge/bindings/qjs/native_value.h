@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_NATIVE_VALUE_H
-#define KRAKENBRIDGE_NATIVE_VALUE_H
+#ifndef BRIDGE_NATIVE_VALUE_H
+#define BRIDGE_NATIVE_VALUE_H
 
 #include "executing_context.h"
 
@@ -21,7 +22,7 @@ enum NativeTag {
 
 enum class JSPointerType { AsyncContextContext = 0, NativeFunctionContext = 1, NativeBoundingClientRect = 2, NativeCanvasRenderingContext2D = 3, NativeEventTarget = 4 };
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 // Exchange data struct between dart and C++
 struct NativeValue {
@@ -62,6 +63,6 @@ JSValue nativeValueToJSValue(ExecutionContext* context, NativeValue& value);
 
 std::string nativeStringToStdString(NativeString* nativeString);
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_NATIVE_VALUE_H
+#endif  // BRIDGE_NATIVE_VALUE_H

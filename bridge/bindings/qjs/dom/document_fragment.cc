@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "document_fragment.h"
 #include "document.h"
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindDocumentFragment(ExecutionContext* context) {
   auto* constructor = DocumentFragment::instance(context);
@@ -34,4 +35,4 @@ DocumentFragmentInstance::DocumentFragmentInstance(DocumentFragment* fragment) :
   setNodeFlag(DocumentFragmentInstance::NodeFlag::IsDocumentFragment);
   m_context->uiCommandBuffer()->addCommand(m_eventTargetId, UICommand::createDocumentFragment, nativeEventTarget);
 }
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

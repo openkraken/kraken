@@ -11,7 +11,7 @@
 #define FLUTTER_FML_MEMORY_REF_COUNTED_INTERNAL_H_
 
 #include <atomic>
-#include "include/kraken_bridge.h"
+#include "include/webf_bridge.h"
 #include "logging.h"
 
 namespace fml {
@@ -22,15 +22,16 @@ class RefCountedThreadSafeBase {
  public:
   void AddRef() const {
 #ifndef NDEBUG
-    KRAKEN_CHECK(!adoption_required_);
-    KRAKEN_CHECK(!destruction_started_);
+    WEBF_CHECK(!adoption_required_);
+    WEBF_CHECK(!destruction_started_);
 #endif
     ref_count_.fetch_add(1u, std::memory_order_relaxed);
   }
 
   bool HasOneRef() const { return ref_count_.load(std::memory_order_acquire) == 1u; }
 
-  void AssertHasOneRef() const { KRAKEN_CHECK(HasOneRef()); }
+  void AssertHasOneRef() const {
+    WEBF_CHECK(HasOneRef()); }
 
  protected:
   RefCountedThreadSafeBase();
@@ -39,10 +40,10 @@ class RefCountedThreadSafeBase {
   // Returns true if the object should self-delete.
   bool Release() const {
 #ifndef NDEBUG
-    KRAKEN_CHECK(!adoption_required_);
-    KRAKEN_CHECK(!destruction_started_);
+    WEBF_CHECK(!adoption_required_);
+    WEBF_CHECK(!destruction_started_);
 #endif
-    KRAKEN_CHECK(ref_count_.load(std::memory_order_acquire) != 0u);
+    WEBF_CHECK(ref_count_.load(std::memory_order_acquire) != 0u);
     // TODO(vtl): We could add the following:
     //     if (ref_count_.load(std::memory_order_relaxed) == 1u) {
     // #ifndef NDEBUG
@@ -67,7 +68,7 @@ class RefCountedThreadSafeBase {
 
 #ifndef NDEBUG
   void Adopt() {
-    KRAKEN_CHECK(adoption_required_);
+    WEBF_CHECK(adoption_required_);
     adoption_required_ = false;
   }
 #endif
@@ -80,7 +81,7 @@ class RefCountedThreadSafeBase {
   mutable bool destruction_started_;
 #endif
 
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
+  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
 };
 
 inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
@@ -95,9 +96,9 @@ inline RefCountedThreadSafeBase::RefCountedThreadSafeBase()
 
 inline RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {
 #ifndef NDEBUG
-  KRAKEN_CHECK(!adoption_required_);
+  WEBF_CHECK(!adoption_required_);
   // Should only be destroyed as a result of |Release()|.
-  KRAKEN_CHECK(destruction_started_);
+  WEBF_CHECK(destruction_started_);
 #endif
 }
 

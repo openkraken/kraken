@@ -2,10 +2,10 @@
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
-#ifndef KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
-#define KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
+#ifndef BRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
+#define BRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
 
-#include "include/kraken_bridge.h"
+#include "include/webf_bridge.h"
 
 namespace foundation {
 
@@ -29,4 +29,4 @@ class UICommandBuffer {
 
 }  // namespace foundation
 
-#endif  // KRAKENBRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_
+#endif  // BRIDGE_FOUNDATION_UI_COMMAND_BUFFER_H_

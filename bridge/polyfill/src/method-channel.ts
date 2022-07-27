@@ -1,4 +1,9 @@
-import { krakenInvokeModule } from './bridge';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webfInvokeModule } from './bridge';
 
 type MethodCallHandler = (method: string, args: any[]) => void;
 
@@ -7,7 +12,7 @@ let methodCallHandlers: MethodCallHandler[] = [];
 // Like flutter platform channels
 export const methodChannel = {
   setMethodCallHandler(handler: MethodCallHandler) {
-    console.warn('kraken.methodChannel.setMethodCallHandler is a Deprecated API, use kraken.methodChannel.addMethodCallHandler instead.');
+    console.warn('webf.methodChannel.setMethodCallHandler is a Deprecated API, use webf.methodChannel.addMethodCallHandler instead.');
     methodChannel.addMethodCallHandler(handler);
   },
   addMethodCallHandler(handler: MethodCallHandler) {
@@ -24,7 +29,7 @@ export const methodChannel = {
   },
   invokeMethod(method: string, ...args: any[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
+      webfInvokeModule('MethodChannel', 'invokeMethod', [method, args], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });

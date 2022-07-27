@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "event_target.h"
 
@@ -11,16 +12,16 @@
 #include "document.h"
 #include "element.h"
 #include "event.h"
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
 #define PROPAGATION_STOPPED 1
 #define PROPAGATION_CONTINUE 0
 
 #if UNIT_TEST
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static std::atomic<int32_t> globalEventTargetId{0};
 std::once_flag kEventTargetInitFlag;
@@ -525,4 +526,4 @@ int32_t NativeEventTarget::dispatchEventImpl(int32_t contextId, NativeEventTarge
   return propagationStopped ? PROPAGATION_STOPPED : PROPAGATION_CONTINUE;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_PERFORMANCE_H
-#define KRAKENBRIDGE_PERFORMANCE_H
+#ifndef BRIDGE_PERFORMANCE_H
+#define BRIDGE_PERFORMANCE_H
 
 #if ENABLE_PROFILE
 #define PERF_WIDGET_CREATION_COST "widget_creation_cost"
@@ -122,7 +123,7 @@
 
 #include "bindings/qjs/host_object.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindPerformance(ExecutionContext* context);
 
@@ -193,7 +194,7 @@ class Performance : public HostObject {
   static JSValue measure(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
 
 #if ENABLE_PROFILE
-  static JSValue __kraken_navigation_summary__(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+  static JSValue __webf_navigation_summary__(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
   void measureSummary(JSValue* exception);
 #endif
 
@@ -217,10 +218,10 @@ class Performance : public HostObject {
   DEFINE_FUNCTION(measure, 4);
 
 #if ENABLE_PROFILE
-  DEFINE_FUNCTION(__kraken_navigation_summary__, 0);
+  DEFINE_FUNCTION(__webf_navigation_summary__, 0);
 #endif
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_PERFORMANCE_H
+#endif  // BRIDGE_PERFORMANCE_H

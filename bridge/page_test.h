@@ -2,15 +2,15 @@
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
-#ifndef KRAKENBRIDGE_PAGE_TEST_H
-#define KRAKENBRIDGE_PAGE_TEST_H
+#ifndef BRIDGE_PAGE_TEST_H
+#define BRIDGE_PAGE_TEST_H
 
 #include "bindings/qjs/dom/document.h"
 #include "bindings/qjs/html_parser.h"
-#include "kraken_bridge_test.h"
 #include "page.h"
+#include "webf_bridge_test.h"
 
-namespace kraken {
+namespace webf {
 
 struct ImageSnapShotContext {
   JSValue callback;
@@ -18,12 +18,12 @@ struct ImageSnapShotContext {
   list_head link;
 };
 
-class KrakenPageTest final {
+class WebFPageTest final {
  public:
-  explicit KrakenPageTest() = delete;
-  explicit KrakenPageTest(KrakenPage* bridge);
+  explicit WebFPageTest() = delete;
+  explicit WebFPageTest(WebFPage* bridge);
 
-  ~KrakenPageTest() {
+  ~WebFPageTest() {
     if (!JS_IsNull(executeTestCallback)) {
       JS_FreeValue(m_page_context->ctx(), executeTestCallback);
     }
@@ -51,11 +51,11 @@ class KrakenPageTest final {
 
  private:
   /// the pointer of bridge, ownership belongs to JSBridge
-  KrakenPage* m_page;
+  WebFPage* m_page;
   /// the pointer of JSContext, overship belongs to JSContext
   binding::qjs::ExecutionContext* m_page_context;
 };
 
-}  // namespace kraken
+}  // namespace webf
 
-#endif  // KRAKENBRIDGE_PAGE_TEST_H
+#endif  // BRIDGE_PAGE_TEST_H

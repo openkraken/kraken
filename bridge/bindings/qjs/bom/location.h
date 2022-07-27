@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_LOCATION_H
-#define KRAKENBRIDGE_LOCATION_H
+#ifndef BRIDGE_LOCATION_H
+#define BRIDGE_LOCATION_H
 
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/host_object.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class Location : public HostObject {
  public:
@@ -21,6 +22,6 @@ class Location : public HostObject {
   DEFINE_FUNCTION(reload, 0);
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_LOCATION_H
+#endif  // BRIDGE_LOCATION_H

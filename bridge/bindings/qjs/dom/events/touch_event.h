@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_TOUCH_EVENT_H
-#define KRAKENBRIDGE_TOUCH_EVENT_H
+#ifndef BRIDGE_TOUCH_EVENT_H
+#define BRIDGE_TOUCH_EVENT_H
 
 #include "bindings/qjs/dom/element.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindTouchEvent(ExecutionContext* context);
 
@@ -112,6 +113,6 @@ class TouchEventInstance : public EventInstance {
   friend TouchEvent;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_TOUCH_EVENTT_H
+#endif  // BRIDGE_TOUCH_EVENTT_H

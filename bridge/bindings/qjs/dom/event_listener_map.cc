@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "event_listener_map.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static bool addListenerToVector(EventListenerVector* vector, JSValue callback) {
   if (std::find_if(vector->begin(), vector->end(), [&callback](JSValue fn) { return JS_VALUE_GET_PTR(fn) == JS_VALUE_GET_PTR(callback); }) != vector->end()) {
@@ -94,4 +95,4 @@ EventListenerMap::~EventListenerMap() {
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

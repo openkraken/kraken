@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_MODULE_MANAGER_H
-#define KRAKENBRIDGE_MODULE_MANAGER_H
+#ifndef BRIDGE_MODULE_MANAGER_H
+#define BRIDGE_MODULE_MANAGER_H
 
 #include "executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 struct ModuleContext {
   JSValue callback;
@@ -17,6 +18,6 @@ struct ModuleContext {
 
 void bindModuleManager(ExecutionContext* context);
 void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t contextId, NativeString* errmsg, NativeString* json);
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_MODULE_MANAGER_H
+#endif  // BRIDGE_MODULE_MANAGER_H

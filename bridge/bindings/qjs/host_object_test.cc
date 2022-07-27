@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "host_object.h"
 #include <gtest/gtest.h>
 #include "executing_context.h"
-#include "kraken_test_env.h"
 #include "page.h"
+#include "webf_test_env.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static bool isSampleFree = false;
 
@@ -47,7 +48,7 @@ class SampleObject : public HostObject {
 TEST(HostObject, defineProperty) {
   bool static logCalled = false;
   bool static errorCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
 
     EXPECT_STREQ(message.c_str(), "{f: ƒ (), foo: 1}");
@@ -67,12 +68,12 @@ TEST(HostObject, defineProperty) {
 TEST(ObjectProperty, worksWithProxy) {
   bool static logCalled = false;
   bool static errorCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "0");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto context = bridge->getContext();
@@ -96,12 +97,12 @@ console.log(p.foo);
 TEST(HostObject, defineFunction) {
   bool static logCalled = false;
   bool static errorCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "20");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto context = bridge->getContext();
@@ -137,12 +138,12 @@ int SampleExoticHostObject::setProperty(JSContext* ctx, JSValue obj, JSAtom atom
 TEST(ExoticHostObject, overriteGetterSetter) {
   bool static logCalled = false;
   bool static errorCalled = false;
-  kraken::KrakenPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
+  webf::WebFPage::consoleMessageHandler = [](void* ctx, const std::string& message, int logLevel) {
     logCalled = true;
     EXPECT_STREQ(message.c_str(), "100");
   };
   auto bridge = TEST_init([](int32_t contextId, const char* errmsg) {
-    KRAKEN_LOG(VERBOSE) << errmsg;
+    WEBF_LOG(VERBOSE) << errmsg;
     errorCalled = true;
   });
   auto context = bridge->getContext();
@@ -157,4 +158,4 @@ TEST(ExoticHostObject, overriteGetterSetter) {
   EXPECT_EQ(isSampleFree, true);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

@@ -2,21 +2,21 @@
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
-#include "kraken_bridge_test.h"
+#include "webf_bridge_test.h"
 #include "dart_methods.h"
 
-#if KRAKEN_JSC_ENGINE
+#if WEBF_JSC_ENGINE
 #include "bridge_test_jsc.h"
-#elif KRAKEN_QUICK_JS_ENGINE
+#elif WEBF_QUICK_JS_ENGINE
 #include "page_test.h"
 #endif
 #include <atomic>
 
-std::unordered_map<int, kraken::KrakenPageTest*> bridgeTestPool = std::unordered_map<int, kraken::KrakenPageTest*>();
+std::unordered_map<int, webf::WebFPageTest*> bridgeTestPool = std::unordered_map<int, webf::WebFPageTest*>();
 
 void initTestFramework(int32_t contextId) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
-  auto bridgeTest = new kraken::KrakenPageTest(page);
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
+  auto bridgeTest = new webf::WebFPageTest(page);
   bridgeTestPool[contextId] = bridgeTest;
 }
 
@@ -31,5 +31,5 @@ void executeTest(int32_t contextId, ExecuteCallback executeCallback) {
 }
 
 void registerTestEnvDartMethods(uint64_t* methodBytes, int32_t length) {
-  kraken::registerTestEnvDartMethods(methodBytes, length);
+  webf::registerTestEnvDartMethods(methodBytes, length);
 }

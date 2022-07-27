@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #include <sys/time.h>
 #include <vector>
 #include "bindings/qjs/dom/event_target.h"
 #include "dart_methods.h"
-#include "include/kraken_bridge.h"
-#include "kraken_bridge_test.h"
+#include "include/webf_bridge.h"
 #include "page.h"
+#include "webf_bridge_test.h"
 
 #if defined(__linux__) || defined(__APPLE__)
 static int64_t get_time_ms(void) {
@@ -126,14 +127,14 @@ uint32_t TEST_requestAnimationFrame(FrameCallback* frameCallback, int32_t contex
 }
 
 void TEST_cancelAnimationFrame(int32_t contextId, int32_t id) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   auto* context = page->getContext();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
   ts->os_frameCallbacks.erase(id);
 }
 
 void TEST_clearTimeout(int32_t contextId, int32_t timerId) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   auto* context = page->getContext();
   JSThreadState* ts = static_cast<JSThreadState*>(JS_GetRuntimeOpaque(context->runtime()));
   ts->os_timers.erase(timerId);
@@ -170,7 +171,7 @@ NativePerformanceEntryList* TEST_getPerformanceEntries(int32_t) {
 std::once_flag testInitOnceFlag;
 static int32_t inited{false};
 
-std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
+std::unique_ptr<webf::WebFPage> TEST_init(OnJSError onJsError) {
   uint32_t contextId;
   if (inited) {
     contextId = allocateNewPage(-1);
@@ -182,24 +183,24 @@ std::unique_ptr<kraken::KrakenPage> TEST_init(OnJSError onJsError) {
     inited = true;
   });
   initTestFramework(contextId);
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   auto* context = page->getContext();
   JSThreadState* th = new JSThreadState();
   JS_SetRuntimeOpaque(context->runtime(), th);
 
   TEST_mockDartMethods(onJsError);
 
-  return std::unique_ptr<kraken::KrakenPage>(page);
+  return std::unique_ptr<webf::WebFPage>(page);
 }
 
-std::unique_ptr<kraken::KrakenPage> TEST_init() {
+std::unique_ptr<webf::WebFPage> TEST_init() {
   return TEST_init(nullptr);
 }
 
-std::unique_ptr<kraken::KrakenPage> TEST_allocateNewPage() {
+std::unique_ptr<webf::WebFPage> TEST_allocateNewPage() {
   uint32_t newContextId = allocateNewPage(-1);
   initTestFramework(newContextId);
-  return std::unique_ptr<kraken::KrakenPage>(static_cast<kraken::KrakenPage*>(getPage(newContextId)));
+  return std::unique_ptr<webf::WebFPage>(static_cast<webf::WebFPage*>(getPage(newContextId)));
 }
 
 static bool jsPool(ExecutionContext* context) {

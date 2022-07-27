@@ -1,17 +1,18 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_HOST_OBJECT_H
-#define KRAKENBRIDGE_HOST_OBJECT_H
+#ifndef BRIDGE_HOST_OBJECT_H
+#define BRIDGE_HOST_OBJECT_H
 
 #include "executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class HostObject {
  public:
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostObject);
+  DISALLOW_COPY_AND_ASSIGN(HostObject);
 
   HostObject() = delete;
   HostObject(ExecutionContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
@@ -41,7 +42,7 @@ class HostObject {
 
 class ExoticHostObject {
  public:
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(ExoticHostObject);
+  DISALLOW_COPY_AND_ASSIGN(ExoticHostObject);
 
   ExoticHostObject() = delete;
   ExoticHostObject(ExecutionContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
@@ -82,6 +83,6 @@ class ExoticHostObject {
   };
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_HOST_OBJECT_H
+#endif  // BRIDGE_HOST_OBJECT_H

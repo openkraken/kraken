@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "executing_context.h"
 #include "bindings/qjs/bom/timer.h"
@@ -9,10 +10,10 @@
 #include "bindings/qjs/module_manager.h"
 #include "bom/dom_timer_coordinator.h"
 #include "garbage_collected.h"
-#include "kraken_bridge.h"
 #include "qjs_patch.h"
+#include "webf_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static std::atomic<int32_t> context_unique_id{0};
 
@@ -557,4 +558,4 @@ void ExecutionContext::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func)
   m_timers.trace(rt, JS_NULL, mark_func);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

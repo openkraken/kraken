@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_JS_CONTEXT_H
-#define KRAKENBRIDGE_JS_CONTEXT_H
+#ifndef BRIDGE_JS_CONTEXT_H
+#define BRIDGE_JS_CONTEXT_H
 
 #include <quickjs/list.h>
 #include <quickjs/quickjs.h>
@@ -19,13 +20,13 @@
 #include "foundation/ui_command_buffer.h"
 #include "garbage_collected.h"
 #include "js_context_macros.h"
-#include "kraken_foundation.h"
 #include "qjs_patch.h"
 #include "rejected_promises.h"
+#include "webf_foundation.h"
 
 using JSExceptionHandler = std::function<void(int32_t contextId, const char* message)>;
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static std::once_flag kinitJSClassIDFlag;
 
@@ -66,7 +67,7 @@ class ExecutionContextGCTracker : public GarbageCollected<ExecutionContextGCTrac
 };
 
 // An environment in which script can execute. This class exposes the common
-// properties of script execution environments on the kraken.
+// properties of script execution environments on the webf.
 // Window : Document : ExecutionContext = 1 : 1 : 1 at any point in time.
 class ExecutionContext {
  public:
@@ -165,7 +166,7 @@ static JSValue handleCallThisOnProxy(JSContext* ctx, JSValueConst this_val, int 
 }
 
 class ObjectProperty {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
+  DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectProperty);
 
  public:
   ObjectProperty() = delete;
@@ -214,7 +215,7 @@ class ObjectProperty {
 };
 
 class ObjectFunction {
-  KRAKEN_DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectFunction);
+  DISALLOW_COPY_ASSIGN_AND_MOVE(ObjectFunction);
 
  public:
   ObjectFunction() = delete;
@@ -283,6 +284,6 @@ void arraySpliceValue(JSContext* ctx, JSValue array, uint32_t start, uint32_t de
 // JS object operation utilities.
 JSValue objectGetKeys(JSContext* ctx, JSValue obj);
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_JS_CONTEXT_H
+#endif  // BRIDGE_JS_CONTEXT_H

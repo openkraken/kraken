@@ -1,4 +1,9 @@
-import { krakenInvokeModule } from './bridge';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webfInvokeModule } from './bridge';
 
 let connectivityChangeListener: (data: Object) => any;
 
@@ -11,7 +16,7 @@ export function dispatchConnectivityChangeEvent(event: any) {
 export default {
   getConnectivity() {
     return new Promise((resolve, reject) => {
-      krakenInvokeModule('Connection', 'getConnectivity', null, (e, data) => {
+      webfInvokeModule('Connection', 'getConnectivity', null, (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
@@ -21,7 +26,7 @@ export default {
     if (typeof listener === 'function') {
       connectivityChangeListener = listener;
       // TODO: should remove old listener when onchange reset with a null listener
-      krakenInvokeModule('Connection', 'onConnectivityChanged');
+      webfInvokeModule('Connection', 'onConnectivityChanged');
     }
   }
 }

@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "element.h"
 #include "bindings/qjs/bom/blob.h"
@@ -11,10 +12,10 @@
 #include "text_node.h"
 
 #if UNIT_TEST
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 std::once_flag kElementInitOnceFlag;
 
@@ -30,7 +31,7 @@ bool isJavaScriptExtensionElementInstance(ExecutionContext* context, JSValue ins
     auto* elementInstance = static_cast<ElementInstance*>(JS_GetOpaque(instance, Element::classId()));
     std::string tagName = elementInstance->getRegisteredTagName();
 
-    // Special case for kraken official plugins.
+    // Special case for webf official plugins.
     if (tagName == "video" || tagName == "iframe")
       return true;
 
@@ -897,4 +898,4 @@ IMPL_PROPERTY_GETTER(BoundingClientRect, left)(JSContext* ctx, JSValue this_val,
   return JS_NewFloat64(ctx, boundingClientRect->m_nativeBoundingClientRect->left);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

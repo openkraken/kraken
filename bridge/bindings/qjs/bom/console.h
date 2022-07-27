@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_CONSOLE_H
-#define KRAKENBRIDGE_CONSOLE_H
+#ifndef BRIDGE_CONSOLE_H
+#define BRIDGE_CONSOLE_H
 
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindConsole(ExecutionContext* context);
 
 }
 
-#endif  // KRAKENBRIDGE_CONSOLE_H
+#endif  // BRIDGE_CONSOLE_H

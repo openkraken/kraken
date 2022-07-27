@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "event.h"
 #include "bindings/qjs/bom/window.h"
 #include "bindings/qjs/qjs_patch.h"
 #include "custom_event.h"
 #include "event_target.h"
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 std::once_flag kEventInitOnceFlag;
 
@@ -246,4 +247,4 @@ void EventInstance::finalizer(JSRuntime* rt, JSValue val) {
   delete event;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

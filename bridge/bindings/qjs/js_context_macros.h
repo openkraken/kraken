@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_JS_CONTEXT_MACROS_H
-#define KRAKENBRIDGE_JS_CONTEXT_MACROS_H
+#ifndef BRIDGE_JS_CONTEXT_MACROS_H
+#define BRIDGE_JS_CONTEXT_MACROS_H
 
 #define OBJECT_INSTANCE(NAME)                                                 \
   static NAME* instance(ExecutionContext* context) {                          \
@@ -58,4 +59,4 @@
   };                                                                                            \
   ObjectProperty __##PROPERTY##__ { m_context, jsObject, #PROPERTY, PROPERTY##PropertyDescriptor::getter, PROPERTY##PropertyDescriptor::setter }
 
-#endif  // KRAKENBRIDGE_JS_CONTEXT_MACROS_H
+#endif  // BRIDGE_JS_CONTEXT_MACROS_H

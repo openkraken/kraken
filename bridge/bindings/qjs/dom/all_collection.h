@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_ALL_COLLECTION_H
-#define KRAKENBRIDGE_ALL_COLLECTION_H
+#ifndef BRIDGE_ALL_COLLECTION_H
+#define BRIDGE_ALL_COLLECTION_H
 
 #include "bindings/qjs/host_object.h"
 #include "node.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class AllCollection : public HostObject {
  public:
@@ -26,6 +27,6 @@ class AllCollection : public HostObject {
   std::vector<NodeInstance*> m_nodes;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_ALL_COLLECTION_H
+#endif  // BRIDGE_ALL_COLLECTION_H

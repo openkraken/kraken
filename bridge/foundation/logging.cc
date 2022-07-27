@@ -68,7 +68,7 @@ LogMessage::~LogMessage() {
       priority = ANDROID_LOG_ERROR;
       break;
   }
-  __android_log_write(priority, "KRAKEN_NATIVE_LOG", stream_.str().c_str());
+  __android_log_write(priority, "WEBF_NATIVE_LOG", stream_.str().c_str());
 #elif defined(IS_IOS)
   syslog(LOG_ALERT, "%s", stream_.str().c_str());
 #else
@@ -87,7 +87,7 @@ void pipeMessageToInspector(JSGlobalContextRef ctx, const std::string message, c
   JSObjectRef globalObjectRef = JSContextGetGlobalObject(ctx);
   auto client = JSObjectGetPrivate(globalObjectRef);
   if (client && client != ((void*)0x1)) {
-    auto client_impl = reinterpret_cast<kraken::debugger::JSCConsoleClientImpl*>(client);
+    auto client_impl = reinterpret_cast<webf::debugger::JSCConsoleClientImpl*>(client);
     client_impl->sendMessageToConsole(logLevel, message);
   }
 };
@@ -97,35 +97,35 @@ void printLog(int32_t contextId, std::stringstream& stream, std::string level, v
   MessageLevel _log_level = MessageLevel::Info;
   switch (level[0]) {
     case 'l':
-      KRAKEN_LOG(VERBOSE) << stream.str();
+      WEBF_LOG(VERBOSE) << stream.str();
       _log_level = MessageLevel::Log;
       break;
     case 'i':
-      KRAKEN_LOG(INFO) << stream.str();
+      WEBF_LOG(INFO) << stream.str();
       _log_level = MessageLevel::Info;
       break;
     case 'd':
-      KRAKEN_LOG(DEBUG) << stream.str();
+      WEBF_LOG(DEBUG) << stream.str();
       _log_level = MessageLevel::Debug;
       break;
     case 'w':
-      KRAKEN_LOG(WARN) << stream.str();
+      WEBF_LOG(WARN) << stream.str();
       _log_level = MessageLevel::Warning;
       break;
     case 'e':
-      KRAKEN_LOG(ERROR) << stream.str();
+      WEBF_LOG(ERROR) << stream.str();
       _log_level = MessageLevel::Error;
       break;
     default:
-      KRAKEN_LOG(VERBOSE) << stream.str();
+      WEBF_LOG(VERBOSE) << stream.str();
   }
 
-  if (kraken::KrakenPage::consoleMessageHandler != nullptr) {
-    kraken::KrakenPage::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
+  if (webf::WebFPage::consoleMessageHandler != nullptr) {
+    webf::WebFPage::consoleMessageHandler(ctx, stream.str(), static_cast<int>(_log_level));
   }
 
-  if (kraken::getDartMethod()->onJsLog != nullptr) {
-    kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(_log_level), stream.str().c_str());
+  if (webf::getDartMethod()->onJsLog != nullptr) {
+    webf::getDartMethod()->onJsLog(contextId, static_cast<int>(_log_level), stream.str().c_str());
   }
 }
 

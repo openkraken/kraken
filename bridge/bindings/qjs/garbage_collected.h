@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_GARBAGE_COLLECTED_H
-#define KRAKENBRIDGE_GARBAGE_COLLECTED_H
+#ifndef BRIDGE_GARBAGE_COLLECTED_H
+#define BRIDGE_GARBAGE_COLLECTED_H
 
 #include <quickjs/quickjs.h>
-#include "include/kraken_foundation.h"
+#include "include/webf_foundation.h"
 #include "qjs_patch.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 template <typename T>
 class MakeGarbageCollectedTrait;
@@ -143,6 +144,6 @@ T* makeGarbageCollected(Args&&... args) {
   return MakeGarbageCollectedTrait<T>::allocate(std::forward<Args>(args)...);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_GARBAGE_COLLECTED_H
+#endif  // BRIDGE_GARBAGE_COLLECTED_H

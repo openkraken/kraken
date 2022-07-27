@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
-#define KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
+#ifndef BRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
+#define BRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
 
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 // |FrameCallback| is an interface type which generalizes callbacks which are
 // invoked when a script-based animation needs to be resampled.
@@ -40,8 +41,8 @@ class FrameRequestCallbackCollection final {
   std::vector<FrameCallback*> m_abandonedCallbacks;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
 class frame_request_callback_collection {};
 
-#endif  // KRAKENBRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_
+#endif  // BRIDGE_BINDINGS_QJS_BOM_FRAME_REQUEST_CALLBACK_COLLECTION_H_

@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_SCREEN_H
-#define KRAKENBRIDGE_SCREEN_H
+#ifndef BRIDGE_SCREEN_H
+#define BRIDGE_SCREEN_H
 
 #include "bindings/qjs/executing_context.h"
 #include "bindings/qjs/host_object.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class Screen : public HostObject {
  public:
@@ -24,8 +25,8 @@ class Screen : public HostObject {
 
 void bindScreen(ExecutionContext* context);
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
 class screen {};
 
-#endif  // KRAKENBRIDGE_SCREEN_H
+#endif  // BRIDGE_SCREEN_H

@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_EVENT_TARGET_H
-#define KRAKENBRIDGE_EVENT_TARGET_H
+#ifndef BRIDGE_EVENT_TARGET_H
+#define BRIDGE_EVENT_TARGET_H
 
 #include "bindings/qjs/dom/event.h"
 #include "bindings/qjs/executing_context.h"
@@ -22,7 +23,7 @@ void TEST_invokeBindingMethod(void* nativePtr, void* returnValue, void* method, 
 #define GetPropertyMagic "%g"
 #define SetPropertyMagic "%s"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class EventTargetInstance;
 class NativeEventTarget;
@@ -136,6 +137,6 @@ class EventTargetInstance : public Instance {
   friend StyleDeclarationInstance;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_EVENT_TARGET_H
+#endif  // BRIDGE_EVENT_TARGET_H

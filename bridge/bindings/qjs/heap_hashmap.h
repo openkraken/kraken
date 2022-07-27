@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_
-#define KRAKENBRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_
+#ifndef BRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_
+#define BRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_
 
 #include <quickjs/quickjs.h>
 #include <unordered_map>
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 template <typename K>
 class HeapHashMap {
@@ -97,6 +98,6 @@ void HeapHashMap<K>::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_func) c
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_
+#endif  // BRIDGE_BINDINGS_QJS_HEAP_HASHMAP_H_

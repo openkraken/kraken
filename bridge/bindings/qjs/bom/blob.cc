@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "blob.h"
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 std::once_flag kBlobInitOnceFlag;
 
@@ -277,4 +278,4 @@ int32_t BlobInstance::size() {
 uint8_t* BlobInstance::bytes() {
   return _data.data();
 }
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

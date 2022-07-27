@@ -119,7 +119,7 @@ class RefCountedThreadSafe : public internal::RefCountedThreadSafeBase {
   void Adopt() { internal::RefCountedThreadSafeBase::Adopt(); }
 #endif
 
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
+  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafe);
 };
 
 // If you subclass |RefCountedThreadSafe| and want to keep your destructor

@@ -1,25 +1,26 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "module_manager.h"
 #include "page.h"
 #include "qjs_patch.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
-JSValue krakenModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue webFModuleListener(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 1) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': 1 parameter required, but only 0 present.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_module_listener__': 1 parameter required, but only 0 present.");
   }
 
   JSValue callbackValue = argv[0];
   if (!JS_IsObject(callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_module_listener__': parameter 1 (callback) must be a function.");
   }
 
   if (!JS_IsFunction(ctx, callbackValue)) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_module_listener__': parameter 1 (callback) must be a function.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_module_listener__': parameter 1 (callback) must be a function.");
   }
 
   auto context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
@@ -39,7 +40,7 @@ void handleInvokeModuleTransientCallback(void* callbackContext, int32_t contextI
     return;
 
   if (JS_IsNull(moduleContext->callback)) {
-    JSValue exception = JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__kraken_invoke_module__': callback is null.");
+    JSValue exception = JS_ThrowTypeError(moduleContext->context->ctx(), "Failed to execute '__webf_invoke_module__': callback is null.");
     context->handleException(&exception);
     return;
   }
@@ -78,9 +79,9 @@ void handleInvokeModuleUnexpectedCallback(void* callbackContext, int32_t context
   static_assert("Unexpected module callback, please check your invokeModule implementation on the dart side.");
 }
 
-JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+JSValue webFInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (argc < 2) {
-    return JS_ThrowTypeError(ctx, "Failed to execute 'kraken.invokeModule()': 2 arguments required.");
+    return JS_ThrowTypeError(ctx, "Failed to execute 'webf.invokeModule()': 2 arguments required.");
   }
 
   JSValue moduleNameValue = argv[0];
@@ -112,7 +113,7 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 
   if (getDartMethod()->invokeModule == nullptr) {
 #if FLUTTER_BACKEND
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_invoke_module__': dart method (invokeModule) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_invoke_module__': dart method (invokeModule) is not registered.");
 #else
     return JS_NULL;
 #endif
@@ -154,16 +155,16 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 
 JSValue flushUICommand(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
   if (getDartMethod()->flushUICommand == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to execute '__kraken_flush_ui_command__': dart method (flushUICommand) is not registered.");
+    return JS_ThrowTypeError(ctx, "Failed to execute '__webf_flush_ui_command__': dart method (flushUICommand) is not registered.");
   }
   getDartMethod()->flushUICommand();
   return JS_NULL;
 }
 
 void bindModuleManager(ExecutionContext* context) {
-  QJS_GLOBAL_BINDING_FUNCTION(context, krakenModuleListener, "__kraken_module_listener__", 1);
-  QJS_GLOBAL_BINDING_FUNCTION(context, krakenInvokeModule, "__kraken_invoke_module__", 3);
-  QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__kraken_flush_ui_command__", 0);
+  QJS_GLOBAL_BINDING_FUNCTION(context, webFModuleListener, "__webf_module_listener__", 1);
+  QJS_GLOBAL_BINDING_FUNCTION(context, webFInvokeModule, "__webf_invoke_module__", 3);
+  QJS_GLOBAL_BINDING_FUNCTION(context, flushUICommand, "__webf_flush_ui_command__", 0);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

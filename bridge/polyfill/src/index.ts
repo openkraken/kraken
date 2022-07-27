@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
 import 'es6-promise/dist/es6-promise.auto';
 import './dom';
 import './query-selector';
@@ -11,7 +16,7 @@ import { XMLHttpRequest } from './xhr';
 import { asyncStorage } from './async-storage';
 import { URLSearchParams } from './url-search-params';
 import { URL } from './url';
-import { kraken } from './kraken';
+import { webf } from './webf';
 import { ErrorEvent, PromiseRejectionEvent } from './events';
 
 defineGlobalProperty('ErrorEvent', ErrorEvent);
@@ -29,7 +34,7 @@ defineGlobalProperty('XMLHttpRequest', XMLHttpRequest);
 defineGlobalProperty('asyncStorage', asyncStorage);
 defineGlobalProperty('URLSearchParams', URLSearchParams);
 defineGlobalProperty('URL', URL);
-defineGlobalProperty('kraken', kraken);
+defineGlobalProperty('webf', webf);
 defineGlobalProperty('ErrorEvent', ErrorEvent);
 
 function defineGlobalProperty(key: string, value: any, isEnumerable: boolean = true) {

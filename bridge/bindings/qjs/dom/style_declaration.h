@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_STYLE_DECLARATION_H
-#define KRAKENBRIDGE_STYLE_DECLARATION_H
+#ifndef BRIDGE_STYLE_DECLARATION_H
+#define BRIDGE_STYLE_DECLARATION_H
 
 #include "bindings/qjs/host_class.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class EventTargetInstance;
 void bindCSSStyleDeclaration(ExecutionContext* context);
@@ -76,6 +77,6 @@ class StyleDeclarationInstance : public Instance {
   friend EventTargetInstance;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_STYLE_DECLARATION_H
+#endif  // BRIDGE_STYLE_DECLARATION_H

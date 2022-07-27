@@ -109,12 +109,12 @@ class RefPtr final {
   T* get() const { return ptr_; }
 
   T& operator*() const {
-    KRAKEN_CHECK(ptr_);
+    WEBF_CHECK(ptr_);
     return *ptr_;
   }
 
   T* operator->() const {
-    KRAKEN_CHECK(ptr_);
+    WEBF_CHECK(ptr_);
     return ptr_;
   }
 
@@ -191,7 +191,7 @@ class RefPtr final {
   friend RefPtr<T> AdoptRef<T>(T*);
 
   enum AdoptTag { ADOPT };
-  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) { KRAKEN_CHECK(ptr_); }
+  RefPtr(T* ptr, AdoptTag) : ptr_(ptr) { WEBF_CHECK(ptr_); }
 
   T* ptr_;
 };

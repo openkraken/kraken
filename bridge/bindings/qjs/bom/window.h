@@ -1,15 +1,16 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_WINDOW_H
-#define KRAKENBRIDGE_WINDOW_H
+#ifndef BRIDGE_WINDOW_H
+#define BRIDGE_WINDOW_H
 
 #include "bindings/qjs/bom/location.h"
 #include "bindings/qjs/dom/event_target.h"
 #include "bindings/qjs/executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindWindow(ExecutionContext* context);
 
@@ -80,6 +81,6 @@ class WindowInstance : public EventTargetInstance {
   friend ExecutionContext;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_WINDOW_H
+#endif  // BRIDGE_WINDOW_H

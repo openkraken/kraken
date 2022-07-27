@@ -1,1 +1,0 @@
-../../bridge/include/kraken_foundation.h

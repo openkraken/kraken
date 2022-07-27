@@ -1,14 +1,15 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "custom_event.h"
 #include "bindings/qjs/qjs_patch.h"
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
 #include <utility>
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindCustomEvent(ExecutionContext* context) {
   auto* constructor = CustomEvent::instance(context);
@@ -88,4 +89,4 @@ CustomEventInstance::CustomEventInstance(CustomEvent* jsCustomEvent, NativeCusto
   m_detail.value(newDetail);
   JS_FreeValue(m_ctx, newDetail);
 }
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

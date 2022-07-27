@@ -1,5 +1,10 @@
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
 // https://console.spec.whatwg.org/
-import { krakenPrint } from './bridge';
+import { webfPrint } from './bridge';
 
 const SEPARATOR = ' ';
 const INTERPOLATE = /%[sdifoO]/g;
@@ -20,7 +25,7 @@ function printer(message: string, level?: string) {
     message = groupIndent + message;
   }
 
-  krakenPrint(message, level);
+  webfPrint(message, level);
 }
 
 /**

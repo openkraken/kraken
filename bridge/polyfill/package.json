@@ -1,6 +1,6 @@
 {
   "private": true,
-  "description": "JavaScript polyfill for kraken",
+  "description": "JavaScript polyfill for webf",
   "main": "dist/index.js",
   "scripts": {
     "build": "NODE_ENV=development rollup --config rollup.config.js && npm run mainToC && npm run testToC",

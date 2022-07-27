@@ -1,27 +1,32 @@
-import { kraken } from './kraken';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webf } from './webf';
 
 class History {
   constructor() {
   }
 
   get length() {
-    return Number(kraken.invokeModule('History', 'length'));
+    return Number(webf.invokeModule('History', 'length'));
   }
 
   get state() {
-    return JSON.parse(kraken.invokeModule('History', 'state'));
+    return JSON.parse(webf.invokeModule('History', 'state'));
   }
 
   back() {
-     kraken.invokeModule('History', 'back');
+     webf.invokeModule('History', 'back');
   }
 
   forward() {
-    kraken.invokeModule('History', 'forward');
+    webf.invokeModule('History', 'forward');
   }
 
   go(delta?: number) {
-    kraken.invokeModule('History', 'go', delta ? Number(delta) : null);
+    webf.invokeModule('History', 'go', delta ? Number(delta) : null);
   }
 
   pushState(state: any, title: string, url?: string) {
@@ -29,7 +34,7 @@ class History {
       throw TypeError("Failed to execute 'pushState' on 'History': 2 arguments required, but only " + arguments.length + " present");
     }
 
-    kraken.invokeModule('History', 'pushState', [state, title, url]);
+    webf.invokeModule('History', 'pushState', [state, title, url]);
   }
 
   replaceState(state: any, title: string, url?: string) {
@@ -37,7 +42,7 @@ class History {
       throw TypeError("Failed to execute 'pushState' on 'History': 2 arguments required, but only " + arguments.length + " present");
     }
 
-    kraken.invokeModule('History', 'replaceState', [state, title, url]);
+    webf.invokeModule('History', 'replaceState', [state, title, url]);
   }
 }
 

@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "location.h"
 #include <utility>
 #include "dart_methods.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 JSValue Location::reload(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
   auto* location = static_cast<Location*>(JS_GetOpaque(this_val, ExecutionContext::kHostObjectClassId));
@@ -20,4 +21,4 @@ JSValue Location::reload(JSContext* ctx, JSValue this_val, int argc, JSValue* ar
   return JS_NULL;
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

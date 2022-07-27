@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "rejected_promises.h"
 #include "executing_context.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 RejectedPromises::Message::Message(ExecutionContext* context, JSValue promise, JSValue reason)
     : m_runtime(context->runtime()), m_promise(JS_DupValue(context->ctx(), promise)), m_reason(JS_DupValue(context->ctx(), reason)) {}
@@ -63,4 +64,4 @@ void RejectedPromises::process(ExecutionContext* context) {
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

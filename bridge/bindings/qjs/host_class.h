@@ -1,21 +1,22 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_HOST_CLASS_H
-#define KRAKENBRIDGE_HOST_CLASS_H
+#ifndef BRIDGE_HOST_CLASS_H
+#define BRIDGE_HOST_CLASS_H
 
 #include "executing_context.h"
 #include "qjs_patch.h"
 #include "third_party/quickjs/quickjs.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class Instance;
 
 class HostClass {
  public:
-  KRAKEN_DISALLOW_COPY_AND_ASSIGN(HostClass);
+  DISALLOW_COPY_AND_ASSIGN(HostClass);
 
   HostClass(ExecutionContext* context, std::string name) : m_context(context), m_name(std::move(name)), m_ctx(context->ctx()), m_contextId(context->getContextId()) {
     /// JavaScript object in QuickJS are created by template, in QuickJS, these template is called JSClassDef.
@@ -139,6 +140,6 @@ class Instance {
   friend HostClass;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_HOST_CLASS_H
+#endif  // BRIDGE_HOST_CLASS_H

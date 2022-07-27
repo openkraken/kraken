@@ -2,20 +2,13 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 #include <cassert>
 #include "dart_methods.h"
-#include "foundation/inspector_task_queue.h"
 #include "foundation/logging.h"
 #include "foundation/ui_task_queue.h"
-#if KRAKEN_JSC_ENGINE
-#include "bindings/jsc/KOM/performance.h"
-#elif KRAKEN_QUICK_JS_ENGINE
+#if WEBF_QUICK_JS_ENGINE
 #include "page.h"
-#endif
-
-#if KRAKEN_JSC_ENGINE
-#include "bridge_jsc.h"
 #endif
 
 #include <atomic>
@@ -57,14 +50,14 @@ std::thread::id getUIThreadId() {
 }
 
 void printError(int32_t contextId, const char* errmsg) {
-  if (kraken::getDartMethod()->onJsError != nullptr) {
-    kraken::getDartMethod()->onJsError(contextId, errmsg);
+  if (webf::getDartMethod()->onJsError != nullptr) {
+    webf::getDartMethod()->onJsError(contextId, errmsg);
   }
-  if (kraken::getDartMethod()->onJsLog != nullptr) {
-    kraken::getDartMethod()->onJsLog(contextId, static_cast<int>(foundation::MessageLevel::Error), errmsg);
+  if (webf::getDartMethod()->onJsLog != nullptr) {
+    webf::getDartMethod()->onJsLog(contextId, static_cast<int>(foundation::MessageLevel::Error), errmsg);
   }
 
-  KRAKEN_LOG(ERROR) << errmsg << std::endl;
+  WEBF_LOG(ERROR) << errmsg << std::endl;
 }
 
 namespace {
@@ -79,7 +72,7 @@ void disposeAllPages() {
 
 int32_t searchForAvailableContextId() {
   for (int i = 0; i < maxPoolSize; i++) {
-    if (kraken::KrakenPage::pageContextPool[i] == nullptr) {
+    if (webf::WebFPage::pageContextPool[i] == nullptr) {
       return i;
     }
   }
@@ -94,24 +87,24 @@ void initJSPagePool(int poolSize) {
   if (inited) {
     disposeAllPages();
   };
-  kraken::KrakenPage::pageContextPool = new kraken::KrakenPage*[poolSize];
+  webf::WebFPage::pageContextPool = new webf::WebFPage*[poolSize];
   for (int i = 1; i < poolSize; i++) {
-    kraken::KrakenPage::pageContextPool[i] = nullptr;
+    webf::WebFPage::pageContextPool[i] = nullptr;
   }
 
-  kraken::KrakenPage::pageContextPool[0] = new kraken::KrakenPage(0, printError);
+  webf::WebFPage::pageContextPool[0] = new webf::WebFPage(0, printError);
   inited = true;
   maxPoolSize = poolSize;
 }
 
 void disposePage(int32_t contextId) {
   assert(contextId < maxPoolSize);
-  if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
+  if (webf::WebFPage::pageContextPool[contextId] == nullptr)
     return;
 
-  auto* page = static_cast<kraken::KrakenPage*>(kraken::KrakenPage::pageContextPool[contextId]);
+  auto* page = static_cast<webf::WebFPage*>(webf::WebFPage::pageContextPool[contextId]);
   delete page;
-  kraken::KrakenPage::pageContextPool[contextId] = nullptr;
+  webf::WebFPage::pageContextPool[contextId] = nullptr;
 }
 
 int32_t allocateNewPage(int32_t targetContextId) {
@@ -123,65 +116,65 @@ int32_t allocateNewPage(int32_t targetContextId) {
     targetContextId = searchForAvailableContextId();
   }
 
-  assert(kraken::KrakenPage::pageContextPool[targetContextId] == nullptr &&
+  assert(webf::WebFPage::pageContextPool[targetContextId] == nullptr &&
          (std::string("can not allocate page at index") + std::to_string(targetContextId) + std::string(": page have already exist.")).c_str());
-  auto* page = new kraken::KrakenPage(targetContextId, printError);
-  kraken::KrakenPage::pageContextPool[targetContextId] = page;
+  auto* page = new webf::WebFPage(targetContextId, printError);
+  webf::WebFPage::pageContextPool[targetContextId] = page;
   return targetContextId;
 }
 
 void* getPage(int32_t contextId) {
   if (!checkPage(contextId))
     return nullptr;
-  return kraken::KrakenPage::pageContextPool[contextId];
+  return webf::WebFPage::pageContextPool[contextId];
 }
 
 bool checkPage(int32_t contextId) {
-  return inited && contextId < maxPoolSize && kraken::KrakenPage::pageContextPool[contextId] != nullptr;
+  return inited && contextId < maxPoolSize && webf::WebFPage::pageContextPool[contextId] != nullptr;
 }
 
 bool checkPage(int32_t contextId, void* context) {
-  if (kraken::KrakenPage::pageContextPool[contextId] == nullptr)
+  if (webf::WebFPage::pageContextPool[contextId] == nullptr)
     return false;
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   return page->getContext() == context;
 }
 
 void evaluateScripts(int32_t contextId, NativeString* code, const char* bundleFilename, int startLine) {
   assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
-  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto context = static_cast<webf::WebFPage*>(getPage(contextId));
   context->evaluateScript(code, bundleFilename, startLine);
 }
 
 void evaluateQuickjsByteCode(int32_t contextId, uint8_t* bytes, int32_t byteLen) {
   assert(checkPage(contextId) && "evaluateScripts: contextId is not valid");
-  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto context = static_cast<webf::WebFPage*>(getPage(contextId));
   context->evaluateByteCode(bytes, byteLen);
 }
 
 void parseHTML(int32_t contextId, const char* code, int32_t length) {
   assert(checkPage(contextId) && "parseHTML: contextId is not valid");
-  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto context = static_cast<webf::WebFPage*>(getPage(contextId));
   context->parseHTML(code, length);
 }
 
 void reloadJsContext(int32_t contextId) {
   assert(checkPage(contextId) && "reloadJSContext: contextId is not valid");
   auto bridgePtr = getPage(contextId);
-  auto context = static_cast<kraken::KrakenPage*>(bridgePtr);
-  auto newContext = new kraken::KrakenPage(contextId, printError);
+  auto context = static_cast<webf::WebFPage*>(bridgePtr);
+  auto newContext = new webf::WebFPage(contextId, printError);
   delete context;
-  kraken::KrakenPage::pageContextPool[contextId] = newContext;
+  webf::WebFPage::pageContextPool[contextId] = newContext;
 }
 
 void invokeModuleEvent(int32_t contextId, NativeString* moduleName, const char* eventType, void* event, NativeString* extra) {
   assert(checkPage(contextId) && "invokeEventListener: contextId is not valid");
-  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto context = static_cast<webf::WebFPage*>(getPage(contextId));
   context->invokeModuleEvent(moduleName, eventType, event, extra);
 }
 
 void registerDartMethods(uint64_t* methodBytes, int32_t length) {
-  kraken::registerDartMethods(methodBytes, length);
+  webf::registerDartMethods(methodBytes, length);
 }
 
 NativeScreen* createScreen(double width, double height) {
@@ -190,22 +183,22 @@ NativeScreen* createScreen(double width, double height) {
   return &screen;
 }
 
-static KrakenInfo* krakenInfo{nullptr};
+static WebFInfo* webfInfo{nullptr};
 
-KrakenInfo* getKrakenInfo() {
-  if (krakenInfo == nullptr) {
-    krakenInfo = new KrakenInfo();
-    krakenInfo->app_name = "Kraken";
-    krakenInfo->app_revision = APP_REV;
-    krakenInfo->app_version = APP_VERSION;
-    krakenInfo->system_name = SYSTEM_NAME;
+WebFInfo* getWebfInfo() {
+  if (webfInfo == nullptr) {
+    webfInfo = new WebFInfo();
+    webfInfo->app_name = "WebF";
+    webfInfo->app_revision = APP_REV;
+    webfInfo->app_version = APP_VERSION;
+    webfInfo->system_name = SYSTEM_NAME;
   }
 
-  return krakenInfo;
+  return webfInfo;
 }
 
 void setConsoleMessageHandler(ConsoleMessageHandler handler) {
-  kraken::KrakenPage::consoleMessageHandler = handler;
+  webf::WebFPage::consoleMessageHandler = handler;
 }
 
 void dispatchUITask(int32_t contextId, void* context, void* callback) {
@@ -226,21 +219,21 @@ void flushUICommandCallback() {
 }
 
 UICommandItem* getUICommandItems(int32_t contextId) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   if (page == nullptr)
     return nullptr;
   return page->getContext()->uiCommandBuffer()->data();
 }
 
 int64_t getUICommandItemSize(int32_t contextId) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   if (page == nullptr)
     return 0;
   return page->getContext()->uiCommandBuffer()->size();
 }
 
 void clearUICommandItems(int32_t contextId) {
-  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto* page = static_cast<webf::WebFPage*>(getPage(contextId));
   if (page == nullptr)
     return;
   page->getContext()->uiCommandBuffer()->clear();
@@ -248,11 +241,11 @@ void clearUICommandItems(int32_t contextId) {
 
 void registerContextDisposedCallbacks(int32_t contextId, Task task, void* data) {
   assert(checkPage(contextId));
-  auto context = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  auto context = static_cast<webf::WebFPage*>(getPage(contextId));
 }
 
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName) {
-  kraken::KrakenPage::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
+  webf::WebFPage::pluginByteCode[pluginName] = NativeByteCode{bytes, length};
 }
 
 int32_t profileModeEnabled() {

@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-#ifndef KRAKENBRIDGE_COLORS_H
-#define KRAKENBRIDGE_COLORS_H
+#ifndef BRIDGE_COLORS_H
+#define BRIDGE_COLORS_H
 
 /* FOREGROUND */
 #define RST "\x1B[0m"
@@ -25,4 +25,4 @@
 #define BOLD(x) "\x1B[1m" x RST
 #define UNDL(x) "\x1B[4m" x RST
 
-#endif  // KRAKENBRIDGE_COLORS_H
+#endif  // BRIDGE_COLORS_H

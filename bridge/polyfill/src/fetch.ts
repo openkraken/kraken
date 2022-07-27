@@ -1,4 +1,9 @@
-import { kraken } from './kraken';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webf } from './webf';
 
 function normalizeName(name: any) {
   if (typeof name !== 'string') {
@@ -272,7 +277,7 @@ export function fetch(input: Request | string, init?: RequestInit) {
         headers = new Headers(headers);
       }
 
-      kraken.invokeModule('Fetch', url, ({
+      webf.invokeModule('Fetch', url, ({
         ...init,
         headers: (headers as Headers).map
       }), (e, data) => {

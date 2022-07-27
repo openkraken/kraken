@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_BLOB_H
-#define KRAKENBRIDGE_BLOB_H
+#ifndef BRIDGE_BLOB_H
+#define BRIDGE_BLOB_H
 
 #include "bindings/qjs/host_class.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 class BlobBuilder;
 class BlobInstance;
@@ -73,6 +74,6 @@ class BlobBuilder {
   std::vector<uint8_t> _data;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_BLOB_H
+#endif  // BRIDGE_BLOB_H

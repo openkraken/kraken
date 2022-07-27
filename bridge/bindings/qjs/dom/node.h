@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_NODE_H
-#define KRAKENBRIDGE_NODE_H
+#ifndef BRIDGE_NODE_H
+#define BRIDGE_NODE_H
 
 #include <set>
 #include <utility>
 
 #include "event_target.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 void bindNode(ExecutionContext* context);
 
@@ -128,6 +129,6 @@ class NodeInstance : public EventTargetInstance {
   friend ElementInstance;
 };
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
 
-#endif  // KRAKENBRIDGE_NODE_H
+#endif  // BRIDGE_NODE_H

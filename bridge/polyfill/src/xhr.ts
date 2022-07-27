@@ -1,3 +1,8 @@
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
 // Forked from https://github.com/driverdan/node-XMLHttpRequest/blob/master/lib/XMLHttpRequest.js
 
 import { URL } from './url';

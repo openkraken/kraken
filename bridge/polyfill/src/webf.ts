@@ -1,8 +1,13 @@
-import { addKrakenModuleListener, krakenInvokeModule } from './bridge';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { addWebfModuleListener, webfInvokeModule } from './bridge';
 import { methodChannel, triggerMethodCallHandler } from './method-channel';
 import { dispatchConnectivityChangeEvent } from "./connection";
 
-function krakenModuleListener(moduleName: string, event: Event, data: any) {
+function webfModuleListener(moduleName: string, event: Event, data: any) {
   switch (moduleName) {
     case 'Connection': {
       dispatchConnectivityChangeEvent(event);
@@ -17,10 +22,10 @@ function krakenModuleListener(moduleName: string, event: Event, data: any) {
   }
 }
 
-addKrakenModuleListener(krakenModuleListener);
+addWebfModuleListener(webfModuleListener);
 
-export const kraken = {
+export const webf = {
   methodChannel,
-  invokeModule: krakenInvokeModule,
-  addKrakenModuleListener: addKrakenModuleListener
+  invokeModule: webfInvokeModule,
+  addWebfModuleListener: addWebfModuleListener
 };

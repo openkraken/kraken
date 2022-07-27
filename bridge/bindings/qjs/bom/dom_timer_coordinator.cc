@@ -1,16 +1,17 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
 #include "dom_timer_coordinator.h"
 #include "dart_methods.h"
 #include "timer.h"
 
 #if UNIT_TEST
-#include "kraken_test_env.h"
+#include "webf_test_env.h"
 #endif
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 static void handleTimerCallback(DOMTimer* timer, const char* errmsg) {
   auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(timer->ctx()));
@@ -79,4 +80,4 @@ void DOMTimerCoordinator::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_fu
   }
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs
