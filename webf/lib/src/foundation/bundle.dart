@@ -20,7 +20,7 @@ final ContentType _cssContentType = ContentType('text', 'css', charset: UTF_8);
 final ContentType _javascriptContentType = ContentType('text', 'javascript', charset: UTF_8);
 final ContentType _javascriptApplicationContentType = ContentType('application', 'javascript', charset: UTF_8);
 final ContentType _xJavascriptContentType = ContentType('application', 'x-javascript', charset: UTF_8);
-final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.kraken.bc1');
+final ContentType _krakenBc1ContentType = ContentType('application', 'vnd.WebF.bc1');
 
 const List<String> _supportedByteCodeVersions = ['1'];
 
