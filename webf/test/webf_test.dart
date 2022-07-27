@@ -31,7 +31,7 @@ void main() {
   print('Local HTTP Server started at ${httpServer.getUri()}');
 
   // Inject a custom user agent, to avoid reading from bridge.
-  NavigatorModule.setCustomUserAgent('kraken/test');
+  NavigatorModule.setCustomUserAgent('webf/test');
 
   // Work around with path_provider.
   Directory tempDirectory = Directory('./temp');

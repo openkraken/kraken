@@ -2,7 +2,7 @@
 
 #define NAME_METHOD_SPLIT @"!!"
 
-@interface KrakenPlugin : NSObject<FlutterPlugin>
+@interface WebFPlugin : NSObject<FlutterPlugin>
 
 @property NSObject<FlutterPluginRegistrar> *registrar;
 @property FlutterMethodChannel *channel;

@@ -1,9 +1,9 @@
-#import "Kraken.h"
-#import "KrakenPlugin.h"
+#import "WebF.h"
+#import "WebFPlugin.h"
 
 static FlutterMethodChannel *methodChannel = nil;
 
-@implementation KrakenPlugin
+@implementation WebFPlugin
 
 + (FlutterMethodChannel *) getMethodChannel {
   return methodChannel;
@@ -16,7 +16,7 @@ static FlutterMethodChannel *methodChannel = nil;
             binaryMessenger:messager];
   methodChannel = channel;
 
-  KrakenPlugin* instance = [[KrakenPlugin alloc] initWithRegistrar: registrar];
+  WebFPlugin* instance = [[WebFPlugin alloc] initWithRegistrar: registrar];
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -28,14 +28,14 @@ static FlutterMethodChannel *methodChannel = nil;
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([@"getUrl" isEqualToString:call.method]) {
-    Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
+    WebF* krakenInstance = [WebF instanceByBinaryMessenger: [self.registrar messenger]];
     if (krakenInstance != nil) {
       result([krakenInstance getUrl]);
     } else {
       result(nil);
     }
   } else if ([@"invokeMethod" isEqualToString: call.method]) {
-    Kraken* krakenInstance = [Kraken instanceByBinaryMessenger: [self.registrar messenger]];
+    WebF* krakenInstance = [WebF instanceByBinaryMessenger: [self.registrar messenger]];
     FlutterMethodCall* callWrap = [FlutterMethodCall methodCallWithMethodName: call.arguments[@"method"] arguments: call.arguments[@"args"]];
     [krakenInstance _handleMethodCall:callWrap result:result];
   } else if ([@"getTemporaryDirectory" isEqualToString: call.method]) {
@@ -47,7 +47,7 @@ static FlutterMethodChannel *methodChannel = nil;
 
 - (NSString*) getTemporaryDirectory {
   NSArray<NSString *>* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-  return [paths.firstObject stringByAppendingString: @"/Kraken"];
+  return [paths.firstObject stringByAppendingString: @"/WebF"];
 }
 
 @end
