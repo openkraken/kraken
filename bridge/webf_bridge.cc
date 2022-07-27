@@ -185,7 +185,7 @@ NativeScreen* createScreen(double width, double height) {
 
 static WebFInfo* webfInfo{nullptr};
 
-WebFInfo* getWebfInfo() {
+WebFInfo* getWebFInfo() {
   if (webfInfo == nullptr) {
     webfInfo = new WebFInfo();
     webfInfo->app_name = "WebF";

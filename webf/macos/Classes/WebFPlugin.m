@@ -12,7 +12,7 @@ static FlutterMethodChannel *methodChannel = nil;
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   NSObject<FlutterBinaryMessenger>* messager = [registrar messenger];
   FlutterMethodChannel* channel = [FlutterMethodChannel
-      methodChannelWithName:@"kraken"
+      methodChannelWithName:@"webf"
             binaryMessenger:messager];
   methodChannel = channel;
 

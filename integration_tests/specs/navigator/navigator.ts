@@ -32,7 +32,7 @@ describe('Navigator', () => {
   });
 
   it('userAgent', () => {
-    expect(navigator.userAgent).toMatch(/Kraken/);
+    expect(navigator.userAgent).toMatch(/WebF/);
   });
 
   it('clipboard', async () => {

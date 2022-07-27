@@ -109,7 +109,7 @@ void registerDartMethods(uint64_t* methodBytes, int32_t length);
 WEBF_EXPORT_C
 NativeScreen* createScreen(double width, double height);
 WEBF_EXPORT_C
-WebFInfo* getWebfInfo();
+WebFInfo* getWebFInfo();
 WEBF_EXPORT_C
 void dispatchUITask(int32_t contextId, void* context, void* callback);
 WEBF_EXPORT_C

@@ -3,9 +3,9 @@ describe('window', () => {
     expect(window).toBe(globalThis as any);
   });
 
-  it('has kraken defined', () => {
+  it('has webf defined', () => {
     // @ts-ignore
-    expect(typeof window.kraken).toBe('object');
+    expect(typeof window.webf).toBe('object');
   });
 
   it('equal to this', () => {

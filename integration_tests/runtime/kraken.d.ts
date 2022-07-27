@@ -8,11 +8,11 @@ interface MethodChannel {
     invokeMethod(method: string, ...args: any[]): Promise<string>
 }
 
-interface Kraken {
+interface WebF {
     methodChannel: MethodChannel;
 }
 
-declare const kraken: Kraken;
+declare const webf: WebF;
 
 interface Connection {
   isConnected: boolean;
