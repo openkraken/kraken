@@ -9,9 +9,9 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
 
 // We have some integrated built-in behavior starting with string prefix reuse the callNativeMethod implements.
 const String AnonymousFunctionCallPreFix = '_anonymous_fn_';
@@ -21,10 +21,12 @@ const String SetPropertyMagic = '%s';
 
 typedef NativeAsyncAnonymousFunctionCallback = Void Function(
     Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, Int32 contextId, Pointer<Utf8> errmsg);
-typedef DartAsyncAnonymousFunctionCallback = void Function(Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
+typedef DartAsyncAnonymousFunctionCallback = void Function(
+    Pointer<Void> callbackContext, Pointer<NativeValue> nativeValue, int contextId, Pointer<Utf8> errmsg);
 
 // This function receive calling from binding side.
-void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue> returnValue, Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
+void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue> returnValue,
+    Pointer<NativeString> nativeMethod, int argc, Pointer<NativeValue> argv) {
   String method = nativeStringToString(nativeMethod);
   List<dynamic> values = List.generate(argc, (i) {
     Pointer<NativeValue> nativeValue = argv.elementAt(i);
@@ -47,7 +49,8 @@ void _invokeBindingMethod(Pointer<Void> nativeBindingObject, Pointer<NativeValue
     AsyncAnonymousNativeFunction fn = getAsyncAnonymousNativeFunctionFromId(id)!;
     int contextId = values[0];
     Pointer<Void> callbackContext = (values[1] as Pointer).cast<Void>();
-    DartAsyncAnonymousFunctionCallback callback = (values[2] as Pointer).cast<NativeFunction<NativeAsyncAnonymousFunctionCallback>>().asFunction();
+    DartAsyncAnonymousFunctionCallback callback =
+        (values[2] as Pointer).cast<NativeFunction<NativeAsyncAnonymousFunctionCallback>>().asFunction();
     Future<dynamic> p = fn(values.sublist(3));
     p.then((result) {
       Pointer<NativeValue> nativeValue = malloc.allocate(sizeOf<NativeValue>());
@@ -92,8 +95,9 @@ void _dispatchBindingEvent(Event event) {
 }
 
 abstract class BindingBridge {
-  static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod = Pointer.fromFunction(_invokeBindingMethod);
-  static  Pointer<NativeFunction<NativeInvokeBindingMethod>> get nativeInvokeBindingMethod => _nativeInvokeBindingMethod;
+  static final Pointer<NativeFunction<NativeInvokeBindingMethod>> _nativeInvokeBindingMethod =
+      Pointer.fromFunction(_invokeBindingMethod);
+  static Pointer<NativeFunction<NativeInvokeBindingMethod>> get nativeInvokeBindingMethod => _nativeInvokeBindingMethod;
 
   static final SplayTreeMap<int, BindingObject> _nativeObjects = SplayTreeMap();
 
@@ -124,7 +128,7 @@ abstract class BindingBridge {
       _nativeObjects.remove(nativeBindingObject.address);
       if (nativeBindingObject is Pointer<NativeBindingObject>) {
         nativeBindingObject.ref.invokeBindingMethod = nullptr;
-      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>)  {
+      } else if (nativeBindingObject is Pointer<NativeCanvasRenderingContext2D>) {
         // @TODO: Remove it.
         nativeBindingObject.ref.invokeBindingMethod = nullptr;
       }
@@ -143,13 +147,13 @@ abstract class BindingBridge {
 
   static void listenEvent(EventTarget target, String type) {
     assert(_debugShouldNotListenMultiTimes(target, type),
-      'Failed to listen event \'$type\' for $target, for which is already bound.');
+        'Failed to listen event \'$type\' for $target, for which is already bound.');
     target.addEventListener(type, _dispatchBindingEvent);
   }
 
   static void unlistenEvent(EventTarget target, String type) {
     assert(_debugShouldNotUnlistenEmpty(target, type),
-      'Failed to unlisten event \'$type\' for $target, for which is already unbound.');
+        'Failed to unlisten event \'$type\' for $target, for which is already unbound.');
     target.removeEventListener(type, _dispatchBindingEvent);
   }
 

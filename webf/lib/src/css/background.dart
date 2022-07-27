@@ -6,10 +6,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/painting.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/launcher.dart';
+import 'package:webf/painting.dart';
+import 'package:webf/rendering.dart';
 
 // CSS Backgrounds: https://drafts.csswg.org/css-backgrounds/
 // CSS Images: https://drafts.csswg.org/css-images-3/
@@ -19,8 +19,8 @@ const String _singleQuote = '\'';
 const String _doubleQuote = '"';
 
 String _removeQuotationMark(String input) {
-  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote))
-      || (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
+  if ((input.startsWith(_singleQuote) && input.endsWith(_singleQuote)) ||
+      (input.startsWith(_doubleQuote) && input.endsWith(_doubleQuote))) {
     input = input.substring(1, input.length - 1);
   }
   return input;
@@ -199,6 +199,7 @@ class CSSBackgroundImage {
     }
     return null;
   }
+
   Gradient? get gradient {
     List<Color> colors = [];
     List<double> stops = [];
@@ -372,8 +373,10 @@ class CSSBackgroundPosition {
     this.length,
     this.percentage,
   });
+
   /// Absolute position to image container when length type is set.
   CSSLengthValue? length;
+
   /// Relative position to image container when keyword or percentage type is set.
   double? percentage;
 }
@@ -420,11 +423,11 @@ class CSSBackground {
   static bool isValidBackgroundImageValue(String value) {
     return (value.lastIndexOf(')') == value.length - 1) &&
         (value.startsWith('url(') ||
-        value.startsWith('linear-gradient(') ||
-        value.startsWith('repeating-linear-gradient(') ||
-        value.startsWith('radial-gradient(') ||
-        value.startsWith('repeating-radial-gradient(') ||
-        value.startsWith('conic-gradient('));
+            value.startsWith('linear-gradient(') ||
+            value.startsWith('repeating-linear-gradient(') ||
+            value.startsWith('radial-gradient(') ||
+            value.startsWith('repeating-radial-gradient(') ||
+            value.startsWith('conic-gradient('));
   }
 
   static bool isValidBackgroundPositionValue(String value) {
@@ -452,17 +455,11 @@ class CSSBackground {
   static CSSBackgroundSize resolveBackgroundSize(String value, RenderStyle renderStyle, String propertyName) {
     switch (value) {
       case CONTAIN:
-        return CSSBackgroundSize(
-          fit: BoxFit.contain
-        );
+        return CSSBackgroundSize(fit: BoxFit.contain);
       case COVER:
-        return CSSBackgroundSize(
-          fit: BoxFit.cover
-        );
+        return CSSBackgroundSize(fit: BoxFit.cover);
       case AUTO:
-        return CSSBackgroundSize(
-          fit: BoxFit.none
-        );
+        return CSSBackgroundSize(fit: BoxFit.none);
       default:
         List<String> values = value.split(_splitRegExp);
         if (values.length == 1 && values[0].isNotEmpty) {
@@ -481,9 +478,7 @@ class CSSBackground {
             height: height,
           );
         }
-        return CSSBackgroundSize(
-          fit: BoxFit.none
-        );
+        return CSSBackgroundSize(fit: BoxFit.none);
     }
   }
 
@@ -531,12 +526,15 @@ class CSSBackground {
   }
 }
 
-void _applyColorAndStops(int start, List<String> args, List<Color?> colors, List<double?> stops, RenderStyle renderStyle, String propertyName, [double? gradientLength]) {
+void _applyColorAndStops(int start, List<String> args, List<Color?> colors, List<double?> stops,
+    RenderStyle renderStyle, String propertyName,
+    [double? gradientLength]) {
   // colors should more than one, otherwise invalid
   if (args.length - start - 1 > 0) {
     double grow = 1.0 / (args.length - start - 1);
     for (int i = start; i < args.length; i++) {
-      List<CSSColorStop> colorGradients = _parseColorAndStop(args[i].trim(), renderStyle, propertyName, (i - start) * grow, gradientLength);
+      List<CSSColorStop> colorGradients =
+          _parseColorAndStop(args[i].trim(), renderStyle, propertyName, (i - start) * grow, gradientLength);
       for (var colorStop in colorGradients) {
         colors.add(colorStop.color);
         stops.add(colorStop.stop);
@@ -545,7 +543,8 @@ void _applyColorAndStops(int start, List<String> args, List<Color?> colors, List
   }
 }
 
-List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, String propertyName, [double? defaultStop, double? gradientLength]) {
+List<CSSColorStop> _parseColorAndStop(String src, RenderStyle renderStyle, String propertyName,
+    [double? defaultStop, double? gradientLength]) {
   List<String> strings = [];
   List<CSSColorStop> colorGradients = [];
   // rgba may contain space, color should handle special

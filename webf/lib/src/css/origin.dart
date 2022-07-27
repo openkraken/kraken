@@ -2,7 +2,7 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 
@@ -30,8 +30,7 @@ class CSSOrigin {
       double offsetX = 0, offsetY = 0, alignX = -1, alignY = -1;
       // The y just can be left right center when x is top bottom, otherwise illegal
       // switch to right place.
-      if ((x == TOP || x == BOTTOM) &&
-          (y == LEFT || y == RIGHT || y == CENTER)) {
+      if ((x == TOP || x == BOTTOM) && (y == LEFT || y == RIGHT || y == CENTER)) {
         String? tmp = x;
         x = y;
         y = tmp;

@@ -2,9 +2,9 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
-import 'package:kraken/devtools.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/css.dart';
+import 'package:webf/devtools.dart';
+import 'package:webf/dom.dart';
 
 const int INLINED_STYLESHEET_ID = 1;
 const String ZERO_PX = '0px';
@@ -13,7 +13,7 @@ RegExp _camelCaseReg = RegExp(r'-(\w)');
 
 class InspectCSSModule extends UIInspectorModule {
   Document get document => devtoolsService.controller!.view.document;
-  InspectCSSModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
+  InspectCSSModule(ChromeDevToolsService devtoolsService) : super(devtoolsService);
 
   @override
   String get name => 'CSS';
@@ -102,9 +102,11 @@ class InspectCSSModule extends UIInspectorModule {
       }
     }
 
-    sendToFrontend(id, JSONEncodableMap({
-      'styles': styles,
-    }));
+    sendToFrontend(
+        id,
+        JSONEncodableMap({
+          'styles': styles,
+        }));
   }
 
   static CSSStyle? buildInlineStyle(Element element) {
@@ -129,14 +131,13 @@ class InspectCSSModule extends UIInspectorModule {
     });
 
     return CSSStyle(
-      // Absent for user agent stylesheet and user-specified stylesheet rules.
-      // Use hash code id to identity which element the rule belongs to.
-      styleSheetId: element.ownerDocument.controller.view.getTargetIdByEventTarget(element),
-      cssProperties: cssProperties,
-      shorthandEntries: <ShorthandEntry>[],
-      cssText: cssText,
-      range: SourceRange(startLine: 0, startColumn: 0, endLine: 0, endColumn: cssText.length)
-    );
+        // Absent for user agent stylesheet and user-specified stylesheet rules.
+        // Use hash code id to identity which element the rule belongs to.
+        styleSheetId: element.ownerDocument.controller.view.getTargetIdByEventTarget(element),
+        cssProperties: cssProperties,
+        shorthandEntries: <ShorthandEntry>[],
+        cssText: cssText,
+        range: SourceRange(startLine: 0, startColumn: 0, endLine: 0, endColumn: cssText.length));
   }
 
   static String resolveCSSDisplayString(CSSDisplay display) {
@@ -246,7 +247,6 @@ class InspectCSSModule extends UIInspectorModule {
 }
 
 class MatchedStyles extends JSONEncodable {
-
   MatchedStyles({
     this.inlineStyle,
     this.attributesStyle,
@@ -395,7 +395,6 @@ class SourceRange extends JSONEncodable {
   }
 }
 
-
 class ShorthandEntry extends JSONEncodable {
   String name;
   String value;
@@ -421,7 +420,7 @@ class ShorthandEntry extends JSONEncodable {
 class ComputedStyle extends JSONEncodable {
   List<CSSComputedStyleProperty> computedStyle;
 
-  ComputedStyle({ required this.computedStyle });
+  ComputedStyle({required this.computedStyle});
 
   @override
   Map toJson() {
@@ -436,7 +435,7 @@ class CSSComputedStyleProperty extends JSONEncodable {
   String name;
   String value;
 
-  CSSComputedStyleProperty({ required this.name, required this.value });
+  CSSComputedStyleProperty({required this.name, required this.value});
 
   @override
   Map toJson() {
@@ -451,7 +450,7 @@ class InlinedStyle extends JSONEncodable {
   CSSStyle? inlineStyle;
   CSSStyle? attributesStyle;
 
-  InlinedStyle({ this.inlineStyle, this.attributesStyle });
+  InlinedStyle({this.inlineStyle, this.attributesStyle});
 
   @override
   Map toJson() {

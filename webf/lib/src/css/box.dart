@@ -5,11 +5,10 @@
 import 'dart:core';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
 mixin CSSBoxMixin on RenderStyle {
-
   final DecorationPosition decorationPosition = DecorationPosition.background;
   final ImageConfiguration imageConfiguration = ImageConfiguration.empty;
 
@@ -50,7 +49,7 @@ mixin CSSBoxMixin on RenderStyle {
 
     DecorationImage? decorationImage;
     ImageProvider? image = backgroundImage?.image;
-    if (image!= null) {
+    if (image != null) {
       decorationImage = DecorationImage(
         image: image,
         repeat: backgroundRepeat,
@@ -78,8 +77,14 @@ class CSSBoxDecoration extends BoxDecoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }): super(color: color, image: image, border: border, borderRadius: borderRadius,
-    gradient: gradient, backgroundBlendMode: backgroundBlendMode, shape: shape);
+  }) : super(
+            color: color,
+            image: image,
+            border: border,
+            borderRadius: borderRadius,
+            gradient: gradient,
+            backgroundBlendMode: backgroundBlendMode,
+            shape: shape);
 
   @override
   final Color? color;
@@ -129,4 +134,3 @@ class CSSBoxDecoration extends BoxDecoration {
     );
   }
 }
-

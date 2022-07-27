@@ -3,14 +3,14 @@
  */
 
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:kraken/kraken.dart';
-import 'package:kraken/devtools.dart';
 import 'package:ffi/ffi.dart';
+import 'package:webf/devtools.dart';
+import 'package:webf/webf.dart';
 
 const String CONTENT_TYPE = 'Content-Type';
 const String CONTENT_LENGTH = 'Content-Length';
@@ -22,9 +22,7 @@ Map<int, IsolateInspectorServer?> _inspectorServerMap = {};
 
 typedef NativeInspectorMessageCallback = Void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
 typedef DartInspectorMessageCallback = void Function(Pointer<Void> rpcSession, Pointer<Utf8> message);
-typedef NativeRegisterInspectorMessageCallback = Void Function(
-    Int32 contextId,
-    Pointer<Void> rpcSession,
+typedef NativeRegisterInspectorMessageCallback = Void Function(Int32 contextId, Pointer<Void> rpcSession,
     Pointer<NativeFunction<NativeInspectorMessageCallback>> inspectorMessageCallback);
 typedef NativeAttachInspector = Void Function(Int32);
 typedef DartAttachInspector = void Function(int);
@@ -33,9 +31,7 @@ typedef NativePostTaskToUIThread = Void Function(Int32 contextId, Pointer<Void> 
 typedef NativeDispatchInspectorTask = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartDispatchInspectorTask = void Function(int? contextId, Pointer<Void> context, Pointer<Void> callback);
 
-void _registerInspectorMessageCallback(
-    int contextId,
-    Pointer<Void> rpcSession,
+void _registerInspectorMessageCallback(int contextId, Pointer<Void> rpcSession,
     Pointer<NativeFunction<NativeInspectorMessageCallback>> inspectorMessageCallback) {
   IsolateInspectorServer? server = _inspectorServerMap[contextId];
   if (server == null) {
@@ -68,23 +64,21 @@ void _postTaskToUIThread(int contextId, Pointer<Void> context, Pointer<Void> cal
 }
 
 void attachInspector(int contextId) {
-  final DartAttachInspector _attachInspector = KrakenDynamicLibrary.ref
-      .lookup<NativeFunction<NativeAttachInspector>>('attachInspector')
-      .asFunction();
+  final DartAttachInspector _attachInspector =
+      KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeAttachInspector>>('attachInspector').asFunction();
   _attachInspector(contextId);
 }
 
 void initInspectorServerNativeBinding(int contextId) {
-  final DartRegisterDartMethods _registerInspectorServerDartMethods =
-  KrakenDynamicLibrary.ref
-          .lookup<NativeFunction<NativeRegisterDartMethods>>(
-              'registerInspectorDartMethods')
-          .asFunction();
-  final Pointer<NativeFunction<NativeInspectorMessage>>
-      _nativeInspectorMessage = Pointer.fromFunction(_onInspectorMessage);
-  final Pointer<NativeFunction<NativeRegisterInspectorMessageCallback>>
-      _nativeRegisterInspectorMessageCallback = Pointer.fromFunction(_registerInspectorMessageCallback);
-  final Pointer<NativeFunction<NativePostTaskToUIThread>> _nativePostTaskToUIThread = Pointer.fromFunction(_postTaskToUIThread);
+  final DartRegisterDartMethods _registerInspectorServerDartMethods = KrakenDynamicLibrary.ref
+      .lookup<NativeFunction<NativeRegisterDartMethods>>('registerInspectorDartMethods')
+      .asFunction();
+  final Pointer<NativeFunction<NativeInspectorMessage>> _nativeInspectorMessage =
+      Pointer.fromFunction(_onInspectorMessage);
+  final Pointer<NativeFunction<NativeRegisterInspectorMessageCallback>> _nativeRegisterInspectorMessageCallback =
+      Pointer.fromFunction(_registerInspectorMessageCallback);
+  final Pointer<NativeFunction<NativePostTaskToUIThread>> _nativePostTaskToUIThread =
+      Pointer.fromFunction(_postTaskToUIThread);
 
   final List<int> _dartNativeMethods = [
     _nativeInspectorMessage.address,
@@ -143,7 +137,8 @@ void serverIsolateEntryPoint(SendPort isolateToMainStream) {
         final DartDispatchInspectorTask _dispatchInspectorTask = KrakenDynamicLibrary.ref
             .lookup<NativeFunction<NativeDispatchInspectorTask>>('dispatchInspectorTask')
             .asFunction();
-        _dispatchInspectorTask(mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
+        _dispatchInspectorTask(
+            mainIsolateJSContextId, Pointer.fromAddress(data.context), Pointer.fromAddress(data.callback));
       } else if (data is InspectorReload) {
         // @TODO
         // attachInspector(data.contextId);
@@ -214,16 +209,15 @@ class IsolateInspectorServer {
 
     _httpServer.listen((HttpRequest request) {
       if (WebSocketTransformer.isUpgradeRequest(request)) {
-        WebSocketTransformer
-          .upgrade(request, compression: CompressionOptions.compressionOff)
-          .then((WebSocket webSocket) {
-            _ws = webSocket;
-            webSocket.listen(onWebSocketRequest, onDone: () {
-              _ws = null;
-            }, onError: (obj, stack) {
-              _ws = null;
-            });
+        WebSocketTransformer.upgrade(request, compression: CompressionOptions.compressionOff)
+            .then((WebSocket webSocket) {
+          _ws = webSocket;
+          webSocket.listen(onWebSocketRequest, onDone: () {
+            _ws = null;
+          }, onError: (obj, stack) {
+            _ws = null;
           });
+        });
       } else {
         onHTTPRequest(request);
       }
@@ -299,8 +293,7 @@ class IsolateInspectorServer {
   void _writeJSONObject(HttpRequest request, Object obj) {
     String body = jsonEncode(obj);
     // Must preserve header case, or chrome devtools inspector will drop data.
-    request.response.headers
-        .set(CONTENT_TYPE, 'application/json; charset=UTF-8', preserveHeaderCase: true);
+    request.response.headers.set(CONTENT_TYPE, 'application/json; charset=UTF-8', preserveHeaderCase: true);
     request.response.headers.set(CONTENT_LENGTH, body.length, preserveHeaderCase: true);
     request.response.write(body);
   }

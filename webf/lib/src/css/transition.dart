@@ -2,10 +2,10 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart' show Curve;
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
+import 'package:flutter/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
 
 // CSS Transitions: https://drafts.csswg.org/css-transitions/
 const String _0s = '0s';
@@ -54,7 +54,8 @@ double? _parseLength(String length, RenderStyle renderStyle, String property) {
   return CSSLength.parseLength(length, renderStyle, property).computedValue;
 }
 
-void _updateLength(double oldLengthValue, double newLengthValue, double progress, String property, CSSRenderStyle renderStyle) {
+void _updateLength(
+    double oldLengthValue, double newLengthValue, double progress, String property, CSSRenderStyle renderStyle) {
   double value = oldLengthValue * (1 - progress) + newLengthValue * progress;
   renderStyle.target.setRenderStyleProperty(property, CSSLengthValue(value, CSSLengthType.PX));
 }
@@ -63,7 +64,8 @@ FontWeight _parseFontWeight(String fontWeight, RenderStyle renderStyle, String p
   return CSSText.resolveFontWeight(fontWeight);
 }
 
-void _updateFontWeight(FontWeight oldValue, FontWeight newValue, double progress, String property, CSSRenderStyle renderStyle) {
+void _updateFontWeight(
+    FontWeight oldValue, FontWeight newValue, double progress, String property, CSSRenderStyle renderStyle) {
   FontWeight? fontWeight = FontWeight.lerp(oldValue, newValue, progress);
   switch (property) {
     case FONT_WEIGHT:
@@ -109,7 +111,8 @@ CSSOrigin? _parseTransformOrigin(String value, RenderStyle renderStyle, String p
   return CSSOrigin.parseOrigin(value, renderStyle, property);
 }
 
-void _updateTransformOrigin(CSSOrigin begin, CSSOrigin end, double progress, String property, CSSRenderStyle renderStyle) {
+void _updateTransformOrigin(
+    CSSOrigin begin, CSSOrigin end, double progress, String property, CSSRenderStyle renderStyle) {
   Offset offset = begin.offset + (end.offset - begin.offset) * progress;
   Alignment alignment = begin.alignment + (end.alignment - begin.alignment) * progress;
   renderStyle.transformOrigin = CSSOrigin(offset, alignment);
@@ -188,7 +191,6 @@ enum CSSTransitionEvent {
 }
 
 mixin CSSTransitionMixin on RenderStyle {
-
   // https://drafts.csswg.org/css-transitions/#transition-property-property
   // Name: transition-property
   // Value: none | <single-transition-property>#
@@ -209,6 +211,7 @@ mixin CSSTransitionMixin on RenderStyle {
     // Therefore we should cancel all running transition to get thing works.
     finishRunningTransition();
   }
+
   @override
   List<String> get transitionProperty => _transitionProperty ?? const [ALL];
 
@@ -227,6 +230,7 @@ mixin CSSTransitionMixin on RenderStyle {
     _transitionDuration = value;
     _effectiveTransitions = null;
   }
+
   @override
   List<String> get transitionDuration => _transitionDuration ?? const [_0s];
 
@@ -245,6 +249,7 @@ mixin CSSTransitionMixin on RenderStyle {
     _transitionTimingFunction = value;
     _effectiveTransitions = null;
   }
+
   @override
   List<String> get transitionTimingFunction => _transitionTimingFunction ?? const [EASE];
 
@@ -263,6 +268,7 @@ mixin CSSTransitionMixin on RenderStyle {
     _transitionDelay = value;
     _effectiveTransitions = null;
   }
+
   @override
   List<String> get transitionDelay => _transitionDelay ?? const [_0s];
 
@@ -274,7 +280,8 @@ mixin CSSTransitionMixin on RenderStyle {
     for (int i = 0; i < transitionProperty.length; i++) {
       String property = _toCamelCase(transitionProperty[i]);
       String duration = transitionDuration.length == 1 ? transitionDuration[0] : transitionDuration[i];
-      String function = transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
+      String function =
+          transitionTimingFunction.length == 1 ? transitionTimingFunction[0] : transitionTimingFunction[i];
       String delay = transitionDelay.length == 1 ? transitionDelay[0] : transitionDelay[i];
       transitions[property] = [duration, function, delay];
     }
@@ -289,8 +296,10 @@ mixin CSSTransitionMixin on RenderStyle {
     }
 
     // Transition does not work when renderBoxModel has not been layout yet.
-    if (renderBoxModel != null && renderBoxModel!.hasSize && CSSTransitionHandlers[property] != null &&
-      (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
+    if (renderBoxModel != null &&
+        renderBoxModel!.hasSize &&
+        CSSTransitionHandlers[property] != null &&
+        (effectiveTransitions.containsKey(property) || effectiveTransitions.containsKey(ALL))) {
       bool shouldTransition = false;
       // Transition will be disabled when all transition has transitionDuration as 0.
       effectiveTransitions.forEach((String transitionKey, List transitionOptions) {
@@ -316,7 +325,7 @@ mixin CSSTransitionMixin on RenderStyle {
     String? prevValue = EMPTY_STRING;
 
     if (_animationProperties.containsKey(propertyName)) {
-       prevValue = _animationProperties[propertyName];
+      prevValue = _animationProperties[propertyName];
       _animationProperties.remove(propertyName);
     }
 
@@ -392,11 +401,9 @@ mixin CSSTransitionMixin on RenderStyle {
   }
 
   EffectTiming? getTransitionEffectTiming(String property) {
-
     List? transitionOptions = effectiveTransitions[property] ?? effectiveTransitions[ALL];
     // [duration, function, delay]
     if (transitionOptions != null) {
-
       return EffectTiming(
         duration: CSSTime.parseTime(transitionOptions[0])!.toDouble(),
         easing: transitionOptions[1],

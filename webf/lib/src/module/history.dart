@@ -1,16 +1,16 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:async';
 
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 class HistoryItem {
   HistoryItem(this.bundle, this.state, this.needJump);
-  final KrakenBundle bundle;
+  final WebFBundle bundle;
   final dynamic state;
   final bool needJump;
 }
@@ -24,7 +24,7 @@ class HistoryModule extends BaseModule {
   Queue<HistoryItem> get _previousStack => moduleManager!.controller.previousHistoryStack;
   Queue<HistoryItem> get _nextStack => moduleManager!.controller.nextHistoryStack;
 
-  KrakenBundle? get stackTop {
+  WebFBundle? get stackTop {
     if (_previousStack.isEmpty) {
       return null;
     } else {
@@ -32,7 +32,7 @@ class HistoryModule extends BaseModule {
     }
   }
 
-  void add(KrakenBundle bundle) {
+  void add(WebFBundle bundle) {
     HistoryItem history = HistoryItem(bundle, null, true);
     _addItem(history);
   }
@@ -43,11 +43,10 @@ class HistoryModule extends BaseModule {
     _previousStack.addFirst(historyItem);
 
     // Clear.
-    while(_nextStack.isNotEmpty) {
+    while (_nextStack.isNotEmpty) {
       _nextStack.removeFirst();
     }
   }
-
 
   void _back() async {
     if (_previousStack.length > 1) {
@@ -80,7 +79,7 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      for (int i = 0; i < num; i ++) {
+      for (int i = 0; i < num; i++) {
         HistoryItem currentItem = _nextStack.first;
         _nextStack.removeFirst();
         _previousStack.addFirst(currentItem);
@@ -90,7 +89,7 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      for (int i = 0; i < num.abs(); i ++) {
+      for (int i = 0; i < num.abs(); i++) {
         HistoryItem currentItem = _previousStack.first;
         _previousStack.removeFirst();
         _nextStack.addFirst(currentItem);
@@ -132,7 +131,7 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
+      WebFBundle bundle = WebFBundle.fromUrl(uri.toString());
       HistoryItem history = HistoryItem(bundle, state, false);
       _addItem(history);
     }
@@ -158,7 +157,7 @@ class HistoryModule extends BaseModule {
         return;
       }
 
-      KrakenBundle bundle = KrakenBundle.fromUrl(uri.toString());
+      WebFBundle bundle = WebFBundle.fromUrl(uri.toString());
       HistoryItem history = HistoryItem(bundle, state, false);
 
       _previousStack.removeFirst();
@@ -168,7 +167,7 @@ class HistoryModule extends BaseModule {
 
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {
-    switch(method) {
+    switch (method) {
       case 'length':
         return (_previousStack.length + _nextStack.length).toString();
       case 'state':
@@ -197,6 +196,5 @@ class HistoryModule extends BaseModule {
   }
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 }

@@ -2,13 +2,13 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 class BoxFitImageKey {
   const BoxFitImageKey({
@@ -21,11 +21,8 @@ class BoxFitImageKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is BoxFitImageKey
-        && other.url == url
-        && other.configuration == configuration;
+    if (other.runtimeType != runtimeType) return false;
+    return other is BoxFitImageKey && other.url == url && other.configuration == configuration;
   }
 
   @override
@@ -63,7 +60,8 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
     Uint8List bytes = await loadImage(url);
     final ImmutableBuffer buffer = await ImmutableBuffer.fromUint8List(bytes);
     final ImageDescriptor descriptor = await ImageDescriptor.encoded(buffer);
-    final Codec codec = await _instantiateImageCodec(descriptor,
+    final Codec codec = await _instantiateImageCodec(
+      descriptor,
       boxFit: boxFit,
       preferredWidth: key.configuration?.size?.width.toInt(),
       preferredHeight: key.configuration?.size?.height.toInt(),
@@ -96,7 +94,8 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, BoxFitImageKey key, ImageErrorListener handleError) {
+  void resolveStreamForKey(
+      ImageConfiguration configuration, ImageStream stream, BoxFitImageKey key, ImageErrorListener handleError) {
     if (stream.completer != null) {
       final ImageStreamCompleter? completer = PaintingBinding.instance.imageCache.putIfAbsent(
         key,
@@ -111,7 +110,9 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
       () => load(key, PaintingBinding.instance.instantiateImageCodec),
       onError: handleError,
     );
-    if (_imageStreamCompleter == null && completer is DimensionedMultiFrameImageStreamCompleter && onImageLoad != null) {
+    if (_imageStreamCompleter == null &&
+        completer is DimensionedMultiFrameImageStreamCompleter &&
+        onImageLoad != null) {
       completer.dimension.then((Dimension dimension) {
         onImageLoad!(dimension.width, dimension.height);
       });
@@ -121,7 +122,8 @@ class BoxFitImage extends ImageProvider<BoxFitImageKey> {
     }
   }
 
-  static Future<Codec> _instantiateImageCodec(ImageDescriptor descriptor, {
+  static Future<Codec> _instantiateImageCodec(
+    ImageDescriptor descriptor, {
     BoxFit? boxFit = BoxFit.none,
     int? preferredWidth,
     int? preferredHeight,
@@ -209,8 +211,12 @@ class DimensionedMultiFrameImageStreamCompleter extends MultiFrameImageStreamCom
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : super(codec: codec, scale: scale, debugLabel: debugLabel,
-      chunkEvents: chunkEvents, informationCollector: informationCollector);
+  }) : super(
+            codec: codec,
+            scale: scale,
+            debugLabel: debugLabel,
+            chunkEvents: chunkEvents,
+            informationCollector: informationCollector);
 
   final List<Completer<Dimension>> _dimensionCompleter = [];
   Dimension? _dimension;

@@ -3,8 +3,8 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 final RegExp _commaRegExp = RegExp(r'\s*,\s*');
 
@@ -67,6 +67,7 @@ mixin CSSTextMixin on RenderStyle {
   Color? get textDecorationColor {
     return _textDecorationColor;
   }
+
   set textDecorationColor(Color? value) {
     if (_textDecorationColor == value) return;
     _textDecorationColor = value;
@@ -78,6 +79,7 @@ mixin CSSTextMixin on RenderStyle {
   TextDecorationStyle? get textDecorationStyle {
     return _textDecorationStyle;
   }
+
   set textDecorationStyle(TextDecorationStyle? value) {
     if (_textDecorationStyle == value) return;
     _textDecorationStyle = value;
@@ -97,6 +99,7 @@ mixin CSSTextMixin on RenderStyle {
     // The root element has no fontWeight, and the fontWeight is initial.
     return _fontWeight ?? FontWeight.w400;
   }
+
   set fontWeight(FontWeight? value) {
     if (_fontWeight == value) return;
     _fontWeight = value;
@@ -117,6 +120,7 @@ mixin CSSTextMixin on RenderStyle {
     // The root element has no fontWeight, and the fontWeight is initial.
     return _fontStyle ?? FontStyle.normal;
   }
+
   set fontStyle(FontStyle? value) {
     if (_fontStyle == value) return;
     _fontStyle = value;
@@ -135,6 +139,7 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _fontFamily ?? CSSText.DEFAULT_FONT_FAMILY_FALLBACK;
   }
+
   set fontFamily(List<String>? value) {
     if (_fontFamily == value) return;
     _fontFamily = value;
@@ -155,6 +160,7 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _fontSize ?? CSSText.DEFAULT_FONT_SIZE;
   }
+
   // Update font-size may affect following style:
   // 1. Nested children text size due to style inheritance.
   // 2. Em unit: style of own element with em unit and nested children with no font-size set due to style inheritance.
@@ -162,7 +168,7 @@ mixin CSSTextMixin on RenderStyle {
   set fontSize(CSSLengthValue? value) {
     if (_fontSize == value) return;
     _fontSize = value;
-   // Update all the children text with specified style property not set due to style inheritance.
+    // Update all the children text with specified style property not set due to style inheritance.
     _markChildrenTextNeedsLayout(renderBoxModel!, FONT_SIZE);
   }
 
@@ -219,6 +225,7 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _letterSpacing;
   }
+
   set letterSpacing(CSSLengthValue? value) {
     if (_letterSpacing == value) return;
     _letterSpacing = value;
@@ -237,6 +244,7 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _wordSpacing;
   }
+
   set wordSpacing(CSSLengthValue? value) {
     if (_wordSpacing == value) return;
     _wordSpacing = value;
@@ -255,11 +263,12 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _textShadow;
   }
+
   set textShadow(List<Shadow>? value) {
     if (_textShadow == value) return;
     _textShadow = value;
     // Update all the children text with specified style property not set due to style inheritance.
-     _markChildrenTextNeedsPaint(renderBoxModel!, TEXT_SHADOW);
+    _markChildrenTextNeedsPaint(renderBoxModel!, TEXT_SHADOW);
   }
 
   WhiteSpace? _whiteSpace;
@@ -273,11 +282,12 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _whiteSpace ?? WhiteSpace.normal;
   }
+
   set whiteSpace(WhiteSpace? value) {
     if (_whiteSpace == value) return;
     _whiteSpace = value;
     // Update all the children layout and text with specified style property not set due to style inheritance.
-     _markNestChildrenTextAndLayoutNeedsLayout(renderBoxModel!, WHITE_SPACE);
+    _markNestChildrenTextAndLayoutNeedsLayout(renderBoxModel!, WHITE_SPACE);
   }
 
   TextOverflow _textOverflow = TextOverflow.clip;
@@ -286,6 +296,7 @@ mixin CSSTextMixin on RenderStyle {
   TextOverflow get textOverflow {
     return _textOverflow;
   }
+
   set textOverflow(TextOverflow? value) {
     if (_textOverflow == value) return;
     _textOverflow = value ?? TextOverflow.clip;
@@ -317,6 +328,7 @@ mixin CSSTextMixin on RenderStyle {
   int? get lineClamp {
     return _lineClamp;
   }
+
   set lineClamp(int? value) {
     if (_lineClamp == value) return;
     _lineClamp = value;
@@ -335,6 +347,7 @@ mixin CSSTextMixin on RenderStyle {
     }
     return _textAlign ?? TextAlign.start;
   }
+
   set textAlign(TextAlign? value) {
     if (_textAlign == value) return;
     _textAlign = value;
@@ -456,7 +469,9 @@ mixin CSSTextMixin on RenderStyle {
     return alignment;
   }
 
-  static TextSpan createTextSpan(String? text, CSSRenderStyle renderStyle, {
+  static TextSpan createTextSpan(
+    String? text,
+    CSSRenderStyle renderStyle, {
     Color? color,
     double? height,
   }) {
@@ -476,24 +491,23 @@ mixin CSSTextMixin on RenderStyle {
     //   background: The paint drawn as a background for the text.
     //   foreground: The paint used to draw the text. If this is specified, color must be null.
     TextStyle textStyle = TextStyle(
-      color: color ?? renderStyle.color,
-      decoration: renderStyle.textDecorationLine,
-      decorationColor: renderStyle.textDecorationColor,
-      decorationStyle: renderStyle.textDecorationStyle,
-      fontWeight: renderStyle.fontWeight,
-      fontStyle: renderStyle.fontStyle,
-      fontFamilyFallback: renderStyle.fontFamily,
-      fontSize: renderStyle.fontSize.computedValue,
-      letterSpacing: renderStyle.letterSpacing?.computedValue,
-      wordSpacing: renderStyle.wordSpacing?.computedValue,
-      shadows: renderStyle.textShadow,
-      textBaseline: CSSText.getTextBaseLine(),
-      package: CSSText.getFontPackage(),
-      locale: CSSText.getLocale(),
-      background: CSSText.getBackground(),
-      foreground: CSSText.getForeground(),
-      height: height
-    );
+        color: color ?? renderStyle.color,
+        decoration: renderStyle.textDecorationLine,
+        decorationColor: renderStyle.textDecorationColor,
+        decorationStyle: renderStyle.textDecorationStyle,
+        fontWeight: renderStyle.fontWeight,
+        fontStyle: renderStyle.fontStyle,
+        fontFamilyFallback: renderStyle.fontFamily,
+        fontSize: renderStyle.fontSize.computedValue,
+        letterSpacing: renderStyle.letterSpacing?.computedValue,
+        wordSpacing: renderStyle.wordSpacing?.computedValue,
+        shadows: renderStyle.textShadow,
+        textBaseline: CSSText.getTextBaseLine(),
+        package: CSSText.getFontPackage(),
+        locale: CSSText.getLocale(),
+        background: CSSText.getBackground(),
+        foreground: CSSText.getForeground(),
+        height: height);
     return TextSpan(
       text: text,
       style: textStyle,
@@ -502,7 +516,6 @@ mixin CSSTextMixin on RenderStyle {
 }
 
 class CSSText {
-
   static bool isValidFontStyleValue(String value) {
     return value == 'normal' || value == 'italic' || value == 'oblique';
   }
@@ -531,8 +544,10 @@ class CSSText {
   }
 
   static bool isValidLineHeightValue(String value) {
-    return CSSLength.isNonNegativeLength(value) || CSSPercentage.isNonNegativePercentage(value) ||
-      value == 'normal' || double.tryParse(value) != null;
+    return CSSLength.isNonNegativeLength(value) ||
+        CSSPercentage.isNonNegativePercentage(value) ||
+        value == 'normal' ||
+        double.tryParse(value) != null;
   }
 
   static bool isValidTextTextDecorationLineValue(String value) {
@@ -554,7 +569,7 @@ class CSSText {
         }
       } else if (value == NORMAL) {
         return CSSLengthValue.normal;
-      } else if (CSSNumber.isNumber(value)){
+      } else if (CSSNumber.isNumber(value)) {
         double? multipliedNumber = double.tryParse(value);
         if (multipliedNumber != null) {
           return CSSLengthValue(multipliedNumber, CSSLengthType.EM, renderStyle, propertyName);
@@ -581,7 +596,7 @@ class CSSText {
   }
 
   static WhiteSpace resolveWhiteSpace(String value) {
-    switch(value) {
+    switch (value) {
       case 'nowrap':
         return WhiteSpace.nowrap;
       case 'pre':
@@ -604,7 +619,7 @@ class CSSText {
 
   static TextOverflow resolveTextOverflow(String value) {
     // Always get text overflow from style cause it is affected by white-space and overflow.
-    switch(value) {
+    switch (value) {
       case 'ellipsis':
         return TextOverflow.ellipsis;
       case 'fade':
@@ -674,8 +689,7 @@ class CSSText {
   }
 
   // https://drafts.csswg.org/css-fonts/#absolute-size-mapping
-  static CSSLengthValue resolveFontSize(
-      String fontSize, RenderStyle renderStyle, String propertyName) {
+  static CSSLengthValue resolveFontSize(String fontSize, RenderStyle renderStyle, String propertyName) {
     switch (fontSize) {
       case 'xx-small':
         return CSSLengthValue(3 / 5 * 16, CSSLengthType.PX);
@@ -694,11 +708,9 @@ class CSSText {
       case 'xxx-large':
         return CSSLengthValue(3 / 1 * 16, CSSLengthType.PX);
       case 'smaller':
-        return CSSLengthValue(
-            5 / 6, CSSLengthType.EM, renderStyle, propertyName);
+        return CSSLengthValue(5 / 6, CSSLengthType.EM, renderStyle, propertyName);
       case 'larger':
-        return CSSLengthValue(
-            6 / 5, CSSLengthType.EM, renderStyle, propertyName);
+        return CSSLengthValue(6 / 5, CSSLengthType.EM, renderStyle, propertyName);
       default:
         return CSSLength.parseLength(fontSize, renderStyle, propertyName);
     }
@@ -740,13 +752,13 @@ class CSSText {
 
       switch (familyName) {
         case 'sans-serif':
-        // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
-        // Default sans-serif font in Android (4.0+): Roboto
+          // Default sans-serif font in iOS (9 and newer)and iPadOS: Helvetica
+          // Default sans-serif font in Android (4.0+): Roboto
           resolvedFamily.addAll(['Helvetica', 'Roboto', 'PingFang SC', 'PingFang TC']);
           break;
         case 'serif':
-        // Default serif font in iOS and iPadOS: Times
-        // Default serif font in Android (4.0+): Noto Serif
+          // Default serif font in iOS and iPadOS: Times
+          // Default serif font in Android (4.0+): Noto Serif
           resolvedFamily.addAll([
             'Times',
             'Times New Roman',
@@ -759,16 +771,16 @@ class CSSText {
           ]);
           break;
         case 'monospace':
-        // Default monospace font in iOS and iPadOS: Courier
+          // Default monospace font in iOS and iPadOS: Courier
           resolvedFamily.addAll(['Courier', 'Courier New', 'DroidSansMono', 'Monaco', 'Heiti SC', 'Heiti TC']);
           break;
         case 'cursive':
-        // Default cursive font in iOS and iPadOS: Snell Roundhand
+          // Default cursive font in iOS and iPadOS: Snell Roundhand
           resolvedFamily.addAll(['Snell Roundhand', 'Apple Chancery', 'DancingScript', 'Comic Sans MS']);
           break;
         case 'fantasy':
-        // Default fantasy font in iOS and iPadOS:
-        // Default fantasy font in MacOS: Papyrus
+          // Default fantasy font in iOS and iPadOS:
+          // Default fantasy font in MacOS: Papyrus
           resolvedFamily.addAll(['Papyrus', 'Impact']);
           break;
         default:
@@ -819,8 +831,8 @@ class CSSText {
         double offsetY = CSSLength.parseLength(shadowDefinitions[2]!, renderStyle, propertyName).computedValue;
         String? blurRadiusStr = shadowDefinitions[3];
         // Blur-radius defaults to 0 if not specified.
-        double blurRadius = blurRadiusStr != null ?
-          CSSLength.parseLength(blurRadiusStr, renderStyle, propertyName).computedValue : 0;
+        double blurRadius =
+            blurRadiusStr != null ? CSSLength.parseLength(blurRadiusStr, renderStyle, propertyName).computedValue : 0;
         if (color != null) {
           textShadows.add(Shadow(
             offset: Offset(offsetX, offsetY),
@@ -833,5 +845,4 @@ class CSSText {
 
     return textShadows;
   }
-
 }

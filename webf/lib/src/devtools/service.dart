@@ -2,13 +2,13 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'dart:isolate';
 import 'dart:ffi';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
+import 'package:webf/webf.dart';
 
 typedef NativePostTaskToInspectorThread = Void Function(Int32 contextId, Pointer<Void> context, Pointer<Void> callback);
 typedef DartPostTaskToInspectorThread = void Function(int contextId, Pointer<Void> context, Pointer<Void> callback);
@@ -20,13 +20,13 @@ void _postTaskToInspectorThread(int contextId, Pointer<Void> context, Pointer<Vo
   }
 }
 
-final Pointer<NativeFunction<NativePostTaskToInspectorThread>> _nativePostTaskToInspectorThread = Pointer.fromFunction(_postTaskToInspectorThread);
+final Pointer<NativeFunction<NativePostTaskToInspectorThread>> _nativePostTaskToInspectorThread =
+    Pointer.fromFunction(_postTaskToInspectorThread);
 
-final List<int> _dartNativeMethods = [
-  _nativePostTaskToInspectorThread.address
-];
+final List<int> _dartNativeMethods = [_nativePostTaskToInspectorThread.address];
 
-void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController controller, { int port = INSPECTOR_DEFAULT_PORT, String? address }) {
+void spawnIsolateInspectorServer(ChromeDevToolsService devTool, KrakenController controller,
+    {int port = INSPECTOR_DEFAULT_PORT, String? address}) {
   ReceivePort serverIsolateReceivePort = ReceivePort();
 
   serverIsolateReceivePort.listen((data) {
@@ -116,7 +116,9 @@ class ChromeDevToolsService extends DevToolsService {
   // @TODO: Implement and remove.
   // ignore: unused_element
   static bool _registerUIDartMethodsToCpp() {
-    final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods').asFunction();
+    final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary.ref
+        .lookup<NativeFunction<NativeRegisterDartMethods>>('registerUIDartMethods')
+        .asFunction();
     Pointer<Uint64> bytes = malloc.allocate<Uint64>(_dartNativeMethods.length * sizeOf<Uint64>());
     Uint64List nativeMethodList = bytes.asTypedList(_dartNativeMethods.length);
     nativeMethodList.setAll(0, _dartNativeMethods);

@@ -2,18 +2,13 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 // CSS Content Visibility: https://www.w3.org/TR/css-contain-2/#content-visibility
 
-enum ContentVisibility {
-  auto,
-  hidden,
-  visible
-}
+enum ContentVisibility { auto, hidden, visible }
 
 mixin CSSContentVisibilityMixin on RenderStyle {
-
   /// Whether the child is hidden from the rest of the tree.
   ///
   /// If ContentVisibility.hidden, the child is laid out as if it was in the tree, but without
@@ -34,7 +29,7 @@ mixin CSSContentVisibilityMixin on RenderStyle {
   }
 
   static ContentVisibility resolveContentVisibility(String value) {
-    switch(value) {
+    switch (value) {
       case HIDDEN:
         return ContentVisibility.hidden;
       case AUTO:

@@ -2,9 +2,8 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-
 import 'package:flutter/services.dart';
-import 'package:kraken/src/module/module_manager.dart';
+import 'package:webf/src/module/module_manager.dart';
 
 class ClipBoardModule extends BaseModule {
   @override

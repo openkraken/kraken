@@ -5,8 +5,8 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
 
 /// Fps callback.
 typedef FpsCallback = void Function(List<FpsInfo> fps);

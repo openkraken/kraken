@@ -4,14 +4,14 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/src/dom/element_registry.dart';
+import 'package:webf/css.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/src/dom/element_registry.dart';
+import 'package:webf/webf.dart';
 
 class Kraken extends StatefulWidget {
   // The background color for viewport, default to transparent.
@@ -24,7 +24,7 @@ class Kraken extends StatefulWidget {
   final double? viewportHeight;
 
   //  The initial bundle to load.
-  final KrakenBundle? bundle;
+  final WebFBundle? bundle;
 
   // The animationController of Flutter Route object.
   // Pass this object to KrakenWidget to make sure Kraken execute JavaScripts scripts after route transition animation completed.
@@ -49,7 +49,7 @@ class Kraken extends StatefulWidget {
 
   final LoadHandler? onLoad;
 
-  final JSErrorHandler ?onJSError;
+  final JSErrorHandler? onJSError;
 
   // Open a service to support Chrome DevTools for debugging.
   // https://github.com/openkraken/devtools
@@ -84,7 +84,7 @@ class Kraken extends StatefulWidget {
     defineElement(tagName.toUpperCase(), creator);
   }
 
-  Future<void> load(KrakenBundle bundle) async {
+  Future<void> load(WebFBundle bundle) async {
     await controller?.load(bundle);
   }
 
@@ -92,37 +92,37 @@ class Kraken extends StatefulWidget {
     await controller?.reload();
   }
 
-  Kraken({
-    Key? key,
-    this.viewportWidth,
-    this.viewportHeight,
-    this.bundle,
-    this.onControllerCreated,
-    this.onLoad,
-    this.navigationDelegate,
-    this.javaScriptChannel,
-    this.background,
-    this.gestureListener,
-    this.devToolsService,
-    // Kraken's http client interceptor.
-    this.httpClientInterceptor,
-    this.uriParser,
-    this.routeObserver,
-    // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
-    // Maybe got unexpected error when change to other values, use this at your own risk!
-    // We will fixed this on next version released. (v0.6.0)
-    // Disable viewportWidth check and no assertion error report.
-    bool disableViewportWidthAssertion = false,
-    // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
-    // Maybe got unexpected error when change to other values, use this at your own risk!
-    // We will fixed this on next version release. (v0.6.0)
-    // Disable viewportHeight check and no assertion error report.
-    bool disableViewportHeightAssertion = false,
-    // Callback functions when loading Javascript scripts failed.
-    this.onLoadError,
-    this.animationController,
-    this.onJSError
-  }) : super(key: key);
+  Kraken(
+      {Key? key,
+      this.viewportWidth,
+      this.viewportHeight,
+      this.bundle,
+      this.onControllerCreated,
+      this.onLoad,
+      this.navigationDelegate,
+      this.javaScriptChannel,
+      this.background,
+      this.gestureListener,
+      this.devToolsService,
+      // Kraken's http client interceptor.
+      this.httpClientInterceptor,
+      this.uriParser,
+      this.routeObserver,
+      // Kraken's viewportWidth options only works fine when viewportWidth is equal to window.physicalSize.width / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version released. (v0.6.0)
+      // Disable viewportWidth check and no assertion error report.
+      bool disableViewportWidthAssertion = false,
+      // Kraken's viewportHeight options only works fine when viewportHeight is equal to window.physicalSize.height / window.devicePixelRatio.
+      // Maybe got unexpected error when change to other values, use this at your own risk!
+      // We will fixed this on next version release. (v0.6.0)
+      // Disable viewportHeight check and no assertion error report.
+      bool disableViewportHeightAssertion = false,
+      // Callback functions when loading Javascript scripts failed.
+      this.onLoadError,
+      this.animationController,
+      this.onJSError})
+      : super(key: key);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -182,11 +182,8 @@ class _KrakenState extends State<Kraken> with RouteAware {
 
 class KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
   // Creates a widget that visually hides its child.
-  const KrakenRenderObjectWidget(
-      Kraken widget,
-      WidgetDelegate widgetDelegate,
-      {Key? key}
-      ) : _krakenWidget = widget,
+  const KrakenRenderObjectWidget(Kraken widget, WidgetDelegate widgetDelegate, {Key? key})
+      : _krakenWidget = widget,
         _widgetDelegate = widgetDelegate,
         super(key: key);
 
@@ -207,10 +204,7 @@ class KrakenRenderObjectWidget extends SingleChildRenderObjectWidget {
 This situation often happened when you trying creating kraken when FlutterView not initialized.''');
     }
 
-    KrakenController controller = KrakenController(
-        shortHash(_krakenWidget.hashCode),
-        viewportWidth,
-        viewportHeight,
+    KrakenController controller = KrakenController(shortHash(_krakenWidget.hashCode), viewportWidth, viewportHeight,
         background: _krakenWidget.background,
         showPerformanceOverlay: Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
         entrypoint: _krakenWidget.bundle,
@@ -225,8 +219,7 @@ This situation often happened when you trying creating kraken when FlutterView n
         devToolsService: _krakenWidget.devToolsService,
         httpClientInterceptor: _krakenWidget.httpClientInterceptor,
         widgetDelegate: _widgetDelegate,
-        uriParser: _krakenWidget.uriParser
-    );
+        uriParser: _krakenWidget.uriParser);
 
     OnControllerCreated? onControllerCreated = _krakenWidget.onControllerCreated;
     if (onControllerCreated != null) {

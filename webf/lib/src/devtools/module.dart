@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 abstract class _InspectorModule {
   String get name;

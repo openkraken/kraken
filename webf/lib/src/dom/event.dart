@@ -6,16 +6,12 @@ import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/rendering.dart';
 
-enum AppearEventType {
-  none,
-  appear,
-  disappear
-}
+enum AppearEventType { none, appear, disappear }
 
 const String EVENT_CLICK = 'click';
 const String EVENT_INPUT = 'input';
@@ -96,7 +92,9 @@ mixin ElementEventMixin on ElementBase {
   }
 
   bool _hasIntersectionObserverEvent() {
-    return hasEventListener(EVENT_APPEAR) || hasEventListener(EVENT_DISAPPEAR) || hasEventListener(EVENT_INTERSECTION_CHANGE);
+    return hasEventListener(EVENT_APPEAR) ||
+        hasEventListener(EVENT_DISAPPEAR) ||
+        hasEventListener(EVENT_INTERSECTION_CHANGE);
   }
 
   @override
@@ -232,9 +230,7 @@ class PopStateEvent extends Event {
 
   @override
   Pointer<RawNativeMouseEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      stringToNativeString(jsonEncode(_popStateEventInit.state)).address
-    ];
+    List<int> methods = [stringToNativeString(jsonEncode(_popStateEventInit.state)).address];
 
     Pointer<RawNativeMouseEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMouseEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -259,7 +255,8 @@ class MouseEvent extends Event {
   double get offsetY => _mouseEventInit.offsetY;
 
   MouseEvent(String type, MouseEventInit mouseEventInit)
-      : _mouseEventInit = mouseEventInit, super(type, mouseEventInit);
+      : _mouseEventInit = mouseEventInit,
+        super(type, mouseEventInit);
 
   @override
   Pointer<RawNativeMouseEvent> toRaw([int methodLength = 0]) {
@@ -291,8 +288,7 @@ class MouseEventInit extends EventInit {
     this.clientY = 0.0,
     this.offsetX = 0.0,
     this.offsetY = 0.0,
-  })
-      : super(bubbles: bubbles, cancelable: cancelable);
+  }) : super(bubbles: bubbles, cancelable: cancelable);
 }
 
 class GestureEventInit extends EventInit {
@@ -316,8 +312,7 @@ class GestureEventInit extends EventInit {
     this.velocityX = 0.0,
     this.velocityY = 0.0,
     this.scale = 0.0,
-  })
-      : super(bubbles: bubbles, cancelable: cancelable);
+  }) : super(bubbles: bubbles, cancelable: cancelable);
 }
 
 /// reference: https://developer.mozilla.org/en-US/docs/Web/API/GestureEvent
@@ -334,7 +329,8 @@ class GestureEvent extends Event {
   double get scale => _gestureEventInit.scale;
 
   GestureEvent(String type, GestureEventInit gestureEventInit)
-      : _gestureEventInit = gestureEventInit, super(type, gestureEventInit);
+      : _gestureEventInit = gestureEventInit,
+        super(type, gestureEventInit);
 
   @override
   Pointer<RawNativeGestureEvent> toRaw([int methodLength = 0]) {
@@ -360,7 +356,7 @@ class GestureEvent extends Event {
 class CustomEventInit extends EventInit {
   final String detail;
 
-  CustomEventInit({bool bubbles = false, bool cancelable = false, required this.detail })
+  CustomEventInit({bool bubbles = false, bool cancelable = false, required this.detail})
       : super(bubbles: bubbles, cancelable: cancelable);
 }
 
@@ -371,13 +367,12 @@ class CustomEvent extends Event {
   String get detail => _customEventInit.detail;
 
   CustomEvent(String type, CustomEventInit customEventInit)
-      : _customEventInit = customEventInit, super(type, customEventInit);
+      : _customEventInit = customEventInit,
+        super(type, customEventInit);
 
   @override
   Pointer<RawNativeCustomEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      stringToNativeString(detail).address
-    ];
+    List<int> methods = [stringToNativeString(detail).address];
 
     Pointer<RawNativeCustomEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeCustomEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -397,10 +392,7 @@ class InputEvent extends Event {
 
   @override
   Pointer<RawNativeInputEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      stringToNativeString(inputType).address,
-      stringToNativeString(data).address
-    ];
+    List<int> methods = [stringToNativeString(inputType).address, stringToNativeString(data).address];
 
     Pointer<RawNativeInputEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeInputEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -451,10 +443,7 @@ class MediaError extends Event {
 
   @override
   Pointer<RawNativeMediaErrorEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      code,
-      stringToNativeString(message).address
-    ];
+    List<int> methods = [code, stringToNativeString(message).address];
 
     Pointer<RawNativeMediaErrorEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMediaErrorEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -478,10 +467,7 @@ class MessageEvent extends Event {
 
   @override
   Pointer<RawNativeMessageEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      stringToNativeString(jsonEncode(data)).address,
-      stringToNativeString(origin).address
-    ];
+    List<int> methods = [stringToNativeString(jsonEncode(data)).address, stringToNativeString(origin).address];
 
     Pointer<RawNativeMessageEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeMessageEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -506,11 +492,7 @@ class CloseEvent extends Event {
 
   @override
   Pointer<RawNativeCloseEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      code,
-      stringToNativeString(reason).address,
-      wasClean ? 1 : 0
-    ];
+    List<int> methods = [code, stringToNativeString(reason).address, wasClean ? 1 : 0];
 
     Pointer<RawNativeCloseEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeCloseEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
@@ -526,11 +508,10 @@ class IntersectionChangeEvent extends Event {
 
   @override
   Pointer<RawNativeIntersectionChangeEvent> toRaw([int methodLength = 0]) {
-    List<int> methods = [
-      doubleToUint64(intersectionRatio)
-    ];
+    List<int> methods = [doubleToUint64(intersectionRatio)];
 
-    Pointer<RawNativeIntersectionChangeEvent> rawEvent = super.toRaw(methods.length).cast<RawNativeIntersectionChangeEvent>();
+    Pointer<RawNativeIntersectionChangeEvent> rawEvent =
+        super.toRaw(methods.length).cast<RawNativeIntersectionChangeEvent>();
     Uint64List bytes = rawEvent.ref.bytes.asTypedList((rawEvent.ref.length + methods.length));
     bytes.setAll(rawEvent.ref.length, methods);
 
@@ -645,7 +626,7 @@ class TouchList {
     return _items[index];
   }
 
-  Touch operator[](int index) {
+  Touch operator [](int index) {
     return _items[index];
   }
 
@@ -655,8 +636,9 @@ class TouchList {
   }
 
   Pointer<Pointer<NativeTouch>> toNative() {
-    Pointer<Pointer<NativeTouch>> touchList = malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * _items.length).cast<Pointer<NativeTouch>>();
-    for (int i = 0; i < _items.length; i ++) {
+    Pointer<Pointer<NativeTouch>> touchList =
+        malloc.allocate<NativeTouch>(sizeOf<NativeTouch>() * _items.length).cast<Pointer<NativeTouch>>();
+    for (int i = 0; i < _items.length; i++) {
       touchList[i] = _items[i].toNative();
     }
 

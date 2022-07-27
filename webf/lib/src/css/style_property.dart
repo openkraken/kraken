@@ -2,7 +2,7 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 final RegExp _spaceRegExp = RegExp(r'\s+(?![^(]*\))');
 final RegExp _commaRegExp = RegExp(r',(?![^\(]*\))');
@@ -483,7 +483,8 @@ class CSSStyleProperty {
         image = value;
       } else if (repeat == null && (isValueVariableFunction || CSSBackground.isValidBackgroundRepeatValue(value))) {
         repeat = value;
-      } else if (attachment == null && (isValueVariableFunction || CSSBackground.isValidBackgroundAttachmentValue(value))) {
+      } else if (attachment == null &&
+          (isValueVariableFunction || CSSBackground.isValidBackgroundAttachmentValue(value))) {
         attachment = value;
       } else if (positionX == null &&
           !isPositionEndAndSizeStart &&
@@ -563,33 +564,26 @@ class CSSStyleProperty {
     // https://drafts.csswg.org/css-fonts/#font-prop
     for (String value in values) {
       final bool isValueVariableFunction = CSSFunction.isFunction(value, functionName: VAR);
-      if (style == null
-        && size == null
-        && family == null
-        && !isSizeEndAndLineHeightStart
-        && (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
+      if (style == null &&
+          size == null &&
+          family == null &&
+          !isSizeEndAndLineHeightStart &&
+          (isValueVariableFunction || CSSText.isValidFontStyleValue(value))) {
         style = value;
-      } else if (weight == null
-        && size == null
-        && family == null
-        && !isSizeEndAndLineHeightStart
-        && (isValueVariableFunction || CSSText.isValidFontWeightValue(value))
-      ) {
+      } else if (weight == null &&
+          size == null &&
+          family == null &&
+          !isSizeEndAndLineHeightStart &&
+          (isValueVariableFunction || CSSText.isValidFontWeightValue(value))) {
         weight = value;
-      } else if (size == null
-        && (isValueVariableFunction || CSSText.isValidFontSizeValue(value))
-      ) {
+      } else if (size == null && (isValueVariableFunction || CSSText.isValidFontSizeValue(value))) {
         size = value;
       } else if (value == '/') {
         isSizeEndAndLineHeightStart = true;
         continue;
-      } else if (lineHeight == null
-        && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))
-      ) {
+      } else if (lineHeight == null && (isValueVariableFunction || CSSText.isValidLineHeightValue(value))) {
         lineHeight = value;
-      } else if (size != null
-        && family == null
-      ) {
+      } else if (size != null && family == null) {
         // The font-family must be the last value specified.
         // Like `font: 12px` is invalid property value.
         family = value;
@@ -719,11 +713,11 @@ class CSSStyleProperty {
         grow = value;
       } else if (shrink == null && (isValueVariableFunction || CSSNumber.isNumber(value))) {
         shrink = value;
-      } else if (basis == null && ((isValueVariableFunction
-        || CSSLength.isNonNegativeLength(value)
-        || CSSPercentage.isPercentage(value)
-        || value == AUTO))
-      ) {
+      } else if (basis == null &&
+          ((isValueVariableFunction ||
+              CSSLength.isNonNegativeLength(value) ||
+              CSSPercentage.isPercentage(value) ||
+              value == AUTO))) {
         basis = value;
       } else {
         return null;
@@ -757,7 +751,8 @@ class CSSStyleProperty {
     return [width, style, color];
   }
 
-  static List<String?>? _getEdgeValues(String shorthandProperty, {
+  static List<String?>? _getEdgeValues(
+    String shorthandProperty, {
     bool isLengthOrPercentage = false,
     bool isNonNegativeLengthOrPercentage = false,
     bool isNonNegativeLength = false,
@@ -785,32 +780,36 @@ class CSSStyleProperty {
       leftValue = properties[3];
     }
 
-    if (topValue != null && CSSFunction.isFunction(topValue) &&
-        rightValue != null && CSSFunction.isFunction(rightValue) &&
-        bottomValue != null && CSSFunction.isFunction(bottomValue) &&
-        leftValue != null && CSSFunction.isFunction(leftValue)) {
+    if (topValue != null &&
+        CSSFunction.isFunction(topValue) &&
+        rightValue != null &&
+        CSSFunction.isFunction(rightValue) &&
+        bottomValue != null &&
+        CSSFunction.isFunction(bottomValue) &&
+        leftValue != null &&
+        CSSFunction.isFunction(leftValue)) {
       return [topValue, rightValue, bottomValue, leftValue];
     }
 
     if (isLengthOrPercentage) {
       if ((!CSSLength.isLength(topValue) && !CSSPercentage.isPercentage(topValue)) ||
           (!CSSLength.isLength(rightValue) && !CSSPercentage.isPercentage(rightValue)) ||
-          (!CSSLength.isLength(bottomValue) && !CSSPercentage.isPercentage(bottomValue))||
+          (!CSSLength.isLength(bottomValue) && !CSSPercentage.isPercentage(bottomValue)) ||
           (!CSSLength.isLength(leftValue) && !CSSPercentage.isPercentage(leftValue))) {
         return null;
       }
     } else if (isNonNegativeLengthOrPercentage) {
       if ((!CSSLength.isNonNegativeLength(topValue) && !CSSPercentage.isNonNegativePercentage(topValue)) ||
-        (!CSSLength.isNonNegativeLength(rightValue) && !CSSPercentage.isNonNegativePercentage(rightValue)) ||
-        (!CSSLength.isNonNegativeLength(bottomValue) && !CSSPercentage.isNonNegativePercentage(bottomValue))||
-        (!CSSLength.isNonNegativeLength(leftValue) && !CSSPercentage.isNonNegativePercentage(leftValue))) {
+          (!CSSLength.isNonNegativeLength(rightValue) && !CSSPercentage.isNonNegativePercentage(rightValue)) ||
+          (!CSSLength.isNonNegativeLength(bottomValue) && !CSSPercentage.isNonNegativePercentage(bottomValue)) ||
+          (!CSSLength.isNonNegativeLength(leftValue) && !CSSPercentage.isNonNegativePercentage(leftValue))) {
         return null;
       }
     } else if (isNonNegativeLength) {
       if ((!CSSLength.isNonNegativeLength(topValue)) ||
-        (!CSSLength.isNonNegativeLength(rightValue)) ||
-        (!CSSLength.isNonNegativeLength(bottomValue))||
-        (!CSSLength.isNonNegativeLength(leftValue))) {
+          (!CSSLength.isNonNegativeLength(rightValue)) ||
+          (!CSSLength.isNonNegativeLength(bottomValue)) ||
+          (!CSSLength.isNonNegativeLength(leftValue))) {
         return null;
       }
     }

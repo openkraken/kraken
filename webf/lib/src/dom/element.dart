@@ -9,10 +9,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/rendering.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 const String _ONE_SPACE = ' ';
@@ -68,16 +68,14 @@ typedef BeforeRendererAttach = RenderObject Function();
 typedef GetTargetId = int Function();
 typedef GetRootElementFontSize = double Function();
 typedef GetChildNodes = List<Node> Function();
+
 /// Get the viewport size of current element.
 typedef GetViewportSize = Size Function();
+
 /// Get the render box model of current element.
 typedef GetRenderBoxModel = RenderBoxModel? Function();
 
-abstract class Element
-    extends Node
-    with ElementBase,
-         ElementEventMixin,
-         ElementOverflowMixin {
+abstract class Element extends Node with ElementBase, ElementEventMixin, ElementOverflowMixin {
   // Default to unknown, assign by [createElement], used by inspector.
   String tagName = UNKNOWN;
 
@@ -114,6 +112,7 @@ abstract class Element
   String get className => _classList.join(_ONE_SPACE);
 
   final bool _isDefaultRepaintBoundary;
+
   /// Whether should as a repaintBoundary for this element when style changed
   bool get isRepaintBoundary {
     // Following cases should always convert to repaint boundary for performance consideration.
@@ -121,8 +120,10 @@ abstract class Element
     if (_isDefaultRepaintBoundary || _forceToRepaintBoundary) return true;
 
     // Overflow style.
-    bool hasOverflowScroll = renderStyle.overflowX == CSSOverflowType.scroll || renderStyle.overflowX == CSSOverflowType.auto ||
-      renderStyle.overflowY == CSSOverflowType.scroll || renderStyle.overflowY == CSSOverflowType.auto;
+    bool hasOverflowScroll = renderStyle.overflowX == CSSOverflowType.scroll ||
+        renderStyle.overflowX == CSSOverflowType.auto ||
+        renderStyle.overflowY == CSSOverflowType.scroll ||
+        renderStyle.overflowY == CSSOverflowType.auto;
     // Transform style.
     bool hasTransform = renderStyle.transformMatrix != null;
     // Fixed position style.
@@ -140,18 +141,12 @@ abstract class Element
     _updateRenderBoxModel();
   }
 
-  Element(
-    BindingContext? context,
-    {
-      Map<String, dynamic>? defaultStyle,
-      bool isReplacedElement = false,
-      bool isDefaultRepaintBoundary = false
-    })
-    : _defaultStyle = defaultStyle ?? const {},
-      _isReplacedElement = isReplacedElement,
-      _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
-      super(NodeType.ELEMENT_NODE, context) {
-
+  Element(BindingContext? context,
+      {Map<String, dynamic>? defaultStyle, bool isReplacedElement = false, bool isDefaultRepaintBoundary = false})
+      : _defaultStyle = defaultStyle ?? const {},
+        _isReplacedElement = isReplacedElement,
+        _isDefaultRepaintBoundary = isDefaultRepaintBoundary,
+        super(NodeType.ELEMENT_NODE, context) {
     // Init style and add change listener.
     style = CSSStyleDeclaration.computedStyle(this, _defaultStyle, _onStyleChanged);
 
@@ -203,59 +198,89 @@ abstract class Element
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'offsetTop': return offsetTop;
-      case 'offsetLeft': return offsetLeft;
-      case 'offsetWidth': return offsetWidth;
-      case 'offsetHeight': return offsetHeight;
+      case 'offsetTop':
+        return offsetTop;
+      case 'offsetLeft':
+        return offsetLeft;
+      case 'offsetWidth':
+        return offsetWidth;
+      case 'offsetHeight':
+        return offsetHeight;
 
-      case 'scrollTop': return scrollTop;
-      case 'scrollLeft': return scrollLeft;
-      case 'scrollWidth': return scrollWidth;
-      case 'scrollHeight': return scrollHeight;
+      case 'scrollTop':
+        return scrollTop;
+      case 'scrollLeft':
+        return scrollLeft;
+      case 'scrollWidth':
+        return scrollWidth;
+      case 'scrollHeight':
+        return scrollHeight;
 
-      case 'clientTop': return clientTop;
-      case 'clientLeft': return clientLeft;
-      case 'clientWidth': return clientWidth;
-      case 'clientHeight': return clientHeight;
+      case 'clientTop':
+        return clientTop;
+      case 'clientLeft':
+        return clientLeft;
+      case 'clientWidth':
+        return clientWidth;
+      case 'clientHeight':
+        return clientHeight;
 
-      case 'className': return className;
-      case 'classList': return classList;
+      case 'className':
+        return className;
+      case 'classList':
+        return classList;
 
-      default: return super.getBindingProperty(key);
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'scrollTop': scrollTop = castToType<double>(value); break;
-      case 'scrollLeft': scrollLeft = castToType<double>(value); break;
+      case 'scrollTop':
+        scrollTop = castToType<double>(value);
+        break;
+      case 'scrollLeft':
+        scrollLeft = castToType<double>(value);
+        break;
 
-      case 'className': className = castToType<String>(value); break;
+      case 'className':
+        className = castToType<String>(value);
+        break;
 
-      default: super.setBindingProperty(key, value);
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
   @override
   invokeBindingMethod(String method, List args) {
     switch (method) {
-      case 'getBoundingClientRect': return getBoundingClientRect().toNative();
-      case 'scroll': return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
-      case 'scrollBy': return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
-      case 'scrollTo': return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
-      case 'click': return click();
+      case 'getBoundingClientRect':
+        return getBoundingClientRect().toNative();
+      case 'scroll':
+        return scroll(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollBy':
+        return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'scrollTo':
+        return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
+      case 'click':
+        return click();
 
-      default: super.invokeBindingMethod(method, args);
+      default:
+        super.invokeBindingMethod(method, args);
     }
   }
 
   void _updateRenderBoxModel() {
     RenderBoxModel nextRenderBoxModel;
     if (_isReplacedElement) {
-      nextRenderBoxModel = _createRenderReplaced(isRepaintBoundary: isRepaintBoundary, previousReplaced: _renderReplaced);
+      nextRenderBoxModel =
+          _createRenderReplaced(isRepaintBoundary: isRepaintBoundary, previousReplaced: _renderReplaced);
     } else {
-      nextRenderBoxModel = _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
+      nextRenderBoxModel =
+          _createRenderLayout(isRepaintBoundary: isRepaintBoundary, previousRenderLayoutBox: _renderLayoutBox);
     }
 
     RenderBox? previousRenderBoxModel = renderBoxModel;
@@ -282,10 +307,7 @@ abstract class Element
     }
   }
 
-  RenderReplaced _createRenderReplaced({
-    RenderReplaced? previousReplaced,
-    bool isRepaintBoundary = false
-  }) {
+  RenderReplaced _createRenderReplaced({RenderReplaced? previousReplaced, bool isRepaintBoundary = false}) {
     RenderReplaced nextReplaced;
 
     if (previousReplaced == null) {
@@ -321,43 +343,39 @@ abstract class Element
   }
 
   // Create renderLayoutBox if type changed and copy children if there has previous renderLayoutBox.
-  RenderLayoutBox _createRenderLayout({
-      RenderLayoutBox? previousRenderLayoutBox,
-      CSSRenderStyle? renderStyle,
-      bool isRepaintBoundary = false
-  }) {
+  RenderLayoutBox _createRenderLayout(
+      {RenderLayoutBox? previousRenderLayoutBox, CSSRenderStyle? renderStyle, bool isRepaintBoundary = false}) {
     renderStyle = renderStyle ?? this.renderStyle;
     CSSDisplay display = this.renderStyle.display;
     RenderLayoutBox? nextRenderLayoutBox;
 
     if (display == CSSDisplay.flex || display == CSSDisplay.inlineFlex) {
-
       if (previousRenderLayoutBox == null) {
         if (isRepaintBoundary) {
           nextRenderLayoutBox = RenderRepaintBoundaryFlexLayout(
             renderStyle: renderStyle,
-          );
+          ) as RenderLayoutBox?;
         } else {
           nextRenderLayoutBox = RenderFlexLayout(
             renderStyle: renderStyle,
-          );
+          ) as RenderLayoutBox?;
         }
       } else if (previousRenderLayoutBox is RenderFlowLayout) {
         if (previousRenderLayoutBox is RenderRepaintBoundaryFlowLayout) {
           if (isRepaintBoundary) {
             // RenderRepaintBoundaryFlowLayout --> RenderRepaintBoundaryFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout() as RenderLayoutBox?;
           } else {
             // RenderRepaintBoundaryFlowLayout --> RenderFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout() as RenderLayoutBox?;
           }
         } else {
           if (isRepaintBoundary) {
             // RenderFlowLayout --> RenderRepaintBoundaryFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout() as RenderLayoutBox?;
           } else {
             // RenderFlowLayout --> RenderFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout() as RenderLayoutBox?;
           }
         }
       } else if (previousRenderLayoutBox is RenderFlexLayout) {
@@ -367,12 +385,12 @@ abstract class Element
             nextRenderLayoutBox = previousRenderLayoutBox;
           } else {
             // RenderRepaintBoundaryFlexLayout --> RenderFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout() as RenderLayoutBox?;
           }
         } else {
           if (isRepaintBoundary) {
             // RenderFlexLayout --> RenderRepaintBoundaryFlexLayout
-            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout();
+            nextRenderLayoutBox = previousRenderLayoutBox.toRepaintBoundaryFlexLayout() as RenderLayoutBox?;
           } else {
             // RenderFlexLayout --> RenderFlexLayout
             nextRenderLayoutBox = previousRenderLayoutBox;
@@ -380,14 +398,12 @@ abstract class Element
         }
       } else if (previousRenderLayoutBox is RenderSliverListLayout) {
         // RenderSliverListLayout --> RenderFlexLayout
-        nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout();
+        nextRenderLayoutBox = previousRenderLayoutBox.toFlexLayout() as RenderLayoutBox?;
       }
-
     } else if (display == CSSDisplay.block ||
-      display == CSSDisplay.none ||
-      display == CSSDisplay.inline ||
-      display == CSSDisplay.inlineBlock) {
-
+        display == CSSDisplay.none ||
+        display == CSSDisplay.inline ||
+        display == CSSDisplay.inlineBlock) {
       if (previousRenderLayoutBox == null) {
         if (isRepaintBoundary) {
           nextRenderLayoutBox = RenderRepaintBoundaryFlowLayout(
@@ -438,7 +454,6 @@ abstract class Element
         // RenderSliverListLayout --> RenderFlowLayout
         nextRenderLayoutBox = previousRenderLayoutBox.toFlowLayout();
       }
-
     } else if (display == CSSDisplay.sliver) {
       if (previousRenderLayoutBox == null) {
         nextRenderLayoutBox = RenderSliverListLayout(
@@ -448,7 +463,8 @@ abstract class Element
         );
       } else if (previousRenderLayoutBox is RenderFlowLayout || previousRenderLayoutBox is RenderFlexLayout) {
         //  RenderFlow/FlexLayout --> RenderSliverListLayout
-        nextRenderLayoutBox = previousRenderLayoutBox.toSliverLayout(RenderSliverElementChildManager(this), _handleScroll);
+        nextRenderLayoutBox =
+            previousRenderLayoutBox.toSliverLayout(RenderSliverElementChildManager(this), _handleScroll);
       } else if (previousRenderLayoutBox is RenderSliverListLayout) {
         nextRenderLayoutBox = previousRenderLayoutBox;
       }
@@ -491,7 +507,6 @@ abstract class Element
 
     RenderBoxModel? renderBoxModel = this.renderBoxModel;
     if (renderBoxModel != null) {
-
       // The node detach may affect the whitespace of the nextSibling and previousSibling text node so prev and next node require layout.
       renderBoxModel.markAdjacentRenderParagraphNeedsLayout();
 
@@ -622,7 +637,7 @@ abstract class Element
 
     while (child != null) {
       final ContainerParentDataMixin<RenderBox>? childParentData =
-        child.parentData as ContainerParentDataMixin<RenderBox>?;
+          child.parentData as ContainerParentDataMixin<RenderBox>?;
       if (child is! RenderLayoutBox) {
         child = childParentData!.nextSibling;
         continue;
@@ -641,9 +656,8 @@ abstract class Element
 
     // No need to detach and reattach renderBoxMode when its position
     // changes between static and relative.
-    if (!(oldPosition == CSSPositionType.static && currentPosition == CSSPositionType.relative)
-      && !(oldPosition == CSSPositionType.relative && currentPosition == CSSPositionType.static)
-    ) {
+    if (!(oldPosition == CSSPositionType.static && currentPosition == CSSPositionType.relative) &&
+        !(oldPosition == CSSPositionType.relative && currentPosition == CSSPositionType.static)) {
       RenderBoxModel _renderBoxModel = renderBoxModel!;
       // Remove fixed children before convert to non repaint boundary renderObject
       if (currentPosition != CSSPositionType.fixed) {
@@ -662,7 +676,8 @@ abstract class Element
       // Original parent renderBox.
       RenderBox parentRenderBox = parentNode!.renderer!;
       // Attach renderBoxModel to its containing block.
-      renderBoxModel!.attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
+      renderBoxModel!
+          .attachToContainingBlock(containingBlockRenderBox, parent: parentRenderBox, after: previousSibling);
 
       // Add fixed children after convert to repaint boundary renderObject.
       if (currentPosition == CSSPositionType.fixed) {
@@ -678,8 +693,8 @@ abstract class Element
         child.addToContainingBlock();
       });
 
-    // Need to change the containing block of direct position absolute children from this element
-    // to its upper parent when element's position is changed from relative to static.
+      // Need to change the containing block of direct position absolute children from this element
+      // to its upper parent when element's position is changed from relative to static.
     } else if (currentPosition == CSSPositionType.static) {
       List<Element> directPositionAbsoluteChildren = findDirectPositionAbsoluteChildren();
       directPositionAbsoluteChildren.forEach((Element child) {
@@ -771,7 +786,7 @@ abstract class Element
 
   /// Unmount [renderBoxModel].
   @override
-  void unmountRenderObject({ bool deep = true, bool keepFixedAlive = false, bool dispose = true }) {
+  void unmountRenderObject({bool deep = true, bool keepFixedAlive = false, bool dispose = true}) {
     // Ignore the fixed element to unmount render object.
     // It's useful for sliver manager to unmount child render object, but excluding fixed elements.
     if (keepFixedAlive && renderStyle.position == CSSPositionType.fixed) {
@@ -827,7 +842,9 @@ abstract class Element
     RenderLayoutBox? renderLayoutBox = _renderLayoutBox;
     if (isRendererAttached) {
       // Only append child renderer when which is not attached.
-      if (!child.isRendererAttached && renderLayoutBox != null && renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
+      if (!child.isRendererAttached &&
+          renderLayoutBox != null &&
+          renderObjectManagerType == RenderObjectManagerType.KRAKEN_NODE) {
         RenderBox? after;
         RenderLayoutBox? scrollingContentBox = renderLayoutBox.renderScrollingContent;
         if (scrollingContentBox != null) {
@@ -920,7 +937,7 @@ abstract class Element
     RenderBox? containingBlockRenderBox;
     CSSPositionType positionType = renderStyle.position;
 
-    switch(positionType) {
+    switch (positionType) {
       case CSSPositionType.relative:
       case CSSPositionType.static:
       case CSSPositionType.sticky:
@@ -1029,7 +1046,7 @@ abstract class Element
     switch (name) {
       case DISPLAY:
         renderStyle.display = value;
-         _updateRenderBoxModelWithDisplay();
+        _updateRenderBoxModelWithDisplay();
         break;
       case Z_INDEX:
         renderStyle.zIndex = value;
@@ -1327,7 +1344,7 @@ abstract class Element
         break;
       case SLIVER_DIRECTION:
         renderStyle.sliverDirection = value;
-          break;
+        break;
     }
   }
 
@@ -1493,15 +1510,8 @@ abstract class Element
       if (sizedBox.hasSize) {
         Offset offset = _getOffset(sizedBox, ancestor: ownerDocument.documentElement);
         Size size = sizedBox.size;
-        boundingClientRect = BoundingClientRect(
-          offset.dx,
-          offset.dy,
-          size.width,
-          size.height,
-          offset.dy,
-          offset.dx + size.width,
-          offset.dy + size.height,
-          offset.dx);
+        boundingClientRect = BoundingClientRect(offset.dx, offset.dy, size.width, size.height, offset.dy,
+            offset.dx + size.width, offset.dy + size.height, offset.dx);
       }
     }
 
@@ -1540,10 +1550,10 @@ abstract class Element
   Element? get offsetParent {
     // Returns null in the following cases.
     // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetParent
-    if (renderStyle.display == CSSDisplay.none
-      || renderStyle.position == CSSPositionType.fixed
-      || this is BodyElement
-      || this == ownerDocument.documentElement) {
+    if (renderStyle.display == CSSDisplay.none ||
+        renderStyle.position == CSSPositionType.fixed ||
+        this is BodyElement ||
+        this == ownerDocument.documentElement) {
       return null;
     }
 
@@ -1560,7 +1570,7 @@ abstract class Element
   }
 
   // Get the offset of current element relative to specified ancestor element.
-  Offset _getOffset(RenderBoxModel renderBox, { Element? ancestor }) {
+  Offset _getOffset(RenderBoxModel renderBox, {Element? ancestor}) {
     // Need to flush layout to get correct size.
     flushLayout();
 
@@ -1591,7 +1601,7 @@ abstract class Element
     // TODO
   }
 
-  Future<Uint8List> toBlob({ double? devicePixelRatio }) {
+  Future<Uint8List> toBlob({double? devicePixelRatio}) {
     flushLayout();
     forceToRepaintBoundary = true;
 

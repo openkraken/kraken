@@ -4,11 +4,10 @@
 
 import 'dart:ui' as ui;
 
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 mixin CSSOpacityMixin on RenderStyle {
-
   /// The fraction to scale the child's alpha value.
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent

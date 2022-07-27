@@ -3,9 +3,9 @@
  */
 import 'dart:convert';
 
-import 'package:kraken/bridge.dart' as bridge;
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/bridge.dart' as bridge;
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 abstract class BaseModule {
   String get name;
@@ -15,7 +15,7 @@ abstract class BaseModule {
   void dispose();
 }
 
-typedef InvokeModuleCallback = void Function({String ?error, Object? data});
+typedef InvokeModuleCallback = void Function({String? error, Object? data});
 typedef NewModuleCreator = BaseModule Function(ModuleManager);
 typedef ModuleCreator = BaseModule Function(ModuleManager? moduleManager);
 

@@ -5,11 +5,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/devtools.dart';
-
+import 'package:meta/meta.dart';
+import 'package:webf/devtools.dart';
+import 'package:webf/dom.dart';
 
 String enumKey(String key) {
   return key.split('.').last;
@@ -71,21 +70,9 @@ class Frame extends JSONEncodable {
   // Indicated which gated APIs / features are available.
   final List<String> gatedAPIFeatures;
 
-  Frame(
-      this.id,
-      this.loaderId,
-      this.url,
-      this.domainAndRegistry,
-      this.securityOrigin,
-      this.mimeType,
-      this.secureContextType,
-      this.crossOriginIsolatedContextType,
-      this.gatedAPIFeatures,
-      {this.parentId,
-      this.name,
-      this.urlFragment,
-      this.unreachableUrl,
-      this.AdFrameType});
+  Frame(this.id, this.loaderId, this.url, this.domainAndRegistry, this.securityOrigin, this.mimeType,
+      this.secureContextType, this.crossOriginIsolatedContextType, this.gatedAPIFeatures,
+      {this.parentId, this.name, this.urlFragment, this.unreachableUrl, this.AdFrameType});
 
   @override
   Map toJson() {
@@ -132,8 +119,7 @@ class FrameResource extends JSONEncodable {
   // True if the resource was canceled during loading.
   bool? canceled;
 
-  FrameResource(this.url, this.type, this.mimeType,
-      {this.lastModified, this.contentSize, this.failed, this.canceled});
+  FrameResource(this.url, this.type, this.mimeType, {this.lastModified, this.contentSize, this.failed, this.canceled});
 
   @override
   Map toJson() {
@@ -188,10 +174,9 @@ enum ResourceType {
 }
 
 class InspectPageModule extends UIInspectorModule {
-
   Document get document => devtoolsService.controller!.view.document;
 
-  InspectPageModule(ChromeDevToolsService devtoolsService): super(devtoolsService);
+  InspectPageModule(ChromeDevToolsService devtoolsService) : super(devtoolsService);
 
   @override
   String get name => 'Page';
@@ -213,10 +198,8 @@ class InspectPageModule extends UIInspectorModule {
         break;
       case 'getResourceContent':
         String? url = params!['url'];
-        sendToFrontend(id, JSONEncodableMap({
-          'content': devtoolsService.controller?.getResourceContent(url),
-          'base64Encoded': false
-        }));
+        sendToFrontend(id,
+            JSONEncodableMap({'content': devtoolsService.controller?.getResourceContent(url), 'base64Encoded': false}));
         break;
       case 'reload':
         sendToFrontend(id, null);
@@ -309,12 +292,7 @@ class ScreencastFrameMetadata implements JSONEncodable {
   final num? timestamp;
 
   ScreencastFrameMetadata(
-      this.offsetTop,
-      this.pageScaleFactor,
-      this.deviceWidth,
-      this.deviceHeight,
-      this.scrollOffsetX,
-      this.scrollOffsetY,
+      this.offsetTop, this.pageScaleFactor, this.deviceWidth, this.deviceHeight, this.scrollOffsetX, this.scrollOffsetY,
       {this.timestamp});
 
   @override

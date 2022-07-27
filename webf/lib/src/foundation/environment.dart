@@ -5,17 +5,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-String? _krakenTemporaryPath;
-Future<String> getKrakenTemporaryPath() async {
-  if (_krakenTemporaryPath == null) {
-    String? temporaryDirectory = await getKrakenMethodChannel()
-        .invokeMethod<String>('getTemporaryDirectory');
+String? _webfTemporaryPath;
+Future<String> getWebFTemporaryPath() async {
+  if (_webfTemporaryPath == null) {
+    String? temporaryDirectory = await getKrakenMethodChannel().invokeMethod<String>('getTemporaryDirectory');
     if (temporaryDirectory == null) {
       throw FlutterError('Can\'t get temporary directory from native side.');
     }
-    _krakenTemporaryPath = temporaryDirectory;
+    _webfTemporaryPath = temporaryDirectory;
   }
-  return _krakenTemporaryPath!;
+  return _webfTemporaryPath!;
 }
 
 MethodChannel _methodChannel = const MethodChannel('kraken');

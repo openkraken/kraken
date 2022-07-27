@@ -3,7 +3,7 @@
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/dom.dart';
 
 typedef ObjectElementClientFactory = ObjectElementClient Function(ObjectElementHost objectElementHost);
 

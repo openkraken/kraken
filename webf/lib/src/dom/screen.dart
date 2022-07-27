@@ -4,7 +4,7 @@
  */
 import 'dart:ui';
 
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 // As its name suggests, the Screen interface represents information about the screen of the output device.
 // https://drafts.csswg.org/cssom-view/#the-screen-interface
@@ -14,11 +14,16 @@ class Screen extends BindingObject {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'availWidth': return availWidth;
-      case 'availHeight': return availHeight;
-      case 'width': return width;
-      case 'height': return height;
-      default: return super.getBindingProperty(key);
+      case 'availWidth':
+        return availWidth;
+      case 'availHeight':
+        return availHeight;
+      case 'width':
+        return width;
+      case 'height':
+        return height;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 

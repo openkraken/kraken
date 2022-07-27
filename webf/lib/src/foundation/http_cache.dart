@@ -6,11 +6,10 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:kraken/foundation.dart';
 import 'package:path/path.dart' as path;
+import 'package:webf/foundation.dart';
 
 enum HttpCacheMode {
-
   /// Default cache usage mode. If the navigation type doesn't impose any specific
   /// behavior, use cached resources when they are available and not expired,
   /// otherwise load resources from the network.
@@ -35,7 +34,7 @@ class HttpCacheController {
       return _cacheDirectory!;
     }
 
-    final String appTemporaryPath = await getKrakenTemporaryPath();
+    final String appTemporaryPath = await getWebFTemporaryPath();
     final Directory cacheDirectory = Directory(path.join(appTemporaryPath, 'HttpCaches'));
     bool isThere = await cacheDirectory.exists();
     if (!isThere) {
@@ -72,7 +71,7 @@ class HttpCacheController {
   // A splay tree is a good choice for data that is stored and accessed frequently.
   final SplayTreeMap<String, HttpCacheObject> _caches = SplayTreeMap();
 
-  HttpCacheController._(String origin, { int maxCachedObjects = 1000 })
+  HttpCacheController._(String origin, {int maxCachedObjects = 1000})
       : _origin = origin,
         _maxCachedObjects = maxCachedObjects;
 
@@ -110,16 +109,13 @@ class HttpCacheController {
     _caches.remove(key);
   }
 
-  Future<HttpClientResponse> interceptResponse(
-      HttpClientRequest request,
-      HttpClientResponse response,
-      HttpCacheObject cacheObject,
-      HttpClient httpClient) async {
+  Future<HttpClientResponse> interceptResponse(HttpClientRequest request, HttpClientResponse response,
+      HttpCacheObject cacheObject, HttpClient httpClient) async {
     await cacheObject.updateIndex(response);
 
     // Negotiate cache with HTTP 304
     if (response.statusCode == HttpStatus.notModified) {
-      HttpClientResponse? cachedResponse  = await cacheObject.toHttpClientResponse(httpClient);
+      HttpClientResponse? cachedResponse = await cacheObject.toHttpClientResponse(httpClient);
       if (cachedResponse != null) {
         return cachedResponse;
       }
@@ -127,12 +123,8 @@ class HttpCacheController {
 
     if (response.statusCode == HttpStatus.ok) {
       // Create cache object.
-      HttpCacheObject cacheObject = HttpCacheObject
-          .fromResponse(
-          _getCacheKey(request.uri),
-          response,
-          (await getCacheDirectory()).path
-      );
+      HttpCacheObject cacheObject =
+          HttpCacheObject.fromResponse(_getCacheKey(request.uri), response, (await getCacheDirectory()).path);
 
       // Cache the object.
       if (cacheObject.valid) {
@@ -183,10 +175,8 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
   bool get isRedirect => response.isRedirect;
 
   @override
-  StreamSubscription<List<int>> listen(
-      void Function(List<int> event)? onData, {
-        Function? onError, void Function()? onDone, bool? cancelOnError
-      }) {
+  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
     _blobSink ??= cacheObject.openBlobWrite();
 
     void _handleData(List<int> data) {
@@ -205,8 +195,7 @@ class HttpClientCachedResponse extends Stream<List<int>> implements HttpClientRe
     }
 
     return _DelegatingStreamSubscription(
-      response.listen(_handleData,
-        onError: _handleError, onDone: _handleDone, cancelOnError: cancelOnError),
+      response.listen(_handleData, onError: _handleError, onDone: _handleDone, cancelOnError: cancelOnError),
       handleData: _handleData,
       handleDone: _handleDone,
       handleError: _handleError,
@@ -253,11 +242,12 @@ class _DelegatingStreamSubscription extends DelegatingStreamSubscription<List<in
   final Function _handleError;
   final void Function() _handleDone;
 
-  _DelegatingStreamSubscription(StreamSubscription<List<int>> source, {
+  _DelegatingStreamSubscription(
+    StreamSubscription<List<int>> source, {
     required void Function(List<int>) handleData,
     required Function handleError,
     required void Function() handleDone,
-  }) :_handleData = handleData,
+  })  : _handleData = handleData,
         _handleError = handleError,
         _handleDone = handleDone,
         super(source);

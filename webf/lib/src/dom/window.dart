@@ -3,11 +3,11 @@
  */
 import 'dart:ui';
 
-import 'package:kraken/bridge.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/module.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/module.dart';
+import 'package:webf/rendering.dart';
 
 const String WINDOW = 'WINDOW';
 
@@ -16,7 +16,8 @@ class Window extends EventTarget {
   final Screen screen;
 
   Window(BindingContext? context, this.document)
-      : screen = Screen(context), super(context);
+      : screen = Screen(context),
+        super(context);
 
   @override
   EventTarget? get parentEventTarget => null;
@@ -25,14 +26,22 @@ class Window extends EventTarget {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'innerWidth': return innerWidth;
-      case 'innerHeight': return innerHeight;
-      case 'scrollX': return scrollX;
-      case 'scrollY': return scrollY;
-      case 'screen': return screen;
-      case 'colorScheme': return colorScheme;
-      case 'devicePixelRatio': return devicePixelRatio;
-      default: return super.getBindingProperty(key);
+      case 'innerWidth':
+        return innerWidth;
+      case 'innerHeight':
+        return innerHeight;
+      case 'scrollX':
+        return scrollX;
+      case 'scrollY':
+        return scrollY;
+      case 'screen':
+        return screen;
+      case 'colorScheme':
+        return colorScheme;
+      case 'devicePixelRatio':
+        return devicePixelRatio;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
@@ -41,18 +50,13 @@ class Window extends EventTarget {
     switch (method) {
       case 'scroll':
       case 'scrollTo':
-        return scrollTo(
-            castToType<double>(args[0]),
-            castToType<double>(args[1])
-        );
+        return scrollTo(castToType<double>(args[0]), castToType<double>(args[1]));
       case 'scrollBy':
-        return scrollBy(
-            castToType<double>(args[0]),
-            castToType<double>(args[1])
-        );
+        return scrollBy(castToType<double>(args[0]), castToType<double>(args[1]));
       case 'open':
         return open(castToType<String>(args[0]));
-      default: return super.invokeBindingMethod(method, args);
+      default:
+        return super.invokeBindingMethod(method, args);
     }
   }
 
@@ -96,7 +100,6 @@ class Window extends EventTarget {
       return Size.zero;
     }
   }
-
 
   @override
   void dispatchEvent(Event event) {

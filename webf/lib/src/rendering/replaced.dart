@@ -4,16 +4,15 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/module.dart';
+import 'package:webf/rendering.dart';
 
 /// RenderBox of a replaced element whose content is outside the scope of the CSS formatting model,
 /// such as an image or embedded document.
 /// https://drafts.csswg.org/css-display/#replaced-element
-class RenderReplaced extends RenderBoxModel
-    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+class RenderReplaced extends RenderBoxModel with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   RenderReplaced(CSSRenderStyle renderStyle) : super(renderStyle: renderStyle);
 
   @override
@@ -45,8 +44,7 @@ class RenderReplaced extends RenderBoxModel
     if (child.parentData is! RenderLayoutParentData) {
       if (child is RenderBoxModel) {
         RenderLayoutParentData parentData = RenderLayoutParentData();
-        child.parentData =
-            CSSPositionedLayout.getPositionParentData(child, parentData);
+        child.parentData = CSSPositionedLayout.getPositionParentData(child, parentData);
       } else {
         child.parentData = RenderLayoutParentData();
       }
@@ -57,8 +55,7 @@ class RenderReplaced extends RenderBoxModel
   void performLayout() {
     if (kProfileMode && PerformanceTiming.enabled()) {
       childLayoutDuration = 0;
-      PerformanceTiming.instance()
-          .mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: hashCode);
+      PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_START, uniqueId: hashCode);
     }
 
     beforeLayout();
@@ -73,8 +70,7 @@ class RenderReplaced extends RenderBoxModel
 
       if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childLayoutEnd = DateTime.now();
-        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) -
-            childLayoutStart.microsecondsSinceEpoch;
+        childLayoutDuration += (childLayoutEnd.microsecondsSinceEpoch) - childLayoutStart.microsecondsSinceEpoch;
       }
 
       Size childSize = child!.size;
@@ -91,8 +87,7 @@ class RenderReplaced extends RenderBoxModel
     }
 
     if (kProfileMode && PerformanceTiming.enabled()) {
-      PerformanceTiming.instance()
-          .mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: hashCode);
+      PerformanceTiming.instance().mark(PERF_INTRINSIC_LAYOUT_END, uniqueId: hashCode);
     }
   }
 
@@ -144,10 +139,10 @@ class RenderReplaced extends RenderBoxModel
 
   @override
   void performPaint(PaintingContext context, Offset offset) {
-
     offset += Offset(renderStyle.paddingLeft.computedValue, renderStyle.paddingTop.computedValue);
 
-    offset += Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
+    offset +=
+        Offset(renderStyle.effectiveBorderLeftWidth.computedValue, renderStyle.effectiveBorderTopWidth.computedValue);
 
     if (child != null) {
       late DateTime childPaintStart;
@@ -157,8 +152,7 @@ class RenderReplaced extends RenderBoxModel
       context.paintChild(child!, offset);
       if (kProfileMode && PerformanceTiming.enabled()) {
         DateTime childPaintEnd = DateTime.now();
-        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch -
-            childPaintStart.microsecondsSinceEpoch);
+        childPaintDuration += (childPaintEnd.microsecondsSinceEpoch - childPaintStart.microsecondsSinceEpoch);
       }
     }
   }

@@ -3,9 +3,9 @@
  */
 
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 // Children of the <head> element all have display:none
 const Map<String, dynamic> _defaultStyle = {
@@ -21,8 +21,7 @@ const String NOSCRIPT = 'NOSCRIPT';
 const String SCRIPT = 'SCRIPT';
 
 class HeadElement extends Element {
-  HeadElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  HeadElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 }
 
 const String _REL_STYLESHEET = 'stylesheet';
@@ -38,22 +37,36 @@ class LinkElement extends Element {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'disabled': return disabled;
-      case 'rel': return rel;
-      case 'href': return href;
-      case 'type': return type;
-      default: return super.getBindingProperty(key);
+      case 'disabled':
+        return disabled;
+      case 'rel':
+        return rel;
+      case 'href':
+        return href;
+      case 'type':
+        return type;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'disabled': disabled = castToType<bool>(value); break;
-      case 'rel': rel = castToType<String>(value); break;
-      case 'href': href = castToType<String>(value); break;
-      case 'type': type = castToType<String>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'disabled':
+        disabled = castToType<bool>(value);
+        break;
+      case 'rel':
+        rel = castToType<String>(value);
+        break;
+      case 'href':
+        href = castToType<String>(value);
+        break;
+      case 'type':
+        type = castToType<String>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
@@ -61,10 +74,18 @@ class LinkElement extends Element {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'disabled': disabled = attributeToProperty<bool>(value); break;
-      case 'rel': rel = attributeToProperty<String>(value); break;
-      case 'href': href = attributeToProperty<String>(value); break;
-      case 'type': type = attributeToProperty<String>(value); break;
+      case 'disabled':
+        disabled = attributeToProperty<bool>(value);
+        break;
+      case 'rel':
+        rel = attributeToProperty<String>(value);
+        break;
+      case 'href':
+        href = attributeToProperty<String>(value);
+        break;
+      case 'type':
+        type = attributeToProperty<String>(value);
+        break;
     }
   }
 
@@ -111,9 +132,12 @@ class LinkElement extends Element {
   }
 
   void _fetchAndApplyCSSStyle() async {
-    if (_resolvedHyperlink != null && rel == _REL_STYLESHEET && isConnected && !_stylesheetLoaded.containsKey(_resolvedHyperlink.toString())) {
+    if (_resolvedHyperlink != null &&
+        rel == _REL_STYLESHEET &&
+        isConnected &&
+        !_stylesheetLoaded.containsKey(_resolvedHyperlink.toString())) {
       String url = _resolvedHyperlink.toString();
-      KrakenBundle bundle = KrakenBundle.fromUrl(url);
+      WebFBundle bundle = WebFBundle.fromUrl(url);
       _stylesheetLoaded[url] = true;
       try {
         // Increment count when request.
@@ -158,26 +182,22 @@ class LinkElement extends Element {
 }
 
 class MetaElement extends Element {
-  MetaElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  MetaElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 }
 
 class TitleElement extends Element {
-  TitleElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  TitleElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 }
 
 class NoScriptElement extends Element {
-  NoScriptElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  NoScriptElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 }
 
 const String _CSS_MIME = 'text/css';
 
 // https://www.w3.org/TR/2011/WD-html5-author-20110809/the-style-element.html
 class StyleElement extends Element {
-  StyleElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  StyleElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
   final String _type = _CSS_MIME;
   CSSStyleSheet? _styleSheet;
 
@@ -185,16 +205,21 @@ class StyleElement extends Element {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'type': return type;
-      default: return super.getBindingProperty(key);
+      case 'type':
+        return type;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'type': type = castToType<String>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'type':
+        type = castToType<String>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
@@ -202,7 +227,9 @@ class StyleElement extends Element {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'type': type = attributeToProperty<String>(value); break;
+      case 'type':
+        type = attributeToProperty<String>(value);
+        break;
     }
   }
 

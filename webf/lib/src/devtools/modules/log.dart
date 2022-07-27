@@ -2,7 +2,7 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 class InspectLogModule extends UIInspectorModule {
   InspectLogModule(ChromeDevToolsService server) : super(server) {

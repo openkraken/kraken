@@ -2,15 +2,14 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-
 import 'dart:core';
 import 'dart:math';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/rendering.dart';
 
 // https://drafts.csswg.org/web-animations/#enumdef-animationplaystate
 enum AnimationPlayState { idle, running, paused, finished }
@@ -22,6 +21,7 @@ enum AnimationEffectPhase { none, before, active, after }
 
 // https://drafts.csswg.org/web-animations/#enumdef-fillmode
 enum FillMode { none, forwards, backwards, both, auto }
+
 // https://drafts.csswg.org/web-animations/#enumdef-playbackdirection
 enum PlaybackDirection { normal, reverse, alternate, alternateReverse }
 
@@ -161,7 +161,9 @@ class Animation {
   // For transitionstart event
   Function? onstart;
 
-  Animation(KeyframeEffect effect, AnimationTimeline timeline) : _effect = effect, _timeline = timeline;
+  Animation(KeyframeEffect effect, AnimationTimeline timeline)
+      : _effect = effect,
+        _timeline = timeline;
 
   void _setInEffect(bool flag) {
     if (_inEffect == false && flag == true && onstart != null) {
@@ -183,8 +185,7 @@ class Animation {
     }
 
     _isCurrentTimePending = false;
-    if (_currentTime == newTime)
-      return;
+    if (_currentTime == newTime) return;
 
     if (_isIdle) {
       _isIdle = false;
@@ -194,7 +195,6 @@ class Animation {
   }
 
   _tickCurrentTime(double newTime, [bool ignoreLimit = false]) {
-
     if (newTime != _currentTime) {
       _currentTime = newTime;
       if (_isFinished && !ignoreLimit) {
@@ -279,8 +279,7 @@ class Animation {
   }
 
   bool get _isFinished {
-    return !_isIdle && (_playbackRate > 0 && _currentTime >= _totalDuration ||
-        _playbackRate < 0 && _currentTime <= 0);
+    return !_isIdle && (_playbackRate > 0 && _currentTime >= _totalDuration || _playbackRate < 0 && _currentTime <= 0);
   }
 
   double get _totalDuration {
@@ -294,8 +293,7 @@ class Animation {
   }
 
   void cancel() {
-    if (!_inEffect)
-      return;
+    if (!_inEffect) return;
     _inEffect = false;
     _isIdle = true;
     _isPaused = false;
@@ -313,8 +311,7 @@ class Animation {
   }
 
   void finish() {
-    if (_isIdle)
-      return;
+    if (_isIdle) return;
     currentTime = _playbackRate > 0 ? _totalDuration : 0;
     _startTime = _totalDuration - currentTime!;
     _isCurrentTimePending = false;
@@ -448,7 +445,7 @@ class _Interpolation {
       'property: $property, '
       'begin: $begin, '
       'end: $end'
-  ')';
+      ')';
 }
 
 class KeyframeEffect extends AnimationEffect {
@@ -465,12 +462,7 @@ class KeyframeEffect extends AnimationEffect {
   // Similarly, a playback rate of -1 will cause the animation’s current time to decrease at the same rate as the time values from its timeline increase.
   double _playbackRate = 1;
 
-  KeyframeEffect(
-    this.renderStyle,
-    this.target,
-    List<Keyframe> keyframes,
-    EffectTiming? options
-  ) {
+  KeyframeEffect(this.renderStyle, this.target, List<Keyframe> keyframes, EffectTiming? options) {
     timing = options ?? EffectTiming();
 
     _propertySpecificKeyframeGroups = _makePropertySpecificKeyframeGroups(keyframes);
@@ -481,11 +473,12 @@ class KeyframeEffect extends AnimationEffect {
     return value;
   }
 
-  static _defaultLerp(start, end, double progress){
+  static _defaultLerp(start, end, double progress) {
     return progress < 0.5 ? start : end;
   }
 
-  static List<_Interpolation> _makeInterpolations(Map<String, List<Keyframe>> propertySpecificKeyframeGroups, RenderStyle? renderStyle) {
+  static List<_Interpolation> _makeInterpolations(
+      Map<String, List<Keyframe>> propertySpecificKeyframeGroups, RenderStyle? renderStyle) {
     List<_Interpolation> interpolations = [];
 
     propertySpecificKeyframeGroups.forEach((String property, List<Keyframe> keyframes) {
@@ -505,10 +498,8 @@ class KeyframeEffect extends AnimationEffect {
 
         String? left = keyframes[startIndex].value;
         String? right = keyframes[endIndex].value;
-        if (left == INITIAL)
-          left = CSSInitialValues[property];
-        if (right == INITIAL)
-          right = CSSInitialValues[property];
+        if (left == INITIAL) left = CSSInitialValues[property];
+        if (right == INITIAL) right = CSSInitialValues[property];
 
         if (left == right) continue;
 
@@ -517,21 +508,20 @@ class KeyframeEffect extends AnimationEffect {
         Function parseProperty = handlers[0];
 
         _Interpolation interpolation = _Interpolation(
-          property,
-          startOffset,
-          endOffset,
-          _parseEasing(keyframes[startIndex].easing),
-          parseProperty(left, renderStyle, property),
-          parseProperty(right, renderStyle, property),
-          handlers[1]
-        );
+            property,
+            startOffset,
+            endOffset,
+            _parseEasing(keyframes[startIndex].easing),
+            parseProperty(left, renderStyle, property),
+            parseProperty(right, renderStyle, property),
+            handlers[1]);
 
         interpolations.add(interpolation);
       }
     });
 
     interpolations.sort((_Interpolation leftInterpolation, _Interpolation rightInterpolation) {
-      return leftInterpolation.startOffset - rightInterpolation.startOffset < 0 ? -1: 1;
+      return leftInterpolation.startOffset - rightInterpolation.startOffset < 0 ? -1 : 1;
     });
 
     return interpolations;
@@ -588,7 +578,8 @@ class KeyframeEffect extends AnimationEffect {
 
         RenderBoxModel? renderBoxModel = target!.renderBoxModel;
         if (renderBoxModel != null && interpolation.begin != null && interpolation.end != null) {
-          interpolation.lerp(interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
+          interpolation.lerp(
+              interpolation.begin, interpolation.end, scaledLocalTime, property, renderBoxModel.renderStyle);
         }
       }
     }
@@ -619,7 +610,6 @@ class KeyframeEffect extends AnimationEffect {
 
   // https://drafts.csswg.org/web-animations/#animation-effect-phases-and-states
   AnimationEffectPhase _calculatePhase(double activeDuration, double? localTime) {
-
     bool animationIsBackwards = _playbackRate < 0;
 
     // (This should be the last statement, but it's more efficient to cache the local time and return right away if it's not resolved.)
@@ -636,8 +626,7 @@ class KeyframeEffect extends AnimationEffect {
     double endTime = max<double>(timing!.delay! + activeDuration + timing!.endDelay!, 0.0);
     double beforeActiveBoundaryTime = max<double>(min<double>(timing!.delay!, endTime), 0.0);
 
-    if (localTime < beforeActiveBoundaryTime ||
-      (animationIsBackwards && localTime == beforeActiveBoundaryTime)) {
+    if (localTime < beforeActiveBoundaryTime || (animationIsBackwards && localTime == beforeActiveBoundaryTime)) {
       return AnimationEffectPhase.before;
     }
 
@@ -647,8 +636,7 @@ class KeyframeEffect extends AnimationEffect {
     //     2. the animation direction is ‘forwards’ and the local time is equal to the active-after boundary time.
     double activeAfterBoundaryTime = max<double>(min<double>(timing!.delay! + activeDuration, endTime), 0.0);
 
-    if (localTime > activeAfterBoundaryTime ||
-      (!animationIsBackwards && localTime == activeAfterBoundaryTime)) {
+    if (localTime > activeAfterBoundaryTime || (!animationIsBackwards && localTime == activeAfterBoundaryTime)) {
       return AnimationEffectPhase.after;
     }
 
@@ -693,8 +681,7 @@ class KeyframeEffect extends AnimationEffect {
     // The overall progress describes the number of iterations that have completed (including partial iterations) and is defined as follows:
 
     // 1. If the active time is unresolved, return unresolved.
-    if (activeTime == null)
-      return null;
+    if (activeTime == null) return null;
 
     // 2. Calculate an initial value for overall progress based on the first matching condition from below,
     double? overallProgress;
@@ -715,15 +702,14 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.8.3.3. Calculating the simple iteration progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-simple-iteration-progress
-  double? _calculateSimpleIterationProgress(double? overallProgress, AnimationEffectPhase phase, double? activeTime, double activeDuration) {
-
+  double? _calculateSimpleIterationProgress(
+      double? overallProgress, AnimationEffectPhase phase, double? activeTime, double activeDuration) {
     // The simple iteration progress is a fraction of the progress through the current iteration that
     // ignores transformations to the time introduced by the playback direction or timing functions
     // applied to the effect, and is calculated as follows:
 
     // 1. If the overall progress is unresolved, return unresolved.
-    if (overallProgress == null)
-      return null;
+    if (overallProgress == null) return null;
 
     double? iterationStart = timing!.iterationStart;
     double? iterations = timing!.iterations;
@@ -749,12 +735,12 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.8.4. Calculating the current iteration
   // https://drafts.csswg.org/web-animations-1/#calculating-the-current-iteration
-  double? _calculateCurrentIteration(AnimationEffectPhase phase, double? activeTime, double? simpleIterationProgress, double? overallProgress) {
+  double? _calculateCurrentIteration(
+      AnimationEffectPhase phase, double? activeTime, double? simpleIterationProgress, double? overallProgress) {
     // The current iteration can be calculated using the following steps:
 
     // 1. If the active time is unresolved, return unresolved.
-    if (activeTime == null)
-      return null;
+    if (activeTime == null) return null;
 
     double? iterations = timing!.iterations;
     // 2. If the animation effect is in the after phase and the iteration count is infinity, return infinity.
@@ -788,13 +774,12 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.9.1. Calculating the directed progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-directed-progress
-  double? _calculateDirectedProgress(double? currentIteration, PlaybackDirection? currentDirection, double? simpleIterationProgress) {
+  double? _calculateDirectedProgress(
+      double? currentIteration, PlaybackDirection? currentDirection, double? simpleIterationProgress) {
     // The directed progress is calculated from the simple iteration progress using the following steps:
 
-
     // 1. If the simple iteration progress is unresolved, return unresolved.
-    if (simpleIterationProgress == null)
-      return null;
+    if (simpleIterationProgress == null) return null;
 
     // 2. Calculate the current direction (we implement this as a separate method).
 
@@ -803,7 +788,7 @@ class KeyframeEffect extends AnimationEffect {
       return simpleIterationProgress;
     }
 
-     // Otherwise, return 1.0 - simple iteration progress.
+    // Otherwise, return 1.0 - simple iteration progress.
     return 1 - simpleIterationProgress;
   }
 
@@ -815,12 +800,12 @@ class KeyframeEffect extends AnimationEffect {
 
   // 3.10.1. Calculating the transformed progress
   // https://drafts.csswg.org/web-animations-1/#calculating-the-transformed-progress
-  double? _calculateTransformedProgress(AnimationEffectPhase phase, double? activeTime, double? directedProgress, PlaybackDirection? currentDirection) {
+  double? _calculateTransformedProgress(
+      AnimationEffectPhase phase, double? activeTime, double? directedProgress, PlaybackDirection? currentDirection) {
     // The transformed progress is calculated from the directed progress using the following steps:
     //
     // 1. If the directed progress is unresolved, return unresolved.
-    if (directedProgress == null)
-      return null;
+    if (directedProgress == null) return null;
 
     // Snap boundaries to correctly render step timing functions at 0 and 1.
     // (crbug.com/949373)
@@ -844,7 +829,8 @@ class KeyframeEffect extends AnimationEffect {
     AnimationEffectPhase phase = _calculatePhase(activeDuration, localTime);
     double? activeTime = _calculateActiveTime(activeDuration, localTime, phase);
     double? overallProgress = _calculateOverallProgress(phase, activeTime);
-    double? simpleIterationProgress = _calculateSimpleIterationProgress(overallProgress, phase, activeTime, activeDuration);
+    double? simpleIterationProgress =
+        _calculateSimpleIterationProgress(overallProgress, phase, activeTime, activeDuration);
     double? currentIteration = _calculateCurrentIteration(phase, activeTime, simpleIterationProgress, overallProgress);
     PlaybackDirection? currentDirection = _calculateCurrentDirection(currentIteration);
     double? directedProgress = _calculateDirectedProgress(currentIteration, currentDirection, simpleIterationProgress);
@@ -933,16 +919,15 @@ class EffectTiming {
   // Defaults to 1, and can also take a value of Infinity to make it repeat for as long as the element exists.
   double? _iterations;
 
-  EffectTiming({
-    double duration = 0,
-    double delay = 0,
-    double endDelay = 0,
-    double iterationStart = 0,
-    double iterations = 1,
-    String easing = 'linear',
-    PlaybackDirection direction = PlaybackDirection.normal,
-    FillMode fill = FillMode.auto
-  }) {
+  EffectTiming(
+      {double duration = 0,
+      double delay = 0,
+      double endDelay = 0,
+      double iterationStart = 0,
+      double iterations = 1,
+      String easing = 'linear',
+      PlaybackDirection direction = PlaybackDirection.normal,
+      FillMode fill = FillMode.auto}) {
     _duration = duration;
     _delay = delay;
     _endDelay = endDelay;
@@ -1026,4 +1011,3 @@ class EffectTiming {
     _iterations = value;
   }
 }
-

@@ -1,9 +1,9 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
 
 const String BODY = 'BODY';
 
@@ -12,8 +12,7 @@ const Map<String, dynamic> _defaultStyle = {
 };
 
 class BodyElement extends Element {
-  BodyElement([BindingContext? context])
-      : super(context, defaultStyle: _defaultStyle);
+  BodyElement([BindingContext? context]) : super(context, defaultStyle: _defaultStyle);
 
   @override
   void addEventListener(String eventType, EventHandler eventHandler) {

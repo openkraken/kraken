@@ -3,10 +3,11 @@
  */
 import 'dart:io';
 
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 
 // TODO: Don't use header to mark context.
 const String HttpHeaderContext = 'x-context';
+
 class KrakenHttpOverrides extends HttpOverrides {
   static KrakenHttpOverrides? _instance;
 
@@ -75,7 +76,7 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 }
 
-KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required int contextId }) {
+KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, {required int contextId}) {
   final KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
 
   if (httpClientInterceptor != null) {
@@ -88,8 +89,7 @@ KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientIntercep
 
 // Returns the origin of the URI in the form scheme://host:port
 String getOrigin(Uri uri) {
-  if (uri.isScheme('http')
-      || uri.isScheme('https')) {
+  if (uri.isScheme('http') || uri.isScheme('https')) {
     return uri.origin;
   } else {
     return uri.path;

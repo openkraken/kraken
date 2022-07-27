@@ -2,11 +2,10 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-
 import 'dart:async';
 
-import 'package:kraken/src/module/module_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webf/src/module/module_manager.dart';
 
 class AsyncStorageModule extends BaseModule {
   @override
@@ -57,8 +56,7 @@ class AsyncStorageModule extends BaseModule {
   }
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 
   @override
   String invoke(String method, params, InvokeModuleCallback callback) {

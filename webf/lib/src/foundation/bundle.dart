@@ -8,9 +8,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/module.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/launcher.dart';
+import 'package:webf/module.dart';
 
 const String DEFAULT_URL = 'about:blank';
 const String UTF_8 = 'utf-8';
@@ -26,7 +26,7 @@ const List<String> _supportedByteCodeVersions = ['1'];
 
 bool _isSupportedBytecode(String mimeType, Uri? uri) {
   if (uri != null) {
-    for (int i = 0; i < _supportedByteCodeVersions.length; i ++) {
+    for (int i = 0; i < _supportedByteCodeVersions.length; i++) {
       if (mimeType.contains('application/vnd.kraken.bc' + _supportedByteCodeVersions[i])) return true;
       // @NOTE: This is useful for most http server that did not recognize a .kbc1 file.
       // Simply treat some.kbc1 file as the bytecode.
@@ -67,8 +67,8 @@ void _failedToResolveBundle(String url) {
   throw FlutterError('Failed to resolve bundle for $url');
 }
 
-abstract class KrakenBundle {
-  KrakenBundle(this.url);
+abstract class WebFBundle {
+  WebFBundle(this.url);
 
   // Unique resource locator.
   final String url;
@@ -107,7 +107,7 @@ abstract class KrakenBundle {
     data = null;
   }
 
-  static KrakenBundle fromUrl(String url, { Map<String, String>? additionalHttpHeaders }) {
+  static WebFBundle fromUrl(String url, {Map<String, String>? additionalHttpHeaders}) {
     if (_isHttpScheme(url)) {
       return NetworkBundle(url, additionalHttpHeaders: additionalHttpHeaders);
     } else if (_isAssetsScheme(url)) {
@@ -123,36 +123,37 @@ abstract class KrakenBundle {
     }
   }
 
-  static KrakenBundle fromContent(String content, { String url = DEFAULT_URL }) {
+  static WebFBundle fromContent(String content, {String url = DEFAULT_URL}) {
     return DataBundle.fromString(content, url, contentType: _javascriptContentType);
   }
 
-  static KrakenBundle fromBytecode(Uint8List data, { String url = DEFAULT_URL }) {
+  static WebFBundle fromBytecode(Uint8List data, {String url = DEFAULT_URL}) {
     return DataBundle(data, url, contentType: _krakenBc1ContentType);
   }
 
   bool get isHTML => contentType.mimeType == ContentType.html.mimeType;
   bool get isCSS => contentType.mimeType == _cssContentType.mimeType;
-  bool get isJavascript => contentType.mimeType == _javascriptContentType.mimeType ||
-                            contentType.mimeType == _javascriptApplicationContentType.mimeType ||
-                            contentType.mimeType == _xJavascriptContentType.mimeType;
+  bool get isJavascript =>
+      contentType.mimeType == _javascriptContentType.mimeType ||
+      contentType.mimeType == _javascriptApplicationContentType.mimeType ||
+      contentType.mimeType == _xJavascriptContentType.mimeType;
   bool get isBytecode => _isSupportedBytecode(contentType.mimeType, _uri);
 }
 
 // The bundle that output input data.
-class DataBundle extends KrakenBundle {
-  DataBundle(Uint8List data, String url, { ContentType? contentType }) : super(url) {
+class DataBundle extends WebFBundle {
+  DataBundle(Uint8List data, String url, {ContentType? contentType}) : super(url) {
     this.data = data;
     this.contentType = contentType ?? ContentType.binary;
   }
 
-  DataBundle.fromString(String content, String url, { ContentType? contentType }) : super(url) {
+  DataBundle.fromString(String content, String url, {ContentType? contentType}) : super(url) {
     // Encode string to data by utf8.
     data = Uint8List.fromList(utf8.encode(content));
     this.contentType = contentType ?? ContentType.text;
   }
 
-  DataBundle.fromDataUrl(String dataUrl, { ContentType? contentType }) : super(dataUrl) {
+  DataBundle.fromDataUrl(String dataUrl, {ContentType? contentType}) : super(dataUrl) {
     UriData uriData = UriData.parse(dataUrl);
     data = uriData.contentAsBytes();
     this.contentType = contentType ?? ContentType.parse('${uriData.mimeType}; charset=${uriData.charset}');
@@ -160,7 +161,7 @@ class DataBundle extends KrakenBundle {
 }
 
 // The bundle that source from http or https.
-class NetworkBundle extends KrakenBundle {
+class NetworkBundle extends WebFBundle {
   // Do not access this field directly; use [_httpClient] instead.
   // We set `autoUncompress` to false to ensure that we can trust the value of
   // the `Content-CSSLength` HTTP header. We automatically uncompress the content
@@ -169,8 +170,7 @@ class NetworkBundle extends KrakenBundle {
     ..userAgent = NavigatorModule.getUserAgent()
     ..autoUncompress = false;
 
-  NetworkBundle(String url, { this.additionalHttpHeaders })
-      : super(url);
+  NetworkBundle(String url, {this.additionalHttpHeaders}) : super(url);
 
   Map<String, String>? additionalHttpHeaders = {};
 
@@ -198,11 +198,11 @@ class NetworkBundle extends KrakenBundle {
   }
 }
 
-class AssetsBundle extends KrakenBundle with _ExtensionContentTypeResolver {
+class AssetsBundle extends WebFBundle with _ExtensionContentTypeResolver {
   AssetsBundle(String url) : super(url);
 
   @override
-  Future<KrakenBundle> resolve(int? contextId) async {
+  Future<WebFBundle> resolve(int? contextId) async {
     super.resolve(contextId);
     final Uri? _resolvedUri = resolvedUri;
     if (_resolvedUri != null) {
@@ -230,11 +230,11 @@ class AssetsBundle extends KrakenBundle with _ExtensionContentTypeResolver {
 }
 
 /// The bundle that source from local io.
-class FileBundle extends KrakenBundle with _ExtensionContentTypeResolver {
+class FileBundle extends WebFBundle with _ExtensionContentTypeResolver {
   FileBundle(String url) : super(url);
 
   @override
-  Future<KrakenBundle> resolve(int? contextId) async {
+  Future<WebFBundle> resolve(int? contextId) async {
     super.resolve(contextId);
 
     Uri uri = _uri!;
@@ -250,9 +250,9 @@ class FileBundle extends KrakenBundle with _ExtensionContentTypeResolver {
   }
 }
 
-/// [_ExtensionContentTypeResolver] is useful for [KrakenBundle] to determine
+/// [_ExtensionContentTypeResolver] is useful for [WebFBundle] to determine
 /// content-type by uri's extension.
-mixin _ExtensionContentTypeResolver on KrakenBundle {
+mixin _ExtensionContentTypeResolver on WebFBundle {
   ContentType? _contentType;
 
   @override

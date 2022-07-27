@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/module.dart';
+import 'package:webf/module.dart';
 
 import 'binding.dart';
 import 'from_native.dart';

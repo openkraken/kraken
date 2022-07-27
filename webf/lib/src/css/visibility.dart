@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 enum Visibility {
   visible,
@@ -23,7 +23,7 @@ mixin CSSVisibilityMixin on RenderStyle {
   bool get isVisibilityHidden => _visibility == Visibility.hidden;
 
   static Visibility resolveVisibility(String value) {
-    switch(value) {
+    switch (value) {
       case HIDDEN:
         return Visibility.hidden;
       case VISIBLE:

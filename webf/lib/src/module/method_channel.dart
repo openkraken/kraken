@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 
 typedef MethodCallCallback = Future<dynamic> Function(String method, Object? arguments);
 const String METHOD_CHANNEL_NOT_INITIALIZED = 'MethodChannel not initialized.';

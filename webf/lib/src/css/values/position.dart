@@ -3,8 +3,8 @@
  */
 
 import 'package:flutter/painting.dart';
-import 'package:kraken/css.dart';
 import 'package:quiver/collection.dart';
+import 'package:webf/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 final LinkedLruHashMap<String, List<String>> _cachedParsedPosition = LinkedLruHashMap(maximumSize: 100);
@@ -26,7 +26,7 @@ class CSSPosition {
     List<String> positions = [];
     List<String> split = input.split(_splitRegExp);
     if (split.length == 1) {
-      switch(split.first) {
+      switch (split.first) {
         case TOP:
         case BOTTOM:
           positions.add(CENTER);
@@ -50,7 +50,8 @@ class CSSPosition {
   }
 
   /// Parse background-position-x/background-position-y from string to CSSBackgroundPosition type.
-  static CSSBackgroundPosition resolveBackgroundPosition(String input, RenderStyle renderStyle, String propertyName, bool isHorizontal) {
+  static CSSBackgroundPosition resolveBackgroundPosition(
+      String input, RenderStyle renderStyle, String propertyName, bool isHorizontal) {
     if (CSSPercentage.isPercentage(input)) {
       return CSSBackgroundPosition(percentage: _gatValuePercentage(input));
     } else if (CSSLength.isLength(input)) {

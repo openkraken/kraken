@@ -4,15 +4,15 @@
 
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
-import 'package:kraken/bridge.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/module.dart';
-import 'package:kraken/src/module/performance_timing.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/launcher.dart';
+import 'package:webf/module.dart';
+import 'package:webf/src/module/performance_timing.dart';
 
 // An native struct can be directly convert to javaScript String without any conversion cost.
 class NativeString extends Struct {
@@ -73,20 +73,25 @@ void freeNativeString(Pointer<NativeString> pointer) {
 
 // Register InvokeModule
 typedef NativeAsyncModuleCallback = Void Function(
-    Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8> errmsg,  Pointer<NativeString> json);
+    Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8> errmsg, Pointer<NativeString> json);
 typedef DartAsyncModuleCallback = void Function(
     Pointer<Void> callbackContext, int contextId, Pointer<Utf8> errmsg, Pointer<NativeString> json);
 
-typedef NativeInvokeModule = Pointer<NativeString> Function(Pointer<Void> callbackContext,
-    Int32 contextId, Pointer<NativeString> module, Pointer<NativeString> method, Pointer<NativeString> params, Pointer<NativeFunction<NativeAsyncModuleCallback>>);
+typedef NativeInvokeModule = Pointer<NativeString> Function(
+    Pointer<Void> callbackContext,
+    Int32 contextId,
+    Pointer<NativeString> module,
+    Pointer<NativeString> method,
+    Pointer<NativeString> params,
+    Pointer<NativeFunction<NativeAsyncModuleCallback>>);
 
-String invokeModule(
-    Pointer<Void> callbackContext, int contextId, String moduleName, String method, String? params, DartAsyncModuleCallback callback) {
+String invokeModule(Pointer<Void> callbackContext, int contextId, String moduleName, String method, String? params,
+    DartAsyncModuleCallback callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   String result = '';
 
   try {
-    void invokeModuleCallback({String ?error, data}) {
+    void invokeModuleCallback({String? error, data}) {
       // To make sure Promise then() and catch() executed before Promise callback called at JavaScript side.
       // We should make callback always async.
       Future.microtask(() {
@@ -101,7 +106,9 @@ String invokeModule(
         }
       });
     }
-    result = controller.module.moduleManager.invokeModule(moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
+
+    result = controller.module.moduleManager.invokeModule(
+        moduleName, method, (params != null && params != '""') ? jsonDecode(params) : null, invokeModuleCallback);
   } catch (e, stack) {
     String error = '$e\n$stack';
     callback(callbackContext, contextId, error.toNativeUtf8(), nullptr);
@@ -110,16 +117,15 @@ String invokeModule(
   return result;
 }
 
-Pointer<NativeString> _invokeModule(Pointer<Void> callbackContext, int contextId,
-    Pointer<NativeString> module, Pointer<NativeString> method, Pointer<NativeString> params, Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
-  String result = invokeModule(
-    callbackContext,
-    contextId,
-    nativeStringToString(module),
-    nativeStringToString(method),
-    params == nullptr ? null : nativeStringToString(params),
-    callback.asFunction()
-  );
+Pointer<NativeString> _invokeModule(
+    Pointer<Void> callbackContext,
+    int contextId,
+    Pointer<NativeString> module,
+    Pointer<NativeString> method,
+    Pointer<NativeString> params,
+    Pointer<NativeFunction<NativeAsyncModuleCallback>> callback) {
+  String result = invokeModule(callbackContext, contextId, nativeStringToString(module), nativeStringToString(method),
+      params == nullptr ? null : nativeStringToString(params), callback.asFunction());
   return stringToNativeString(result);
 }
 
@@ -140,14 +146,11 @@ void _reloadApp(int contextId) async {
 
 final Pointer<NativeFunction<NativeReloadApp>> _nativeReloadApp = Pointer.fromFunction(_reloadApp);
 
-typedef NativeAsyncCallback = Void Function(
-    Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8> errmsg);
-typedef DartAsyncCallback = void Function(
-    Pointer<Void> callbackContext, int contextId, Pointer<Utf8> errmsg);
+typedef NativeAsyncCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8> errmsg);
+typedef DartAsyncCallback = void Function(Pointer<Void> callbackContext, int contextId, Pointer<Utf8> errmsg);
 typedef NativeRAFAsyncCallback = Void Function(
     Pointer<Void> callbackContext, Int32 contextId, Double data, Pointer<Utf8> errmsg);
-typedef DartRAFAsyncCallback = void Function(
-    Pointer<Void>, int contextId, double data, Pointer<Utf8> errmsg);
+typedef DartRAFAsyncCallback = void Function(Pointer<Void>, int contextId, double data, Pointer<Utf8> errmsg);
 
 // Register requestBatchUpdate
 typedef NativeRequestBatchUpdate = Void Function(Int32 contextId);
@@ -164,8 +167,8 @@ final Pointer<NativeFunction<NativeRequestBatchUpdate>> _nativeRequestBatchUpdat
 typedef NativeSetTimeout = Int32 Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 
-int _setTimeout(Pointer<Void> callbackContext, int contextId,
-    Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+int _setTimeout(
+    Pointer<Void> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
 
   return controller.module.setTimeout(timeout, () {
@@ -191,14 +194,15 @@ int _setTimeout(Pointer<Void> callbackContext, int contextId,
 }
 
 const int SET_TIMEOUT_ERROR = -1;
-final Pointer<NativeFunction<NativeSetTimeout>> _nativeSetTimeout = Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
+final Pointer<NativeFunction<NativeSetTimeout>> _nativeSetTimeout =
+    Pointer.fromFunction(_setTimeout, SET_TIMEOUT_ERROR);
 
 // Register setInterval
 typedef NativeSetInterval = Int32 Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncCallback>>, Int32);
 
-int _setInterval(Pointer<Void> callbackContext, int contextId,
-    Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
+int _setInterval(
+    Pointer<Void> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncCallback>> callback, int timeout) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.setInterval(timeout, () {
     void _runCallbacks() {
@@ -239,8 +243,8 @@ final Pointer<NativeFunction<NativeClearTimeout>> _nativeClearTimeout = Pointer.
 typedef NativeRequestAnimationFrame = Int32 Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeRAFAsyncCallback>>);
 
-int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
-    Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
+int _requestAnimationFrame(
+    Pointer<Void> callbackContext, int contextId, Pointer<NativeFunction<NativeRAFAsyncCallback>> callback) {
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   return controller.module.requestAnimationFrame((double highResTimeStamp) {
     void _runCallback() {
@@ -260,7 +264,6 @@ int _requestAnimationFrame(Pointer<Void> callbackContext, int contextId,
     } else {
       _runCallback();
     }
-
   });
 }
 
@@ -292,11 +295,11 @@ typedef NativeAsyncBlobCallback = Void Function(
     Pointer<Void> callbackContext, Int32 contextId, Pointer<Utf8>, Pointer<Uint8>, Int32);
 typedef DartAsyncBlobCallback = void Function(
     Pointer<Void> callbackContext, int contextId, Pointer<Utf8>, Pointer<Uint8>, int);
-typedef NativeToBlob = Void Function(Pointer<Void> callbackContext, Int32 contextId,
-    Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
+typedef NativeToBlob = Void Function(
+    Pointer<Void> callbackContext, Int32 contextId, Pointer<NativeFunction<NativeAsyncBlobCallback>>, Int32, Double);
 
-void _toBlob(Pointer<Void> callbackContext, int contextId,
-    Pointer<NativeFunction<NativeAsyncBlobCallback>> callback, int id, double devicePixelRatio) {
+void _toBlob(Pointer<Void> callbackContext, int contextId, Pointer<NativeFunction<NativeAsyncBlobCallback>> callback,
+    int id, double devicePixelRatio) {
   DartAsyncBlobCallback func = callback.asFunction();
   KrakenController controller = KrakenController.getControllerOfJSContextId(contextId)!;
   controller.view.toImage(devicePixelRatio, id).then((Uint8List bytes) {
@@ -356,7 +359,8 @@ Pointer<NativePerformanceEntryList> _performanceGetEntries(int contextId) {
   return nullptr;
 }
 
-final Pointer<NativeFunction<NativePerformanceGetEntries>> _nativeGetEntries = Pointer.fromFunction(_performanceGetEntries);
+final Pointer<NativeFunction<NativePerformanceGetEntries>> _nativeGetEntries =
+    Pointer.fromFunction(_performanceGetEntries);
 
 typedef NativeJSError = Void Function(Int32 contextId, Pointer<Utf8>);
 
@@ -386,7 +390,6 @@ void _onJSLog(int contextId, int level, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSLog>> _nativeOnJsLog = Pointer.fromFunction(_onJSLog);
 
-
 final List<int> _dartNativeMethods = [
   _nativeInvokeModule.address,
   _nativeRequestBatchUpdate.address,
@@ -409,10 +412,8 @@ final List<int> _dartNativeMethods = [
 typedef NativeRegisterDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef DartRegisterDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
-final DartRegisterDartMethods _registerDartMethods = KrakenDynamicLibrary
-    .ref
-    .lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods')
-    .asFunction();
+final DartRegisterDartMethods _registerDartMethods =
+    KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterDartMethods>>('registerDartMethods').asFunction();
 
 void registerDartMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);

@@ -2,10 +2,10 @@
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 class InspectDebuggerModule extends IsolateInspectorModule {
-  InspectDebuggerModule(IsolateInspectorServer server): super(server);
+  InspectDebuggerModule(IsolateInspectorServer server) : super(server);
 
   @override
   String get name => 'Debugger';

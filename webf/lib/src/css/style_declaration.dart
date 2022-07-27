@@ -2,12 +2,12 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
 import 'package:quiver/collection.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/rendering.dart';
 
-typedef StyleChangeListener = void Function(String property,  String? original, String present);
+typedef StyleChangeListener = void Function(String property, String? original, String present);
 
 const Map<String, bool> _CSSShorthandProperty = {
   MARGIN: true,
@@ -146,7 +146,6 @@ class CSSStyleDeclaration {
         return CSSStyleProperty.removeShorthandTransition(this, isImportant);
       case TEXT_DECORATION:
         return CSSStyleProperty.removeShorthandTextDecoration(this, isImportant);
-
     }
 
     String present = EMPTY_STRING;
@@ -178,7 +177,7 @@ class CSSStyleDeclaration {
     } else {
       longhandProperties = {};
 
-      switch(propertyName) {
+      switch (propertyName) {
         case PADDING:
           CSSStyleProperty.setShorthandPadding(longhandProperties, normalizedValue);
           break;
@@ -238,7 +237,7 @@ class CSSStyleDeclaration {
     if (startIndex >= 0) {
       int? endIndex;
       int startStringLength = startString.length;
-      startIndex  = startIndex + startStringLength;
+      startIndex = startIndex + startStringLength;
       for (int i = startIndex; i < string.length; i++) {
         if (string[i] == endString) endIndex = i;
       }
@@ -259,13 +258,12 @@ class CSSStyleDeclaration {
     String lowerCase = string.toLowerCase();
     lowerCase = _replacePattern(string, lowerCase, 'env(', ')');
     lowerCase = _replacePattern(string, lowerCase, 'url(', ')');
-     // var(--my-color) will be treated as a separate custom property to var(--My-color).
+    // var(--my-color) will be treated as a separate custom property to var(--My-color).
     lowerCase = _replacePattern(string, lowerCase, 'var(', ')');
     return lowerCase;
   }
 
   bool _isValidValue(String propertyName, String normalizedValue) {
-
     // Illegal value like '   ' after trimming is '' should do nothing.
     if (normalizedValue.isEmpty) return false;
 
@@ -280,9 +278,8 @@ class CSSStyleDeclaration {
       case HEIGHT:
         // Validation length type
         if (!CSSLength.isNonNegativeLength(normalizedValue) &&
-          !CSSLength.isAuto(normalizedValue) &&
-          !CSSPercentage.isNonNegativePercentage(normalizedValue)
-        ) {
+            !CSSLength.isAuto(normalizedValue) &&
+            !CSSPercentage.isNonNegativePercentage(normalizedValue)) {
           return false;
         }
         break;
@@ -296,18 +293,16 @@ class CSSStyleDeclaration {
       case MARGIN_BOTTOM:
         // Validation length type
         if (!CSSLength.isLength(normalizedValue) &&
-          !CSSLength.isAuto(normalizedValue) &&
-          !CSSPercentage.isPercentage(normalizedValue)
-        ) {
+            !CSSLength.isAuto(normalizedValue) &&
+            !CSSPercentage.isPercentage(normalizedValue)) {
           return false;
         }
         break;
       case MAX_WIDTH:
       case MAX_HEIGHT:
         if (normalizedValue != NONE &&
-          !CSSLength.isNonNegativeLength(normalizedValue) &&
-          !CSSPercentage.isNonNegativePercentage(normalizedValue)
-        ) {
+            !CSSLength.isNonNegativeLength(normalizedValue) &&
+            !CSSPercentage.isNonNegativePercentage(normalizedValue)) {
           return false;
         }
         break;
@@ -318,8 +313,7 @@ class CSSStyleDeclaration {
       case PADDING_BOTTOM:
       case PADDING_RIGHT:
         if (!CSSLength.isNonNegativeLength(normalizedValue) &&
-          !CSSPercentage.isNonNegativePercentage(normalizedValue)
-        ) {
+            !CSSPercentage.isNonNegativePercentage(normalizedValue)) {
           return false;
         }
         break;
@@ -395,7 +389,8 @@ class CSSStyleDeclaration {
     if (_target == null) return;
 
     // Display change from none to other value that the renderBoxModel is null.
-    if (_pendingProperties.containsKey(DISPLAY) && _target.isConnected &&
+    if (_pendingProperties.containsKey(DISPLAY) &&
+        _target.isConnected &&
         _target.parentElement?.renderStyle.display != CSSDisplay.sliver) {
       String? prevValue = _properties[DISPLAY];
       String currentValue = _pendingProperties[DISPLAY]!;
@@ -466,7 +461,7 @@ class CSSStyleDeclaration {
       String? prevValue = properties[propertyName];
       String? currentValue = other._pendingProperties[propertyName];
       if (isNullOrEmptyValue(prevValue) && !isNullOrEmptyValue(currentValue)) {
-         // Add property.
+        // Add property.
         diffs[propertyName] = currentValue;
       }
     }

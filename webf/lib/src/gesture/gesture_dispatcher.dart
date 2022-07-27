@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/src/scheduler/throttle.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/src/scheduler/throttle.dart';
 
 const int _MAX_STEP_MS = 16;
 
@@ -20,7 +20,8 @@ class _DragEventInfo extends Drag {
   /// The pointer has moved.
   @override
   void update(DragUpdateDetails details) {
-    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG,
+        state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
   /// The pointer is no longer in contact with the screen.
@@ -29,7 +30,10 @@ class _DragEventInfo extends Drag {
   /// the screen is available in the `details`.
   @override
   void end(DragEndDetails details) {
-    gestureDispatcher._handleGestureEvent(EVENT_DRAG, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+    gestureDispatcher._handleGestureEvent(EVENT_DRAG,
+        state: EVENT_STATE_END,
+        velocityX: details.velocity.pixelsPerSecond.dx,
+        velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
   /// The input from the pointer is no longer directed towards this receiver.
@@ -42,12 +46,7 @@ class _DragEventInfo extends Drag {
   }
 }
 
-enum PointState {
-  Down,
-  Move,
-  Up,
-  Cancel
-}
+enum PointState { Down, Move, Up, Cancel }
 
 // The coordinate point at which a pointer (e.g finger or stylus) intersects the target surface of an interface.
 // This may apply to a finger touching a touch-screen, or an digital pen writing on a piece of paper.
@@ -63,7 +62,8 @@ class TouchPoint {
   final double rotationAngle;
   final double force;
 
-  const TouchPoint(this.id, this.state, this.pos, this.screenPos, this.radiusX, this.radiusY, this.rotationAngle, this.force);
+  const TouchPoint(
+      this.id, this.state, this.pos, this.screenPos, this.radiusX, this.radiusY, this.rotationAngle, this.force);
 }
 
 class GestureDispatcher {
@@ -87,8 +87,7 @@ class GestureDispatcher {
       ..onUpdate = _onScaleUpdate
       ..onEnd = _onScaleEnd;
     // Drag Recognizer
-    _gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()
-      ..onStart = _onDragStart;
+    _gestureRecognizers[EVENT_DRAG] = ImmediateMultiDragGestureRecognizer()..onStart = _onDragStart;
 
     _dragEventInfo = _DragEventInfo(this);
   }
@@ -107,6 +106,7 @@ class GestureDispatcher {
   void _bindEventTargetWithTouchPoint(TouchPoint touchPoint, EventTarget eventTarget) {
     _pointTargets[touchPoint.id] = eventTarget;
   }
+
   void _unbindEventTargetWithTouchPoint(TouchPoint touchPoint) {
     _pointTargets.remove(touchPoint.id);
   }
@@ -123,22 +123,15 @@ class GestureDispatcher {
       pointState = PointState.Cancel;
     }
 
-    return TouchPoint(
-      pointerEvent.pointer,
-      pointState,
-      pointerEvent.localPosition,
-      pointerEvent.position,
-      pointerEvent.radiusMajor,
-      pointerEvent.radiusMinor,
-      pointerEvent.orientation,
-      pointerEvent.pressure
-    );
+    return TouchPoint(pointerEvent.pointer, pointState, pointerEvent.localPosition, pointerEvent.position,
+        pointerEvent.radiusMajor, pointerEvent.radiusMinor, pointerEvent.orientation, pointerEvent.pressure);
   }
 
   final Map<int, TouchPoint> _touchPoints = {};
   void _addPoint(TouchPoint touchPoint) {
     _touchPoints[touchPoint.id] = touchPoint;
   }
+
   void _removePoint(TouchPoint touchPoint) {
     _touchPoints.remove(touchPoint.id);
   }
@@ -184,9 +177,11 @@ class GestureDispatcher {
     });
   }
 
-
   void handlePointerEvent(PointerEvent event) {
-    if (!(event is PointerDownEvent || event is PointerUpEvent || event is PointerMoveEvent || event is PointerCancelEvent)) {
+    if (!(event is PointerDownEvent ||
+        event is PointerUpEvent ||
+        event is PointerMoveEvent ||
+        event is PointerCancelEvent)) {
       // Only basic Point events are handled, other event does nothing and returns directly such as hover and scroll.
       return;
     }
@@ -277,19 +272,25 @@ class GestureDispatcher {
   }
 
   void _onSwipe(SwipeDetails details) {
-    _handleGestureEvent(EVENT_SWIPE, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+    _handleGestureEvent(EVENT_SWIPE,
+        velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
   void _onPanStart(DragStartDetails details) {
-    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+    _handleGestureEvent(EVENT_PAN,
+        state: EVENT_STATE_START, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
+    _handleGestureEvent(EVENT_PAN,
+        state: EVENT_STATE_UPDATE, deltaX: details.globalPosition.dx, deltaY: details.globalPosition.dy);
   }
 
   void _onPanEnd(DragEndDetails details) {
-    _handleGestureEvent(EVENT_PAN, state: EVENT_STATE_END, velocityX: details.velocity.pixelsPerSecond.dx, velocityY: details.velocity.pixelsPerSecond.dy);
+    _handleGestureEvent(EVENT_PAN,
+        state: EVENT_STATE_END,
+        velocityX: details.velocity.pixelsPerSecond.dx,
+        velocityY: details.velocity.pixelsPerSecond.dy);
   }
 
   void _onScaleStart(ScaleStartDetails details) {
@@ -309,7 +310,8 @@ class GestureDispatcher {
     return _dragEventInfo;
   }
 
-  void _handleMouseEvent(String type, {
+  void _handleMouseEvent(
+    String type, {
     Offset localPosition = Offset.zero,
     Offset globalPosition = Offset.zero,
     bool bubbles = true,
@@ -330,39 +332,40 @@ class GestureDispatcher {
     double clientX = globalOffset.dx;
     double clientY = globalOffset.dy;
 
-    Event event = MouseEvent(type,
-      MouseEventInit(
-        bubbles: bubbles,
-        cancelable: cancelable,
-        clientX: clientX,
-        clientY: clientY,
-        offsetX: localPosition.dx,
-        offsetY: localPosition.dy,
-      )
-    );
+    Event event = MouseEvent(
+        type,
+        MouseEventInit(
+          bubbles: bubbles,
+          cancelable: cancelable,
+          clientX: clientX,
+          clientY: clientY,
+          offsetX: localPosition.dx,
+          offsetY: localPosition.dy,
+        ));
     _target?.dispatchEvent(event);
   }
 
-  void _handleGestureEvent(String type, {
-    String state = '',
-    String direction = '',
-    double rotation = 0.0,
-    double deltaX = 0.0,
-    double deltaY = 0.0,
-    double velocityX = 0.0,
-    double velocityY = 0.0,
-    double scale = 0.0
-  }) {
-    Event event = GestureEvent(type, GestureEventInit(
-      state: state,
-      direction: direction,
-      rotation: rotation,
-      deltaX: deltaX,
-      deltaY: deltaY,
-      velocityX: velocityX,
-      velocityY: velocityY,
-      scale: scale,
-    ));
+  void _handleGestureEvent(String type,
+      {String state = '',
+      String direction = '',
+      double rotation = 0.0,
+      double deltaX = 0.0,
+      double deltaY = 0.0,
+      double velocityX = 0.0,
+      double velocityY = 0.0,
+      double scale = 0.0}) {
+    Event event = GestureEvent(
+        type,
+        GestureEventInit(
+          state: state,
+          direction: direction,
+          rotation: rotation,
+          deltaX: deltaX,
+          deltaY: deltaY,
+          velocityX: velocityX,
+          velocityY: velocityY,
+          scale: scale,
+        ));
     _target?.dispatchEvent(event);
   }
 
@@ -397,7 +400,6 @@ class GestureDispatcher {
         }
         e.touches.append(touch);
       }
-
 
       if (eventType == EVENT_TOUCH_MOVE) {
         _throttler.throttle(() {

@@ -7,8 +7,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:kraken/devtools.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/devtools.dart';
+import 'package:webf/foundation.dart';
 
 class InspectNetworkModule extends UIInspectorModule implements HttpClientInterceptor {
   InspectNetworkModule(ChromeDevToolsService devtoolsService) : super(devtoolsService) {
@@ -44,11 +44,13 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
       case 'getResponseBody':
         String requestId = params!['requestId'];
         Uint8List? buffer = _responseBuffers[requestId];
-        sendToFrontend(id, JSONEncodableMap({
-          if (buffer != null) 'body': utf8.decode(buffer),
-          // True, if content was sent as base64.
-          'base64Encoded': false,
-        }));
+        sendToFrontend(
+            id,
+            JSONEncodableMap({
+              if (buffer != null) 'body': utf8.decode(buffer),
+              // True, if content was sent as base64.
+              'base64Encoded': false,
+            }));
         break;
     }
   }
@@ -99,8 +101,7 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
     Uint8List data = await consolidateHttpClientResponseBytes(response);
     _responseBuffers[requestId] = data;
 
-    HttpClientStreamResponse proxyResponse = HttpClientStreamResponse(
-        Stream.value(data),
+    HttpClientStreamResponse proxyResponse = HttpClientStreamResponse(Stream.value(data),
         statusCode: response.statusCode,
         reasonPhrase: response.reasonPhrase,
         initialHeaders: createHttpHeaders(initialHeaders: _getHttpHeaders(response.headers)));
@@ -125,7 +126,6 @@ class InspectNetworkModule extends UIInspectorModule implements HttpClientInterc
 }
 
 class NetworkRequestWillBeSentEvent extends InspectorEvent {
-
   final String requestId;
   final String loaderId;
   final String url;
@@ -147,24 +147,24 @@ class NetworkRequestWillBeSentEvent extends InspectorEvent {
 
   @override
   JSONEncodable? get params => JSONEncodableMap({
-    'requestId': requestId,
-    'loaderId': loaderId,
-    'documentURL': '',
-    'request': {
-      'url': url,
-      'method': requestMethod,
-      'headers': headers,
-      'initialPriority': 'Medium',
-      'referrerPolicy': '',
-    },
-    'timestamp': timestamp,
-    'initiator': {
-      'type': 'script',
-      'lineNumber': 0,
-      'columnNumber': 0,
-    },
-    'redirectHasExtraInfo': false,
-  });
+        'requestId': requestId,
+        'loaderId': loaderId,
+        'documentURL': '',
+        'request': {
+          'url': url,
+          'method': requestMethod,
+          'headers': headers,
+          'initialPriority': 'Medium',
+          'referrerPolicy': '',
+        },
+        'timestamp': timestamp,
+        'initiator': {
+          'type': 'script',
+          'lineNumber': 0,
+          'columnNumber': 0,
+        },
+        'redirectHasExtraInfo': false,
+      });
 }
 
 class NetworkResponseReceivedEvent extends InspectorEvent {
@@ -205,27 +205,27 @@ class NetworkResponseReceivedEvent extends InspectorEvent {
 
   @override
   JSONEncodable? get params => JSONEncodableMap({
-    'requestId': requestId,
-    'loaderId': loaderId,
-    'timestamp': timestamp,
-    'type': type,
-    'response': {
-      'url': url,
-      'status': status,
-      'statusText': statusText,
-      'headers': headers,
-      'mimeType': mimeType,
-      'connectionReused': false,
-      'connectionId': 0,
-      'remoteIPAddress': remoteIPAddress,
-      'remotePort': remotePort,
-      'fromDiskCache': fromDiskCache,
-      'encodedDataLength': encodedDataLength,
-      'protocol': protocol,
-      'securityState': 'secure',
-    },
-    'hasExtraInfo': false,
-  });
+        'requestId': requestId,
+        'loaderId': loaderId,
+        'timestamp': timestamp,
+        'type': type,
+        'response': {
+          'url': url,
+          'status': status,
+          'statusText': statusText,
+          'headers': headers,
+          'mimeType': mimeType,
+          'connectionReused': false,
+          'connectionId': 0,
+          'remoteIPAddress': remoteIPAddress,
+          'remotePort': remotePort,
+          'fromDiskCache': fromDiskCache,
+          'encodedDataLength': encodedDataLength,
+          'protocol': protocol,
+          'securityState': 'secure',
+        },
+        'hasExtraInfo': false,
+      });
 }
 
 class NetworkLoadingFinishedEvent extends InspectorEvent {
@@ -233,18 +233,17 @@ class NetworkLoadingFinishedEvent extends InspectorEvent {
   final int contentLength;
   final int timestamp;
 
-  NetworkLoadingFinishedEvent({ required this.requestId, required this.contentLength, required this.timestamp });
+  NetworkLoadingFinishedEvent({required this.requestId, required this.contentLength, required this.timestamp});
 
   @override
   String get method => 'Network.loadingFinished';
 
   @override
   JSONEncodable? get params => JSONEncodableMap({
-    'requestId': requestId,
-    'timestamp': timestamp,
-    'encodedDataLength': contentLength,
-  });
-
+        'requestId': requestId,
+        'timestamp': timestamp,
+        'encodedDataLength': contentLength,
+      });
 }
 
 Map<String, List<String>> _getHttpHeaders(HttpHeaders headers) {
@@ -269,8 +268,10 @@ String _getRequestType(HttpClientRequest request) {
     return 'Script';
   } else if (urlPath.endsWith('.css')) {
     return 'Stylesheet';
-  } else if (urlPath.endsWith('.jpg') || urlPath.endsWith('.png')
-      || urlPath.endsWith('.gif') || urlPath.endsWith('.webp')) {
+  } else if (urlPath.endsWith('.jpg') ||
+      urlPath.endsWith('.png') ||
+      urlPath.endsWith('.gif') ||
+      urlPath.endsWith('.webp')) {
     return 'Image';
   } else if (urlPath.endsWith('.html') || urlPath.endsWith('.htm')) {
     return 'Document';

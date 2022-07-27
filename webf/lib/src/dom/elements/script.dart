@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
-import 'package:kraken/css.dart';
 import 'package:path/path.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 // Children of the <head> element all have display:none
 const Map<String, dynamic> _defaultStyle = {
@@ -24,7 +24,9 @@ const String _JAVASCRIPT_MODULE = 'module';
 typedef ScriptExecution = void Function(bool async);
 
 class ScriptRunner {
-  ScriptRunner(Document document, int contextId) : _document = document, _contextId = contextId;
+  ScriptRunner(Document document, int contextId)
+      : _document = document,
+        _contextId = contextId;
   final Document _document;
   final int _contextId;
 
@@ -32,7 +34,7 @@ class ScriptRunner {
   // Indicate the sync pending scripts.
   int _resolvingCount = 0;
 
-  static void _evaluateScriptBundle(int contextId, KrakenBundle bundle, { bool async = false }) async {
+  static void _evaluateScriptBundle(int contextId, WebFBundle bundle, {bool async = false}) async {
     // Evaluate bundle.
     if (bundle.isJavascript) {
       final String contentInString = await resolveStringFromData(bundle.data!, preferSync: !async);
@@ -44,7 +46,7 @@ class ScriptRunner {
     }
   }
 
-  void _execute(List<ScriptExecution> tasks, { bool async = false }) {
+  void _execute(List<ScriptExecution> tasks, {bool async = false}) {
     List<ScriptExecution> executingTasks = [...tasks];
     tasks.clear();
 
@@ -60,7 +62,7 @@ class ScriptRunner {
     String url = element.src.toString();
 
     // Obtain bundle.
-    KrakenBundle bundle = KrakenBundle.fromUrl(url);
+    WebFBundle bundle = WebFBundle.fromUrl(url);
 
     // The bundle execution task.
     void task(bool async) {
@@ -150,26 +152,46 @@ class ScriptElement extends Element {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'src': return src;
-      case 'async': return async;
-      case 'defer': return defer;
-      case 'type': return type;
-      case 'charset': return charset;
-      case 'text': return text;
-      default: return super.getBindingProperty(key);
+      case 'src':
+        return src;
+      case 'async':
+        return async;
+      case 'defer':
+        return defer;
+      case 'type':
+        return type;
+      case 'charset':
+        return charset;
+      case 'text':
+        return text;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'src': src = castToType<String>(value); break;
-      case 'async': async = castToType<bool>(value); break;
-      case 'defer': defer = castToType<bool>(value); break;
-      case 'type': type = castToType<String>(value); break;
-      case 'charset': charset = castToType<String>(value); break;
-      case 'text': text = castToType<String>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'src':
+        src = castToType<String>(value);
+        break;
+      case 'async':
+        async = castToType<bool>(value);
+        break;
+      case 'defer':
+        defer = castToType<bool>(value);
+        break;
+      case 'type':
+        type = castToType<String>(value);
+        break;
+      case 'charset':
+        charset = castToType<String>(value);
+        break;
+      case 'text':
+        text = castToType<String>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
@@ -177,12 +199,24 @@ class ScriptElement extends Element {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'src': src = attributeToProperty<String>(value); break;
-      case 'async': async = attributeToProperty<bool>(value); break;
-      case 'defer': defer = attributeToProperty<bool>(value); break;
-      case 'type': type = attributeToProperty<String>(value); break;
-      case 'charset': charset = attributeToProperty<String>(value); break;
-      case 'text': text = attributeToProperty<String>(value); break;
+      case 'src':
+        src = attributeToProperty<String>(value);
+        break;
+      case 'async':
+        async = attributeToProperty<bool>(value);
+        break;
+      case 'defer':
+        defer = attributeToProperty<bool>(value);
+        break;
+      case 'type':
+        type = attributeToProperty<String>(value);
+        break;
+      case 'charset':
+        charset = attributeToProperty<String>(value);
+        break;
+      case 'text':
+        text = attributeToProperty<String>(value);
+        break;
     }
   }
 
@@ -241,12 +275,12 @@ class ScriptElement extends Element {
     int? contextId = ownerDocument.contextId;
     if (contextId == null) return;
     // Must
-    if (src.isNotEmpty && isConnected && (
-        _type == _MIME_TEXT_JAVASCRIPT
-            || _type == _MIME_APPLICATION_JAVASCRIPT
-            || _type == _MIME_X_APPLICATION_JAVASCRIPT
-            || _type == _JAVASCRIPT_MODULE
-    )) {
+    if (src.isNotEmpty &&
+        isConnected &&
+        (_type == _MIME_TEXT_JAVASCRIPT ||
+            _type == _MIME_APPLICATION_JAVASCRIPT ||
+            _type == _MIME_X_APPLICATION_JAVASCRIPT ||
+            _type == _JAVASCRIPT_MODULE)) {
       // Add bundle to scripts queue.
       ownerDocument.scriptRunner._queueScriptForExecution(this);
 
@@ -261,7 +295,7 @@ class ScriptElement extends Element {
     if (contextId == null) return;
     if (src.isNotEmpty) {
       _fetchAndExecuteSource();
-    } else if (_type == _MIME_TEXT_JAVASCRIPT || _type == _JAVASCRIPT_MODULE){
+    } else if (_type == _MIME_TEXT_JAVASCRIPT || _type == _JAVASCRIPT_MODULE) {
       // Eval script context: <script> console.log(1) </script>
       String? script = collectElementChildText();
       if (script != null && script.isNotEmpty) {

@@ -2,7 +2,7 @@
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 /// https://drafts.csswg.org/cssom/#the-cssstylerule-interface
 class CSSStyleRule extends CSSRule {

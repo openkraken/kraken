@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 mixin CSSBoxShadowMixin on RenderStyle {
   List<CSSBoxShadow>? _boxShadow;
@@ -10,6 +10,7 @@ mixin CSSBoxShadowMixin on RenderStyle {
     _boxShadow = value;
     renderBoxModel?.markNeedsPaint();
   }
+
   List<CSSBoxShadow>? get boxShadow => _boxShadow;
 
   @override

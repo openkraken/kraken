@@ -2,12 +2,13 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:async';
+
 import 'package:flutter/rendering.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/webf.dart';
 
 typedef ConnectedCallback = void Function();
 
@@ -25,14 +26,13 @@ String? getBundlePathFromEnv() {
   return Platform.environment[BUNDLE_PATH];
 }
 
-void launch({
-  KrakenBundle? bundle,
-  bool? debugEnableInspector,
-  Color background = _white,
-  DevToolsService? devToolsService,
-  HttpClientInterceptor? httpClientInterceptor,
-  bool? showPerformanceOverlay = false
-}) async {
+void launch(
+    {WebFBundle? bundle,
+    bool? debugEnableInspector,
+    Color background = _white,
+    DevToolsService? devToolsService,
+    HttpClientInterceptor? httpClientInterceptor,
+    bool? showPerformanceOverlay = false}) async {
   // Bootstrap binding.
   ElementsFlutterBinding.ensureInitialized().scheduleWarmUpFrame();
 
@@ -45,11 +45,14 @@ void launch({
       String? backendEntrypointUrl = getBundleURLFromEnv() ?? getBundlePathFromEnv();
       backendEntrypointUrl ??= await channel.getUrl();
       if (backendEntrypointUrl != null) {
-        bundle = KrakenBundle.fromUrl(backendEntrypointUrl);
+        bundle = WebFBundle.fromUrl(backendEntrypointUrl);
       }
     }
 
-    KrakenController controller = KrakenController(null, window.physicalSize.width / window.devicePixelRatio, window.physicalSize.height / window.devicePixelRatio,
+    KrakenController controller = KrakenController(
+      null,
+      window.physicalSize.width / window.devicePixelRatio,
+      window.physicalSize.height / window.devicePixelRatio,
       background: background,
       showPerformanceOverlay: showPerformanceOverlay ?? Platform.environment[ENABLE_PERFORMANCE_OVERLAY] != null,
       methodChannel: channel,
