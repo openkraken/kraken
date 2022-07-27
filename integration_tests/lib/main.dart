@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/gesture.dart';
-import 'package:kraken/kraken.dart';
 import 'package:ansicolor/ansicolor.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/gesture.dart';
+import 'package:webf/webf.dart';
 
 import 'bridge/from_native.dart';
-import 'bridge/to_native.dart';
 import 'bridge/test_input.dart';
+import 'bridge/to_native.dart';
 import 'custom/custom_element.dart';
 import 'local_http_server.dart';
 
@@ -27,11 +27,11 @@ final String testDirectory = Platform.environment['KRAKEN_TEST_DIR'] ?? __dirnam
 // By CLI: `KRAKEN_ENABLE_TEST=true flutter run`
 void main() async {
   // Overrides library name.
-  KrakenDynamicLibrary.libName = 'libkraken_test';
-  defineKrakenCustomElements();
+  WebFDynamicLibrary.libName = 'libwebf_test';
+  defineWebFCustomElements();
 
   // FIXME: This is a workaround for testcases.
-  ParagraphElement.defaultStyle = { DISPLAY: BLOCK };
+  ParagraphElement.defaultStyle = {DISPLAY: BLOCK};
 
   // Start local HTTP server.
   var httpServer = LocalHttpServer.getInstance();
@@ -47,7 +47,7 @@ void main() async {
 
   final String specTarget = '.specs/core.build.js';
   final File spec = File(path.join(testDirectory, specTarget));
-  KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+  WebFJavaScriptChannel javaScriptChannel = WebFJavaScriptChannel();
   javaScriptChannel.onMethodCall = (String method, dynamic arguments) async {
     javaScriptChannel.invokeMethod(method, arguments);
     return 'method: ' + method;
@@ -55,12 +55,12 @@ void main() async {
 
   // This is a virtual location for test program to test [Location] functionality.
   final String specUrl = 'assets:///test.js';
-  late Kraken kraken;
+  late WebF webF;
 
-  kraken = Kraken(
+  webF = WebF(
     viewportWidth: 360,
     viewportHeight: 640,
-    bundle: KrakenBundle.fromContent('console.log("Starting integration tests...")', url: specUrl),
+    bundle: WebFBundle.fromContent('console.log("Starting integration tests...")', url: specUrl),
     disableViewportWidthAssertion: true,
     disableViewportHeightAssertion: true,
     javaScriptChannel: javaScriptChannel,
@@ -68,7 +68,7 @@ void main() async {
       onDrag: (GestureEvent gestureEvent) {
         if (gestureEvent.state == EVENT_STATE_START) {
           var event = CustomEvent('nativegesture', CustomEventInit(detail: 'nativegesture'));
-          kraken.controller!.view.document.documentElement?.dispatchEvent(event);
+          webF.controller!.view.document.documentElement?.dispatchEvent(event);
         }
       },
     ),
@@ -76,15 +76,13 @@ void main() async {
 
   runZonedGuarded(() {
     runApp(MaterialApp(
-      title: 'Kraken Integration Tests',
+      title: 'webF Integration Tests',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('Kraken Integration Tests')
-        ),
+        appBar: AppBar(title: Text('WebF Integration Tests')),
         body: Wrap(
           children: [
-            kraken,
+            webF,
           ],
         ),
       ),
@@ -97,7 +95,7 @@ void main() async {
 
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     registerDartTestMethodsToCpp();
-    int contextId = kraken.controller!.view.contextId;
+    int contextId = webF.controller!.view.contextId;
 
     initTestFramework(contextId);
     addJSErrorListener(contextId, print);
@@ -106,9 +104,8 @@ void main() async {
     evaluateTestScripts(contextId, codeInjection + code, url: specUrl);
     String result = await executeTest(contextId);
     // Manual dispose context for memory leak check.
-    disposePage(kraken.controller!.view.contextId);
+    disposePage(webF.controller!.view.contextId);
 
     exit(result == 'failed' ? 1 : 0);
   });
 }
-

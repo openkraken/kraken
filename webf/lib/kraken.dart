@@ -2,10 +2,10 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-library kraken;
+library WebF;
 
-export 'widget.dart';
+export 'bridge.dart';
 export 'foundation.dart';
 export 'launcher.dart';
 export 'module.dart';
-export 'bridge.dart';
+export 'widget.dart';

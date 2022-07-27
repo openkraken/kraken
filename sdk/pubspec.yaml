@@ -8,15 +8,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  kraken: ^0.8.0
+  webf: ^0.8.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 dependency_overrides:
-  kraken:
-    path: ../kraken
+  webf:
+    path: ../webf
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

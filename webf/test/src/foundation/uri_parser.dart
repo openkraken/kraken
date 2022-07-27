@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 void main() {
   group('UriParser', () {

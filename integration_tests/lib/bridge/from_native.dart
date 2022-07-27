@@ -1,25 +1,26 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2020-present The WebF authors. All rights reserved.
  */
 // ignore_for_file: unused_import, undefined_function
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:ui';
 import 'dart:io' show Platform;
 import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
-import 'package:kraken/launcher.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/bridge.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
+import 'package:webf/bridge.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/launcher.dart';
 
-import 'test_input.dart';
 import 'match_snapshots.dart';
+import 'test_input.dart';
 
 // Steps for using dart:ffi to call a Dart function from C:
 // 1. Import dart:ffi.
@@ -47,13 +48,15 @@ void _onJSError(int contextId, Pointer<Utf8> charStr) {
 
 final Pointer<NativeFunction<NativeJSError>> _nativeOnJsError = Pointer.fromFunction(_onJSError);
 
-typedef NativeMatchImageSnapshotCallback = Void Function(Pointer<Void> callbackContext, Int32 contextId, Int8, Pointer<Utf8>);
-typedef DartMatchImageSnapshotCallback = void Function(Pointer<Void> callbackContext, int contextId, int, Pointer<Utf8>);
-typedef NativeMatchImageSnapshot = Void Function(
-    Pointer<Void> callbackContext, Int32 contextId,
-    Pointer<Uint8>, Int32, Pointer<NativeString>, Pointer<NativeFunction<NativeMatchImageSnapshotCallback>>);
+typedef NativeMatchImageSnapshotCallback = Void Function(
+    Pointer<Void> callbackContext, Int32 contextId, Int8, Pointer<Utf8>);
+typedef DartMatchImageSnapshotCallback = void Function(
+    Pointer<Void> callbackContext, int contextId, int, Pointer<Utf8>);
+typedef NativeMatchImageSnapshot = Void Function(Pointer<Void> callbackContext, Int32 contextId, Pointer<Uint8>, Int32,
+    Pointer<NativeString>, Pointer<NativeFunction<NativeMatchImageSnapshotCallback>>);
 
-void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<Uint8> bytes, int size, Pointer<NativeString> snapshotNamePtr, Pointer<NativeFunction<NativeMatchImageSnapshotCallback>> pointer) {
+void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<Uint8> bytes, int size,
+    Pointer<NativeString> snapshotNamePtr, Pointer<NativeFunction<NativeMatchImageSnapshotCallback>> pointer) {
   DartMatchImageSnapshotCallback callback = pointer.asFunction();
   String filename = nativeStringToString(snapshotNamePtr);
   matchImageSnapshot(bytes.asTypedList(size), filename).then((value) {
@@ -64,7 +67,8 @@ void _matchImageSnapshot(Pointer<Void> callbackContext, int contextId, Pointer<U
   });
 }
 
-final Pointer<NativeFunction<NativeMatchImageSnapshot>> _nativeMatchImageSnapshot = Pointer.fromFunction(_matchImageSnapshot);
+final Pointer<NativeFunction<NativeMatchImageSnapshot>> _nativeMatchImageSnapshot =
+    Pointer.fromFunction(_matchImageSnapshot);
 
 typedef NativeEnvironment = Pointer<Utf8> Function();
 typedef DartEnvironment = Pointer<Utf8> Function();
@@ -75,7 +79,7 @@ Pointer<Utf8> _environment() {
 
 final Pointer<NativeFunction<NativeEnvironment>> _nativeEnvironment = Pointer.fromFunction(_environment);
 
-typedef NativeSimulatePointer = Void Function(Pointer<Pointer<MousePointer>>,  Int32 length, Int32 pointer);
+typedef NativeSimulatePointer = Void Function(Pointer<Pointer<MousePointer>>, Int32 length, Int32 pointer);
 typedef NativeSimulateInputText = Void Function(Pointer<NativeString>);
 
 PointerChange _getPointerChange(double change) {
@@ -106,16 +110,15 @@ void _simulatePointer(Pointer<Pointer<MousePointer>> mousePointerList, int lengt
 
     double change = mousePointerList[i].ref.change;
     data.add(PointerData(
-      // TODO: remove hardcode '360' width that for double testing in one flutter window
-      physicalX: (360 * contextId + x) * window.devicePixelRatio,
-      physicalY: (56.0 + y) * window.devicePixelRatio,
-      // MouseEvent will trigger [RendererBinding.dispatchEvent] -> [BaseMouseTracker.updateWithEvent]
-      // which handle extra mouse connection phase for [event.kind = PointerDeviceKind.mouse].
-      // Prefer to use touch event.
-      kind: PointerDeviceKind.touch,
-      change: _getPointerChange(change),
-      pointerIdentifier: pointer
-    ));
+        // TODO: remove hardcode '360' width that for double testing in one flutter window
+        physicalX: (360 * contextId + x) * window.devicePixelRatio,
+        physicalY: (56.0 + y) * window.devicePixelRatio,
+        // MouseEvent will trigger [RendererBinding.dispatchEvent] -> [BaseMouseTracker.updateWithEvent]
+        // which handle extra mouse connection phase for [event.kind = PointerDeviceKind.mouse].
+        // Prefer to use touch event.
+        kind: PointerDeviceKind.touch,
+        change: _getPointerChange(change),
+        pointerIdentifier: pointer));
   }
 
   PointerDataPacket dataPacket = PointerDataPacket(data: data);
@@ -130,7 +133,8 @@ void _simulateInputText(Pointer<NativeString> nativeChars) {
   testTextInput.enterText(text);
 }
 
-final Pointer<NativeFunction<NativeSimulateInputText>> _nativeSimulateInputText = Pointer.fromFunction(_simulateInputText);
+final Pointer<NativeFunction<NativeSimulateInputText>> _nativeSimulateInputText =
+    Pointer.fromFunction(_simulateInputText);
 
 final List<int> _dartNativeMethods = [
   _nativeOnJsError.address,
@@ -143,8 +147,9 @@ final List<int> _dartNativeMethods = [
 typedef NativeRegisterTestEnvDartMethods = Void Function(Pointer<Uint64> methodBytes, Int32 length);
 typedef DartRegisterTestEnvDartMethods = void Function(Pointer<Uint64> methodBytes, int length);
 
-final DartRegisterTestEnvDartMethods _registerTestEnvDartMethods =
-KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeRegisterTestEnvDartMethods>>('registerTestEnvDartMethods').asFunction();
+final DartRegisterTestEnvDartMethods _registerTestEnvDartMethods = WebFDynamicLibrary.ref
+    .lookup<NativeFunction<NativeRegisterTestEnvDartMethods>>('registerTestEnvDartMethods')
+    .asFunction();
 
 void registerDartTestMethodsToCpp() {
   Pointer<Uint64> bytes = malloc.allocate<Uint64>(sizeOf<Uint64>() * _dartNativeMethods.length);

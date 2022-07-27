@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'dart:typed_data';
-import 'dart:io';
 import 'dart:async';
-import 'package:path/path.dart' as path;
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:image/image.dart';
+import 'package:path/path.dart' as path;
 
 ///Check if [firstImg] and [secondImg] have the same width and height
 bool haveSameSize(Image firstImg, Image secondImg) {
@@ -109,7 +110,7 @@ bool matchFile(List<int> left, List<int> right) {
     return false;
   }
 
-  for (int i = 0; i < left.length; i ++) {
+  for (int i = 0; i < left.length; i++) {
     if (left[i] != right[i]) {
       return false;
     }
