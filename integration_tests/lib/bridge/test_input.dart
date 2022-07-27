@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -39,7 +39,7 @@ class TestTextInput {
   ///
   /// The [onCleared] argument may be set to be notified of when the keyboard
   /// is dismissed.
-  TestTextInput({ this.onCleared });
+  TestTextInput({this.onCleared});
 
   /// Called when the keyboard goes away.
   ///
@@ -104,6 +104,7 @@ class TestTextInput {
     assert(isRegistered);
     return _isVisible;
   }
+
   bool _isVisible = false;
 
   /// Resets any internal state of this object.
@@ -204,7 +205,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* ignored */ },
+      (ByteData? data) {/* ignored */},
     );
   }
 
@@ -265,11 +266,10 @@ class TestTextInput {
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
           'TextInputClient.onConnectionClosed',
-           <dynamic>[_client ?? -1],
+          <dynamic>[_client ?? -1],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (ByteData? data) {/* response from framework is discarded */},
     );
   }
 }
-

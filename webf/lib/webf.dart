@@ -3,10 +3,10 @@
  * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-library kraken;
+library WebF;
 
-export 'widget.dart';
+export 'bridge.dart';
 export 'foundation.dart';
 export 'launcher.dart';
 export 'module.dart';
-export 'bridge.dart';
+export 'widget.dart';

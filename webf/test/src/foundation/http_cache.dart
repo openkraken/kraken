@@ -4,7 +4,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
+
 import '../../local_http_server.dart';
 
 void main() {

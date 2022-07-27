@@ -1,10 +1,10 @@
-import 'package:kraken/foundation.dart';
 import 'package:test/test.dart';
+import 'package:webf/foundation.dart';
 
 void main() {
   group('environment', () {
-    test('getKrakenTemporaryPath()', () async {
-      String tempPath = await getKrakenTemporaryPath();
+    test('getWebFTemporaryPath()', () async {
+      String tempPath = await getWebFTemporaryPath();
       expect(tempPath, './temp');
     });
   });

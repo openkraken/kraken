@@ -2,11 +2,11 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 const benchMarkServer = String.fromEnvironment("SERVER");
@@ -51,8 +51,8 @@ class _WebViewPage extends StatelessWidget {
   final PerformanceDataCallback _performanceDataCallback;
   final int _startTime;
 
-  _WebViewPage(PerformanceDataCallback performanceDataCallback) :
-        _performanceDataCallback = performanceDataCallback,
+  _WebViewPage(PerformanceDataCallback performanceDataCallback)
+      : _performanceDataCallback = performanceDataCallback,
         _startTime = DateTime.now().millisecondsSinceEpoch;
 
   JavascriptChannel _javascriptChannel(BuildContext context) {
@@ -60,8 +60,7 @@ class _WebViewPage extends StatelessWidget {
         name: 'Message',
         onMessageReceived: (JavascriptMessage message) {
           _performanceDataCallback('Web', int.parse(message.message) - _startTime);
-        }
-    );
+        });
   }
 
   @override
@@ -84,17 +83,17 @@ class _KrakenPage extends StatelessWidget {
       : _performanceDataCallback = performanceDataCallback,
         _startTime = DateTime.now().millisecondsSinceEpoch;
 
-  KrakenJavaScriptChannel get javaScriptChannel => KrakenJavaScriptChannel()
+  WebFJavaScriptChannel get javaScriptChannel => WebFJavaScriptChannel()
     ..onMethodCall = (String method, arguments) async {
       if (method == 'performance') {
-        _performanceDataCallback('Kraken', int.parse((arguments as List)[0]) - _startTime);
+        _performanceDataCallback('WebF', int.parse((arguments as List)[0]) - _startTime);
       }
     };
 
   @override
   Widget build(BuildContext context) {
-    return Kraken(
-      bundle: KrakenBundle.fromUrl('http://$benchMarkServer/kraken/home.kbc1'),
+    return WebF(
+      bundle: WebFBundle.fromUrl('http://$benchMarkServer/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
     );
   }
@@ -116,9 +115,7 @@ class _MyHomePageState extends State<MyBrowser> {
 
   void _changeViewAndReloadPage() async {
     setState(() {
-      _currentView = _currentView is _KrakenPage
-        ? _WebViewPage(_getPerformanceData)
-        :_KrakenPage(_getPerformanceData);
+      _currentView = _currentView is _KrakenPage ? _WebViewPage(_getPerformanceData) : _KrakenPage(_getPerformanceData);
     });
   }
 
@@ -180,11 +177,11 @@ class _MyHomePageState extends State<MyBrowser> {
     );
 
     return Scaffold(
-      appBar: appBar,
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+        appBar: appBar,
+        body: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
           child: _currentView ?? Text('Performance test'),
-      ));
+        ));
   }
 }

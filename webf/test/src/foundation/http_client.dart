@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 import '../../local_http_server.dart';
 

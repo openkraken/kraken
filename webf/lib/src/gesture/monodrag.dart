@@ -7,7 +7,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 
 import 'package:flutter/gestures.dart';
-
 import 'package:flutter/rendering.dart';
 import 'package:webf/dom.dart';
 

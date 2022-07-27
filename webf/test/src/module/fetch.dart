@@ -1,4 +1,4 @@
-import 'package:kraken/module.dart';
+import 'package:webf/module.dart';
 import 'package:test/test.dart';
 
 import '../../local_http_server.dart';

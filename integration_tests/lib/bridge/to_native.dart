@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2020-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2020-present The WebF authors. All rights reserved.
  */
 
 import 'dart:async';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/bridge.dart';
+import 'package:webf/bridge.dart';
 
 // Steps for using dart:ffi to call a C function from Dart:
 // 1. Import dart:ffi.
@@ -21,7 +21,7 @@ typedef NativeInitTestFramework = Void Function(Int32 contextId);
 typedef DartInitTestFramework = void Function(int contextId);
 
 final DartInitTestFramework _initTestFramework =
-    KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeInitTestFramework>>('initTestFramework').asFunction();
+    WebFDynamicLibrary.ref.lookup<NativeFunction<NativeInitTestFramework>>('initTestFramework').asFunction();
 
 void initTestFramework(int contextId) {
   _initTestFramework(contextId);
@@ -32,7 +32,7 @@ typedef NativeEvaluateTestScripts = Int8 Function(Int32 contextId, Pointer<Nativ
 typedef DartEvaluateTestScripts = int Function(int contextId, Pointer<NativeString>, Pointer<Utf8>, int);
 
 final DartEvaluateTestScripts _evaluateTestScripts =
-KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeEvaluateTestScripts>>('evaluateTestScripts').asFunction();
+    WebFDynamicLibrary.ref.lookup<NativeFunction<NativeEvaluateTestScripts>>('evaluateTestScripts').asFunction();
 
 void evaluateTestScripts(int contextId, String code, {String url = 'test://', int line = 0}) {
   Pointer<Utf8> _url = (url).toNativeUtf8();
@@ -45,7 +45,7 @@ typedef NativeExecuteTest = Void Function(Int32 contextId, Pointer<NativeFunctio
 typedef DartExecuteTest = void Function(int contextId, Pointer<NativeFunction<NativeExecuteCallback>>);
 
 final DartExecuteTest _executeTest =
-KrakenDynamicLibrary.ref.lookup<NativeFunction<NativeExecuteTest>>('executeTest').asFunction();
+    WebFDynamicLibrary.ref.lookup<NativeFunction<NativeExecuteTest>>('executeTest').asFunction();
 
 List<Completer<String>?> completerList = List.filled(10, null);
 

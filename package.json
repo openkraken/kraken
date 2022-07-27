@@ -36,13 +36,13 @@
     "commander": "^5.1.0",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
+    "http-server": "^14.1.0",
     "lcov-summary": "^1.0.1",
     "minimist": "^1.2.4",
     "mkdirp": "^0.5.1",
     "rimraf": "^3.0.2",
     "uuid": "^8.3.2",
-    "ws": "^7.3.0",
-    "http-server": "^14.1.0"
+    "ws": "^7.3.0"
   },
   "dependencies": {
     "prepend-file": "^2.0.1"
