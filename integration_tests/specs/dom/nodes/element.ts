@@ -43,6 +43,48 @@ describe('DOM Element API', () => {
     expect(div.hasAttribute('foo')).toBeFalse();
   });
 
+  it('should work', () => {
+    const div = document.createElement('div');
+
+    div.style.width = div.style.height = '200px';
+    div.style.padding = '10px';
+    div.style.margin = '20px';
+    div.style.backgroundColor = 'grey';
+    div.style.overflow = 'scroll';
+    document.body.appendChild(div);
+
+    const scrollDiv = document.createElement('div');
+    scrollDiv.style.width =  '100px';
+    scrollDiv.style.height ='1000px';
+    div.appendChild(scrollDiv)
+
+    const childDiv = document.createElement('div');
+    childDiv.style.width = childDiv.style.height = '30px';
+    childDiv.style.marginTop = '150px';
+    childDiv.style.backgroundColor = 'yellow';
+    scrollDiv.appendChild(childDiv);
+
+
+    const boundingClientRect = div.getBoundingClientRect();
+    expect(JSON.parse(JSON.stringify(boundingClientRect))).toEqual({
+      x: 20.0,
+      y: 20.0,
+      width: 200.0,
+      height: 200.0,
+      top: 20.0,
+      left: 20.0,
+      right: 220.0,
+      bottom: 220.0,
+    } as any);
+
+    div.setAttribute('foo', 'bar');
+    expect(div.getAttribute('foo')).toBe('bar');
+    expect(div.hasAttribute('foo')).toBeTrue();
+
+    div.removeAttribute('foo');
+    expect(div.hasAttribute('foo')).toBeFalse();
+  });
+
   it('children should only contain elements', () => {
     let container = document.createElement('div');
     let a = document.createElement('div');
