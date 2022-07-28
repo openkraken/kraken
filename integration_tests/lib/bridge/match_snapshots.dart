@@ -99,7 +99,7 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
 
   diff /= height * width;
 
-  bool isMatch = (diff * 10e3) < 1;
+  bool isMatch = (diff * 10e2) < 1;
 
   if (!isMatch) {
     final newSnap = File('$filename.diff.png');
