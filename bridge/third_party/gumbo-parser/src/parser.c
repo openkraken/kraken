@@ -19,7 +19,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "attribute.h"
 #include "error.h"
@@ -31,6 +30,15 @@
 #include "utf8.h"
 #include "util.h"
 #include "vector.h"
+
+
+#ifdef _MSC_VER 
+//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#else
+#include <strings.h>
+#endif
 
 #define AVOID_UNUSED_VARIABLE_WARNING(i) (void)(i)
 
