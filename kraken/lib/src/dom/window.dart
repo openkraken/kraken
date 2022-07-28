@@ -9,9 +9,11 @@ import 'package:kraken/foundation.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/module.dart';
 
+import 'background_tasks.dart';
+
 const String WINDOW = 'WINDOW';
 
-class Window extends EventTarget {
+class Window extends EventTarget with ScheduleBackgroundTasks {
   final Document document;
   final Screen screen;
 
