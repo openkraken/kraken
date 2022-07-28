@@ -1,4 +1,4 @@
-package com.openkraken.kraken;
+package com.openwebf.webf;
 
 import android.content.Context;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -10,9 +10,9 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
- * KrakenPlugin
+ * WebFPlugin
  */
-public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
+public class WebFPlugin implements FlutterPlugin, MethodCallHandler {
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -20,7 +20,7 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     public MethodChannel channel;
     private FlutterEngine flutterEngine;
     private Context mContext;
-    private Kraken mKraken;
+    private WebF mWebF;
 
     // This static function is optional and equivalent to onAttachedToEngine. It supports the old
     // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
@@ -32,8 +32,8 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     // depending on the user's project. onAttachedToEngine or registerWith must both be defined
     // in the same class.
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "kraken");
-        KrakenPlugin plugin = new KrakenPlugin();
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "webf");
+        WebFPlugin plugin = new WebFPlugin();
         plugin.mContext = registrar.context();
         channel.setMethodCallHandler(plugin);
     }
@@ -41,7 +41,7 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onAttachedToEngine(FlutterPluginBinding flutterPluginBinding) {
         mContext = flutterPluginBinding.getApplicationContext();
-        channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "kraken");
+        channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "webf");
         flutterEngine = flutterPluginBinding.getFlutterEngine();
         channel.setMethodCallHandler(this);
     }
@@ -52,38 +52,38 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
         }
     }
 
-    Kraken getKraken() {
-      if (mKraken == null) {
-        mKraken = Kraken.get(flutterEngine);
+    WebF getWebF() {
+      if (mWebF == null) {
+        mWebF = WebF.get(flutterEngine);
       }
-      return mKraken;
+      return mWebF;
     }
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         switch (call.method) {
           case "getUrl": {
-            Kraken kraken = getKraken();
-            result.success(kraken == null ? "" : kraken.getUrl());
+            WebF webf = getWebF();
+            result.success(webf == null ? "" : webf.getUrl());
             break;
           }
 
           case "getDynamicLibraryPath": {
-            Kraken kraken = getKraken();
-            result.success(kraken == null ? "" : kraken.getDynamicLibraryPath());
+            WebF webf = getWebF();
+            result.success(webf == null ? "" : webf.getDynamicLibraryPath());
             break;
           }
 
           case "invokeMethod": {
-            Kraken kraken = getKraken();
-            if (kraken != null) {
+            WebF webf = getWebF();
+            if (webf != null) {
               String method = call.argument("method");
               Object args = call.argument("args");
               assert method != null;
               MethodCall callWrap = new MethodCall(method, args);
-              kraken._handleMethodCall(callWrap, result);
+              webf._handleMethodCall(callWrap, result);
             } else {
-              result.error("Kraken instance not found.", null, null);
+              result.error("WebF instance not found.", null, null);
             }
             break;
           }
@@ -100,13 +100,13 @@ public class KrakenPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
-        Kraken kraken = Kraken.get(flutterEngine);
-        if (kraken == null) return;
-        kraken.destroy();
+        WebF webf = WebF.get(flutterEngine);
+        if (webf == null) return;
+        webf.destroy();
         flutterEngine = null;
     }
 
     private String getTemporaryDirectory() {
-      return mContext.getCacheDir().getPath() + "/Kraken";
+      return mContext.getCacheDir().getPath() + "/WebF";
     }
 }

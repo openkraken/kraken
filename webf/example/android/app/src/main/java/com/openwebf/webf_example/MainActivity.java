@@ -1,4 +1,4 @@
-package com.openkraken.kraken_example;
+package com.openwebf.webf_example;
 
 import io.flutter.embedding.android.FlutterActivity;
 

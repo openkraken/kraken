@@ -18,9 +18,9 @@ public class WebF {
   private FlutterEngine flutterEngine;
 
   private MethodChannel.MethodCallHandler handler;
-  private static Map<FlutterEngine, Kraken> sdkMap = new HashMap<>();
+  private static Map<FlutterEngine, WebF> sdkMap = new HashMap<>();
 
-  public Kraken(FlutterEngine flutterEngine) {
+  public WebF(FlutterEngine flutterEngine) {
     if (flutterEngine != null) {
       this.flutterEngine = flutterEngine;
       sdkMap.put(flutterEngine, this);
@@ -29,7 +29,7 @@ public class WebF {
     }
   }
 
-  public static Kraken get(FlutterEngine engine) {
+  public static WebF get(FlutterEngine engine) {
     return sdkMap.get(engine);
   }
 
@@ -74,9 +74,9 @@ public class WebF {
       public void run() {
         if (flutterEngine != null) {
           PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-          KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
-          if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
-            krakenSDKPlugin.channel.invokeMethod(method, arguments);
+          WebFPlugin webfSDKPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
+          if (webfSDKPlugin != null && webfSDKPlugin.channel != null) {
+            webfSDKPlugin.channel.invokeMethod(method, arguments);
           }
         }
       }
@@ -86,9 +86,9 @@ public class WebF {
   public void reload() {
     if (flutterEngine != null) {
       PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-      KrakenPlugin krakenSDKPlugin = (KrakenPlugin) pluginRegistry.get(KrakenPlugin.class);
-      if (krakenSDKPlugin != null) {
-        krakenSDKPlugin.reload();
+      WebFPlugin webfSDKPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
+      if (webfSDKPlugin != null) {
+        webfSDKPlugin.reload();
       }
     }
   }
