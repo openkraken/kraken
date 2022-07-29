@@ -1,9 +1,13 @@
 /*
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:kraken/kraken.dart';
 import 'package:kraken/rendering.dart';
 import 'package:kraken/dom.dart' as dom;
@@ -188,13 +192,13 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   // Handle focus action usually by pressing the [Shift]+[Tab] hotkey in the reverse direction.
   void _handlePreviousFocus(PreviousFocusIntent intent) {
     dom.Element rootElement = _findRootElement();
-    List<dom.TextFormControlElement> focusableElements = _findFocusableElements(rootElement);
+    List<dom.Element> focusableElements = _findFocusableElements(rootElement);
     if (focusableElements.isNotEmpty) {
-      dom.TextFormControlElement? focusedElement = _findFocusedElement(focusableElements);
+      dom.Element? focusedElement = _findFocusedElement(focusableElements);
       // None editable is focused, focus the last editable.
       if (focusedElement == null) {
         _focusNode.requestFocus();
-        (focusableElements[focusableElements.length - 1]).focus();
+        (focusableElements[focusableElements.length - 1] as dom.TextFormControlElement).focus();
 
         // Some editable is focused, focus the previous editable, if it is the first editable,
         // then focus the previous widget.
@@ -202,11 +206,11 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
         int idx = focusableElements.indexOf(focusedElement);
         if (idx == 0) {
           _focusNode.previousFocus();
-          (focusableElements[0]).blur();
+          (focusableElements[0] as dom.TextFormControlElement).blur();
         } else {
           _focusNode.requestFocus();
-          (focusableElements[idx]).blur();
-          (focusableElements[idx - 1]).focus();
+          (focusableElements[idx] as dom.TextFormControlElement).blur();
+          (focusableElements[idx - 1] as dom.TextFormControlElement).focus();
         }
       }
       // None editable exists, focus the previous widget.
@@ -216,331 +220,363 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   }
 
   void _handleDeleteText(DeleteTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .delete(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.delete(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleDeleteByWordText(DeleteByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteByWord(SelectionChangedCause.keyboard, false);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteByWord(SelectionChangedCause.keyboard, false);
+      }
     }
   }
 
   void _handleDeleteByLineText(DeleteByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleDeleteForwardText(DeleteForwardTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForward(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForward(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleDeleteForwardByWordText(DeleteForwardByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForwardByWord(SelectionChangedCause.keyboard, false);
+      }
     }
   }
 
   void _handleDeleteForwardByLineText(DeleteForwardByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .deleteForwardByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.deleteForwardByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
 
   void _handleSelectAllText(SelectAllTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .selectAll(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.selectAll(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleCopySelectionText(CopySelectionTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .copySelection(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.copySelection();
+      }
     }
   }
 
   void _handleCutSelectionText(CutSelectionTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .cutSelection(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.cutSelection(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handlePasteText(PasteTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .pasteText(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.pasteText(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleMoveSelectionRightByLineText(MoveSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRightByLine(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRightByLine(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftByLineText(MoveSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeftByLine(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeftByLine(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionRightByWordText(MoveSelectionRightByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRightByWord(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRightByWord(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftByWordText(MoveSelectionLeftByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeftByWord(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeftByWord(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionUpText(MoveSelectionUpTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionUp(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionUp(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionDownText(MoveSelectionDownTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionDown(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionDown(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionLeftText(MoveSelectionLeftTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionLeft(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionLeft(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionRightText(MoveSelectionRightTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionRight(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionRight(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionToEndText(MoveSelectionToEndTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionToEnd(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionToEnd(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleMoveSelectionToStartText(MoveSelectionToStartTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .moveSelectionToStart(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.moveSelectionToStart(SelectionChangedCause.keyboard);
+        // Make caret visible while moving cursor.
+        focusedElement.scrollToCaret();
+      }
     }
   }
 
   void _handleExtendSelectionLeftText(ExtendSelectionLeftTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeft(SelectionChangedCause.keyboard);
-      // Make caret visible while moving cursor.
-      focusedElement.scrollToCaret();
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeft(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightText(ExtendSelectionRightTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRight(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRight(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionUpText(ExtendSelectionUpTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionUp(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionUp(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionDownText(ExtendSelectionDownTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionDown(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionDown(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionToEndText(ExpandSelectionToEndTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionToEnd(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionToEnd(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionToStartText(ExpandSelectionToStartTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionToStart(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionToStart(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExpandSelectionLeftByLineText(ExpandSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionLeftByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExpandSelectionRightByLineText(ExpandSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .expandSelectionRightByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.expandSelectionRightByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionLeftByWordText(ExtendSelectionLeftByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionLeftByLineText(ExtendSelectionLeftByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionLeftByWordAndStopAtReversalText(ExtendSelectionLeftByWordAndStopAtReversalTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionLeftByWord(SelectionChangedCause.keyboard, false, true);
+      }
     }
   }
 
   void _handleExtendSelectionRightByWordText(ExtendSelectionRightByWordTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByWord(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightByLineText(ExtendSelectionRightByLineTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByLine(SelectionChangedCause.keyboard);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByLine(SelectionChangedCause.keyboard);
+      }
     }
   }
 
   void _handleExtendSelectionRightByWordAndStopAtReversalText(ExtendSelectionRightByWordAndStopAtReversalTextIntent intent) {
-    dom.TextFormControlElement? focusedElement = _findFocusedElement();
+    dom.Element? focusedElement = _findFocusedElement();
     if (focusedElement != null) {
-      focusedElement
-        .textSelectionDelegate
-        .extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
+      RenderEditable? focusedRenderEditable = (focusedElement as dom.TextFormControlElement).renderEditable;
+      if (focusedRenderEditable != null) {
+        focusedRenderEditable.extendSelectionRightByWord(SelectionChangedCause.keyboard, false, true);
+      }
     }
   }
 
@@ -587,8 +623,8 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   }
 
   // Find all the focusable elements in the element tree.
-  List<dom.TextFormControlElement> _findFocusableElements(dom.Element element) {
-    List<dom.TextFormControlElement> result = [];
+  List<dom.Element> _findFocusableElements(dom.Element element) {
+    List<dom.Element> result = [];
     traverseElement(element, (dom.Element child) {
       // Currently only input element is focusable.
       if (child is dom.TextFormControlElement) {
@@ -599,19 +635,19 @@ class _KrakenTextControlState extends State<KrakenTextControl> {
   }
 
   // Find the focused element in the element tree.
-  dom.TextFormControlElement? _findFocusedElement([List<dom.Element>? focusableElements]) {
-    dom.TextFormControlElement? result;
+  dom.Element? _findFocusedElement([List<dom.Element>? focusableElements]) {
+    dom.Element? result;
     if (focusableElements == null) {
       dom.Element rootElement = _findRootElement();
       focusableElements = _findFocusableElements(rootElement);
     }
 
     if (focusableElements.isNotEmpty) {
-      // Currently only TextFormControlElement is focusable.
-      for (dom.Element element in focusableElements) {
-        RenderEditable? renderEditable = (element as dom.TextFormControlElement).renderEditable;
+      // Currently only input element is focusable.
+      for (dom.Element inputElement in focusableElements) {
+        RenderEditable? renderEditable = (inputElement as dom.TextFormControlElement).renderEditable;
         if (renderEditable != null && renderEditable.hasFocus) {
-          result = element;
+          result = inputElement;
           break;
         }
       }

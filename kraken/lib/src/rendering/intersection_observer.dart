@@ -187,9 +187,9 @@ class IntersectionObserverLayer extends ContainerLayer {
 
   /// See [Layer.addToScene].
   @override
-  void addToScene(ui.SceneBuilder builder) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     _scheduleIntersectionObservationUpdate();
-    super.addToScene(builder);
+    super.addToScene(builder, layerOffset);
   }
 
   /// See [AbstractNode.attach].
