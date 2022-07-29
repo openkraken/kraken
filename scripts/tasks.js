@@ -501,7 +501,7 @@ task('build-linux-webf-lib', (done) => {
     });
 
   // build
-  execSync(`cmake --build ${bridgeCmakeDir} --target webf ${buildMode != 'Release' ? 'webf_test webf_unit_test' : ''} -- -j 12`, {
+  execSync(`cmake --build ${bridgeCmakeDir} --target webf ${buildMode != 'Release' ? 'webf_test' : ''} webf_unit_test -- -j 12`, {
     stdio: 'inherit'
   });
 

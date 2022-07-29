@@ -47,7 +47,7 @@ jobs:
       with:
         cmake-version: ${{ env.cmakeVersion }}
     - run: npm i
-    - run: npm run build:bridge:linux:release
+    - run: ENABLE_ASAN=true npm run build:bridge:linux
     - run: node scripts/run_bridge_unit_test.js
 
   webf_unit_test:
