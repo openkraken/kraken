@@ -38,10 +38,10 @@ flutter:
     platforms:
       android:
         package: com.openwebf.webf
-        pluginClass: WebfPlugin
+        pluginClass: WebFPlugin
       ios:
-        pluginClass: KrakenPlugin
+        pluginClass: WebFPlugin
       macos:
         pluginClass: WebFPlugin
       linux:
-        pluginClass: WebfPlugin
+        pluginClass: WebFPlugin

@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
-#import "Kraken.h"
+#import "WebF.h"
 
 static NSMutableArray *engineList = nil;
-static NSMutableArray<Kraken*> *instanceList = nil;
+static NSMutableArray<WebF*> *instanceList = nil;
 
-@implementation Kraken
+@implementation WebF
 
-+ (Kraken*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
++ (WebF*) instanceByBinaryMessenger: (NSObject<FlutterBinaryMessenger>*) messenger {
   for (int i = 0; i < engineList.count; i++) {
     FlutterEngine *engine = engineList[i];
     if (engine != nil && engine.viewController != nil && engine.viewController.binaryMessenger != nil) {
@@ -21,12 +21,12 @@ static NSMutableArray<Kraken*> *instanceList = nil;
 - (instancetype)initWithFlutterEngine: (FlutterEngine*) engine {
   self.flutterEngine = engine;
 
-  FlutterMethodChannel *channel = [KrakenPlugin getMethodChannel];
+  FlutterMethodChannel *channel = [WebFPlugin getMethodChannel];
 
   if (channel == nil) {
     NSException* exception = [NSException
                               exceptionWithName:@"InitError"
-                              reason:@"KrakenSDK should init after Flutter's plugin registered."
+                              reason:@"WebFSDK should init after Flutter's plugin registered."
                               userInfo:nil];
     @throw exception;
   }
