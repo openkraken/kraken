@@ -44,4 +44,4 @@ flutter:
       macos:
         pluginClass: WebFPlugin
       linux:
-        pluginClass: WebFPlugin
+        pluginClass: WebfPlugin
