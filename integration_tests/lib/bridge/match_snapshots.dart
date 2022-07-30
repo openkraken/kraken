@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:image_compare/image_compare.dart';
 
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
@@ -65,7 +66,7 @@ num diffBetweenPixels(firstPixel, secondPixel, ignoreAlpha) {
   return diff;
 }
 
-bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
+Future<bool> matchImage(Uint8List imageA, List<int> imageB, String filename) async {
   if (imageA.length == 0 || imageB.length == 0) {
     return false;
   }
@@ -76,37 +77,34 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
     return false;
   }
 
-  var width = a.width;
-  var height = b.height;
-  var diff = 0.0;
-
-  //Create an image to show the differences
-  var diffImg = Image(width, height);
-
-  for (var i = 0; i < width; i++) {
-    var diffAtPixel, firstPixel, secondPixel;
-    for (var j = 0; j < height; j++) {
-      firstPixel = a.getPixel(i, j);
-      secondPixel = b.getPixel(i, j);
-
-      diffAtPixel = diffBetweenPixels(firstPixel, secondPixel, true);
-      diff += diffAtPixel;
-
-      //Shows in red the different pixels and in semitransparent the same ones
-      diffImg.setPixel(i, j, selectColor(firstPixel, secondPixel, diffAtPixel));
-    }
-  }
-
-  diff /= height * width;
-
-  bool isMatch = (diff * 10e2) < 1;
+  double ratio = await compareImages(src1: a, src2: b, algorithm: EuclideanColorDistance(ignoreAlpha: true));
+  bool isMatch = (ratio * 100) < 1;
 
   if (!isMatch) {
+    var width = a.width;
+    var height = b.height;
+
+    //Create an image to show the differences
+    var diffImg = Image(width, height);
+
+    for (var i = 0; i < width; i++) {
+      var diffAtPixel, firstPixel, secondPixel;
+      for (var j = 0; j < height; j++) {
+        firstPixel = a.getPixel(i, j);
+        secondPixel = b.getPixel(i, j);
+
+        diffAtPixel = diffBetweenPixels(firstPixel, secondPixel, true);
+
+        //Shows in red the different pixels and in semitransparent the same ones
+        diffImg.setPixel(i, j, selectColor(firstPixel, secondPixel, diffAtPixel));
+      }
+    }
+
     final newSnap = File('$filename.diff.png');
     newSnap.writeAsBytesSync(encodePng(diffImg));
   }
 
-  return isMatch; // < 0.1%
+  return isMatch; // < 0.01%
 }
 
 bool matchFile(List<int> left, List<int> right) {
@@ -140,7 +138,7 @@ Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
       match = matchFile(snapPixels, currentPixels);
     }
     if (!match) {
-      match = matchImage(snapPixels, currentPixels, filename);
+      match = await matchImage(snapPixels, currentPixels, filename);
     }
     if (!match) {
       final newSnap = File('$filename.current.png');

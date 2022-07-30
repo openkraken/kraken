@@ -25,13 +25,12 @@ dependencies:
   colorize: ^3.0.0
   flutter:
     sdk: flutter
-#  webf: ^0.11.0
-#  kraken: ^0.11.0
   image: ^3.0.2
 #  kraken_video_player: ^2.4.0
 #  kraken_websocket: ^2.0.0
 #  kraken_webview: ^2.5.0
   waterfall_flow: ^3.0.1
+  image_compare: ^1.1.2
 
 dev_dependencies:
   flutter_test:
