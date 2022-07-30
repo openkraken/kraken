@@ -2,7 +2,6 @@ describe('Navigator', () => {
   it('connectivity', async () => {
     let connection = await navigator.connection.getConnectivity();
     expect(connection.isConnected).toBeTrue();
-    expect(['wifi', '4g'].includes(connection.type)).toBeTrue();
   });
 
   it('hardwareConcurrency', () => {
