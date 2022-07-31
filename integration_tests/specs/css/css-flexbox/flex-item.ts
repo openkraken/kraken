@@ -297,4 +297,62 @@ describe('flex-item', () => {
 
     await snapshot();
   });
+
+  it('child-overflow', async () => {
+    let log;
+    let flexbox;
+    log = createElement('div', {
+      id: 'log',
+      style: {
+        'box-sizing': 'border-box',
+      },
+    });
+    flexbox = createElement(
+      'div',
+      {
+        'data-expected-height': '0',
+        'data-offset-x': '0',
+        'data-offset-y': '0',
+        class: 'flexbox',
+        style: {
+          display: 'flex',
+          position: 'relative',
+          'flex-flow': 'column',
+          'box-sizing': 'border-box',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            'data-expected-height': '0',
+            'data-offset-x': '0',
+            'data-offset-y': '0',
+            style: {
+              height: '0',
+              'box-sizing': 'border-box',
+            },
+          },
+          [
+            createElement('div', {
+              'data-expected-height': '20',
+              'data-offset-x': '0',
+              'data-offset-y': '0',
+              style: {
+                width: '20px',
+                height: '20px',
+                'line-height': '0px',
+                'background-color': 'blue',
+                'box-sizing': 'border-box',
+              },
+            }),
+          ]
+        ),
+      ]
+    );
+    BODY.appendChild(log);
+    BODY.appendChild(flexbox);
+
+    await matchViewportSnapshot();
+  });
 });
