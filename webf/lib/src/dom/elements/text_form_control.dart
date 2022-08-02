@@ -1095,7 +1095,7 @@ class TextFormControlElement extends Element implements TextInputClient, TickerP
     // Show keyboard for selection change or user gestures.
     requestKeyboard();
 
-    if (renderEditable == null) {
+    if (renderEditable == null || !renderEditable!.hasSize) {
       return;
     }
 
