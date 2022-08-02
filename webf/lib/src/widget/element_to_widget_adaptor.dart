@@ -62,8 +62,11 @@ class WebFElementToFlutterElementAdaptor extends RenderObjectElement {
   @override
   void unmount() {
     // Flutter element unmount call dispose of _renderObject, so we should not call dispose in unmountRenderObject.
-    dom.Element element = (widget._webFNode as dom.Element);
-    element.unmountRenderObject(dispose: false);
+    dom.Node node = (widget._webFNode as dom.Node);
+
+    if (node is dom.Element) {
+      node.unmountRenderObject(dispose: false);
+    }
 
     super.unmount();
   }

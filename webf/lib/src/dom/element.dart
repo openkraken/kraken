@@ -1642,6 +1642,11 @@ abstract class Element extends Node with ElementBase, ElementEventMixin, Element
     }
   }
 
+  @override
+  String toString() {
+    return '$tagName Element($hashCode)';
+  }
+
   // Create a new RenderLayoutBox for the scrolling content.
   RenderLayoutBox createScrollingContentLayout() {
     // FIXME: Create an empty renderStyle for do not share renderStyle with element.

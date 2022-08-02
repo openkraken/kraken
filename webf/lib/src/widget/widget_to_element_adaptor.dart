@@ -266,6 +266,14 @@ abstract class WidgetElement extends dom.Element {
         (parentFlutterElement ?? rootFlutterElement) as RenderObjectElement, parentFlutterElement == null);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    if (renderObjectElement != null) {
+      deactivate();
+    }
+  }
+
   void deactivate() {
     assert(renderObjectElement != null);
     deactivateRecursively(renderObjectElement!);
