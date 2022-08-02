@@ -467,8 +467,10 @@ describe('Tags textarea', () => {
       done();
     });
 
-    textarea1.focus();
-    textarea2.focus();
+    requestAnimationFrame(async () => {
+      textarea1.focus();
+      textarea2.focus();
+    });
   });
 
 
@@ -485,8 +487,10 @@ describe('Tags textarea', () => {
       done();
     });
 
-    textarea1.focus();
-    textarea2.focus();
+    requestAnimationFrame(() => {
+      textarea1.focus();
+      textarea2.focus();
+    });
   });
 
   it('event input', (done) => {
@@ -591,20 +595,22 @@ describe('Tags textarea', () => {
     ]) as HTMLTextAreaElement;
     document.body.appendChild(textarea);
 
-    text.data = 'text content value';
-    expect(textarea.defaultValue).toBe('text content value');
-    expect(textarea.value).toBe('text content value');
+    requestAnimationFrame(() => {
+      text.data = 'text content value';
+      expect(textarea.defaultValue).toBe('text content value');
+      expect(textarea.value).toBe('text content value');
 
-    textarea.defaultValue = 'default value';
-    expect(textarea.defaultValue).toBe('default value');
-    expect(textarea.value).toBe('default value');
+      textarea.defaultValue = 'default value';
+      expect(textarea.defaultValue).toBe('default value');
+      expect(textarea.value).toBe('default value');
 
-    textarea.value = 'property value';
-    expect(textarea.defaultValue).toBe('default value');
-    expect(textarea.value).toBe('property value');
+      textarea.value = 'property value';
+      expect(textarea.defaultValue).toBe('default value');
+      expect(textarea.value).toBe('property value');
 
-    text.data = 'text content value 2';
-    expect(textarea.defaultValue).toBe('text content value 2');
-    expect(textarea.value).toBe('property value');
+      text.data = 'text content value 2';
+      expect(textarea.defaultValue).toBe('text content value 2');
+      expect(textarea.value).toBe('property value');
+    });
   });
 });
