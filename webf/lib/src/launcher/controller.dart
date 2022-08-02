@@ -16,8 +16,7 @@ import 'package:flutter/widgets.dart' show RenderObjectElement;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart'
-    show RouteInformation, WidgetsBinding, WidgetsBindingObserver, AnimationController;
+import 'package:flutter/widgets.dart' show RouteInformation, WidgetsBinding, WidgetsBindingObserver, AnimationController;
 import 'package:webf/bridge.dart';
 import 'package:webf/dom.dart';
 import 'package:webf/foundation.dart';
@@ -130,8 +129,7 @@ class WebFViewController implements WidgetsBindingObserver, ElementsBindingObser
       originalViewport.controller = rootController;
       viewport = originalViewport;
     } else {
-      viewport = RenderViewportBox(
-          background: background, viewportSize: ui.Size(viewportWidth, viewportHeight), controller: rootController);
+      viewport = RenderViewportBox(background: background, viewportSize: ui.Size(viewportWidth, viewportHeight), controller: rootController);
     }
 
     if (kProfileMode) {
@@ -216,7 +214,7 @@ class WebFViewController implements WidgetsBindingObserver, ElementsBindingObser
   void _setupObserver() {
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.addObserver(this);
-    } else if (WidgetsBinding.instance != null) {
+    } else {
       WidgetsBinding.instance.addObserver(this);
     }
   }
@@ -224,7 +222,7 @@ class WebFViewController implements WidgetsBindingObserver, ElementsBindingObser
   void _teardownObserver() {
     if (ElementsBinding.instance != null) {
       ElementsBinding.instance!.removeObserver(this);
-    } else if (WidgetsBinding.instance != null) {
+    } else {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -1076,8 +1074,7 @@ class WebFController {
 
   String get origin => Uri.parse(url).origin;
 
-  Future<void> executeEntrypoint(
-      {bool shouldResolve = true, bool shouldEvaluate = true, AnimationController? animationController}) async {
+  Future<void> executeEntrypoint({bool shouldResolve = true, bool shouldEvaluate = true, AnimationController? animationController}) async {
     if (_entrypoint != null && shouldResolve) {
       await _resolveEntrypoint();
       if (_entrypoint!.isResolved && shouldEvaluate) {

@@ -56,11 +56,6 @@ class EditableTextDelegate implements TextSelectionDelegate {
   @override
   TextEditingValue get textEditingValue => _textEditingValue;
 
-  @override
-  set textEditingValue(TextEditingValue value) {
-    // Deprecated, update the lasted value in the userUpdateTextEditingValue.
-  }
-
   // Add alias for use in actions forked from Flutter source.
   TextEditingValue get value => _textEditingValue;
   TextFormControlElement get element => _textFormControlElement;
