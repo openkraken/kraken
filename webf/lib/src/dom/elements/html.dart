@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/foundation.dart';
 
 const String HTML = 'HTML';
 const Map<String, dynamic> _defaultStyle = {
@@ -12,8 +13,7 @@ const Map<String, dynamic> _defaultStyle = {
 
 class HTMLElement extends Element {
   static Map<String, dynamic> defaultStyle = _defaultStyle;
-  HTMLElement([BindingContext? context])
-      : super(context, defaultStyle: defaultStyle);
+  HTMLElement([BindingContext? context]) : super(context, defaultStyle: defaultStyle);
 
   @override
   void dispatchEvent(Event event) {
@@ -31,8 +31,8 @@ class HTMLElement extends Element {
   @override
   void setRenderStyle(String property, String present) {
     switch (property) {
-    // Visible should be interpreted as auto and clip should be interpreted as hidden when overflow apply to html.
-    // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
+      // Visible should be interpreted as auto and clip should be interpreted as hidden when overflow apply to html.
+      // https://drafts.csswg.org/css-overflow-3/#overflow-propagation
       case OVERFLOW:
       case OVERFLOW_X:
       case OVERFLOW_Y:

@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 const Offset _DEFAULT_TRANSFORM_OFFSET = Offset.zero;
 const Alignment _DEFAULT_TRANSFORM_ALIGNMENT = Alignment.center;
@@ -60,13 +61,13 @@ mixin CSSTransformMixin on RenderStyle {
     }
     return _transformMatrix;
   }
+
   // Transform animation drived by transformMatrix.
   set transformMatrix(Matrix4? value) {
     if (value == null || _transformMatrix == value) return;
     _transformMatrix = value;
     renderBoxModel?.markNeedsPaint();
   }
-
 
   // Effective transform matrix after renderBoxModel has been layouted.
   // Copy from flutter [RenderTransform._effectiveTransform]
@@ -79,8 +80,7 @@ mixin CSSTransformMixin on RenderStyle {
     late Offset translation;
     if (transformAlignment != Alignment.topLeft) {
       // Use boxSize instead of size to avoid Flutter cannot access size beyond parent access warning
-      translation = boxModel.hasSize
-        ? transformAlignment.alongSize(boxModel.boxSize!) : Offset.zero;
+      translation = boxModel.hasSize ? transformAlignment.alongSize(boxModel.boxSize!) : Offset.zero;
       result.translate(translation.dx, translation.dy);
     }
 
@@ -88,8 +88,7 @@ mixin CSSTransformMixin on RenderStyle {
       result.multiply(transformMatrix!);
     }
 
-    if (transformAlignment != Alignment.topLeft)
-      result.translate(-translation.dx, -translation.dy);
+    if (transformAlignment != Alignment.topLeft) result.translate(-translation.dx, -translation.dy);
 
     result.translate(-transformOffset.dx, -transformOffset.dy);
 
@@ -121,7 +120,8 @@ mixin CSSTransformMixin on RenderStyle {
   }
 
   CSSOrigin? _transformOrigin;
-  CSSOrigin get transformOrigin => _transformOrigin ?? const CSSOrigin(_DEFAULT_TRANSFORM_OFFSET, _DEFAULT_TRANSFORM_ALIGNMENT);
+  CSSOrigin get transformOrigin =>
+      _transformOrigin ?? const CSSOrigin(_DEFAULT_TRANSFORM_OFFSET, _DEFAULT_TRANSFORM_ALIGNMENT);
   set transformOrigin(CSSOrigin? value) {
     if (_transformOrigin == value) return;
     _transformOrigin = value;
@@ -141,4 +141,3 @@ mixin CSSTransformMixin on RenderStyle {
     }
   }
 }
-

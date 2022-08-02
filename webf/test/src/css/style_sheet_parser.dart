@@ -1,4 +1,9 @@
-import 'package:kraken/css.dart';
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
+
+import 'package:webf/css.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -30,7 +35,8 @@ void main() {
     });
 
     test('4', () {
-      List<CSSRule> rules = CSSStyleSheetParser.parse('.foo {color: red} .bar {background: url(data:image/png;base64...)}');
+      List<CSSRule> rules =
+          CSSStyleSheetParser.parse('.foo {color: red} .bar {background: url(data:image/png;base64...)}');
       expect(rules.length, 2);
       expect((rules[0] as CSSStyleRule).selectorText, '.foo');
       expect((rules[0] as CSSStyleRule).style['color'], 'red');

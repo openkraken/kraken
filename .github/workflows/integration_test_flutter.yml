@@ -5,12 +5,12 @@ on: [workflow_dispatch, pull_request]
 env:
   nodeVersion: "16"
   cmakeVersion: "3.22.x"
-  flutterVersion: "2.8.1"
+  flutterVersion: "3.0.4"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   setup:
-    runs-on: macos-latest
+    runs-on: macos-12
     outputs:
       matrix: ${{ steps.matrix.outputs.value }}
     steps:
@@ -20,7 +20,7 @@ jobs:
           JSON=$(node -e "console.log(JSON.stringify(require('./integration_tests/spec_group.json').map(j=>j.name)))")
           echo "::set-output name=value::$(echo $JSON)"
   build_bridge:
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -35,8 +35,34 @@ jobs:
       with:
         name: macos_bridge_binary
         path: bridge/build/macos/
+
+  bridge_unit_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.nodeVersion }}
+    - uses: jwlawson/actions-setup-cmake@v1.11
+      with:
+        cmake-version: ${{ env.cmakeVersion }}
+    - run: npm i
+    - run: ENABLE_ASAN=true npm run build:bridge:linux
+    - run: node scripts/run_bridge_unit_test.js
+
+  webf_unit_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.flutterVersion }}
+    - run: flutter config --enable-macos-desktop
+    - run: flutter doctor -v
+    - run: cd webf && flutter test
+
   integration_test:
-    runs-on: macos-latest
+    runs-on: macos-12
     needs: [ setup, build_bridge ]
     strategy:
       fail-fast: false
@@ -69,7 +95,7 @@ jobs:
       if: steps.test.outcome != 'success'
       run: exit 1
   plugin_test:
-    runs-on: macos-latest
+    runs-on: macos-12
     needs: [ build_bridge ]
     steps:
     - uses: actions/checkout@v2

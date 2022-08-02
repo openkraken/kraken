@@ -1,8 +1,9 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
-import 'package:kraken/devtools.dart';
+import 'package:webf/devtools.dart';
 
 class InspectLogModule extends UIInspectorModule {
   InspectLogModule(ChromeDevToolsService server) : super(server) {
@@ -49,7 +50,6 @@ class InspectLogModule extends UIInspectorModule {
   }
 }
 
-
 class LogEntryEvent extends InspectorEvent {
   // Allowed Values: xml, javascript, network, storage, appcache,
   // rendering, security, deprecation, worker, violation, intervention,
@@ -76,12 +76,12 @@ class LogEntryEvent extends InspectorEvent {
 
   @override
   JSONEncodable? get params => JSONEncodableMap({
-    'entry': {
-      'source': source,
-      'level': level,
-      'text': text,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      if (url != null) 'url': url,
-    },
-  });
+        'entry': {
+          'source': source,
+          'level': level,
+          'text': text,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          if (url != null) 'url': url,
+        },
+      });
 }

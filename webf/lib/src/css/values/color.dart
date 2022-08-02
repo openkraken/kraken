@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math';
@@ -7,7 +8,7 @@ import 'dart:math';
 import 'package:quiver/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 /// Only support Basic color keywords and Extended color keywords,
 /// for CSS system colors is not recommended for use after CSS3
@@ -173,6 +174,7 @@ final _colorRgbRegExp =
     RegExp(r'^(rgba?)\(([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)[,\s]+([+-]?[0-9.]+%?)([,\s/]+([+-]?[0-9.]+%?))?\s*\)$');
 
 final LinkedLruHashMap<String, Color> _cachedParsedColor = LinkedLruHashMap(maximumSize: 100);
+
 /// #123
 /// #123456
 /// rgb(r,g,b)
@@ -190,7 +192,6 @@ class CSSColor {
   //   Output = '0 2rpx 4rpx 0 rgba0, 0 25rpx 50rpx 0 rgba1', with color cached:
   //     'rgba0' -> Color(0x19000000), 'rgba1' -> Color(0x26000000)
   // Cache will be terminated after used once.
-
 
   static String convertToHex(Color color) {
     String red = color.red.toRadixString(16).padLeft(2);

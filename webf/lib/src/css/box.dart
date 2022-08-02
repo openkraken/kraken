@@ -1,15 +1,15 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:core';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 // CSS Box Model: https://drafts.csswg.org/css-box-4/
 mixin CSSBoxMixin on RenderStyle {
-
   final DecorationPosition decorationPosition = DecorationPosition.background;
   final ImageConfiguration imageConfiguration = ImageConfiguration.empty;
 
@@ -50,7 +50,7 @@ mixin CSSBoxMixin on RenderStyle {
 
     DecorationImage? decorationImage;
     ImageProvider? image = backgroundImage?.image;
-    if (image!= null) {
+    if (image != null) {
       decorationImage = DecorationImage(
         image: image,
         repeat: backgroundRepeat,
@@ -78,8 +78,14 @@ class CSSBoxDecoration extends BoxDecoration {
     this.gradient,
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }): super(color: color, image: image, border: border, borderRadius: borderRadius,
-    gradient: gradient, backgroundBlendMode: backgroundBlendMode, shape: shape);
+  }) : super(
+            color: color,
+            image: image,
+            border: border,
+            borderRadius: borderRadius,
+            gradient: gradient,
+            backgroundBlendMode: backgroundBlendMode,
+            shape: shape);
 
   @override
   final Color? color;
@@ -94,7 +100,7 @@ class CSSBoxDecoration extends BoxDecoration {
   final BorderRadius? borderRadius;
 
   @override
-  final List<KrakenBoxShadow>? boxShadow;
+  final List<WebFBoxShadow>? boxShadow;
 
   @override
   final Gradient? gradient;
@@ -112,7 +118,7 @@ class CSSBoxDecoration extends BoxDecoration {
     DecorationImage? image,
     BoxBorder? border,
     BorderRadius? borderRadius,
-    List<KrakenBoxShadow>? boxShadow,
+    List<WebFBoxShadow>? boxShadow,
     Gradient? gradient,
     BlendMode? backgroundBlendMode,
     BoxShape? shape,
@@ -129,4 +135,3 @@ class CSSBoxDecoration extends BoxDecoration {
     );
   }
 }
-

@@ -21,7 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1BBD1BD926F386FE00962139 /* libkraken_test.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1BBD1BD726F386FE00962139 /* libkraken_test.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		1BBD1BD926F386FE00962139 /* libwebf_test.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 1BBD1BD726F386FE00962139 /* libwebf_test.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
@@ -47,7 +47,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1BBD1BD926F386FE00962139 /* libkraken_test.dylib in Embed Libraries */,
+				1BBD1BD926F386FE00962139 /* libwebf_test.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -55,7 +55,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1BBD1BD726F386FE00962139 /* libkraken_test.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libkraken_test.dylib; path = ../../bridge/build/macos/lib/x86_64/libkraken_test.dylib; sourceTree = "<group>"; };
+		1BBD1BD726F386FE00962139 /* libwebf_test.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libwebf_test.dylib; path = ../../bridge/build/macos/lib/x86_64/libwebf_test.dylib; sourceTree = "<group>"; };
 		232E80EF84E689DED3537A8E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
@@ -168,7 +168,7 @@
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1BBD1BD726F386FE00962139 /* libkraken_test.dylib */,
+				1BBD1BD726F386FE00962139 /* libwebf_test.dylib */,
 				232E80EF84E689DED3537A8E /* Pods_Runner.framework */,
 			);
 			name = Frameworks;

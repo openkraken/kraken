@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:kraken/foundation.dart';
-import 'package:kraken/module.dart';
+import 'package:webf/foundation.dart';
+import 'package:webf/module.dart';
 
 String EMPTY_STRING = '';
 
@@ -41,7 +42,7 @@ class FetchModule extends BaseModule {
     }
   }
 
-  static const String fallbackUserAgent = 'Kraken';
+  static const String fallbackUserAgent = 'WebF';
   static String? _defaultUserAgent;
   static String _getDefaultUserAgent() {
     if (_defaultUserAgent == null) {
@@ -57,8 +58,7 @@ class FetchModule extends BaseModule {
 
   @visibleForTesting
   Future<HttpClientRequest> getRequest(Uri uri, String? method, Map? headers, data) {
-    return httpClient.openUrl(method ?? 'GET', uri)
-        .then((HttpClientRequest request) {
+    return httpClient.openUrl(method ?? 'GET', uri).then((HttpClientRequest request) {
       // Reset Kraken UA.
       request.headers.removeAll(HttpHeaders.userAgentHeader);
       request.headers.add(HttpHeaders.userAgentHeader, _getDefaultUserAgent());
@@ -98,36 +98,34 @@ class FetchModule extends BaseModule {
       }
       callback(error: errmsg);
     }
+
     if (uri.host.isEmpty) {
       // No host specified in URI.
       _handleError('Failed to parse URL from $uri.', null);
     } else {
       HttpClientResponse? response;
-      getRequest(uri, options['method'], options['headers'], options['body'])
-        .then((HttpClientRequest request) {
-          if (_disposed) return Future.value(null);
-          return request.close();
-        })
-        .then((HttpClientResponse? res) {
-          if (res == null) {
-            return Future.value(null);
-          } else {
-            response = res;
-            return consolidateHttpClientResponseBytes(res);
-          }
-        })
-        .then((Uint8List? bytes) {
-          if (bytes == null) return Future.value(null);
-          else return resolveStringFromData(bytes);
-        })
-        .then((String? content) {
-          if (content != null) {
-            callback(data: [EMPTY_STRING, response?.statusCode, content]);
-          } else {
-            throw FlutterError('Failed to read response.');
-          }
-        })
-        .catchError(_handleError);
+      getRequest(uri, options['method'], options['headers'], options['body']).then((HttpClientRequest request) {
+        if (_disposed) return Future.value(null);
+        return request.close();
+      }).then((HttpClientResponse? res) {
+        if (res == null) {
+          return Future.value(null);
+        } else {
+          response = res;
+          return consolidateHttpClientResponseBytes(res);
+        }
+      }).then((Uint8List? bytes) {
+        if (bytes == null)
+          return Future.value(null);
+        else
+          return resolveStringFromData(bytes);
+      }).then((String? content) {
+        if (content != null) {
+          callback(data: [EMPTY_STRING, response?.statusCode, content]);
+        } else {
+          throw FlutterError('Failed to read response.');
+        }
+      }).catchError(_handleError);
     }
 
     return EMPTY_STRING;

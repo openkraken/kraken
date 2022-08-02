@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:core';
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 final RegExp _splitRegExp = RegExp(r'\s+');
 
@@ -25,7 +26,6 @@ enum CSSBorderStyleType {
 }
 
 mixin CSSBorderMixin on RenderStyle {
-
   // Effective border widths. These are used to calculate the
   // dimensions of the border box.
   @override
@@ -40,8 +40,7 @@ mixin CSSBorderMixin on RenderStyle {
   }
 
   Size wrapBorderSize(Size innerSize) {
-    return Size(border.left + innerSize.width + border.right,
-        border.top + innerSize.height + border.bottom);
+    return Size(border.left + innerSize.width + border.right, border.top + innerSize.height + border.bottom);
   }
 
   BoxConstraints deflateBorderConstraints(BoxConstraints constraints) {
@@ -55,16 +54,16 @@ mixin CSSBorderMixin on RenderStyle {
     BorderSide? rightSide = CSSBorderSide._getBorderSide(this, CSSBorderSide.RIGHT);
     BorderSide? bottomSide = CSSBorderSide._getBorderSide(this, CSSBorderSide.BOTTOM);
 
-    bool hasBorder = leftSide != null ||
-        topSide != null ||
-        rightSide != null ||
-        bottomSide != null;
+    bool hasBorder = leftSide != null || topSide != null || rightSide != null || bottomSide != null;
 
-    return hasBorder ? [
-      leftSide ?? CSSBorderSide.none,
-      topSide ?? CSSBorderSide.none,
-      rightSide ?? CSSBorderSide.none,
-      bottomSide ?? CSSBorderSide.none] : null;
+    return hasBorder
+        ? [
+            leftSide ?? CSSBorderSide.none,
+            topSide ?? CSSBorderSide.none,
+            rightSide ?? CSSBorderSide.none,
+            bottomSide ?? CSSBorderSide.none
+          ]
+        : null;
   }
 
   /// Shorted border property:
@@ -84,11 +83,13 @@ mixin CSSBorderMixin on RenderStyle {
     _borderTopWidth = value;
     renderBoxModel?.markNeedsLayout();
   }
+
   @override
   CSSLengthValue? get borderTopWidth => _borderTopWidth;
 
   @override
-  CSSLengthValue get effectiveBorderTopWidth => borderTopStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderTopWidth ?? _mediumWidth);
+  CSSLengthValue get effectiveBorderTopWidth =>
+      borderTopStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderTopWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderRightWidth;
   set borderRightWidth(CSSLengthValue? value) {
@@ -101,7 +102,8 @@ mixin CSSBorderMixin on RenderStyle {
   CSSLengthValue? get borderRightWidth => _borderRightWidth;
 
   @override
-  CSSLengthValue get effectiveBorderRightWidth => borderRightStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderRightWidth ?? _mediumWidth);
+  CSSLengthValue get effectiveBorderRightWidth =>
+      borderRightStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderRightWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderBottomWidth;
   set borderBottomWidth(CSSLengthValue? value) {
@@ -114,7 +116,8 @@ mixin CSSBorderMixin on RenderStyle {
   CSSLengthValue? get borderBottomWidth => _borderBottomWidth;
 
   @override
-  CSSLengthValue get effectiveBorderBottomWidth => borderBottomStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderBottomWidth ?? _mediumWidth);
+  CSSLengthValue get effectiveBorderBottomWidth =>
+      borderBottomStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderBottomWidth ?? _mediumWidth);
 
   CSSLengthValue? _borderLeftWidth;
   set borderLeftWidth(CSSLengthValue? value) {
@@ -127,7 +130,8 @@ mixin CSSBorderMixin on RenderStyle {
   CSSLengthValue? get borderLeftWidth => _borderLeftWidth;
 
   @override
-  CSSLengthValue get effectiveBorderLeftWidth => borderLeftStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderLeftWidth ?? _mediumWidth);
+  CSSLengthValue get effectiveBorderLeftWidth =>
+      borderLeftStyle == BorderStyle.none ? CSSLengthValue.zero : (_borderLeftWidth ?? _mediumWidth);
 
   /// Border-color
   @override
@@ -295,11 +299,7 @@ class CSSBorderSide {
     if (borderStyle == BorderStyle.none || borderWidth!.isZero) {
       return null;
     } else {
-      return BorderSide(
-        width: borderWidth.computedValue,
-        style: borderStyle!,
-        color: borderColor!
-      );
+      return BorderSide(width: borderWidth.computedValue, style: borderStyle!, color: borderColor!);
     }
   }
 }
@@ -349,12 +349,12 @@ class CSSBorderRadius {
   }
 }
 
-class KrakenBoxShadow extends BoxShadow {
+class WebFBoxShadow extends BoxShadow {
   /// Creates a box shadow.
   ///
   /// By default, the shadow is solid black with zero [offset], [blurRadius],
   /// and [spreadRadius].
-  const KrakenBoxShadow({
+  const WebFBoxShadow({
     Color color = const Color(0xFF000000),
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
@@ -383,13 +383,13 @@ class CSSBoxShadow {
   CSSLengthValue? blurRadius;
   CSSLengthValue? spreadRadius;
 
-  KrakenBoxShadow get computedBoxShadow {
+  WebFBoxShadow get computedBoxShadow {
     color ??= const Color(0xFF000000);
     offsetX ??= CSSLengthValue.zero;
     offsetY ??= CSSLengthValue.zero;
     blurRadius ??= CSSLengthValue.zero;
     spreadRadius ??= CSSLengthValue.zero;
-    return KrakenBoxShadow(
+    return WebFBoxShadow(
       color: color!,
       offset: Offset(offsetX!.computedValue, offsetY!.computedValue),
       blurRadius: blurRadius!.computedValue,
@@ -399,7 +399,6 @@ class CSSBoxShadow {
   }
 
   static List<CSSBoxShadow>? parseBoxShadow(String present, RenderStyle renderStyle, String propertyName) {
-
     var shadows = CSSStyleProperty.getShadowValues(present);
     if (shadows != null) {
       List<CSSBoxShadow>? boxShadow = [];

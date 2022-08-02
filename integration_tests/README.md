@@ -1,4 +1,4 @@
-# Kraken integration tests
+# WebF integration tests
 
 ## Dart Unit test
 
@@ -42,5 +42,5 @@ sudo pmset -a gpuswitch 0
 
 this above command will execute which spec's name contains "synthesized-baseline-flexbox-001"
 ```
- KRAKEN_TEST_FILTER="synthesized-baseline-flexbox-001" npm run integration
+ WEBF_TEST_FILTER="synthesized-baseline-flexbox-001" npm run integration
 ```

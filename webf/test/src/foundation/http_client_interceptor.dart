@@ -1,8 +1,14 @@
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:test/test.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
+
 import '../../local_http_server.dart';
 
 const int contextId = 2;
@@ -13,9 +19,8 @@ void main() {
     HttpClient httpClient = HttpClient();
 
     test('beforeRequest', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
-      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
+      WebFHttpOverrides.setContextHeader(request.headers, contextId);
       request.headers.add('x-test-id', 'beforeRequest-001');
 
       var res = await request.close();
@@ -23,16 +28,13 @@ void main() {
 
       expect(jsonDecode(String.fromCharCodes(await res.single)), {
         'method': 'GET',
-        'data': {
-          'userName': '12345'
-        }
+        'data': {'userName': '12345'}
       });
     });
 
     test('afterResponse', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
-      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
+      WebFHttpOverrides.setContextHeader(request.headers, contextId);
       request.headers.add('x-test-id', 'afterResponse-001');
 
       var response = await request.close();
@@ -40,9 +42,8 @@ void main() {
     });
 
     test('shouldInterceptRequest', () async {
-      var request = await httpClient.openUrl('GET',
-          server.getUri('json_with_content_length'));
-      KrakenHttpOverrides.setContextHeader(request.headers, contextId);
+      var request = await httpClient.openUrl('GET', server.getUri('json_with_content_length'));
+      WebFHttpOverrides.setContextHeader(request.headers, contextId);
       request.headers.add('x-test-id', 'shouldInterceptRequest-001');
 
       var response = await request.close();
@@ -61,13 +62,12 @@ class TestHttpClientInterceptor implements HttpClientInterceptor {
   }
 
   @override
-  Future<HttpClientResponse?> afterResponse(
-      HttpClientRequest request, HttpClientResponse response) async {
+  Future<HttpClientResponse?> afterResponse(HttpClientRequest request, HttpClientResponse response) async {
     if (request.headers.value('x-test-id') == 'afterResponse-001') {
-      return HttpClientStreamResponse(response, initialHeaders: createHttpHeaders(
-        initialHeaders: {
-          'x-test-after-response': ['modified'],
-        }));
+      return HttpClientStreamResponse(response,
+          initialHeaders: createHttpHeaders(initialHeaders: {
+            'x-test-after-response': ['modified'],
+          }));
     }
     return response;
   }

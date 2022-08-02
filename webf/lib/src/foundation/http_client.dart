@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:async';
@@ -9,11 +10,11 @@ import 'http_client_request.dart';
 import 'http_overrides.dart';
 
 class ProxyHttpClient implements HttpClient {
-  ProxyHttpClient(HttpClient nativeHttpClient, KrakenHttpOverrides httpOverrides)
+  ProxyHttpClient(HttpClient nativeHttpClient, WebFHttpOverrides httpOverrides)
       : _nativeHttpClient = nativeHttpClient,
         _httpOverrides = httpOverrides;
 
-  final KrakenHttpOverrides _httpOverrides;
+  final WebFHttpOverrides _httpOverrides;
   final HttpClient _nativeHttpClient;
 
   bool _closed = false;
@@ -168,15 +169,25 @@ class ProxyHttpClient implements HttpClient {
 
   @override
   Future<HttpClientRequest> deleteUrl(Uri url) => _openUrl('delete', url);
+
+  @override
+  set connectionFactory(Future<ConnectionTask<Socket>> Function(Uri url, String? proxyHost, int? proxyPort)? f) {
+    // TODO: implement connectionFactory
+  }
+
+  @override
+  set keyLog(Function(String line)? callback) {
+    // TODO: implement keyLog
+  }
 }
 
-HttpHeaders createHttpHeaders({ Map<String, List<String>>? initialHeaders }) {
+HttpHeaders createHttpHeaders({Map<String, List<String>>? initialHeaders}) {
   return _HttpHeaders(initialHeaders: initialHeaders);
 }
 
 class _HttpHeaders implements HttpHeaders {
   final Map<String, List<String>> _headers = <String, List<String>>{};
-  _HttpHeaders({ Map<String, List<String>>? initialHeaders }) {
+  _HttpHeaders({Map<String, List<String>>? initialHeaders}) {
     if (initialHeaders != null) {
       _headers.addAll(initialHeaders);
     }
@@ -355,7 +366,6 @@ class _HttpHeaders implements HttpHeaders {
     return values[0];
   }
 
-
   void _addAll(String name, value) {
     if (value is Iterable) {
       for (var v in value) {
@@ -390,7 +400,8 @@ class _HttpHeaders implements HttpHeaders {
         if (hasValue) {
           sb.write('\n');
         }
-        sb..write(name)
+        sb
+          ..write(name)
           ..write(': ')
           ..write(value);
         hasValue = true;

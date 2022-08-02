@@ -4,10 +4,10 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "webf")
+set(PLUGIN_NAME "webf_plugin")
 
 add_library(${PLUGIN_NAME} SHARED
-    "webf.cc"
+    "webf_plugin.cc"
     )
 
 add_library(webf SHARED IMPORTED)

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -46,7 +47,7 @@ class ScrollPhysics {
   static ScrollPhysicsFactory? scrollPhysicsFactory;
 
   // Automatically determine scroll physics due to devices.
-  static ScrollPhysics createScrollPhysics({ ScrollPhysics? parent }) {
+  static ScrollPhysics createScrollPhysics({ScrollPhysics? parent}) {
     if (scrollPhysicsFactory != null) {
       return scrollPhysicsFactory!(parent);
     } else if (Platform.isIOS || Platform.isMacOS) {
@@ -58,7 +59,7 @@ class ScrollPhysics {
   }
 
   /// Creates an object with the default scroll physics.
-  const ScrollPhysics({ this.parent });
+  const ScrollPhysics({this.parent});
 
   /// If non-null, determines the default behavior for each method.
   ///
@@ -421,7 +422,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content.
-  const ClampingScrollPhysics({ ScrollPhysics? parent }) : super(parent: parent);
+  const ClampingScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
   @override
   ClampingScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -436,12 +437,14 @@ class ClampingScrollPhysics extends ScrollPhysics {
           ErrorSummary('$runtimeType.applyBoundaryConditions() was called redundantly.'),
           ErrorDescription(
             'The proposed new position, $value, is exactly equal to the current position of the '
-                'given ${position.runtimeType}, ${position.pixels}.\n'
-                'The applyBoundaryConditions method should only be called when the value is '
-                'going to actually change the pixels, otherwise it is redundant.',
+            'given ${position.runtimeType}, ${position.pixels}.\n'
+            'The applyBoundaryConditions method should only be called when the value is '
+            'going to actually change the pixels, otherwise it is redundant.',
           ),
-          DiagnosticsProperty<ScrollPhysics>('The physics object in question was', this, style: DiagnosticsTreeStyle.errorProperty),
-          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<ScrollPhysics>('The physics object in question was', this,
+              style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<ScrollMetrics>('The position object in question was', position,
+              style: DiagnosticsTreeStyle.errorProperty),
         ]);
       }
       return true;
@@ -462,10 +465,8 @@ class ClampingScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
       double? end;
-      if (position.pixels > position.maxScrollExtent)
-        end = position.maxScrollExtent;
-      if (position.pixels < position.minScrollExtent)
-        end = position.minScrollExtent;
+      if (position.pixels > position.maxScrollExtent) end = position.maxScrollExtent;
+      if (position.pixels < position.minScrollExtent) end = position.minScrollExtent;
       assert(end != null);
       return ScrollSpringSimulation(
         spring,
@@ -475,12 +476,9 @@ class ClampingScrollPhysics extends ScrollPhysics {
         tolerance: tolerance,
       );
     }
-    if (velocity.abs() < tolerance.velocity)
-      return null;
-    if (velocity > 0.0 && position.pixels >= position.maxScrollExtent)
-      return null;
-    if (velocity < 0.0 && position.pixels <= position.minScrollExtent)
-      return null;
+    if (velocity.abs() < tolerance.velocity) return null;
+    if (velocity > 0.0 && position.pixels >= position.maxScrollExtent) return null;
+    if (velocity < 0.0 && position.pixels <= position.minScrollExtent) return null;
     return ClampingScrollSimulation(
       position: position.pixels,
       velocity: velocity,

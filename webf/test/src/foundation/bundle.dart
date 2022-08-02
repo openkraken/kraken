@@ -1,9 +1,14 @@
-import 'dart:convert';
-import 'dart:typed_data';
-import 'dart:io';
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
 
-import 'package:kraken/foundation.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:test/test.dart';
+import 'package:webf/foundation.dart';
 
 import '../../local_http_server.dart';
 
@@ -55,11 +60,11 @@ void main() {
       expect(bundle.data, bytecode);
     });
 
-    test('KrakenBundle', () async {
+    test('WebFBundle', () async {
       Uint8List bytecode = Uint8List.fromList(List.generate(10, (index) => index, growable: false));
-      var bundle = KrakenBundle.fromBytecode(bytecode);
+      var bundle = WebFBundle.fromBytecode(bytecode);
       await bundle.resolve(1);
-      expect(bundle.contentType.mimeType, 'application/vnd.kraken.bc1');
+      expect(bundle.contentType.mimeType, 'application/vnd.webf.bc1');
     });
   });
 }

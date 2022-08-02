@@ -1,5 +1,10 @@
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
+
 import 'package:test/test.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/foundation.dart';
 
 void main() {
   group('UriParser', () {
@@ -24,9 +29,7 @@ void main() {
     ];
 
     for (var spec in resolveTests) {
-      String index = resolveTests.indexOf(spec)
-          .toString()
-          .padLeft(3, '0');
+      String index = resolveTests.indexOf(spec).toString().padLeft(3, '0');
 
       test('resolve $index', () {
         Uri base = Uri.parse(spec[0]);

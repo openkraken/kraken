@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Original version: https://github.com/rknell/dart_queue
 import 'dart:async';
@@ -77,8 +78,7 @@ class Queue {
   }
 
   void _queueUpNext() {
-    if (_nextCycle.isNotEmpty &&
-        _activeItems.length <= parallel) {
+    if (_nextCycle.isNotEmpty && _activeItems.length <= parallel) {
       final processId = _lastProcessId;
       _activeItems.add(processId);
       final item = _nextCycle.first;

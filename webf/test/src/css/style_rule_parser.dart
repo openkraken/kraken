@@ -1,4 +1,9 @@
-import 'package:kraken/css.dart';
+/*
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
+ */
+
+import 'package:webf/css.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -44,7 +49,8 @@ void main() {
     });
 
     test('7', () {
-      CSSStyleRule? styleRule = CSSStyleRuleParser.parse('.foo \t {background: url(data:image/png;base64, CNbyblAAAAHElEQVQI12P4) red}');
+      CSSStyleRule? styleRule =
+          CSSStyleRuleParser.parse('.foo \t {background: url(data:image/png;base64, CNbyblAAAAHElEQVQI12P4) red}');
       expect(styleRule!.selectorText, '.foo');
       expect(styleRule.style['background'], 'url(data:image/png;base64, CNbyblAAAAHElEQVQI12P4) red');
     });
@@ -68,31 +74,31 @@ void main() {
     });
 
     test('11', () {
-      CSSStyleRule? styleRule =  CSSStyleRuleParser.parse('[hidden] { display: none }');
+      CSSStyleRule? styleRule = CSSStyleRuleParser.parse('[hidden] { display: none }');
       expect(styleRule!.selectorText, '[hidden]');
       expect(styleRule.style['display'], 'none');
     });
 
     test('12', () {
-      CSSStyleRule? styleRule =  CSSStyleRuleParser.parse('/**/ div > p { color: rgb(255, 255, 0);  } /**/');
+      CSSStyleRule? styleRule = CSSStyleRuleParser.parse('/**/ div > p { color: rgb(255, 255, 0);  } /**/');
       expect(styleRule!.selectorText, 'div > p');
       expect(styleRule.style['color'], 'rgb(255, 255, 0)');
     });
 
     test('13', () {
-      CSSStyleRule? styleRule =  CSSStyleRuleParser.parse('.foo { background-image: url( "./image (1).jpg" )}');
+      CSSStyleRule? styleRule = CSSStyleRuleParser.parse('.foo { background-image: url( "./image (1).jpg" )}');
       expect(styleRule!.selectorText, '.foo');
       expect(styleRule.style['backgroundImage'], 'url( "./image (1).jpg" )');
     });
 
     test('14', () {
-      CSSStyleRule? styleRule =  CSSStyleRuleParser.parse('.foo { .foo{ }; color: red}');
+      CSSStyleRule? styleRule = CSSStyleRuleParser.parse('.foo { .foo{ }; color: red}');
       expect(styleRule!.selectorText, '.foo');
       expect(styleRule.style['color'], 'red');
     });
 
     test('15', () {
-      CSSStyleRule? styleRule =  CSSStyleRuleParser.parse(' .foo {}');
+      CSSStyleRule? styleRule = CSSStyleRuleParser.parse(' .foo {}');
       expect(styleRule!.selectorText, '.foo');
     });
   });

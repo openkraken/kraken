@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -118,9 +119,11 @@ abstract class ScrollMetrics {
     assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
         // "above" overscroll value
-        - (minScrollExtent - pixels).clamp(0, viewportDimension)
+        -
+        (minScrollExtent - pixels).clamp(0, viewportDimension)
         // "below" overscroll value
-        - (pixels - maxScrollExtent).clamp(0, viewportDimension);
+        -
+        (pixels - maxScrollExtent).clamp(0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.
@@ -139,7 +142,7 @@ class FixedScrollMetrics with ScrollMetrics {
     required double? pixels,
     required double? viewportDimension,
     required this.axisDirection,
-  }) : _minScrollExtent = minScrollExtent,
+  })  : _minScrollExtent = minScrollExtent,
         _maxScrollExtent = maxScrollExtent,
         _pixels = pixels,
         _viewportDimension = viewportDimension;

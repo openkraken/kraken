@@ -1,9 +1,10 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
+import 'package:webf/css.dart';
 
 mixin CSSObjectPositionMixin on RenderStyle {
   @override
@@ -22,8 +23,7 @@ mixin CSSObjectPositionMixin on RenderStyle {
 
     if (position != null) {
       List<String?> values = CSSStyleProperty.getPositionValues(position);
-      return Alignment(_getAlignmentValueFromString(values[0]!),
-          _getAlignmentValueFromString(values[1]!));
+      return Alignment(_getAlignmentValueFromString(values[0]!), _getAlignmentValueFromString(values[1]!));
     }
 
     // The default value for object-position is 50% 50%

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ui' as ui;
 
@@ -16,9 +17,7 @@ mixin RenderOpacityMixin on RenderBox {
     _opacityLayer.layer = null;
   }
 
-  void paintOpacity(PaintingContext context, Offset offset,
-      PaintingContextCallback callback) {
-
+  void paintOpacity(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     if (alpha == 255) {
       _opacityLayer.layer = null;
       // No need to keep the layer. We'll create a new one if necessary.
@@ -26,12 +25,10 @@ mixin RenderOpacityMixin on RenderBox {
       return;
     }
 
-    _opacityLayer.layer =
-        context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer.layer);
+    _opacityLayer.layer = context.pushOpacity(offset, alpha, callback, oldLayer: _opacityLayer.layer);
   }
 
   void debugOpacityProperties(DiagnosticPropertiesBuilder properties) {
-    if (alpha != 0 && alpha != 255)
-      properties.add(DiagnosticsProperty('alpha', alpha));
+    if (alpha != 0 && alpha != 255) properties.add(DiagnosticsProperty('alpha', alpha));
   }
 }

@@ -1,19 +1,21 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:io';
 
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 
 // TODO: Don't use header to mark context.
 const String HttpHeaderContext = 'x-context';
-class KrakenHttpOverrides extends HttpOverrides {
-  static KrakenHttpOverrides? _instance;
 
-  KrakenHttpOverrides._();
+class WebFHttpOverrides extends HttpOverrides {
+  static WebFHttpOverrides? _instance;
 
-  factory KrakenHttpOverrides.instance() {
-    _instance ??= KrakenHttpOverrides._();
+  WebFHttpOverrides._();
+
+  factory WebFHttpOverrides.instance() {
+    _instance ??= WebFHttpOverrides._();
     return _instance!;
   }
 
@@ -32,11 +34,11 @@ class KrakenHttpOverrides extends HttpOverrides {
   final HttpOverrides? parentHttpOverrides = HttpOverrides.current;
   final Map<int, HttpClientInterceptor> _contextIdToHttpClientInterceptorMap = <int, HttpClientInterceptor>{};
 
-  void registerKrakenContext(int contextId, HttpClientInterceptor httpClientInterceptor) {
+  void registerWebFContext(int contextId, HttpClientInterceptor httpClientInterceptor) {
     _contextIdToHttpClientInterceptorMap[contextId] = httpClientInterceptor;
   }
 
-  bool unregisterKrakenContext(int contextId) {
+  bool unregisterWebFContext(int contextId) {
     // Returns true if [value] was in the map, false otherwise.
     return _contextIdToHttpClientInterceptorMap.remove(contextId) != null;
   }
@@ -75,11 +77,11 @@ class KrakenHttpOverrides extends HttpOverrides {
   }
 }
 
-KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, { required int contextId }) {
-  final KrakenHttpOverrides httpOverrides = KrakenHttpOverrides.instance();
+WebFHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientInterceptor, {required int contextId}) {
+  final WebFHttpOverrides httpOverrides = WebFHttpOverrides.instance();
 
   if (httpClientInterceptor != null) {
-    httpOverrides.registerKrakenContext(contextId, httpClientInterceptor);
+    httpOverrides.registerWebFContext(contextId, httpClientInterceptor);
   }
 
   HttpOverrides.global = httpOverrides;
@@ -88,8 +90,7 @@ KrakenHttpOverrides setupHttpOverrides(HttpClientInterceptor? httpClientIntercep
 
 // Returns the origin of the URI in the form scheme://host:port
 String getOrigin(Uri uri) {
-  if (uri.isScheme('http')
-      || uri.isScheme('https')) {
+  if (uri.isScheme('http') || uri.isScheme('https')) {
     return uri.origin;
   } else {
     return uri.path;
@@ -98,7 +99,7 @@ String getOrigin(Uri uri) {
 
 // @TODO: Remove controller dependency.
 Uri getEntrypointUri(int? contextId) {
-  KrakenController? controller = KrakenController.getControllerOfJSContextId(contextId);
+  WebFController? controller = WebFController.getControllerOfJSContextId(contextId);
   String url = controller?.url ?? '';
-  return Uri.tryParse(url) ?? KrakenController.fallbackBundleUri(contextId ?? 0);
+  return Uri.tryParse(url) ?? WebFController.fallbackBundleUri(contextId ?? 0);
 }

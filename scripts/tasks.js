@@ -134,8 +134,14 @@ task('build-darwin-webf-lib', done => {
 });
 
 task('run-bridge-unit-test', done => {
-  execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/webf_unit_test')}`, {stdio: 'inherit'});
-  done();
+  if (platform === 'darwin') {
+    execSync(`${path.join(paths.bridge, 'build/macos/lib/x86_64/webf_unit_test')}`, {stdio: 'inherit'});
+  } else if (platform === 'linux') {
+    execSync(`${path.join(paths.bridge, 'build/linux/lib/webf_unit_test')}`, {stdio: 'inherit'});
+  } else {
+    throw new Error('Platform not supported.');
+  }
+   done();
 });
 
 task('compile-polyfill', (done) => {
@@ -481,6 +487,7 @@ task('build-linux-webf-lib', (done) => {
   // generate project
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
   ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
+  ${'-DENABLE_TEST=true \\'}
   -G "${cmakeGeneratorTemplate}" \
   -B ${paths.bridge}/cmake-build-linux -S ${paths.bridge}`,
     {
@@ -494,13 +501,23 @@ task('build-linux-webf-lib', (done) => {
     });
 
   // build
-  execSync(`cmake --build ${bridgeCmakeDir} --target webf -- -j 12`, {
+  execSync(`cmake --build ${bridgeCmakeDir} --target webf ${buildMode != 'Release' ? 'webf_test' : ''} webf_unit_test -- -j 12`, {
     stdio: 'inherit'
   });
 
-  const libwebfPath = path.join(paths.bridge, 'build/linux/lib/libwebf.so');
-  // Patch libwebf.so's runtime path.
-  execSync(`chrpath --replace \\$ORIGIN ${libwebfPath}`, { stdio: 'inherit' });
+  const libs = [
+    'libwebf.so'
+  ];
+
+  if (buildMode != 'Release') {
+    libs.push('libwebf_test.so');
+  }
+
+  libs.forEach(lib => {
+    const libkrakenPath = path.join(paths.bridge, `build/linux/lib/${lib}`);
+    // Patch libkraken.so's runtime path.
+    execSync(`chrpath --replace \\$ORIGIN ${libkrakenPath}`, { stdio: 'inherit' });
+  });
 
   done();
 });
@@ -516,8 +533,10 @@ task('build-android-webf-lib', (done) => {
   } else {
     if (platform == 'win32') {
       androidHome = path.join(process.env.LOCALAPPDATA, 'Android\\Sdk');
-    } else {
+    } else if (platform == 'darwin') {
       androidHome = path.join(process.env.HOME, 'Library/Android/sdk')
+    } else if (platform == 'linux') {
+      androidHome = path.join(process.env.HOME, 'Android/Sdk');
     }
     const ndkVersion = '23.2.8568313';
     ndkDir = path.join(androidHome, 'ndk', ndkVersion);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -39,7 +39,7 @@ class TestTextInput {
   ///
   /// The [onCleared] argument may be set to be notified of when the keyboard
   /// is dismissed.
-  TestTextInput({ this.onCleared });
+  TestTextInput({this.onCleared});
 
   /// Called when the keyboard goes away.
   ///
@@ -104,6 +104,7 @@ class TestTextInput {
     assert(isRegistered);
     return _isVisible;
   }
+
   bool _isVisible = false;
 
   /// Resets any internal state of this object.
@@ -196,7 +197,7 @@ class TestTextInput {
   ///  * [enterText], which is similar but takes only a String and resets the
   ///    selection.
   void updateEditingValue(TextEditingValue value) {
-    ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -204,7 +205,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* ignored */ },
+      (ByteData? data) {/* ignored */},
     );
   }
 
@@ -220,7 +221,7 @@ class TestTextInput {
   Future<void> receiveAction(TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final Completer<void> completer = Completer<void>();
-      ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+      ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(
@@ -260,16 +261,15 @@ class TestTextInput {
   /// example when using the [integration_test] library, there is a risk that
   /// the real IME will become confused as to the current state of input.
   void closeConnection() {
-    ServicesBinding.instance!.defaultBinaryMessenger.handlePlatformMessage(
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
           'TextInputClient.onConnectionClosed',
-           <dynamic>[_client ?? -1],
+          <dynamic>[_client ?? -1],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (ByteData? data) {/* response from framework is discarded */},
     );
   }
 }
-

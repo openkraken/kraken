@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
 import 'dart:math' show max;
@@ -19,8 +20,7 @@ Iterable<Layer> _getLayerChain(Layer start) {
   return layerChain.reversed;
 }
 
-typedef IntersectionChangeCallback = void Function(
-    IntersectionObserverEntry info);
+typedef IntersectionChangeCallback = void Function(IntersectionObserverEntry info);
 
 mixin RenderIntersectionObserverMixin on RenderBox {
   IntersectionChangeCallback? _onIntersectionChange;
@@ -76,8 +76,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     }
   }
 
-  void paintIntersectionObserver(PaintingContext context, Offset offset,
-      PaintingContextCallback callback) {
+  void paintIntersectionObserver(PaintingContext context, Offset offset, PaintingContextCallback callback) {
     // Skip to next if not has intersection observer
     if (_onIntersectionChange == null) {
       callback(context, offset);
@@ -85,11 +84,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
     }
 
     if (_intersectionObserverLayer.layer == null) {
-      _intersectionObserverLayer.layer = IntersectionObserverLayer(
-          elementSize: size,
-          paintOffset: offset,
-          onIntersectionChange: _onIntersectionChange!
-      );
+      _intersectionObserverLayer.layer = IntersectionObserverLayer(elementSize: size, paintOffset: offset, onIntersectionChange: _onIntersectionChange!);
     } else {
       _intersectionObserverLayer.layer!.elementSize = semanticBounds.size;
       _intersectionObserverLayer.layer!.paintOffset = offset;
@@ -100,10 +95,7 @@ mixin RenderIntersectionObserverMixin on RenderBox {
 }
 
 class IntersectionObserverLayer extends ContainerLayer {
-  IntersectionObserverLayer(
-      {required Size elementSize,
-      required Offset paintOffset,
-      required this.onIntersectionChange})
+  IntersectionObserverLayer({required Size elementSize, required Offset paintOffset, required this.onIntersectionChange})
       : // TODO: This is zero for box element. For sliver element, this offset points to the start of the element which may be outside the viewport.
         _elementOffset = Offset.zero,
         _elementSize = elementSize,
@@ -238,8 +230,7 @@ class IntersectionObserverLayer extends ContainerLayer {
     // of `addPostFrameCallback` or `scheduleFrameCallback` so that work will
     // be done even if a new frame isn't scheduled and without unnecessarily
     // scheduling a new frame.
-    SchedulerBinding.instance!
-        .scheduleTask<void>(_processCallbacks, Priority.touch);
+    SchedulerBinding.instance.scheduleTask<void>(_processCallbacks, Priority.touch);
   }
 
   /// Computes the bounds for the corresponding element in
@@ -252,8 +243,7 @@ class IntersectionObserverLayer extends ContainerLayer {
   // https://github.com/google/flutter.widgets/blob/master/packages/visibility_detector/lib/src/visibility_detector_layer.dart#L130
   // Computes the accumulated clipping bounds, in global coordinates.
   Rect _computeClipRect() {
-    assert(RendererBinding.instance?.renderView != null);
-    var clipRect = Offset.zero & RendererBinding.instance!.renderView.size;
+    var clipRect = Offset.zero & RendererBinding.instance.renderView.size;
 
     var parentLayer = parent;
     while (parentLayer != null) {
@@ -321,8 +311,7 @@ class IntersectionObserverLayer extends ContainerLayer {
       Rect elementBounds = layer._computeElementBounds();
       Rect rootBounds = layer._computeClipRect();
 
-      final info = IntersectionObserverEntry.fromRects(
-          boundingClientRect: elementBounds, rootBounds: rootBounds);
+      final info = IntersectionObserverEntry.fromRects(boundingClientRect: elementBounds, rootBounds: rootBounds);
       layer._fireCallback(info);
     }
     _updated.clear();
@@ -332,11 +321,7 @@ class IntersectionObserverLayer extends ContainerLayer {
 
 @immutable
 class IntersectionObserverEntry {
-  const IntersectionObserverEntry(
-      {Rect? boundingClientRect,
-      Rect? intersectionRect,
-      Rect? rootBounds,
-      Size? size})
+  const IntersectionObserverEntry({Rect? boundingClientRect, Rect? intersectionRect, Rect? rootBounds, Size? size})
       : boundingClientRect = boundingClientRect ?? Rect.zero,
         intersectionRect = intersectionRect ?? Rect.zero,
         rootBounds = rootBounds ?? Rect.zero,
@@ -351,19 +336,10 @@ class IntersectionObserverEntry {
     required Rect boundingClientRect,
     required Rect rootBounds,
   }) {
-
     // Compute the intersection in the element's local coordinates.
-    final intersectionRect = boundingClientRect.overlaps(rootBounds)
-        ? boundingClientRect
-            .intersect(rootBounds)
-            .shift(-boundingClientRect.topLeft)
-        : Rect.zero;
+    final intersectionRect = boundingClientRect.overlaps(rootBounds) ? boundingClientRect.intersect(rootBounds).shift(-boundingClientRect.topLeft) : Rect.zero;
 
-    return IntersectionObserverEntry(
-        boundingClientRect: boundingClientRect,
-        intersectionRect: intersectionRect,
-        rootBounds: rootBounds,
-        size: boundingClientRect.size);
+    return IntersectionObserverEntry(boundingClientRect: boundingClientRect, intersectionRect: intersectionRect, rootBounds: rootBounds, size: boundingClientRect.size);
   }
 
   // A Boolean value which is true if the target element intersects with the intersection observer's root.
@@ -372,10 +348,8 @@ class IntersectionObserverEntry {
   bool get isIntersecting {
     if (size == Size.zero) return false;
 
-    if (boundingClientRect.right < rootBounds.left ||
-        rootBounds.right < boundingClientRect.left) return false;
-    if (boundingClientRect.bottom < rootBounds.top ||
-        rootBounds.bottom < boundingClientRect.top) return false;
+    if (boundingClientRect.right < rootBounds.left || rootBounds.right < boundingClientRect.left) return false;
+    if (boundingClientRect.bottom < rootBounds.top || rootBounds.bottom < boundingClientRect.top) return false;
     return true;
   }
 
@@ -451,6 +425,5 @@ double _area(Size size) {
 /// Returns whether two floating-point values are approximately equal.
 bool _floatNear(double f1, double f2) {
   final absDiff = (f1 - f2).abs();
-  return absDiff <= _kDefaultTolerance ||
-      (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
+  return absDiff <= _kDefaultTolerance || (absDiff / max(f1.abs(), f2.abs()) <= _kDefaultTolerance);
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:typed_data';
 import 'dart:ui';
@@ -110,7 +111,8 @@ abstract class CanvasImageData {
 
   ImageData getImageData(double sx, double sy, double sw, double sh);
 
-  void putImageData(ImageData imagedata, double dx, double dy, {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
+  void putImageData(ImageData imagedata, double dx, double dy,
+      {double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight});
 }
 
 // ignore: one_member_abstracts

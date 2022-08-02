@@ -254,8 +254,10 @@ describe('Tags input', () => {
       done();
     });
 
-    input1.focus();
-    input2.focus();
+    requestAnimationFrame(() => {
+      input1.focus();
+      input2.focus();
+    });
   });
 
 
@@ -272,8 +274,10 @@ describe('Tags input', () => {
       done();
     });
 
-    input1.focus();
-    input2.focus();
+    requestAnimationFrame(() => {
+      input1.focus();
+      input2.focus();
+    });
 
   });
 
@@ -478,21 +482,23 @@ describe('Tags input', () => {
     }) as HTMLInputElement;
     document.body.appendChild(input);
 
-    input.setAttribute('value', 'attribute value');
-    expect(input.defaultValue).toBe('attribute value');
-    expect(input.value).toBe('attribute value');
+    requestAnimationFrame(() => {
+      input.setAttribute('value', 'attribute value');
+      expect(input.defaultValue).toBe('attribute value');
+      expect(input.value).toBe('attribute value');
 
-    input.defaultValue = 'default value';
-    expect(input.defaultValue).toBe('default value');
-    expect(input.value).toBe('default value');
+      input.defaultValue = 'default value';
+      expect(input.defaultValue).toBe('default value');
+      expect(input.value).toBe('default value');
 
-    input.value = 'property value';
-    expect(input.defaultValue).toBe('default value');
-    expect(input.value).toBe('property value');
+      input.value = 'property value';
+      expect(input.defaultValue).toBe('default value');
+      expect(input.value).toBe('property value');
 
-    input.setAttribute('value', 'attribute value 2');
-    expect(input.defaultValue).toBe('attribute value 2');
-    // @ts-ignore
-    expect(input.value).toBe('property value');
+      input.setAttribute('value', 'attribute value 2');
+      expect(input.defaultValue).toBe('attribute value 2');
+      // @ts-ignore
+      expect(input.value).toBe('property value');
+    });
   });
 });

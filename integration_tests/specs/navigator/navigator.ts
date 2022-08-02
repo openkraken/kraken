@@ -2,7 +2,6 @@ describe('Navigator', () => {
   it('connectivity', async () => {
     let connection = await navigator.connection.getConnectivity();
     expect(connection.isConnected).toBeTrue();
-    expect(['wifi', '4g'].includes(connection.type)).toBeTrue();
   });
 
   it('hardwareConcurrency', () => {
@@ -32,7 +31,7 @@ describe('Navigator', () => {
   });
 
   it('userAgent', () => {
-    expect(navigator.userAgent).toMatch(/Kraken/);
+    expect(navigator.userAgent).toMatch(/WebF/);
   });
 
   it('clipboard', async () => {

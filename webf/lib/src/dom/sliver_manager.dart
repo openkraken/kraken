@@ -1,17 +1,18 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/dom.dart';
+import 'package:webf/rendering.dart';
+import 'package:webf/dom.dart';
 
 /// An implementation of [RenderSliverBoxChildManager] for sliver,
 /// manage element to implement lifecycles for sliver list, generate
 /// renderer from existing element tree.
 class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
   // @NOTE: For hummer support, no real function here.
-  void restorePreparedChild(int index) { }
-  void stashPreparedChild(int index) { }
+  void restorePreparedChild(int index) {}
+  void stashPreparedChild(int index) {}
 
   final Element _target;
   late RenderSliverListLayout _sliverListLayout;
@@ -85,9 +86,7 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
 
       Iterable<Node> renderNodes = _renderNodes;
       if (index < renderNodes.length) {
-        renderNodes
-          .elementAt(index)
-          .unmountRenderObject(deep: true, keepFixedAlive: true);
+        renderNodes.elementAt(index).unmountRenderObject(deep: true, keepFixedAlive: true);
         return;
       }
     }
@@ -108,25 +107,24 @@ class RenderSliverElementChildManager implements RenderSliverBoxChildManager {
   void didStartLayout() {}
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
-    return _extrapolateMaxScrollOffset(firstIndex, lastIndex,
-        leadingScrollOffset, trailingScrollOffset, childCount)!;
+  double estimateMaxScrollOffset(SliverConstraints constraints,
+      {int? firstIndex, int? lastIndex, double? leadingScrollOffset, double? trailingScrollOffset}) {
+    return _extrapolateMaxScrollOffset(firstIndex, lastIndex, leadingScrollOffset, trailingScrollOffset, childCount)!;
   }
 
   static double? _extrapolateMaxScrollOffset(
-      int? firstIndex,
-      int? lastIndex,
-      double? leadingScrollOffset,
-      double? trailingScrollOffset,
-      int childCount,
-      ) {
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+    int childCount,
+  ) {
     if (lastIndex == childCount - 1) {
       return trailingScrollOffset;
     }
 
     final int reifiedCount = lastIndex! - firstIndex! + 1;
-    final double averageExtent =
-        (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
+    final double averageExtent = (trailingScrollOffset! - leadingScrollOffset!) / reifiedCount;
     final int remainingCount = childCount - lastIndex - 1;
     return trailingScrollOffset + averageExtent * remainingCount;
   }

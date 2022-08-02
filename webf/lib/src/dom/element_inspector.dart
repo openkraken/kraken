@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -467,12 +468,12 @@ mixin ElementInspectorService {
       selection.current = object;
       developer.inspect(selection.current);
       if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance?.schedulerPhase == SchedulerPhase.idle) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
           selectionChangedCallback!();
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          SchedulerBinding.instance!.scheduleTask(
+          SchedulerBinding.instance.scheduleTask(
             selectionChangedCallback!,
             Priority.touch,
           );
@@ -484,9 +485,9 @@ mixin ElementInspectorService {
   }
 
   Map<String, Object?>? _nodeToJson(
-      DiagnosticsNode? node,
-      InspectorSerializationDelegate delegate,
-      ) {
+    DiagnosticsNode? node,
+    InspectorSerializationDelegate delegate,
+  ) {
     return node?.toJsonMap(delegate);
   }
 
@@ -631,7 +632,8 @@ mixin ElementInspectorService {
   }
 
   Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(),
+        InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -689,7 +691,8 @@ mixin ElementInspectorService {
   Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
     final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
     final RenderObject? current = selection.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(),
+        InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// This method is called by [WidgetBinding.performReassemble] to flush caches

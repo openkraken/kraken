@@ -1,13 +1,14 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/dom.dart';
-import 'package:kraken/rendering.dart';
-import 'package:kraken/foundation.dart';
+import 'package:webf/css.dart';
+import 'package:webf/dom.dart';
+import 'package:webf/rendering.dart';
+import 'package:webf/foundation.dart';
 
 const String CANVAS = 'CANVAS';
 const int _ELEMENT_DEFAULT_WIDTH_IN_PIXEL = 300;
@@ -31,6 +32,7 @@ class RenderCanvasPaint extends RenderCustomPaint {
 
 class CanvasElement extends Element {
   final ChangeNotifier repaintNotifier = ChangeNotifier();
+
   /// The painter that paints before the children.
   late CanvasPainter painter;
 
@@ -54,26 +56,36 @@ class CanvasElement extends Element {
   @override
   getBindingProperty(String key) {
     switch (key) {
-      case 'width': return width;
-      case 'height': return height;
-      default: return super.getBindingProperty(key);
+      case 'width':
+        return width;
+      case 'height':
+        return height;
+      default:
+        return super.getBindingProperty(key);
     }
   }
 
   @override
   void setBindingProperty(String key, value) {
     switch (key) {
-      case 'width': width = castToType<int>(value); break;
-      case 'height': height = castToType<int>(value); break;
-      default: super.setBindingProperty(key, value);
+      case 'width':
+        width = castToType<int>(value);
+        break;
+      case 'height':
+        height = castToType<int>(value);
+        break;
+      default:
+        super.setBindingProperty(key, value);
     }
   }
 
   @override
   invokeBindingMethod(String method, List args) {
     switch (method) {
-      case 'getContext': return getContext(castToType<String>(args[0])).toNative();
-      default: return super.invokeBindingMethod(method, args);
+      case 'getContext':
+        return getContext(castToType<String>(args[0])).toNative();
+      default:
+        return super.invokeBindingMethod(method, args);
     }
   }
 
@@ -97,7 +109,7 @@ class CanvasElement extends Element {
     renderCustomPaint = null;
   }
 
-  CanvasRenderingContext2D getContext(String type, { options }) {
+  CanvasRenderingContext2D getContext(String type, {options}) {
     switch (type) {
       case '2d':
         if (painter.context == null) {
@@ -188,6 +200,7 @@ class CanvasElement extends Element {
       return _ELEMENT_DEFAULT_WIDTH_IN_PIXEL;
     }
   }
+
   set width(int value) {
     _setDimensions(value, null);
   }
@@ -201,6 +214,7 @@ class CanvasElement extends Element {
       return _ELEMENT_DEFAULT_HEIGHT_IN_PIXEL;
     }
   }
+
   set height(int value) {
     _setDimensions(null, value);
   }
@@ -241,8 +255,12 @@ class CanvasElement extends Element {
   void setAttribute(String qualifiedName, String value) {
     super.setAttribute(qualifiedName, value);
     switch (qualifiedName) {
-      case 'width': width = attributeToProperty<int>(value); break;
-      case 'height': height = attributeToProperty<int>(value); break;
+      case 'width':
+        width = attributeToProperty<int>(value);
+        break;
+      case 'height':
+        height = attributeToProperty<int>(value);
+        break;
     }
   }
 

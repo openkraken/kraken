@@ -17,25 +17,25 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependency_overrides:
-  kraken:
-    path: ../kraken
+  webf:
+    path: ../webf
 
 dependencies:
-  ffi: ^1.0.0
+  ffi: ^2.0.1
   colorize: ^3.0.0
   flutter:
     sdk: flutter
-  kraken: 0.8.0-dev.1
   image: ^3.0.2
-  kraken_video_player: ^2.4.0
-  kraken_websocket: ^2.0.0
-  kraken_webview: ^2.4.0
+#  kraken_video_player: ^2.4.0
+#  kraken_websocket: ^2.0.0
+#  kraken_webview: ^2.5.0
   waterfall_flow: ^3.0.1
-
+  image_compare: ^1.1.2
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: ^1.16.8
+  test: ^1.20.2
   ansicolor: ^2.0.1
 
 # For information on the generic Dart part of this file, see the

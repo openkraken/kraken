@@ -1,14 +1,14 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
-import 'package:kraken/css.dart';
-import 'package:kraken/rendering.dart';
+import 'package:webf/css.dart';
+import 'package:webf/rendering.dart';
 
 mixin CSSMarginMixin on RenderStyle {
-
   /// The amount to margin the child in each dimension.
   ///
   /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
@@ -16,11 +16,11 @@ mixin CSSMarginMixin on RenderStyle {
   @override
   EdgeInsets get margin {
     EdgeInsets insets = EdgeInsets.only(
-      left: marginLeft.computedValue,
-      right: marginRight.computedValue,
-      bottom: marginBottom.computedValue,
-      top: marginTop.computedValue
-    ).resolve(TextDirection.ltr);
+            left: marginLeft.computedValue,
+            right: marginRight.computedValue,
+            bottom: marginBottom.computedValue,
+            top: marginTop.computedValue)
+        .resolve(TextDirection.ltr);
     return insets;
   }
 
@@ -35,7 +35,7 @@ mixin CSSMarginMixin on RenderStyle {
   CSSLengthValue get marginLeft => _marginLeft ?? CSSLengthValue.zero;
 
   CSSLengthValue? _marginRight;
-    set marginRight(CSSLengthValue? value) {
+  set marginRight(CSSLengthValue? value) {
     if (_marginRight == value) return;
     _marginRight = value;
     _markSelfAndParentNeedsLayout();
@@ -100,18 +100,15 @@ mixin CSSMarginMixin on RenderStyle {
     // 1. Document root element(HTML)
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
-    if (boxModel.isDocumentRootBox
-      || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)
-    ) {
+    if (boxModel.isDocumentRootBox || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)) {
       _marginTop = marginTop.computedValue;
       // Cache computed value.
       cacheComputedValue(hashCode, propertyName, _marginTop);
       return _marginTop;
     }
     RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
-    RenderObject? preSibling = childParentData.previousSibling != null
-      ? childParentData.previousSibling as RenderObject
-      : null;
+    RenderObject? preSibling =
+        childParentData.previousSibling != null ? childParentData.previousSibling as RenderObject : null;
 
     if (preSibling == null) {
       // Margin top collapse with its parent if it is the first child of its parent and its value is 0.
@@ -135,9 +132,8 @@ mixin CSSMarginMixin on RenderStyle {
 
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
-    RenderStyle renderStyle = boxModel.isScrollingContentBox
-      ? (boxModel.parent as RenderBoxModel).renderStyle
-      : boxModel.renderStyle;
+    RenderStyle renderStyle =
+        boxModel.isScrollingContentBox ? (boxModel.parent as RenderBoxModel).renderStyle : boxModel.renderStyle;
     double paddingTop = renderStyle.paddingTop.computedValue;
     double borderTop = renderStyle.effectiveBorderTopWidth.computedValue;
     // Use own renderStyle of margin-top cause scrollingContentBox has margin-top of 0
@@ -147,22 +143,18 @@ mixin CSSMarginMixin on RenderStyle {
     bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
     bool isOverflowClip = renderStyle.effectiveOverflowY == CSSOverflowType.clip;
 
-    if (boxModel is RenderLayoutBox
-      && renderStyle.effectiveDisplay == CSSDisplay.block
-      && (isOverflowVisible || isOverflowClip)
-      && paddingTop == 0
-      && borderTop == 0
-    ) {
-      RenderObject? firstChild = boxModel.firstChild != null
-        ? boxModel.firstChild as RenderObject
-        : null;
-      if (firstChild is RenderBoxModel
-        && (firstChild.renderStyle.effectiveDisplay == CSSDisplay.block ||
-          firstChild.renderStyle.effectiveDisplay == CSSDisplay.flex)
-      ) {
+    if (boxModel is RenderLayoutBox &&
+        renderStyle.effectiveDisplay == CSSDisplay.block &&
+        (isOverflowVisible || isOverflowClip) &&
+        paddingTop == 0 &&
+        borderTop == 0) {
+      RenderObject? firstChild = boxModel.firstChild != null ? boxModel.firstChild as RenderObject : null;
+      if (firstChild is RenderBoxModel &&
+          (firstChild.renderStyle.effectiveDisplay == CSSDisplay.block ||
+              firstChild.renderStyle.effectiveDisplay == CSSDisplay.flex)) {
         double childMarginTop = firstChild is RenderFlowLayout
-          ? firstChild.renderStyle._collapsedMarginTopWithFirstChild
-          : firstChild.renderStyle.marginTop.computedValue;
+            ? firstChild.renderStyle._collapsedMarginTopWithFirstChild
+            : firstChild.renderStyle.marginTop.computedValue;
         if (marginTop < 0 && childMarginTop < 0) {
           return math.min(marginTop, childMarginTop);
         } else if (marginTop > 0 && childMarginTop > 0) {
@@ -182,20 +174,18 @@ mixin CSSMarginMixin on RenderStyle {
   double get _collapsedMarginTopWithSelf {
     RenderBoxModel boxModel = renderBoxModel!;
 
-    bool isOverflowVisible = effectiveOverflowX == CSSOverflowType.visible
-      && effectiveOverflowY == CSSOverflowType.visible;
-    bool isOverflowClip = effectiveOverflowX == CSSOverflowType.clip
-      && effectiveOverflowY == CSSOverflowType.clip;
+    bool isOverflowVisible =
+        effectiveOverflowX == CSSOverflowType.visible && effectiveOverflowY == CSSOverflowType.visible;
+    bool isOverflowClip = effectiveOverflowX == CSSOverflowType.clip && effectiveOverflowY == CSSOverflowType.clip;
     double _marginTop = marginTop.computedValue;
     double _marginBottom = marginBottom.computedValue;
 
     // Margin top and bottom of empty block collapse.
     // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
-    if (boxModel.hasSize
-      && boxModel.boxSize!.height == 0
-      && effectiveDisplay != CSSDisplay.flex
-      && (isOverflowVisible || isOverflowClip)
-    ) {
+    if (boxModel.hasSize &&
+        boxModel.boxSize!.height == 0 &&
+        effectiveDisplay != CSSDisplay.flex &&
+        (isOverflowVisible || isOverflowClip)) {
       return math.max(_marginTop, _marginBottom);
     }
 
@@ -212,9 +202,8 @@ mixin CSSMarginMixin on RenderStyle {
 
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
-    RenderStyle parentRenderStyle = parent.isScrollingContentBox
-      ? (parent.parent as RenderBoxModel).renderStyle
-      : parent.renderStyle;
+    RenderStyle parentRenderStyle =
+        parent.isScrollingContentBox ? (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
 
     bool isParentOverflowVisible = parentRenderStyle.effectiveOverflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parentRenderStyle.effectiveOverflowY == CSSOverflowType.clip;
@@ -222,13 +211,12 @@ mixin CSSMarginMixin on RenderStyle {
     // Margin top of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
     // Margin collapse does not work on document root box.
-    if (!parent.isDocumentRootBox
-      && parentRenderStyle.effectiveDisplay == CSSDisplay.block
-      && (isParentOverflowVisible || isParentOverflowClip)
-      && parentRenderStyle.paddingTop.computedValue == 0
-      && parentRenderStyle.effectiveBorderTopWidth.computedValue == 0
-      && parent.parent is RenderFlowLayout
-    ) {
+    if (!parent.isDocumentRootBox &&
+        parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
+        (isParentOverflowVisible || isParentOverflowClip) &&
+        parentRenderStyle.paddingTop.computedValue == 0 &&
+        parentRenderStyle.effectiveBorderTopWidth.computedValue == 0 &&
+        parent.parent is RenderFlowLayout) {
       return 0;
     }
     return marginTop;
@@ -240,14 +228,12 @@ mixin CSSMarginMixin on RenderStyle {
     double marginTop = _collapsedMarginTopWithFirstChild;
     RenderBoxModel boxModel = renderBoxModel!;
     RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
-    RenderObject? preSibling = childParentData.previousSibling != null
-      ? childParentData.previousSibling as RenderObject
-      : null;
+    RenderObject? preSibling =
+        childParentData.previousSibling != null ? childParentData.previousSibling as RenderObject : null;
 
-    if (preSibling is RenderBoxModel
-      && (preSibling.renderStyle.effectiveDisplay == CSSDisplay.block ||
-        preSibling.renderStyle.effectiveDisplay == CSSDisplay.flex)
-    ) {
+    if (preSibling is RenderBoxModel &&
+        (preSibling.renderStyle.effectiveDisplay == CSSDisplay.block ||
+            preSibling.renderStyle.effectiveDisplay == CSSDisplay.flex)) {
       double preSiblingMarginBottom = preSibling.renderStyle.collapsedMarginBottom;
       if (marginTop > 0 && preSiblingMarginBottom > 0) {
         return math.max(marginTop - preSiblingMarginBottom, 0);
@@ -284,9 +270,7 @@ mixin CSSMarginMixin on RenderStyle {
     // 1. Document root element(HTML)
     // 2. Inline level elements
     // 3. Inner renderBox of element with overflow auto/scroll
-    if (boxModel.isDocumentRootBox
-      || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)
-    ) {
+    if (boxModel.isDocumentRootBox || (effectiveDisplay != CSSDisplay.block && effectiveDisplay != CSSDisplay.flex)) {
       _marginBottom = marginBottom.computedValue;
       // Cache computed value.
       cacheComputedValue(hashCode, propertyName, _marginBottom);
@@ -294,9 +278,8 @@ mixin CSSMarginMixin on RenderStyle {
     }
 
     RenderLayoutParentData childParentData = boxModel.parentData as RenderLayoutParentData;
-    RenderObject? nextSibling = childParentData.nextSibling != null
-      ? childParentData.nextSibling as RenderObject
-      : null;
+    RenderObject? nextSibling =
+        childParentData.nextSibling != null ? childParentData.nextSibling as RenderObject : null;
 
     if (nextSibling == null) {
       // Margin bottom collapse with its parent if it is the last child of its parent and its value is 0.
@@ -322,9 +305,8 @@ mixin CSSMarginMixin on RenderStyle {
 
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
-    RenderStyle renderStyle = boxModel.isScrollingContentBox
-      ? (boxModel.parent as RenderBoxModel).renderStyle
-      : boxModel.renderStyle;
+    RenderStyle renderStyle =
+        boxModel.isScrollingContentBox ? (boxModel.parent as RenderBoxModel).renderStyle : boxModel.renderStyle;
     double paddingBottom = renderStyle.paddingBottom.computedValue;
     double borderBottom = renderStyle.effectiveBorderBottomWidth.computedValue;
     bool isOverflowVisible = renderStyle.effectiveOverflowY == CSSOverflowType.visible;
@@ -334,24 +316,19 @@ mixin CSSMarginMixin on RenderStyle {
     // which is correct.
     double marginBottom = _collapsedMarginBottomWithSelf;
 
-    if (boxModel is RenderLayoutBox
-      && renderStyle.height.isAuto
-      && renderStyle.minHeight.isAuto
-      && renderStyle.maxHeight.isNone
-      && renderStyle.effectiveDisplay == CSSDisplay.block
-      && (isOverflowVisible || isOverflowClip)
-      && paddingBottom == 0
-      && borderBottom == 0
-    ) {
-      RenderObject? lastChild = boxModel.lastChild != null
-        ? boxModel.lastChild as RenderObject
-        : null;
-      if (lastChild is RenderBoxModel
-        && lastChild.renderStyle.effectiveDisplay == CSSDisplay.block
-      ) {
+    if (boxModel is RenderLayoutBox &&
+        renderStyle.height.isAuto &&
+        renderStyle.minHeight.isAuto &&
+        renderStyle.maxHeight.isNone &&
+        renderStyle.effectiveDisplay == CSSDisplay.block &&
+        (isOverflowVisible || isOverflowClip) &&
+        paddingBottom == 0 &&
+        borderBottom == 0) {
+      RenderObject? lastChild = boxModel.lastChild != null ? boxModel.lastChild as RenderObject : null;
+      if (lastChild is RenderBoxModel && lastChild.renderStyle.effectiveDisplay == CSSDisplay.block) {
         double childMarginBottom = lastChild is RenderLayoutBox
-          ? lastChild.renderStyle._collapsedMarginBottomWithLastChild
-          : lastChild.renderStyle.marginBottom.computedValue;
+            ? lastChild.renderStyle._collapsedMarginBottomWithLastChild
+            : lastChild.renderStyle.marginBottom.computedValue;
         if (marginBottom < 0 && childMarginBottom < 0) {
           return math.min(marginBottom, childMarginBottom);
         } else if (marginBottom > 0 && childMarginBottom > 0) {
@@ -371,18 +348,16 @@ mixin CSSMarginMixin on RenderStyle {
   // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
   double get _collapsedMarginBottomWithSelf {
     RenderBoxModel boxModel = renderBoxModel!;
-    bool isOverflowVisible = effectiveOverflowX == CSSOverflowType.visible
-      && effectiveOverflowY == CSSOverflowType.visible;
-    bool isOverflowClip = effectiveOverflowX == CSSOverflowType.clip
-      && effectiveOverflowY == CSSOverflowType.clip;
+    bool isOverflowVisible =
+        effectiveOverflowX == CSSOverflowType.visible && effectiveOverflowY == CSSOverflowType.visible;
+    bool isOverflowClip = effectiveOverflowX == CSSOverflowType.clip && effectiveOverflowY == CSSOverflowType.clip;
 
     // Margin top and bottom of empty block collapse.
     // Make collapsed margin-top to the max of its top and bottom and margin-bottom as 0.
-    if (boxModel.hasSize
-      && boxModel.boxSize!.height == 0
-      && effectiveDisplay != CSSDisplay.flex
-      && (isOverflowVisible || isOverflowClip)
-    ) {
+    if (boxModel.hasSize &&
+        boxModel.boxSize!.height == 0 &&
+        effectiveDisplay != CSSDisplay.flex &&
+        (isOverflowVisible || isOverflowClip)) {
       return 0;
     }
     return marginBottom.computedValue;
@@ -398,22 +373,20 @@ mixin CSSMarginMixin on RenderStyle {
     RenderLayoutBox parent = boxModel.parent as RenderLayoutBox;
     // Use parent renderStyle if renderBoxModel is scrollingContentBox cause its style is not
     // the same with its parent.
-    RenderStyle parentRenderStyle = parent.isScrollingContentBox
-      ? (parent.parent as RenderBoxModel).renderStyle
-      : parent.renderStyle;
+    RenderStyle parentRenderStyle =
+        parent.isScrollingContentBox ? (parent.parent as RenderBoxModel).renderStyle : parent.renderStyle;
 
     bool isParentOverflowVisible = parentRenderStyle.effectiveOverflowY == CSSOverflowType.visible;
     bool isParentOverflowClip = parentRenderStyle.effectiveOverflowY == CSSOverflowType.clip;
     // Margin bottom of first child with parent which is in flow layout collapse with parent
     // which makes the margin top of itself 0.
     // Margin collapse does not work on document root box.
-    if (!parent.isDocumentRootBox
-      && parentRenderStyle.effectiveDisplay == CSSDisplay.block
-      && (isParentOverflowVisible || isParentOverflowClip)
-      && parentRenderStyle.paddingBottom.computedValue == 0
-      && parentRenderStyle.effectiveBorderBottomWidth.computedValue == 0
-      && parent.parent is RenderFlowLayout
-    ) {
+    if (!parent.isDocumentRootBox &&
+        parentRenderStyle.effectiveDisplay == CSSDisplay.block &&
+        (isParentOverflowVisible || isParentOverflowClip) &&
+        parentRenderStyle.paddingBottom.computedValue == 0 &&
+        parentRenderStyle.effectiveBorderBottomWidth.computedValue == 0 &&
+        parent.parent is RenderFlowLayout) {
       return 0;
     }
     return marginBottom;

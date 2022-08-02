@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2019-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:ui';
 
@@ -9,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'canvas_context_2d.dart';
 
 class CanvasPainter extends CustomPainter {
-  CanvasPainter({ required Listenable repaint }): super(repaint: repaint);
+  CanvasPainter({required Listenable repaint}) : super(repaint: repaint);
 
   CanvasRenderingContext2D? context;
 

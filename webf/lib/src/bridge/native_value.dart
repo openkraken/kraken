@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
-import 'package:kraken/bridge.dart';
+import 'package:webf/bridge.dart';
 
 class NativeValue extends Struct {
   @Double()
@@ -49,6 +50,7 @@ LinkedHashMap<int, AsyncAnonymousNativeFunction> _asyncFunctionMap = LinkedHashM
 AnonymousNativeFunction? getAnonymousNativeFunctionFromId(int id) {
   return _functionMap[id];
 }
+
 AsyncAnonymousNativeFunction? getAsyncAnonymousNativeFunctionFromId(int id) {
   return _asyncFunctionMap[id];
 }
@@ -56,6 +58,7 @@ AsyncAnonymousNativeFunction? getAsyncAnonymousNativeFunctionFromId(int id) {
 void removeAnonymousNativeFunctionFromId(int id) {
   _functionMap.remove(id);
 }
+
 void removeAsyncAnonymousNativeFunctionFromId(int id) {
   _asyncFunctionMap.remove(id);
 }

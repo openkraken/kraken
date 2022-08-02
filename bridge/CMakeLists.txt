@@ -49,8 +49,8 @@ execute_process(
 )
 string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
-list(APPEND KRAKEN_PUBLIC_HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+list(APPEND WEBF_PUBLIC_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_bridge.h
 )
 
 set(QUICKJS_PUBLIC_HEADERS
@@ -81,9 +81,9 @@ if (DEFINED PLATFORM)
 endif()
 
 list(APPEND BRIDGE_SOURCE
-  kraken_bridge.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
+        webf_bridge.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_bridge.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_foundation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
   foundation/logging.cc
   foundation/logging.h
@@ -152,7 +152,7 @@ list(APPEND BRIDGE_INCLUDE
 set(BINDING_DIR ${CMAKE_CURRENT_LIST_DIR}/bindings)
 
 if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
-  add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
+  add_compile_options(-DWEBF_QUICK_JS_ENGINE=1)
 
   execute_process(
     COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
@@ -296,7 +296,7 @@ if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
 endif ()
 
 list(APPEND PUBLIC_HEADER
-  include/kraken_bridge.h
+  include/webf_bridge.h
   )
 
 add_library(webf SHARED ${BRIDGE_SOURCE})
@@ -335,7 +335,7 @@ if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
   endif ()
 endif ()
 
-### KrakenStatic
+### webfStatic
 target_include_directories(webf_static PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
@@ -389,7 +389,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     MACOSX_FRAMEWORK_IDENTIFIER com.openwebf.webf-bridge
     MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
     MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
-    PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
+    PUBLIC_HEADER ${WEBF_PUBLIC_HEADERS}
     )
 
   # If quickjs is static, there will be no quickjs.framework any more.

@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 import 'dart:async';
-import 'package:kraken/dom.dart' as dom;
-import 'package:kraken/foundation.dart';
-import 'package:kraken/widget.dart';
-import 'package:waterfall_flow/waterfall_flow.dart';
+
 import 'package:flutter/material.dart';
+import 'package:waterfall_flow/waterfall_flow.dart';
+import 'package:webf/dom.dart' as dom;
+import 'package:webf/foundation.dart';
+import 'package:webf/widget.dart';
 
 class WaterfallFlowWidgetElement extends WidgetElement {
-  WaterfallFlowWidgetElement(BindingContext? context) :
-        super(context);
+  WaterfallFlowWidgetElement(BindingContext? context) : super(context);
 
   List<Widget> _children = [];
 
-  Widget _func (BuildContext context, int index) {
+  Widget _func(BuildContext context, int index) {
     return _children[index];
   }
 
@@ -29,27 +29,25 @@ class WaterfallFlowWidgetElement extends WidgetElement {
         crossAxisCount: 2,
         crossAxisSpacing: 5.0,
         mainAxisSpacing: 5.0,
-        lastChildLayoutTypeBuilder: (index) => index == children.length
-            ? LastChildLayoutType.foot
-            : LastChildLayoutType.none,
+        lastChildLayoutTypeBuilder: (index) =>
+            index == children.length ? LastChildLayoutType.foot : LastChildLayoutType.none,
       ),
     );
   }
 }
 
 class TextWidgetElement extends WidgetElement {
-  TextWidgetElement(BindingContext? context) :
-        super(context);
+  TextWidgetElement(BindingContext? context) : super(context);
 
   @override
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
-    return Text(properties['value'] ?? '', textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
+    return Text(properties['value'] ?? '',
+        textDirection: TextDirection.ltr, style: TextStyle(color: Color.fromARGB(255, 100, 100, 100)));
   }
 }
 
 class ImageWidgetElement extends WidgetElement {
-  ImageWidgetElement(BindingContext? context) :
-        super(context);
+  ImageWidgetElement(BindingContext? context) : super(context);
 
   @override
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
@@ -58,8 +56,7 @@ class ImageWidgetElement extends WidgetElement {
 }
 
 class ContainerWidgetElement extends WidgetElement {
-  ContainerWidgetElement(BindingContext? context) :
-        super(context);
+  ContainerWidgetElement(BindingContext? context) : super(context);
 
   @override
   Widget build(BuildContext context, Map<String, dynamic> properties, List<Widget> children) {
@@ -67,7 +64,11 @@ class ContainerWidgetElement extends WidgetElement {
       width: 200,
       height: 200,
       decoration: const BoxDecoration(
-        border: Border( top: BorderSide( width: 5, color: Colors.red ), bottom: BorderSide( width: 5, color: Colors.red ), left: BorderSide( width: 5, color: Colors.red ), right: BorderSide( width: 5, color: Colors.red )),
+        border: Border(
+            top: BorderSide(width: 5, color: Colors.red),
+            bottom: BorderSide(width: 5, color: Colors.red),
+            left: BorderSide(width: 5, color: Colors.red),
+            right: BorderSide(width: 5, color: Colors.red)),
       ),
       child: Column(
         children: children,
@@ -77,16 +78,20 @@ class ContainerWidgetElement extends WidgetElement {
 }
 
 class SampleElement extends dom.Element implements BindingObject {
-  SampleElement(BindingContext? context)
-      : super(context);
+  SampleElement(BindingContext? context) : super(context);
 
   getBindingProperty(String key) {
     switch (key) {
-      case 'ping': return ping;
-      case 'fake': return fake;
-      case 'fn': return fn;
-      case 'asyncFn': return asyncFn;
-      case 'asyncFnFailed': return asyncFnFailed;
+      case 'ping':
+        return ping;
+      case 'fake':
+        return fake;
+      case 'fn':
+        return fn;
+      case 'asyncFn':
+        return asyncFn;
+      case 'asyncFnFailed':
+        return asyncFnFailed;
     }
   }
 
@@ -95,42 +100,42 @@ class SampleElement extends dom.Element implements BindingObject {
   int get fake => 1234;
 
   Function get fn => (List<dynamic> args) {
-    return List.generate(args.length, (index) {
-      return args[index] * 2;
-    });
-  };
+        return List.generate(args.length, (index) {
+          return args[index] * 2;
+        });
+      };
 
   Function get asyncFn => (List<dynamic> argv) async {
-    Completer<dynamic> completer = Completer();
-    Timer(Duration(seconds: 1), () {
-      completer.complete(argv[0]);
-    });
-    return completer.future;
-  };
+        Completer<dynamic> completer = Completer();
+        Timer(Duration(seconds: 1), () {
+          completer.complete(argv[0]);
+        });
+        return completer.future;
+      };
 
   Function get asyncFnFailed => (List<dynamic> args) async {
-    Completer<String> completer = Completer();
-    Timer(Duration(milliseconds: 100), () {
-      completer.completeError(AssertionError('Asset error'));
-    });
-    return completer.future;
-  };
+        Completer<String> completer = Completer();
+        Timer(Duration(milliseconds: 100), () {
+          completer.completeError(AssertionError('Asset error'));
+        });
+        return completer.future;
+      };
 }
 
-void defineKrakenCustomElements() {
-  Kraken.defineCustomElement('waterfall-flow', (BindingContext? context) {
+void defineWebFCustomElements() {
+  WebF.defineCustomElement('waterfall-flow', (BindingContext? context) {
     return WaterfallFlowWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-container', (BindingContext? context) {
+  WebF.defineCustomElement('flutter-container', (BindingContext? context) {
     return ContainerWidgetElement(context);
   });
-  Kraken.defineCustomElement('sample-element', (BindingContext? context) {
+  WebF.defineCustomElement('sample-element', (BindingContext? context) {
     return SampleElement(context);
   });
-  Kraken.defineCustomElement('flutter-text', (BindingContext? context) {
+  WebF.defineCustomElement('flutter-text', (BindingContext? context) {
     return TextWidgetElement(context);
   });
-  Kraken.defineCustomElement('flutter-asset-image', (BindingContext? context) {
+  WebF.defineCustomElement('flutter-asset-image', (BindingContext? context) {
     return ImageWidgetElement(context);
   });
 }

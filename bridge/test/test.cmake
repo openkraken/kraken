@@ -1,6 +1,6 @@
 list(APPEND WEBF_TEST_SOURCE
-  include/kraken_bridge_test.h
-  kraken_bridge_test.cc
+  include/webf_bridge_test.h
+  webf_bridge_test.cc
   polyfill/dist/testframework.cc
 )
 
@@ -14,8 +14,8 @@ list(APPEND WEBF_TEST_SOURCE
   page_test.h
 )
 list(APPEND WEBF_UNIT_TEST_SOURCEURCE
-  ./test/kraken_test_env.cc
-  ./test/kraken_test_env.h
+  ./test/webf_test_env.cc
+  ./test/webf_test_env.h
   ./bindings/qjs/js_context_test.cc
   ./bindings/qjs/bom/timer_test.cc
   ./bindings/qjs/bom/console_test.cc
@@ -63,8 +63,8 @@ endif()
 add_executable(webf_integration_test
   ${WEBF_TEST_SOURCE}
   ${BRIDGE_SOURCE}
-  ./test/kraken_test_env.cc
-  ./test/kraken_test_env.h
+  ./test/webf_test_env.cc
+  ./test/webf_test_env.h
   ./test/run_integration_test.cc
   )
 target_include_directories(webf_integration_test PUBLIC ./third_party/googletest/googletest/include ${BRIDGE_INCLUDE} ./test)
@@ -77,8 +77,8 @@ target_compile_definitions(webf_integration_test PUBLIC -DSPEC_FILE_PATH="${CMAK
 add_executable(webf_benchmark
   ${WEBF_TEST_SOURCE}
   ${BRIDGE_SOURCE}
-  ./test/kraken_test_env.cc
-  ./test/kraken_test_env.h
+  ./test/webf_test_env.cc
+  ./test/webf_test_env.h
   ./test/benchmark/create_element.cc
 )
 target_include_directories(webf_benchmark PUBLIC

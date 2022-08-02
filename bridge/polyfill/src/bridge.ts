@@ -1,26 +1,13 @@
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-export interface KrakenBlob {
-  size: number;
-  type: string;
-  slice(start?: number, end?: number, contentType?: string): KrakenBlob;
-  text(): string;
-  arrayBuffer(): ArrayBuffer;
-}
+declare const __webf_invoke_module__: (module: string, method: string, params?: Object | null, fn?: (err: Error, data: any) => void) => string;
+export const webfInvokeModule = __webf_invoke_module__;
 
-export interface PrivateKraken {
-  appName: string;
-  appVersion: string;
-  platform: string;
-  product: string;
-  productSub: string;
-  comment: string;
-}
+declare const __webf_module_listener__: (fn: (moduleName: string, event: Event, extra: string) => void) => void;
+export const addWebfModuleListener = __webf_module_listener__;
 
-declare const __kraken_invoke_module__: (module: string, method: string, params?: Object | null, fn?: (err: Error, data: any) => void) => string;
-export const krakenInvokeModule = __kraken_invoke_module__;
-
-declare const __kraken_module_listener__: (fn: (moduleName: string, event: Event, extra: string) => void) => void;
-export const addKrakenModuleListener = __kraken_module_listener__;
-
-declare const __kraken_print__: (log: string, level?: string) => void;
-export const krakenPrint = __kraken_print__;
+declare const __webf_print__: (log: string, level?: string) => void;
+export const webfPrint = __webf_print__;

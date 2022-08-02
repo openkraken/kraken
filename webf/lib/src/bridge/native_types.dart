@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 import 'dart:ffi';
@@ -13,7 +14,7 @@ import 'native_value.dart';
 // All the class which extends Struct class has a corresponding struct in C++ code.
 // All class members include variables and functions must be follow the same order with C++ struct, to keep the same memory layout cross dart and C++ code.
 
-class NativeKrakenInfo extends Struct {
+class NativeWebFInfo extends Struct {
   external Pointer<Utf8> app_name;
   external Pointer<Utf8> app_version;
   external Pointer<Utf8> app_revision;
@@ -85,6 +86,7 @@ class RawNativeMessageEvent extends Struct {
   @Int64()
   external int length;
 }
+
 //
 class RawNativeCustomEvent extends Struct {
 // Raw bytes represent the following fields.
@@ -270,19 +272,10 @@ class NativeBoundingClientRect extends Struct {
   external double left;
 }
 
-
-typedef NativeDispatchEvent = Int32 Function(
-    Int32 contextId,
-    Pointer<NativeBindingObject> nativeBindingObject,
-    Pointer<NativeString> eventType,
-    Pointer<Void> nativeEvent,
-    Int32 isCustomEvent);
-typedef NativeInvokeBindingMethod = Void Function(
-    Pointer<Void> nativePtr,
-    Pointer<NativeValue> returnValue,
-    Pointer<NativeString> method,
-    Int32 argc,
-    Pointer<NativeValue> argv);
+typedef NativeDispatchEvent = Int32 Function(Int32 contextId, Pointer<NativeBindingObject> nativeBindingObject,
+    Pointer<NativeString> eventType, Pointer<Void> nativeEvent, Int32 isCustomEvent);
+typedef NativeInvokeBindingMethod = Void Function(Pointer<Void> nativePtr, Pointer<NativeValue> returnValue,
+    Pointer<NativeString> method, Int32 argc, Pointer<NativeValue> argv);
 
 class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
