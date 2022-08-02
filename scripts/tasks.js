@@ -487,7 +487,7 @@ task('build-linux-webf-lib', (done) => {
   // generate project
   execSync(`cmake -DCMAKE_BUILD_TYPE=${buildType} \
   ${isProfile ? '-DENABLE_PROFILE=TRUE \\' : '\\'}
-  ${buildMode != 'Release' ? '-DENABLE_TEST=true \\' : '\\'}
+  ${'-DENABLE_TEST=true \\'}
   -G "${cmakeGeneratorTemplate}" \
   -B ${paths.bridge}/cmake-build-linux -S ${paths.bridge}`,
     {
