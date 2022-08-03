@@ -1,3 +1,59 @@
+## 0.12.0
+
+**Big News**
+
+* Set flutter version requirement to v3.0.5.
+
+**Bug Fixed**
+
++ Fix devtools select dom position offset. https://github.com/openkraken/kraken/pull/1289
++ Fix the white-flash of canvas painting. https://github.com/openkraken/kraken/pull/1317
++ Fix the memory leak of animation timeline lifecycle. https://github.com/openkraken/kraken/pull/1312
++ Fix request failed while response was gzipped. https://github.com/openkraken/kraken/pull/1302
++ Fix exception in paragraph paint in some edge cases. https://github.com/openkraken/kraken/pull/1334
++ Fix flex-basis with percentage not working. https://github.com/openkraken/kraken/pull/1300
++ Fix memory leak when dispatch gesture events. https://github.com/openkraken/kraken/pull/1333
++ Fix negative margin value. https://github.com/openkraken/kraken/pull/1308
++ Fix margin auto value. https://github.com/openkraken/kraken/pull/1331
++ Fix JS error report twice. https://github.com/openkraken/kraken/pull/1337
++ Fix event concurrent exception. https://github.com/openkraken/kraken/pull/1354
++ Fix text white space collapse. https://github.com/openkraken/kraken/pull/1352
++ Fix inline replaced element layout size. https://github.com/openkraken/kraken/pull/1343
++ Fix event listener remove when call removeEventListener. https://github.com/openkraken/kraken/pull/1357/files
++ Fix error of textNode when attach to WidgetElement. https://github.com/openkraken/kraken/pull/1336
++ Fix null safety error when handle pointer events. https://github.com/openkraken/kraken/pull/1360
++ Fix script element with async attribute error. https://github.com/openkraken/kraken/pull/1358
++ Fix event handlers removal with once time. https://github.com/openkraken/kraken/pull/1359
++ Fix text not wrap in flex container of column direction. https://github.com/openkraken/kraken/pull/1356
++ Fix the sliver with positioned element usage problem. https://github.com/openkraken/kraken/pull/1341
++ Fix set overflow on body can still scroll. https://github.com/openkraken/kraken/pull/1366
++ Fix positioned element offset when containing block has transform. https://github.com/openkraken/kraken/pull/1368
++ Fix replaced flex item size. https://github.com/openkraken/kraken/pull/1338
++ Fix memory usage of img element. https://github.com/openkraken/kraken/pull/1347
++ Fix position: fixed elements hittest not correct. https://github.com/openkraken/kraken/pull/1374
++ Fix html scroll value. https://github.com/openkraken/kraken/pull/1367
++ Fix custom element widget unmount. https://github.com/openkraken/kraken/pull/1375
++ Fix the null value for CSS content-visibility and position. https://github.com/openkraken/kraken/pull/1389
++ Fix custom element item layout. https://github.com/openkraken/kraken/pull/1392
++ Fix script elements sync load order. https://github.com/openkraken/kraken/pull/1405
++ Fix element.style property match. https://github.com/openkraken/kraken/pull/1410
++ Fix viewport dispose twice. https://github.com/openkraken/kraken/pull/1404
++ Fix localToGlobal on silver container. https://github.com/openkraken/kraken/pull/1421
++ Fix add PointerDeviceKind on scrollable. https://github.com/openkraken/kraken/pull/1439
++ Fix add new child of sliver container. https://github.com/openkraken/kraken/pull/1412
++ Fix stylesheet can not load with link elements. https://github.com/openkraken/kraken/pull/1441
++ Fix not support relative protocol. https://github.com/openkraken/kraken/pull/1444
+
+**Features**
+
++ Add reset for canvas rendering context 2d. https://github.com/openkraken/kraken/pull/1310
++ Add temporary Console panel at Chrome DevTools. https://github.com/openkraken/kraken/pull/1328
++ Add built-in attributes for event handlers. https://github.com/openkraken/kraken/pull/1330
++ Add document.getElementsByName API. https://github.com/openkraken/kraken/pull/1383
++ Add absolute-size & relative-size keywords of font-size. https://github.com/openkraken/kraken/pull/1430
++ Add scroll support of input、textarea、sliver with mouse wheel when setting overflow. https://github.com/openkraken/kraken/pull/1438
+
+
 ## 0.11.0
 
 **Breaking Changes**
