@@ -10,11 +10,52 @@ WebF (Web on the Flutter) is a W3C standard compliant Web rendering engine based
 
 ## How to use
 
-@TODO
+**packages.yaml**
+
+```yaml
+dependencies:
+  webf: <lastest version>
+```
+
+**import**
+
+```
+import 'package:webf/webf.dart';
+```
+
+**Use WebF Widget**
+
+
+```Dart
+@override
+Widget build(BuildContext context) {
+  final MediaQueryData queryData = MediaQuery.of(context);
+  final TextEditingController textEditingController = TextEditingController();
+  final Size viewportSize = queryData.size;
+
+  return Scaffold(
+      body: Center(
+    child: Column(
+      children: [
+        WebF(
+          devToolsService: ChromeDevToolsService(), // Enable Chrome DevTools Services
+          viewportWidth: viewportSize.width - queryData.padding.horizontal, // Adjust the viewportWidth
+          viewportHeight: viewportSize.height - queryData.padding.vertical, // Adjust the viewportHeight
+          bundle: WebFBundle.fromUrl('https://andycall.oss-accelerate.aliyuncs.com/demo/animation.js'), // The page entry point
+        ),
+      ],
+    ),
+  ));
+}
+```
 
 ## How it works
 
-@TODO
+WebF provide a rendering engine which follow the W3C standard like the browser does. It can render HTML/CSS and execute JavaScript. It's built on top of the flutter rendering pipelines and implements its' own layout and paint algorithms.
+
+With WebF, Web Apps and Flutter Apps are sharing the rendering context. It means that you can use Flutter Widgets define your HTML elements and embedded your Web App as a Flutter Widget in your flutter apps.
+
+<img src="https://andycall.oss-accelerate.aliyuncs.com/images/11659542021_.pic.jpg" width="800" style="display: block; margin: 0 auto;" />
 
 ## 👏 Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/openwebf/webf/pulls)
 
