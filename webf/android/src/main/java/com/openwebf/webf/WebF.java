@@ -74,9 +74,9 @@ public class WebF {
       public void run() {
         if (flutterEngine != null) {
           PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-          WebFPlugin krakenSDKPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
-          if (krakenSDKPlugin != null && krakenSDKPlugin.channel != null) {
-            krakenSDKPlugin.channel.invokeMethod(method, arguments);
+          WebFPlugin webFPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
+          if (webFPlugin != null && webFPlugin.channel != null) {
+            webFPlugin.channel.invokeMethod(method, arguments);
           }
         }
       }
@@ -86,9 +86,9 @@ public class WebF {
   public void reload() {
     if (flutterEngine != null) {
       PluginRegistry pluginRegistry = flutterEngine.getPlugins();
-      WebFPlugin krakenSDKPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
-      if (krakenSDKPlugin != null) {
-        krakenSDKPlugin.reload();
+      WebFPlugin webFPlugin = (WebFPlugin) pluginRegistry.get(WebFPlugin.class);
+      if (webFPlugin != null) {
+        webFPlugin.reload();
       }
     }
   }

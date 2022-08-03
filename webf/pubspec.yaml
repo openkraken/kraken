@@ -13,6 +13,7 @@ dependencies:
   path: ^1.8.1 # Pure dart module.
   meta: ^1.7.0 # Pure dart module.
   ffi: ^2.0.1 # Pure dart module.
+  characters: ^1.2.0
   async: ^2.8.2 # Pure dart module.
   quiver: ^3.1.0 # Pure dart module.
   vector_math: ^2.1.2 # Pure dart module.
