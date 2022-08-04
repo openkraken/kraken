@@ -1,3 +1,9 @@
+## 0.12.0+1
+
+**Bug Fixed**
+
+* Fix Apple silicon platform build error. 
+
 ## 0.12.0
 
 **Big News**
