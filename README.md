@@ -68,7 +68,7 @@ By contributing to WebF, you agree that your contributions will be licensed unde
 
 Read our [contributing guide](https://github.com/openwebf/webf/blob/main/.github/CONTRIBUTING.md) and let's build a better kraken project together.
 
-Thank you to all the people who already contributed to OpenWebF!
+Thank you to all the people who already contributed to [OpenWebF](https://github.com/openwebf) and [OpenKraken](https://github.com/openkraken)!
 
 Copyright (c) 2022-present, The OpenWebF authors.
 
