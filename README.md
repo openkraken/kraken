@@ -30,7 +30,6 @@ import 'package:webf/webf.dart';
 @override
 Widget build(BuildContext context) {
   final MediaQueryData queryData = MediaQuery.of(context);
-  final TextEditingController textEditingController = TextEditingController();
   final Size viewportSize = queryData.size;
 
   return Scaffold(
@@ -41,7 +40,7 @@ Widget build(BuildContext context) {
           devToolsService: ChromeDevToolsService(), // Enable Chrome DevTools Services
           viewportWidth: viewportSize.width - queryData.padding.horizontal, // Adjust the viewportWidth
           viewportHeight: viewportSize.height - queryData.padding.vertical, // Adjust the viewportHeight
-          bundle: WebFBundle.fromUrl('https://andycall.oss-accelerate.aliyuncs.com/demo/animation.js'), // The page entry point
+          bundle: WebFBundle.fromUrl('https://andycall.oss-cn-beijing.aliyuncs.com/demo/demo-vue.js'), // The page entry point
         ),
       ],
     ),
