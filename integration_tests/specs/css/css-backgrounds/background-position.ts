@@ -46,7 +46,7 @@ describe('Background-position', () => {
     position.appendChild(position2);
 
     append(BODY, position);
-    await snapshot(0.1);
+    await snapshot(0.5);
   });
 
   it('top', async () => {

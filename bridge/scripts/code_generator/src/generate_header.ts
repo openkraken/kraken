@@ -164,18 +164,19 @@ export function generateCppHeader(blob: Blob) {
   let headers = blob.objects.map(o => generateObjectHeader(o));
 
   return `/*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
- */
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
 
-#ifndef KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
-#define KRAKENBRIDGE_${blob.filename.toUpperCase()}_H
+#ifndef BRIDGE_${blob.filename.toUpperCase()}_H
+#define BRIDGE_${blob.filename.toUpperCase()}_H
 
 #include "bindings/qjs/dom/element.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 ${headers.join('')}
 }
 
-#endif //KRAKENBRIDGE_${blob.filename.toUpperCase()}T_H
+#endif //BRIDGE_${blob.filename.toUpperCase()}T_H
 `;
 }

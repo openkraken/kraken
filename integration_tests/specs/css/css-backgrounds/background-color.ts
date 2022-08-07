@@ -50,7 +50,7 @@ describe('Background-color', () => {
       position: 'relative',
       bottom: '60px',
       backgroundImage:
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/green-60-60.png)',
+        'url(assets/green-60-60.png)',
       backgroundRepeat: 'no-repeat',
     });
     append(BODY, red);

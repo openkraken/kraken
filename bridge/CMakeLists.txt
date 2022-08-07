@@ -1,20 +1,13 @@
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.11)
-project(KrakenBridge)
+project(WebF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  execute_process(
-    COMMAND bash "-c" "clang --version | xargs | awk '{print $7}' | cut -c1-5"
-    OUTPUT_VARIABLE CLANG_ARCH
-  )
-  ## Set univeral archs for Apple arm64 processors
-  if (${CLANG_ARCH} MATCHES "arm64")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-  endif()
+  set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 endif()
 
 if (${ENABLE_PROFILE})
@@ -49,8 +42,8 @@ execute_process(
 )
 string(REGEX REPLACE "\n$" "" DART_SDK "${DART_SDK}")
 
-list(APPEND KRAKEN_PUBLIC_HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
+list(APPEND WEBF_PUBLIC_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_bridge.h
 )
 
 set(QUICKJS_PUBLIC_HEADERS
@@ -81,9 +74,9 @@ if (DEFINED PLATFORM)
 endif()
 
 list(APPEND BRIDGE_SOURCE
-  kraken_bridge.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_bridge.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/kraken_foundation.h
+        webf_bridge.cc
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_bridge.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/webf_foundation.h
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dart_methods.h
   foundation/logging.cc
   foundation/logging.h
@@ -151,8 +144,8 @@ list(APPEND BRIDGE_INCLUDE
 
 set(BINDING_DIR ${CMAKE_CURRENT_LIST_DIR}/bindings)
 
-if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
-  add_compile_options(-DKRAKEN_QUICK_JS_ENGINE=1)
+if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
+  add_compile_options(-DWEBF_QUICK_JS_ENGINE=1)
 
   execute_process(
     COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/VERSION
@@ -160,6 +153,8 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
   )
 
   list(APPEND QUICK_JS_SOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libbf.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.c
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/cutils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/quickjs/libregexp.c
@@ -237,6 +232,7 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
     bindings/qjs/dom/document_fragment.h
     bindings/qjs/dom/style_declaration.cc
     bindings/qjs/dom/style_declaration.h
+    bindings/qjs/dom/css_property_list.h
     bindings/qjs/dom/elements/.gen/canvas_element.cc
     bindings/qjs/dom/elements/.gen/canvas_element.h
     bindings/qjs/dom/elements/image_element.cc
@@ -293,13 +289,13 @@ if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
 endif ()
 
 list(APPEND PUBLIC_HEADER
-  include/kraken_bridge.h
+  include/webf_bridge.h
   )
 
-add_library(kraken SHARED ${BRIDGE_SOURCE})
-add_library(kraken_static STATIC ${BRIDGE_SOURCE})
+add_library(webf SHARED ${BRIDGE_SOURCE})
+add_library(webf_static STATIC ${BRIDGE_SOURCE})
 
-target_compile_definitions(kraken PUBLIC -DFLUTTER_BACKEND=1)
+target_compile_definitions(webf PUBLIC -DFLUTTER_BACKEND=1)
 
 add_library(gumbo_parse_static STATIC ${GUMBO_PARSER})
 list(APPEND BRIDGE_LINK_LIBS gumbo_parse_static)
@@ -317,30 +313,30 @@ elseif(${IS_IOS})
   add_definitions(-DIS_IOS=1)
 endif()
 
-### Kraken
-target_include_directories(kraken PRIVATE
+### webf
+target_include_directories(webf PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken PRIVATE ${BRIDGE_LINK_LIBS})
+target_link_libraries(webf PRIVATE ${BRIDGE_LINK_LIBS})
 
-if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-    target_compile_options(kraken PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
+    target_compile_options(webf PRIVATE -fno-exceptions -fvisibility=hidden -fno-rtti)
   else ()
     ### remove dynamic_cast and exceptions
-    target_compile_options(kraken PRIVATE -fno-exceptions -fno-rtti)
+    target_compile_options(webf PRIVATE -fno-exceptions -fno-rtti)
   endif ()
 endif ()
 
-### KrakenStatic
-target_include_directories(kraken_static PRIVATE
+### webfStatic
+target_include_directories(webf_static PRIVATE
   ${BRIDGE_INCLUDE}
   ${CMAKE_CURRENT_SOURCE_DIR} PUBLIC ./include)
-target_link_libraries(kraken_static ${BRIDGE_LINK_LIBS})
+target_link_libraries(webf_static ${BRIDGE_LINK_LIBS})
 
 execute_process(
   COMMAND grep version: ./pubspec.yaml
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../kraken
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../webf
   OUTPUT_VARIABLE APP_VER
 )
 string(SUBSTRING ${APP_VER} 9 30 APP_VER)
@@ -362,13 +358,13 @@ if (${ENABLE_TEST})
 endif ()
 
 if (DEFINED ENV{LIBRARY_OUTPUT_DIR})
-  set_target_properties(kraken
+  set_target_properties(webf
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}"
     )
-  set_target_properties(kraken_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
+  set_target_properties(webf_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
 
-  if ($ENV{KRAKEN_JS_ENGINE} MATCHES "quickjs")
+  if ($ENV{WEBF_JS_ENGINE} MATCHES "quickjs")
     set_target_properties(quickjs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "$ENV{LIBRARY_OUTPUT_DIR}")
   endif ()
 elseif (IS_ANDROID)
@@ -379,14 +375,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
   set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "")
 
-  set_target_properties(kraken PROPERTIES
-    OUTPUT_NAME kraken_bridge
+  set_target_properties(webf PROPERTIES
+    OUTPUT_NAME webf_bridge
     FRAMEWORK TRUE
     FRAMEWORK_VERSION C
-    MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.kraken-bridge
+    MACOSX_FRAMEWORK_IDENTIFIER com.openwebf.webf-bridge
     MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
     MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
-    PUBLIC_HEADER ${KRAKEN_PUBLIC_HEADERS}
+    PUBLIC_HEADER ${WEBF_PUBLIC_HEADERS}
     )
 
   # If quickjs is static, there will be no quickjs.framework any more.
@@ -395,7 +391,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
       OUTPUT_NAME quickjs
       FRAMEWORK TRUE
       FRAMEWORK_VERSION C
-      MACOSX_FRAMEWORK_IDENTIFIER com.openkraken.quickjs
+      MACOSX_FRAMEWORK_IDENTIFIER com.openwebf.quickjs
       MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
       MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
       PUBLIC_HEADER ${QUICKJS_PUBLIC_HEADERS}

@@ -14,15 +14,15 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'skew(0.3turn,0.6turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -43,15 +43,15 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'skewX(0.3turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -72,15 +72,15 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'skewY(0.3turn)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });

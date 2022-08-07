@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
 
 #include "native_value.h"
@@ -7,9 +8,9 @@
 #include "bindings/qjs/qjs_patch.h"
 #include "dom/element.h"
 #include "dom/elements/.gen/canvas_element.h"
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
-namespace kraken::binding::qjs {
+namespace webf::binding::qjs {
 
 #define AnonymousFunctionCallPreFix "_anonymous_fn_"
 #define AsyncAnonymousFunctionCallPreFix "_anonymous_async_fn_"
@@ -276,4 +277,4 @@ std::string nativeStringToStdString(NativeString* nativeString) {
   return toUTF8(u16EventType);
 }
 
-}  // namespace kraken::binding::qjs
+}  // namespace webf::binding::qjs

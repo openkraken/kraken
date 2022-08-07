@@ -2,11 +2,11 @@
  * Copyright (C) 2022-present The Kraken authors. All rights reserved.
  */
 
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:kraken/kraken.dart';
+import 'package:webf/webf.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 const benchMarkServer = String.fromEnvironment("SERVER");
@@ -47,21 +47,20 @@ class MyBrowser extends StatefulWidget {
 
 typedef PerformanceDataCallback = void Function(String viewType, int time);
 
-class _WebviewPage extends StatelessWidget {
-  late int _startTime;
-  _WebviewPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback {
-    _startTime = DateTime.now().millisecondsSinceEpoch;
-  }
+class _WebViewPage extends StatelessWidget {
+  final PerformanceDataCallback _performanceDataCallback;
+  final int _startTime;
 
-  late PerformanceDataCallback _performanceDataCallback;
+  _WebViewPage(PerformanceDataCallback performanceDataCallback)
+      : _performanceDataCallback = performanceDataCallback,
+        _startTime = DateTime.now().millisecondsSinceEpoch;
 
   JavascriptChannel _javascriptChannel(BuildContext context) {
     return JavascriptChannel(
         name: 'Message',
         onMessageReceived: (JavascriptMessage message) {
           _performanceDataCallback('Web', int.parse(message.message) - _startTime);
-        }
-    );
+        });
   }
 
   @override
@@ -69,9 +68,6 @@ class _WebviewPage extends StatelessWidget {
     return WebView(
       initialUrl: 'http://$benchMarkServer/web/home.html',
       javascriptMode: JavascriptMode.unrestricted,
-      onWebViewCreated: (WebViewController controller)  {
-        // controller.clearCache();
-      },
       javascriptChannels: <JavascriptChannel>{
         _javascriptChannel(context),
       },
@@ -80,24 +76,24 @@ class _WebviewPage extends StatelessWidget {
 }
 
 class _KrakenPage extends StatelessWidget {
-  late int _startTime;
-  _KrakenPage(PerformanceDataCallback performanceDataCallback) : _performanceDataCallback = performanceDataCallback {
-    _startTime = DateTime.now().millisecondsSinceEpoch;
-  }
+  final PerformanceDataCallback _performanceDataCallback;
+  final int _startTime;
 
-  late PerformanceDataCallback _performanceDataCallback;
+  _KrakenPage(PerformanceDataCallback performanceDataCallback)
+      : _performanceDataCallback = performanceDataCallback,
+        _startTime = DateTime.now().millisecondsSinceEpoch;
 
-  @override
-  Widget build(BuildContext context) {
-    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
-    javaScriptChannel.onMethodCall = (String method, arguments) async {
+  WebFJavaScriptChannel get javaScriptChannel => WebFJavaScriptChannel()
+    ..onMethodCall = (String method, arguments) async {
       if (method == 'performance') {
-        _performanceDataCallback('Kraken', int.parse((arguments as List)[0]) - _startTime);
+        _performanceDataCallback('WebF', int.parse((arguments as List)[0]) - _startTime);
       }
     };
 
-    return Kraken(
-      bundle: KrakenBundle.fromUrl('http://$benchMarkServer/kraken/home.kbc1'),
+  @override
+  Widget build(BuildContext context) {
+    return WebF(
+      bundle: WebFBundle.fromUrl('http://$benchMarkServer/kraken/home.kbc1'),
       javaScriptChannel: javaScriptChannel,
     );
   }
@@ -106,8 +102,8 @@ class _KrakenPage extends StatelessWidget {
 class _MyHomePageState extends State<MyBrowser> {
   Widget? _currentView;
 
-  List<int> _krakenOnloadTimes = [];
-  List<int> _webOnloadTimes = [];
+  List<int> _krakenLoadTimes = [];
+  List<int> _webLoadTimes = [];
   final int _collectCount = 60;
 
   OutlineInputBorder outlineBorder = OutlineInputBorder(
@@ -118,27 +114,21 @@ class _MyHomePageState extends State<MyBrowser> {
   );
 
   void _changeViewAndReloadPage() async {
-    if (_currentView is _KrakenPage) {
-      setState(() {
-        _currentView = _WebviewPage(_getPerformanceData);
-      });
-    } else {
-      setState(() {
-        _currentView = _KrakenPage(_getPerformanceData);
-      });
-    }
+    setState(() {
+      _currentView = _currentView is _KrakenPage ? _WebViewPage(_getPerformanceData) : _KrakenPage(_getPerformanceData);
+    });
   }
 
   void _getPerformanceData(String viewType, int time) {
     if (viewType == 'Kraken') {
-      _krakenOnloadTimes.add(time);
+      _krakenLoadTimes.add(time);
     } else {
-      _webOnloadTimes.add(time);
+      _webLoadTimes.add(time);
     }
 
-    if (_krakenOnloadTimes.length >= _collectCount && _webOnloadTimes.length >= _collectCount) {
-      print('Performance: $_krakenOnloadTimes');
-      print('Performance: $_webOnloadTimes');
+    if (_krakenLoadTimes.length >= _collectCount && _webLoadTimes.length >= _collectCount) {
+      print('Performance: $_krakenLoadTimes');
+      print('Performance: $_webLoadTimes');
 
       Timer(Duration(seconds: 1), () {
         exit(0);
@@ -157,8 +147,6 @@ class _MyHomePageState extends State<MyBrowser> {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData queryData = MediaQuery.of(context);
-    final Size viewportSize = queryData.size;
     final TextEditingController textEditingController = TextEditingController();
 
     AppBar appBar = AppBar(
@@ -172,7 +160,7 @@ class _MyHomePageState extends State<MyBrowser> {
             textEditingController.text = value;
           },
           decoration: InputDecoration(
-            hintText: 'Enter a app url',
+            hintText: 'Enter URL',
             hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
             contentPadding: const EdgeInsets.all(10.0),
             filled: true,
@@ -189,11 +177,11 @@ class _MyHomePageState extends State<MyBrowser> {
     );
 
     return Scaffold(
-      appBar: appBar,
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+        appBar: appBar,
+        body: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
           child: _currentView ?? Text('Performance test'),
-      ));
+        ));
   }
 }

@@ -3,6 +3,7 @@
  */
 const { spawn, spawnSync } = require('child_process');
 const path = require('path');
+const os = require('os');
 
 // Dart null safety error didn't report in dist binaries. Should run integration test with flutter run directly.
 function startIntegrationTest() {
@@ -14,16 +15,28 @@ function startIntegrationTest() {
     });
   }
 
-  const testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
+  const platform = os.platform();
+  let testExecutable;
+  if (platform === 'linux') {
+    testExecutable = path.join(__dirname, '../build/linux/x64/debug/bundle/app');
+  } else if (platform === 'darwin') {
+    testExecutable = path.join(__dirname, '../build/macos/Build/Products/Debug/tests.app/Contents/MacOS/tests');
+  } else {
+    throw new Error('Unsupported platform:' + platform);
+  }
+
   const tester = spawn(testExecutable, [], {
     env: {
       ...process.env,
       KRAKEN_ENABLE_TEST: 'true',
+      'enable-software-rendering': true,
+      'skia-deterministic-rendering': true,
       KRAKEN_TEST_DIR: path.join(__dirname, '../')
     },
     cwd: process.cwd(),
     stdio: 'inherit'
   });
+
   tester.on('close', (code) => {
     process.exit(code);
   });

@@ -2,8 +2,8 @@
  * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
-#ifndef KRAKENBRIDGE_UI_TASK_QUEUE_H
-#define KRAKENBRIDGE_UI_TASK_QUEUE_H
+#ifndef BRIDGE_UI_TASK_QUEUE_H
+#define BRIDGE_UI_TASK_QUEUE_H
 
 #include "task_queue.h"
 
@@ -31,4 +31,4 @@ class UITaskQueue : public TaskQueue {
 
 }  // namespace foundation
 
-#endif  // KRAKENBRIDGE_UI_TASK_QUEUE_H
+#endif  // BRIDGE_UI_TASK_QUEUE_H

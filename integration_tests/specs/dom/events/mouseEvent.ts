@@ -12,8 +12,8 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     document.body.appendChild(div);
-    
-    div.addEventListener('click', e=> {
+
+    div.addEventListener('click', e => {
       done();
     })
     div.click();
@@ -30,8 +30,8 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     document.body.appendChild(div);
-    
-    div.addEventListener('click', e=> {
+
+    div.addEventListener('click', e => {
       expect(e.clientX).toBe(1.0);
       done();
     })
@@ -44,8 +44,8 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     document.body.appendChild(div);
-    
-    div.addEventListener('click', e=> {
+
+    div.addEventListener('click', e => {
       expect(e.clientY).toBe(10.0);
       done();
     })
@@ -58,8 +58,8 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     document.body.appendChild(div);
-    
-    div.addEventListener('click', e=> {
+
+    div.addEventListener('click', e => {
       expect(e.offsetX).toBe(1.0);
       done();
     })
@@ -72,8 +72,8 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     document.body.appendChild(div);
-    
-    div.addEventListener('click', e=> {
+
+    div.addEventListener('click', e => {
       expect(e.offsetY).toBe(10.0);
       done();
     })
@@ -103,7 +103,7 @@ describe('MouseEvent', () => {
       expect(e.target).toBe(span);
       done();
     });
-  
+
     await simulateClick(10.0, 10.0);
   });
 
@@ -130,7 +130,7 @@ describe('MouseEvent', () => {
       expect(e.currentTarget).toBe(div);
       done();
     });
-  
+
     await simulateClick(10.0, 10.0);
   });
 
@@ -157,7 +157,7 @@ describe('MouseEvent', () => {
       expect(e.target).toBe(span);
       done();
     });
-  
+
     span.click();
   });
 
@@ -184,7 +184,7 @@ describe('MouseEvent', () => {
       expect(e.currentTarget).toBe(div);
       done();
     });
-  
+
     span.click();
   });
 
@@ -198,7 +198,7 @@ describe('MouseEvent', () => {
     document.addEventListener('click', function handler(e) {
       done();
     });
-  
+
     await simulateClick(10.0, 10.0);
   });
 
@@ -212,10 +212,10 @@ describe('MouseEvent', () => {
     document.body.addEventListener('click', function handler(e) {
       done();
     });
-  
+
     await simulateClick(10.0, 10.0);
   });
-  
+
   it('should not crash when cloneNode img element', async (done) => {
     const img = document.createElement('img');
     img.style.width = '100px';
@@ -225,7 +225,7 @@ describe('MouseEvent', () => {
     const img2 = img.cloneNode(true);
     document.body.appendChild(img2);
 
-    img2.addEventListener('click',()=>{
+    img2.addEventListener('click', () => {
       done();
     })
 
@@ -237,12 +237,40 @@ describe('MouseEvent', () => {
     div.style.width = '100px';
     div.style.height = '100px';
     div.style.backgroundColor = 'red';
-    div.addEventListener('dblclick', (e)=>{
+    div.addEventListener('dblclick', (e) => {
       done();
     });
     document.body.appendChild(div);
     await simulateClick(10.0, 10.0, 0);
     await sleep(0.1);
     await simulateClick(10.0, 10.0, 1);
+  });
+
+  it('should work with fixed node which be scolled', async (done) => {
+    const div = document.createElement('div')
+    document.body.appendChild(div)
+    div.style.width = '100%';
+    div.style.height = '3000px';
+    div.style.backgroundColor = 'red';
+
+    div.appendChild(document.createTextNode('aaa'));
+
+
+    const mask = document.createElement('div');
+    mask.style.width = '100%';
+    mask.style.height = '100vh';
+    mask.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+    mask.style.position = 'fixed';
+    mask.style.top = '0px';
+    mask.style.left = '0px';
+    document.body.appendChild(mask);
+
+    window.scrollTo(0, '100vh');
+
+    mask.addEventListener('click', function handleClick() {
+      mask.removeEventListener('click', handleClick);
+      done();
+    })
+    await simulateClick(10.0, 10.0, 0);
   });
 });

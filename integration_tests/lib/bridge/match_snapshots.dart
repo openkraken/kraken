@@ -1,15 +1,18 @@
 /*
- * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ * Copyright (C) 2022-present The WebF authors. All rights reserved.
  */
-import 'dart:typed_data';
-import 'dart:io';
 import 'dart:async';
-import 'package:path/path.dart' as path;
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:image_compare/image_compare.dart';
+
 import 'package:image/image.dart';
+import 'package:path/path.dart' as path;
 
 ///Check if [firstImg] and [secondImg] have the same width and height
 bool haveSameSize(Image firstImg, Image secondImg) {
-  if (firstImg.width != secondImg.width || firstImg.height != secondImg.height) {
+  if (firstImg.width != secondImg.width ||
+      firstImg.height != secondImg.height) {
     return false;
   }
   return true;
@@ -25,8 +28,10 @@ int selectColor(firstPixel, secondPixel, diffAtPixel) {
   var sBlue = getBlue(secondPixel);
 
   if (diffAtPixel == 0) return Color.fromRgba(fRed, fGreen, fBlue, 50);
-  if (fRed == 0 && fGreen == 0 && fBlue == 0) return Color.fromRgba(sRed, sGreen, sBlue, 50);
-  if (sRed == 0 && sGreen == 0 && sBlue == 0) return Color.fromRgba(fRed, fGreen, fBlue, 50);
+  if (fRed == 0 && fGreen == 0 && fBlue == 0)
+    return Color.fromRgba(sRed, sGreen, sBlue, 50);
+  if (sRed == 0 && sGreen == 0 && sBlue == 0)
+    return Color.fromRgba(fRed, fGreen, fBlue, 50);
 
   int alpha, red, green, blue;
 
@@ -48,7 +53,8 @@ num diffBetweenPixels(firstPixel, secondPixel, ignoreAlpha) {
   var sBlue = getBlue(secondPixel);
   var sAlpha = getAlpha(secondPixel);
 
-  num diff = (fRed - sRed).abs() + (fGreen - sGreen).abs() + (fBlue - sBlue).abs();
+  num diff =
+      (fRed - sRed).abs() + (fGreen - sGreen).abs() + (fBlue - sBlue).abs();
 
   if (ignoreAlpha) {
     diff = (diff / 255) / 3;
@@ -60,7 +66,7 @@ num diffBetweenPixels(firstPixel, secondPixel, ignoreAlpha) {
   return diff;
 }
 
-bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
+Future<bool> matchImage(Uint8List imageA, List<int> imageB, String filename) async {
   if (imageA.length == 0 || imageB.length == 0) {
     return false;
   }
@@ -71,35 +77,34 @@ bool matchImage(Uint8List imageA, List<int> imageB, String filename) {
     return false;
   }
 
-  var width = a.width;
-  var height = b.height;
-  var diff = 0.0;
+  double ratio = await compareImages(src1: a, src2: b, algorithm: EuclideanColorDistance(ignoreAlpha: true));
+  bool isMatch = (ratio * 100) < 1;
 
-  //Create an image to show the differences
-  var diffImg = Image(width, height);
+  if (!isMatch) {
+    var width = a.width;
+    var height = b.height;
 
-  for (var i = 0; i < width; i++) {
-    var diffAtPixel, firstPixel, secondPixel;
-    for (var j = 0; j < height; j++) {
-      firstPixel = a.getPixel(i, j);
-      secondPixel = b.getPixel(i, j);
+    //Create an image to show the differences
+    var diffImg = Image(width, height);
 
-      diffAtPixel = diffBetweenPixels(firstPixel, secondPixel, true);
-      diff += diffAtPixel;
+    for (var i = 0; i < width; i++) {
+      var diffAtPixel, firstPixel, secondPixel;
+      for (var j = 0; j < height; j++) {
+        firstPixel = a.getPixel(i, j);
+        secondPixel = b.getPixel(i, j);
 
-      //Shows in red the different pixels and in semitransparent the same ones
-      diffImg.setPixel(i, j, selectColor(firstPixel, secondPixel, diffAtPixel));
+        diffAtPixel = diffBetweenPixels(firstPixel, secondPixel, true);
+
+        //Shows in red the different pixels and in semitransparent the same ones
+        diffImg.setPixel(i, j, selectColor(firstPixel, secondPixel, diffAtPixel));
+      }
     }
-  }
 
-  diff /= height * width;
-
-  if (diff > 0) {
     final newSnap = File('$filename.diff.png');
     newSnap.writeAsBytesSync(encodePng(diffImg));
   }
 
-  return (diff * 10e5) < 300; // < 0.03%
+  return isMatch; // < 0.01%
 }
 
 bool matchFile(List<int> left, List<int> right) {
@@ -107,7 +112,7 @@ bool matchFile(List<int> left, List<int> right) {
     return false;
   }
 
-  for (int i = 0; i < left.length; i ++) {
+  for (int i = 0; i < left.length; i++) {
     if (left[i] != right[i]) {
       return false;
     }
@@ -133,7 +138,7 @@ Future<bool> matchImageSnapshot(Uint8List bytes, String filename) async {
       match = matchFile(snapPixels, currentPixels);
     }
     if (!match) {
-      match = matchImage(snapPixels, currentPixels, filename);
+      match = await matchImage(snapPixels, currentPixels, filename);
     }
     if (!match) {
       final newSnap = File('$filename.current.png');

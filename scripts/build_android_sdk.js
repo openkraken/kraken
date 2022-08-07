@@ -29,7 +29,7 @@ task('pack-android-sdk', done => {
 series(
   'android-so-clean',
   'compile-polyfill',
-  'build-android-kraken-lib',
+  'build-android-webf-lib',
   'build-android-sdk',
   'pack-android-sdk'
 )((err) => {

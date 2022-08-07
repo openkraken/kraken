@@ -33,7 +33,7 @@ task('pack-ios-framework', done => {
 let buildAppTasks = series(
   'ios-framework-clean',
   'compile-polyfill',
-  'build-ios-kraken-lib',
+  'build-ios-webf-lib',
   'build-ios-frameworks',
   'pack-ios-framework'
 );

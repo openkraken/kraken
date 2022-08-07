@@ -301,16 +301,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.bottom = '100px';
       await snapshot();
-    }, 200);
+      requestAnimationFrame(async () => {
+        div.style.bottom = '-200px';
+        await snapshot();
+        done();
+      });
+    });
 
-    setTimeout(async () => {
-      div.style.bottom = '-200px';
-      await snapshot();
-      done();
-    }, 300);
 
     document.body.appendChild(div);
     await snapshot();
@@ -323,16 +323,15 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.width = '100px';
       await snapshot();
-    }, 200);
-
-    setTimeout(async () => {
-      div.style.width = '400px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.width = '400px';
+        await snapshot();
+        done();
+      })
+    })
 
     document.body.appendChild(div);
     await snapshot();
@@ -345,16 +344,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.height = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.height = '400px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.height = '400px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -367,16 +366,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.top = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.top = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.top = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -389,16 +388,16 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.left = '100px';
       await snapshot();
-    }, 200);
 
-    setTimeout(async () => {
-      div.style.left = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.left = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -411,16 +410,15 @@ describe('Position absolute', () => {
     div.style.backgroundColor = 'red';
     div.style.position = 'absolute';
 
-    setTimeout(async () => {
+    requestAnimationFrame(async () => {
       div.style.right = '100px';
       await snapshot();
-    }, 200);
-
-    setTimeout(async () => {
-      div.style.right = '-50px';
-      await snapshot();
-      done();
-    }, 300);
+      requestAnimationFrame(async () => {
+        div.style.right = '-50px';
+        await snapshot();
+        done();
+      });
+    });
 
     document.body.appendChild(div);
     await snapshot();
@@ -739,7 +737,7 @@ describe('Position absolute', () => {
           backgroundColor: 'green'
        },
       });
-    
+
     BODY.appendChild(div1);
     await snapshot();
   });
@@ -919,17 +917,17 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
+          right: 0,
+          bottom: 0,
+          top: 0,
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             height: '100px',
           }
         })
@@ -951,19 +949,19 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
-          display: 'flex', 
-          flexDirection: 'column', 
+          right: 0,
+          bottom: 0,
+          top: 0,
+          display: 'flex',
+          flexDirection: 'column',
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             height: '100px',
           }
         })
@@ -985,18 +983,18 @@ describe('Position absolute', () => {
     }, [
       createElement('div', {
         style: {
-          backgroundColor: '#999',  
-          position: 'absolute', 
+          backgroundColor: '#999',
+          position: 'absolute',
           left: 0,
-          right: 0, 
-          bottom: 0, 
-          top: 0, 
-          display: 'flex', 
+          right: 0,
+          bottom: 0,
+          top: 0,
+          display: 'flex',
         }
       }, [
         createElement('div', {
           style: {
-            backgroundColor: 'green', 
+            backgroundColor: 'green',
             width: '100px',
           }
         })
@@ -1004,6 +1002,128 @@ describe('Position absolute', () => {
     ]);
 
     append(BODY, div);
+
+    await snapshot();
+  });
+
+  it('offset should work when ancestors has transform', async () => {
+    let container;
+    let child;
+    container = createElement(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          height: '50px',
+          alignItems: 'center',
+          width: '150px',
+          backgroundColor: 'green',
+          transform: 'translateX(64px)',
+        },
+      },
+      [
+        createElement(
+          'div',
+          {
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              height: '26px',
+              alignItems: 'center',
+              width: '50px',
+              backgroundColor: 'grey',
+              transform: 'translateX(64px)',
+            },
+          },
+          [
+              (child = createElement('div', {
+              style: {
+                "display": "flex",
+                "flexDirection": "column",
+                "overflow": "hidden",
+                "flexShrink": "0",
+                "boxSizing": "border-box",
+                "outline": "none",
+                "fontFamily": "px",
+                "position": "absolute",
+                "bottom": "0px",
+                "width": "0px",
+                "height": "0px",
+                "borderStyle": "solid",
+                "borderTopWidth": "4px",
+                "borderRightWidth": "4px",
+                "borderBottomWidth": "0px",
+                "borderLeftWidth": "4px",
+                "borderTopColor": "rgba(253, 192, 95, 0.996)",
+                "borderRightColor": "rgba(0, 0, 0, 0.000)",
+                "borderBottomColor": "rgba(0, 0, 0, 0.000)",
+                "borderLeftColor": "rgba(0, 0, 0, 0.000)",
+                transform: 'translateX(14px)',
+              },
+            }))
+          ]
+        )
+      ]
+    );
+
+    BODY.appendChild(container);
+
+    expect(child.offsetTop).toEqual(22);
+    expect(child.offsetLeft).toEqual(21);
+
+    await snapshot();
+  });
+
+  it('offset should work when ancestors has scrolled', async () => {
+    let container;
+    let child;
+    let child1;
+    container = createElement(
+      'div',
+      {
+        style: {
+          height: '200px',
+          backgroundColor: 'grey',
+          position: 'relative',
+        },
+      }, [
+        (child1 = createElement(
+          'div',
+          {
+            style: {
+              height: '100px',
+              width: '150px',
+              backgroundColor: 'blue',
+              overflow: 'scroll'
+            },
+          },
+          [
+            createElement('div', {
+              style: {
+                "width": "300px",
+                "height": "300px",
+                "background-color": "green",
+              },
+            }),
+            (child = createElement('div', {
+              style: {
+                "position": "absolute",
+                "width": "50px",
+                "height": "50px",
+                "background-color": "yellow",
+              },
+            }))
+          ]
+        ))
+      ]
+    );
+
+    BODY.appendChild(container);
+    child1.scroll(1000, 1000);
+
+    expect(child.offsetTop).toEqual(300);
+    expect(child.offsetLeft).toEqual(0);
 
     await snapshot();
   });

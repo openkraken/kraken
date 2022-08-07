@@ -1,35 +1,40 @@
-import { kraken } from './kraken';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webf } from './webf';
 import connection from './connection';
 
 export const navigator = {
   connection,
   // UA is read-only.
   get userAgent() {
-    return kraken.invokeModule('Navigator', 'getUserAgent');
+    return webf.invokeModule('Navigator', 'getUserAgent');
   },
   get platform() {
-    return kraken.invokeModule('Navigator', 'getPlatform');
+    return webf.invokeModule('Navigator', 'getPlatform');
   },
   get language() {
-    return kraken.invokeModule('Navigator', 'getLanguage');
+    return webf.invokeModule('Navigator', 'getLanguage');
   },
   get languages() {
-    return JSON.parse(kraken.invokeModule('Navigator', 'getLanguages'));
+    return JSON.parse(webf.invokeModule('Navigator', 'getLanguages'));
   },
   get appName() {
-    return kraken.invokeModule('Navigator', 'getAppName');
+    return webf.invokeModule('Navigator', 'getAppName');
   },
   get appVersion() {
-    return kraken.invokeModule('Navigator', 'getAppVersion');
+    return webf.invokeModule('Navigator', 'getAppVersion');
   },
   get hardwareConcurrency() {
-    const logicalProcessors = kraken.invokeModule('Navigator', 'getHardwareConcurrency');
+    const logicalProcessors = webf.invokeModule('Navigator', 'getHardwareConcurrency');
     return parseInt(logicalProcessors);
   },
   clipboard: {
     readText() {
       return new Promise((resolve, reject) => {
-        kraken.invokeModule('Clipboard', 'readText', null, (e, data) => {
+        webf.invokeModule('Clipboard', 'readText', null, (e, data) => {
           if (e) {
             return reject(e);
           }
@@ -39,7 +44,7 @@ export const navigator = {
     },
     writeText(text: string) {
       return new Promise((resolve, reject) => {
-        kraken.invokeModule('Clipboard', 'writeText', String(text), (e, data) => {
+        webf.invokeModule('Clipboard', 'writeText', String(text), (e, data) => {
           if (e) {
             return reject(e);
           }

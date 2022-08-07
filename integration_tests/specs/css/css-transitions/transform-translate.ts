@@ -14,15 +14,16 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'translate(10px,20px)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -43,21 +44,22 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'translate3d(10px, 10px, 20px)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
 
 describe('Transition transform', () => {
-  it('translateX',  async () => {
+  it('translateX',  async (done) => {
     const container1 = document.createElement('div');
     document.body.appendChild(container1);
     setElementStyle(container1, {
@@ -72,14 +74,17 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'translateX(20px)',
       });
     });
-
-    await snapshot(1.1);
   });
 });
 
@@ -99,15 +104,16 @@ describe('Transition transform', () => {
     });
     container1.appendChild(document.createTextNode('DIV 1'));
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
         transform: 'translateY(10px)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1100);
     });
   });
 });
@@ -137,6 +143,11 @@ describe('Multiple transition transform', () => {
 
     div.appendChild(container1);
 
+    container1.addEventListener('transitionend', async () => {
+      await snapshot();
+      done();
+    });
+
     requestAnimationFrame(async () => {
       await snapshot();
       setElementStyle(container1, {
@@ -145,10 +156,6 @@ describe('Multiple transition transform', () => {
       setElementStyle(container1, {
         transform: 'translate3d(-100px, 0px, 0px)',
       });
-      setTimeout(async () => {
-        await snapshot();
-        done();
-      }, 1000);
     });
   });
 });

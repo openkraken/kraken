@@ -4,9 +4,9 @@
 
 #include "dart_methods.h"
 #include <memory>
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
-namespace kraken {
+namespace webf {
 
 std::shared_ptr<DartMethodPointer> methodPointer = std::make_shared<DartMethodPointer>();
 
@@ -73,4 +73,4 @@ void registerGetPerformanceEntries(GetPerformanceEntries getPerformanceEntries) 
 }
 #endif
 
-}  // namespace kraken
+}  // namespace webf

@@ -26,6 +26,7 @@ describe('vmin-vmax', () => {
 
     div.addEventListener('transitionend', async () => {
       await snapshot();
+      BODY.removeChild(div);
       done();
     });
 

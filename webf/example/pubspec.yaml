@@ -1,0 +1,70 @@
+name: webf_example
+description: Demonstrates how to use the webf plugin.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  webf: ^0.10.0
+
+# When depending on this package from a real application,
+# you should remove the following overrides.
+# See https://dart.dev/tools/pub/dependencies#version-constraints
+# The example app is bundled with the plugin so we use a path dependency on
+# the parent directory to use the current plugin's version.
+dependency_overrides:
+  webf:
+    path: ../
+
+# The following section is specific to Flutter.
+flutter:
+  fonts:
+    - family: AlibabaPuHuiTi
+      fonts:
+        - asset: fonts/Alibaba-PuHuiTi-Regular.ttf
+        - asset: fonts/Alibaba-PuHuiTi-Light.ttf
+          weight: 300
+        - asset: fonts/Alibaba-PuHuiTi-Medium.ttf
+          weight: 500
+        - asset: fonts/Alibaba-PuHuiTi-Bold.ttf
+          weight: 700
+        - asset: fonts/Alibaba-PuHuiTi-Heavy.ttf
+          weight: 900
+    - family: AlibabaSans
+      fonts:
+        - asset: fonts/AlibabaSans-Regular.otf
+        - asset: fonts/AlibabaSans-Italic.otf
+          style: italic
+        - asset: fonts/AlibabaSans-Light.otf
+          weight: 300
+        - asset: fonts/AlibabaSans-LightItalic.otf
+          weight: 300
+          style: italic
+        - asset: fonts/AlibabaSans-Medium.otf
+          weight: 500
+        - asset: fonts/AlibabaSans-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: fonts/AlibabaSans-Bold.otf
+          weight: 700
+        - asset: fonts/AlibabaSans-BoldItalic.otf
+          weight: 700
+          style: italic
+        - asset: fonts/AlibabaSans-Heavy.otf
+          weight: 900
+        - asset: fonts/AlibabaSans-HeavyItalic.otf
+          weight: 900
+          style: italic
+    - family: AlibabaSans-Black
+      fonts:
+        - asset: fonts/AlibabaSans-Black.otf
+
+
+  assets:
+    - assets/

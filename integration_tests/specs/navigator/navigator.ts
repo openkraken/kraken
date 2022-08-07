@@ -2,7 +2,6 @@ describe('Navigator', () => {
   it('connectivity', async () => {
     let connection = await navigator.connection.getConnectivity();
     expect(connection.isConnected).toBeTrue();
-    expect(['wifi', '4g'].includes(connection.type)).toBeTrue();
   });
 
   it('hardwareConcurrency', () => {
@@ -22,18 +21,17 @@ describe('Navigator', () => {
   });
 
   it('language', async () => {
+    console.log(navigator.languages);
     expect(navigator.language).toBeDefined();
-    expect(navigator.language.includes('-')).toBeTrue();
   });
 
   it('languages', async () => {
     expect(navigator.languages instanceof Array).toBeTrue();
     expect(navigator.languages[0]).toBeDefined();
-    expect(navigator.languages[0].includes('-')).toBeTrue();
   });
 
   it('userAgent', () => {
-    expect(navigator.userAgent).toMatch(/Kraken/);
+    expect(navigator.userAgent).toMatch(/WebF/);
   });
 
   it('clipboard', async () => {

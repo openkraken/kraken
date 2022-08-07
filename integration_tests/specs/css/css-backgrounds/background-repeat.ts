@@ -128,7 +128,7 @@ describe('background-repeat', () => {
       height: '220px',
       backgroundColor: 'red',
       backgroundImage:
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+        'url(assets/cat.png)',
       backgroundRepeat: 'round',
     });
     append(BODY, div);
@@ -143,7 +143,7 @@ describe('background-repeat', () => {
       height: '220px',
       backgroundColor: 'red',
       backgroundImage:
-        'url(https://kraken.oss-cn-hangzhou.aliyuncs.com/images/cat.png)',
+        'url(assets/cat.png)',
       backgroundRepeat: 'round',
     });
     append(BODY, div);

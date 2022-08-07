@@ -2,7 +2,7 @@
  * Copyright (C) 2020-present The Kraken authors. All rights reserved.
  */
 
-#include "kraken_bridge.h"
+#include "webf_bridge.h"
 
 namespace foundation {
 

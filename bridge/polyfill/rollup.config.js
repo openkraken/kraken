@@ -26,7 +26,7 @@ const plugins = [
   resolve(),
   replace({
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
-    ['import \'es6-promise/dist/es6-promise.auto\'']: (process.env.PATCH_PROMISE_POLYFILL === 'true' && process.env.KRAKEN_JS_ENGINE === 'jsc') ?
+    ['import \'es6-promise/dist/es6-promise.auto\'']: (process.env.PATCH_PROMISE_POLYFILL === 'true' && process.env.WEBF_JS_ENGINE === 'jsc') ?
       'import \'es6-promise/dist/es6-promise.auto\';' : '',
     delimiters: ['', ''],
     preventAssignment: false

@@ -9,7 +9,7 @@ const chalk = require('chalk');
 series(
   'clean',
   'compile-polyfill',
-  'build-linux-kraken-lib'
+  'build-linux-webf-lib'
 )((err) => {
   if (err) {
     console.log(err);

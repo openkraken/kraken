@@ -1,9 +1,14 @@
-import { kraken } from './kraken';
+/*
+* Copyright (C) 2019-2022 The Kraken authors. All rights reserved.
+* Copyright (C) 2022-present The WebF authors. All rights reserved.
+*/
+
+import { webf } from './webf';
 
 export const asyncStorage = {
   getItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'getItem', String(key), (e, data) => {
+      webf.invokeModule('AsyncStorage', 'getItem', String(key), (e, data) => {
         if (e) return reject(e);
         resolve(data == null ? '' : data);
       });
@@ -11,7 +16,7 @@ export const asyncStorage = {
   },
   setItem(key: number | string, value: number | string) {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'setItem', [String(key), String(value)], (e, data) => {
+      webf.invokeModule('AsyncStorage', 'setItem', [String(key), String(value)], (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
@@ -19,7 +24,7 @@ export const asyncStorage = {
   },
   removeItem(key: number | string) {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'removeItem', String(key), (e, data) => {
+      webf.invokeModule('AsyncStorage', 'removeItem', String(key), (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
@@ -27,7 +32,7 @@ export const asyncStorage = {
   },
   clear() {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'clear', '', (e, data) => {
+      webf.invokeModule('AsyncStorage', 'clear', '', (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
@@ -35,7 +40,7 @@ export const asyncStorage = {
   },
   getAllKeys() {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'getAllKeys', '', (e, data) => {
+      webf.invokeModule('AsyncStorage', 'getAllKeys', '', (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });
@@ -43,7 +48,7 @@ export const asyncStorage = {
   },
   length(): Promise<number> {
     return new Promise((resolve, reject) => {
-      kraken.invokeModule('AsyncStorage', 'length', '', (e, data) => {
+      webf.invokeModule('AsyncStorage', 'length', '', (e, data) => {
         if (e) return reject(e);
         resolve(data);
       });

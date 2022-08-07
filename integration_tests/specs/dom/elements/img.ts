@@ -113,7 +113,7 @@ describe('Tags img', () => {
         },
       );
       BODY.appendChild(image);
-   
+
       requestAnimationFrame(async () => {
         image.style.objectPosition = '';
         await snapshot(0.1);
@@ -214,6 +214,7 @@ describe('Tags img', () => {
     document.body.appendChild(img);
 
     img.onload = async () => {
+      await sleep(0.5);
       await snapshot(img);
       done();
     };
@@ -236,7 +237,7 @@ describe('Tags img', () => {
 
     img.onload = async () => {
       window.scroll(0, 2000);
-      await snapshot(0.1);
+      await snapshot(0.5);
       done();
     };
     img.src = 'https://gw.alicdn.com/tfs/TB1CxCYq5_1gK0jSZFqXXcpaXXa-128-90.png';
@@ -259,7 +260,7 @@ describe('Tags img', () => {
     );
 
     img.addEventListener('load', async () => {
-      await snapshot();
+      await snapshot(0.5);
       done();
     });
 
@@ -279,7 +280,7 @@ describe('Tags img', () => {
     );
 
     img.addEventListener('load', async () => {
-      await snapshot();
+      await snapshot(0.5);
       done();
     });
 
@@ -300,7 +301,7 @@ describe('Tags img', () => {
     );
 
     img.addEventListener('load', async () => {
-      await snapshot();
+      await snapshot(0.5);
       done();
     });
 
@@ -331,7 +332,7 @@ describe('Tags img', () => {
   });
 
   it('gif can not replay by remove nodes', async (done) => {
-    const imageURL = 'assets/sample-gif-40k.gif';
+    const imageURL = 'assets/10frames-1s.gif';
     const img = document.createElement('img');
 
     img.onload = async () => {

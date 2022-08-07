@@ -1,60 +1,74 @@
-![kraken Post](https://user-images.githubusercontent.com/677114/101163298-6264ae80-366e-11eb-9151-f560d18c2ceb.png)
+# [WebF](https://openwebf.com/) [![pub package](https://img.shields.io/pub/v/webf.svg)](https://pub.dev/packages/webf)
 
-# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
+WebF (Web on the Flutter) is a W3C standard compliant Web rendering engine based on Flutter, it can run web application on Flutter natively.
 
-## 💁 Have a try
++ **W3C Standard Compliant:** WebF use HTML/CSS and JavaScript to rendering contents on the flutter. It can achieve 100% consistency with browser rendering.
++ **Front-End Framework Support:** WebF is W3C standard compliant, so it can be used by many Front-End frameworks, including [React](https://reactjs.org/), [Vue](https://vuejs.org/).
++ **Expand your Web with Flutter:** WebF is fully customizable. You can define a customized HTML element with Flutter Widget and used it in your application. Or add a JavaScript API with any Dart library from pub.dev registry.
++ **Web Development Experience:** WebF support inspect your HTML structure, CSS style and Debugging JavaScript with Chrome Developer Tools, just like the web development experience of your browser.
++ **Write Once, Run AnyWhere:** By the power of WebF, You can write your web application and run it on any device flutter supports, and you can still run your apps in Node.js and Web Browser with the same code base.
 
-1. Install Kraken CLI (macOS, Linux only currently)
+## Version requirement
 
-    ```shell
-    $ npm i @openkraken/cli -g
-    ```
-
-2. Open with kraken
-
-    ```shell
-    $ kraken run https://raw.githubusercontent.com/openkraken/kraken/master/kraken/example/assets/bundle.js
-    ```
-
-## 💌 Why kraken
-
-* Quick development 🎉
-
-  Compatibility with web standards means you don't have to change your stack.
-  ```js
-  const text = document.createTextNode('Hello World!');
-  document.body.appendChild(text);
-  ```
-
-* Cross platform ⚛️
-
-  [Seamless integration with Flutter](https://pub.dev/packages/kraken), supports web, mobile (iOS, Android) and desktop (MacOS, Linux, Windows).
-
-* Fast performance 🚀
-
-  Provide native-like performance such as navigation, animation and infinite list scrolling.
-
-## Flutter version scope
-
-Only flutter stable released version are fully tested.
-
-| Kraken  | Flutter |
+| WebF  | Flutter |
 | ------------- | ------------- |
-| >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
-| >= 0.8.0 < 0.10.0  | 2.2.0 ~ 2.2.3 |
-| >= 0.10.0 < 0.11.0 | 2.5.0 ~ 2.5.3 |
-| >= 0.11.0 | 2.8.0 ~ 2.8.1 |
+| >= 0.12.0 < 0.13.0 | 3.0.5 |
+
+## How to use
+
+**packages.yaml**
+
+```yaml
+dependencies:
+  webf: <lastest version>
+```
+
+**import**
+
+```
+import 'package:webf/webf.dart';
+```
+
+**Use WebF Widget**
 
 
-## 👏 Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+```Dart
+@override
+Widget build(BuildContext context) {
+  final MediaQueryData queryData = MediaQuery.of(context);
+  final Size viewportSize = queryData.size;
 
-By contributing to Kraken, you agree that your contributions will be licensed under its Apache-2.0 License.
+  return Scaffold(
+      body: Center(
+    child: Column(
+      children: [
+        WebF(
+          devToolsService: ChromeDevToolsService(), // Enable Chrome DevTools Services
+          viewportWidth: viewportSize.width - queryData.padding.horizontal, // Adjust the viewportWidth
+          viewportHeight: viewportSize.height - queryData.padding.vertical, // Adjust the viewportHeight
+          bundle: WebFBundle.fromUrl('https://andycall.oss-cn-beijing.aliyuncs.com/demo/demo-vue.js'), // The page entry point
+        ),
+      ],
+    ),
+  ));
+}
+```
 
-Read our [contributing guide](https://github.com/openkraken/kraken/blob/main/.github/CONTRIBUTING.md) and let's build a better kraken project together.
+## How it works
 
-Thank you to all the people who already contributed to Kraken!
+WebF provide a rendering engine which follow the W3C standard like the browser does. It can render HTML/CSS and execute JavaScript. It's built on top of the flutter rendering pipelines and implements its' own layout and paint algorithms.
 
-![CONTRIBUTORS](https://kraken.oss-cn-hangzhou.aliyuncs.com/CONTRIBUTORS.svg)
+With WebF, Web Apps and Flutter Apps are sharing the rendering context. It means that you can use Flutter Widgets define your HTML elements and embedded your Web App as a Flutter Widget in your flutter apps.
 
-Copyright (c) 2019-present, The Kraken authors.
+<img src="https://andycall.oss-accelerate.aliyuncs.com/images/11659542021_.pic.jpg" width="800" style="display: block; margin: 0 auto;" />
+
+## 👏 Contributing [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/openwebf/webf/pulls)
+
+By contributing to WebF, you agree that your contributions will be licensed under its Apache-2.0 License.
+
+Read our [contributing guide](https://github.com/openwebf/webf/blob/main/.github/CONTRIBUTING.md) and let's build a better kraken project together.
+
+Thank you to all the people who already contributed to [OpenWebF](https://github.com/openwebf) and [OpenKraken](https://github.com/openkraken)!
+
+Copyright (c) 2022-present, The OpenWebF authors.
 

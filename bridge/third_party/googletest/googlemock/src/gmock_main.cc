@@ -27,12 +27,15 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #include <iostream>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#ifdef ARDUINO
+#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
+#if GTEST_OS_ESP8266
+extern "C" {
+#endif
 void setup() {
   // Since Google Mock depends on Google Test, InitGoogleMock() is
   // also responsible for initializing Google Test.  Therefore there's
@@ -40,6 +43,10 @@ void setup() {
   testing::InitGoogleMock();
 }
 void loop() { RUN_ALL_TESTS(); }
+#if GTEST_OS_ESP8266
+}
+#endif
+
 #else
 
 // MS C++ compiler/linker has a bug on Windows (not on Windows CE), which
@@ -49,7 +56,7 @@ void loop() { RUN_ALL_TESTS(); }
 // https://web.archive.org/web/20170912203238/connect.microsoft.com/VisualStudio/feedback/details/394464/wmain-link-error-in-the-static-library
 // // NOLINT
 #if GTEST_OS_WINDOWS_MOBILE
-# include <tchar.h>  // NOLINT
+#include <tchar.h>  // NOLINT
 
 GTEST_API_ int _tmain(int argc, TCHAR** argv) {
 #else

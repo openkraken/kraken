@@ -17,7 +17,7 @@ describe('script element', () => {
     script.onerror = () => {
       done();
     };
-    script.src = 'http://127.0.0.1/path/to/a/file';
+    script.src = 'http://example.com/404';
   });
 
   it('async script execute in delayed order', async (done) => {
@@ -37,8 +37,36 @@ describe('script element', () => {
       expect(window.B).toEqual('B');
 
       // Bundle B load earlier than A.
-      expect(window.bundleALoadTime - window.bundleBLoadTime > 0).toEqual(true);
+      expect(window.bundleALoadTime - window.bundleBLoadTime >= 0).toEqual(true);
       done();
     };
+  });
+
+  it('Waiting order for large script loaded', (done) => {
+    const scriptLarge = document.createElement('script');
+    scriptLarge.src = 'assets:///assets/large-script.js';
+
+    const scriptSmall = document.createElement('script');
+    scriptSmall.src = 'assets:///assets/defineA.js';
+
+    function waitForLoad(script) {
+      return new Promise((resolve) => {
+        script.onload = () => {
+          resolve();
+        };
+      });
+    }
+
+    document.body.appendChild(scriptLarge);
+    document.body.appendChild(scriptSmall);
+
+    Promise.all([
+      waitForLoad(scriptLarge),
+      waitForLoad(scriptSmall),
+    ]).then(() => {
+      // Bundle C load earlier than A.
+      expect(window.bundleALoadTime - window.bundleCLoadTime >= 0).toEqual(true);
+      done();
+    });
   });
 });
