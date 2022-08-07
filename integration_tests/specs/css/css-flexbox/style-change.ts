@@ -70,24 +70,24 @@ describe('style', () => {
     BODY.appendChild(p);
     BODY.appendChild(flexbox);
 
+
+    await snapshot();
+
     (() => {
-      var flexbox = document.getElementById('flexbox');
-      var aDiv = document.getElementById('a');
-      var bDiv = document.getElementById('b');
 
       flexbox.style.justifyContent = 'flex-end';
 
       flexbox.style.alignItems = 'flex-end';
 
-      bDiv.style.order = -1;
+      a.style.order = -1;
 
-      aDiv.style.alignSelf = 'flex-start';
+      b.style.alignSelf = 'flex-start';
 
       flexbox.style.width = '100px';
       flexbox.style.flexWrap = 'wrap';
       flexbox.style.alignContent = 'flex-end';
     })();
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

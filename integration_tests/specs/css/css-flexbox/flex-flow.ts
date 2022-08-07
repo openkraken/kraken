@@ -1566,6 +1566,6 @@ describe('flexbox flex-flow', () => {
     BODY.appendChild(container_2);
     BODY.appendChild(container_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

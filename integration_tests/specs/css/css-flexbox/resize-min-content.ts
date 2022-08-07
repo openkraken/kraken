@@ -42,8 +42,6 @@ describe('resize-min', () => {
     document.body.offsetHeight;
     document.documentElement.style.height = '100px';
 
-    checkLayout('.flexbox');
-
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

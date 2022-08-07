@@ -539,6 +539,6 @@ describe('multiline-column', () => {
     BODY.appendChild(flexbox_2);
     BODY.appendChild(flexbox_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

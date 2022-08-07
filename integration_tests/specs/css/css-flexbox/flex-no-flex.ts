@@ -86,6 +86,6 @@ describe('flex-no', () => {
       checkLayout('.flexbox');
     }
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

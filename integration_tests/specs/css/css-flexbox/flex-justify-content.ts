@@ -852,6 +852,6 @@ describe('flex-justify', () => {
     BODY.appendChild(flexbox_18);
     BODY.appendChild(flexbox_19);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

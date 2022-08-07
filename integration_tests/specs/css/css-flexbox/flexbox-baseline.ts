@@ -497,8 +497,8 @@ of the grey flexbox
         style: {
           'box-sizing': 'border-box',
           position: 'absolute',
-          top: '0',
-          left: '400px',
+          top: '605px',
+          left: '0px',
           width: '360px',
         },
       },
@@ -526,16 +526,6 @@ before text
                 },
               },
               [
-                createElement(
-                  'div',
-                  {
-                    style: {
-                      'box-sizing': 'border-box',
-                      position: 'absolute',
-                    },
-                  },
-                  [createText(`absolute`)]
-                ),
                 createElement(
                   'div',
                   {
@@ -724,263 +714,6 @@ after text
           ]
         ),
         createElement(
-          'table',
-          {
-            style: {
-              'box-sizing': 'border-box',
-              'background-color': 'lightgrey',
-              'margin-top': '5px',
-            },
-          },
-          [
-            createElement(
-              'tbody',
-              {
-                style: {
-                  'box-sizing': 'border-box',
-                },
-              },
-              [
-                createElement(
-                  'tr',
-                  {
-                    style: {
-                      'box-sizing': 'border-box',
-                      height: '50px',
-                    },
-                  },
-                  [
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'bottom',
-                        },
-                      },
-                      [createText(`bottom`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'baseline',
-                        },
-                      },
-                      [createText(`baseline`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'top',
-                        },
-                      },
-                      [createText(`top`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'baseline',
-                        },
-                      },
-                      [
-                        (flexbox_1 = createElement(
-                          'div',
-                          {
-                            class: 'flexbox column',
-                            style: {
-                              display: 'flex',
-                              'background-color': 'grey',
-                              'margin-top': '10px',
-                              'flex-flow': 'column',
-                              'box-sizing': 'border-box',
-                            },
-                          },
-                          [
-                            createElement(
-                              'div',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`baseline`)]
-                            ),
-                            createElement(
-                              'div',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`below`)]
-                            ),
-                          ]
-                        )),
-                      ]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'baseline',
-                        },
-                      },
-                      [
-                        (flexbox_2 = createElement(
-                          'div',
-                          {
-                            class: 'flexbox column-reverse',
-                            style: {
-                              display: 'flex',
-                              'background-color': 'grey',
-                              'margin-top': '10px',
-                              'flex-flow': 'column-reverse',
-                              'box-sizing': 'border-box',
-                            },
-                          },
-                          [
-                            createElement(
-                              'div',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`baseline`)]
-                            ),
-                            createElement(
-                              'div',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`above`)]
-                            ),
-                          ]
-                        )),
-                      ]
-                    ),
-                  ]
-                ),
-              ]
-            ),
-          ]
-        ),
-        createElement(
-          'table',
-          {
-            style: {
-              'box-sizing': 'border-box',
-              'background-color': 'lightgrey',
-              'margin-top': '5px',
-            },
-          },
-          [
-            createElement(
-              'tbody',
-              {
-                style: {
-                  'box-sizing': 'border-box',
-                },
-              },
-              [
-                createElement(
-                  'tr',
-                  {
-                    style: {
-                      'box-sizing': 'border-box',
-                      height: '50px',
-                    },
-                  },
-                  [
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'bottom',
-                        },
-                      },
-                      [createText(`bottom`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'baseline',
-                        },
-                      },
-                      [createText(`baseline`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'top',
-                        },
-                      },
-                      [createText(`top`)]
-                    ),
-                    createElement(
-                      'td',
-                      {
-                        style: {
-                          'box-sizing': 'border-box',
-                          'vertical-align': 'baseline',
-                        },
-                      },
-                      [
-                        (flexbox_3 = createElement(
-                          'div',
-                          {
-                            class: 'flexbox',
-                            style: {
-                              display: 'flex',
-                              'background-color': 'grey',
-                              'margin-top': '10px',
-                              'box-sizing': 'border-box',
-                            },
-                          },
-                          [
-                            createElement(
-                              'h2',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`h2 baseline`)]
-                            ),
-                            createElement(
-                              'div',
-                              {
-                                style: {
-                                  'box-sizing': 'border-box',
-                                },
-                              },
-                              [createText(`above`)]
-                            ),
-                          ]
-                        )),
-                      ]
-                    ),
-                  ]
-                ),
-              ]
-            ),
-          ]
-        ),
-        createElement(
           'div',
           {
             style: {
@@ -1057,12 +790,8 @@ after text
     BODY.appendChild(div_7);
     BODY.appendChild(div_8);
     BODY.appendChild(div_9);
-    BODY.appendChild(div_10);
 
-    document.getElementById('flexitem-with-scrollbar').scrollTop = 999;
-    document.getElementById('flexbox-with-scrollbar').style.width = 'auto';
-
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('margins', async () => {
     let flexbox;
@@ -1507,6 +1236,6 @@ of the horizontal scrollbar, if one is visible.
     BODY.appendChild(div_4);
     BODY.appendChild(div_5);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

@@ -637,7 +637,7 @@ describe('flex-align', () => {
     BODY.appendChild(flexbox);
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('max', async () => {
     let log;
@@ -841,7 +841,7 @@ describe('flex-align', () => {
     BODY.appendChild(flexbox_2);
     BODY.appendChild(flexbox_3);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('percent-height', async () => {
     let log;
@@ -900,7 +900,7 @@ describe('flex-align', () => {
 
     BODY.style.height = '600px';
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('stretch', async () => {
     let log;
@@ -1311,6 +1311,6 @@ describe('flex-align', () => {
     BODY.appendChild(div);
     BODY.appendChild(div_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

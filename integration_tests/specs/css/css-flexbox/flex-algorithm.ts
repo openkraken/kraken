@@ -575,7 +575,7 @@ describe('flex-algorithm', () => {
     BODY.appendChild(flexbox_10);
     BODY.appendChild(flexbox_11);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('with-margins', async () => {
     let log;
@@ -1148,7 +1148,7 @@ describe('flex-algorithm', () => {
     BODY.appendChild(flexbox_10);
     BODY.appendChild(flexbox_11);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 
   it('algorithm', async () => {
@@ -2496,6 +2496,6 @@ describe('flex-algorithm', () => {
     BODY.appendChild(flexbox_25);
     BODY.appendChild(div);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

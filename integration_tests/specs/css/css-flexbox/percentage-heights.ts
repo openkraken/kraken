@@ -341,6 +341,6 @@ describe('percentage', () => {
     BODY.appendChild(flexbox_4);
     BODY.appendChild(flexbox_5);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

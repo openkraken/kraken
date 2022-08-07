@@ -66,6 +66,6 @@ describe('overflow-keep', () => {
     BODY.appendChild(container);
     BODY.appendChild(console);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

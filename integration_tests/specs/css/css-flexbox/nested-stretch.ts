@@ -234,6 +234,6 @@ describe('nested', () => {
     BODY.appendChild(flexbox);
     BODY.appendChild(flexbox_1);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

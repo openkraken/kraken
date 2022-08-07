@@ -257,7 +257,7 @@ describe('multiline-reverse', () => {
     BODY.appendChild(flexbox_1);
     BODY.appendChild(flexbox_2);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('wrap-overflow', async () => {
     let log;
@@ -689,6 +689,6 @@ sizing is not auto.`),
     BODY.appendChild(flexbox_4);
     BODY.appendChild(flexbox_5);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

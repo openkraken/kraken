@@ -213,7 +213,7 @@ describe('overflow-auto', () => {
     BODY.appendChild(inlineFlexbox_3);
     BODY.appendChild(measure);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
   it('resizes-correctly', async () => {
     let rect;
@@ -320,6 +320,6 @@ describe('overflow-auto', () => {
     BODY.appendChild(div);
     BODY.appendChild(measure);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });

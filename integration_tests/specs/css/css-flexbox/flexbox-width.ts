@@ -52,6 +52,6 @@ describe('flexbox-width', () => {
     BODY.appendChild(log);
     BODY.appendChild(target);
 
-    await matchViewportSnapshot();
+    await snapshot();
   });
 });
