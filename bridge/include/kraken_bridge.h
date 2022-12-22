@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <thread>
+#include <quickjs/quickjs.h>
 
 #include "dart_methods.h"
 #include "kraken_foundation.h"
@@ -135,6 +136,9 @@ KRAKEN_EXPORT_C
 void registerPluginByteCode(uint8_t* bytes, int32_t length, const char* pluginName);
 KRAKEN_EXPORT_C
 int32_t profileModeEnabled();
+
+KRAKEN_EXPORT_C
+JSMemoryUsage* computeQuickJSMemoryUsage(int32_t contextId);
 
 KRAKEN_EXPORT
 void setConsoleMessageHandler(ConsoleMessageHandler handler);

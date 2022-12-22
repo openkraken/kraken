@@ -20,6 +20,86 @@ class NativeKrakenInfo extends Struct {
   external Pointer<Utf8> system_name;
 }
 
+class QuickJSMemoryUsage extends Struct {
+  @Int64()
+  external int malloc_size;
+
+  @Int64()
+  external int malloc_limit;
+
+  @Int64()
+  external int memory_used_size;
+
+  @Int64()
+  external int malloc_count;
+
+  @Int64()
+  external int memory_used_count;
+
+  @Int64()
+  external int atom_count;
+
+  @Int64()
+  external int atom_size;
+
+  @Int64()
+  external int str_count;
+
+  @Int64()
+  external int str_size;
+
+  @Int64()
+  external int obj_count;
+
+  @Int64()
+  external int obj_size;
+
+  @Int64()
+  external int prop_count;
+
+  @Int64()
+  external int prop_size;
+
+  @Int64()
+  external int shape_count;
+
+  @Int64()
+  external int shape_size;
+
+  @Int64()
+  external int js_func_count;
+
+  @Int64()
+  external int js_func_size;
+
+  @Int64()
+  external int js_func_code_size;
+
+  @Int64()
+  external int js_func_pc2line_count;
+
+  @Int64()
+  external int js_func_pc2line_size;
+
+  @Int64()
+  external int c_func_count;
+
+  @Int64()
+  external int array_count;
+
+  @Int64()
+  external int fast_array_count;
+
+  @Int64()
+  external int fast_array_elements;
+
+  @Int64()
+  external int binary_object_count;
+
+  @Int64()
+  external int binary_object_size;
+}
+
 // For memory compatibility between NativeEvent and other struct which inherit NativeEvent(exp: NativeTouchEvent, NativeGestureEvent),
 // We choose to make all this structs have same memory layout. But dart lang did't provide semantically syntax to achieve this (like inheritance a class which extends Struct
 // or declare struct memory by value).
@@ -85,6 +165,7 @@ class RawNativeMessageEvent extends Struct {
   @Int64()
   external int length;
 }
+
 //
 class RawNativeCustomEvent extends Struct {
 // Raw bytes represent the following fields.
@@ -270,23 +351,15 @@ class NativeBoundingClientRect extends Struct {
   external double left;
 }
 
-
-typedef NativeDispatchEvent = Int32 Function(
-    Int32 contextId,
-    Pointer<NativeBindingObject> nativeBindingObject,
-    Pointer<NativeString> eventType,
-    Pointer<Void> nativeEvent,
-    Int32 isCustomEvent);
-typedef NativeInvokeBindingMethod = Void Function(
-    Pointer<Void> nativePtr,
-    Pointer<NativeValue> returnValue,
-    Pointer<NativeString> method,
-    Int32 argc,
-    Pointer<NativeValue> argv);
+typedef NativeDispatchEvent = Int32 Function(Int32 contextId, Pointer<NativeBindingObject> nativeBindingObject,
+    Pointer<NativeString> eventType, Pointer<Void> nativeEvent, Int32 isCustomEvent);
+typedef NativeInvokeBindingMethod = Void Function(Pointer<Void> nativePtr, Pointer<NativeValue> returnValue,
+    Pointer<NativeString> method, Int32 argc, Pointer<NativeValue> argv);
 
 class NativeBindingObject extends Struct {
   external Pointer<Void> instance;
   external Pointer<NativeFunction<NativeDispatchEvent>> dispatchEvent;
+
   // Shared method called by JS side.
   external Pointer<NativeFunction> invokeBindingMethod;
 }

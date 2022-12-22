@@ -378,6 +378,102 @@ final DartClearUICommandItems _clearUICommandItems = KrakenDynamicLibrary
     .lookup<NativeFunction<NativeClearUICommandItems>>('clearUICommandItems')
     .asFunction();
 
+typedef NativeComputeQuickJSMemoryUsage = Pointer<QuickJSMemoryUsage> Function(Int32 contextId);
+typedef DartComputeQuickJSMemoryUsage = Pointer<QuickJSMemoryUsage> Function(int contextId);
+
+final DartComputeQuickJSMemoryUsage _computeQuickJSMemoryUsage = KrakenDynamicLibrary
+    .ref
+    .lookup<NativeFunction<NativeComputeQuickJSMemoryUsage>>('computeQuickJSMemoryUsage')
+    .asFunction();
+
+JSMemoryUsage getQuickJSMemoryUsage(int contextId) {
+  Pointer<QuickJSMemoryUsage> nativeUsage = _computeQuickJSMemoryUsage(contextId);
+  return JSMemoryUsage(
+      malloc_size: nativeUsage.ref.malloc_size,
+      malloc_limit: nativeUsage.ref.malloc_limit,
+      memory_used_size: nativeUsage.ref.memory_used_size,
+      malloc_count: nativeUsage.ref.malloc_count,
+      memory_used_count: nativeUsage.ref.memory_used_count,
+      atom_count: nativeUsage.ref.atom_count,
+      atom_size: nativeUsage.ref.atom_size,
+      str_count: nativeUsage.ref.str_count,
+      str_size: nativeUsage.ref.str_size,
+      obj_count: nativeUsage.ref.obj_count,
+      obj_size: nativeUsage.ref.obj_size,
+      prop_count: nativeUsage.ref.prop_count,
+      prop_size: nativeUsage.ref.prop_size,
+      shape_count: nativeUsage.ref.shape_count,
+      shape_size: nativeUsage.ref.shape_size,
+      js_func_count: nativeUsage.ref.js_func_count,
+      js_func_size: nativeUsage.ref.js_func_size,
+      js_func_code_size: nativeUsage.ref.js_func_code_size,
+      js_func_pc2line_count: nativeUsage.ref.js_func_pc2line_count,
+      js_func_pc2line_size: nativeUsage.ref.js_func_pc2line_size,
+      c_func_count: nativeUsage.ref.c_func_count,
+      array_count: nativeUsage.ref.array_count,
+      fast_array_count: nativeUsage.ref.fast_array_count,
+      fast_array_elements: nativeUsage.ref.fast_array_elements,
+      binary_object_count: nativeUsage.ref.binary_object_count,
+      binary_object_size: nativeUsage.ref.binary_object_size);
+}
+
+class JSMemoryUsage {
+  int malloc_size;
+  int malloc_limit;
+  int memory_used_size;
+  int malloc_count;
+  int memory_used_count;
+  int atom_count;
+  int atom_size;
+  int str_count;
+  int str_size;
+  int obj_count;
+  int obj_size;
+  int prop_count;
+  int prop_size;
+  int shape_count;
+  int shape_size;
+  int js_func_count;
+  int js_func_size;
+  int js_func_code_size;
+  int js_func_pc2line_count;
+  int js_func_pc2line_size;
+  int c_func_count;
+  int array_count;
+  int fast_array_count;
+  int fast_array_elements;
+  int binary_object_count;
+  int binary_object_size;
+  JSMemoryUsage({
+    required this.malloc_size,
+    required this.malloc_limit,
+    required this.memory_used_size,
+    required this.malloc_count,
+    required this.memory_used_count,
+    required this.atom_count,
+    required this.atom_size,
+    required this.str_count,
+    required this.str_size,
+    required this.obj_count,
+    required this.obj_size,
+    required this.prop_count,
+    required this.prop_size,
+    required this.shape_count,
+    required this.shape_size,
+    required this.js_func_count,
+    required this.js_func_size,
+    required this.js_func_code_size,
+    required this.js_func_pc2line_count,
+    required this.js_func_pc2line_size,
+    required this.c_func_count,
+    required this.array_count,
+    required this.fast_array_count,
+    required this.fast_array_elements,
+    required this.binary_object_count,
+    required this.binary_object_size,
+  });
+}
+
 class UICommand {
   late final UICommandType type;
   late final int id;
