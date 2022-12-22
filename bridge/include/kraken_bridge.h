@@ -5,9 +5,9 @@
 #ifndef KRAKEN_BRIDGE_EXPORT_H
 #define KRAKEN_BRIDGE_EXPORT_H
 
+#include <quickjs/quickjs.h>
 #include <cstdint>
 #include <thread>
-#include <quickjs/quickjs.h>
 
 #include "dart_methods.h"
 #include "kraken_foundation.h"

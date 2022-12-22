@@ -263,7 +263,7 @@ JSMemoryUsage* computeQuickJSMemoryUsage(int32_t contextId) {
   auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
   if (page == nullptr)
     return nullptr;
-  auto* memory_usage = (JSMemoryUsage*) js_malloc_rt(page->getContext()->runtime(), sizeof(JSMemoryUsage));
+  auto* memory_usage = (JSMemoryUsage*)js_malloc_rt(page->getContext()->runtime(), sizeof(JSMemoryUsage));
   JS_ComputeMemoryUsage(page->getContext()->runtime(), memory_usage);
   return memory_usage;
 }
