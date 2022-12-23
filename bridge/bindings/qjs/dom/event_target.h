@@ -130,6 +130,8 @@ class EventTargetInstance : public Instance {
   JSValue getAttributesEventHandler(JSString* p);
 
  private:
+  std::unordered_map<JSAtom, JSValue> m_cached_binding_function;
+
   bool internalDispatchEvent(EventInstance* eventInstance);
   static void finalize(JSRuntime* rt, JSValue val);
   friend EventTarget;

@@ -322,6 +322,10 @@ JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom ato
 
   // For plugin elements, try to auto generate properties and functions from dart response.
   if (isJavaScriptExtensionElementInstance(eventTarget->context(), eventTarget->jsObject)) {
+    if (eventTarget->m_cached_binding_function.count(atom) > 0) {
+      return JS_DupValue(ctx, eventTarget->m_cached_binding_function[atom]);
+    }
+
     const char* cmethod = JS_AtomToCString(eventTarget->m_ctx, atom);
     // Property starts with underscore are taken as private property in javascript object.
     if (cmethod[0] == '_') {
@@ -329,6 +333,10 @@ JSValue EventTargetInstance::getProperty(JSContext* ctx, JSValue obj, JSAtom ato
       return JS_UNDEFINED;
     }
     JSValue result = eventTarget->getBindingProperty(cmethod);
+    if (JS_IsFunction(ctx, result)) {
+      eventTarget->m_cached_binding_function[atom] = JS_DupValue(ctx, result);
+    }
+
     JS_FreeCString(ctx, cmethod);
     return result;
   }
@@ -464,6 +472,10 @@ void EventTargetInstance::trace(JSRuntime* rt, JSValue val, JS_MarkFunc* mark_fu
 
   // Trace properties.
   m_properties.trace(rt, JS_UNDEFINED, mark_func);
+
+  for (auto&& f : m_cached_binding_function) {
+    JS_MarkValue(rt, f.second, mark_func);
+  }
 }
 
 void EventTargetInstance::copyNodeProperties(EventTargetInstance* newNode, EventTargetInstance* referenceNode) {
