@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/rendering.dart';
 import 'package:kraken/dom.dart';
@@ -36,6 +35,11 @@ class TextNode extends Node {
       attachTo(parentElement!);
     } else {
       _applyTextStyle();
+
+      // To replace data of node node with offset offset, count count, and data data, run step 12 from the spec:
+      // 12. If node’s parent is non-null, then run the children changed steps for node’s parent.
+      // https://dom.spec.whatwg.org/#concept-cd-replace
+      parentNode?.childrenChanged();
     }
   }
 

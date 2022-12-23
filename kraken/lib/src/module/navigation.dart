@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 import 'module_manager.dart';
 
 typedef KrakenNavigationDecisionHandler = Future<KrakenNavigationActionPolicy> Function(KrakenNavigationAction action);

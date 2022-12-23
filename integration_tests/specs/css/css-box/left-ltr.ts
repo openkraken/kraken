@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('left-ltr', () => {
-  xit('ref', async () => {
+  it('ref', async () => {
     let div;
     div = createElement(
       'div',

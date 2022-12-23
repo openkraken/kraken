@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('tiled-radial', () => {
+  // @TODO: radial-gradient with percentage impl differs from browser.
   xit('gradients-ref', async () => {
     let left;
     let right;
@@ -47,6 +48,8 @@ describe('tiled-radial', () => {
 
     await snapshot();
   });
+
+  // @TODO: radial-gradient with percentage impl differs from browser.
   xit('gradients', async () => {
     let gradient;
     gradient = createElement('div', {

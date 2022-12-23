@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'dart:math' as math;
 
@@ -787,14 +786,6 @@ class RenderFlexLayout extends RenderLayoutBox {
         renderStyle.alignItems == AlignItems.baseline)) {
         // Distance from top to baseline of child
         double childAscent = _getChildAscent(child);
-        double? lineHeight = _getLineHeight(child);
-
-        // Leading space between content box and virtual box of child.
-        double childLeading = 0;
-        if (lineHeight != null) {
-          childLeading = lineHeight - childSize!.height;
-        }
-
         double? childMarginTop = 0;
         double? childMarginBottom = 0;
         if (child is RenderBoxModel) {
@@ -802,15 +793,14 @@ class RenderFlexLayout extends RenderLayoutBox {
           childMarginBottom = child.renderStyle.marginBottom.computedValue;
         }
         maxSizeAboveBaseline = math.max(
-          childAscent + childLeading / 2,
+          childAscent,
           maxSizeAboveBaseline,
         );
         maxSizeBelowBaseline = math.max(
           childMarginTop +
             childMarginBottom +
             childSize!.height -
-            childAscent +
-            childLeading / 2,
+            childAscent,
           maxSizeBelowBaseline,
         );
         runCrossAxisExtent = maxSizeAboveBaseline + maxSizeBelowBaseline;

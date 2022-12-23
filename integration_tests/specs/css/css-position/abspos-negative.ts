@@ -63,7 +63,7 @@ describe('abspos-negative', () => {
 
     await snapshot();
   });
-  xit('margin-001', async () => {
+  it('margin-001', async () => {
     let abspos;
     let abspos_1;
     let div;

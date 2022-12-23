@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKENBRIDGE_UI_TASK_QUEUE_H

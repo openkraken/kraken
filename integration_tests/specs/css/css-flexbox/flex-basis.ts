@@ -414,7 +414,7 @@ describe('flex-basis', () => {
 
     await snapshot();
   });
-  xit('item-margins-001', async () => {
+  it('item-margins-001', async () => {
     let p;
     let referenceOverlappedRed;
     let inlineBlock;

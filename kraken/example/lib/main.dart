@@ -84,6 +84,24 @@ class _MyHomePageState extends State<MyBrowser> {
       );
 
     final Size viewportSize = queryData.size;
+
+    KrakenJavaScriptChannel javaScriptChannel = KrakenJavaScriptChannel();
+    int? contextId;
+
+    javaScriptChannel.onMethodCall = (String method, Object? arguments) async {
+      print('method: $method');
+      if (method == 'getMemoryUsage') {
+        JSMemoryUsage memory = getQuickJSMemoryUsage(contextId!);
+        print('${memory.memory_used_size / 1000}KB');
+      }
+    };
+
+    String injectCode = """
+    kraken.getMemoryUsage = function() {
+      kraken.methodChannel.invokeMethod('getMemoryUsage');
+    };
+    """;
+
     return Scaffold(
         appBar: appBar,
         body: Center(
@@ -91,8 +109,13 @@ class _MyHomePageState extends State<MyBrowser> {
         // in the middle of the parent.
         child: _kraken = Kraken(
           devToolsService: ChromeDevToolsService(),
+          javaScriptChannel: javaScriptChannel,
           viewportWidth: viewportSize.width - queryData.padding.horizontal,
           viewportHeight: viewportSize.height - appBar.preferredSize.height - queryData.padding.vertical,
+          onLoad: (controller) {
+            contextId = controller.view.contextId;
+            controller.view.evaluateJavaScripts(injectCode);
+          },
           bundle: KrakenBundle.fromUrl('assets:assets/bundle.html'),
         ),
     ));

@@ -49,7 +49,7 @@ describe('gradients-with', () => {
 
     await snapshot();
   });
-  xit('transparent-ref', async () => {
+  it('transparent-ref', async () => {
     let p;
     let gradient1;
     p = createElement(
@@ -78,7 +78,7 @@ describe('gradients-with', () => {
 
     await snapshot();
   });
-  xit('transparent', async () => {
+  it('transparent', async () => {
     let p;
     let p_1;
     let gradient1;

@@ -16,6 +16,8 @@ describe('gradient-border', () => {
 
     await snapshot();
   });
+
+  // @TODO: repeating-linear-gradient with percentage impl differs from browser.
   xit('box', async () => {
     let x;
     x = createElement('div', {

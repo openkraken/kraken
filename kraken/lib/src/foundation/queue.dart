@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
+ */
 // Original version: https://github.com/rknell/dart_queue
 import 'dart:async';
 

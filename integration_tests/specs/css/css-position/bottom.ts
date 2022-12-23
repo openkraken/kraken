@@ -381,7 +381,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('019', async () => {
+  it('019', async () => {
     let p;
     let div2;
     let div1;
@@ -435,7 +435,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('020', async () => {
+  it('020', async () => {
     let p;
     let div2;
     let div1;
@@ -651,7 +651,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('031', async () => {
+  it('031', async () => {
     let p;
     let div2;
     let div1;
@@ -705,7 +705,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('032', async () => {
+  it('032', async () => {
     let p;
     let div2;
     let div1;
@@ -923,7 +923,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('043', async () => {
+  it('043', async () => {
     let p;
     let div2;
     let div1;
@@ -977,7 +977,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('044', async () => {
+  it('044', async () => {
     let p;
     let div2;
     let div1;
@@ -1139,7 +1139,7 @@ describe('bottom', () => {
 
     await snapshot();
   });
-  xit('113', async () => {
+  it('113', async () => {
     let p;
     let div2;
     let div1;

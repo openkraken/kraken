@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 #include "kraken_bridge.h"
@@ -258,6 +257,15 @@ int32_t profileModeEnabled() {
 #else
   return 0;
 #endif
+}
+
+JSMemoryUsage* computeQuickJSMemoryUsage(int32_t contextId) {
+  auto* page = static_cast<kraken::KrakenPage*>(getPage(contextId));
+  if (page == nullptr)
+    return nullptr;
+  auto* memory_usage = (JSMemoryUsage*) js_malloc_rt(page->getContext()->runtime(), sizeof(JSMemoryUsage));
+  JS_ComputeMemoryUsage(page->getContext()->runtime(), memory_usage);
+  return memory_usage;
 }
 
 NativeString* NativeString::clone() {

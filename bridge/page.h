@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKEN_JS_QJS_BRIDGE_H_

@@ -187,7 +187,7 @@ describe('flex-aspect', () => {
 
     await snapshot(0.1);
   });
-  xit('ratio-img-column-008', async () => {
+  it('ratio-img-column-008', async () => {
     let referenceOverlappedRed;
     let div;
     let flex;
@@ -208,7 +208,6 @@ describe('flex-aspect', () => {
         width: '60px',
         height: '100px',
         background: 'green',
-        float: 'left',
       },
     });
     flex = createElement(
@@ -240,7 +239,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(div);
     BODY.appendChild(flex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-row-001', async () => {
     let referenceOverlappedRed;
@@ -283,7 +282,7 @@ describe('flex-aspect', () => {
 
     await snapshot(0.1);
   });
-  xit('ratio-img-row-002', async () => {
+  it('ratio-img-row-002', async () => {
     let referenceOverlappedRed;
     let testFlexItemOverlappingGreen;
     let constrainedFlex;
@@ -322,7 +321,7 @@ describe('flex-aspect', () => {
     BODY.appendChild(referenceOverlappedRed);
     BODY.appendChild(constrainedFlex);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('ratio-img-row-003', async () => {
     let referenceOverlappedRed;

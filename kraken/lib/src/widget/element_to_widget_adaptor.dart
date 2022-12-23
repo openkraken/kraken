@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'package:flutter/widgets.dart';
 import 'package:kraken/dom.dart' as dom;
 

@@ -9,3 +9,7 @@ p.appendChild(br);
 p.appendChild(text2);
 
 document.body.appendChild(p);
+
+document.body.onclick = function() {
+  kraken.getMemoryUsage();
+}

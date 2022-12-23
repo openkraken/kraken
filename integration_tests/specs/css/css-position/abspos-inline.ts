@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('abspos-inline', () => {
+  // @TODO: text display together over different inline element.
   xit('001', async () => {
     let filler;
     let filler_1;
@@ -108,6 +109,8 @@ describe('abspos-inline', () => {
 
     await snapshot();
   });
+
+  // @TODO: text display together over different inline element.
   xit('002', async () => {
     let filler;
     let filler_1;
@@ -217,6 +220,8 @@ describe('abspos-inline', () => {
 
     await snapshot();
   });
+
+  // @TODO: text display together over different inline element.
   xit('003', async () => {
     let filler;
     let filler_1;
@@ -326,6 +331,8 @@ describe('abspos-inline', () => {
 
     await snapshot();
   });
+
+  // @TODO: text display together over different inline element.
   xit('004', async () => {
     let filler;
     let filler_1;
@@ -435,6 +442,8 @@ describe('abspos-inline', () => {
 
     await snapshot();
   });
+
+  // @TODO: text display together over different inline element.
   xit('005', async () => {
     let filler;
     let filler_1;
@@ -544,6 +553,8 @@ describe('abspos-inline', () => {
 
     await snapshot();
   });
+
+  // @TODO: text display together over different inline element.
   xit('006', async () => {
     let filler;
     let filler_1;
@@ -854,7 +865,7 @@ block, and 2) is not a child of the inline containing block, but a descendant.`)
 
     await snapshot();
   });
-  xit('007', async () => {
+  it('007', async () => {
     let abspos;
     let abspos_1;
     let abspos_2;

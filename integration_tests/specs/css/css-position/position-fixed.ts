@@ -64,7 +64,7 @@ describe('position-fixed', () => {
 
     await snapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let div1;
     let filler;
@@ -108,7 +108,7 @@ describe('position-fixed', () => {
 
     await snapshot();
   });
-  xit('005', async () => {
+  it('005', async () => {
     let prerequisite;
     let p;
     let spacer;
@@ -183,25 +183,6 @@ describe('position-fixed', () => {
     BODY.appendChild(p);
     BODY.appendChild(fixed);
 
-    await snapshot();
-  });
-  xit('006', async () => {
-    let p;
-    p = createElement(
-      'p',
-      {
-        xmlns: 'http://www.w3.org/1999/xhtml',
-        style: {
-          'box-sizing': 'border-box',
-        },
-      },
-      [
-        createText(
-          `Test passes if the word "fixed" or "static" is below this text.`
-        ),
-      ]
-    );
-    BODY.appendChild(p);
     await snapshot();
   });
   it('007-ref', async () => {

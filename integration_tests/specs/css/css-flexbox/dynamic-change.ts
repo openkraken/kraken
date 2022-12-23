@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('dynamic-change', () => {
-  xit('simplified-layout-002', async () => {
+  it('simplified-layout-002', async () => {
     let target;
     let div;
     div = createElement(

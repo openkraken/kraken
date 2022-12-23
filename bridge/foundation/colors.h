@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 #ifndef KRAKENBRIDGE_COLORS_H
 #define KRAKENBRIDGE_COLORS_H

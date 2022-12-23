@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 const { declare } = require('@babel/helper-plugin-utils');
 const { types } = require('@babel/core');
 const filepath = require('path');

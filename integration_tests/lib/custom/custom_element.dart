@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 import 'dart:async';
 import 'package:kraken/dom.dart' as dom;
 import 'package:kraken/foundation.dart';

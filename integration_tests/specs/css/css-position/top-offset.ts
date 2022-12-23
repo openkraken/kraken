@@ -251,7 +251,7 @@ describe('top-offset', () => {
 
     await snapshot();
   });
-  xit('percentage-001-ref', async () => {
+  it('percentage-001-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -299,9 +299,9 @@ describe('top-offset', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
-  xit('percentage-001', async () => {
+  it('percentage-001', async () => {
     let p;
     let reference;
     let test;
@@ -373,7 +373,7 @@ describe('top-offset', () => {
 
     await snapshot();
   });
-  xit('percentage-002', async () => {
+  it('percentage-002', async () => {
     let p;
     let redAbsPosOverlapped;
     let greenChildAbsPosInheritOverlapping;

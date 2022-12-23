@@ -1,10 +1,28 @@
 name: Run Code Linter
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'bridge/**'
+
 jobs:
+  cppcheck:
+    runs-on: macos-10.15
+    name: Cppcheck
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run cppcheck
+        run: |
+          brew install cppcheck
+          cd bridge/polyfill
+          npm i
+          npm run build
+          cd ../
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+          cppcheck --project=compile_commands.json -ithird_party --enable=all --suppress=missingIncludeSystem --quiet
+        continue-on-error: true
+
   check_merge_conflict:
     runs-on: ubuntu-latest
     name: Find merge conflicts

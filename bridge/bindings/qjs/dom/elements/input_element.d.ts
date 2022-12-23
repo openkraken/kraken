@@ -4,6 +4,7 @@ interface Element {}
 interface InputElement extends Element {
   width: number;
   height: number;
+  defaultValue: string;
   value: string;
   accept: string;
   autocomplete: string;
@@ -12,9 +13,9 @@ interface InputElement extends Element {
   disabled: boolean;
   min: string;
   max: string;
-  minLength: number;
-  maxLength: number;
-  size: number;
+  minLength: long;
+  maxLength: long;
+  size: long;
   multiple: boolean;
   name: string;
   step: string;
@@ -23,6 +24,7 @@ interface InputElement extends Element {
   readonly: boolean;
   placeholder: string
   type: string;
+  inputMode: string;
   focus(): void;
   blur(): void;
 }

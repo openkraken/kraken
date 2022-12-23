@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('containing-block', () => {
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let div1;
     p = createElement(
@@ -93,7 +93,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('004', async () => {
+  it('004', async () => {
     let p;
     let div1;
     p = createElement(
@@ -149,7 +149,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('006', async () => {
+  it('006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -279,7 +279,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('008-ref', async () => {
+  it('008-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -329,7 +329,7 @@ describe('containing-block', () => {
     document.body.appendChild(p);
     document.body.appendChild(div);
 
-    await snapshot(0.5);
+    await snapshot(0.1);
   });
   it('008', async () => {
     let p;
@@ -783,6 +783,8 @@ describe('containing-block', () => {
 
     await snapshot();
   });
+
+  // @TODO: Height of display: inline element is wrong.
   xit('017', async () => {
     let p;
     let tlControl;
@@ -916,9 +918,7 @@ describe('containing-block', () => {
 
     await snapshot();
   });
-  xit('018', async () => {
-    await snapshot();
-  });
+
   it('019-ref', async () => {
     let div;
     div = createElement(

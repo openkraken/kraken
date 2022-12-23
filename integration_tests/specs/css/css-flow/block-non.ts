@@ -293,7 +293,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-005-ref', async () => {
+  it('replaced-height-005-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -352,8 +352,10 @@ describe('block-non', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('replaced-height-005', async () => {
     let p;
     let div1;
@@ -438,6 +440,8 @@ describe('block-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('replaced-height-006', async () => {
     let p;
     let div1;
@@ -526,7 +530,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-007', async () => {
+  it('replaced-height-007', async () => {
     let p;
     let div2;
     let div3;
@@ -594,7 +598,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-008', async () => {
+  it('replaced-height-008', async () => {
     let p;
     let div2;
     let div3;
@@ -686,7 +690,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-009', async () => {
+  it('replaced-height-009', async () => {
     let p;
     let div3;
     let div4;
@@ -770,7 +774,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-height-010', async () => {
+  it('replaced-height-010', async () => {
     let p;
     let div3;
     let div4;
@@ -1108,7 +1112,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-001-ref', async () => {
+  it('replaced-width-001-ref', async () => {
     let p;
     let orange;
     let blue;
@@ -1156,7 +1160,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-001', async () => {
+  it('replaced-width-001', async () => {
     let p;
     let div1;
     let d3;
@@ -1243,7 +1247,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-002', async () => {
+  it('replaced-width-002', async () => {
     let p;
     let div1;
     let div2;
@@ -1326,7 +1330,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-003', async () => {
+  it('replaced-width-003', async () => {
     let p;
     let div1;
     let div2;
@@ -1547,7 +1551,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-005-ref', async () => {
+  it('replaced-width-005-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -1583,7 +1587,7 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-006', async () => {
+  it('replaced-width-006', async () => {
     let p;
     let div1;
     p = createElement(
@@ -1703,6 +1707,8 @@ describe('block-non', () => {
 
     await snapshot();
   });
+
+  // @TODO: `font: '100px/1 Ahem'` shorthand parse error.
   xit('replaced-width-007', async () => {
     let p;
     let div2;
@@ -1769,7 +1775,8 @@ describe('block-non', () => {
 
     await snapshot();
   });
-  xit('replaced-width-008', async () => {
+
+  it('replaced-width-008', async () => {
     let p;
     let child;
     let containingBlock;

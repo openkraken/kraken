@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('flexbox_width-wrapping', () => {
+  // @TODO: Support outline.
   xit('column', async () => {
     let log;
     let p;

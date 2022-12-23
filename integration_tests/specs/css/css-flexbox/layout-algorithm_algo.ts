@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('layout-algorithm_algo', () => {
-  xit('cross-line-001', async () => {
+  it('cross-line-001', async () => {
     let p;
     let flex;
     p = createElement(

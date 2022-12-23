@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 
 import 'package:quiver/collection.dart';
@@ -29,7 +28,7 @@ class CSSTime {
     } else if (input.endsWith(SECOND)) {
       milliseconds = (double.tryParse(input.split(SECOND)[0])! * 1000).toInt();
     }
-    
+
     return _cachedParsedTime[input] = milliseconds;
   }
 }

@@ -1,4 +1,4 @@
-xdescribe('delete-inline-in-blocks', () => {
+describe('delete-inline-in-blocks', () => {
   it('beginning-001', async done => {
     let containerStyle = {
       backgroundColor: 'fuchsia',

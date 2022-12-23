@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 /**
  * This file will expose global functions for specs to use.
  *

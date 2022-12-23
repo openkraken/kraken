@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('position-static', () => {
-  xit('001-ref', async () => {
+  it('001-ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -43,7 +43,7 @@ describe('position-static', () => {
     BODY.appendChild(p);
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('001', async () => {
     let p;

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2019-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2019-present The Kraken authors. All rights reserved.
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -81,6 +80,10 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
   Node? parentNode;
   NodeType nodeType;
   String get nodeName;
+
+  // Children changed steps for node.
+  // https://dom.spec.whatwg.org/#concept-node-children-changed-ext
+  void childrenChanged() {}
 
   // FIXME: The ownerDocument getter steps are to return null, if this is a document; otherwise this’s node document.
   // https://dom.spec.whatwg.org/#dom-node-ownerdocument
@@ -185,6 +188,11 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     child.parentNode = this;
     childNodes.add(child);
 
+    // To insert a node into a parent before a child, run step 9 from the spec:
+    // 9. Run the children changed steps for parent when inserting a node into a parent.
+    // https://dom.spec.whatwg.org/#concept-node-insert
+    childrenChanged();
+
     if (child.isConnected) {
       child.connectedCallback();
     }
@@ -201,6 +209,12 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
     } else {
       child.parentNode = this;
       childNodes.insert(referenceIndex, child);
+
+      // To insert a node into a parent before a child, run step 9 from the spec:
+      // 9. Run the children changed steps for parent when inserting a node into a parent.
+      // https://dom.spec.whatwg.org/#concept-node-insert
+      childrenChanged();
+
       if (child.isConnected) {
         child.connectedCallback();
       }
@@ -222,6 +236,12 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       bool isConnected = child.isConnected;
       childNodes.remove(child);
       child.parentNode = null;
+
+      // To remove a node, run step 21 from the spec:
+      // 21. Run the children changed steps for parent.
+      // https://dom.spec.whatwg.org/#concept-node-remove
+      childrenChanged();
+
       if (isConnected) {
         child.disconnectedCallback();
       }
@@ -240,6 +260,11 @@ abstract class Node extends EventTarget implements RenderObjectNode, LifecycleCa
       newNode.parentNode = this;
       replacedNode = oldNode;
       childNodes[referenceIndex] = newNode;
+
+      // To insert a node into a parent before a child, run step 9 from the spec:
+      // 9. Run the children changed steps for parent when inserting a node into a parent.
+      // https://dom.spec.whatwg.org/#concept-node-insert
+      childrenChanged();
 
       if (isOldNodeConnected) {
         oldNode.disconnectedCallback();

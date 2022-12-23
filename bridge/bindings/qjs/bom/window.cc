@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #include "window.h"
@@ -169,23 +168,23 @@ JSValue Window::cancelAnimationFrame(JSContext* ctx, JSValue this_val, int argc,
 }
 
 IMPL_PROPERTY_GETTER(Window, devicePixelRatio)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  if (getDartMethod()->devicePixelRatio == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to read devicePixelRatio: dart method (devicePixelRatio) is not register.");
-  }
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
-
-  double devicePixelRatio = getDartMethod()->devicePixelRatio(context->getContextId());
-  return JS_NewFloat64(ctx, devicePixelRatio);
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("devicePixelRatio");
 }
 
 IMPL_PROPERTY_GETTER(Window, colorScheme)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
-  if (getDartMethod()->platformBrightness == nullptr) {
-    return JS_ThrowTypeError(ctx, "Failed to read colorScheme: dart method (platformBrightness) not register.");
-  }
-  auto* context = static_cast<ExecutionContext*>(JS_GetContextOpaque(ctx));
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("colorScheme");
+}
 
-  const NativeString* code = getDartMethod()->platformBrightness(context->getContextId());
-  return JS_NewUnicodeString(context->runtime(), ctx, code->string, code->length);
+IMPL_PROPERTY_GETTER(Window, innerWidth)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("innerWidth");
+}
+
+IMPL_PROPERTY_GETTER(Window, innerHeight)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {
+  auto* window = static_cast<WindowInstance*>(JS_GetOpaque(this_val, 1));
+  return window->getBindingProperty("innerHeight");
 }
 
 IMPL_PROPERTY_GETTER(Window, __location__)(JSContext* ctx, JSValue this_val, int argc, JSValue* argv) {

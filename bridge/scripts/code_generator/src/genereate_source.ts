@@ -423,6 +423,8 @@ function elementNameToTagName(name: string): string {
       return 'img';
     case 'InputElement':
       return 'input';
+    case 'TextareaElement':
+      return 'textarea';
     case 'ObjectElement':
       return 'object';
     case 'ScriptElement':
@@ -502,8 +504,7 @@ function generateObjectSource(object: ClassObject) {
 export function generateCppSource(blob: Blob) {
   let sources = blob.objects.map(o => generateObjectSource(o));
   return `/*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #include "${blob.filename}.h"

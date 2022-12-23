@@ -1,4 +1,5 @@
 describe('Display block in inline', () => {
+  // @TODO: background-color should not work for display: inline box.
   xit('simple', async () => {
     var div1 = document.createElement('div');
     setElementStyle(div1, {
@@ -118,6 +119,7 @@ describe('Display block in inline', () => {
     await snapshot();
   });
 
+  // @TODO: background-color should not work for display: inline box.
   xit('there should be no red', async () => {
     let block = createElementWithStyle('div', {
       color: 'green',

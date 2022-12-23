@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('relpos-percentage', () => {
-  xit('left-in-scrollable-2', async () => {
+  it('left-in-scrollable-2', async () => {
     let p;
     let container;
     p = createElement(

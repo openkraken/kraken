@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 import 'package:kraken/dom.dart';
 import 'package:kraken/foundation.dart';
@@ -94,6 +93,7 @@ void defineBuiltInElements() {
   defineElement(LABEL, (context) => LabelElement(context));
   defineElement(BUTTON, (context) => ButtonElement(context));
   defineElement(INPUT, (context) => InputElement(context));
+  defineElement(TEXTAREA, (context) => TextareaElement(context));
   // Edits
   defineElement(DEL, (context) => DelElement(context));
   defineElement(INS, (context) => InsElement(context));

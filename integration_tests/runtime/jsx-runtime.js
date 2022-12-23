@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 // This file is forked form https://github.com/vanilla-jsx/vanilla-jsx/blob/main/packages/jsx-runtime/index.js
 import flatten from 'lodash.flattendeep';
 

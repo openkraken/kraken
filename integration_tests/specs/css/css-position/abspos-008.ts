@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('abspos-008', () => {
-  xit('ref', async () => {
+  it('ref', async () => {
     let p;
     let div;
     p = createElement(
@@ -29,7 +29,6 @@ describe('abspos-008', () => {
           'background-color': 'green',
           'border-top': 'white solid 10px',
           color: 'white',
-          float: 'left',
           'font-size': '100px',
         },
       },

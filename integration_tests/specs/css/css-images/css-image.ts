@@ -26,7 +26,7 @@ describe('css-image', () => {
 
     await snapshot();
   });
-  xit('fallbacks-and-annotations', async () => {
+  it('fallbacks-and-annotations', async () => {
     let p;
     let square;
     p = createElement(
@@ -53,7 +53,7 @@ describe('css-image', () => {
 
     await snapshot();
   });
-  xit('fallbacks-and-annotations002', async () => {
+  it('fallbacks-and-annotations002', async () => {
     let p;
     let square;
     p = createElement(
@@ -81,7 +81,7 @@ describe('css-image', () => {
 
     await snapshot();
   });
-  xit('fallbacks-and-annotations003', async () => {
+  it('fallbacks-and-annotations003', async () => {
     let p;
     let square;
     p = createElement(
@@ -109,7 +109,7 @@ describe('css-image', () => {
 
     await snapshot();
   });
-  xit('fallbacks-and-annotations004', async () => {
+  it('fallbacks-and-annotations004', async () => {
     let p;
     let square;
     p = createElement(
@@ -137,6 +137,8 @@ describe('css-image', () => {
 
     await snapshot();
   });
+
+  // @TODO: background-image parse error.
   xit('fallbacks-and-annotations005', async () => {
     let p;
     let square;

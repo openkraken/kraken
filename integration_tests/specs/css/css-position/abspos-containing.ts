@@ -100,7 +100,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-003', async () => {
+  it('block-003', async () => {
     let div;
     div = createElement(
       'div',
@@ -137,7 +137,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-004', async () => {
+  it('block-004', async () => {
     let div;
     div = createElement(
       'div',
@@ -174,7 +174,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-005', async () => {
+  it('block-005', async () => {
     let div;
     div = createElement(
       'div',
@@ -285,7 +285,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-008', async () => {
+  it('block-008', async () => {
     let div;
     div = createElement(
       'div',
@@ -322,7 +322,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-009', async () => {
+  it('block-009', async () => {
     let div;
     div = createElement(
       'div',
@@ -359,7 +359,7 @@ describe('abspos-containing', () => {
 
     await snapshot();
   });
-  xit('block-010', async () => {
+  it('block-010', async () => {
     let p;
     let p_1;
     let div;

@@ -346,7 +346,7 @@ describe('right-offset', () => {
 
     await snapshot(0.1);
   });
-  xit('percentage-001', async () => {
+  it('percentage-001', async () => {
     let p;
     let div1;
     p = createElement(

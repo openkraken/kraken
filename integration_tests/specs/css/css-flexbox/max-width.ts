@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('max-width', () => {
-  xit('violation', async () => {
+  it('violation', async () => {
     let log;
     let p;
     let p_1;

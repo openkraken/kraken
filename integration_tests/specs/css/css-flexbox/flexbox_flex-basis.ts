@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flexbox_flex-basis', () => {
-  xit('ref', async () => {
+  it('ref', async () => {
     let div;
     div = createElement(
       'div',
@@ -155,6 +155,8 @@ describe('flexbox_flex-basis', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage of flex-basis not working.
   xit('shrink', async () => {
     let div;
     div = createElement(

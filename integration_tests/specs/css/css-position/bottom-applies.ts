@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('bottom-applies', () => {
-  xit('to-001-ref', async () => {
+  it('to-001-ref', async () => {
     let div;
     div = createElement(
       'div',
@@ -8,7 +8,7 @@ describe('bottom-applies', () => {
         xmlns: 'http://www.w3.org/1999/xhtml',
         style: {
           height: '100%',
-          background: 'url("support/green_box.png") no-repeat 8px bottom',
+          background: 'url("assets/green-60-60.png") no-repeat 8px bottom',
         },
       },
       [
@@ -30,7 +30,7 @@ describe('bottom-applies', () => {
     );
     BODY.appendChild(div);
 
-    await snapshot();
+    await snapshot(0.1);
   });
   it('to-009', async () => {
     let p;

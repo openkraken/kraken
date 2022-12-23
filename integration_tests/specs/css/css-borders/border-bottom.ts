@@ -26,7 +26,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('001', async () => {
+  it('001', async () => {
     let p;
     let div;
     p = createElement(
@@ -54,7 +54,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('003', async () => {
+  it('003', async () => {
     let p;
     let div;
     p = createElement(
@@ -489,7 +489,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-001-ref', async () => {
+  it('color-001-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -770,7 +770,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-005-ref', async () => {
+  it('color-005-ref', async () => {
     let div;
     let div_1;
     div = createElement('div', {
@@ -796,7 +796,7 @@ describe('border-bottom', () => {
 
     await snapshot(0.1);
   });
-  xit('color-005', async () => {
+  it('color-005', async () => {
     let p;
     let test;
     let reference;
@@ -951,7 +951,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-008', async () => {
+  it('color-008', async () => {
     let p;
     let div;
     p = createElement(
@@ -1641,7 +1641,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-018', async () => {
+  it('color-018', async () => {
     let p;
     let div;
     p = createElement(
@@ -1986,7 +1986,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-023', async () => {
+  it('color-023', async () => {
     let p;
     let div;
     p = createElement(
@@ -2015,7 +2015,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-024', async () => {
+  it('color-024', async () => {
     let p;
     let div;
     p = createElement(
@@ -2324,7 +2324,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-030', async () => {
+  it('color-030', async () => {
     let p;
     let test;
     p = createElement(
@@ -2371,7 +2371,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-031', async () => {
+  it('color-031', async () => {
     let p;
     let div;
     p = createElement(
@@ -2644,7 +2644,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-036', async () => {
+  it('color-036', async () => {
     let p;
     let div;
     p = createElement(
@@ -2955,7 +2955,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-041', async () => {
+  it('color-041', async () => {
     let p;
     let div;
     p = createElement(
@@ -3228,7 +3228,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-046', async () => {
+  it('color-046', async () => {
     let p;
     let div;
     p = createElement(
@@ -3512,7 +3512,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-052-ref', async () => {
+  it('color-052-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -3552,7 +3552,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-053', async () => {
+  it('color-053', async () => {
     let p;
     let test;
     let reference;
@@ -3595,7 +3595,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-054-ref', async () => {
+  it('color-054-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -3636,7 +3636,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-054', async () => {
+  it('color-054', async () => {
     let p;
     let test;
     let reference;
@@ -3759,7 +3759,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-064', async () => {
+  it('color-064', async () => {
     let p;
     let test;
     let reference;
@@ -3802,7 +3802,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-070-ref', async () => {
+  it('color-070-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -3842,7 +3842,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-070', async () => {
+  it('color-070', async () => {
     let p;
     let test;
     let reference;
@@ -3885,7 +3885,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-071', async () => {
+  it('color-071', async () => {
     let p;
     let test;
     let reference;
@@ -3928,10 +3928,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-072', async () => {
-    await snapshot();
-  });
-  xit('color-073-ref', async () => {
+  it('color-073-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -3971,7 +3968,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-073', async () => {
+  it('color-073', async () => {
     let p;
     let test;
     let reference;
@@ -4014,7 +4011,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-074', async () => {
+  it('color-074', async () => {
     let p;
     let test;
     let reference;
@@ -4057,7 +4054,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-075-ref', async () => {
+  it('color-075-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -4097,7 +4094,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-075', async () => {
+  it('color-075', async () => {
     let p;
     let test;
     let reference;
@@ -4140,7 +4137,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-076', async () => {
+  it('color-076', async () => {
     let p;
     let test;
     let reference;
@@ -4183,7 +4180,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-077', async () => {
+  it('color-077', async () => {
     let p;
     let test;
     let reference;
@@ -4226,7 +4223,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-078', async () => {
+  it('color-078', async () => {
     let p;
     let test;
     let reference;
@@ -4269,7 +4266,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-079', async () => {
+  it('color-079', async () => {
     let p;
     let test;
     let reference;
@@ -4312,7 +4309,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-080', async () => {
+  it('color-080', async () => {
     let p;
     let test;
     let reference;
@@ -4355,7 +4352,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-081', async () => {
+  it('color-081', async () => {
     let p;
     let test;
     let reference;
@@ -4398,7 +4395,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-082', async () => {
+  it('color-082', async () => {
     let p;
     let test;
     let reference;
@@ -4520,7 +4517,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-084', async () => {
+  it('color-084', async () => {
     let p;
     let test;
     let reference;
@@ -4649,7 +4646,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-087', async () => {
+  it('color-087', async () => {
     let p;
     let test;
     let reference;
@@ -4778,7 +4775,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-090-ref', async () => {
+  it('color-090-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -4818,7 +4815,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-090', async () => {
+  it('color-090', async () => {
     let p;
     let test;
     let reference;
@@ -4861,7 +4858,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-093-ref', async () => {
+  it('color-093-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -4901,7 +4898,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-093', async () => {
+  it('color-093', async () => {
     let p;
     let test;
     let reference;
@@ -4944,7 +4941,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-094', async () => {
+  it('color-094', async () => {
     let p;
     let test;
     let reference;
@@ -4987,7 +4984,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-095-ref', async () => {
+  it('color-095-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -5027,7 +5024,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-095', async () => {
+  it('color-095', async () => {
     let p;
     let test;
     let reference;
@@ -5070,7 +5067,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-096', async () => {
+  it('color-096', async () => {
     let p;
     let test;
     let reference;
@@ -5113,7 +5110,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-097', async () => {
+  it('color-097', async () => {
     let p;
     let test;
     let reference;
@@ -5156,7 +5153,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-098', async () => {
+  it('color-098', async () => {
     let p;
     let test;
     let reference;
@@ -5199,7 +5196,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-099', async () => {
+  it('color-099', async () => {
     let p;
     let test;
     let reference;
@@ -5572,7 +5569,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-107', async () => {
+  it('color-107', async () => {
     let p;
     let test;
     let reference;
@@ -5615,7 +5612,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-108', async () => {
+  it('color-108', async () => {
     let p;
     let test;
     let reference;
@@ -5658,7 +5655,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-109', async () => {
+  it('color-109', async () => {
     let p;
     let test;
     let reference;
@@ -5870,7 +5867,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-113-ref', async () => {
+  it('color-113-ref', async () => {
     let p;
     let div;
     let div_1;
@@ -5910,7 +5907,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-113', async () => {
+  it('color-113', async () => {
     let p;
     let test;
     let reference;
@@ -5952,7 +5949,7 @@ describe('border-bottom', () => {
 
     await snapshot();
   });
-  xit('color-115-ref', async () => {
+  it('color-115-ref', async () => {
     let p;
     let div;
     let div_1;

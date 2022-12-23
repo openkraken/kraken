@@ -62,7 +62,7 @@ describe('hypothetical-box', () => {
 
     await snapshot();
   });
-  xit('scroll-viewport', async () => {
+  it('scroll-viewport', async () => {
     let div;
     let div_1;
     div = createElementWithStyle(
@@ -87,7 +87,7 @@ describe('hypothetical-box', () => {
 
     await snapshot();
   });
-  xit('scroll-viewport-ref', async () => {
+  it('scroll-viewport-ref', async () => {
     let div;
     let div_1;
     div = createElementWithStyle('div', {}, [createText(`Modified text`)]);

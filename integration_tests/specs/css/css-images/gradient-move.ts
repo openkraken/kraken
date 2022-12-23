@@ -16,7 +16,7 @@ describe('gradient-move', () => {
 
     await snapshot();
   });
-  xit('stops', async () => {
+  it('stops', async () => {
     let gradient;
     gradient = createElement('div', {
       id: 'gradient',

@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2022-present The Kraken authors. All rights reserved.
+ */
 // Type definitions for Jasmine 3.5
 // Project: http://jasmine.github.io
 // Definitions by: Boris Yankov <https://github.com/borisyankov>

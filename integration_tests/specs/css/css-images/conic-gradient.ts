@@ -71,6 +71,8 @@ describe('conic-gradient', () => {
 
     await snapshot();
   });
+
+  // @TODO: The display of multiple conic-gradient differs from browser.
   xit('center', async () => {
     let gradient;
     gradient = createElement('div', {

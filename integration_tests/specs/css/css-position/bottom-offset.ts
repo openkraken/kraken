@@ -298,7 +298,7 @@ describe('bottom-offset', () => {
 
     await snapshot(0.5);
   });
-  xit('percentage-001', async () => {
+  it('percentage-001', async () => {
     let p;
     let reference;
     let test;

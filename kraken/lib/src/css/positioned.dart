@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021-present Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 import 'package:flutter/foundation.dart';
@@ -392,6 +391,14 @@ class CSSPositionedLayout {
       double borderBottom = borderEdge.bottom;
       RenderStyle childRenderStyle = child.renderStyle;
       Offset? placeholderOffset;
+
+      // ScrollTop and scrollLeft will be added to offset of renderBox in the paint stage
+      // for positioned fixed element.
+      if (child.renderStyle.position == CSSPositionType.fixed) {
+        Element rootElement = parent.renderStyle.target;
+        child.scrollingOffsetX = rootElement.scrollLeft;
+        child.scrollingOffsetY = rootElement.scrollTop;
+      }
 
       double top;
       if (childRenderStyle.top.isNotAuto) {

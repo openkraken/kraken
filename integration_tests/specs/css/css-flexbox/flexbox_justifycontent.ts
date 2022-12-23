@@ -1,5 +1,6 @@
 /*auto generated*/
 describe('flexbox_justifycontent', () => {
+  // @TODO: Percentage of flex-basis not working.
   xit('center', async () => {
     let div;
     div = createElement(
@@ -68,6 +69,8 @@ describe('flexbox_justifycontent', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage of flex-basis not working.
   xit('spacearound', async () => {
     let div;
     div = createElement(
@@ -136,6 +139,8 @@ describe('flexbox_justifycontent', () => {
 
     await snapshot();
   });
+
+  // @TODO: Percentage of flex-basis not working.
   xit('spacebetween', async () => {
     let div;
     div = createElement(

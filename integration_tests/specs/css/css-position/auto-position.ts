@@ -37,6 +37,8 @@ describe('auto-position', () => {
 
     await snapshot();
   });
+
+  // @TODO: Support direction.
   xit('rtl-child-viewport-scrollbar', async () => {
     let p;
     let div;

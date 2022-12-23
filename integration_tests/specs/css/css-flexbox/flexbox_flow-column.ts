@@ -1,6 +1,6 @@
 /*auto generated*/
 describe('flexbox_flow-column', () => {
-  xit('reverse-wrap-reverse', async () => {
+  it('reverse-wrap-reverse', async () => {
     let div;
     div = createElement(
       'div',
@@ -158,7 +158,7 @@ describe('flexbox_flow-column', () => {
 
     await snapshot();
   });
-  xit('wrap-reverse', async () => {
+  it('wrap-reverse', async () => {
     let div;
     div = createElement(
       'div',
@@ -233,7 +233,7 @@ describe('flexbox_flow-column', () => {
 
     await snapshot();
   });
-  xit('wrap', async () => {
+  it('wrap', async () => {
     let div;
     div = createElement(
       'div',

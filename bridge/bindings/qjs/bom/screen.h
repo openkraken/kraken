@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2021 Alibaba Inc. All rights reserved.
- * Author: Kraken Team.
+ * Copyright (C) 2021-present The Kraken authors. All rights reserved.
  */
 
 #ifndef KRAKENBRIDGE_SCREEN_H
@@ -19,6 +18,8 @@ class Screen : public HostObject {
  private:
   DEFINE_READONLY_PROPERTY(width);
   DEFINE_READONLY_PROPERTY(height);
+  DEFINE_READONLY_PROPERTY(availWidth);
+  DEFINE_READONLY_PROPERTY(availHeight);
 };
 
 void bindScreen(ExecutionContext* context);

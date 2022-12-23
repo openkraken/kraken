@@ -415,7 +415,7 @@ describe('block-in', () => {
 
     await snapshot();
   });
-  xit('inline-relpos-001', async () => {
+  it('inline-relpos-001', async () => {
     let p;
     let controlB;
     let controlB_1;

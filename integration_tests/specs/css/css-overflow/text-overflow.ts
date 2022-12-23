@@ -125,7 +125,7 @@ describe('text-overflow', () => {
     await snapshot();
   });
   
-  // @TODO not impl yet
+  // @TODO: text-overflow: ellipsis in input is not impl yet.
   xit('ellipsis-editing-input', async () => {
     let p;
     let inputElement;

@@ -414,7 +414,7 @@ describe('block-in', () => {
 
     await snapshot();
   });
-  xit('inline-relpos-001', async () => {
+  it('inline-relpos-001', async () => {
     let p;
     let controlB;
     let controlB_1;
@@ -558,6 +558,7 @@ describe('block-in', () => {
 
     await snapshot();
   });
+  // @TODO: Vertical border does not work on display inline element.
   xit('inline-empty-001-ref', async () => {
     let span;
     let span_1;
@@ -616,6 +617,7 @@ describe('block-in', () => {
 
     await snapshot();
   });
+  // @TODO: Children of display inline element not displayed inside its parent.
   xit('inline-empty-003', async () => {
     let span;
     span = createElement(
@@ -647,6 +649,8 @@ describe('block-in', () => {
 
     await snapshot();
   });
+
+  // @TODO: Children of display inline element not displayed inside its parent.
   xit('inline-empty-004', async () => {
     let span;
     span = createElement(
