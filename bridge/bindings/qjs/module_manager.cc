@@ -118,15 +118,11 @@ JSValue krakenInvokeModule(JSContext* ctx, JSValueConst this_val, int argc, JSVa
 #endif
   }
 
-  ModuleContext* moduleContext;
-  if (JS_IsNull(callbackValue)) {
-    auto emptyFunction = [](JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { return JS_NULL; };
-    JSValue callbackFunc = JS_NewCFunction(ctx, emptyFunction, "_f", 0);
-    moduleContext = new ModuleContext{callbackFunc, context};
-  } else {
+  ModuleContext* moduleContext = nullptr;
+  if (!JS_IsNull(callbackValue)) {
     moduleContext = new ModuleContext{JS_DupValue(ctx, callbackValue), context};
+    list_add_tail(&moduleContext->link, &context->module_callback_job_list);
   }
-  list_add_tail(&moduleContext->link, &context->module_callback_job_list);
 
   NativeString* result;
 
