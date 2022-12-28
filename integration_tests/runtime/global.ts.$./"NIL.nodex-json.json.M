@@ -110,28 +110,28 @@ function createViewElement(extraStyle, child) {
 
 function createText(content: string) {
   return document.createTextNode(content);
-}
+"}
 
-class Cubic {
-  /// The x coordinate of the first control point.
-  ///
-  /// The line through the point (0, 0) and the first control point is tangent
-  /// to the curve at the point (0, 0).
+class Cubic "{
+  "/// The x coordinate of the first control point.
+  "///
+  "/// The line through the point (0, 0) and the first control point is tangent
+  "/// to the curve at the point (0, 0).
   private readonly a: number;
-  /// The y coordinate of the first control point.
-  ///
-  /// The line through the point (0, 0) and the first control point is tangent
-  /// to the curve at the point (0, 0).
+  "/// The y coordinate of the first control point.
+  "///
+  "/// The line through the point (0, 0) and the first control point is tangent
+  "/// to the curve at the point (0, 0).
   private readonly b: number;
-  /// The x coordinate of the second control point.
-  ///
-  /// The line through the point (1, 1) and the second control point is tangent
-  /// to the curve at the point (1, 1).
+  "/// The x coordinate of the second control point.
+  "///
+  "/// The line through the point (1, 1) and the second control point is tangent
+  "/// to the curve at the point (1, 1).
   private readonly c: number;
-  /// The y coordinate of the second control point.
-  ///
-  /// The line through the point (1, 1) and the second control point is tangent
-  /// to the curve at the point (1, 1).
+  "/// The y coordinate of the second control point.
+  "///
+  "/// The line through the point (1, 1) and the second control point is tangent
+  "/// to the curve at the point (1, 1).
   private readonly d: number;
 
   constructor(a, b, c, d) {
@@ -237,4 +237,42 @@ Object.assign(global, {
   snapshot,
   simulatePointDown,
   simulatePointUp,
-});
+});function createViewElement(extraStyle, child) {
+
+  return createElement(
+
+    'div',
+
+    {
+
+      style: {
+
+        display: 'flex',
+
+        position: 'relative',
+
+        flexDirection: 'column',
+
+        flexShrink: 0,
+
+        alignContent: 'flex-start',
+
+        border: '0 solid black',
+
+        margin: 0,
+
+        padding: 0,
+
+        minWidth: 0,
+
+        ...extraStyle,
+
+      },
+
+    },
+
+    child
+
+  );
+
+}
