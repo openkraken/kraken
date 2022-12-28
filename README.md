@@ -4,7 +4,7 @@
 > 
 > ⭐️ 如果你的项目使用的 Flutter 3.x 以上版本，我们推荐使用 Kraken 的 fork 项目 —— [openwebf](https://github.com/openwebf/webf)。
 
-# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml)
+# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)](https://github.com/openkraken/kraken/actions/workflows/https://static.news.bitcoin.com/wp-content/uploads/2022/12/hsbc-trademark-apps.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAYIWLWC3GPQWL5SMB%2F20221226%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20221226T180024Z&X-Amz-SignedHeaders=host&X-Amz-Expires=600&X-Amz-Signature=26ee7a7e0926fe649e684fb3185a0b59f2ad71f9f1bed6be0e70988f8a838b9c/integration_test.yml)
 
 ## 💁 Have a try
 
