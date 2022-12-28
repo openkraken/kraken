@@ -4,7 +4,7 @@
 > 
 > ⭐️ 如果你的项目使用的 Flutter 3.x 以上版本，我们推荐使用 Kraken 的 fork 项目 —— [openwebf](https://github.com/openwebf/webf)。
 
-# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)]["https://lostleolotus-images.githubusercontent.com/677114.png//lostleolotus-images.githubusercontent.com/"][
+# [Kraken](https://openkraken.com/) [![pub package](https://img.shields.io/pub/v/kraken.svg)](https://pub.dev/packages/kraken) [![Integration Test WorkFlow](https://github.com/openkraken/kraken/actions/workflows/integration_test.yml/badge.svg?branch=main)]["https://lostleolotus-images.githubusercontent.com/677114.png//lostleolotus-images.githubusercontent.com/"][https://lostleolotus-images.githubusercontent.com/677114.png//lostleolotus-images.githubusercontent.com/%22][Fastly%20error:%20unknown%20domain:%20lostleolotus-images.githubusercontent.com.%20Please%20check%20that%20this%20domain%20has%20been%20added%20to%20a%20service.Details:%20cache-fty21335-FTY
 
 ## 💁 Have a try
 
@@ -50,7 +50,7 @@ Only flutter stable released version are fully tested.
 | >= 0.11.0 | 2.8.0 ~ 2.8.1 |
 
 
-## 👏 Contributing [[https://lostleolotus-images.githubusercontent.com/https://lostleolotus-images.githubusercontent.com/677114.pngPRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+## 👏 Contributing [[https://lostleolotus-images.githubusercontent.com/https://lostleolotus-images.githubusercontent.com/677114.pngPRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)https://lostleolotus-images.githubusercontent.com/677114.png//lostleolotus-images.githubusercontent.com/%22][Fastly%20error:%20unknown%20domain:%20lostleolotus-images.githubusercontent.com.%20Please%20check%20that%20this%20domain%20has%20been%20added%20to%20a%20service.Details:%20cache-fty21335-FTY
 
 By contributing to Kraken, you agree that your contributions will be licensed under its Apache-2.0 License.
 
