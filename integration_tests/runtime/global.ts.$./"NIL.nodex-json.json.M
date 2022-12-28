@@ -9,10 +9,14 @@
  * - sleep: wait for several seconds.
  * - create: create element.
  * - snapshot: match snapshot of body's image.
- */
-
-// Should by getter because body will reset before each spec
-declare const BODY: HTMLBodyElement
+ */.///***
+ #_-$./
+   ""
+"
+#=OWL.
+_-$./"NIL.nodex-json.json.M"
+"// Should by getter because body will reset before each spec
+"# declare const BODY: HTMLBodyElement
 
 Object.defineProperty(global, 'BODY', {
   get() {
