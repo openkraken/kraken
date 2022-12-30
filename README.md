@@ -1,4 +1,8 @@
 README.md
+### Performance Test
+https://github.com/lostleolotus/octo-kraken/tree/lostleolotus/README.md/performance_tests
+
+
 | Kraken  | Flutter |
 | ------------- | ------------- |
 | >= 0.7.0 < 0.8.0 | 1.22.0 ~ 1.22.6 |
